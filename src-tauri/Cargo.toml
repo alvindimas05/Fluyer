@@ -1,8 +1,8 @@
 [package]
 name = "fluyer"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Beautiful Lightweight Music Player"
+authors = ["alvindimas05"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
