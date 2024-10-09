@@ -4,6 +4,7 @@
     
     const SIZE = 10;
     const GRID_COLS = Array.apply(null, Array(SIZE)).map(() => "auto").join(" ");
+    const ALBUM_PATH = "/test-album.jpg"
     
     const musicProgressMin = 0;
     const musicProgressMax = 10;
@@ -13,7 +14,7 @@
     let position: string[][] = [];
     async function getColors(){
         // @ts-ignore
-        let colors: Hex[] = await prominent("/wild-youth.jpg", { amount: 10, format: "hex" });
+        let colors: Hex[] = await prominent(ALBUM_PATH, { amount: 10, format: "hex" });
         for (var i = 0; i < SIZE; i++) {
             position[i] = [];
         }
@@ -34,7 +35,7 @@
     <div class="max-w-[75rem]">
         <div class="w-full text-white">
             <div class="w-full">
-                <img src="/wild-youth.jpg" class="rounded-lg" alt="Music Album">
+                <img src={ALBUM_PATH} class="rounded-lg" alt="Music Album">
             </div>
             <div class="w-full grid grid-cols-3">
                 <div class="text-sm flex"><span class="self-end">0:10</span></div>
