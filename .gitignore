@@ -11,3 +11,5 @@ vite.config.ts.timestamp-*
 
 static/test-album.jpg
 src-tauri/test-music.flac
+
+**/._*
