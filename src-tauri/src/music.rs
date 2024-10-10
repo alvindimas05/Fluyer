@@ -3,13 +3,13 @@ use rodio::Sink;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
-use std::sync::mpsc;
+use std::sync::mpsc::{self, SendError};
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::time::Duration;
 
 #[derive(Clone, Copy, Debug)]
-enum MusicCommand {
+pub enum MusicCommand {
     Pause,
     Play,
     // WeakPause,
@@ -17,7 +17,7 @@ enum MusicCommand {
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-enum MusicState {
+pub enum MusicState {
     #[default]
     Playing,
     Paused,
@@ -35,14 +35,14 @@ impl MusicPlayer {
             music_path: music_spawn.1
         }
     }
-    pub fn play(&mut self){
-        self.music_command.send(MusicCommand::Play);
+    pub fn play(&mut self) -> Result<(), SendError<MusicCommand>>{
+        self.music_command.send(MusicCommand::Play)
     }
-    pub fn pause(&mut self){
-        self.music_command.send(MusicCommand::Pause);
+    pub fn pause(&mut self) -> Result<(), SendError<MusicCommand>>{
+        self.music_command.send(MusicCommand::Pause)
     }
-    pub fn set_music_path(&mut self, path: String){
-        self.music_path.send(path);
+    pub fn set_music_path(&mut self, path: String) -> Result<(), SendError<String>>{
+        self.music_path.send(path)
     }
 }
 
@@ -85,11 +85,14 @@ fn play(receiver_command: &Receiver<MusicCommand>, receiver_path: &Receiver<Stri
         }
 
         if let Ok(path) = receiver_path.try_recv() {
-            if let Ok(file) = File::open(path) {
+            if let Ok(file) = File::open(&path) {
                 if state == MusicState::Playing && sink.empty() {
+                    println!("Playing music {}", &path);
                     let source = rodio::Decoder::new(BufReader::new(file))?;
                     sink.append(source);
                 }
+            } else {
+                eprintln!("Failed to open file: {:?}", path);
             }
         }
 

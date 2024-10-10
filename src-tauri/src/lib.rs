@@ -7,10 +7,11 @@ mod music;
 #[tauri::command]
 fn music_controller(state: State<'_, Mutex<AppState>>, command: String){
     let mut state = state.lock().unwrap();
+    state.music_player.set_music_path(String::from("test-music.flac")).expect("Can't change music player name");
     if command == "play" {
-        state.music_player.play();
+        state.music_player.play().expect("Can't play music player.");
     } else if command == "pause" || command == "stop" {
-        state.music_player.pause();
+        state.music_player.pause().expect("Can't pause music player.");
     }
 }
 
@@ -19,10 +20,7 @@ struct AppState {
 }
 impl AppState {
     fn default() -> Self {
-        let mut music_player = MusicPlayer::spawn();
-        music_player.set_music_path(String::from("../test-music.flac"));
-            
-        Self { music_player }
+        Self { music_player: MusicPlayer::spawn() }
     }
 }
 
