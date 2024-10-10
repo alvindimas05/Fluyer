@@ -87,7 +87,6 @@ fn play(receiver_command: &Receiver<MusicCommand>, receiver_path: &Receiver<Stri
         if let Ok(path) = receiver_path.try_recv() {
             if let Ok(file) = File::open(&path) {
                 if state == MusicState::Playing && sink.empty() {
-                    println!("Playing music {}", &path);
                     let source = rodio::Decoder::new(BufReader::new(file))?;
                     sink.append(source);
                 }
@@ -115,5 +114,11 @@ fn fade(sink: &Sink, out: bool) {
 
     if out {
         sink.pause();
+    }
+    
+    if out {
+        sink.pause();
+    } else {
+        sink.play();
     }
 }

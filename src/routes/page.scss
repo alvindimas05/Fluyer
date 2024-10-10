@@ -1,5 +1,6 @@
 .bg-blur {
     @apply w-screen h-screen fixed z-[-8];
+    /* background-color: rgba(0, 0, 0, .05); */
     backdrop-filter: blur(90px);
 }
 .bg-blur-colors {

@@ -15,8 +15,12 @@
         "title": "Fluyer",
         "width": 1920,
         "height": 1080,
+        "decorations": true,
+        "transparent": true,
         "resizable": true,
-        "maximized": true
+        "maximized": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
       }
     ],
     "security": {
