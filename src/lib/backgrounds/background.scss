@@ -1,0 +1,34 @@
+.bg-blur {
+    @apply w-screen h-screen fixed z-[-8];
+    /* background-color: rgba(0, 0, 0, .05); */
+    backdrop-filter: blur(90px);
+}
+.bg-blur-colors {
+    @apply w-screen h-screen grid bg-black fixed z-[-10];
+    .bg-blur-pixel {
+        @apply min-w-[30px] relative z-[-9];
+    }
+}
+
+.bg-blur-heart {
+    @apply relative z-[-9];
+    animation: bg-blur-heart 5s linear infinite;
+}
+
+@keyframes bg-blur-heart {
+    0% {
+        opacity: 0.1;
+    }
+    25% {
+        opacity: 0.2;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    75% {
+        opacity: 0.2;
+    }
+    100% {
+        opacity: 0.1;
+    }
+}

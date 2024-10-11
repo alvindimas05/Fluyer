@@ -1,15 +1,3 @@
-.bg-blur {
-    @apply w-screen h-screen fixed z-[-8];
-    /* background-color: rgba(0, 0, 0, .05); */
-    backdrop-filter: blur(90px);
-}
-.bg-blur-colors {
-    @apply w-screen h-screen grid bg-black fixed z-[-10];
-    .bg-blur-pixel {
-        @apply min-w-[30px] relative z-[-9];
-    }
-}
-
 #music-progress-bar {
     @apply h-[.25rem] rounded cursor-pointer outline-0;
     background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));

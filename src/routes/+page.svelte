@@ -1,8 +1,8 @@
 <script lang="ts">
-    import BlurBackground from "$lib/BlurBackground.svelte";
     import Music from "$lib/Music";
     import { invoke } from "@tauri-apps/api/core";
     import "./page.scss";
+    import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 
     const ALBUM_PATH = "/test-album.jpg";
     
@@ -79,4 +79,4 @@
         </div>
     </div>
 </div>
-<BlurBackground album_path={ALBUM_PATH}/>
+<AnimatedBackground album_path={ALBUM_PATH}/>

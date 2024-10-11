@@ -2,6 +2,7 @@
     import { prominent } from "color.js";
     
     export let album_path: string;
+    export let classes = "";
     const SIZE = 10;
     
     const GRID_COLS = Array.apply(null, Array(SIZE)).map(() => "auto").join(" ");
@@ -22,8 +23,7 @@
     }
     getColors();
 </script>
-<div class="bg-blur"></div>
-<div class="bg-blur-colors" style={`grid-template-columns: ${GRID_COLS}`}>
+<div class={`bg-blur-colors ${classes}`} style={`grid-template-columns: ${GRID_COLS}`}>
     {#each position as row}
         {#each row as col}
             <div class="bg-blur-pixel" style={`background: ${col}`}></div>
