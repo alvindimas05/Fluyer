@@ -24,40 +24,50 @@ pub enum MusicState {
 }
 
 pub struct MusicPlayer {
-    music_command: Sender<MusicCommand>,
-    music_path: Sender<String>
+    command: Sender<MusicCommand>,
+    path: Sender<String>,
+    position: Sender<Duration>
 }
 impl MusicPlayer {
     pub fn spawn() -> Self {
         let music_spawn = spawn(MusicState::Paused);
         Self {
-            music_command: music_spawn.0,
-            music_path: music_spawn.1
+            command: music_spawn.0,
+            path: music_spawn.1,
+            position: music_spawn.2
         }
     }
     pub fn play(&mut self) -> Result<(), SendError<MusicCommand>>{
-        self.music_command.send(MusicCommand::Play)
+        self.command.send(MusicCommand::Play)
     }
     pub fn pause(&mut self) -> Result<(), SendError<MusicCommand>>{
-        self.music_command.send(MusicCommand::Pause)
+        self.command.send(MusicCommand::Pause)
     }
-    pub fn set_music_path(&mut self, path: String) -> Result<(), SendError<String>>{
-        self.music_path.send(path)
+    pub fn set_path(&mut self, path: String) -> Result<(), SendError<String>>{
+        self.path.send(path)
+    }
+    pub fn set_pos(&mut self, position: u64) -> Result<(), SendError<Duration>>{
+        self.position.send(Duration::from_millis(position))
     }
 }
 
-fn spawn(initial_state: MusicState) -> (Sender<MusicCommand>, Sender<String>) {
+fn spawn(initial_state: MusicState) -> (Sender<MusicCommand>, Sender<String>, Sender<Duration>) {
     let (sender_command, receiver_command) = mpsc::channel();
     let (sender_path, receiver_path) = mpsc::channel();
+    let (sender_position, receiver_position) = mpsc::channel();
     thread::spawn(move || {
-        if let Err(e) = play(&receiver_command, &receiver_path, initial_state) {
+        if let Err(e) = play(&receiver_command, &receiver_path, &receiver_position, initial_state) {
             println!("Music thread crashed: {:#}", e);
         }
     });
-    (sender_command, sender_path)
+    (sender_command, sender_path, sender_position)
 }
 
-fn play(receiver_command: &Receiver<MusicCommand>, receiver_path: &Receiver<String>, initial_state: MusicState) -> Result<()> {
+fn play(
+    receiver_command: &Receiver<MusicCommand>,
+    receiver_path: &Receiver<String>,
+    receiver_position: &Receiver<Duration>,
+    initial_state: MusicState) -> Result<()> {
     let (_stream, stream_handle) =
         rodio::OutputStream::try_default().context("Failed to get output stream")?;
 
@@ -93,6 +103,10 @@ fn play(receiver_command: &Receiver<MusicCommand>, receiver_path: &Receiver<Stri
             } else {
                 eprintln!("Failed to open file: {:?}", path);
             }
+        }
+        
+        if let Ok(position) = receiver_position.try_recv() {
+            sink.try_seek(position).expect("Can't set the music position.");
         }
 
         thread::sleep(Duration::from_millis(100));

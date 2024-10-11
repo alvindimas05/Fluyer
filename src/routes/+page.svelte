@@ -1,6 +1,7 @@
 <script lang="ts">
     import BlurBackground from "$lib/BlurBackground.svelte";
     import Music from "$lib/Music";
+    import { invoke } from "@tauri-apps/api/core";
     import "./page.scss";
 
     const ALBUM_PATH = "/test-album.jpg";
@@ -9,11 +10,16 @@
     let musicIsPlaying = music.isPlaying;
 
     let musicValue = music.value;
+    let musicProgressDuration = music.progressDuration;
     let musicProgressPercentage = music.progressPercentage;
     let musicParsedDuration = music.getParsedDuration();
     let musicParsedDurationNegative = music.getParsedDuration(true);
     
-    $: musicValue, music.value = musicValue;
+    $: musicValue, (() => {
+        music.value = musicValue;
+        updateStates();
+        invoke('music_set_position', { position: musicProgressDuration * 1000 });
+    })();
     
     function handlePlayPause() {
         music.playOrPause();
@@ -26,11 +32,16 @@
         if(music.isPlaying){
             music.startProgress(() => {
                 musicValue = music.value;
-                musicProgressPercentage = music.progressPercentage;
-                musicParsedDuration = music.getParsedDuration();
-                musicParsedDurationNegative = music.getParsedDuration(true);
+                updateStates();
             });
         }
+    }
+    
+    function updateStates(){
+        musicProgressPercentage = music.progressPercentage;
+        musicProgressDuration = music.progressDuration;
+        musicParsedDuration = music.getParsedDuration();
+        musicParsedDurationNegative = music.getParsedDuration(true);
     }
 
     music.resetProgress();
@@ -64,6 +75,7 @@
                     <button class="w-12 btn-music-player"><img class="music-icon" src="/icons/default/next.png" alt="Icon Next"></button>
                 </div>
             </div>
+            
         </div>
     </div>
 </div>

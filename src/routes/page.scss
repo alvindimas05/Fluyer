@@ -12,18 +12,18 @@
 
 #music-progress-bar {
     @apply h-[.25rem] rounded cursor-pointer outline-0;
-    background: linear-gradient(to right, #fff var(--progress-width), #d1d5db var(--progress-width));
+    background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
 
     -webkit-appearance: none;
     appearance: none;
     &::-webkit-slider-runnable-track {
         @apply h-[.25rem] rounded;
-        background: linear-gradient(to right, #fff var(--progress-width), #d1d5db var(--progress-width));
+        background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
     }
     &::-webkit-slider-thumb {
-        @apply h-[.15px] w-[.15px] bg-black rounded-full;
-        -webkit-appearance: none;
-        appearance: none;
+        @apply mt-[-6px] invisible;
+        /* -webkit-appearance: none;
+        appearance: none; */
     }
 }
 

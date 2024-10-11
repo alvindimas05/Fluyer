@@ -24,7 +24,7 @@ export default class Music {
             this.value = Math.min(this.value + this.step, this.max);
 
             if (this.value >= this.max) {
-                this.clearProgress();
+                this.stopProgress();
             }
             callback();
         }, updateInterval);
