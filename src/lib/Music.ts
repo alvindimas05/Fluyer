@@ -1,16 +1,23 @@
 import { invoke } from "@tauri-apps/api/core";
 
+
+export const MusicConfig = {
+    step: .01,
+    min: 0,
+    max: 10,
+    getProgressPercentage: (val: number) => ((val - MusicConfig.min) / (MusicConfig.max - MusicConfig.min)) * 100
+}
 export default class Music {
     private intervalId: ReturnType<typeof setInterval> | null = null;
     isPlaying = false;
-    step = .01;
+    step = MusicConfig.step;
     duration = 248;
-    min = 0;
-    max = 10;
+    min = MusicConfig.min;
+    max = MusicConfig.max;
     value = 0;
 
     get progressPercentage() {
-        return ((this.value - this.min) / (this.max - this.min)) * 100;
+        return MusicConfig.getProgressPercentage(this.value);
     }
 
     get progressDuration() {

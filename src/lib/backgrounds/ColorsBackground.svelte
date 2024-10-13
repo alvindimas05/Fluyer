@@ -1,7 +1,7 @@
 <script lang="ts">
+    import { album } from "$lib/stores";
     import { prominent } from "color.js";
     
-    export let album_path: string;
     export let classes = "";
     const SIZE = 10;
     
@@ -10,7 +10,7 @@
     let position: string[][] = [];
     async function getColors(){
         // @ts-ignore
-        let colors: Hex[] = await prominent(album_path, { amount: 10, format: "hex" });
+        let colors: Hex[] = await prominent($album, { amount: 10, format: "hex" });
         for (var i = 0; i < SIZE; i++) {
             position[i] = [];
         }
