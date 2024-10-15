@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Error, Result};
 use rodio::Sink;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -57,7 +57,7 @@ fn spawn(initial_state: MusicState) -> (Sender<MusicCommand>, Sender<String>, Se
     let (sender_position, receiver_position) = mpsc::channel();
     thread::spawn(move || {
         if let Err(e) = play(&receiver_command, &receiver_path, &receiver_position, initial_state) {
-            println!("Music thread crashed: {:#}", e);
+            log::error!("Music thread crashed: {:#}", e);
         }
     });
     (sender_command, sender_path, sender_position)
@@ -67,11 +67,11 @@ fn play(
     receiver_command: &Receiver<MusicCommand>,
     receiver_path: &Receiver<String>,
     receiver_position: &Receiver<Duration>,
-    initial_state: MusicState) -> Result<()> {
+    initial_state: MusicState) -> Result<(), Error> {
     let (_stream, stream_handle) =
-        rodio::OutputStream::try_default().context("Failed to get output stream")?;
+        rodio::OutputStream::try_default()?;
 
-    let sink = Sink::try_new(&stream_handle).context("Failed to create Sink")?;
+    let sink = Sink::try_new(&stream_handle)?;
 
     let mut state = initial_state;
     loop {
@@ -93,20 +93,24 @@ fn play(
                 // }
             }
         }
-
+        let mut log_path: Option<String> = None;
         if let Ok(path) = receiver_path.try_recv() {
+            log_path = Some(path.clone());
             if let Ok(file) = File::open(&path) {
                 if state == MusicState::Playing && sink.empty() {
                     let source = rodio::Decoder::new(BufReader::new(file))?;
                     sink.append(source);
                 }
             } else {
-                eprintln!("Failed to open file: {:?}", path);
+                log::error!("Failed to open file: {}", path);
             }
         }
         
         if let Ok(position) = receiver_position.try_recv() {
-            sink.try_seek(position).expect("Can't set the music position.");
+            if let Err(err) = sink.try_seek(position) {
+                log::error!("Failed to change position of music: {}", log_path.unwrap());
+                log::error!("{:#}", err);
+            }
         }
 
         thread::sleep(Duration::from_millis(100));
