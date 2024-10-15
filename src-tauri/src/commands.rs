@@ -23,4 +23,5 @@ pub fn music_set_position(state: State<'_, Mutex<AppState>>, position: u64){
 #[tauri::command]
 pub fn music_get_all(){
     let musics = crate::file::get_all_music();
+    musics
 }
