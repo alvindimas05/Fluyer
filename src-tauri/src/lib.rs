@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 use tauri::{Builder, Manager};
-use music::MusicPlayer;
+use music::player::MusicPlayer;
 
 mod music;
 mod commands;
