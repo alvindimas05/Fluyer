@@ -4,6 +4,7 @@ use rodio::Source;
 use symphonia::core::formats::FormatOptions;
 use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
 use symphonia::core::io::MediaSourceStream;
+use base64::Engine;
 
 #[derive(Debug)]
 pub struct MusicMetadata {
@@ -12,7 +13,8 @@ pub struct MusicMetadata {
     artist: Option<String>,
     album_artist: Option<String>,
     track_number: Option<String>,
-    duration: Option<u128>
+    duration: Option<u128>,
+    image: Option<String>
 }
 
 impl MusicMetadata {
@@ -23,7 +25,8 @@ impl MusicMetadata {
             artist: None,
             album_artist: None,
             track_number: None,
-            duration: None
+            duration: None,
+            image: None
         }
     }
     
@@ -74,6 +77,10 @@ impl MusicMetadata {
                         metadata.track_number = self.get_value(tag);
                     }
                 }
+            }
+            
+            for visual in rev.visuals() {
+                metadata.image = Some(base64::engine::general_purpose::STANDARD.encode(visual.data.clone()));
             }
         }
         
