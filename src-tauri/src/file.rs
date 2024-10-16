@@ -12,7 +12,7 @@ fn is_audio_file(entry: &DirEntry) -> bool {
     }
 }
 
-pub fn get_all_music() {
+pub fn get_all_music() -> Vec<MusicMetadata> {
     let dir = "/Users/alvindimas05/Music/The Meaning Of Life";
     let mut musics: Vec<MusicMetadata> = vec![];
     for entry in WalkDir::new(dir)
@@ -24,4 +24,6 @@ pub fn get_all_music() {
             String::from(entry.path().to_str().unwrap())
         ).get());
     }
+    
+    musics
 }

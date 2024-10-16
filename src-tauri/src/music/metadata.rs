@@ -1,12 +1,11 @@
-use std::io::BufReader;
+use std::time::Duration;
 
-use rodio::Source;
 use symphonia::core::formats::FormatOptions;
-use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
+use symphonia::core::meta::MetadataOptions;
 use symphonia::core::io::MediaSourceStream;
 use base64::Engine;
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize)]
 pub struct MusicMetadata {
     path: String,
     title: Option<String>,
@@ -41,20 +40,20 @@ impl MusicMetadata {
                 return metadata;
             }
         };
-    
+        
         let mss = MediaSourceStream::new(Box::new(src.try_clone().unwrap()), Default::default());
-    
+        
         let meta_opts: MetadataOptions = Default::default();
         let fmt_opts: FormatOptions = Default::default();
-    
-        let probed = match symphonia::default::get_probe().format(&Default::default(), mss, &fmt_opts, &meta_opts){
+        
+        let probed = match symphonia::default::get_probe().format(&Default::default(), mss, &fmt_opts, &meta_opts) {
             Ok(probed) => probed,
             Err(_) => {
                 log::error!("Unsupported format music: {}", &path);
                 return metadata;
             }
         };
-    
+        
         let mut format = probed.format;
         
         while !format.metadata().is_latest() {
@@ -64,36 +63,46 @@ impl MusicMetadata {
         if let Some(rev) = format.metadata().current() {
             for tag in rev.tags() {
                 if let Some(std_key) = tag.std_key {
-                    if matches!(std_key, StandardTagKey::TrackTitle) {
-                        metadata.title = self.get_value(tag);
-                    }
-                    if matches!(std_key, StandardTagKey::Artist) {
-                        metadata.artist = self.get_value(tag);
-                    }
-                    if matches!(std_key, StandardTagKey::AlbumArtist) {
-                        metadata.album_artist = self.get_value(tag);
-                    }
-                    if matches!(std_key, StandardTagKey::TrackNumber) {
-                        metadata.track_number = self.get_value(tag);
+                    match std_key {
+                        StandardTagKey::TrackTitle => metadata.title = self.get_value(tag),
+                        StandardTagKey::Artist => metadata.artist = self.get_value(tag),
+                        StandardTagKey::AlbumArtist => metadata.album_artist = self.get_value(tag),
+                        StandardTagKey::TrackNumber => metadata.track_number = self.get_value(tag),
+                        _ => {}
                     }
                 }
             }
-            
+        
             for visual in rev.visuals() {
                 metadata.image = Some(base64::engine::general_purpose::STANDARD.encode(visual.data.clone()));
             }
         }
         
-        let source = match rodio::Decoder::new(BufReader::new(src)){
-            Ok(source) => source,
-            Err(_) => {
-                log::error!("Can't decode music: {}", &path);
+        let track = match format.default_track() {
+            Some(track) => track,
+            None => {
+                log::error!("Can't find the track of music: {}", &path);
                 return metadata;
             }
         };
-        if let Some(duration) = source.total_duration() {
-            metadata.duration = Some(duration.as_millis())
-        }
+    
+        let sample_rate = match track.codec_params.sample_rate {
+            Some(sample_rate) => sample_rate,
+            None => {
+                log::error!("Unknown sample rate of music: {}", &path);
+                return metadata;
+            }
+        };
+    
+        let total_frames = match track.codec_params.n_frames {
+            Some(total_frames) => total_frames,
+            None => {
+                log::error!("Unknown sample of frames of music: {}", &path);
+                return metadata;
+            }
+        };
+    
+        metadata.duration = Some(Duration::from_secs_f64(total_frames as f64 / sample_rate as f64).as_millis());
         
         metadata
     }

@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 use tauri::State;
 
-use crate::AppState;
+use crate::{music::metadata::MusicMetadata, AppState};
 
 #[tauri::command]
 pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String, message: String){
@@ -21,7 +21,7 @@ pub fn music_set_position(state: State<'_, Mutex<AppState>>, position: u64){
 }
 
 #[tauri::command]
-pub fn music_get_all(){
+pub fn music_get_all() -> Vec<MusicMetadata> {
     let musics = crate::file::get_all_music();
     musics
 }
