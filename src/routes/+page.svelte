@@ -1,27 +1,10 @@
 <script lang="ts">
-    import Album from "$lib/home/Album.svelte";
-    import PlayerBar from "$lib/home/PlayerBar.svelte";
-    import { invoke } from "@tauri-apps/api/core";
-    import { onMount } from "svelte";
-    
-    onMount(async () => {
-        const musics = await invoke('music_get_all');
-        console.log(musics);
-    });
+    import AlbumList from "$lib/home/album/AlbumList.svelte";
+    import MusicList from "$lib/home/music/MusicList.svelte";
+    import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
 </script>
 <PlayerBar />
-<div class="grid grid-cols-5 p-5">
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
-    <Album />
+<div class="h-full grid grid-rows-[min-content_1fr]">
+    <AlbumList />
+    <MusicList />
 </div>

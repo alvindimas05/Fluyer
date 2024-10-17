@@ -4,7 +4,7 @@ use tauri::State;
 use crate::{music::metadata::MusicMetadata, AppState};
 
 #[tauri::command]
-pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String, message: String){
+pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String){
     let mut state = state.lock().unwrap();
     state.music_player.set_path(String::from("test-music.flac")).expect("Can't change music player name");
     if command == "play" {

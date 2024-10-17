@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use symphonia::core::formats::FormatOptions;
-use symphonia::core::meta::MetadataOptions;
+use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
 use symphonia::core::io::MediaSourceStream;
 use base64::Engine;
 
