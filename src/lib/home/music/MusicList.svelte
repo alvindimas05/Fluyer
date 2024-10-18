@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
     import MusicItem from "./MusicItem.svelte";
+    import type { MusicData } from "./types";
+    import { musicList } from "../stores/music";
     
-    let splittedMusics: MusicData[][] = [];
+    $: splittedMusics = splitMusics($musicList);
     
     function splitMusics(arr: MusicData[]): MusicData[][] {
         const length = arr.length;
@@ -19,11 +20,6 @@
     
         return [firstPart, secondPart, thirdPart];
     }
-    async function getMusics(){
-        const musics = await invoke<MusicData[]>('music_get_all');
-        splittedMusics = splitMusics(musics);
-    }
-    getMusics();
 </script>
 
 <div class="grid grid-cols-3 text-white px-3 overflow-y-auto scrollbar-hidden mb-20">

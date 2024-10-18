@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type { MusicData } from "./types";
+
     export let music: MusicData;
 
     const albumArtist = music.album_artist && !music.artist.includes(music.album_artist) ? ` • ${music.album_artist}` : "";

@@ -10,6 +10,7 @@ pub struct MusicMetadata {
     path: String,
     title: Option<String>,
     artist: Option<String>,
+    album: Option<String>,
     album_artist: Option<String>,
     track_number: Option<String>,
     duration: Option<u128>,
@@ -22,6 +23,7 @@ impl MusicMetadata {
             path,
             title: None,
             artist: None,
+            album: None,
             album_artist: None,
             track_number: None,
             duration: None,
@@ -66,6 +68,7 @@ impl MusicMetadata {
                     match std_key {
                         StandardTagKey::TrackTitle => metadata.title = self.get_value(tag),
                         StandardTagKey::Artist => metadata.artist = self.get_value(tag),
+                        StandardTagKey::Album => metadata.album = self.get_value(tag),
                         StandardTagKey::AlbumArtist => metadata.album_artist = self.get_value(tag),
                         StandardTagKey::TrackNumber => metadata.track_number = self.get_value(tag),
                         _ => {}
