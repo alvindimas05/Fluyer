@@ -1,6 +1,6 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
-    import Music from "./Music.svelte";
+    import MusicItem from "./MusicItem.svelte";
     
     let splittedMusics: MusicData[][] = [];
     
@@ -30,7 +30,7 @@
     {#each splittedMusics as musics}
         <div>
             {#each musics as music}
-                <Music {music} />
+                <MusicItem {music} />
             {/each}
         </div>
     {/each}
