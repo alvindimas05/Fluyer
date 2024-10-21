@@ -26,7 +26,6 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::music::music_controller,
             commands::music::music_position_set,
-            commands::music::music_set_playlist,
             commands::music::music_get_all
         ])
         .run(tauri::generate_context!())
