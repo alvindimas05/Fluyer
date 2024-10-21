@@ -6,7 +6,6 @@ use crate::{music::metadata::MusicMetadata, AppState};
 #[tauri::command]
 pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String){
     let mut state = state.lock().unwrap();
-    state.music_player.set_path(String::from("test-music.flac")).expect("Can't change music player name");
     if command == "play" {
         state.music_player.play().expect("Can't play music player.");
     } else if command == "pause" || command == "stop" {
@@ -15,7 +14,7 @@ pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String){
 }
 
 #[tauri::command]
-pub fn music_set_position(state: State<'_, Mutex<AppState>>, position: u64){
+pub fn music_position_set(state: State<'_, Mutex<AppState>>, position: u64){
     let mut state = state.lock().unwrap();
     state.music_player.set_pos(position).expect("Can't set music player position");
 }

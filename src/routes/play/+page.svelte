@@ -16,7 +16,7 @@
     $: musicValue, (() => {
         music.value = musicValue;
         updateStates();
-        invoke('music_set_position', { position: musicProgressDuration * 1000 });
+        invoke('music_position_set', { position: musicProgressDuration * 1000 });
     })();
     
     function handlePlayPause() {
