@@ -12,6 +12,7 @@ use std::time::Duration;
 pub enum MusicCommand {
     Pause,
     Play,
+    Next,
     // WeakPause,
     // WeakPlay,
 }
@@ -43,10 +44,13 @@ impl MusicPlayer {
     pub fn pause(&mut self) -> Result<(), SendError<MusicCommand>>{
         self.command.send(MusicCommand::Pause)
     }
+    pub fn next(&mut self) -> Result<(), SendError<MusicCommand>>{
+        self.command.send(MusicCommand::Next)
+    }
     pub fn set_pos(&mut self, position: u64) -> Result<(), SendError<Duration>>{
         self.position.send(Duration::from_millis(position))
     }
-    pub fn set_playlist(&mut self, playlist: Vec<String>) -> Result<(), SendError<Vec<String>>> {
+    pub fn add_playlist(&mut self, playlist: Vec<String>) -> Result<(), SendError<Vec<String>>> {
         self.playlist.send(playlist)
     }
 }
@@ -86,6 +90,9 @@ fn play(
                     state = MusicState::Playing;
                     fade(&sink, false);
                 }
+                MusicCommand::Next => {
+                    sink.skip_one();
+                }
                 // MusicCommand::WeakPause => fade(&sink, true),
                 // MusicCommand::WeakPlay => {
                 //     if state == MusicState::Playing {
@@ -95,7 +102,6 @@ fn play(
             }
         }
         if let Ok(playlist) = receiver_playlist.try_recv() {
-            sink.clear();
             for path in playlist.iter() {
                 if let Ok(file) = File::open(&path) {
                     if state == MusicState::Playing && sink.empty() {
