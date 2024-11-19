@@ -1,20 +1,19 @@
 <script lang="ts">
     import Music from "$lib/Music";
     import { invoke } from "@tauri-apps/api/core";
-    import { album } from "$lib/stores";
+    import { album, musicValue } from "$lib/stores";
     import "./page.scss";
     
     let music = new Music();
     let musicIsPlaying = music.isPlaying;
 
-    let musicValue = music.value;
     let musicProgressDuration = music.progressDuration;
     let musicProgressPercentage = music.progressPercentage;
     let musicParsedDuration = music.getParsedDuration();
     let musicParsedDurationNegative = music.getParsedDuration(true);
     
-    $: musicValue, (() => {
-        music.value = musicValue;
+    $: $musicValue, (() => { 
+        music.value = $musicValue;
         updateStates();
         invoke('music_position_set', { position: musicProgressDuration * 1000 });
     })();

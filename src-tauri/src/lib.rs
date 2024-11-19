@@ -28,6 +28,8 @@ pub fn run() {
             commands::music::music_position_set,
             commands::music::music_get_all,
             commands::music::music_playlist_add,
+            
+            commands::log::log_error,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
