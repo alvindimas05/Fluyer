@@ -12,7 +12,6 @@
     
     async function checkAlbumImage(){
         if(music.image !== null) return;
-        await spotifyApi.auth();
         const spotifyMusic = await spotifyApi.searchMusic(music);
         albumImage = spotifyMusic?.imageUrl
     }

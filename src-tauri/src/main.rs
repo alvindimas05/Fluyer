@@ -11,7 +11,7 @@ fn main() {
 fn init_log(){
     CombinedLogger::init(vec![
         WriteLogger::new(
-            LevelFilter::Debug,
+            LevelFilter::Error,
             Config::default(),
             File::create("/tmp/fluyer.log").unwrap(),
         ),

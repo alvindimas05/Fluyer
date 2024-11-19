@@ -1,5 +1,6 @@
 import type { MusicData } from "$lib/home/music/types";
 import { spotifyAccessToken } from "$lib/stores";
+import { invoke } from "@tauri-apps/api/core";
 import axios, { AxiosHeaders } from "axios";
 import { get } from "svelte/store";
 
@@ -27,10 +28,13 @@ export default class SpotifyApi {
             spotifyAccessToken.set(res.data.access_token);
         } catch(err){
             console.error(err);
+            invoke('log_error', { message: `${err}` });
         }
     }
     
     public async searchMusic(music: MusicData): Promise<SpotifyMusic | null> {
+        await this.auth();
+        
         const url = new URL(`${this.apiEndpoint}/search`);
         url.searchParams.set('type', 'album');
         url.searchParams.set('limit', '1');
@@ -43,6 +47,7 @@ export default class SpotifyApi {
             return new SpotifyMusic(res.data.albums.items[0]);
         } catch(err){
             console.error(err);
+            invoke('log_error', { message: `${err}` });
         }
         return null;
     }
