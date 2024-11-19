@@ -1,6 +1,6 @@
 {
   "name": "fluyer",
-  "version": "0.1.0",
+  "version": "0.0.1-alpha",
   "description": "",
   "type": "module",
   "scripts": {
@@ -15,7 +15,10 @@
   "dependencies": {
     "@tauri-apps/api": ">=2.0.0",
     "@tauri-apps/plugin-shell": ">=2.0.0",
+    "@types/node": "^22.9.0",
+    "axios": "^1.7.7",
     "color.js": "^1.2.0",
+    "musicbrainz-api": "^0.19.1",
     "sass": "^1.79.4"
   },
   "devDependencies": {
