@@ -28,7 +28,6 @@ export default class SpotifyApi {
             spotifyAccessToken.set(res.data.access_token);
         } catch(err){
             console.error(err);
-            invoke('log_error', { message: `${err}` });
         }
     }
     
@@ -47,7 +46,6 @@ export default class SpotifyApi {
             return new SpotifyMusic(res.data.albums.items[0]);
         } catch(err){
             console.error(err);
-            invoke('log_error', { message: `${err}` });
         }
         return null;
     }
