@@ -22,10 +22,12 @@ tauri = { version = "2.0.0", features = ["macos-private-api"] }
 tauri-plugin-shell = "2.0.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rodio = { version = "0.19.0", features = ["symphonia-all"] }
+rodio = { version = "0.20.1" }
 anyhow = "1.0.89"
 symphonia = "0.5.4"
 log = "0.4.22"
 simplelog = "0.12.2"
 base64 = "0.22.1"
 walkdir = "2.5.0"
+flacenc = { git = "https://github.com/yotarok/flacenc-rs.git", version = "0.5.0", features = ["decode"] }
+thread-priority = "1.2.0"

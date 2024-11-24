@@ -21,6 +21,13 @@ pub fn music_position_set(state: State<'_, Mutex<AppState>>, position: u64){
     state.music_player.set_pos(position).expect("Can't set music player position.");
 }
 
+
+#[tauri::command]
+pub fn music_get_info(state: State<'_, Mutex<AppState>>){
+    let mut state = state.lock().unwrap();
+    state.music_player.get_info().expect("Can't get music player position.");
+}
+
 #[tauri::command]
 pub fn music_get_all() -> Vec<MusicMetadata> {
     let musics = crate::file::get_all_music();

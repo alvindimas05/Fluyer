@@ -1,10 +1,11 @@
-use std::sync::Mutex;
-use tauri::{Builder, Manager};
+use std::sync::{Mutex, OnceLock};
+use tauri::{AppHandle, Builder, Manager};
 use music::player::MusicPlayer;
 
 mod music;
 mod commands;
 mod file;
+mod tests;
 
 struct AppState {
     music_player: MusicPlayer
@@ -14,6 +15,8 @@ impl AppState {
         Self { music_player: MusicPlayer::spawn() }
     }
 }
+
+static GLOBAL_APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -28,9 +31,16 @@ pub fn run() {
             commands::music::music_position_set,
             commands::music::music_get_all,
             commands::music::music_playlist_add,
+            commands::music::music_get_info,
             
             commands::log::log_error,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application")
+        .run(|app_handle, event| match event {
+            tauri::RunEvent::Ready => { 
+                GLOBAL_APP_HANDLE.set(app_handle.clone()).expect("Failed to set GLOBAL_APP_HANDLE");
+            }
+            _ => {}
+        });
 }
