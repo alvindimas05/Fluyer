@@ -29,5 +29,4 @@ log = "0.4.22"
 simplelog = "0.12.2"
 base64 = "0.22.1"
 walkdir = "2.5.0"
-flacenc = { git = "https://github.com/yotarok/flacenc-rs.git", version = "0.5.0", features = ["decode"] }
 thread-priority = "1.2.0"
