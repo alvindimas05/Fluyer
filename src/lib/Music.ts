@@ -1,5 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 
+interface MusicPlayerInfo {
+    current_position: number,
+    is_paused: boolean,
+}
 
 export const MusicConfig = {
     step: .01,
@@ -11,7 +15,7 @@ export default class Music {
     private intervalId: ReturnType<typeof setInterval> | null = null;
     isPlaying = false;
     step = MusicConfig.step;
-    duration = 248;
+    duration = 0;
     min = MusicConfig.min;
     max = MusicConfig.max;
     value = 0;
@@ -25,7 +29,8 @@ export default class Music {
     }
     
     startProgress(callback: () => void) {
-        const updateInterval = (this.duration / this.max) * this.step * 1000;
+        console.log("Starting progress...");
+        const updateInterval = (this.duration / this.max) * this.step * 1000;        
     
         this.intervalId = setInterval(() => {
             this.value = Math.min(this.value + this.step, this.max);
@@ -33,6 +38,7 @@ export default class Music {
             if (this.value >= this.max) {
                 this.stopProgress();
             }
+            
             callback();
         }, updateInterval);
     }
@@ -60,8 +66,16 @@ export default class Music {
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     }
     
+    play(){
+        this.isPlaying = true;
+    }
+    
+    pause(){
+        this.isPlaying = false;
+    }
+    
     playOrPause() {
         this.isPlaying = !this.isPlaying;
-        invoke('music_controller', { command: this.isPlaying ? "play" : "pause" });
+        // invoke('music_controller', { command: this.isPlaying ? "play" : "pause" });
     }
 }

@@ -1,11 +1,10 @@
 use anyhow::{Error, Result};
-use rodio::source::SineWave;
 use rodio::{Sink, Source};
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 use std::fs::File;
-use std::io::{BufReader, Cursor};
+use std::io::BufReader;
 use std::sync::mpsc::{self, SendError};
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
@@ -79,7 +78,7 @@ fn spawn(initial_state: MusicState) ->
     let (sender_playlist, receiver_playlist) = mpsc::channel();
     let (sender_info, receiver_info) = mpsc::channel();
     
-    ThreadBuilder::default()
+    let _ = ThreadBuilder::default()
         .name("Music Player")
         .priority(ThreadPriority::Max)
         .spawn_careless(move || {

@@ -1,7 +1,7 @@
 <script lang="ts">
+    import { musicList } from "$lib/stores/music";
     import MusicItem from "./MusicItem.svelte";
     import type { MusicData } from "./types";
-    import { musicList } from "../stores/music";
     
     $: splittedMusics = splitMusics($musicList);
     

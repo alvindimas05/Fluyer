@@ -5,7 +5,6 @@ use music::player::MusicPlayer;
 mod music;
 mod commands;
 mod file;
-mod tests;
 
 struct AppState {
     music_player: MusicPlayer

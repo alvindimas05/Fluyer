@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { MusicData } from "../music/types";
-    import { musicList } from "../stores/music";
+    import { musicList } from "$lib/stores/music";
     import AlbumItem from "./AlbumItem.svelte";
     
     let grouppedAlbums = groupByAlbum();
