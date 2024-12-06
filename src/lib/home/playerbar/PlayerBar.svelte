@@ -24,7 +24,13 @@
         music.duration = ($musicPlayed?.duration ?? 0) / 1000;
         if ($musicIsPlaying) music.play();
         else music.pause();
+
         updateProgress();
+    }
+
+    function handleButtonPlayPause() {
+        $musicIsPlaying = !$musicIsPlaying;
+        handlePlayPause();
     }
 
     function updateProgress() {
@@ -50,7 +56,7 @@
     }
 </script>
 
-<div class="fixed left-0 bottom-0 w-full bg-[rgba(0,0,0,.9)] text-white">
+<div class="fixed left-0 bottom-0 w-full bg-[rgba(0,0,0,.5)] text-white">
     <input
         id="music-progress-bar"
         class="w-full absolute"
@@ -71,10 +77,10 @@
                         alt="Icon Previous"
                     /></button
                 >
-                <button class="w-10 invert mx-2" on:click={handlePlayPause}
+                <button class="w-10 invert mx-2" on:click={handleButtonPlayPause}
                     ><img
                         class="music-icon"
-                        src={`/icons/default/${!musicIsPlaying ? "play" : "pause"}.png`}
+                        src={`/icons/default/${!$musicIsPlaying ? "play" : "pause"}.png`}
                         alt="Icon Play"
                     /></button
                 >

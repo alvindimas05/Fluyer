@@ -1,4 +1,4 @@
-import { writable } from "svelte/store"
+import { writable } from "svelte/store";
 
-export let album = writable('/test-album.jpg')
+export let album = writable<null | string>(null);
 export let spotifyAccessToken = writable<null | string>(null);

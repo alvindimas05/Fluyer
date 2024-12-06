@@ -5,6 +5,7 @@
     import { invoke } from "@tauri-apps/api/core";
     import { listen } from "@tauri-apps/api/event";
     import { musicIsPlaying, musicPlayed } from "$lib/stores/music";
+    import { album } from "$lib/stores";
 
     export let music: MusicData;
 
@@ -30,6 +31,7 @@
             $musicPlayed = music;
             $musicIsPlaying = true;
         });
+        $album = albumImage;
     }
 
     onMount(checkAlbumImage);
