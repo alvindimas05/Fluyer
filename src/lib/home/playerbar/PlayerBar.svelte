@@ -28,6 +28,14 @@
         updateProgress();
     }
 
+    function onPlayerBarChange() {
+        if ($musicPlayed == null) {
+            musicValue = 0;
+            return;
+        }
+        music.sendCommandSetPosition(musicProgressDuration * 1000);
+    }
+
     function handleButtonPlayPause() {
         $musicIsPlaying = !$musicIsPlaying;
         handlePlayPause();
@@ -66,6 +74,7 @@
         min={MusicConfig.min}
         max={MusicConfig.max}
         step={MusicConfig.step}
+        on:change={onPlayerBarChange}
     />
     <div class="p-3 mt-1">
         <div class="grid grid-cols-3">
@@ -77,7 +86,9 @@
                         alt="Icon Previous"
                     /></button
                 >
-                <button class="w-10 invert mx-2" on:click={handleButtonPlayPause}
+                <button
+                    class="w-10 invert mx-2"
+                    on:click={handleButtonPlayPause}
                     ><img
                         class="music-icon"
                         src={`/icons/default/${!$musicIsPlaying ? "play" : "pause"}.png`}

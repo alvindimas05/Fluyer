@@ -71,22 +71,26 @@ export default class Music {
 
     play() {
         this.isPlaying = true;
-        this.sendCommand();
+        this.sendCommandPlayPause();
     }
 
     pause() {
         this.isPlaying = false;
-        this.sendCommand();
+        this.sendCommandPlayPause();
     }
 
     playOrPause() {
         this.isPlaying = !this.isPlaying;
-        this.sendCommand();
+        this.sendCommandPlayPause();
     }
 
-    sendCommand() {
+    sendCommandPlayPause() {
         invoke("music_controller", {
             command: this.isPlaying ? "play" : "pause",
         });
+    }
+
+    sendCommandSetPosition(position: number) {
+        invoke("music_position_set", { position: Math.trunc(position) });
     }
 }
