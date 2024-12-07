@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { album } from "$lib/stores";
+    import MusicController from "$lib/Music";
+    import { musicCurrent } from "$lib/stores/music";
     import { prominent } from "color.js";
 
     export let classes = "";
@@ -11,11 +12,12 @@
 
     let position: string[][] = [];
     async function getColors() {
-        if ($album == null) return;
+        if (MusicController.currentMusic() == null) return;
         position = [];
 
         let image = new Image();
-        image.src = $album;
+        image.src = `data:image/png;base64,${MusicController.currentMusic()!.image}`;
+
         // @ts-ignore
         let colors: Hex[] = await prominent(image, {
             amount: 10,
@@ -32,7 +34,7 @@
             }
         }
     }
-    $: $album, getColors();
+    musicCurrent.subscribe(getColors);
 </script>
 
 <div

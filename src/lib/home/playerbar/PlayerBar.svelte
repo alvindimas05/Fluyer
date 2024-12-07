@@ -1,66 +1,72 @@
 <script lang="ts">
-    import Music, { MusicConfig } from "$lib/Music";
-    import { invoke } from "@tauri-apps/api/core";
+    import MusicController, { MusicConfig } from "$lib/Music";
     import "./playerbar.scss";
-    import { musicPlayed, musicIsPlaying } from "$lib/stores/music";
+    import { musicCurrent, musicProgressValue } from "$lib/stores/music";
 
-    let music = new Music();
-
-    let musicValue = music.value;
-    let musicProgressDuration = music.progressDuration;
-    let musicProgressPercentage = music.progressPercentage;
-
+    let title = "";
+    let artist = "";
     let albumArtist = "";
     let albumImage = "";
 
-    $: musicValue,
-        (() => {
-            music.value = musicValue;
-            updateStates();
-        })();
-    $: $musicIsPlaying, handlePlayPause();
+    let isPlaying = MusicController.isPlaying();
+    let progressPercentage = MusicController.progressPercentage();
+
+    musicProgressValue.subscribe(updateStates);
+    musicCurrent.subscribe(handlePlayPause);
 
     function handlePlayPause() {
-        music.duration = ($musicPlayed?.duration ?? 0) / 1000;
-        if ($musicIsPlaying) music.play();
-        else music.pause();
+        if (MusicController.isPlaying()) MusicController.play();
+        else MusicController.pause();
 
+        updateStates();
+        updateProgress();
+    }
+
+    function handleButtonPlayPause() {
+        if (MusicController.isPlaying()) MusicController.pause();
+        else MusicController.play();
+
+        updateStates();
         updateProgress();
     }
 
     function onPlayerBarChange() {
-        if ($musicPlayed == null) {
-            musicValue = 0;
+        if (MusicController.currentMusic() == null) {
+            MusicController.setProgressValue(0);
             return;
         }
-        music.sendCommandSetPosition(musicProgressDuration * 1000);
-    }
 
-    function handleButtonPlayPause() {
-        $musicIsPlaying = !$musicIsPlaying;
-        handlePlayPause();
+        if (MusicController.progressValue() == MusicConfig.max) {
+            MusicController.addMusic(MusicController.currentMusic()!.path);
+            handlePlayPause();
+        }
+
+        MusicController.sendCommandSetPosition(
+            MusicController.realProgressDuration(),
+        );
     }
 
     function updateProgress() {
-        music.stopProgress();
-        if (music.isPlaying) {
-            music.startProgress(() => {
-                musicValue = music.value;
-                updateStates();
-            });
+        MusicController.stopProgress();
+        if (MusicController.isPlaying()) {
+            MusicController.startProgress();
         }
     }
 
     function updateStates() {
-        musicProgressPercentage = music.progressPercentage;
-        musicProgressDuration = music.progressDuration;
+        isPlaying = MusicController.isPlaying();
+        progressPercentage = MusicController.progressPercentage();
 
+        let music = MusicController.currentMusic();
+        if (music == null) return;
+
+        title = music.title!;
+        artist = music.artist;
         albumArtist =
-            $musicPlayed?.album_artist &&
-            !$musicPlayed?.artist.includes($musicPlayed.album_artist)
-                ? ` • ${$musicPlayed?.album_artist}`
+            music.album_artist && !music.artist.includes(music.album_artist)
+                ? ` • ${music.album_artist}`
                 : "";
-        albumImage = `data:image/png;base64,${$musicPlayed?.image}`;
+        albumImage = `data:image/png;base64,${music.image}`;
     }
 </script>
 
@@ -69,8 +75,8 @@
         id="music-progress-bar"
         class="w-full absolute"
         type="range"
-        style={`--progress-width: ${musicProgressPercentage}%`}
-        bind:value={musicValue}
+        style={`--progress-width: ${progressPercentage}%`}
+        bind:value={$musicProgressValue}
         min={MusicConfig.min}
         max={MusicConfig.max}
         step={MusicConfig.step}
@@ -91,7 +97,7 @@
                     on:click={handleButtonPlayPause}
                     ><img
                         class="music-icon"
-                        src={`/icons/default/${!$musicIsPlaying ? "play" : "pause"}.png`}
+                        src={`/icons/default/${!isPlaying ? "play" : "pause"}.png`}
                         alt="Icon Play"
                     /></button
                 >
@@ -108,10 +114,10 @@
                     <img class="w-12 rounded" src={albumImage} alt="Album" />
                     <div class="ms-3">
                         <p class="font-medium">
-                            {$musicPlayed?.title ?? "The Meaning of Title"}
+                            {title}
                         </p>
                         <p class="text-gray-400">
-                            {$musicPlayed?.artist ?? "The Artist"}{albumArtist}
+                            {artist ?? "The Artist"}{albumArtist}
                         </p>
                     </div>
                 </div>

@@ -2,10 +2,7 @@
     import { onMount } from "svelte";
     import type { MusicData } from "./types";
     import SpotifyApi from "$lib/api/spotify";
-    import { invoke } from "@tauri-apps/api/core";
-    import { listen } from "@tauri-apps/api/event";
-    import { musicIsPlaying, musicPlayed } from "$lib/stores/music";
-    import { album } from "$lib/stores";
+    import MusicController from "$lib/Music";
 
     export let music: MusicData;
 
@@ -24,14 +21,9 @@
     }
 
     async function addMusicAndPlay() {
-        await invoke("music_playlist_add", { playlist: [music.path] });
-        const unlisten = await listen("music_playlist_add", async (_) => {
-            invoke("music_controller", { command: "play" });
-            unlisten();
-            $musicPlayed = music;
-            $musicIsPlaying = true;
-        });
-        $album = albumImage;
+        MusicController.addMusic(music.path);
+        MusicController.setIsPlaying(true);
+        MusicController.setCurrentMusic(music);
     }
 
     onMount(checkAlbumImage);

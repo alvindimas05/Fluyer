@@ -3,4 +3,6 @@ import { writable } from "svelte/store";
 
 export let musicList = writable<MusicData[]>([]);
 export let musicIsPlaying = writable(false);
-export let musicPlayed = writable<MusicData | null>(null);
+export let musicCurrent = writable<MusicData | null>(null);
+export let musicProgressValue = writable(0);
+export let musicProgressIntervalId = writable<null | ReturnType<typeof setInterval>>(null);
