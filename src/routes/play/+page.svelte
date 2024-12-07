@@ -5,7 +5,7 @@
     import { album } from "$lib/stores";
     import "./page.scss";
 
-    let musicProgressBar: HTMLInputElement;
+    let musicProgressBar: HTMLInputElement = $state();
 </script>
 
 <div class="w-full h-full grid items-center justify-center">

@@ -3,14 +3,18 @@
     import { musicCurrent } from "$lib/stores/music";
     import { prominent } from "color.js";
 
-    export let classes = "";
+    interface Props {
+        classes?: string;
+    }
+
+    let { classes = "" }: Props = $props();
     const SIZE = 10;
 
     const GRID_COLS = Array.apply(null, Array(SIZE))
         .map(() => "auto")
         .join(" ");
 
-    let position: string[][] = [];
+    let position: string[][] = $state([]);
     async function getColors() {
         if (MusicController.currentMusic() == null) return;
         position = [];

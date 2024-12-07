@@ -3,13 +3,13 @@
     import "./playerbar.scss";
     import { musicCurrent, musicProgressValue } from "$lib/stores/music";
 
-    let title = "";
-    let artist = "";
-    let albumArtist = "";
-    let albumImage = "";
+    let title = $state("");
+    let artist = $state("");
+    let albumArtist = $state("");
+    let albumImage = $state("");
 
-    let isPlaying = MusicController.isPlaying();
-    let progressPercentage = MusicController.progressPercentage();
+    let isPlaying = $state(MusicController.isPlaying());
+    let progressPercentage = $state(MusicController.progressPercentage());
 
     musicProgressValue.subscribe(updateStates);
     musicCurrent.subscribe(handlePlayPause);
@@ -80,7 +80,7 @@
         min={MusicConfig.min}
         max={MusicConfig.max}
         step={MusicConfig.step}
-        on:change={onPlayerBarChange}
+        onchange={onPlayerBarChange}
     />
     <div class="p-3 mt-1">
         <div class="grid grid-cols-3">
@@ -94,7 +94,7 @@
                 >
                 <button
                     class="w-10 invert mx-2"
-                    on:click={handleButtonPlayPause}
+                    onclick={handleButtonPlayPause}
                     ><img
                         class="music-icon"
                         src={`/icons/default/${!isPlaying ? "play" : "pause"}.png`}

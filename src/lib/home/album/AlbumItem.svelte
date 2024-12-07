@@ -3,10 +3,14 @@
     import { onMount } from "svelte";
     import type { MusicData } from "../music/types";
 
-    export let music: MusicData;
+    interface Props {
+        music: MusicData;
+    }
+
+    let { music }: Props = $props();
     
     const spotifyApi = new SpotifyApi();
-    let albumImage = `data:image/png;base64,${music.image}`;
+    let albumImage = $state(`data:image/png;base64,${music.image}`);
     
     async function checkAlbumImage(){
         if(music.image !== null) return;

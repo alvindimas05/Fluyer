@@ -3,7 +3,6 @@
     import MusicItem from "./MusicItem.svelte";
     import type { MusicData } from "./types";
     
-    $: splittedMusics = splitMusics($musicList);
     
     function splitMusics(arr: MusicData[]): MusicData[][] {
         const length = arr.length;
@@ -20,6 +19,7 @@
     
         return [firstPart, secondPart, thirdPart];
     }
+    let splittedMusics = $derived(splitMusics($musicList));
 </script>
 
 <div class="grid grid-cols-3 text-white px-3 overflow-y-auto scrollbar-hidden mb-20">

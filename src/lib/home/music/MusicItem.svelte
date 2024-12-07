@@ -4,7 +4,11 @@
     import SpotifyApi from "$lib/api/spotify";
     import MusicController from "$lib/Music";
 
-    export let music: MusicData;
+    interface Props {
+        music: MusicData;
+    }
+
+    let { music }: Props = $props();
 
     const spotifyApi = new SpotifyApi();
     const albumArtist =
@@ -12,7 +16,7 @@
             ? ` • ${music.album_artist}`
             : "";
 
-    let albumImage = `data:image/png;base64,${music.image}`;
+    let albumImage = $state(`data:image/png;base64,${music.image}`);
 
     async function checkAlbumImage() {
         if (music.image !== null) return;
@@ -30,7 +34,7 @@
 </script>
 
 <div class="grid grid-cols-[max-content_auto] py-2">
-    <button on:click={addMusicAndPlay}
+    <button onclick={addMusicAndPlay}
         ><img class="w-16 rounded" src={albumImage} alt="Album" /></button
     >
     <div class="ms-3">
