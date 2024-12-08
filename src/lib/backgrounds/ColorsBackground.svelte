@@ -1,5 +1,5 @@
 <script lang="ts">
-    import MusicController from "$lib/Music";
+    import MusicController from "$lib/MusicController";
     import { musicCurrent } from "$lib/stores/music";
     import { prominent } from "color.js";
 

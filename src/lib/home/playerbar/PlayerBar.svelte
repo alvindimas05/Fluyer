@@ -1,5 +1,5 @@
 <script lang="ts">
-    import MusicController, { MusicConfig } from "$lib/Music";
+    import MusicController, { MusicConfig } from "$lib/MusicController";
     import "./playerbar.scss";
     import { musicCurrent, musicProgressValue } from "$lib/stores/music";
 
