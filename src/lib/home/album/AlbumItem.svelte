@@ -10,7 +10,7 @@
     let { music }: Props = $props();
     
     const spotifyApi = new SpotifyApi();
-    let albumImage = $state(`data:image/png;base64,${music.image}`);
+    let albumImage = $state(music.image ? `data:image/png;base64,${music.image}` : '/icons/default/default-album-cover.jpg');
     
     async function checkAlbumImage(){
         if(music.image !== null) return;
@@ -24,5 +24,5 @@
 <div class="px-3 py-6 text-white row-[1] col-auto">
     <img class="rounded-lg" src={albumImage} alt="Album">
     <p class="font-medium text-xl mt-2">{music.album}</p>
-    <p class="text-lg text-gray-300">{music.album_artist ?? music.artist}</p>
+    <p class="text-lg text-gray-200">{music.album_artist ?? music.artist}</p>
 </div>

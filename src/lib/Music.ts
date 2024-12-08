@@ -24,6 +24,15 @@ const MusicController = {
     setIsPlaying: (value: boolean) => musicIsPlaying.set(value),
 
     currentMusic: () => get(musicCurrent),
+    currentMusicAlbumImage: () => {
+        var image = MusicController.currentMusic()!.image;
+        try {
+            new URL(image);
+            return image;
+        } catch (e) {
+            return `data:image/png;base64,${image}`;
+        }
+    },
     setCurrentMusic: (value: MusicData | null) => musicCurrent.set(value),
 
     currentMusicDuration: () =>

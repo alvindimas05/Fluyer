@@ -3,10 +3,10 @@
     import "./playerbar.scss";
     import { musicCurrent, musicProgressValue } from "$lib/stores/music";
 
-    let title = $state("");
-    let artist = $state("");
+    let title = $state("The Meaning of Life");
+    let artist = $state("Musician");
     let albumArtist = $state("");
-    let albumImage = $state("");
+    let albumImage = $state("/icons/default/default-album-cover.jpg");
 
     let isPlaying = $state(MusicController.isPlaying());
     let progressPercentage = $state(MusicController.progressPercentage());
@@ -66,7 +66,7 @@
             music.album_artist && !music.artist.includes(music.album_artist)
                 ? ` • ${music.album_artist}`
                 : "";
-        albumImage = `data:image/png;base64,${music.image}`;
+        albumImage = MusicController.currentMusicAlbumImage();
     }
 </script>
 
@@ -92,9 +92,7 @@
                         alt="Icon Previous"
                     /></button
                 >
-                <button
-                    class="w-10 invert mx-2"
-                    onclick={handleButtonPlayPause}
+                <button class="w-10 invert mx-2" onclick={handleButtonPlayPause}
                     ><img
                         class="music-icon"
                         src={`/icons/default/${!isPlaying ? "play" : "pause"}.png`}
@@ -117,7 +115,7 @@
                             {title}
                         </p>
                         <p class="text-gray-400">
-                            {artist ?? "The Artist"}{albumArtist}
+                            {artist}{albumArtist}
                         </p>
                     </div>
                 </div>

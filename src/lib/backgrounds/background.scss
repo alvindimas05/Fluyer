@@ -3,6 +3,11 @@
     /* background-color: rgba(0, 0, 0, .05); */
     backdrop-filter: blur(90px);
 }
+
+.bg-blur-dark {
+    @apply w-screen h-screen grid fixed z-[-8] bg-black bg-opacity-10;
+}
+
 .bg-blur-colors {
     @apply w-screen h-screen grid bg-black fixed z-[-10];
     .bg-blur-pixel {

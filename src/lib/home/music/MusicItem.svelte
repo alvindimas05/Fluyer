@@ -16,7 +16,7 @@
             ? ` • ${music.album_artist}`
             : "";
 
-    let albumImage = $state(`data:image/png;base64,${music.image}`);
+    let albumImage = $state(music.image ? `data:image/png;base64,${music.image}` : '/icons/default/default-album-cover.jpg');
 
     async function checkAlbumImage() {
         if (music.image !== null) return;
@@ -27,6 +27,8 @@
     async function addMusicAndPlay() {
         MusicController.addMusic(music.path);
         MusicController.setIsPlaying(true);
+        
+        music.image = albumImage;
         MusicController.setCurrentMusic(music);
     }
 
@@ -39,6 +41,6 @@
     >
     <div class="ms-3">
         <p class="font-medium">{music.title}</p>
-        <p class="text-gray-400">{music.artist}{albumArtist}</p>
+        <p class="text-gray-200">{music.artist}{albumArtist}</p>
     </div>
 </div>
