@@ -22,7 +22,7 @@
     let splittedMusics = $derived(splitMusics($musicList));
 </script>
 
-<div class="grid grid-cols-3 text-white px-3 overflow-y-auto scrollbar-hidden mb-20">
+<div class="grid grid-cols-3 text-white px-3 overflow-y-auto scrollbar-hidden pb-20">
     {#each splittedMusics as musics}
         <div>
             {#each musics as music}

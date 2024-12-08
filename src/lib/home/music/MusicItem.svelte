@@ -35,7 +35,7 @@
     onMount(checkAlbumImage);
 </script>
 
-<div class="grid grid-cols-[max-content_auto] py-2">
+<div class="grid grid-cols-[max-content_auto] py-2 animate__animated animate__fadeIn animate__slow">
     <button onclick={addMusicAndPlay}
         ><img class="w-16 rounded" src={albumImage} alt="Album" /></button
     >

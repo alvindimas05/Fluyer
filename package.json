@@ -16,6 +16,7 @@
     "@tauri-apps/api": ">=2.0.0",
     "@tauri-apps/plugin-shell": ">=2.0.0",
     "@types/node": "^22.9.0",
+    "animate.css": "^4.1.1",
     "axios": "^1.7.7",
     "color.js": "^1.2.0",
     "musicbrainz-api": "^0.19.1",

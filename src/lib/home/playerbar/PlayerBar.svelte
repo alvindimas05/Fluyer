@@ -70,7 +70,7 @@
     }
 </script>
 
-<div class="fixed left-0 bottom-0 w-full bg-[rgba(0,0,0,.5)] text-white">
+<div class="fixed left-0 bottom-0 z-10 w-full bg-[rgba(0,0,0,.9)] text-white animate__animated animate__slideInUp animate__slow">
     <input
         id="music-progress-bar"
         class="w-full absolute"

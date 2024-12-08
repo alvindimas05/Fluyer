@@ -5,6 +5,7 @@ import {
     musicCurrent,
     musicProgressIntervalId,
     musicProgressValue,
+    musicList,
 } from "./stores/music";
 import { get } from "svelte/store";
 import type { MusicData } from "./home/music/types";
@@ -22,6 +23,8 @@ export const MusicConfig = {
 const MusicController = {
     isPlaying: () => get(musicIsPlaying),
     setIsPlaying: (value: boolean) => musicIsPlaying.set(value),
+    
+    musicList: () => get(musicList),
 
     currentMusic: () => get(musicCurrent),
     currentMusicAlbumImage: () => {

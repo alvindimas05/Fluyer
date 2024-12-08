@@ -1,4 +1,5 @@
 <script lang="ts">
+    import 'animate.css';
     import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
     import logHandler from "$lib/handlers/log";
     import "../app.scss";
