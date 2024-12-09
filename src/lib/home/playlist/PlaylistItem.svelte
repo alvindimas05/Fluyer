@@ -12,7 +12,7 @@
 
 <div
     class={`grid grid-cols-[max-content_auto_max-content] py-2 px-3 ${isPlaying ? "bg-gray-700 bg-opacity-40" : ""}
-    animate__animated animate__fadeInRight animate__slow`}
+    animate__animated animate__fadeIn`}
 >
     <button class="relative"
         ><img
