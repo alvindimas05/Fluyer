@@ -2,6 +2,7 @@
     import SpotifyApi from "$lib/api/spotify";
     import { onMount } from "svelte";
     import type { MusicData } from "../music/types";
+    import MusicController from "$lib/MusicController";
 
     interface Props {
         music: MusicData;
@@ -15,14 +16,13 @@
 
     const spotifyApi = new SpotifyApi();
     let albumImage = $state(
-        music.image
-            ? `data:image/png;base64,${music.image}`
-            : "/icons/default/default-album-cover.jpg",
+        MusicController.getAlbumImageFromMusic(music)
     );
 
     async function checkAlbumImage() {
         if (music.image !== null) return;
         const spotifyMusic = await spotifyApi.searchMusic(music);
+        if(spotifyMusic == null) return;
         albumImage = spotifyMusic?.imageUrl;
     }
 

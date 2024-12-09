@@ -3,6 +3,7 @@
     import MusicList from "$lib/home/music/MusicList.svelte";
     import type { MusicData } from "$lib/home/music/types";
     import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
+    import Playlist from "$lib/home/playlist/Playlist.svelte";
     import { musicList } from "$lib/stores/music";
     import { invoke } from "@tauri-apps/api/core";
     
@@ -16,4 +17,5 @@
 <div class="h-full grid grid-rows-[min-content_1fr]">
     <AlbumList />
     <MusicList />
+    <Playlist />
 </div>

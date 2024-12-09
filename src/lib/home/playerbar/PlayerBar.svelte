@@ -23,6 +23,8 @@
     }
 
     function handleButtonPlayPause() {
+        if (MusicController.currentMusic() == null) return;
+
         if (MusicController.isPlaying()) MusicController.pause();
         else MusicController.play();
 
@@ -70,7 +72,9 @@
     }
 </script>
 
-<div class="fixed left-0 bottom-0 z-10 w-full bg-[rgba(0,0,0,.9)] text-white animate__animated animate__slideInUp animate__slow">
+<div
+    class="fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 backdrop-blur-md text-white animate__animated animate__slideInUp animate__slow"
+>
     <input
         id="music-progress-bar"
         class="w-full absolute"

@@ -188,34 +188,34 @@ fn play(
     }
 }
 
-fn fade(sink: &Sink, out: bool) {
-    if out {
-        sink.pause();
-    } else {
-        sink.play();
-    }
-}
-
 // fn fade(sink: &Sink, out: bool) {
-//     let mut range: Vec<i32> = (1..20).collect();
-//     if out {
-//         range.reverse();
-//     } else {
-//         sink.play();
-//     }
-
-//     for i in range {
-//         sink.set_volume(i as f32 / 20.);
-//         thread::sleep(Duration::from_millis(20));
-//     }
-
-//     if out {
-//         sink.pause();
-//     }
-
 //     if out {
 //         sink.pause();
 //     } else {
 //         sink.play();
 //     }
 // }
+
+fn fade(sink: &Sink, out: bool) {
+    let mut range: Vec<i32> = (1..20).collect();
+    if out {
+        range.reverse();
+    } else {
+        sink.play();
+    }
+
+    for i in range {
+        sink.set_volume(i as f32 / 20.);
+        thread::sleep(Duration::from_millis(20));
+    }
+
+    if out {
+        sink.pause();
+    }
+
+    if out {
+        sink.pause();
+    } else {
+        sink.play();
+    }
+}

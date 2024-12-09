@@ -53,11 +53,11 @@
 
     
     async function getColors() {
-        if (MusicController.currentMusic() == null) return;
         position = [];
 
         let image = new Image();
-        image.src = MusicController.currentMusicAlbumImage();
+        image.src = MusicController.currentMusic() ? MusicController.currentMusicAlbumImage() :
+            '/icons/default/default-album-cover.jpg';
 
         // @ts-ignore
         let colors: Hex[] = await prominent(image, {
@@ -65,7 +65,6 @@
             format: "hex",
         });
         isLight = isMajorityLight(colors);
-        console.log(isLight);
         
         for (var i = 0; i < SIZE; i++) {
             position[i] = [];

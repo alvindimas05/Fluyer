@@ -27,8 +27,11 @@ const MusicController = {
     musicList: () => get(musicList),
 
     currentMusic: () => get(musicCurrent),
+    setCurrentMusic: (value: MusicData | null) => musicCurrent.set(value),
+    
     currentMusicAlbumImage: () => {
         var image = MusicController.currentMusic()!.image;
+        if(image.startsWith('/')) return image;
         try {
             new URL(image);
             return image;
@@ -36,7 +39,15 @@ const MusicController = {
             return `data:image/png;base64,${image}`;
         }
     },
-    setCurrentMusic: (value: MusicData | null) => musicCurrent.set(value),
+    getAlbumImageFromMusic: (music: MusicData) => {
+        return music.image ? `data:image/png;base64,${music.image}` : '/icons/default/default-album-cover.jpg';
+    },
+    
+    getFullArtistFromMusic: (music: MusicData) => {
+      return music.artist + (music.album_artist && !music.artist.includes(music.album_artist)
+          ? ` • ${music.album_artist}`
+          : "" ); 
+    },
 
     currentMusicDuration: () =>
         MusicController.currentMusic() != null
