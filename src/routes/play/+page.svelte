@@ -1,11 +1,11 @@
 <script lang="ts">
-    import Music, { MusicConfig } from "$lib/Music";
-    import { invoke } from "@tauri-apps/api/core";
-    import { musicIsPlaying } from "$lib/stores/music";
-    import { album } from "$lib/stores";
-    import "./page.scss";
+import Music, { MusicConfig } from "$lib/Music";
+import { invoke } from "@tauri-apps/api/core";
+import { musicIsPlaying } from "$lib/stores/music";
+import { album } from "$lib/stores";
+import "./page.scss";
 
-    let musicProgressBar: HTMLInputElement = $state();
+let musicProgressBar: HTMLInputElement = $state();
 </script>
 
 <div class="w-full h-full grid items-center justify-center">

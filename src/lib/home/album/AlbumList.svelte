@@ -1,32 +1,32 @@
 <script lang="ts">
-    import type { MusicData } from "../music/types";
-    import { musicList } from "$lib/stores/music";
-    import AlbumItem from "./AlbumItem.svelte";
-    import MusicController from "$lib/MusicController";
+import type { MusicData } from "../music/types";
+import { musicList } from "$lib/stores/music";
+import AlbumItem from "./AlbumItem.svelte";
+import MusicController from "$lib/controllers/MusicController";
 
-    let grouppedAlbums = $state(groupByAlbum());
+let grouppedAlbums = $state(groupByAlbum());
 
-    function groupByAlbum(): MusicData[][] {
-        const albumsMap = MusicController.musicList().reduce(
-            (acc, item) => {
-                if (item.album.trim() === "") {
-                    return acc;
-                }
+function groupByAlbum(): MusicData[][] {
+	const albumsMap = MusicController.musicList().reduce(
+		(acc, item) => {
+			if (item.album.trim() === "") {
+				return acc;
+			}
 
-                if (!acc[item.album]) {
-                    acc[item.album] = [];
-                }
+			if (!acc[item.album]) {
+				acc[item.album] = [];
+			}
 
-                acc[item.album].push(item);
+			acc[item.album].push(item);
 
-                return acc;
-            },
-            {} as Record<string, MusicData[]>,
-        );
+			return acc;
+		},
+		{} as Record<string, MusicData[]>,
+	);
 
-        return Object.values(albumsMap);
-    }
-    musicList.subscribe(() => (grouppedAlbums = groupByAlbum()));
+	return Object.values(albumsMap);
+}
+musicList.subscribe(() => (grouppedAlbums = groupByAlbum()));
 </script>
 
 <div

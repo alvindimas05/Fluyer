@@ -1,42 +1,42 @@
 {
-  "$schema": "https://schema.tauri.app/config/2.0.0",
-  "productName": "Fluyer",
-  "version": "0.0.1-alpha",
-  "identifier": "org.alvindimas05.fluyer",
-  "build": {
-    "beforeDevCommand": "bun run dev",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "bun run build",
-    "frontendDist": "../build"
-  },
-  "app": {
-    "macOSPrivateApi": true,
-    "windows": [
-      {
-        "title": "Fluyer",
-        "width": 1920,
-        "height": 1080,
-        "decorations": true,
-        "transparent": true,
-        "resizable": true,
-        "maximized": true,
-        "titleBarStyle": "Overlay",
-        "hiddenTitle": true
-      }
-    ],
-    "security": {
-      "csp": null
-    }
-  },
-  "bundle": {
-    "active": true,
-    "targets": "all",
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
-  }
+	"$schema": "https://schema.tauri.app/config/2.0.0",
+	"productName": "Fluyer",
+	"version": "0.0.1-alpha",
+	"identifier": "org.alvindimas05.fluyer",
+	"build": {
+		"beforeDevCommand": "bun run dev",
+		"devUrl": "http://localhost:1420",
+		"beforeBuildCommand": "bun run build",
+		"frontendDist": "../build"
+	},
+	"app": {
+		"macOSPrivateApi": true,
+		"windows": [
+			{
+				"title": "Fluyer",
+				"width": 1920,
+				"height": 1080,
+				"decorations": true,
+				"transparent": true,
+				"resizable": true,
+				"maximized": true,
+				"titleBarStyle": "Overlay",
+				"hiddenTitle": true
+			}
+		],
+		"security": {
+			"csp": null
+		}
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		]
+	}
 }

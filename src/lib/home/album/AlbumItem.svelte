@@ -1,39 +1,35 @@
 <script lang="ts">
-    import SpotifyApi from "$lib/api/spotify";
-    import { onMount } from "svelte";
-    import type { MusicData } from "../music/types";
-    import MusicController from "$lib/MusicController";
+import SpotifyApi from "$lib/api/spotify";
+import { onMount } from "svelte";
+import type { MusicData } from "../music/types";
+import MusicController from "$lib/controllers/MusicController";
 
-    interface Props {
-        music: MusicData;
-        index: number;
-    }
+interface Props {
+	music: MusicData;
+	index: number;
+}
 
-    let { music, index }: Props = $props();
+let { music, index }: Props = $props();
 
-    const animationDelay = 200;
-    let animationClasses = $state("hidden");
+const animationDelay = 200;
+let animationClasses = $state("hidden");
 
-    const spotifyApi = new SpotifyApi();
-    let albumImage = $state(
-        MusicController.getAlbumImageFromMusic(music)
-    );
+const spotifyApi = new SpotifyApi();
+let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
-    async function checkAlbumImage() {
-        if (music.image !== null) return;
-        const spotifyMusic = await spotifyApi.searchMusic(music);
-        if(spotifyMusic == null) return;
-        albumImage = spotifyMusic?.imageUrl;
-    }
+async function checkAlbumImage() {
+	if (music.image !== null) return;
+	const spotifyMusic = await spotifyApi.searchMusic(music);
+	if (spotifyMusic == null) return;
+	albumImage = spotifyMusic?.imageUrl;
+}
 
-    onMount(checkAlbumImage);
+onMount(checkAlbumImage);
 
-    setTimeout(
-        () =>
-            (animationClasses =
-                "animate__animated animate__fadeInDown"),
-        animationDelay * index
-    );
+setTimeout(
+	() => (animationClasses = "animate__animated animate__fadeInDown"),
+	animationDelay * index,
+);
 </script>
 
 <div class={`px-3 py-6 text-white row-[1] col-auto ${animationClasses}`}>

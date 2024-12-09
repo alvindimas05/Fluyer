@@ -1,35 +1,35 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import type { MusicData } from "./types";
-    import SpotifyApi from "$lib/api/spotify";
-    import MusicController from "$lib/MusicController";
+import { onMount } from "svelte";
+import type { MusicData } from "./types";
+import SpotifyApi from "$lib/api/spotify";
+import MusicController from "$lib/controllers/MusicController";
 
-    interface Props {
-        music: MusicData;
-    }
+interface Props {
+	music: MusicData;
+}
 
-    let { music }: Props = $props();
+let { music }: Props = $props();
 
-    const spotifyApi = new SpotifyApi();
+const spotifyApi = new SpotifyApi();
 
-    let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
+let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
-    async function checkAlbumImage() {
-        if (music.image !== null) return;
-        const spotifyMusic = await spotifyApi.searchMusic(music);
-        if(spotifyMusic == null) return;
-        albumImage = spotifyMusic?.imageUrl;
-    }
+async function checkAlbumImage() {
+	if (music.image !== null) return;
+	const spotifyMusic = await spotifyApi.searchMusic(music);
+	if (spotifyMusic == null) return;
+	albumImage = spotifyMusic?.imageUrl;
+}
 
-    async function addMusicAndPlay() {
-        MusicController.addMusic(music.path);
-        MusicController.setIsPlaying(true);
-        
-        music.image = albumImage;
-        MusicController.setCurrentMusic(music);
-    }
+async function addMusicAndPlay() {
+	MusicController.addMusic(music.path);
+	MusicController.setIsPlaying(true);
 
-    onMount(checkAlbumImage);
+	music.image = albumImage;
+	MusicController.setCurrentMusic(music);
+}
+
+onMount(checkAlbumImage);
 </script>
 
 <div class="grid grid-cols-[max-content_auto] py-2 animate__animated animate__fadeInDown animate__slow">

@@ -7,10 +7,10 @@ import path from "path";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  preprocess: vitePreprocess(),
-  kit: {
-    adapter: adapter(),
-  }
+	preprocess: vitePreprocess(),
+	kit: {
+		adapter: adapter(),
+	},
 };
 
 export default config;

@@ -1,38 +1,38 @@
 <script lang="ts">
-    import MusicController from "$lib/MusicController";
-    import PlaylistItem from "./PlaylistItem.svelte";
+import MusicController from "$lib/controllers/MusicController";
+import PlaylistItem from "./PlaylistItem.svelte";
 
-    let isMouseInsideArea = $state(false);
-    let animationClass = $state("");
+let isMouseInsideArea = $state(false);
+let animationClass = $state("");
 
-    function onMouseMove(
-        e: MouseEvent & {
-            currentTarget: EventTarget & Document;
-        },
-    ) {
-        if (
-            e.clientX > window.innerWidth - 20 &&
-            e.clientY <= window.innerHeight - 8 * 16 &&
-            !isMouseInsideArea
-        ) {
-            isMouseInsideArea = true;
-            animationClass = "animate__fadeInRight";
-        }
-    }
+function onMouseMove(
+	e: MouseEvent & {
+		currentTarget: EventTarget & Document;
+	},
+) {
+	if (
+		e.clientX > window.innerWidth - 20 &&
+		e.clientY <= window.innerHeight - 8 * 16 &&
+		!isMouseInsideArea
+	) {
+		isMouseInsideArea = true;
+		animationClass = "animate__fadeInRight";
+	}
+}
 
-    function onMouseLeave(
-        e: MouseEvent & {
-            currentTarget: EventTarget & HTMLDivElement;
-        },
-    ) {
-        if (!isMouseInsideArea) return;
-        animationClass = "animate__fadeOutRight";
-    }
+function onMouseLeave(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	if (!isMouseInsideArea) return;
+	animationClass = "animate__fadeOutRight";
+}
 
-    function onAnimationEnd() {
-        if (animationClass != "animate__fadeOutRight") return;
-        isMouseInsideArea = false;
-    }
+function onAnimationEnd() {
+	if (animationClass != "animate__fadeOutRight") return;
+	isMouseInsideArea = false;
+}
 </script>
 
 <svelte:document onmousemove={onMouseMove} />
