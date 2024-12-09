@@ -9,6 +9,7 @@ import {
 } from "./stores/music";
 import { get } from "svelte/store";
 import type { MusicData } from "./home/music/types";
+import LoadingController from "./loading/LoadingController";
 
 interface MusicPlayerInfo {
     current_position: number;
@@ -21,11 +22,17 @@ export const MusicConfig = {
     max: 10,
 };
 const MusicController = {
+    musicList: () => get(musicList),
+    setMusicList: (value: MusicData[]) => musicList.set(value),
+    getMusics: async () => {
+        if(MusicController.musicList().length > 0) return;
+        MusicController.setMusicList(await invoke<MusicData[]>('music_get_all'));
+        LoadingController.setLoadingMusicList(true);
+    },
+    
     isPlaying: () => get(musicIsPlaying),
     setIsPlaying: (value: boolean) => musicIsPlaying.set(value),
     
-    musicList: () => get(musicList),
-
     currentMusic: () => get(musicCurrent),
     setCurrentMusic: (value: MusicData | null) => musicCurrent.set(value),
     

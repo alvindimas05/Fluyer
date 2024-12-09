@@ -4,18 +4,27 @@
     import type { MusicData } from "$lib/home/music/types";
     import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
     import Playlist from "$lib/home/playlist/Playlist.svelte";
-    import { musicList } from "$lib/stores/music";
-    import { invoke } from "@tauri-apps/api/core";
+    import Loading from "$lib/loading/Loading.svelte";
+    import LoadingController from "$lib/loading/LoadingController";
+    import { loadingShow } from "$lib/loading/stores";
+    import MusicController from "$lib/MusicController";
     
-    async function getMusics(){
-        if($musicList.length > 0) return;
-        $musicList = await invoke<MusicData[]>('music_get_all');
-    }
-    getMusics();
+    let isLoadingDone = LoadingController.loadingShow();
+        
+    loadingShow.subscribe(() => {
+       isLoadingDone = LoadingController.loadingShow(); 
+    });
+    
+    LoadingController.listen();
+    MusicController.getMusics();
 </script>
+{#if isLoadingDone}
 <PlayerBar />
 <div class="h-full grid grid-rows-[min-content_1fr]">
     <AlbumList />
     <MusicList />
     <Playlist />
 </div>
+{:else}
+<Loading />
+{/if}

@@ -5,7 +5,6 @@
 
     let title = $state("The Meaning of Life");
     let artist = $state("Musician");
-    let albumArtist = $state("");
     let albumImage = $state("/icons/default/default-album-cover.jpg");
 
     let isPlaying = $state(MusicController.isPlaying());
@@ -63,11 +62,7 @@
         if (music == null) return;
 
         title = music.title!;
-        artist = music.artist;
-        albumArtist =
-            music.album_artist && !music.artist.includes(music.album_artist)
-                ? ` • ${music.album_artist}`
-                : "";
+        artist = MusicController.getFullArtistFromMusic(music);
         albumImage = MusicController.currentMusicAlbumImage();
     }
 </script>
@@ -119,7 +114,7 @@
                             {title}
                         </p>
                         <p class="text-gray-400">
-                            {artist}{albumArtist}
+                            {artist}
                         </p>
                     </div>
                 </div>
