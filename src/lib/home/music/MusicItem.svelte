@@ -22,11 +22,8 @@ async function checkAlbumImage() {
 }
 
 async function addMusicAndPlay() {
-	MusicController.addMusic(music.path);
-	MusicController.setIsPlaying(true);
-
-	music.image = albumImage;
-	MusicController.setCurrentMusic(music);
+	await MusicController.addMusic(music);
+	MusicController.play();
 }
 
 onMount(checkAlbumImage);

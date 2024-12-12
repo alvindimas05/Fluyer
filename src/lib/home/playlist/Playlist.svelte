@@ -1,5 +1,6 @@
 <script lang="ts">
 import MusicController from "$lib/controllers/MusicController";
+    import { musicCurrent, musicsNext } from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
 
 let isMouseInsideArea = $state(false);
@@ -52,8 +53,11 @@ function onAnimationEnd() {
         <div class="border border-gray-400 h-full w-full rounded flex flex-col">
             <p class="text-[1.5rem] font-semibold p-3">Playlist</p>
             <div class="flex-1 w-full overflow-auto scrollbar-hidden">
-                {#each MusicController.musicList() as music, index}
-                    <PlaylistItem {music} isPlaying={index == 6} />
+                {#if $musicCurrent}
+                    <PlaylistItem music={$musicCurrent} isPlaying={true}/>
+                {/if}
+                {#each $musicsNext as music}
+                    <PlaylistItem {music}/>
                 {/each}
             </div>
         </div>

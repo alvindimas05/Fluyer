@@ -8,3 +8,4 @@ export let musicProgressValue = writable(0);
 export let musicProgressIntervalId = writable<null | ReturnType<
 	typeof setInterval
 >>(null);
+export let musicsNext = writable<MusicData[]>([]);

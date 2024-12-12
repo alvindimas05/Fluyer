@@ -43,7 +43,7 @@ pub struct MusicPlayerInfo {
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
-        let music_spawn = spawn(MusicState::Playing);
+        let music_spawn = spawn(MusicState::Paused);
         Self {
             command: music_spawn.0,
             position: music_spawn.1,

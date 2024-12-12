@@ -1,12 +1,11 @@
 <script lang="ts">
-import MusicController from "$lib/controllers/MusicController";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import { musicCurrent } from "$lib/stores/music";
 import { prominent } from "color.js";
 
 interface Props {
 	classes?: string;
 }
-import LoadingController from "$lib/controllers/LoadingController";
 
 let { classes = "" }: Props = $props();
 const SIZE = 10;
@@ -55,9 +54,8 @@ async function getColors() {
 	position = [];
 
 	let image = new Image();
-	image.src = MusicController.currentMusic()
-		? MusicController.currentMusicAlbumImage()
-		: "/icons/default/default-album-cover.jpg";
+	image.src = MusicController.currentMusicAlbumImage() ??
+		 MusicConfig.defaultAlbumImage;
 
 	// @ts-ignore
 	let colors: Hex[] = await prominent(image, {
