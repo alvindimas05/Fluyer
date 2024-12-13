@@ -124,7 +124,7 @@ const MusicController = {
             if (force) MusicController.sendCommandController("next");
 
             MusicController.setCurrentMusic(nextMusics[0]);
-            MusicController.play();
+            MusicController.play(false);
         } else {
             MusicController.pause();
             return;
@@ -160,15 +160,15 @@ const MusicController = {
         seconds = Math.floor(seconds);
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     },
-    play: () => {
+    play: (sendCommand: boolean = true) => {
         musicIsPlaying.set(true);
         MusicController.startProgress();
-        MusicController.sendCommandController("play");
+        if(sendCommand) MusicController.sendCommandController("play");
     },
-    pause: () => {
+    pause: (sendCommand: boolean = true) => {
         musicIsPlaying.set(false);
         MusicController.stopProgress();
-        MusicController.sendCommandController("pause");
+        if(sendCommand) MusicController.sendCommandController("pause");
     },
     sendCommandController: (command: string) => {
         invoke("music_controller", { command });
