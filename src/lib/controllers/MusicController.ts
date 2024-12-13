@@ -24,6 +24,8 @@ export const MusicConfig = {
     defaultTitle: "The Meaning of Life",
     defaultArtist: "Musician",
     defaultAlbumImage: "/icons/default/default-album-cover.jpg",
+    defaultPlayButton: "/icons/default/play.png",
+    defaultPauseButton: "/icons/default/pause.png",
 };
 const MusicController = {
     musicList: () => get(musicList),

@@ -87,7 +87,9 @@
                 <button class="w-10 invert mx-2" onclick={handleButtonPlayPause}
                     ><img
                         class="music-icon"
-                        src={`/icons/default/${!isPlaying ? "play" : "pause"}.png`}
+                        src={isPlaying
+                            ? MusicConfig.defaultPlayButton
+                            : MusicConfig.defaultPauseButton}
                         alt="Icon Play"
                     /></button
                 >

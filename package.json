@@ -21,7 +21,8 @@
 		"axios": "^1.7.7",
 		"color.js": "^1.2.0",
 		"musicbrainz-api": "^0.19.1",
-		"sass": "^1.79.4"
+		"sass": "^1.79.4",
+		"tailwindcss-animatecss": "^3.0.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

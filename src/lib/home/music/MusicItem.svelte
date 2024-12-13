@@ -2,7 +2,9 @@
     import { onMount } from "svelte";
     import type { MusicData } from "./types";
     import SpotifyApi from "$lib/api/spotify";
-    import MusicController from "$lib/controllers/MusicController";
+    import MusicController, {
+        MusicConfig,
+    } from "$lib/controllers/MusicController";
 
     interface Props {
         music: MusicData;
@@ -22,6 +24,7 @@
     }
 
     async function addMusicAndPlay() {
+        music.image = albumImage;
         const previousMusic = MusicController.currentMusic();
         await MusicController.addMusic(music);
         if (
@@ -38,9 +41,14 @@
 <div
     class="grid grid-cols-[max-content_auto] py-2 animate__animated animate__fadeInDown animate__slow"
 >
-    <button onclick={addMusicAndPlay}
-        ><img class="w-16 rounded" src={albumImage} alt="Album" /></button
-    >
+    <button class="w-16 h-16 relative" onclick={addMusicAndPlay}>
+        <img
+            class="absolute inset-0 m-auto w-12 animate__animated animate__faster animate__fadeOut hover:animate__fadeIn invert"
+            src={MusicConfig.defaultPlayButton}
+            alt="Play"
+        />
+        <img class="rounded" src={albumImage} alt="Album" />
+    </button>
     <div class="ms-3">
         <p class="font-medium">{music.title}</p>
         <p class="text-gray-200">
