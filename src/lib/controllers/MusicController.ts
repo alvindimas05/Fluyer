@@ -132,7 +132,7 @@ const MusicController = {
         if (nextMusics.length > 1) {
             MusicController.addMusicToPlayList(nextMusics[1].path);
         }
-        MusicController.removeLastNextMusics();
+        MusicController.removeFirstNextMusics();
     },
 
     resetProgress: () => musicProgressValue.set(MusicConfig.min),
@@ -199,8 +199,8 @@ const MusicController = {
         musicsNext.set([...get(musicsNext), ...musics]);
     },
 
-    removeLastNextMusics: () =>
-        musicsNext.set(MusicController.nextMusics().slice(0, -1)),
+    removeFirstNextMusics: () =>
+        musicsNext.set(MusicController.nextMusics().slice(1)),
     isCurrentMusicFinished: () => {
         return (
             MusicController.progressValue() >= MusicConfig.max ||
