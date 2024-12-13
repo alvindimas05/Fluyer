@@ -9,8 +9,8 @@
         musicProgressValue,
     } from "$lib/stores/music";
 
-    let title = $state("The Meaning of Life");
-    let artist = $state("Musician");
+    let title = $state(MusicConfig.defaultTitle);
+    let artist = $state(MusicConfig.defaultArtist);
     let albumImage = $state(MusicConfig.defaultAlbumImage);
 
     let isPlaying = $state(MusicController.isPlaying());
@@ -26,6 +26,10 @@
         else MusicController.play();
 
         updateStates();
+    }
+
+    function handleButtonNext() {
+        MusicController.tryNextMusic(true);
     }
 
     function onPlayerBarChange() {
@@ -87,7 +91,7 @@
                         alt="Icon Play"
                     /></button
                 >
-                <button class="w-10 invert mx-2"
+                <button class="w-10 invert mx-2" onclick={handleButtonNext}
                     ><img
                         class="music-icon"
                         src="/icons/default/next.png"
@@ -102,7 +106,7 @@
                         <p class="font-medium">
                             {title}
                         </p>
-                        <p class="text-gray-400">
+                        <p class="text-gray-200">
                             {artist}
                         </p>
                     </div>

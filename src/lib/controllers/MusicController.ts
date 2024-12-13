@@ -21,6 +21,8 @@ export const MusicConfig = {
     step: 0.01,
     min: 0,
     max: 10,
+    defaultTitle: "The Meaning of Life",
+    defaultArtist: "Musician",
     defaultAlbumImage: "/icons/default/default-album-cover.jpg",
 };
 const MusicController = {
@@ -104,18 +106,21 @@ const MusicController = {
                 );
 
                 if (MusicController.progressValue() >= MusicConfig.max) {
-                    MusicController.stopProgress();
-                    MusicController.resetProgress();
-                    musicProgressIntervalId.set(null);
                     MusicController.tryNextMusic();
                 }
             }, updateInterval),
         );
     },
 
-    tryNextMusic: () => {
+    tryNextMusic: (force = false) => {
+        clearInterval(get(musicProgressIntervalId)!);
+        musicProgressIntervalId.set(null);
+        MusicController.resetProgress();
+
         const nextMusics = MusicController.nextMusics();
         if (nextMusics.length > 0) {
+            if (force) MusicController.sendCommandController("next");
+
             MusicController.setCurrentMusic(nextMusics[0]);
             MusicController.play();
         } else {
@@ -176,8 +181,9 @@ const MusicController = {
             MusicController.setCurrentMusic(music);
             await MusicController.addMusicToPlayList(music.path);
         } else {
-            if (MusicController.nextMusics().length < 2)
+            if (MusicController.nextMusics().length < 2) {
                 await MusicController.addMusicToPlayList(music.path);
+            }
             MusicController.addNextMusics([music]);
         }
     },
@@ -196,7 +202,8 @@ const MusicController = {
     isCurrentMusicFinished: () => {
         return (
             MusicController.progressValue() >= MusicConfig.max ||
-            MusicController.currentMusic() === null
+            MusicController.currentMusic() === null ||
+            get(musicProgressIntervalId) === null
         );
     },
 };
