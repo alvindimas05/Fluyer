@@ -3,6 +3,7 @@ import SpotifyApi from "$lib/api/spotify";
 import { onMount } from "svelte";
 import type { MusicData } from "../music/types";
 import MusicController from "$lib/controllers/MusicController";
+    import MusicItem from "../music/MusicItem.svelte";
 
 interface Props {
 	music: MusicData;
@@ -35,5 +36,5 @@ setTimeout(
 <div class={`px-3 py-6 text-white row-[1] col-auto ${animationClasses}`}>
     <img class="rounded-lg" src={albumImage} alt="Album" />
     <p class="font-medium text-xl mt-2">{music.album}</p>
-    <p class="text-lg text-gray-200">{music.album_artist ?? music.artist}</p>
+    <p class="text-lg text-gray-200">{MusicController.getFullArtistFromMusic(music)}</p>
 </div>

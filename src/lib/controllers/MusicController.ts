@@ -66,12 +66,7 @@ const MusicController = {
     },
 
     getFullArtistFromMusic: (music: MusicData) => {
-        return (
-            music.artist +
-            (music.album_artist && !music.artist.includes(music.album_artist)
-                ? ` • ${music.album_artist}`
-                : "")
-        );
+        return music.artist.replace(/\|\|/g, ' • ');
     },
 
     currentMusicDuration: () =>
@@ -88,7 +83,7 @@ const MusicController = {
     progressDuration: () =>
         MusicController.currentMusic() != null
             ? (MusicController.progressValue() / MusicConfig.max) *
-              MusicController.currentMusicDuration()
+            MusicController.currentMusicDuration()
             : -1,
     realProgressDuration: () => MusicController.progressDuration() * 1000,
 
@@ -150,7 +145,7 @@ const MusicController = {
         let minutes = 0;
         let seconds = negative
             ? MusicController.currentMusicDuration() -
-              MusicController.progressDuration()
+            MusicController.progressDuration()
             : MusicController.progressDuration();
 
         while (seconds > 60) {
@@ -163,12 +158,12 @@ const MusicController = {
     play: (sendCommand: boolean = true) => {
         musicIsPlaying.set(true);
         MusicController.startProgress();
-        if(sendCommand) MusicController.sendCommandController("play");
+        if (sendCommand) MusicController.sendCommandController("play");
     },
     pause: (sendCommand: boolean = true) => {
         musicIsPlaying.set(false);
         MusicController.stopProgress();
-        if(sendCommand) MusicController.sendCommandController("pause");
+        if (sendCommand) MusicController.sendCommandController("pause");
     },
     sendCommandController: (command: string) => {
         invoke("music_controller", { command });
