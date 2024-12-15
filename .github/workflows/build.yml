@@ -1,4 +1,4 @@
-name: Build Fluyer
+name: Build Tauri App
 
 on:
   workflow_dispatch:
@@ -13,8 +13,13 @@ on:
         required: false
         default: "false"
         type: boolean
-      build_macos:
-        description: "Build for MacOS"
+      build_macos_intel:
+        description: "Build for MacOS (Intel)"
+        required: false
+        default: "false"
+        type: boolean
+      build_macos_silicon:
+        description: "Build for MacOS (Silicon)"
         required: false
         default: "false"
         type: boolean
@@ -37,8 +42,12 @@ jobs:
             build_key: build_linux
           - os: windows-latest
             build_key: build_windows
+          - os: macos-13
+            build_key: build_macos_intel
+            target: x86_64-apple-darwin
           - os: macos-latest
-            build_key: build_macos
+            build_key: build_macos_silicon
+            target: aarch64-apple-darwin
 
     if: ${{ github.event.inputs[matrix.build_key] == 'true' }}
 
@@ -62,7 +71,7 @@ jobs:
           elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
             cargo tauri build --target x86_64-unknown-linux-gnu;
           elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            cargo tauri build --target x86_64-apple-darwin;
+            cargo tauri build --target ${{ matrix.target }};
           fi
 
   android:
