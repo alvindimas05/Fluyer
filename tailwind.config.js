@@ -3,9 +3,9 @@ export default {
     content: ["./src/**/*.{html,js,svelte,ts}"],
     theme: {
         extend: {},
-        animatedSettings: {
-            classes: ["fadeIn"],
-        },
-        plugins: [require("tailwindcss-animatecss")],
+        // animatedSettings: {
+        //     classes: ["fadeIn"],
+        // },
+        // plugins: [require("tailwindcss-animatecss")],
     }
 };
