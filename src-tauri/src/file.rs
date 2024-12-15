@@ -33,7 +33,6 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
         let path_str = entry.path().to_str();
         match path_str {
             Some(path) => {
-                log::info!("Processing file: {}", path);
                 let metadata = MusicMetadata::new(path.to_string()).get();
                 musics.push(metadata);
             }
