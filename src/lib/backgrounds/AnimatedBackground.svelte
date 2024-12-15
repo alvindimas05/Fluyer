@@ -14,9 +14,8 @@
         .map(() => "auto")
         .join(" ");
 
-    let isEffectInitialized = false;
     let animatedClasses = $state("hidden");
-    let divElement: HTMLDivElement;
+    let lastImage = "";
     let position: string[][] = $state([]);
     let isLight = $state(false);
 
@@ -56,13 +55,12 @@
     }
 
     async function getColors() {
+        if (lastImage === MusicController.currentMusicAlbumImage()) return;
         $observerCounts = 0;
         position = [];
 
         let image = new Image();
-        image.src =
-            MusicController.currentMusicAlbumImage() ??
-            MusicConfig.defaultAlbumImage;
+        image.src = lastImage = MusicController.currentMusicAlbumImage();
 
         // @ts-ignore
         let colors: Hex[] = await prominent(image, {
@@ -89,13 +87,15 @@
 {#if isLight}
     <div class="bg-blur-dark"></div>
 {/if}
-<div class={`fixed ${animatedClasses}`} onanimationend={() => LoadingController.setLoadingBackground(true)}>
+<div
+    class={`fixed ${animatedClasses}`}
+    onanimationend={() => LoadingController.setLoadingBackground(true)}
+>
     <div class="bg-blur"></div>
     <div class="bg-blur-heart">
         <div
             class="bg-blur-colors"
             style={`grid-template-columns: ${GRID_COLS}`}
-            bind:this={divElement}
         >
             {#each position as row}
                 {#each row as col}
@@ -111,7 +111,6 @@
         <div
             class="bg-blur-colors"
             style={`grid-template-columns: ${GRID_COLS}`}
-            bind:this={divElement}
         >
             {#each position as row}
                 {#each row as col}

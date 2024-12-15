@@ -1,5 +1,5 @@
 use anyhow::{Error, Result};
-use rodio::{Sink, Source};
+use rodio::Sink;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
@@ -116,9 +116,9 @@ fn play(
     let (_stream, stream_handle) = rodio::OutputStream::try_default()?;
 
     let sink = Sink::try_new(&stream_handle)?;
-    let mut state = initial_state;
+    // let mut state = initial_state;
 
-    if state == MusicState::Paused {
+    if initial_state == MusicState::Paused {
         sink.pause();
     }
 
@@ -126,11 +126,11 @@ fn play(
         if let Ok(cmd) = receiver_command.try_recv() {
             match cmd {
                 MusicCommand::Pause => {
-                    state = MusicState::Paused;
+                    // state = MusicState::Paused;
                     fade(&sink, true);
                 }
                 MusicCommand::Play => {
-                    state = MusicState::Playing;
+                    // state = MusicState::Playing;
                     fade(&sink, false);
                 }
                 MusicCommand::Next => {
