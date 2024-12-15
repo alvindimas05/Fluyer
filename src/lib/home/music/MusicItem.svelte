@@ -38,21 +38,20 @@
     onMount(checkAlbumImage);
 </script>
 
-<style lang="scss">
-	.music-item-play:hover {
-		animation-name: fadeIn;
-	}
-</style>
-
 <div
     class="grid grid-cols-[max-content_auto] py-2 animate__animated animate__fadeInDown animate__slow"
 >
     <button class="w-16 h-16 relative" onclick={addMusicAndPlay}>
-        <img
-            class="music-item-play absolute inset-0 m-auto w-12 animate__animated animate__faster animate__fadeOut invert"
-            src={MusicConfig.defaultPlayButton}
-            alt="Play"
-        />
+        <div
+            class="music-item-play bg-black bg-opacity-50 absolute grid w-full h-full
+        justify-items-center items-center animate__animated animate__faster animate__fadeOut rounded"
+        >
+            <img
+                class="w-12 h-12 invert"
+                src={MusicConfig.defaultPlayButton}
+                alt="Play"
+            />
+        </div>
         <img class="rounded" src={albumImage} alt="Album" />
     </button>
     <div class="ms-3">
@@ -62,3 +61,9 @@
         </p>
     </div>
 </div>
+
+<style lang="scss">
+    .music-item-play:hover {
+        animation-name: fadeIn;
+    }
+</style>

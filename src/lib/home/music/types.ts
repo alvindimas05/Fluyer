@@ -1,10 +1,12 @@
 export interface MusicData {
 	path: string;
-	title: string;
-	artist: string;
-	album: string;
-	album_artist: string;
-	track_number: string;
+	filename: string;
 	duration: number;
-	image: string;
+
+	title: string | null;
+	artist: string | null;
+	album: string | null;
+	album_artist: string | null;
+	track_number: string | null;
+	image: string | null;
 }

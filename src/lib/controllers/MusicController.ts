@@ -65,6 +65,7 @@ const MusicController = {
     },
 
     getFullArtistFromMusic: (music: MusicData) => {
+        if (music.artist === null) return '';
         return music.artist.replace(/\|\|/g, ' • ');
     },
 

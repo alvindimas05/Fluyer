@@ -6,7 +6,7 @@ use walkdir::{DirEntry, WalkDir};
 fn is_audio_file(entry: &DirEntry) -> bool {
     if let Some(ext) = entry.path().extension() {
         match ext.to_str().unwrap_or("").to_lowercase().as_str() {
-            "mp3" | "flac" | "aac" => true,
+            "mp3" | "flac" | "aac" | "m4a" | "wav" | "ogg" => true,
             _ => false,
         }
     } else {

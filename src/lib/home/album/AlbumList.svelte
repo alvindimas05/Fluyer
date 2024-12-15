@@ -9,7 +9,7 @@ let grouppedAlbums = $state(groupByAlbum());
 function groupByAlbum(): MusicData[][] {
 	const albumsMap = MusicController.musicList()!.reduce(
 		(acc, item) => {
-			if (item.album.trim() === "") {
+			if (item.album === null || item.album.trim() === "") {
 				return acc;
 			}
 

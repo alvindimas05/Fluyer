@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::time::Duration;
 
 use base64::Engine;
@@ -8,12 +9,14 @@ use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
 #[derive(Debug, serde::Serialize, Clone)]
 pub struct MusicMetadata {
     path: String,
+    duration: Option<u128>,
+    filename: Option<String>,
+
     title: Option<String>,
     artist: Option<String>,
     album: Option<String>,
     album_artist: Option<String>,
     track_number: Option<String>,
-    duration: Option<u128>,
     image: Option<String>,
 }
 
@@ -21,12 +24,13 @@ impl MusicMetadata {
     pub fn new(path: String) -> Self {
         MusicMetadata {
             path,
+            duration: None,
+            filename: None,
             title: None,
             artist: None,
             album: None,
             album_artist: None,
             track_number: None,
-            duration: None,
             image: None,
         }
     }
@@ -35,6 +39,9 @@ impl MusicMetadata {
         let path = self.path.clone();
         let mut metadata = MusicMetadata::new(path.clone());
 
+        if let Some(filename) = Path::new(&path).file_stem() {
+            metadata.filename = Some(filename.to_string_lossy().to_string());
+        }
         let src = match std::fs::File::open(&path) {
             Ok(file) => file,
             Err(_) => {
@@ -125,6 +132,10 @@ impl MusicMetadata {
 
         metadata.duration =
             Some(Duration::from_secs_f64(total_frames as f64 / sample_rate as f64).as_millis());
+
+        if metadata.artist.is_none() {
+            metadata.title = metadata.clone().filename;
+        }
 
         metadata
     }
