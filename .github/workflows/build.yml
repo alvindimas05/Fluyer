@@ -7,7 +7,6 @@ on:
         description: "Build for Windows"
         required: false
         default: "false"
-        type: boolean
 
 jobs:
   build:
@@ -22,7 +21,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Front-End dependencies
-        uses: bun i
+        run: bun i
 
       - uses: tauri-apps/tauri-action@v0
         env:
