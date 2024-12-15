@@ -114,10 +114,10 @@ const MusicController = {
         musicProgressIntervalId.set(null);
         MusicController.resetProgress();
 
+        if (force) MusicController.sendCommandController("next");
+
         const nextMusics = MusicController.nextMusics();
         if (nextMusics.length > 0) {
-            if (force) MusicController.sendCommandController("next");
-
             MusicController.setCurrentMusic(nextMusics[0]);
             MusicController.play(false);
         } else {
