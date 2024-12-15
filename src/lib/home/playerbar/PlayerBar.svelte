@@ -88,8 +88,8 @@
                     ><img
                         class="music-icon"
                         src={isPlaying
-                            ? MusicConfig.defaultPlayButton
-                            : MusicConfig.defaultPauseButton}
+                            ? MusicConfig.defaultPauseButton
+                            : MusicConfig.defaultPlayButton}
                         alt="Icon Play"
                     /></button
                 >
