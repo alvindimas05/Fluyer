@@ -1,22 +1,14 @@
 <script lang="ts">
-import Music, { MusicConfig } from "$lib/Music";
-import { invoke } from "@tauri-apps/api/core";
-import { musicIsPlaying } from "$lib/stores/music";
-import { album } from "$lib/stores";
-import "./page.scss";
-
-let musicProgressBar: HTMLInputElement = $state();
+    import { musicIsPlaying } from "$lib/stores/music";
+    import "./page.scss";
+    import { MusicConfig } from "$lib/controllers/MusicController";
 </script>
 
 <div class="w-full h-full grid items-center justify-center">
     <div class="max-w-[75rem]">
         <div class="w-full text-white">
             <div class="w-full">
-                <img
-                    src={$album}
-                    class="rounded-lg w-[40rem]"
-                    alt="Music Album"
-                />
+                <img class="rounded-lg w-[40rem]" alt="Music Album" />
             </div>
             <div class="w-full grid grid-cols-3">
                 <div class="text-sm flex">
@@ -31,7 +23,6 @@ let musicProgressBar: HTMLInputElement = $state();
             </div>
             <div class="w-full mt-[-4px]">
                 <input
-                    bind:value={musicProgressBar}
                     id="music-progress-bar"
                     style={`--progress-width: ${null}%`}
                     class="w-full"
