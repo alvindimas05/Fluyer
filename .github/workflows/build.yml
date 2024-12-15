@@ -8,77 +8,28 @@ on:
         required: false
         default: "false"
         type: boolean
-    #   build_linux:
-    #     description: "Build for Linux"
-    #     required: false
-    #     default: "false"
-    #     type: boolean
-    #   build_macos_intel:
-    #     description: "Build for MacOS (Intel)"
-    #     required: false
-    #     default: "false"
-    #     type: boolean
-    #   build_macos_silicon:
-    #     description: "Build for MacOS (Silicon)"
-    #     required: false
-    #     default: "false"
-    #     type: boolean
-    #   build_android:
-    #     description: "Build for Android"
-    #     required: false
-    #     default: "false"
-    #     type: boolean
 
 jobs:
   build:
     name: Build Windows
     runs-on: windows-latest
     if: ${{ github.event.inputs.build_windows == 'true' }}
+    steps: 
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+      - name: Install Front-End dependencies
+        uses: bun i
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          toolchain: stable
-          override: true
-
-      - name: Install Tauri CLI
-        run: cargo install tauri-cli
-
-      - name: Build Tauri App
-        run: |
-            cargo tauri build --target x86_64-pc-windows-msvc;
-
-#   android:
-#     name: Build Android
-#     runs-on: ubuntu-latest
-#     if: ${{ github.event.inputs.build_android == 'true' }}
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-
-#       - name: Setup Rust
-#         uses: actions-rs/toolchain@v1
-#         with:
-#           toolchain: stable
-#           override: true
-
-#       - name: Install Tauri CLI
-#         run: cargo install tauri-cli
-
-#       - name: Setup Android environment
-#         env:
-#           ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
-#           ANDROID_HOME: ${{ runner.temp }}/android-sdk
-#         run: |
-#           sudo apt-get update && sudo apt-get install -y openjdk-11-jdk unzip
-#           curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o android-tools.zip
-#           unzip -q android-tools.zip -d $ANDROID_SDK_ROOT
-#           yes | $ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT "build-tools;30.0.3" "platform-tools" "platforms;android-30"
-
-#       - name: Build Tauri for Android
-#         run: cargo tauri android build
+          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          releaseName: 'App v__VERSION__'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          prerelease: false  
