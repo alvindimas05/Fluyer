@@ -7,7 +7,7 @@ import MusicController from "$lib/controllers/MusicController";
 let grouppedAlbums = $state(groupByAlbum());
 
 function groupByAlbum(): MusicData[][] {
-	const albumsMap = MusicController.musicList().reduce(
+	const albumsMap = MusicController.musicList()!.reduce(
 		(acc, item) => {
 			if (item.album.trim() === "") {
 				return acc;

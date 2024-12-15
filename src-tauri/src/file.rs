@@ -1,5 +1,7 @@
+use crate::{
+    commands::music::STORE_PATH_NAME, music::metadata::MusicMetadata, store::GLOBAL_APP_STORE,
+};
 use walkdir::{DirEntry, WalkDir};
-use crate::music::metadata::MusicMetadata;
 
 fn is_audio_file(entry: &DirEntry) -> bool {
     if let Some(ext) = entry.path().extension() {
@@ -12,18 +14,34 @@ fn is_audio_file(entry: &DirEntry) -> bool {
     }
 }
 
-pub fn get_all_music() -> Vec<MusicMetadata> {
-    let dir = "/Users/alvindimas05/Music/The Meaning Of Life";
+pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
+    let mut dir = GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string();
+    dir.remove(0);
+    dir.pop();
+
     let mut musics: Vec<MusicMetadata> = vec![];
-    for entry in WalkDir::new(dir)
+    for entry in WalkDir::new(&dir)
         .into_iter()
-        .filter_map(Result::ok)
+        .filter_map(|e| {
+            if let Err(err) = &e {
+                log::warn!("Error reading entry: {}", err);
+            }
+            e.ok()
+        })
         .filter(|e| e.path().is_file() && is_audio_file(e))
     {
-        musics.push(MusicMetadata::new(
-            String::from(entry.path().to_str().unwrap())
-        ).get());
+        let path_str = entry.path().to_str();
+        match path_str {
+            Some(path) => {
+                log::info!("Processing file: {}", path);
+                let metadata = MusicMetadata::new(path.to_string()).get();
+                musics.push(metadata);
+            }
+            None => {
+                log::warn!("Skipping invalid UTF-8 path: {:?}", entry.path());
+            }
+        }
     }
-    
-    musics
+
+    Some(musics)
 }

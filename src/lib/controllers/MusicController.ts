@@ -29,12 +29,11 @@ export const MusicConfig = {
 };
 const MusicController = {
     musicList: () => get(musicList),
-    setMusicList: (value: MusicData[]) => musicList.set(value),
+    setMusicList: (value: MusicData[] | null) => musicList.set(value),
     getMusics: async () => {
-        if (MusicController.musicList().length > 0) return;
-        MusicController.setMusicList(
-            await invoke<MusicData[]>("music_get_all"),
-        );
+        if (MusicController.musicList()?.length) return;
+        const musics = await invoke<MusicData[] | null>("music_get_all");
+        MusicController.setMusicList(musics);
         LoadingController.setLoadingMusicList(true);
     },
 

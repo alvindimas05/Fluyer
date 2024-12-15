@@ -2,7 +2,9 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_dialog::DialogExt;
 
-use crate::{music::metadata::MusicMetadata, AppState, GLOBAL_APP_HANDLE};
+use crate::{music::metadata::MusicMetadata, store::GLOBAL_APP_STORE, AppState, GLOBAL_APP_HANDLE};
+
+pub static STORE_PATH_NAME: &str = "music-path";
 
 #[tauri::command]
 pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String) {
@@ -38,7 +40,7 @@ pub fn music_get_info(state: State<'_, Mutex<AppState>>) {
 }
 
 #[tauri::command]
-pub fn music_get_all() -> Vec<MusicMetadata> {
+pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
     let musics = crate::file::get_all_music();
     musics
 }
@@ -63,7 +65,12 @@ pub fn music_request_dir(app: AppHandle) {
                 .into_os_string()
                 .into_string()
                 .expect("Failed to get music dir path.");
-            
+
+            GLOBAL_APP_STORE
+                .get()
+                .expect("Failed to get GLOBAL_APP_STORE")
+                .set(STORE_PATH_NAME, dir);
+
             app_handle
                 .emit("music_request_dir", ())
                 .expect("Can't emit music_get_dir_path");

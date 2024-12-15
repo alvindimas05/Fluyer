@@ -6,6 +6,7 @@
     import { musicCurrent } from "$lib/stores/music";
     import { prominent } from "color.js";
     import "./background.scss";
+    import LoadingController from "$lib/controllers/LoadingController";
 
     const SIZE = 10;
 
@@ -83,35 +84,13 @@
         animatedClasses = "animate__animated animate__fadeIn";
     }
     musicCurrent.subscribe(getColors);
-
-    // $effect(() => {
-    // 	if (isEffectInitialized) return;
-    // 	isEffectInitialized = true;
-    // 	musicCurrent.subscribe(getColors);
-    // 	var observer = new MutationObserver(() => {
-    // 		$observerCounts += 1;
-    // 		if ($observerCounts >= 2) {
-    // 			console.log("Nyata");
-    // 		}
-    // 	});
-    // 	observer.observe(divElement, {
-    // 		attributes: true,
-    // 		childList: true,
-    // 		characterData: true,
-    // 		subtree: true,
-    // 	});
-    // });
 </script>
 
 {#if isLight}
     <div class="bg-blur-dark"></div>
 {/if}
-<div
-    class={`fixed ${animatedClasses}`}
-    onanimationend={() => (animatedClasses = "")}
->
+<div class={`fixed ${animatedClasses}`} onanimationend={() => LoadingController.setLoadingBackground(true)}>
     <div class="bg-blur"></div>
-
     <div class="bg-blur-heart">
         <div
             class="bg-blur-colors"

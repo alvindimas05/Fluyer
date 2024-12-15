@@ -18,7 +18,7 @@ function splitMusics(arr: MusicData[]): MusicData[][] {
 
 	return [firstPart, secondPart, thirdPart];
 }
-let splittedMusics = $derived(splitMusics(MusicController.musicList()));
+let splittedMusics = $derived(splitMusics(MusicController.musicList()!));
 </script>
 
 <div class="grid grid-cols-3 text-white px-3 overflow-y-auto scrollbar-hidden pb-20">

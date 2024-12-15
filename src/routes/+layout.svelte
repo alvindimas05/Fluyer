@@ -13,6 +13,6 @@ logHandler();
 </script>
 
 <AnimatedBackground/>
-<div class="w-screen h-screen absolute overflow-x-hidden scrollbar-hidden">
+<div class="w-screen h-screen fixed overflow-x-hidden scrollbar-hidden">
     {@render children?.()}
 </div>
