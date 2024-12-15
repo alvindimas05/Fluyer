@@ -1,6 +1,6 @@
 <script lang="ts">
 import MusicController from "$lib/controllers/MusicController";
-    import { musicCurrent, musicsNext } from "$lib/stores/music";
+import { musicCurrent, musicsNext } from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
 
 let isMouseInsideArea = $state(false);

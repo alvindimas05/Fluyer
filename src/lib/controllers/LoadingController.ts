@@ -1,5 +1,9 @@
 import { get } from "svelte/store";
-import { loadingBackground, loadingMusicList, loadingShow } from "$lib/stores/loading";
+import {
+	loadingBackground,
+	loadingMusicList,
+	loadingShow,
+} from "$lib/stores/loading";
 
 const LoadingController = {
 	loadingMusicList: () => get(loadingMusicList),
@@ -14,7 +18,10 @@ const LoadingController = {
 		loadingMusicList.subscribe(LoadingController.onAllLoadingChange);
 	},
 	onAllLoadingChange: () => {
-		if (LoadingController.loadingMusicList() && LoadingController.loadingBackground())
+		if (
+			LoadingController.loadingMusicList() &&
+			LoadingController.loadingBackground()
+		)
 			LoadingController.setLoadingShow(true);
 	},
 };

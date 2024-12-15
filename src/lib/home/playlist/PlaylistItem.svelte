@@ -1,13 +1,13 @@
 <script lang="ts">
-    import type { MusicData } from "../music/types";
+import type { MusicData } from "../music/types";
 
-    interface Props {
-        music: MusicData;
-        isPlaying?: boolean;
-    }
-    import MusicController from "$lib/controllers/MusicController";
+interface Props {
+	music: MusicData;
+	isPlaying?: boolean;
+}
+import MusicController from "$lib/controllers/MusicController";
 
-    let { music, isPlaying = false }: Props = $props();
+let { music, isPlaying = false }: Props = $props();
 </script>
 
 <div

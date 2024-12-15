@@ -1,63 +1,61 @@
 <script lang="ts">
-    import MusicController, {
-        MusicConfig,
-    } from "$lib/controllers/MusicController";
-    import "./playerbar.scss";
-    import {
-        musicCurrent,
-        musicIsPlaying,
-        musicProgressValue,
-    } from "$lib/stores/music";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import "./playerbar.scss";
+import {
+	musicCurrent,
+	musicIsPlaying,
+	musicProgressValue,
+} from "$lib/stores/music";
 
-    let title = $state(MusicConfig.defaultTitle);
-    let artist = $state(MusicConfig.defaultArtist);
-    let albumImage = $state(MusicConfig.defaultAlbumImage);
+let title = $state(MusicConfig.defaultTitle);
+let artist = $state(MusicConfig.defaultArtist);
+let albumImage = $state(MusicConfig.defaultAlbumImage);
 
-    let isPlaying = $state(MusicController.isPlaying());
-    let progressPercentage = $state(MusicController.progressPercentage());
+let isPlaying = $state(MusicController.isPlaying());
+let progressPercentage = $state(MusicController.progressPercentage());
 
-    musicProgressValue.subscribe(updateStates);
-    musicCurrent.subscribe(updateStates);
+musicProgressValue.subscribe(updateStates);
+musicCurrent.subscribe(updateStates);
 
-    function handleButtonPlayPause() {
-        if (MusicController.currentMusic() == null) return;
+function handleButtonPlayPause() {
+	if (MusicController.currentMusic() == null) return;
 
-        if (MusicController.isPlaying()) MusicController.pause();
-        else MusicController.play();
+	if (MusicController.isPlaying()) MusicController.pause();
+	else MusicController.play();
 
-        updateStates();
-    }
+	updateStates();
+}
 
-    function handleButtonNext() {
-        MusicController.tryNextMusic(true);
-    }
+function handleButtonNext() {
+	MusicController.tryNextMusic(true);
+}
 
-    function onPlayerBarChange() {
-        if (MusicController.currentMusic() == null) {
-            MusicController.setProgressValue(0);
-            return;
-        }
+function onPlayerBarChange() {
+	if (MusicController.currentMusic() == null) {
+		MusicController.setProgressValue(0);
+		return;
+	}
 
-        if (MusicController.progressValue() >= MusicConfig.max) {
-            MusicController.addMusic(MusicController.currentMusic()!);
-        }
+	if (MusicController.progressValue() >= MusicConfig.max) {
+		MusicController.addMusic(MusicController.currentMusic()!);
+	}
 
-        MusicController.sendCommandSetPosition(
-            MusicController.realProgressDuration(),
-        );
-    }
+	MusicController.sendCommandSetPosition(
+		MusicController.realProgressDuration(),
+	);
+}
 
-    function updateStates() {
-        isPlaying = MusicController.isPlaying();
-        progressPercentage = MusicController.progressPercentage();
+function updateStates() {
+	isPlaying = MusicController.isPlaying();
+	progressPercentage = MusicController.progressPercentage();
 
-        let music = MusicController.currentMusic();
-        if (music == null) return;
+	let music = MusicController.currentMusic();
+	if (music == null) return;
 
-        title = music.title!;
-        artist = MusicController.getFullArtistFromMusic(music);
-        albumImage = MusicController.currentMusicAlbumImage();
-    }
+	title = music.title!;
+	artist = MusicController.getFullArtistFromMusic(music);
+	albumImage = MusicController.currentMusicAlbumImage();
+}
 </script>
 
 <div

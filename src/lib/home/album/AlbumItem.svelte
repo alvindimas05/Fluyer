@@ -3,7 +3,7 @@ import SpotifyApi from "$lib/api/spotify";
 import { onMount } from "svelte";
 import type { MusicData } from "../music/types";
 import MusicController from "$lib/controllers/MusicController";
-    import MusicItem from "../music/MusicItem.svelte";
+import MusicItem from "../music/MusicItem.svelte";
 
 interface Props {
 	music: MusicData;

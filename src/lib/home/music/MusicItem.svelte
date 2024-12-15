@@ -1,41 +1,38 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import type { MusicData } from "./types";
-    import SpotifyApi from "$lib/api/spotify";
-    import MusicController, {
-        MusicConfig,
-    } from "$lib/controllers/MusicController";
+import { onMount } from "svelte";
+import type { MusicData } from "./types";
+import SpotifyApi from "$lib/api/spotify";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 
-    interface Props {
-        music: MusicData;
-    }
+interface Props {
+	music: MusicData;
+}
 
-    let { music }: Props = $props();
+let { music }: Props = $props();
 
-    const spotifyApi = new SpotifyApi();
+const spotifyApi = new SpotifyApi();
 
-    let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
+let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
-    async function checkAlbumImage() {
-        if (music.image !== null) return;
-        const spotifyMusic = await spotifyApi.searchMusic(music);
-        if (spotifyMusic == null) return;
-        albumImage = spotifyMusic?.imageUrl;
-    }
+async function checkAlbumImage() {
+	if (music.image !== null) return;
+	const spotifyMusic = await spotifyApi.searchMusic(music);
+	if (spotifyMusic == null) return;
+	albumImage = spotifyMusic?.imageUrl;
+}
 
-    async function addMusicAndPlay() {
-        music.image = albumImage;
-        const previousMusic = MusicController.currentMusic();
-        await MusicController.addMusic(music);
-        if (
-            previousMusic === null ||
-            (!previousMusic !== null &&
-                MusicController.isCurrentMusicFinished())
-        )
-            MusicController.play();
-    }
+async function addMusicAndPlay() {
+	music.image = albumImage;
+	const previousMusic = MusicController.currentMusic();
+	await MusicController.addMusic(music);
+	if (
+		previousMusic === null ||
+		(!previousMusic !== null && MusicController.isCurrentMusicFinished())
+	)
+		MusicController.play();
+}
 
-    onMount(checkAlbumImage);
+onMount(checkAlbumImage);
 </script>
 
 <div

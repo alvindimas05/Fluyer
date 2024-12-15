@@ -1,22 +1,22 @@
 <script lang="ts">
-    import LoadingController from "$lib/controllers/LoadingController";
-    import MusicController from "$lib/controllers/MusicController";
-    import { invoke } from "@tauri-apps/api/core";
-    import { listen } from "@tauri-apps/api/event";
+import LoadingController from "$lib/controllers/LoadingController";
+import MusicController from "$lib/controllers/MusicController";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
-    let animatedClasses = $state("animate__fadeIn");
-    async function chooseDirPath() {
-        await invoke("music_request_dir");
-        const unlisten = await listen("music_request_dir", (e) => {
-            animatedClasses = "animate__fadeOut";
-            unlisten();
-        });
-    }
+let animatedClasses = $state("animate__fadeIn");
+async function chooseDirPath() {
+	await invoke("music_request_dir");
+	const unlisten = await listen("music_request_dir", (e) => {
+		animatedClasses = "animate__fadeOut";
+		unlisten();
+	});
+}
 
-    function onAnimationEnd() {
-        LoadingController.setLoadingMusicList(false);
-        MusicController.getMusics();
-    }
+function onAnimationEnd() {
+	LoadingController.setLoadingMusicList(false);
+	MusicController.getMusics();
+}
 </script>
 
 <div
