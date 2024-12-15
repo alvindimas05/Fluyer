@@ -12,7 +12,7 @@ let { children }: Props = $props();
 logHandler();
 </script>
 
+<AnimatedBackground/>
 <div class="w-screen h-screen absolute overflow-x-hidden scrollbar-hidden">
     {@render children?.()}
 </div>
-<AnimatedBackground/>

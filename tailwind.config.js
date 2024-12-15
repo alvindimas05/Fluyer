@@ -6,6 +6,6 @@ export default {
         animatedSettings: {
             classes: ["fadeIn"],
         },
-    },
-    plugins: [require("tailwindcss-animatecss")],
+        plugins: [require("tailwindcss-animatecss")],
+    }
 };
