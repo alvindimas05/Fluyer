@@ -7,8 +7,8 @@ on:
         description: "Build for Windows"
         required: false
         type: boolean
-      build-linux-deb:
-        description: "Build for Linux (.deb)"
+      build-linux:
+        description: "Build for Linux"
         required: false
         type: boolean
 
@@ -43,11 +43,11 @@ jobs:
           prerelease: false  
 
       
-  build-linux-deb:
-    name: Build Linux (.deb)
+  build-linux:
+    name: Build Linux
     runs-on: ubuntu-latest
     permissions: write-all
-    if: ${{ github.event.inputs.build-linux-deb == 'true' }}
+    if: ${{ github.event.inputs.build-linux == 'true' }}
     steps: 
       - uses: actions/checkout@v4
 
@@ -76,6 +76,4 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'Fluyer v__VERSION__'
           releaseDraft: true
-          prerelease: false  
-
-              
+          prerelease: false
