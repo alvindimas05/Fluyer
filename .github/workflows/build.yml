@@ -3,23 +3,32 @@ name: Build Fluyer
 on:
   workflow_dispatch:
     inputs:
-      build_windows:
+      build-windows:
         description: "Build for Windows"
+        required: false
+        type: boolean
+      build-linux-deb:
+        description: "Build for Linux (.deb)"
         required: false
         type: boolean
 
 jobs:
-  build:
+  build-windows:
     name: Build Windows
     runs-on: windows-latest
     permissions: write-all
-    if: ${{ github.event.inputs.build_windows == 'true' }}
+    if: ${{ github.event.inputs.build-windows == 'true' }}
     steps: 
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
 
       - name: Install Front-End dependencies
         run: bun i
@@ -32,3 +41,41 @@ jobs:
           releaseName: 'Fluyer v__VERSION__'
           releaseDraft: true
           prerelease: false  
+
+      
+  build-linux-deb:
+    name: Build Linux (.deb)
+    runs-on: ubuntu-latest
+    permissions: write-all
+    if: ${{ github.event.inputs.build-linux-deb == 'true' }}
+    steps: 
+      - uses: actions/checkout@v4
+
+      - name: Install Ubuntu Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+
+      - name: Install Front-End dependencies
+        run: bun i
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'Fluyer v__VERSION__'
+          releaseDraft: true
+          prerelease: false  
+
+              
