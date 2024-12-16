@@ -13,12 +13,16 @@ fn main() {
 fn init_log() {
     CombinedLogger::init(vec![
         WriteLogger::new(
-            LevelFilter::Error,
+            LevelFilter::Warn,
             Config::default(),
             File::create(format!("{}/fluyer.log", temp_dir().display().to_string())).unwrap(),
         ),
         TermLogger::new(
-            LevelFilter::Debug,
+            if cfg!(debug_assertions) {
+                LevelFilter::Debug
+            } else {
+                LevelFilter::Warn
+            },
             Config::default(),
             TerminalMode::Mixed,
             ColorChoice::Auto,
