@@ -1,7 +1,7 @@
+use crate::store::init_store;
 use music::player::MusicPlayer;
 use std::sync::{Mutex, OnceLock};
 use tauri::{AppHandle, Manager};
-use crate::store::init_store;
 
 mod commands;
 mod file;
@@ -24,7 +24,13 @@ static GLOBAL_APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_os::init())
         .setup(|app| {
+            let window = app.get_webview_window("main").unwrap();
+
+            if tauri_plugin_os::platform() != "macos" {
+                window.set_decorations(false).expect("Failed to set decorations on MacOS");
+            }
             app.manage(Mutex::new(AppState::default()));
             init_store(app);
             Ok(())
