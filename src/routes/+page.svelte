@@ -8,6 +8,7 @@ import { loadingBackground, loadingShow } from "$lib/stores/loading";
 import MusicController from "$lib/controllers/MusicController";
 import MusicDirSelector from "$lib/home/music/MusicDirSelector.svelte";
 import { musicList } from "$lib/stores/music";
+    import TitleBar from "$lib/titlebar/TitleBar.svelte";
 
 let isLoadingDone = LoadingController.loadingShow();
 
