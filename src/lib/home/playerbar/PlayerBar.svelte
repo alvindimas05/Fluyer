@@ -20,11 +20,13 @@
 
     musicProgressValue.subscribe(updateStates);
     musicCurrent.subscribe(updateStates);
+    musicIsPlaying.subscribe(updateStates);
 
     function handleButtonPlayPause() {
         if (MusicController.currentMusic() == null) return;
 
         if (MusicController.isPlaying()) {
+            MusicController.setIsPlaying(false);
             setTimeout(MusicController.pause, pauseDelay);
         } else MusicController.play();
 
