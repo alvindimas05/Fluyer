@@ -9,3 +9,4 @@ You can grab the alpha version on the Releases page or just [click this](https:/
 ## Credits
 - [Music Icons](https://www.flaticon.com/packs/music-249)
 - [Default/Empty Album Cover](https://www.freepik.com/free-vector/music-notes-rainbow-colourful-with-vinyl-record-white-backgro_24459713.htm)
+- [Title Bar Buttons](https://www.flaticon.com/authors/sonnycandra)
