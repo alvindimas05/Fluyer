@@ -32,7 +32,7 @@ musicList.subscribe(() => (grouppedAlbums = groupByAlbum()));
 <div
     class="grid auto-cols-[20rem] grid-rows-[1fr] w-full mt-2 overflow-x-auto scrollbar-hidden"
 >
-    {#each Object.entries(grouppedAlbums) as [album, list], index}
-        <AlbumItem music={list[0]} {index} />
+    {#each Object.entries(grouppedAlbums) as [album, musicList], index}
+        <AlbumItem {musicList} {index} />
     {/each}
 </div>

@@ -1,40 +1,96 @@
 <script lang="ts">
-import SpotifyApi from "$lib/api/spotify";
-import { onMount } from "svelte";
-import type { MusicData } from "../music/types";
-import MusicController from "$lib/controllers/MusicController";
-import MusicItem from "../music/MusicItem.svelte";
+	import SpotifyApi from "$lib/api/spotify";
+	import { onMount } from "svelte";
+	import type { MusicData } from "../music/types";
+	import MusicController, {
+		MusicConfig,
+	} from "$lib/controllers/MusicController";
 
-interface Props {
-	music: MusicData;
-	index: number;
-}
+	interface Props {
+		musicList: MusicData[];
+		index: number;
+	}
 
-let { music, index }: Props = $props();
+	let { musicList, index }: Props = $props();
+	let music = musicList[0];
 
-const animationDelay = 200;
-let animationClasses = $state("hidden");
+	const animationDelay = 200;
+	let animationClasses = $state("hidden");
 
-const spotifyApi = new SpotifyApi();
-let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
+	const spotifyApi = new SpotifyApi();
+	let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
-async function checkAlbumImage() {
-	if (music.image !== null) return;
-	const spotifyMusic = await spotifyApi.searchMusic(music);
-	if (spotifyMusic == null) return;
-	albumImage = spotifyMusic?.imageUrl;
-}
+	async function checkAlbumImage() {
+		if (music.image !== null) return;
+		const spotifyMusic = await spotifyApi.searchMusic(music);
+		if (spotifyMusic == null) return;
+		albumImage = spotifyMusic?.imageUrl;
+		musicList = musicList.map((m) => {
+			m.image = albumImage;
+			return m;
+		});
+	}
 
-onMount(checkAlbumImage);
+	async function sortMusicList() {
+		musicList = musicList.sort((a, b) => {
+			if(a.track_number?.includes('/') || b.track_number?.includes('/')){
+				a.track_number = a.track_number!.split('/')[0];
+				b.track_number = b.track_number!.split('/')[0];
+			}
+			return +a.track_number! - +b.track_number!;
+		});
+	}
 
-setTimeout(
-	() => (animationClasses = "animate__animated animate__fadeInDown"),
-	animationDelay * index,
-);
+	async function addMusicListAndPlay() {
+		music.image = albumImage;
+		const previousMusic = MusicController.currentMusic();
+		await MusicController.addMusicList(musicList);
+		if (
+			previousMusic === null ||
+			(!previousMusic !== null &&
+				MusicController.isCurrentMusicFinished())
+		)
+			MusicController.play();
+	}
+
+	onMount(() => {
+		sortMusicList();
+		checkAlbumImage();
+	});
+
+	setTimeout(
+		() => (animationClasses = "animate__animated animate__fadeInDown"),
+		animationDelay * index,
+	);
 </script>
 
 <div class={`px-3 py-6 text-white row-[1] col-auto ${animationClasses}`}>
-    <img class="rounded-lg" src={albumImage} alt="Album" />
-    <p class="font-medium text-xl mt-2">{music.album}</p>
-    <p class="text-lg text-gray-200">{MusicController.getFullArtistFromMusic(music)}</p>
+	<div class="relative">
+		<div
+			class="album-item-actions w-full h-full absolute rounded-lg bg-gradient-to-b from-transparent to-black/75
+			animate__animated animate__faster animate__fadeOut"
+		>
+			<button
+				class="w-12 h-12 absolute bottom-0 left-0 ms-3 mb-3"
+				onclick={addMusicListAndPlay}
+			>
+				<img
+					class="invert"
+					src={MusicConfig.defaultPlayButton}
+					alt="Play"
+				/></button
+			>
+		</div>
+		<img class="rounded-lg" src={albumImage} alt="Album" />
+	</div>
+	<p class="font-medium text-xl mt-2">{music.album}</p>
+	<p class="text-lg text-gray-200">
+		{MusicController.getFullArtistFromMusic(music)}
+	</p>
 </div>
+
+<style lang="scss">
+	.album-item-actions:hover {
+		animation-name: fadeIn;
+	}
+</style>

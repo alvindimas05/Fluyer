@@ -40,7 +40,7 @@ onMount(checkAlbumImage);
 >
     <button class="w-16 h-16 relative" onclick={addMusicAndPlay}>
         <div
-            class="music-item-play bg-black bg-opacity-50 absolute grid w-full h-full
+            class="music-item-play bg-black bg-opacity-40 absolute grid w-full h-full
         justify-items-center items-center animate__animated animate__faster animate__fadeOut rounded"
         >
             <img

@@ -1,5 +1,4 @@
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
 import {
 	musicIsPlaying,
 	musicCurrent,
@@ -82,7 +81,7 @@ const MusicController = {
 	progressDuration: () =>
 		MusicController.currentMusic() != null
 			? (MusicController.progressValue() / MusicConfig.max) *
-				MusicController.currentMusicDuration()
+			MusicController.currentMusicDuration()
 			: -1,
 	realProgressDuration: () => MusicController.progressDuration() * 1000,
 
@@ -144,7 +143,7 @@ const MusicController = {
 		let minutes = 0;
 		let seconds = negative
 			? MusicController.currentMusicDuration() -
-				MusicController.progressDuration()
+			MusicController.progressDuration()
 			: MusicController.progressDuration();
 
 		while (seconds > 60) {
@@ -184,7 +183,22 @@ const MusicController = {
 		}
 	},
 	addMusicToPlayList: async (musicPath: string) => {
-		await invoke("music_playlist_add", { playlist: [musicPath] });
+		await MusicController.addMusicListToPlayList([musicPath]);
+	},
+	addMusicListToPlayList: async (musicPaths: string[]) => {
+		await invoke("music_playlist_add", { playlist: musicPaths });
+	},
+
+	addMusicList: async (musicDataList: MusicData[]) => {
+		if (MusicController.isCurrentMusicFinished()) {
+			const firstMusic = musicDataList.shift()!;
+			MusicController.setCurrentMusic(firstMusic);
+			await MusicController.addMusicToPlayList(firstMusic.path);
+		}
+		if (musicDataList.length !== 0) {
+			await MusicController.addMusicToPlayList(musicDataList[0].path);
+			MusicController.addNextMusics(musicDataList);
+		}
 	},
 
 	nextMusics: () => get(musicsNext),
