@@ -25,7 +25,7 @@
 <div class="fixed top-0 left-0 w-full h-8 z-[99999] grid grid-cols-[1fr_auto]">
     <div class="h-full w-full" onmousedown={onMouseDown}></div>
     {#if platform() != "macos"}
-        <div class="absolute right-0 top-0 pe-3">
+        <div class="pe-3">
             <TitleBarButton
                 name="minimize"
                 onclick={() => appWindow.minimize()}
