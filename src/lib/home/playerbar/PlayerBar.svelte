@@ -106,7 +106,7 @@
                     /></button
                 >
             </div>
-            <div class="flex items-center justify-center order-first lg:order-none">
+            <div class="ms-2 lg:ms-0 lg:flex items-center justify-center order-first lg:order-none">
                 <div class="grid grid-cols-[max-content_auto]">
                     <img class="w-12 rounded" src={albumImage} alt="Album" />
                     <div class="ms-3">
