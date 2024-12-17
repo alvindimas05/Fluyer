@@ -80,7 +80,7 @@
         onchange={onPlayerBarChange}
     />
     <div class="p-3 mt-1">
-        <div class="grid grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
             <div class="flex items-center">
                 <button class="w-10 invert mx-2"
                     ><img
@@ -106,7 +106,7 @@
                     /></button
                 >
             </div>
-            <div class="flex items-center justify-center">
+            <div class="flex items-center justify-center order-first lg:order-none">
                 <div class="grid grid-cols-[max-content_auto]">
                     <img class="w-12 rounded" src={albumImage} alt="Album" />
                     <div class="ms-3">
