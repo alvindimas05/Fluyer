@@ -33,7 +33,6 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-
       - name: Install Front-End dependencies
         run: bun i
 
@@ -69,7 +68,6 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-
       - name: Install Front-End dependencies
         run: bun i
 
@@ -103,20 +101,17 @@ jobs:
           - name: Install NDK
             run: sdkmanager "ndk;27.0.11902837"
 
-          - name: install Rust stable
+          - name: Install Rust stable
             uses: dtolnay/rust-toolchain@stable
+          - name: Rust cache
+            uses: swatinem/rust-cache@v2
             with:
-                targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+              workspaces: './src-tauri -> target'
 
-          - name: Install dependencies
+          - name: Install Front-End dependencies
             run: bun i
-
-          - name: Build app bundle
-            run: bun tauri android build -v
-            env:
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
-
-          - name: setup Android signing
+          
+          - name: Setup Android signing
             run: |
               cd src-tauri/gen/android
               echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" > keystore.properties
@@ -124,7 +119,12 @@ jobs:
               base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
               echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
-          - name: Get Node project version
+          - name: Build App Bundle
+            run: bun tauri android build -v
+            env:
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+
+          - name: Get Node Project Version
             id: package-version
             uses: martinbeentjes/npm-get-version-action@v1.3.1
 
