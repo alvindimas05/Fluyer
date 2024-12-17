@@ -219,3 +219,9 @@ fn fade(sink: &Sink, out: bool) {
         sink.play();
     }
 }
+
+#[no_mangle]
+#[allow(clippy::empty_loop)]
+pub extern "C" fn __cxa_pure_virtual() {
+    loop {}
+}
