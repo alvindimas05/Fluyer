@@ -103,6 +103,8 @@ jobs:
 
           - name: Install Rust stable
             uses: dtolnay/rust-toolchain@stable
+            with:
+              targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
           - name: Rust cache
             uses: swatinem/rust-cache@v2
             with:
@@ -118,13 +120,6 @@ jobs:
               echo "password=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore.properties
               base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
               echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
-
-          - name: Add Rust Target All Android
-            run: |
-              rustup target add aarch64-linux-android \
-                 armv7-linux-androideabi \
-                 x86_64-linux-android \
-                 i686-linux-android
 
           - name: Build App Bundle
             run: bun tauri android build -v
