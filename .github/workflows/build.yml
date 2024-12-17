@@ -123,7 +123,7 @@ jobs:
               echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
           - name: Build App Bundle
-            run: bun tauri android build apk --target aarch64
+            run: bun tauri android build --target aarch64
             env:
                 NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
 
