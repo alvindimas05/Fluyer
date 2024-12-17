@@ -59,7 +59,7 @@ pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<Strin
 
 #[tauri::command]
 pub fn music_request_dir(app: AppHandle) {
-    #[cfg(any(target_os = "windows", target_os = "linux"))]
+    #[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
     {
         app.dialog().file().pick_folder(|dir_path| {
             if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
