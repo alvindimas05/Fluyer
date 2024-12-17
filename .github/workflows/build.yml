@@ -83,59 +83,60 @@ jobs:
           prerelease: false
 
   build-android:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        steps:
-            - uses: actions/checkout@v4
-            - name: Setup Java
-              uses: actions/setup-java@v4
-              with:
-                  distribution: 'zulu'
-                  java-version: '17'
-            - uses: oven-sh/setup-bun@v2
+      runs-on: ubuntu-latest
+      permissions:
+          contents: write
+      if: ${{ github.event.inputs.build-android == 'true' }}
+      steps:
+          - uses: actions/checkout@v4
+          - name: Setup Java
+            uses: actions/setup-java@v4
+            with:
+                distribution: 'zulu'
+                java-version: '17'
+          - uses: oven-sh/setup-bun@v2
 
-            - name: Setup Android SDK
-              uses: android-actions/setup-android@v3
+          - name: Setup Android SDK
+            uses: android-actions/setup-android@v3
 
-            - name: Install NDK
-              run: sdkmanager "ndk;27.0.11902837"
+          - name: Install NDK
+            run: sdkmanager "ndk;27.0.11902837"
 
-            - name: install Rust stable
-              uses: dtolnay/rust-toolchain@stable
-              with:
-                  targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+          - name: install Rust stable
+            uses: dtolnay/rust-toolchain@stable
+            with:
+                targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
 
-            - name: Install dependencies
-              run: bun i
+          - name: Install dependencies
+            run: bun i
 
-            - name: Build app bundle
-              run: bun tauri android build -v
-              env:
-                  NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+          - name: Build app bundle
+            run: bun tauri android build -v
+            env:
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
 
-            - name: setup Android signing
-              run: |
-                cd src-tauri/gen/android
-                echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" > keystore.properties
-                echo "password=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore.properties
-                base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
-                echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
+          - name: setup Android signing
+            run: |
+              cd src-tauri/gen/android
+              echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" > keystore.properties
+              echo "password=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore.properties
+              base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
+              echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
-            - name: Get Node project version
-              id: package-version
-              uses: martinbeentjes/npm-get-version-action@v1.3.1
+          - name: Get Node project version
+            id: package-version
+            uses: martinbeentjes/npm-get-version-action@v1.3.1
 
-            - name: Rename APK file
-              run: |
-                  mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-signed.apk ./src-tauri/gen/android/app/build/outputs/apk/universal/release/fluyer-${{ steps.package-version.outputs.current-version }}.apk
+          - name: Rename APK file
+            run: |
+                mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-signed.apk ./src-tauri/gen/android/app/build/outputs/apk/universal/release/fluyer-${{ steps.package-version.outputs.current-version }}.apk
 
-            - name: Publish
-              uses: softprops/action-gh-release@v1
-              with:
-                  draft: true
-                  name: Fluyer v${{ steps.package-version.outputs.current-version }}
-                  tag_name: v${{ steps.package-version.outputs.current-version }}
-                  generate_release_notes: true
-                  files: |
-                      ./src-tauri/gen/android/app/build/outputs/apk/universal/release/fluyer-${{ steps.package-version.outputs.current-version }}.apk
+          - name: Publish
+            uses: softprops/action-gh-release@v1
+            with:
+                draft: true
+                name: Fluyer v${{ steps.package-version.outputs.current-version }}
+                tag_name: v${{ steps.package-version.outputs.current-version }}
+                generate_release_notes: true
+                files: |
+                    ./src-tauri/gen/android/app/build/outputs/apk/universal/release/fluyer-${{ steps.package-version.outputs.current-version }}.apk
