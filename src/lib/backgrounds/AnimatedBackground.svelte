@@ -84,6 +84,7 @@
 		// Force remove loading for temporary solution
 		if (platform() == "linux") {
 			LoadingController.setLoadingBackground(true);
+			animatedClasses = "";
 		} else {
 			animatedClasses = "animate__animated animate__fadeIn";
 		}
