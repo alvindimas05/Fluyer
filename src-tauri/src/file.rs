@@ -2,9 +2,9 @@ use std::path::PathBuf;
 
 use crate::{
     commands::music::STORE_PATH_NAME, music::metadata::MusicMetadata, platform::is_mobile,
-    store::GLOBAL_APP_STORE,
+    store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE,
 };
-use tauri::path::PathResolver;
+use tauri::{path::PathResolver, Manager};
 use tauri_plugin_os::hostname;
 use walkdir::{DirEntry, WalkDir};
 
@@ -21,8 +21,10 @@ fn is_audio_file(entry: &DirEntry) -> bool {
 
 pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
     let mut dir = if is_mobile() {
-        PathResolver::audio_dir(&self)
-            .expect("Failed to get audio dir on mobile.")
+        GLOBAL_APP_HANDLE
+            .get()?
+            .path()
+            .audio_dir()
             .into_os_string()
             .into_string();
     } else {
