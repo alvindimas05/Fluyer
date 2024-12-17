@@ -20,13 +20,14 @@ fn is_audio_file(entry: &DirEntry) -> bool {
 }
 
 pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
-    let mut dir = if is_mobile() {
+    let mut dir: String = if is_mobile() {
         GLOBAL_APP_HANDLE
             .get()?
             .path()
             .audio_dir()
+            .expect("Failed to get audio dir on mobile.")
             .into_os_string()
-            .into_string();
+            .into_string().unwrap()
     } else {
         GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string()
     };
