@@ -83,6 +83,7 @@ jobs:
           prerelease: false
 
   build-android:
+      name: Build Android
       runs-on: ubuntu-latest
       permissions:
           contents: write
