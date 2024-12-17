@@ -1,5 +1,5 @@
 [package]
-name = "Fluyer"
+name = "fluyer"
 version = "0.0.1-alpha"
 description = "Beautiful Lightweight Music Player"
 authors = ["alvindimas05"]

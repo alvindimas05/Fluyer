@@ -6,6 +6,7 @@ use tauri::{AppHandle, Manager};
 mod commands;
 mod file;
 mod music;
+mod platform;
 mod store;
 
 struct AppState {
@@ -26,10 +27,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_os::init())
         .setup(|app| {
-            let window = app.get_webview_window("main").unwrap();
-
-            if tauri_plugin_os::platform() != "macos" {
-                window.set_decorations(false).expect("Failed to set decorations on MacOS");
+            #[cfg(any(target_os = "windows", target_os = "linux"))]
+            {
+                let window = app.get_webview_window("main").unwrap();
+                window
+                    .set_decorations(false)
+                    .expect("Failed to set decorations on MacOS");
             }
             app.manage(Mutex::new(AppState::default()));
             init_store(app);

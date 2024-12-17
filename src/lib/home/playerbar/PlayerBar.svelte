@@ -80,7 +80,7 @@
         onchange={onPlayerBarChange}
     />
     <div class="p-3 mt-1">
-        <div class="grid grid-cols-3">
+        <div class="grid grid-cols-2 lg:grid-cols-3">
             <div class="flex items-center">
                 <button class="w-10 invert mx-2"
                     ><img

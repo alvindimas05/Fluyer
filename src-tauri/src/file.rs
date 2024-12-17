@@ -1,5 +1,8 @@
+use std::path::PathBuf;
+
 use crate::{
-    commands::music::STORE_PATH_NAME, music::metadata::MusicMetadata, store::GLOBAL_APP_STORE,
+    commands::music::STORE_PATH_NAME, music::metadata::MusicMetadata, platform::is_mobile,
+    store::GLOBAL_APP_STORE,
 };
 use walkdir::{DirEntry, WalkDir};
 
@@ -14,10 +17,31 @@ fn is_audio_file(entry: &DirEntry) -> bool {
     }
 }
 
+pub fn get_android_storage() -> Option<PathBuf> {
+    let base_path = std::env::var("EXTERNAL_STORAGE").ok();
+    base_path
+        .map(PathBuf::from)
+        .or_else(|| Some(PathBuf::from("/storage/emulated/0")))
+}
+
 pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
-    let mut dir = GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string();
-    dir.remove(0);
-    dir.pop();
+    let mut dir = if is_mobile() {
+        format!(
+            "{}/Music",
+            get_android_storage()
+                .unwrap()
+                .into_os_string()
+                .into_string()
+                .unwrap()
+        )
+    } else {
+        GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string()
+    };
+
+    if !is_mobile() {
+        dir.remove(0);
+        dir.pop();
+    }
 
     let mut musics: Vec<MusicMetadata> = vec![];
     for entry in WalkDir::new(&dir)

@@ -1,32 +1,43 @@
 <script lang="ts">
-import MusicController from "$lib/controllers/MusicController";
-import MusicItem from "./MusicItem.svelte";
-import type { MusicData } from "./types";
+	import MusicController from "$lib/controllers/MusicController";
+	import { musicList } from "$lib/stores/music";
+	import { platform } from "@tauri-apps/plugin-os";
+	import MusicItem from "./MusicItem.svelte";
+	import type { MusicData } from "./types";
 
-function splitMusics(arr: MusicData[]): MusicData[][] {
-	const length = arr.length;
+	function splitMusics(arr: MusicData[] | null | undefined): MusicData[][] {
+		if (!Array.isArray(arr)) return [];
+		const length = arr.length;
 
-	// Calculate the sizes of the three parts
-	const part1Size = Math.ceil(length / 3); // First part size
-	const part2Size = Math.ceil((length - part1Size) / 2); // Second part size
-	const part3Size = length - part1Size - part2Size; // Remaining elements for the third part
+		// Calculate the sizes of the three parts
+		const part1Size = Math.ceil(length / 3); // First part size
+		const part2Size = Math.ceil((length - part1Size) / 2); // Second part size
+		const part3Size = length - part1Size - part2Size; // Remaining elements for the third part
 
-	// Split the array
-	const firstPart = arr.slice(0, part1Size);
-	const secondPart = arr.slice(part1Size, part1Size + part2Size);
-	const thirdPart = arr.slice(part1Size + part2Size);
+		// Split the array
+		const firstPart = arr.slice(0, part1Size);
+		const secondPart = arr.slice(part1Size, part1Size + part2Size);
+		const thirdPart = arr.slice(part1Size + part2Size);
 
-	return [firstPart, secondPart, thirdPart];
-}
-let splittedMusics = $derived(splitMusics(MusicController.musicList()!));
+		return [firstPart, secondPart, thirdPart];
+	}
+	let splittedMusics = $derived(splitMusics($musicList));
 </script>
 
-<div class="grid grid-cols-3 text-white px-3 overflow-y-auto scrollbar-hidden pb-20">
-    {#each splittedMusics as musics}
-        <div>
-            {#each musics as music}
-                <MusicItem {music} />
-            {/each}
-        </div>
-    {/each}
+<div
+	class="lg:grid lg:grid-cols-3 text-white px-3 overflow-y-auto scrollbar-hidden pb-20"
+>
+	{#if Array.isArray($musicList)}
+		{#each $musicList as music}
+			<MusicItem {music} />
+		{/each}
+	{:else}
+		{#each splittedMusics as musics}
+			<div>
+				{#each musics as music}
+					<MusicItem {music} />
+				{/each}
+			</div>
+		{/each}
+	{/if}
 </div>

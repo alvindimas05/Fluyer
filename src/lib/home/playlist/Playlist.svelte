@@ -40,7 +40,7 @@ function onAnimationEnd() {
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-    class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-[25%] pe-3 pt-8
+    class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-[80%] lg:w-[25%] pe-3 pt-8
     ${isMouseInsideArea ? "" : "hidden"}`}
     onmouseleave={onMouseLeave}
 >
