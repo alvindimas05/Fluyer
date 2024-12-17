@@ -12,7 +12,7 @@ on:
         required: false
         type: boolean
       build-android:
-        description: "Build for Android"
+        description: "Build for Android (aarch64)"
         required: false
         type: boolean
 
@@ -81,7 +81,7 @@ jobs:
           prerelease: false
 
   build-android:
-      name: Build Android
+      name: Build Android (aarch64)
       runs-on: ubuntu-latest
       permissions:
           contents: write
@@ -104,7 +104,8 @@ jobs:
           - name: Install Rust stable
             uses: dtolnay/rust-toolchain@stable
             with:
-              targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+              # targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+              targets: aarch64-linux-android
           - name: Rust cache
             uses: swatinem/rust-cache@v2
             with:
@@ -122,7 +123,7 @@ jobs:
               echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
           - name: Build App Bundle
-            run: bun tauri android build -v
+            run: bun tauri android build apk --target aarch64
             env:
                 NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
 
@@ -130,16 +131,18 @@ jobs:
             id: package-version
             uses: martinbeentjes/npm-get-version-action@v1.3.1
 
-          - name: Rename APK file
+          - name: Zip Outputs Folder
             run: |
-                mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-signed.apk ./src-tauri/gen/android/app/build/outputs/apk/universal/release/fluyer-${{ steps.package-version.outputs.current-version }}.apk
-
+              cd ./src-tauri/gen/android/app/build/outputs/
+              zip -r outputs-${{ steps.package-version.outputs.current-version }}.zip apk/
+          
           - name: Publish
             uses: softprops/action-gh-release@v1
             with:
-                draft: true
-                name: Fluyer v${{ steps.package-version.outputs.current-version }}
-                tag_name: v${{ steps.package-version.outputs.current-version }}
-                generate_release_notes: true
-                files: |
-                    ./src-tauri/gen/android/app/build/outputs/apk/universal/release/fluyer-${{ steps.package-version.outputs.current-version }}.apk
+              draft: true
+              name: Fluyer v${{ steps.package-version.outputs.current-version }}
+              tag_name: v${{ steps.package-version.outputs.current-version }}
+              generate_release_notes: true
+              files: |
+                ./src-tauri/gen/android/app/build/outputs/outputs-${{ steps.package-version.outputs.current-version }}.zip
+          
