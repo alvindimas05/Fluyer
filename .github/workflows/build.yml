@@ -7,6 +7,10 @@ on:
         description: "Build for Windows"
         required: false
         type: boolean
+      build-macos-intel:
+        description: "Build for MacOS (Intel)"
+        required: false
+        type: boolean
       build-linux:
         description: "Build for Linux"
         required: false
@@ -22,6 +26,34 @@ jobs:
     runs-on: windows-latest
     permissions: write-all
     if: ${{ github.event.inputs.build-windows == 'true' }}
+    steps: 
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install Front-End dependencies
+        run: bun i
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'Fluyer v__VERSION__'
+          releaseDraft: true
+          prerelease: false  
+
+  build-macos-intel:
+    name: Build MacOS (Intel)
+    runs-on: macos-13
+    permissions: write-all
+    if: ${{ github.event.inputs.build-macos-intel == 'true' }}
     steps: 
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
