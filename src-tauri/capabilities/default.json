@@ -16,6 +16,15 @@
     "core:window:allow-maximize",
     "core:window:allow-close",
     "core:window:allow-set-decorations",
-    "os:default"
+    "os:default",
+    "fs:default",
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [
+        {
+          "path": "$HOME/Music"
+        }
+      ]
+    }
   ]
 }
