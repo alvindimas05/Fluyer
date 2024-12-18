@@ -5,7 +5,6 @@ use crate::{
     store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE,
 };
 use tauri::{path::PathResolver, Manager};
-use tauri_plugin_os::hostname;
 use walkdir::{DirEntry, WalkDir};
 
 fn is_audio_file(entry: &DirEntry) -> bool {

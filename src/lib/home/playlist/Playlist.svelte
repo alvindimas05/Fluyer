@@ -49,7 +49,7 @@
 </script>
 
 <svelte:body
-    use:swipe={{ timeframe: 300, minSwipeDistance: 100 }}
+    use:swipe={{ minSwipeDistance: 100, touchAction: "pan-y" }}
     onswipe={onSwipeLeft}
 />
 <svelte:document onmousemove={onMouseMove} />
@@ -57,6 +57,7 @@
 <div
     class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-[80%] lg:w-[25%] pe-3 pt-8
     ${isMouseInsideArea ? "" : "hidden"}`}
+    onmouseleave={onMouseLeave}
 >
     <div
         class={`bg-gray-700 bg-opacity-30 backdrop-blur-md rounded
