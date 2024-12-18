@@ -14,6 +14,7 @@ let { children }: Props = $props();
 logHandler();
 </script>
 
+<!-- FIXME: Layout is overflowing top and bottom on some android devices -->
 <!-- TODO: Add default blurred and colored background -->
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
 {#if !isMobile()}
