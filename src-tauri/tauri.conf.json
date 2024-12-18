@@ -19,7 +19,7 @@
 				"decorations": true,
 				"transparent": true,
 				"resizable": true,
-				"maximized": false,
+				"maximized": true,
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true
 			}
