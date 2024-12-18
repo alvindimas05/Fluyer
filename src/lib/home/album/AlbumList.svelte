@@ -29,6 +29,7 @@ function groupByAlbum(): MusicData[][] {
 musicList.subscribe(() => (grouppedAlbums = groupByAlbum()));
 </script>
 
+<!-- FIXME: Mouse scroll horizontal not working -->
 <div
     class="grid auto-cols-[50%] lg:auto-cols-[16.6667%] grid-rows-[1fr] w-full mt-2 overflow-x-auto scrollbar-hidden"
 >
