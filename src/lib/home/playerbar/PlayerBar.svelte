@@ -82,6 +82,7 @@
     <div class="p-3 mt-1">
         <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
             <div class="flex items-center">
+                <!-- TODO: Button Previous Functionality -->
                 <button class="w-8 lg:w-10 invert mx-2"
                     ><img
                         class="music-icon"
