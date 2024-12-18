@@ -38,13 +38,13 @@ onMount(checkAlbumImage);
 <div
     class="grid grid-cols-[max-content_auto] py-2 animate__animated animate__fadeInDown animate__slow"
 >
-    <button class="w-16 h-16 relative" onclick={addMusicAndPlay}>
+    <button class="w-12 h-12 lg:w-16 lg:h-16 relative" onclick={addMusicAndPlay}>
         <div
             class="music-item-play bg-black bg-opacity-40 absolute grid w-full h-full
         justify-items-center items-center animate__animated animate__faster animate__fadeOut rounded"
         >
             <img
-                class="w-12 h-12 invert"
+                class="w-10 h-10 lg:w-12 lg:h-12 invert"
                 src={MusicConfig.defaultPlayButton}
                 alt="Play"
             />

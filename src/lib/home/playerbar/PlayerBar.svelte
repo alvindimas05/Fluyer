@@ -82,14 +82,14 @@
     <div class="p-3 mt-1">
         <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
             <div class="flex items-center">
-                <button class="w-10 invert mx-2"
+                <button class="w-8 lg:w-10 invert mx-2"
                     ><img
                         class="music-icon"
                         src="/icons/default/previous.png"
                         alt="Icon Previous"
                     /></button
                 >
-                <button class="w-10 invert mx-2" onclick={handleButtonPlayPause}
+                <button class="w-8 lg:w-10 invert mx-2" onclick={handleButtonPlayPause}
                     ><img
                         class="music-icon"
                         src={isPlaying
@@ -98,7 +98,7 @@
                         alt="Icon Play"
                     /></button
                 >
-                <button class="w-10 invert mx-2" onclick={handleButtonNext}
+                <button class="w-8 lg:w-10 invert mx-2" onclick={handleButtonNext}
                     ><img
                         class="music-icon"
                         src="/icons/default/next.png"
@@ -108,7 +108,7 @@
             </div>
             <div class="ms-2 lg:ms-0 lg:flex items-center justify-center order-first lg:order-none">
                 <div class="grid grid-cols-[max-content_auto]">
-                    <img class="w-12 rounded" src={albumImage} alt="Album" />
+                    <img class="w-10 lg:w-12 rounded" src={albumImage} alt="Album" />
                     <div class="ms-3">
                         <p class="font-medium">
                             {title}

@@ -24,12 +24,7 @@
     LoadingController.listen();
 </script>
 
-{#await readDir("Downloads", { baseDir: BaseDirectory.Home }) then dirs}
-    <div>{dirs.toString()} Sigma</div>
-{:catch ex}
-    <div>{ex}</div>
-{/await}
-<!-- {#if isLoadingDone}
+{#if isLoadingDone}
     {#if $musicList === null}
         <MusicDirSelector />
     {:else if Array.isArray($musicList)}
@@ -40,4 +35,4 @@
             <MusicList />
         </div>
     {/if}
-{/if} -->
+{/if}
