@@ -39,7 +39,7 @@ function onAnimationEnd() {
 }
 
 function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
-	if (!isMobile()) return;
+	if (!isMobile() || e.detail.initial[1] < 250) return;
 	if (e.detail.deltaX < -100 && !isMouseInsideArea) {
 		isMouseInsideArea = true;
 		animationClass = "animate__fadeInRight";
