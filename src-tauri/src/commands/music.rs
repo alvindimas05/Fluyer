@@ -56,7 +56,7 @@ pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<Strin
 
 #[tauri::command]
 pub fn music_request_dir(app: AppHandle) {
-    #[cfg(not(target_os = "android"))]
+    #[cfg(all(not(target_os = "android"), not(target_os = "ios")))]
     {
         app.dialog().file().pick_folder(|dir_path| {
             if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
