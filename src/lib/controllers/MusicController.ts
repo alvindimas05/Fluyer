@@ -10,6 +10,7 @@ import {
 import { get } from "svelte/store";
 import type { MusicData } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
+import { listen } from "@tauri-apps/api/event";
 
 interface MusicPlayerInfo {
 	current_position: number;
@@ -69,7 +70,7 @@ const MusicController = {
 
 	currentMusicDuration: () =>
 		MusicController.currentMusic() != null
-			? MusicController.currentMusic()!.duration / 1000
+			? MusicController.parseProgressDuration(MusicController.currentMusic()!.duration)
 			: 0,
 	progressValue: () => get(musicProgressValue),
 	setProgressValue: (value: number) => musicProgressValue.set(value),
@@ -81,9 +82,10 @@ const MusicController = {
 	progressDuration: () =>
 		MusicController.currentMusic() != null
 			? (MusicController.progressValue() / MusicConfig.max) *
-				MusicController.currentMusicDuration()
+			MusicController.currentMusicDuration()
 			: -1,
 	realProgressDuration: () => MusicController.progressDuration() * 1000,
+	parseProgressDuration: (value: number) => value / 1000,
 
 	startProgress: () => {
 		const updateInterval =
@@ -118,7 +120,7 @@ const MusicController = {
 		const nextMusics = MusicController.nextMusics();
 		if (nextMusics.length > 0) {
 			MusicController.setCurrentMusic(nextMusics[0]);
-			MusicController.play(MusicController.isPlaying());
+			MusicController.play(!MusicController.isPlaying());
 		} else {
 			MusicController.pause();
 			return;
@@ -127,6 +129,15 @@ const MusicController = {
 			MusicController.addMusicToPlayList(nextMusics[1].path);
 		}
 		MusicController.removeFirstNextMusics();
+		MusicController.syncPlayerBar();
+	},
+
+	syncPlayerBar: async () => {
+		await invoke("music_get_info");
+		const unlisten = await listen<MusicPlayerInfo>("music_get_info", e => {
+			musicProgressValue.set(MusicController.parseProgressDuration(e.payload.current_position));
+			unlisten();
+		});
 	},
 
 	resetProgress: () => musicProgressValue.set(MusicConfig.min),
@@ -144,7 +155,7 @@ const MusicController = {
 		let minutes = 0;
 		let seconds = negative
 			? MusicController.currentMusicDuration() -
-				MusicController.progressDuration()
+			MusicController.progressDuration()
 			: MusicController.progressDuration();
 
 		while (seconds > 60) {

@@ -10,3 +10,8 @@ export interface MusicData {
 	track_number: string | null;
 	image: string | null;
 }
+
+export interface MusicPlayerInfo {
+	current_position: number;
+	is_paused: boolean;
+}
