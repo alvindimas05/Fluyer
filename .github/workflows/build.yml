@@ -165,13 +165,14 @@ jobs:
           - name: Rename APK file
             run: |
                 mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./src-tauri/gen/android/app/build/outputs/apk/universal/release/Fluyer-${{ steps.package-version.outputs.current-version }}.apk
-
-          - name: Publish
-            uses: softprops/action-gh-release@v1
+          
+          - name: Publish release
+            uses: ncipollo/release-action@v1
             with:
-                draft: true
+                artifacts: ./src-tauri/gen/android/app/build/outputs/apk/universal/release/Fluyer-${{ steps.package-version.outputs.current-version }}.apk
+                tag: v${{ steps.package-version.outputs.current-version }}
                 name: Fluyer v${{ steps.package-version.outputs.current-version }}
-                tag_name: v${{ steps.package-version.outputs.current-version }}
-                generate_release_notes: true
-                files: |
-                    ./src-tauri/gen/android/app/build/outputs/apk/universal/release/Fluyer-${{ steps.package-version.outputs.current-version }}.apk
+                allowUpdates: true
+                artifactErrorsFailBuild: false
+                draft: true
+                token: ${{ secrets.GITHUB_TOKEN }}
