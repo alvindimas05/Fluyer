@@ -107,7 +107,6 @@ const MusicController = {
 		);
 	},
 
-	// FIXME: Next from Button when pausing doesn't play
 	// FIXME: Sync Progress Bar with Back-end Player after next
 	tryNextMusic: (force = false) => {
 		clearInterval(get(musicProgressIntervalId)!);
@@ -119,7 +118,7 @@ const MusicController = {
 		const nextMusics = MusicController.nextMusics();
 		if (nextMusics.length > 0) {
 			MusicController.setCurrentMusic(nextMusics[0]);
-			MusicController.play(false);
+			MusicController.play(MusicController.isPlaying());
 		} else {
 			MusicController.pause();
 			return;
