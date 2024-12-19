@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { musicCurrent, musicsNext } from "$lib/stores/music";
 	import PlaylistItem from "./PlaylistItem.svelte";
-	import { isMobile, mobileStyle } from "$lib/platform";
+	import { isMobile } from "$lib/platform";
 	import { swipeable } from "@react2svelte/swipeable";
 	import type { SwipeEventData } from "@react2svelte/swipeable";
 
