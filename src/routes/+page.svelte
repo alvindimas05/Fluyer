@@ -10,6 +10,9 @@
     import { musicList } from "$lib/stores/music";
     import TitleBar from "$lib/titlebar/TitleBar.svelte";
     import { BaseDirectory, readDir } from "@tauri-apps/plugin-fs";
+    import { isMobile } from "$lib/platform";
+
+    if (isMobile()) LoadingController.setLoadingBackground(true);
 
     let isLoadingDone = LoadingController.loadingShow();
 

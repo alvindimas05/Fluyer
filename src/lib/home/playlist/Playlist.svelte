@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { swipe, type SwipePointerEventDetail } from "svelte-gestures";
     import { musicCurrent, musicsNext } from "$lib/stores/music";
     import PlaylistItem from "./PlaylistItem.svelte";
     import { isMobile } from "$lib/platform";
+    import { swipeable } from "@react2svelte/swipeable";
+    import type { SwipeEventData } from "@react2svelte/swipeable";
 
     let isMouseInsideArea = $state(false);
     let animationClass = $state("");
@@ -37,21 +38,18 @@
         isMouseInsideArea = false;
     }
 
-    function onSwipeLeft(e: CustomEvent<SwipePointerEventDetail>) {
+    function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
         if (!isMobile()) return;
-        if (e.detail.direction == "left" && !isMouseInsideArea) {
+        if (e.detail.deltaX < -100 && !isMouseInsideArea) {
             isMouseInsideArea = true;
             animationClass = "animate__fadeInRight";
-        } else if (e.detail.direction == "right" && isMouseInsideArea) {
+        } else if (e.detail.deltaX > 100 && isMouseInsideArea) {
             animationClass = "animate__fadeOutRight";
         }
     }
 </script>
 
-<svelte:body
-    use:swipe={{ minSwipeDistance: 100, touchAction: "pan-y" }}
-    onswipe={onSwipeLeft}
-/>
+<svelte:body use:swipeable on:swiped={onSwipeLeft} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div

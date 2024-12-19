@@ -16,6 +16,7 @@
 	},
 	"license": "MIT",
 	"dependencies": {
+		"@react2svelte/swipeable": "^0.1.4",
 		"@tauri-apps/api": "^2.1.1",
 		"@tauri-apps/plugin-dialog": "~2",
 		"@tauri-apps/plugin-fs": "~2",
@@ -29,7 +30,6 @@
 		"html2canvas-pro": "^1.5.8",
 		"musicbrainz-api": "^0.19.1",
 		"sass": "^1.79.4",
-		"svelte-gestures": "^5.0.6",
 		"tailwindcss-animatecss": "^3.0.5"
 	},
 	"devDependencies": {
