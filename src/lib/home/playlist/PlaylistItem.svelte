@@ -16,7 +16,7 @@ let { music, isPlaying = false }: Props = $props();
 >
     <button class="relative"
         ><img
-            class="w-16 rounded"
+            class="w-12 lg:w-16 rounded"
             src={MusicController.getAlbumImageFromMusic(music)}
             alt="Album"
         />
@@ -28,7 +28,7 @@ let { music, isPlaying = false }: Props = $props();
         </p>
     </div>
     {#if isPlaying}
-        <div class="w-16 flex justify-center items-center">
+        <div class="w-12 lg:w-16 flex justify-center items-center">
             <img
                 class="w-10 h-10 invert animate__animated animate__pulse animate__infinite"
                 src={"/icons/default/playing.png"}

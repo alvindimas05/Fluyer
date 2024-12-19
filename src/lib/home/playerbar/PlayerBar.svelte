@@ -106,13 +106,13 @@ function updateStates() {
                 >
             </div>
             <div class="ms-2 lg:ms-0 lg:flex items-center justify-center order-first lg:order-none">
-                <div class="grid grid-cols-[max-content_auto]">
-                    <img class="w-10 lg:w-12 rounded" src={albumImage} alt="Album" />
-                    <div class="ms-3">
+                <div class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]">
+                    <img class="rounded" src={albumImage} alt="Album" />
+                    <div class="ms-3 overflow-hidden">
                         <p class="font-medium">
                             {title}
                         </p>
-                        <p class="text-gray-200">
+                        <p class="text-gray-200 whitespace-nowrap overflow-ellipsis">
                             {artist}
                         </p>
                     </div>
