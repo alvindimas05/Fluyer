@@ -1,25 +1,23 @@
 <script lang="ts">
-    import { getCurrentWindow } from "@tauri-apps/api/window";
-    import TitleBarButton from "./TitleBarButton.svelte";
-    import { platform } from "@tauri-apps/plugin-os";
-    import { isMobile } from "$lib/platform";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import TitleBarButton from "./TitleBarButton.svelte";
+import { platform } from "@tauri-apps/plugin-os";
+import { isMobile } from "$lib/platform";
 
-    let isMaximized = $state(true);
-    const appWindow = getCurrentWindow();
-    function onMouseDown(
-        e: MouseEvent & {
-            currentTarget: EventTarget & HTMLDivElement;
-        },
-    ) {
-        if (e.buttons === 1) {
-            e.detail === 2
-                ? appWindow.toggleMaximize()
-                : appWindow.startDragging();
-        }
-    }
-    appWindow.onResized(async (_) => {
-        isMaximized = await appWindow.isMaximized();
-    });
+let isMaximized = $state(true);
+const appWindow = getCurrentWindow();
+function onMouseDown(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	if (e.buttons === 1) {
+		e.detail === 2 ? appWindow.toggleMaximize() : appWindow.startDragging();
+	}
+}
+appWindow.onResized(async (_) => {
+	isMaximized = await appWindow.isMaximized();
+});
 </script>
 
 {#if !isMobile()}

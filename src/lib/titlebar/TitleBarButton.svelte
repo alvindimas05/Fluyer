@@ -1,14 +1,14 @@
 <script lang="ts">
-    interface Props {
-        name: string;
-        onclick: (
-            e: MouseEvent & {
-                currentTarget: EventTarget & HTMLButtonElement;
-            },
-        ) => any;
-    }
+interface Props {
+	name: string;
+	onclick: (
+		e: MouseEvent & {
+			currentTarget: EventTarget & HTMLButtonElement;
+		},
+	) => any;
+}
 
-    let { name, onclick }: Props = $props();
+let { name, onclick }: Props = $props();
 </script>
 
 <!-- svelte-ignore a11y_consider_explicit_label -->

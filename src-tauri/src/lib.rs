@@ -2,7 +2,6 @@ use crate::store::init_store;
 use music::player::MusicPlayer;
 use std::sync::{Mutex, OnceLock};
 use tauri::{AppHandle, Manager};
-use tauri_plugin_fs::FsExt;
 
 mod commands;
 mod file;

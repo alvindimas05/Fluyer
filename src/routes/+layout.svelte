@@ -3,8 +3,8 @@ import "animate.css";
 import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 import logHandler from "$lib/handlers/log";
 import "../app.scss";
-    import TitleBar from "$lib/titlebar/TitleBar.svelte";
-    import { isMobile } from "$lib/platform";
+import TitleBar from "$lib/titlebar/TitleBar.svelte";
+import { isMobile } from "$lib/platform";
 interface Props {
 	children?: import("svelte").Snippet;
 }

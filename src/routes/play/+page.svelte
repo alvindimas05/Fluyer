@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { musicIsPlaying } from "$lib/stores/music";
-    import "./page.scss";
-    import { MusicConfig } from "$lib/controllers/MusicController";
+import { musicIsPlaying } from "$lib/stores/music";
+import "./page.scss";
+import { MusicConfig } from "$lib/controllers/MusicController";
 </script>
 
 <div class="w-full h-full grid items-center justify-center">

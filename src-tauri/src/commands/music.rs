@@ -2,10 +2,7 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_dialog::DialogExt;
 
-use crate::{
-    music::metadata::MusicMetadata, platform::is_mobile, store::GLOBAL_APP_STORE, AppState,
-    GLOBAL_APP_HANDLE,
-};
+use crate::{music::metadata::MusicMetadata, store::GLOBAL_APP_STORE, AppState, GLOBAL_APP_HANDLE};
 
 pub static STORE_PATH_NAME: &str = "music-path";
 
@@ -59,7 +56,7 @@ pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<Strin
 
 #[tauri::command]
 pub fn music_request_dir(app: AppHandle) {
-    #[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
+    #[cfg(not(target_os = "android"))]
     {
         app.dialog().file().pick_folder(|dir_path| {
             if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {

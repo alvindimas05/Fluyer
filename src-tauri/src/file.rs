@@ -1,10 +1,8 @@
-use std::path::PathBuf;
-
 use crate::{
     commands::music::STORE_PATH_NAME, music::metadata::MusicMetadata, platform::is_mobile,
     store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE,
 };
-use tauri::{path::PathResolver, Manager};
+use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
 
 fn is_audio_file(entry: &DirEntry) -> bool {

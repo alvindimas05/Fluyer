@@ -81,7 +81,7 @@ const MusicController = {
 	progressDuration: () =>
 		MusicController.currentMusic() != null
 			? (MusicController.progressValue() / MusicConfig.max) *
-			MusicController.currentMusicDuration()
+				MusicController.currentMusicDuration()
 			: -1,
 	realProgressDuration: () => MusicController.progressDuration() * 1000,
 
@@ -145,7 +145,7 @@ const MusicController = {
 		let minutes = 0;
 		let seconds = negative
 			? MusicController.currentMusicDuration() -
-			MusicController.progressDuration()
+				MusicController.progressDuration()
 			: MusicController.progressDuration();
 
 		while (seconds > 60) {

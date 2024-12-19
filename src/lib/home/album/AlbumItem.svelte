@@ -1,67 +1,64 @@
 <script lang="ts">
-	import SpotifyApi from "$lib/api/spotify";
-	import { onMount } from "svelte";
-	import type { MusicData } from "../music/types";
-	import MusicController, {
-		MusicConfig,
-	} from "$lib/controllers/MusicController";
+import SpotifyApi from "$lib/api/spotify";
+import { onMount } from "svelte";
+import type { MusicData } from "../music/types";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 
-	interface Props {
-		musicList: MusicData[];
-		index: number;
-	}
+interface Props {
+	musicList: MusicData[];
+	index: number;
+}
 
-	let { musicList, index }: Props = $props();
-	let music = musicList[0];
+let { musicList, index }: Props = $props();
+let music = musicList[0];
 
-	const animationDelay = 200;
-	let animationClasses = $state("hidden");
+const animationDelay = 200;
+let animationClasses = $state("hidden");
 
-	const spotifyApi = new SpotifyApi();
-	let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
+const spotifyApi = new SpotifyApi();
+let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
-	async function checkAlbumImage() {
-		if (music.image !== null) return;
-		const spotifyMusic = await spotifyApi.searchMusic(music);
-		if (spotifyMusic == null) return;
-		albumImage = spotifyMusic?.imageUrl;
-		musicList = musicList.map((m) => {
-			m.image = albumImage;
-			return m;
-		});
-	}
-
-	async function sortMusicList() {
-		musicList = musicList.sort((a, b) => {
-			if(a.track_number?.includes('/') || b.track_number?.includes('/')){
-				a.track_number = a.track_number!.split('/')[0];
-				b.track_number = b.track_number!.split('/')[0];
-			}
-			return +a.track_number! - +b.track_number!;
-		});
-	}
-
-	async function addMusicListAndPlay() {
-		music.image = albumImage;
-		const previousMusic = MusicController.currentMusic();
-		await MusicController.addMusicList(musicList);
-		if (
-			previousMusic === null ||
-			(!previousMusic !== null &&
-				MusicController.isCurrentMusicFinished())
-		)
-			MusicController.play();
-	}
-
-	onMount(() => {
-		sortMusicList();
-		checkAlbumImage();
+async function checkAlbumImage() {
+	if (music.image !== null) return;
+	const spotifyMusic = await spotifyApi.searchMusic(music);
+	if (spotifyMusic == null) return;
+	albumImage = spotifyMusic?.imageUrl;
+	musicList = musicList.map((m) => {
+		m.image = albumImage;
+		return m;
 	});
+}
 
-	setTimeout(
-		() => (animationClasses = "animate__animated animate__fadeInDown"),
-		animationDelay * index,
-	);
+async function sortMusicList() {
+	musicList = musicList.sort((a, b) => {
+		if (a.track_number?.includes("/") || b.track_number?.includes("/")) {
+			a.track_number = a.track_number!.split("/")[0];
+			b.track_number = b.track_number!.split("/")[0];
+		}
+		return +a.track_number! - +b.track_number!;
+	});
+}
+
+async function addMusicListAndPlay() {
+	music.image = albumImage;
+	const previousMusic = MusicController.currentMusic();
+	await MusicController.addMusicList(musicList);
+	if (
+		previousMusic === null ||
+		(!previousMusic !== null && MusicController.isCurrentMusicFinished())
+	)
+		MusicController.play();
+}
+
+onMount(() => {
+	sortMusicList();
+	checkAlbumImage();
+});
+
+setTimeout(
+	() => (animationClasses = "animate__animated animate__fadeInDown"),
+	animationDelay * index,
+);
 </script>
 
 <div class={`px-3 py-6 text-white row-[1] col-auto ${animationClasses}`}>
