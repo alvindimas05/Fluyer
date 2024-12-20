@@ -10,7 +10,7 @@ mod mobile;
 
 mod commands;
 mod error;
-mod models;
+pub mod models;
 
 pub use error::{Error, Result};
 
@@ -46,8 +46,12 @@ impl<R: Runtime, T: Manager<R>> crate::FluyerExt<R> for T {
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("fluyer")
         .invoke_handler(tauri::generate_handler![
-            // #[cfg(mobile)]
-            // commands::toast
+            #[cfg(mobile)]
+            commands::toast,
+            #[cfg(mobile)]
+            commands::check_permissions,
+            #[cfg(mobile)]
+            commands::request_permissions,
         ])
         .setup(|app, api| {
             #[cfg(mobile)]

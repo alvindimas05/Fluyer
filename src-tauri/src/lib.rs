@@ -57,6 +57,8 @@ pub fn run() {
             commands::log::log_error,
             #[cfg(mobile)]
             commands::log::toast,
+            #[cfg(mobile)]
+            commands::mobile::request_read_audio_permission,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

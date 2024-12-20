@@ -17,6 +17,8 @@
 		"os:default",
 		"fs:default",
 		"fluyer:allow-toast",
+		"fluyer:allow-check-permissions",
+		"fluyer:deny-check-permissions",
 		{
 			"identifier": "fs:allow-read-dir",
 			"allow": [
