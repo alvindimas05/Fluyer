@@ -1,7 +1,9 @@
 use crate::store::init_store;
 use music::player::MusicPlayer;
 use std::sync::{Mutex, OnceLock};
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
+#[allow(unused)]
+use tauri::{Manager, RunEvent};
 
 mod commands;
 mod file;
@@ -30,6 +32,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_fluyer::init())
         .setup(|app| {
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             {
@@ -49,8 +52,11 @@ pub fn run() {
             commands::music::music_get_all,
             commands::music::music_playlist_add,
             commands::music::music_get_info,
+            #[cfg(desktop)]
             commands::music::music_request_dir,
             commands::log::log_error,
+            #[cfg(mobile)]
+            commands::log::toast,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

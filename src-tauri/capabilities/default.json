@@ -16,6 +16,7 @@
 		"core:window:allow-set-decorations",
 		"os:default",
 		"fs:default",
+		"fluyer:allow-toast",
 		{
 			"identifier": "fs:allow-read-dir",
 			"allow": [

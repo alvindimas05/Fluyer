@@ -1030,6 +1030,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
+ "tauri-plugin-fluyer",
  "tauri-plugin-fs",
  "tauri-plugin-os",
  "tauri-plugin-shell",
@@ -3945,9 +3946,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin"
-version = "2.0.1"
+version = "2.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2e6660a409963e4d57b9bfab4addd141eeff41bd3a7fb14e13004a832cf7ef6"
+checksum = "e753f2a30933a9bbf0a202fa47d7cc4a3401f06e8d6dcc53b79aa62954828c79"
 dependencies = [
  "anyhow",
  "glob",
@@ -3976,6 +3977,16 @@ dependencies = [
  "tauri-plugin-fs",
  "thiserror 2.0.7",
  "url",
+]
+
+[[package]]
+name = "tauri-plugin-fluyer"
+version = "0.0.1-alpha"
+dependencies = [
+ "serde",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
