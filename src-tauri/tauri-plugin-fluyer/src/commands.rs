@@ -1,7 +1,10 @@
+#[cfg(mobile)]
 use tauri::{AppHandle, Runtime};
-
+#[cfg(mobile)]
 use crate::models::*;
+#[cfg(mobile)]
 use crate::FluyerExt;
+#[cfg(mobile)]
 use crate::Result;
 
 #[cfg(mobile)]

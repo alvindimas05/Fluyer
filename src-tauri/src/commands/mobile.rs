@@ -1,3 +1,4 @@
+#[cfg(mobile)]
 #[tauri::command]
 pub fn request_read_audio_permission() -> bool {
     use crate::GLOBAL_APP_HANDLE;
