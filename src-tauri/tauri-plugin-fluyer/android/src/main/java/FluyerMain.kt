@@ -9,11 +9,6 @@ import app.tauri.plugin.Channel
 import app.tauri.plugin.JSObject
 
 class FluyerMain {
-
-    companion object {
-        const val READ_AUDIO_PERMISSION_REQUEST_CODE = 101
-    }
-
     fun toast(activity: Activity, value: String) {
         Toast.makeText(activity, value, Toast.LENGTH_SHORT).show()
     }

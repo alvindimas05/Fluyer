@@ -19,19 +19,3 @@ pub struct PermissionStatus {
 pub enum PermissionType {
     Audio,
 }
-
-
-// #[derive(Debug, Clone, Default, Deserialize, Serialize)]
-// #[serde(rename_all = "camelCase")]
-// pub struct ToastResponse {}
-
-// #[derive(Serialize)]
-// pub struct RequestReadAudioPayload {
-//     pub channel: Channel,
-// }
-
-// #[derive(Debug, Clone, Default, Deserialize, Serialize)]
-// #[serde(rename_all = "camelCase")]
-// pub struct RequestReadAudioEvent {
-//     pub result: bool
-// }

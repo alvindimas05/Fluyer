@@ -47,29 +47,4 @@ impl<R: Runtime> Fluyer<R> {
             )
             .map_err(Into::into)
     }
-
-    // pub fn request_read_audio_permission<F: Fn(bool) + Send + Sync + 'static>(
-    //     &self,
-    //     callback: F,
-    // ) -> crate::Result<()> {
-    //     let channel = Channel::new(move |event| {
-    //         let payload = match event {
-    //             InvokeResponseBody::Json(payload) => {
-    //                 serde_json::from_str::<RequestReadAudioEvent>(&payload)
-    //                 .unwrap_or(RequestReadAudioEvent { result: false })
-    //             }
-    //             _ => RequestReadAudioEvent { result: false },
-    //         };
-    //         callback(payload.result);
-
-    //         Ok(())
-    //     });
-
-    //     self.0
-    //         .run_mobile_plugin(
-    //             "request_read_audio_permission",
-    //             RequestReadAudioPayload { channel },
-    //         )
-    //         .map_err(Into::into)
-    // }
 }

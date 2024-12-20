@@ -16,11 +16,6 @@ class ToastArgs {
   lateinit var value: String
 }
 
-@InvokeArg
-class RequestAudioPermissionArgs {
-  lateinit var channel: Channel
-}
-
 private const val ALIAS_READ_AUDIO: String = "audio"
 @TauriPlugin(
     permissions = [
@@ -41,17 +36,4 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
         implementation.toast(activity, args.value)
         invoke.resolve()
     }
-
-    // @Command
-    // fun requestReadAudioPermission(invoke: Invoke){
-    //     val args = invoke.parseArgs(RequestAudioPermissionArgs::class.java)
-    //     channel = args.channel
-
-    //     var result = implementation.checkReadAudioPermission(activity)
-    //     if(!result) implementation.requestReadAudioPermission(activity, args.channel)
-
-    //     var obj = JSObject()
-    //     obj.put("result", result)
-    //     invoke.resolve(obj)
-    // }
 }
