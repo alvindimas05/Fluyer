@@ -1,4 +1,9 @@
-import { invoke } from '@tauri-apps/api/core'
+import {
+    invoke,
+    PermissionState,
+    checkPermissions as checkPluginPermissions
+
+} from '@tauri-apps/api/core'
 
 export async function toast(value: string) {
     return await invoke<{ value?: string }>('plugin:fluyer|toast', {
@@ -6,4 +11,23 @@ export async function toast(value: string) {
             value,
         },
     });
+}
+
+
+export type PermissionStatus = {
+    audio: PermissionState,
+}
+
+export type PermissionType = 'audio'
+
+export async function checkPermissions(): Promise<PermissionStatus> {
+    return await checkPluginPermissions('audio')
+}
+
+export async function requestPermissions(
+    permissions: PermissionType[] | null
+): Promise<PermissionStatus> {
+    return await invoke('plugin:geolocation|request_permissions', {
+        permissions
+    })
 }
