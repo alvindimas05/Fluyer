@@ -1,35 +1,35 @@
 <script lang="ts">
-import AlbumList from "$lib/home/album/AlbumList.svelte";
-import MusicList from "$lib/home/music/MusicList.svelte";
-import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
-import Playlist from "$lib/home/playlist/Playlist.svelte";
-import LoadingController from "$lib/controllers/LoadingController";
-import { loadingBackground, loadingShow } from "$lib/stores/loading";
-import MusicController from "$lib/controllers/MusicController";
-import MusicDirSelector from "$lib/home/music/MusicDirSelector.svelte";
-import { musicList } from "$lib/stores/music";
-import TitleBar from "$lib/titlebar/TitleBar.svelte";
-import { BaseDirectory, readDir } from "@tauri-apps/plugin-fs";
-import { isMobile } from "$lib/platform";
+    import AlbumList from "$lib/home/album/AlbumList.svelte";
+    import MusicList from "$lib/home/music/MusicList.svelte";
+    import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
+    import Playlist from "$lib/home/playlist/Playlist.svelte";
+    import LoadingController from "$lib/controllers/LoadingController";
+    import { loadingBackground, loadingShow } from "$lib/stores/loading";
+    import MusicController from "$lib/controllers/MusicController";
+    import { musicList } from "$lib/stores/music";
+    import TitleBar from "$lib/titlebar/TitleBar.svelte";
+    import { BaseDirectory, readDir } from "@tauri-apps/plugin-fs";
+    import { isMobile } from "$lib/platform";
+    import Intro from "$lib/home/intro/Intro.svelte";
 
-if (isMobile()) LoadingController.setLoadingBackground(true);
+    if (isMobile()) LoadingController.setLoadingBackground(true);
 
-let isLoadingDone = LoadingController.loadingShow();
+    let isLoadingDone = LoadingController.loadingShow();
 
-loadingBackground.subscribe(() => {
-	if (!LoadingController.loadingBackground()) return;
-	MusicController.getMusics();
-});
-loadingShow.subscribe(() => {
-	isLoadingDone = LoadingController.loadingShow();
-});
+    loadingBackground.subscribe(() => {
+        if (!LoadingController.loadingBackground()) return;
+        MusicController.getMusics();
+    });
+    loadingShow.subscribe(() => {
+        isLoadingDone = LoadingController.loadingShow();
+    });
 
-LoadingController.listen();
+    LoadingController.listen();
 </script>
 
 {#if isLoadingDone}
     {#if $musicList === null}
-        <MusicDirSelector />
+        <Intro />
     {:else if Array.isArray($musicList)}
         <PlayerBar />
         <Playlist />

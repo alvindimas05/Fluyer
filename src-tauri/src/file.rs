@@ -1,3 +1,5 @@
+#[cfg(mobile)]
+use crate::commands::mobile::check_read_audio_permission;
 use crate::{
     commands::music::STORE_PATH_NAME, music::metadata::MusicMetadata, platform::is_mobile,
     store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE,
@@ -17,6 +19,12 @@ fn is_audio_file(entry: &DirEntry) -> bool {
 }
 
 pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
+    #[cfg(mobile)]
+    {
+        if !check_read_audio_permission() {
+            return None;
+        }
+    }
     let mut dir: String = if is_mobile() {
         get_android_audio_dir()
     } else {
@@ -37,7 +45,18 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
             }
             e.ok()
         })
-        .filter(|e| e.path().is_file() && is_audio_file(e))
+        .filter(|e| {
+            e.path().is_file()
+            // Common unknown music file on Androids
+                && !e.path()
+                    .file_name()
+                    .unwrap()
+                    .to_os_string()
+                    .into_string()
+                    .unwrap()
+                    .contains("au_uu_SzH34yR2")
+                && is_audio_file(e)
+        })
     {
         let path_str = entry.path().to_str();
         match path_str {

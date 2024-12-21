@@ -7,6 +7,21 @@ use tauri_plugin_fluyer::FluyerExt;
 
 #[cfg(mobile)]
 #[tauri::command]
+pub fn check_read_audio_permission() -> bool {
+    use tauri::plugin::PermissionState;
+
+    let app = GLOBAL_APP_HANDLE
+        .get()
+        .expect("Failed to get GLOBAL_APP_HANDLE");
+    app.fluyer()
+        .check_permissions()
+        .expect("Failed to request read audio permission")
+        .audio
+        == PermissionState::Granted
+}
+
+#[cfg(mobile)]
+#[tauri::command]
 pub fn request_read_audio_permission() -> bool {
     use tauri::plugin::PermissionState;
     use tauri_plugin_fluyer::models::PermissionType;
@@ -14,11 +29,7 @@ pub fn request_read_audio_permission() -> bool {
     let app = GLOBAL_APP_HANDLE
         .get()
         .expect("Failed to get GLOBAL_APP_HANDLE");
-    let res = app
-        .fluyer()
-        .check_permissions()
-        .expect("Failed to request read audio permission");
-    if res.audio != PermissionState::Granted {
+    if !check_read_audio_permission() {
         return app
             .fluyer()
             .request_permissions(Some(vec![PermissionType::Audio]))

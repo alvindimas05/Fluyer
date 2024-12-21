@@ -102,14 +102,14 @@
 		class="fixed z-[-10] w-full h-full animate__animated animate__fadeIn"
 		onanimationend={() => LoadingController.setLoadingBackground(true)}
 	>
-		<div class="bg-blur-heart">
+		<div>
 			<img
-				class="bg-blur-colors object-cover"
+				class="bg-blur-colors object-cover scale-x-[-1]"
 				src="/images/mobile-background.png"
 				alt="Background"
 			/>
 		</div>
-		<div>
+		<div class="bg-blur-heart">
 			<img
 				class="bg-blur-colors object-cover"
 				src="/images/mobile-background.png"
