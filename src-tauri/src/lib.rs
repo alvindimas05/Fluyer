@@ -59,6 +59,12 @@ pub fn run() {
             commands::log::toast,
             #[cfg(mobile)]
             commands::mobile::request_read_audio_permission,
+            #[cfg(mobile)]
+            commands::mobile::get_navigation_bar_height,
+            #[cfg(mobile)]
+            commands::mobile::get_navigation_bar_size,
+            #[cfg(mobile)]
+            commands::mobile::get_status_bar_height,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

@@ -61,7 +61,7 @@ setTimeout(
 );
 </script>
 
-<div class={`px-3 py-6 text-white row-[1] col-auto ${animationClasses}`}>
+<div class={`px-3 pb-6 lg:pt-6 text-white row-[1] col-auto ${animationClasses}`}>
 	<div class="relative w-full">
 		<div
 			class="album-item-actions w-full h-full absolute rounded-lg bg-gradient-to-b from-transparent to-black/75

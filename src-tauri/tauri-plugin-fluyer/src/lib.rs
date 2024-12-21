@@ -49,6 +49,10 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             #[cfg(mobile)]
             commands::toast,
             #[cfg(mobile)]
+            commands::get_navigation_bar_size,
+            #[cfg(mobile)]
+            commands::get_status_bar_height,
+            #[cfg(mobile)]
             commands::check_permissions,
             #[cfg(mobile)]
             commands::request_permissions,

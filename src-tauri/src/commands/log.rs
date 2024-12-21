@@ -13,5 +13,6 @@ pub fn toast(message: String) {
         .get()
         .expect("Failed to get GLOBAL_APP_HANDLE")
         .fluyer()
-        .toast(message);
+        .toast(message)
+        .unwrap();
 }

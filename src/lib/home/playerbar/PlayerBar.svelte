@@ -1,70 +1,80 @@
 <script lang="ts">
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import "./playerbar.scss";
-import {
-	musicCurrent,
-	musicIsPlaying,
-	musicProgressValue,
-} from "$lib/stores/music";
+    import MusicController, {
+        MusicConfig,
+    } from "$lib/controllers/MusicController";
+    import "./playerbar.scss";
+    import {
+        musicCurrent,
+        musicIsPlaying,
+        musicProgressValue,
+    } from "$lib/stores/music";
+    import { invoke } from "@tauri-apps/api/core";
 
-// Based on Rust Rodio fade effect (Please check player.rs)
-let pauseDelay = 400;
-let title = $state(MusicConfig.defaultTitle);
-let artist = $state(MusicConfig.defaultArtist);
-let albumImage = $state(MusicConfig.defaultAlbumImage);
+    // Based on Rust Rodio fade effect (Please check player.rs)
+    let pauseDelay = 400;
+    let title = $state(MusicConfig.defaultTitle);
+    let artist = $state(MusicConfig.defaultArtist);
+    let albumImage = $state(MusicConfig.defaultAlbumImage);
 
-let isPlaying = $state(MusicController.isPlaying());
-let progressPercentage = $state(MusicController.progressPercentage());
+    let isPlaying = $state(MusicController.isPlaying());
+    let progressPercentage = $state(MusicController.progressPercentage());
+    let navigationBarHeight = $state(0);
 
-musicProgressValue.subscribe(updateStates);
-musicCurrent.subscribe(updateStates);
-musicIsPlaying.subscribe(updateStates);
+    musicProgressValue.subscribe(updateStates);
+    musicCurrent.subscribe(updateStates);
+    musicIsPlaying.subscribe(updateStates);
 
-function handleButtonPlayPause() {
-	if (MusicController.currentMusic() == null) return;
+    function handleButtonPlayPause() {
+        if (MusicController.currentMusic() == null) return;
 
-	if (MusicController.isPlaying()) {
-		MusicController.setIsPlaying(false);
-		setTimeout(MusicController.pause, pauseDelay);
-	} else MusicController.play();
+        if (MusicController.isPlaying()) {
+            MusicController.setIsPlaying(false);
+            setTimeout(MusicController.pause, pauseDelay);
+        } else MusicController.play();
 
-	updateStates();
-}
+        updateStates();
+    }
 
-function handleButtonNext() {
-	MusicController.tryNextMusic(true);
-}
+    function handleButtonNext() {
+        MusicController.tryNextMusic(true);
+    }
 
-function onPlayerBarChange() {
-	if (MusicController.currentMusic() == null) {
-		MusicController.setProgressValue(0);
-		return;
-	}
+    function onPlayerBarChange() {
+        if (MusicController.currentMusic() == null) {
+            MusicController.setProgressValue(0);
+            return;
+        }
 
-	if (MusicController.progressValue() >= MusicConfig.max) {
-		MusicController.addMusic(MusicController.currentMusic()!);
-	}
+        if (MusicController.progressValue() >= MusicConfig.max) {
+            MusicController.addMusic(MusicController.currentMusic()!);
+        }
 
-	MusicController.sendCommandSetPosition(
-		MusicController.realProgressDuration(),
-	);
-}
+        MusicController.sendCommandSetPosition(
+            MusicController.realProgressDuration(),
+        );
+    }
 
-function updateStates() {
-	isPlaying = MusicController.isPlaying();
-	progressPercentage = MusicController.progressPercentage();
+    function updateStates() {
+        isPlaying = MusicController.isPlaying();
+        progressPercentage = MusicController.progressPercentage();
 
-	let music = MusicController.currentMusic();
-	if (music == null) return;
+        let music = MusicController.currentMusic();
+        if (music == null) return;
 
-	title = music.title!;
-	artist = MusicController.getFullArtistFromMusic(music);
-	albumImage = MusicController.currentMusicAlbumImage();
-}
+        title = music.title!;
+        artist = MusicController.getFullArtistFromMusic(music);
+        albumImage = MusicController.currentMusicAlbumImage();
+    }
+
+    async function getNavigationBarHeight() {
+        navigationBarHeight = await invoke<number>("get_navigation_bar_height");
+    }
+    getNavigationBarHeight();
 </script>
 
 <div
     class="fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 backdrop-blur-md text-white animate__animated animate__slideInUp animate__slow"
+    style={`padding-bottom: ${navigationBarHeight}px`}
 >
     <input
         id="music-progress-bar"
@@ -88,7 +98,9 @@ function updateStates() {
                         alt="Icon Previous"
                     /></button
                 >
-                <button class="w-8 lg:w-10 invert mx-2" onclick={handleButtonPlayPause}
+                <button
+                    class="w-8 lg:w-10 invert mx-2"
+                    onclick={handleButtonPlayPause}
                     ><img
                         class="music-icon"
                         src={isPlaying
@@ -97,7 +109,9 @@ function updateStates() {
                         alt="Icon Play"
                     /></button
                 >
-                <button class="w-8 lg:w-10 invert mx-2" onclick={handleButtonNext}
+                <button
+                    class="w-8 lg:w-10 invert mx-2"
+                    onclick={handleButtonNext}
                     ><img
                         class="music-icon"
                         src="/icons/default/next.png"
@@ -105,14 +119,20 @@ function updateStates() {
                     /></button
                 >
             </div>
-            <div class="ms-2 lg:ms-0 lg:flex items-center justify-center order-first lg:order-none">
-                <div class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]">
+            <div
+                class="ms-2 lg:ms-0 lg:flex items-center justify-center order-first lg:order-none"
+            >
+                <div
+                    class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
+                >
                     <img class="rounded" src={albumImage} alt="Album" />
                     <div class="ms-3 overflow-hidden">
                         <p class="font-medium">
                             {title}
                         </p>
-                        <p class="text-gray-200 whitespace-nowrap overflow-ellipsis">
+                        <p
+                            class="text-gray-200 whitespace-nowrap overflow-ellipsis"
+                        >
                             {artist}
                         </p>
                     </div>
