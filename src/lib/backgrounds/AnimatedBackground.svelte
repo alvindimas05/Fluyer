@@ -86,13 +86,14 @@
 		);
 
 		// FIXME: Visible Animated Colored Squares on Linux
-		// Force remove loading for temporary solution
-		if (platform() == "linux") {
-			LoadingController.setLoadingBackground(true);
-			animatedClasses = "";
-		} else {
-			animatedClasses = "animate__animated animate__fadeIn";
-		}
+		// Note: Probably won't be fixed soon since it's WebView issue
+		// if (platform() == "linux") {
+		// 	LoadingController.setLoadingBackground(true);
+		// 	animatedClasses = "";
+		// } else {
+		// 	animatedClasses = "animate__animated animate__fadeIn";
+		// }
+		animatedClasses = "animate__animated animate__fadeIn";
 	}
 	musicCurrent.subscribe(() => !isMobile() && getColors());
 </script>
