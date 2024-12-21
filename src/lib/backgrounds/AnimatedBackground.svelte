@@ -19,6 +19,7 @@
 	let animatedClasses = $state("hidden");
 	let lastImage = "";
 	let position: string[][] = $state([]);
+	let secondPosition: string[][] = $state([]);
 	let isLight = $state(false);
 
 	function hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -71,16 +72,19 @@
 		});
 		isLight = isMajorityLight(colors);
 
-		for (var i = 0; i < SIZE; i++) {
-			position[i] = [];
-		}
+		position = Array.from({ length: SIZE }, () =>
+			Array.from(
+				{ length: SIZE },
+				() => colors[Math.floor(Math.random() * colors.length)],
+			),
+		);
+		secondPosition = Array.from({ length: SIZE }, () =>
+			Array.from(
+				{ length: SIZE },
+				() => colors[Math.floor(Math.random() * colors.length)],
+			),
+		);
 
-		for (let i = 0; i < SIZE; i++) {
-			for (let j = 0; j < SIZE; j++) {
-				position[i][j] =
-					colors[Math.floor(Math.random() * colors.length)];
-			}
-		}
 		// FIXME: Visible Animated Colored Squares on Linux
 		// Force remove loading for temporary solution
 		if (platform() == "linux") {
@@ -90,12 +94,9 @@
 			animatedClasses = "animate__animated animate__fadeIn";
 		}
 	}
-	musicCurrent.subscribe(getColors);
+	musicCurrent.subscribe(() => !isMobile() && getColors());
 </script>
 
-{#if isLight}
-	<div class="bg-blur-dark"></div>
-{/if}
 {#if isMobile()}
 	<div
 		class="fixed z-[-10] w-full h-full animate__animated animate__fadeIn"
@@ -121,8 +122,7 @@
 		class={`fixed ${animatedClasses}`}
 		onanimationend={() => LoadingController.setLoadingBackground(true)}
 	>
-		<div class="bg-blur"></div>
-		<div class="bg-blur-heart">
+		<div>
 			<div
 				class="bg-blur-colors"
 				style={`grid-template-columns: ${GRID_COLS}`}
@@ -139,10 +139,10 @@
 		</div>
 		<div>
 			<div
-				class="bg-blur-colors"
+				class="bg-blur-colors bg-blur-heart"
 				style={`grid-template-columns: ${GRID_COLS}`}
 			>
-				{#each position as row}
+				{#each secondPosition as row}
 					{#each row as col}
 						<div
 							class="bg-blur-pixel"
@@ -152,5 +152,9 @@
 				{/each}
 			</div>
 		</div>
+		<div class="bg-blur"></div>
 	</div>
+{/if}
+{#if isLight}
+	<div class="bg-blur-dark"></div>
 {/if}

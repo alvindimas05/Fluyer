@@ -1,22 +1,22 @@
 .bg-blur {
-    @apply w-screen h-screen fixed z-[-8];
+    @apply w-screen h-screen absolute;
     /* background-color: rgba(0, 0, 0, .05); */
     backdrop-filter: blur(90px);
 }
 
 .bg-blur-dark {
-    @apply w-screen h-screen grid fixed z-[-8] bg-black bg-opacity-10;
+    @apply w-screen h-screen grid fixed bg-black bg-opacity-[.15];
 }
 
 .bg-blur-colors {
-    @apply w-screen h-screen grid bg-black fixed z-[-10];
+    @apply w-screen h-screen grid bg-black absolute z-[-99999];
+
     .bg-blur-pixel {
-        @apply min-w-[30px] relative z-[-9];
+        @apply min-w-[30px] relative;
     }
 }
 
 .bg-blur-heart {
-    @apply relative z-[-9];
     animation: bg-blur-heart 5s linear infinite;
 }
 
@@ -24,15 +24,19 @@
     0% {
         opacity: 0;
     }
+
     25% {
         opacity: 0.5;
     }
+
     50% {
         opacity: 1;
     }
+
     75% {
         opacity: 0.5;
     }
+
     100% {
         opacity: 0;
     }
