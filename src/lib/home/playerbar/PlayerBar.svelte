@@ -9,6 +9,7 @@
         musicProgressValue,
     } from "$lib/stores/music";
     import { invoke } from "@tauri-apps/api/core";
+    import { isMobile } from "$lib/platform";
 
     // Based on Rust Rodio fade effect (Please check player.rs)
     let pauseDelay = 400;
@@ -69,7 +70,7 @@
     async function getNavigationBarHeight() {
         navigationBarHeight = await invoke<number>("get_navigation_bar_height");
     }
-    getNavigationBarHeight();
+    if (isMobile()) getNavigationBarHeight();
 </script>
 
 <div
