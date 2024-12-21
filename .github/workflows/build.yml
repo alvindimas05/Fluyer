@@ -166,9 +166,9 @@ jobs:
             run: |
                 mkdir apks
                 mv ./src-tauri/gen/android/app/build/outputs/apk/arm/release/app-arm-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm.apk
-                mv ./src-tauri/gen/android/app/build/outputs/apk/arm64/release/app-arm64-release.apk ./apks/Fluyer_arm64${{ steps.package-version.outputs.current-version }}_arm64.apk
-                mv ./src-tauri/gen/android/app/build/outputs/apk/x86/release/app-x86-release.apk ./apks/Fluyer_arm64${{ steps.package-version.outputs.current-version }}_x86.apk
-                mv ./src-tauri/gen/android/app/build/outputs/apk/x86_64/release/app-x86_64-release.apk ./apks/Fluyer_arm64${{ steps.package-version.outputs.current-version }}_x86_64.apk
+                mv ./src-tauri/gen/android/app/build/outputs/apk/arm64/release/app-arm64-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm64.apk
+                mv ./src-tauri/gen/android/app/build/outputs/apk/x86/release/app-x86-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86.apk
+                mv ./src-tauri/gen/android/app/build/outputs/apk/x86_64/release/app-x86_64-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk
           
           - name: Publish release
             uses: ncipollo/release-action@v1
