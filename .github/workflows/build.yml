@@ -154,7 +154,7 @@ jobs:
               echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
 
           - name: Build App Bundle
-            run: bun tauri android build -v --split-per-abi
+            run: bun tauri android build -v --target armv7
             env:
                 NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
 
@@ -165,15 +165,17 @@ jobs:
           - name: Rename APK file
             run: |
                 mkdir apks
-                mv ./src-tauri/gen/android/app/build/outputs/apk/arm/release/app-arm-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm.apk
-                mv ./src-tauri/gen/android/app/build/outputs/apk/arm64/release/app-arm64-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm64.apk
-                mv ./src-tauri/gen/android/app/build/outputs/apk/x86/release/app-x86-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86.apk
-                mv ./src-tauri/gen/android/app/build/outputs/apk/x86_64/release/app-x86_64-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk
+                mv ./src-tauri/gen/android/app/build/outputs/apk/arm/release/app-arm-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}.apk
+                # mv ./src-tauri/gen/android/app/build/outputs/apk/arm/release/app-arm-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm.apk
+                # mv ./src-tauri/gen/android/app/build/outputs/apk/arm64/release/app-arm64-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm64.apk
+                # mv ./src-tauri/gen/android/app/build/outputs/apk/x86/release/app-x86-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86.apk
+                # mv ./src-tauri/gen/android/app/build/outputs/apk/x86_64/release/app-x86_64-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk
           
           - name: Publish release
             uses: ncipollo/release-action@v1
             with:
-                artifacts: "./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm64.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk"
+                artifacts: ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}.apk
+                # artifacts: "./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm64.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk"
                 tag: v${{ steps.package-version.outputs.current-version }}
                 name: Fluyer v${{ steps.package-version.outputs.current-version }}
                 allowUpdates: true
