@@ -86,6 +86,7 @@ const MusicController = {
 			: -1,
 	realProgressDuration: () => MusicController.progressDuration() * 1000,
 	parseProgressDuration: (value: number) => value / 1000,
+	parseProgressDurationIntoValue: (value: number) => (value / MusicConfig.max) * MusicConfig.step,
 
 	startProgress: () => {
 		const updateInterval =
@@ -128,13 +129,14 @@ const MusicController = {
 			MusicController.addMusicToPlayList(nextMusics[1].path);
 		}
 		MusicController.removeFirstNextMusics();
-		MusicController.syncPlayerBar();
+		if (!force) MusicController.syncPlayerBar();
 	},
 
 	syncPlayerBar: async () => {
 		await invoke("music_get_info");
 		const unlisten = await listen<MusicPlayerInfo>("music_get_info", e => {
-			musicProgressValue.set(MusicController.parseProgressDuration(e.payload.current_position));
+			console.log(MusicController.parseProgressDurationIntoValue(e.payload.current_position));
+			musicProgressValue.set(MusicController.parseProgressDurationIntoValue(e.payload.current_position));
 			unlisten();
 		});
 	},
