@@ -20,7 +20,6 @@
     getStatusBarHeight();
 </script>
 
-<!-- FIXME: Layout is overflowing top and bottom on some android devices -->
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
 <AnimatedBackground />
 <div

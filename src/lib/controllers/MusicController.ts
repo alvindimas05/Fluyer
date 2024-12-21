@@ -109,7 +109,6 @@ const MusicController = {
 		);
 	},
 
-	// FIXME: Sync Progress Bar with Back-end Player after next
 	tryNextMusic: (force = false) => {
 		clearInterval(get(musicProgressIntervalId)!);
 		musicProgressIntervalId.set(null);
