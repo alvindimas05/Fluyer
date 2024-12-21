@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { musicCurrent, musicsNext } from "$lib/stores/music";
 	import PlaylistItem from "./PlaylistItem.svelte";
-	import { isMobile, tabletStyle } from "$lib/platform";
+	import { isMobile } from "$lib/platform";
 	import { swipeable } from "@react2svelte/swipeable";
 	import type { SwipeEventData } from "@react2svelte/swipeable";
 
@@ -54,7 +54,7 @@
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full ${tabletStyle("w-[50%]", "w-[25%]")} ps-3 md:ps-0 pe-3 pt-8
+	class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full md:w-[50%] lg:w-[25%] ps-3 md:ps-0 pe-3 pt-8
     ${isMouseInsideArea ? "" : "hidden"}`}
 	onmouseleave={onMouseLeave}
 >
