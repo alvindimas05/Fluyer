@@ -5,6 +5,7 @@
     import "../app.scss";
     import TitleBar from "$lib/titlebar/TitleBar.svelte";
     import { invoke } from "@tauri-apps/api/core";
+    import { isMobile } from "$lib/platform";
     interface Props {
         children?: import("svelte").Snippet;
     }
@@ -17,7 +18,7 @@
     async function getStatusBarHeight() {
         statusBarHeight = await invoke<number>("get_status_bar_height");
     }
-    getStatusBarHeight();
+    if (isMobile()) getStatusBarHeight();
 </script>
 
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
