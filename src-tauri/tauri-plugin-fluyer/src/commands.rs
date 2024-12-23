@@ -42,3 +42,10 @@ pub(crate) async fn request_permissions<R: Runtime>(
 ) -> Result<PermissionStatus> {
     app.fluyer().request_permissions(permissions)
 }
+
+
+// #[cfg(mobile)]
+// #[tauri::command]
+// pub async fn watch_android_state<R: Runtime, F: Fn(AppState) + Send + Sync + 'static>(app: AppHandle<R>, callback: F) -> Result<()> {
+//     app.fluyer().watch_state(callback)
+// }

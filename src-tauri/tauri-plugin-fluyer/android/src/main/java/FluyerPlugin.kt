@@ -8,11 +8,17 @@ import app.tauri.plugin.Plugin
 import app.tauri.plugin.Invoke
 import app.tauri.plugin.JSObject
 import app.tauri.annotation.Permission
+import app.tauri.plugin.Channel
 import android.Manifest
 
 @InvokeArg
 class ToastArgs {
   lateinit var value: String
+}
+
+@InvokeArg
+class StateWatcherArgs {
+    lateinit var channel: Channel
 }
 
 private const val ALIAS_READ_AUDIO: String = "audio"
@@ -27,16 +33,21 @@ private const val ALIAS_READ_AUDIO: String = "audio"
 )
 class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
+    private var stateChannel: Channel? = null
 
     override fun onPause(){
         super.onPause()
-        implementation.toast("User is pausing...")
+        if(stateChannel != null){
+            stateChannel.send(JSObject().put("value", "pause"))
+        }
     }
 
 
     override fun onResume(){
         super.onResume()
-        implementation.toast("User is resuming...")
+        if(stateChannel != null){
+            stateChannel.send(JSObject().put("value", "resume"))
+        }
     }
 
     @Command
@@ -48,15 +59,25 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
 
     @Command
     fun getNavigationBarHeight(invoke: Invoke){
-        var obj = JSObject()
-        obj.put("value", implementation.getNavigationBarHeight())
+        var obj = JSObject().put("value", implementation.getNavigationBarHeight())
         invoke.resolve(obj)
     }
 
     @Command
     fun getStatusBarHeight(invoke: Invoke){
-        var obj = JSObject()
-        obj.put("value", implementation.getStatusBarHeight())
+        var obj = JSObject().put("value", implementation.getStatusBarHeight())
         invoke.resolve(obj)
+    }
+
+    @Command
+    fun watchState(invoke: Invoke){
+        if(stateWatcher != null){
+            invoke.resolve(false)
+            return
+        }
+
+        val args = invoke.parseArgs(StateWatcherArgs::class.java)
+        stateWatcher = args.channel
+        invoke.resolve(true)
     }
 }
