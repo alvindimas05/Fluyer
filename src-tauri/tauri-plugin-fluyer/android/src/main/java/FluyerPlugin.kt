@@ -26,26 +26,37 @@ private const val ALIAS_READ_AUDIO: String = "audio"
     ]
 )
 class FluyerPlugin(private val activity: Activity): Plugin(activity) {
-    private val implementation = FluyerMain()
+    private val implementation = FluyerMain(activity)
+
+    override fun onPause(){
+        super.onPause()
+        implementation.toast("User is pausing...")
+    }
+
+
+    override fun onResume(){
+        super.onResume()
+        implementation.toast("User is resuming...")
+    }
 
     @Command
     fun toast(invoke: Invoke) {
         val args = invoke.parseArgs(ToastArgs::class.java)
-        implementation.toast(activity, args.value)
+        implementation.toast(args.value)
         invoke.resolve()
     }
 
     @Command
     fun getNavigationBarHeight(invoke: Invoke){
         var obj = JSObject()
-        obj.put("value", NavigationBar.getHeight(activity))
+        obj.put("value", implementation.getNavigationBarHeight())
         invoke.resolve(obj)
     }
 
     @Command
     fun getStatusBarHeight(invoke: Invoke){
         var obj = JSObject()
-        obj.put("value", StatusBar.getHeight(activity))
+        obj.put("value", implementation.getStatusBarHeight())
         invoke.resolve(obj)
     }
 }

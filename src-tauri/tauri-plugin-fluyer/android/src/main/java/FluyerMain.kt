@@ -18,27 +18,20 @@ import android.graphics.Rect
 import android.app.Activity
 import android.widget.Toast
 
-class FluyerMain {
-    fun toast(activity: Activity, value: String) {
+class FluyerMain(private val activity: Activity) {
+    fun toast(value: String) {
         activity.runOnUiThread {
             Toast.makeText(activity, value, Toast.LENGTH_SHORT).show()
         }
     }
-}
-
-fun dpToPx(activity: Activity, value: Int): Int {
-    return (value / activity.resources.displayMetrics.density).roundToInt()
-}
-
-object StatusBar {
-    fun getHeight(activity: Activity): Int {
-        return dpToPx(activity, activity.window.decorView.rootWindowInsets
+    fun dpToPx(value: Int): Int {
+        return (value / activity.resources.displayMetrics.density).roundToInt()
+    }
+    fun getStatusBarHeight(): Int {
+        return dpToPx(activity.window.decorView.rootWindowInsets
             .getInsets(WindowInsets.Type.statusBars()).top)
     }
-}
-
-object NavigationBar {
-    fun getHeight(activity: Activity): Int {
+    fun getNavigationBarHeight(): Int {
         val resources: Resources = activity.resources
 
         val resName = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -50,7 +43,7 @@ object NavigationBar {
         val id: Int = resources.getIdentifier(resName, "dimen", "android")
 
         return if (id > 0) {
-            dpToPx(activity, resources.getDimensionPixelSize(id))
+            dpToPx(resources.getDimensionPixelSize(id))
         } else {
             0
         }
