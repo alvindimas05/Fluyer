@@ -31,7 +31,7 @@ musicList.subscribe(() => (grouppedAlbums = groupByAlbum()));
 
 <!-- FIXME: Mouse scroll horizontal not working -->
 <div
-class="grid auto-cols-[50%] md:auto-cols-[25%] lg:auto-cols-[16.6667%] grid-rows-[1fr] w-full mt-2 overflow-x-auto scrollbar-hidden"
+class="grid auto-cols-[50%] md:auto-cols-[25%] tb:auto-cols-[20%] lg:auto-cols-[16.6667%] grid-rows-[1fr] w-full mt-2 overflow-x-auto scrollbar-hidden"
 >
     {#each Object.entries(grouppedAlbums) as [album, musicList], index}
         <AlbumItem {musicList} {index} />

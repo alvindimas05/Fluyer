@@ -16,7 +16,8 @@
     let statusBarHeight: number | null = $state(0);
 
     async function getStatusBarHeight() {
-        statusBarHeight = await invoke<number>("get_status_bar_height");
+        const barHeight = await invoke<number>("get_status_bar_height");
+        statusBarHeight = barHeight > 28 ? 28 : barHeight;
     }
     if (isMobile()) getStatusBarHeight();
 </script>

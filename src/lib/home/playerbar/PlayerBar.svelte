@@ -68,7 +68,8 @@
     }
 
     async function getNavigationBarHeight() {
-        navigationBarHeight = await invoke<number>("get_navigation_bar_height");
+        const navbarHeight = await invoke<number>("get_navigation_bar_height");
+        navigationBarHeight = navbarHeight > 32 ? 32 : navbarHeight;
     }
     if (isMobile()) getNavigationBarHeight();
 </script>
