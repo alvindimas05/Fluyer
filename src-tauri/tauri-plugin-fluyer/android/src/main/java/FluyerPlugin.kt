@@ -37,16 +37,16 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
 
     override fun onPause(){
         super.onPause()
-        if(stateChannel != null){
-            stateChannel.send(JSObject().put("value", "pause"))
+        stateChannel?.let{
+            it.send(JSObject().put("value", "pause"))
         }
     }
 
 
     override fun onResume(){
         super.onResume()
-        if(stateChannel != null){
-            stateChannel.send(JSObject().put("value", "resume"))
+        stateChannel?.let{
+            it.send(JSObject().put("value", "pause"))
         }
     }
 
@@ -71,13 +71,13 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
 
     @Command
     fun watchState(invoke: Invoke){
-        if(stateWatcher != null){
-            invoke.resolve(false)
+        if(stateChannel != null){
+            invoke.resolve(JSObject().put("value", true))
             return
         }
 
         val args = invoke.parseArgs(StateWatcherArgs::class.java)
-        stateWatcher = args.channel
-        invoke.resolve(true)
+        stateChannel = args.channel
+        invoke.resolve(JSObject().put("value", false))
     }
 }

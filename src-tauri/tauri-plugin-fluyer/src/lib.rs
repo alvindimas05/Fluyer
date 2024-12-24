@@ -46,18 +46,12 @@ impl<R: Runtime, T: Manager<R>> crate::FluyerExt<R> for T {
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("fluyer")
         .invoke_handler(tauri::generate_handler![
-            #[cfg(mobile)]
             commands::toast,
-            #[cfg(mobile)]
             commands::get_navigation_bar_size,
-            #[cfg(mobile)]
             commands::get_status_bar_height,
-            #[cfg(mobile)]
             commands::check_permissions,
-            #[cfg(mobile)]
             commands::request_permissions,
-            // #[cfg(mobile)]
-            // commands::watch_state,
+            commands::watch_state,
         ])
         .setup(|app, api| {
             #[cfg(mobile)]

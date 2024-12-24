@@ -68,29 +68,34 @@ impl<R: Runtime> Fluyer<R> {
             .map_err(Into::into)
     }
 
-    // pub fn watch_state<F: Fn(AppState) + Send + Sync + 'static>(&self, callback: F)
-    //     -> crate::Result<bool> {
-    //     let channel = Channel::new(move |event| {
-    //         // let payload = match event {
-    //         //     InvokeResponseBody::Json(payload) => serde_json::from_str::<AndroidState>(&payload)
-    //         //         .unwrap_or_else(|error| {
-    //         //             AndroidState::Error(format!(
-    //         //                 "Couldn't deserialize watch event payload: `{error}`"
-    //         //             ))
-    //         //         }),
-    //         // };
-    //         let payload = serde_json::from_str::<AppState>(event).unwrap();
+    pub fn watch_state<F: Fn(AppState) + Send + Sync + 'static>(
+        &self,
+        callback: F,
+    ) -> crate::Result<WatchResponse> {
+        let channel = Channel::new(move |event| {
+            let payload = if let InvokeResponseBody::Json(payload) = event {
+                serde_json::from_str::<AppState>(&payload).unwrap()
+            } else {
+                panic!("Unexpected watch event payload.");
+            };
 
-    //         callback(payload);
+            callback(payload);
 
-    //         Ok(())
-    //     });
-    //     self.0.run_mobile_plugin("watchState", WatchPayload { channel: channel.id })
-    //         .map_err(Into::into())
-    // }
+            Ok(())
+        });
+        self.0
+            .run_mobile_plugin("watchState", WatchPayload { channel: channel })
+            .map_err(Into::into)
+    }
+
+    pub(crate) fn watch_state_inner(&self, channel: Channel) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("watchState", WatchPayload { channel })
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]
 struct WatchPayload {
-    channel: Channel,
+    pub channel: Channel,
 }

@@ -42,6 +42,12 @@ pub enum PermissionType {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub enum AppState {
+pub struct AppState {
     pub value: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WatchResponse {
+    pub value: bool,
 }
