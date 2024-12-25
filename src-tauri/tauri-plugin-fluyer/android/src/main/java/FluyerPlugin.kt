@@ -21,6 +21,10 @@ class StateWatcherArgs {
     lateinit var channel: Channel
 }
 
+enum class WatcherStateType {
+    PAUSE, RESUME
+}
+
 private const val ALIAS_READ_AUDIO: String = "audio"
 @TauriPlugin(
     permissions = [
@@ -38,7 +42,7 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     override fun onPause(){
         super.onPause()
         stateChannel?.let{
-            it.send(JSObject().put("value", "pause"))
+            it.send(JSObject().put("value", WatcherStateType.PAUSE))
         }
     }
 
@@ -46,7 +50,7 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     override fun onResume(){
         super.onResume()
         stateChannel?.let{
-            it.send(JSObject().put("value", "pause"))
+            it.send(JSObject().put("value", WatcherStateType.RESUME))
         }
     }
 

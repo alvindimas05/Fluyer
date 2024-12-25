@@ -68,13 +68,13 @@ impl<R: Runtime> Fluyer<R> {
             .map_err(Into::into)
     }
 
-    pub fn watch_state<F: Fn(AppState) + Send + Sync + 'static>(
+    pub fn watch_state<F: Fn(WatcherState) + Send + Sync + 'static>(
         &self,
         callback: F,
     ) -> crate::Result<WatchResponse> {
         let channel = Channel::new(move |event| {
             let payload = if let InvokeResponseBody::Json(payload) = event {
-                serde_json::from_str::<AppState>(&payload).unwrap()
+                serde_json::from_str::<WatcherState>(&payload).unwrap()
             } else {
                 panic!("Unexpected watch event payload.");
             };

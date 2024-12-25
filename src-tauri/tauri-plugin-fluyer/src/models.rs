@@ -39,11 +39,16 @@ pub enum PermissionType {
     Audio,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum WatcherStateType {
+    Pause, Resume
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AppState {
-    pub value: String,
+pub struct WatcherState {
+    pub value: WatcherStateType,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
