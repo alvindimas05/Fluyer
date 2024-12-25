@@ -4,7 +4,7 @@ export default {
 	theme: {
 		extend: {
 			screens: {
-				lg: { raw: '@media (min-width: 1024px) and (max-resolution: 1.0dppx)' },
+				lg: { raw: '(min-width: 1024px) and (max-resolution: 1.0dppx)' },
 				// tb: Tablet
 				tb: { raw: '(min-width: 768px) and (max-width: 1920px) and (min-resolution: 1.01dppx)' },
 			},
