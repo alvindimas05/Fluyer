@@ -22,7 +22,7 @@ class StateWatcherArgs {
 }
 
 enum class WatcherStateType {
-    PAUSE, RESUME
+    Pause, Resume
 }
 
 private const val ALIAS_READ_AUDIO: String = "audio"
@@ -42,7 +42,7 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     override fun onPause(){
         super.onPause()
         stateChannel?.let{
-            it.send(JSObject().put("value", WatcherStateType.PAUSE))
+            it.send(JSObject().put("value", WatcherStateType.Pause))
         }
     }
 
@@ -50,7 +50,7 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     override fun onResume(){
         super.onResume()
         stateChannel?.let{
-            it.send(JSObject().put("value", WatcherStateType.RESUME))
+            it.send(JSObject().put("value", WatcherStateType.Resume))
         }
     }
 
