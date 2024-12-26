@@ -5,8 +5,7 @@ use tauri::{ipc::Channel, AppHandle, Runtime};
 
 #[tauri::command]
 pub async fn toast<R: Runtime>(app: tauri::AppHandle<R>, value: String) -> Result<()> {
-    app.fluyer().toast(value).unwrap();
-    Ok(())
+    app.fluyer().toast(value)
 }
 
 #[tauri::command]

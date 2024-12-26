@@ -12,6 +12,8 @@ use thread_priority::{ThreadBuilder, ThreadPriority};
 
 use crate::GLOBAL_APP_HANDLE;
 
+use super::metadata::MusicMetadata;
+
 #[derive(Clone, Copy, Debug)]
 pub enum MusicCommand {
     Pause,
@@ -40,6 +42,8 @@ pub struct MusicPlayerInfo {
     current_position: u128,
     is_paused: bool,
 }
+
+static MUSIC_PLAYLIST: Vec<MusicMetadata> = vec![];
 
 impl MusicPlayer {
     pub fn spawn() -> Self {

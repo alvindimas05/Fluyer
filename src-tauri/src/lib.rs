@@ -1,5 +1,5 @@
 use crate::store::init_store;
-use music::{metadata::MusicMetadata, player::MusicPlayer};
+use music::player::MusicPlayer;
 use std::sync::{Mutex, OnceLock};
 use tauri::AppHandle;
 #[allow(unused)]
@@ -23,7 +23,6 @@ impl AppState {
 }
 
 static GLOBAL_APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
-static GLOBAL_MUSIC_PLAYLIST: Vec<MusicMetadata> = vec![];
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
