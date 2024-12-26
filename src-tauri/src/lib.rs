@@ -1,5 +1,5 @@
 use crate::store::init_store;
-use music::player::MusicPlayer;
+use music::{metadata::MusicMetadata, player::MusicPlayer};
 use std::sync::{Mutex, OnceLock};
 use tauri::AppHandle;
 #[allow(unused)]
@@ -23,6 +23,7 @@ impl AppState {
 }
 
 static GLOBAL_APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
+static GLOBAL_MUSIC_PLAYLIST: Vec<MusicMetadata> = vec![];
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -39,7 +40,7 @@ pub fn run() {
                 let window = app.get_webview_window("main").unwrap();
                 window
                     .set_decorations(false)
-                    .expect("Failed to set decorations on MacOS");
+                    .expect("Failed to set decorations on Windows/Linux");
             }
 
             app.manage(Mutex::new(AppState::default()));
