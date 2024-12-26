@@ -135,7 +135,6 @@ const MusicController = {
 	syncPlayerBar: async () => {
 		await invoke("music_get_info");
 		const unlisten = await listen<MusicPlayerInfo>("music_get_info", e => {
-			console.log(MusicController.parseProgressDurationIntoValue(e.payload.current_position));
 			musicProgressValue.set(MusicController.parseProgressDurationIntoValue(e.payload.current_position));
 			unlisten();
 		});
