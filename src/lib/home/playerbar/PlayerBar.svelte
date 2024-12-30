@@ -41,7 +41,7 @@
     }
 
     function onPlayerBarChange() {
-        if (MusicController.currentMusic() == null) {
+        if (MusicController.isCurrentMusicFinished()) {
             MusicController.setProgressValue(0);
             return;
         }
