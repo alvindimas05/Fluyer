@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::sync::mpsc::{self, SendError};
 use std::sync::mpsc::{Receiver, Sender};
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
@@ -43,7 +44,8 @@ pub struct MusicPlayerInfo {
     is_paused: bool,
 }
 
-static MUSIC_PLAYLIST: Vec<MusicMetadata> = vec![];
+// Bunch of music paths
+static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
@@ -85,37 +87,118 @@ fn spawn(
 ) {
     let (sender_command, receiver_command) = mpsc::channel();
     let (sender_position, receiver_position) = mpsc::channel();
-    let (sender_playlist, receiver_playlist) = mpsc::channel();
     let (sender_info, receiver_info) = mpsc::channel();
 
-    let _ = ThreadBuilder::default()
+    let (sender_next, receiver_next) = mpsc::channel();
+    let (sender_next_playlist, receiver_next_playlist) = mpsc::channel();
+    let (sender_next_position, receiver_next_position) = mpsc::channel();
+    let (sender_player_playlist, receiver_player_playlist) = mpsc::channel();
+
+    ThreadBuilder::default()
+        .name("Music Player Next")
+        .spawn_careless(move || {
+            spawn_next_listener(
+                receiver_next_playlist,
+                receiver_next,
+                receiver_next_position,
+                sender_player_playlist,
+            );
+        })
+        .expect("Failed to create music next thread");
+
+    ThreadBuilder::default()
         .name("Music Player")
         .priority(ThreadPriority::Max)
         .spawn_careless(move || {
             if let Err(e) = play(
                 initial_state,
-                &receiver_command,
-                &receiver_position,
-                &receiver_playlist,
-                &receiver_info,
+                receiver_command,
+                receiver_position,
+                receiver_player_playlist,
+                receiver_info,
+                sender_next,
+                sender_next_position,
             ) {
                 log::error!("Music thread crashed: {:#}", e);
             }
-        });
+        })
+        .expect("Failed to create music thread");
     (
         sender_command,
         sender_position,
-        sender_playlist,
+        sender_next_playlist,
         sender_info,
     )
 }
 
+fn spawn_next_listener(
+    receiver_playlist: Receiver<Vec<String>>,
+    receiver_next: Receiver<()>,
+    receiver_next_position: Receiver<Duration>,
+    sender_player_playlist: Sender<Vec<String>>,
+) {
+    let ms_countdown: u64 = 100;
+    let mut counter: i128 = 0;
+    let mut current_music_duration: u128 = 0;
+    loop {
+        let mut is_receiving_playlist = false;
+        if let Ok(playlist) = receiver_playlist.try_recv() {
+            is_receiving_playlist = true;
+            for path in playlist.iter() {
+                MUSIC_PLAYLIST
+                    .lock()
+                    .unwrap()
+                    .push(MusicMetadata::new(path.clone()).get());
+            }
+            if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
+                app_handle
+                    .emit("music_playlist_add", ())
+                    .expect("Can't emit music_playlist_add");
+            } else {
+                log::error!("Failed to get GLOBAL_APP_HANDLE");
+            }
+        }
+
+        if let Ok(position) = receiver_next_position.try_recv() {
+            counter = (current_music_duration - position.as_millis()) as i128;
+        }
+
+        let mut playlist = MUSIC_PLAYLIST.lock().unwrap();
+        if counter <= 0 && !playlist.is_empty() {
+            if !is_receiving_playlist {
+                if playlist.len() > 1 {
+                    GLOBAL_APP_HANDLE
+                        .get()
+                        .expect("Failed to get GLOBAL_APP_HANDLE")
+                        .emit("music_player_next", ())
+                        .expect("Failed to emit music_player_next");
+                }
+                playlist.remove(0);
+            }
+            if let Some(music) = playlist.first() {
+                current_music_duration = music.duration.unwrap();
+                sender_player_playlist
+                    .send(vec![music.path.clone()])
+                    .expect("Failed to send sender_player_playlist");
+                counter = music.duration.unwrap() as i128;
+            }
+        }
+        if counter > 0 {
+            counter -= ms_countdown as i128;
+        }
+
+        thread::sleep(Duration::from_millis(ms_countdown));
+    }
+}
+
 fn play(
     initial_state: MusicState,
-    receiver_command: &Receiver<MusicCommand>,
-    receiver_position: &Receiver<Duration>,
-    receiver_playlist: &Receiver<Vec<String>>,
-    receiver_info: &Receiver<()>,
+    receiver_command: Receiver<MusicCommand>,
+    receiver_position: Receiver<Duration>,
+    receiver_playlist: Receiver<Vec<String>>,
+    receiver_info: Receiver<()>,
+    sender_next: Sender<()>,
+    sender_next_position: Sender<Duration>,
 ) -> Result<(), Error> {
     let (_stream, stream_handle) = rodio::OutputStream::try_default()?;
 
@@ -138,6 +221,7 @@ fn play(
                     fade(&sink, false);
                 }
                 MusicCommand::Next => {
+                    sender_next.send(()).expect("Failed to send sender_next");
                     sink.skip_one();
                 } // MusicCommand::WeakPause => fade(&sink, true),
                   // MusicCommand::WeakPlay => {
@@ -147,25 +231,29 @@ fn play(
                   // }
             }
         }
+
         if let Ok(playlist) = receiver_playlist.try_recv() {
             for path in playlist.iter() {
-                if let Ok(file) = File::open(&path) {
+                if let Ok(file) = File::open(path) {
                     let source = rodio::Decoder::new(BufReader::new(file))?;
                     sink.append(source);
                 } else {
                     log::error!("Failed to open file: {}", path);
                 }
             }
-            if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
-                app_handle
-                    .emit("music_playlist_add", ())
-                    .expect("Can't emit music_playlist_add");
-            } else {
-                log::error!("Failed to get GLOBAL_APP_HANDLE");
-            }
+            // if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
+            //     app_handle
+            //         .emit("music_playlist_add", ())
+            //         .expect("Can't emit music_playlist_add");
+            // } else {
+            //     log::error!("Failed to get GLOBAL_APP_HANDLE");
+            // }
         }
 
         if let Ok(position) = receiver_position.try_recv() {
+            sender_next_position
+                .send(position)
+                .expect("Failed to send sender_next_position");
             if let Err(err) = sink.try_seek(position) {
                 log::error!("Failed to change position of music");
                 log::error!("{:#}", err);

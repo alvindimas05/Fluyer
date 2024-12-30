@@ -37,7 +37,7 @@
     }
 
     function handleButtonNext() {
-        MusicController.tryNextMusic(true);
+        // MusicController.tryNextMusic(true);
     }
 
     function onPlayerBarChange() {

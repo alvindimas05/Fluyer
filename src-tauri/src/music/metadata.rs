@@ -8,16 +8,16 @@ use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
 
 #[derive(Debug, serde::Serialize, Clone)]
 pub struct MusicMetadata {
-    path: String,
-    duration: Option<u128>,
-    filename: Option<String>,
+    pub path: String,
+    pub duration: Option<u128>,
+    pub filename: Option<String>,
 
-    title: Option<String>,
-    artist: Option<String>,
-    album: Option<String>,
-    album_artist: Option<String>,
-    track_number: Option<String>,
-    image: Option<String>,
+    pub title: Option<String>,
+    pub artist: Option<String>,
+    pub album: Option<String>,
+    pub album_artist: Option<String>,
+    pub track_number: Option<String>,
+    pub image: Option<String>,
 }
 
 impl MusicMetadata {
@@ -80,13 +80,13 @@ impl MusicMetadata {
                     match std_key {
                         StandardTagKey::TrackTitle => metadata.title = self.get_value(tag),
                         StandardTagKey::Artist => {
-                            if metadata.artist != None
-                                && metadata.artist.clone().unwrap() != self.get_string_value(tag)
+                            if metadata.artist.is_some()
+                                && metadata.artist.clone().unwrap() != self.get_value(tag).unwrap()
                             {
                                 metadata.artist = Some(format!(
                                     "{}||{}",
                                     metadata.artist.unwrap(),
-                                    self.get_string_value(tag)
+                                    self.get_value(tag).unwrap()
                                 ));
                             } else {
                                 metadata.artist = self.get_value(tag);
@@ -104,6 +104,10 @@ impl MusicMetadata {
                 metadata.image =
                     Some(base64::engine::general_purpose::STANDARD.encode(visual.data.clone()));
             }
+        }
+        
+        if metadata.artist.is_none() {
+            metadata.title = metadata.clone().filename;
         }
 
         let track = match format.default_track() {
@@ -133,18 +137,10 @@ impl MusicMetadata {
         metadata.duration =
             Some(Duration::from_secs_f64(total_frames as f64 / sample_rate as f64).as_millis());
 
-        if metadata.artist.is_none() {
-            metadata.title = metadata.clone().filename;
-        }
-
         metadata
     }
 
     fn get_value(&self, tag: &Tag) -> Option<String> {
         Some(tag.value.to_string())
-    }
-
-    fn get_string_value(&self, tag: &Tag) -> String {
-        tag.value.to_string()
     }
 }

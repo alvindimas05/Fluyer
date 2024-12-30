@@ -68,12 +68,11 @@ pub fn run() {
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
-        .run(|app_handle, event| match event {
-            tauri::RunEvent::Ready => {
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::Ready = event {
                 GLOBAL_APP_HANDLE
                     .set(app_handle.clone())
                     .expect("Failed to set GLOBAL_APP_HANDLE");
             }
-            _ => {}
         });
 }

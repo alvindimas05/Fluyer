@@ -6,6 +6,7 @@
     import TitleBar from "$lib/titlebar/TitleBar.svelte";
     import { invoke } from "@tauri-apps/api/core";
     import { isMobile } from "$lib/platform";
+    import MusicController from "$lib/controllers/MusicController";
     interface Props {
         children?: import("svelte").Snippet;
     }
@@ -20,6 +21,7 @@
         statusBarHeight = barHeight > 28 ? 28 : barHeight;
     }
     if (isMobile()) getStatusBarHeight();
+    MusicController.listenNextMusic();
 </script>
 
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->

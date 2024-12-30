@@ -49,8 +49,7 @@ pub fn music_get_info(state: State<'_, Mutex<AppState>>) {
 
 #[tauri::command]
 pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
-    let musics = crate::file::get_all_music();
-    musics
+    crate::file::get_all_music()
 }
 
 #[tauri::command]

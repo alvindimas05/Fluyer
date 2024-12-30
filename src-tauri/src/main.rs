@@ -16,7 +16,7 @@ fn init_logging() {
         WriteLogger::new(
             LevelFilter::Warn,
             Config::default(),
-            File::create(format!("{}/fluyer.log", temp_dir().display().to_string())).unwrap(),
+            File::create(format!("{}/fluyer.log", temp_dir().display())).unwrap(),
         ),
         TermLogger::new(
             if cfg!(debug_assertions) {
