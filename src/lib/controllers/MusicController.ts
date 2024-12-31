@@ -108,6 +108,7 @@ const MusicController = {
                 );
 
                 if (MusicController.progressValue() >= MusicConfig.max) {
+                    MusicController.setIsPlaying(false);
                     MusicController.stopProgress();
                     MusicController.resetProgress();
                 }
@@ -136,6 +137,7 @@ const MusicController = {
                 MusicController.addMusicToPlayList(nextMusics[1].path);
             }
             MusicController.removeFirstNextMusics();
+            MusicController.setIsPlaying(true);
         });
     },
 
@@ -149,7 +151,7 @@ const MusicController = {
     },
 
     getParsedDuration: (negative = false) => {
-        if (MusicController.currentMusic() == null) return null;
+        if (MusicController.isCurrentMusicFinished()) return null;
 
         let minutes = 0;
         let seconds = negative
