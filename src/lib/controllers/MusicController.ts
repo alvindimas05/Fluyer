@@ -117,6 +117,7 @@ const MusicController = {
 
     nextMusic: () => {
         MusicController.sendCommandController("next");
+        MusicController.stopProgress();
         MusicController.resetProgress();
     },
 
