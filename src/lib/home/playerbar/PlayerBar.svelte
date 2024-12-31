@@ -26,7 +26,7 @@
     musicIsPlaying.subscribe(updateStates);
 
     function handleButtonPlayPause() {
-        if (MusicController.isCurrentMusicFinished()) return;
+        if (MusicController.currentMusic() === null || MusicController.isProgressValueEnd()) return;
 
         if (MusicController.isPlaying()) {
             MusicController.setIsPlaying(false);
@@ -41,12 +41,12 @@
     }
 
     function onPlayerBarChange() {
-        if (MusicController.isCurrentMusicFinished()) {
+        if (MusicController.isProgressValueEnd()) {
             MusicController.setProgressValue(0);
             return;
         }
 
-        if (MusicController.progressValue() >= MusicConfig.max) {
+        if (MusicController.isProgressValueEnd()) {
             MusicController.addMusic(MusicController.currentMusic()!);
         }
 
@@ -72,7 +72,7 @@
             currentTarget: EventTarget & Document;
         },
     ) {
-        if(e.key === ' ') handleButtonPlayPause();
+        if (e.key === " ") handleButtonPlayPause();
     }
 
     async function getNavigationBarHeight() {

@@ -27,7 +27,7 @@ async function addMusicAndPlay() {
 	await MusicController.addMusic(music);
 	if (
 		previousMusic === null ||
-		(!previousMusic !== null && MusicController.isCurrentMusicFinished())
+		(previousMusic !== null && MusicController.isCurrentMusicFinished())
 	)
 		MusicController.play();
 }
