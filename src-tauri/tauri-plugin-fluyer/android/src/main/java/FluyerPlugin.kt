@@ -10,6 +10,8 @@ import app.tauri.plugin.JSObject
 import app.tauri.annotation.Permission
 import app.tauri.plugin.Channel
 import android.Manifest
+import android.util.Log
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @InvokeArg
 class ToastArgs {
@@ -22,7 +24,10 @@ class StateWatcherArgs {
 }
 
 enum class WatcherStateType {
-    Pause, Resume
+    @JsonProperty("pause")
+    Pause,
+    @JsonProperty("resume")
+    Resume;
 }
 
 private const val ALIAS_READ_AUDIO: String = "audio"
@@ -42,7 +47,7 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     override fun onPause(){
         super.onPause()
         stateChannel?.let{
-            it.send(JSObject().put("value", WatcherStateType.Pause))
+            it.send(JSObject().put("value", "pause"))
         }
     }
 
@@ -50,7 +55,7 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     override fun onResume(){
         super.onResume()
         stateChannel?.let{
-            it.send(JSObject().put("value", WatcherStateType.Resume))
+            it.send(JSObject().put("value", "resume"))
         }
     }
 
@@ -74,14 +79,14 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     }
 
     @Command
-    fun watchState(invoke: Invoke){
-        if(stateChannel != null){
+    fun watchState(invoke: Invoke) {
+        if (stateChannel != null) {
             invoke.resolve(JSObject().put("value", true))
             return
         }
 
         val args = invoke.parseArgs(StateWatcherArgs::class.java)
         stateChannel = args.channel
-        invoke.resolve(JSObject().put("value", false))
+        invoke.resolve(JSObject().put("value", stateChannel != null))
     }
 }

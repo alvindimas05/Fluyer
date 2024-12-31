@@ -7,6 +7,7 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
 
 #[derive(Debug, serde::Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct MusicMetadata {
     pub path: String,
     pub duration: Option<u128>,

@@ -31,11 +31,11 @@ async function checkAlbumImage() {
 
 async function sortMusicList() {
 	musicList = musicList.sort((a, b) => {
-		if (a.track_number?.includes("/") || b.track_number?.includes("/")) {
-			a.track_number = a.track_number!.split("/")[0];
-			b.track_number = b.track_number!.split("/")[0];
+		if (a.trackNumber?.includes("/") || b.trackNumber?.includes("/")) {
+			a.trackNumber = a.trackNumber!.split("/")[0];
+			b.trackNumber = b.trackNumber!.split("/")[0];
 		}
-		return +a.track_number! - +b.track_number!;
+		return +a.trackNumber! - +b.trackNumber!;
 	});
 }
 

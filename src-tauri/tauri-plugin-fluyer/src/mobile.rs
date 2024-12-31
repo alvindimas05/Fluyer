@@ -73,22 +73,20 @@ impl<R: Runtime> Fluyer<R> {
         callback: F,
     ) -> crate::Result<WatchResponse> {
         let channel = Channel::new(move |event| {
-            let payload = if let InvokeResponseBody::Json(payload) = event {
-                serde_json::from_str::<WatcherState>(&payload).unwrap()
-            } else {
-                panic!("Unexpected watch event payload.");
+            let payload = match event {
+                InvokeResponseBody::Json(payload) => serde_json::from_str::<WatcherState>(&payload)
+                    .unwrap(),
+                _ => panic!("Failed to parse payload."),
             };
 
             callback(payload);
 
             Ok(())
         });
-        self.0
-            .run_mobile_plugin("watchState", WatchPayload { channel: channel })
-            .map_err(Into::into)
+        self.watch_state_inner(channel)
     }
 
-    pub(crate) fn watch_state_inner(&self, channel: Channel) -> crate::Result<()> {
+    pub(crate) fn watch_state_inner(&self, channel: Channel) -> crate::Result<WatchResponse> {
         self.0
             .run_mobile_plugin("watchState", WatchPayload { channel })
             .map_err(Into::into)

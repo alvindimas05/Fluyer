@@ -39,19 +39,21 @@ pub enum PermissionType {
     Audio,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum WatcherStateType {
-    Pause, Resume
+    #[default]
+    Pause,
+    Resume,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct WatcherState {
     pub value: WatcherStateType,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct WatchResponse {
     pub value: bool,

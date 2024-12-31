@@ -8,14 +8,9 @@ import {
     musicsNext,
 } from "$lib/stores/music";
 import { get } from "svelte/store";
-import type { MusicData } from "$lib/home/music/types";
+import type { MusicPlayerSync, MusicData, MusicPlayerInfo } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
-
-interface MusicPlayerInfo {
-    current_position: number;
-    is_paused: boolean;
-}
 
 export const MusicConfig = {
     step: 0.01,
@@ -138,6 +133,19 @@ const MusicController = {
             }
             MusicController.removeFirstNextMusics();
             MusicController.setIsPlaying(true);
+        });
+    },
+    listenSyncMusic: () => {
+        listen<MusicPlayerSync>("music_player_sync", async (e) => {
+            const skip = e.payload.skip;
+            await invoke("music_get_info");
+            const unlisten = await listen<MusicPlayerInfo>("music_get_info", (e) => {
+                MusicController.setMusicList(MusicController.musicList()!.splice(0, skip));
+                MusicController.setProgressValue(
+                    MusicController.parseProgressDurationIntoValue(e.payload.currentPosition));
+                MusicController.setIsPlaying(e.payload.isPlaying);
+                unlisten();
+            });
         });
     },
 

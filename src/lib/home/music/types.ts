@@ -6,12 +6,16 @@ export interface MusicData {
 	title: string | null;
 	artist: string | null;
 	album: string | null;
-	album_artist: string | null;
-	track_number: string | null;
+	albumArtist: string | null;
+	trackNumber: string | null;
 	image: string | null;
 }
 
 export interface MusicPlayerInfo {
-	current_position: number;
-	is_paused: boolean;
+	currentPosition: number;
+	isPlaying: boolean;
+}
+
+export interface MusicPlayerSync {
+    skip: number;
 }

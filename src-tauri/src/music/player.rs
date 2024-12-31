@@ -9,6 +9,10 @@ use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
+#[cfg(mobile)]
+use tauri_plugin_fluyer::models::WatcherStateType;
+#[cfg(mobile)]
+use tauri_plugin_fluyer::FluyerExt;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 
 use crate::GLOBAL_APP_HANDLE;
@@ -39,13 +43,24 @@ pub struct MusicPlayer {
 }
 
 #[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MusicPlayerInfo {
     current_position: u128,
-    is_paused: bool,
+    is_playing: bool,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MusicPlayerSync {
+    skip: u8,
 }
 
 // Bunch of music paths
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
+#[cfg(mobile)]
+static MUSIC_IS_BACKGROUND: Mutex<bool> = Mutex::new(false);
+#[cfg(mobile)]
+static MUSIC_BACKGROUND_COUNT: Mutex<u8> = Mutex::new(0);
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
@@ -75,6 +90,30 @@ impl MusicPlayer {
     pub fn add_playlist(&mut self, playlist: Vec<String>) -> Result<(), SendError<Vec<String>>> {
         self.playlist.send(playlist)
     }
+}
+
+#[cfg(mobile)]
+pub fn handle_music_player_background() {
+    GLOBAL_APP_HANDLE
+        .get()
+        .unwrap()
+        .fluyer()
+        .watch_state(|payload| {
+            let is_resuming = matches!(payload.value, WatcherStateType::Resume);
+            let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
+            *state = !is_resuming;
+
+            if is_resuming {
+                let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
+                GLOBAL_APP_HANDLE
+                    .get()
+                    .unwrap()
+                    .emit("music_player_sync", MusicPlayerSync { skip: *count })
+                    .expect("Failed to sync music player");
+                *count = 0;
+            }
+        })
+        .expect("Failed to watch app state");
 }
 
 fn spawn(
@@ -169,6 +208,14 @@ fn spawn_next_listener(
 
         let mut playlist = MUSIC_PLAYLIST.lock().unwrap();
         if counter <= 0 && !playlist.is_empty() {
+            #[cfg(mobile)]
+            {
+                if *MUSIC_IS_BACKGROUND.lock().unwrap() {
+                    let mut background_count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
+                    *background_count += 1;
+                }
+            }
+
             if !is_receiving_playlist {
                 if playlist.len() > 1 {
                     GLOBAL_APP_HANDLE
@@ -267,13 +314,7 @@ fn play(
         if let Ok(_info) = receiver_info.try_recv() {
             if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
                 app_handle
-                    .emit(
-                        "music_get_info",
-                        MusicPlayerInfo {
-                            current_position: sink.get_pos().as_millis(),
-                            is_paused: sink.is_paused(),
-                        },
-                    )
+                    .emit("music_get_info", get_music_player_info_from_sink(&sink))
                     .expect("Can't emit music_get_info");
             } else {
                 log::error!("Failed to get GLOBAL_APP_HANDLE");
@@ -281,6 +322,13 @@ fn play(
         }
 
         thread::sleep(Duration::from_millis(100));
+    }
+}
+
+fn get_music_player_info_from_sink(sink: &Sink) -> MusicPlayerInfo {
+    MusicPlayerInfo {
+        current_position: sink.get_pos().as_millis(),
+        is_playing: !sink.is_paused(),
     }
 }
 
@@ -316,6 +364,7 @@ fn fade(sink: &Sink, out: bool) {
     }
 }
 
+// Note: I have no idea what is this for but it's required for Rodio
 #[no_mangle]
 #[allow(clippy::empty_loop)]
 pub extern "C" fn __cxa_pure_virtual() {

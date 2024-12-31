@@ -35,6 +35,6 @@ pub(crate) async fn request_permissions<R: Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-pub async fn watch_state<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<()> {
+pub async fn watch_state<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<WatchResponse> {
     app.fluyer().watch_state_inner(channel)
 }

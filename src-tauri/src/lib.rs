@@ -4,6 +4,8 @@ use std::sync::{Mutex, OnceLock};
 use tauri::AppHandle;
 #[allow(unused)]
 use tauri::{Manager, RunEvent};
+#[cfg(mobile)]
+use crate::music::player::handle_music_player_background;
 
 mod commands;
 mod file;
@@ -73,6 +75,9 @@ pub fn run() {
                 GLOBAL_APP_HANDLE
                     .set(app_handle.clone())
                     .expect("Failed to set GLOBAL_APP_HANDLE");
+                #[cfg(mobile)]{
+                    handle_music_player_background();
+                }
             }
         });
 }

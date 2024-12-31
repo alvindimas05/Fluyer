@@ -41,8 +41,15 @@ impl<R: Runtime> Fluyer<R> {
         Ok(PermissionStatus::default())
     }
 
-    pub(crate) fn watch_state_inner(&self, _channel: Channel) -> crate::Result<()> {
-        Ok(())
+    pub fn watch_state<F: Fn(WatcherState) + Send + Sync + 'static>(
+        &self,
+        _callback: F,
+    ) -> crate::Result<WatchResponse> {
+        Ok(WatchResponse { value: false })
+    }
+
+    pub(crate) fn watch_state_inner(&self, _channel: Channel) -> crate::Result<WatchResponse> {
+        Ok(WatchResponse { value: false })
     }
 }
 
