@@ -115,8 +115,14 @@ const MusicController = {
         );
     },
 
+    nextMusic: () => {
+        MusicController.sendCommandController("next");
+        MusicController.resetProgress();
+    },
+
     listenNextMusic: () => {
         listen("music_player_next", () => {
+            MusicController.resetProgress();
             const nextMusics = MusicController.nextMusics();
             if (nextMusics.length > 0) {
                 MusicController.setCurrentMusic(nextMusics[0]);

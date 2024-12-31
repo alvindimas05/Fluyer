@@ -37,7 +37,7 @@
     }
 
     function handleButtonNext() {
-        // MusicController.tryNextMusic(true);
+        MusicController.nextMusic();
     }
 
     function onPlayerBarChange() {
@@ -67,12 +67,22 @@
         albumImage = MusicController.currentMusicAlbumImage();
     }
 
+    async function onKeyDown(
+        e: KeyboardEvent & {
+            currentTarget: EventTarget & Document;
+        },
+    ) {
+        if(e.key === ' ') handleButtonPlayPause();
+    }
+
     async function getNavigationBarHeight() {
         const navbarHeight = await invoke<number>("get_navigation_bar_height");
         navigationBarHeight = navbarHeight > 32 ? 32 : navbarHeight;
     }
     if (isMobile()) getNavigationBarHeight();
 </script>
+
+<svelte:document onkeydown={onKeyDown} />
 
 <div
     class="fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 backdrop-blur-md text-white animate__animated animate__slideInUp animate__slow"

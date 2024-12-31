@@ -155,12 +155,16 @@ fn spawn_next_listener(
                     .emit("music_playlist_add", ())
                     .expect("Can't emit music_playlist_add");
             } else {
-                log::error!("Failed to get GLOBAL_APP_HANDLE");
+                log::error!("Failed to get GLOBAL_APP_HAzNDLE");
             }
         }
 
         if let Ok(position) = receiver_next_position.try_recv() {
             counter = (current_music_duration - position.as_millis()) as i128;
+        }
+
+        if receiver_next.try_recv().is_ok() {
+            counter = 0;
         }
 
         let mut playlist = MUSIC_PLAYLIST.lock().unwrap();
