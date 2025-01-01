@@ -88,8 +88,8 @@ const MusicController = {
             : -1,
     realProgressDuration: () => MusicController.progressDuration() * 1000,
     parseProgressDuration: (value: number) => value / 1000,
-    parseProgressDurationIntoValue: (value: number) =>
-        (value / MusicConfig.max) * MusicConfig.step,
+    parseProgressDurationIntoValue: (value: number, max: number) =>
+        (value / max) * MusicConfig.max,
 
     startProgress: () => {
         const updateInterval =
@@ -143,21 +143,26 @@ const MusicController = {
         listen<MusicPlayerSync>("music_player_sync", async (e) => {
             const skip = e.payload.skip;
             await invoke("music_get_info");
-            const unlisten = await listen<MusicPlayerInfo>(
-                "music_get_info",
-                (e) => {
-                    MusicController.setMusicList(
-                        MusicController.musicList()!.splice(0, skip),
-                    );
-                    MusicController.setProgressValue(
-                        MusicController.parseProgressDurationIntoValue(
+
+            if (skip < 1) return;
+            MusicController.setNextMusics(
+                MusicController.nextMusics()!.splice(0, skip),
+            );
+        });
+        listen<MusicPlayerInfo>("music_get_info", (e) => {
+            if (e.payload.music != null) {
+                MusicController.setProgressValue(
+                    MusicController.parseProgressDurationIntoValue(
+                        MusicController.parseProgressDuration(
                             e.payload.currentPosition,
                         ),
-                    );
-                    MusicController.setIsPlaying(e.payload.isPlaying);
-                    unlisten();
-                },
-            );
+                        MusicController.parseProgressDuration(
+                            e.payload.music.duration,
+                        ),
+                    ),
+                );
+            }
+            MusicController.setIsPlaying(e.payload.isPlaying);
         });
     },
 
@@ -235,7 +240,7 @@ const MusicController = {
     },
 
     nextMusics: () => get(musicsNext),
-
+    setNextMusics: (value: MusicData[]) => musicsNext.set(value),
     addNextMusics: (musics: MusicData[]) => {
         musicsNext.set([...get(musicsNext), ...musics]);
     },
@@ -251,7 +256,8 @@ const MusicController = {
     },
 
     isProgressValueEnd: () =>
-    MusicController.progressValue() >= MusicConfig.max || MusicController.progressValue() <= MusicConfig.min,
+        MusicController.progressValue() >= MusicConfig.max ||
+        MusicController.progressValue() <= MusicConfig.min,
 };
 
 export default MusicController;

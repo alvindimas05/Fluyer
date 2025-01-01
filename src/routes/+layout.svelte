@@ -20,7 +20,10 @@
         const barHeight = await invoke<number>("get_status_bar_height");
         statusBarHeight = barHeight > 28 ? 28 : barHeight;
     }
-    if (isMobile()) getStatusBarHeight();
+    if (isMobile()) {
+        getStatusBarHeight();
+        MusicController.listenSyncMusic();
+    }
     MusicController.listenNextMusic();
 </script>
 

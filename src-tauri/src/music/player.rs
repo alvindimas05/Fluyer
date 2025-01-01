@@ -47,6 +47,7 @@ pub struct MusicPlayer {
 pub struct MusicPlayerInfo {
     current_position: u128,
     is_playing: bool,
+    music: Option<MusicMetadata>,
 }
 
 #[derive(Clone, Serialize)]
@@ -329,6 +330,7 @@ fn get_music_player_info_from_sink(sink: &Sink) -> MusicPlayerInfo {
     MusicPlayerInfo {
         current_position: sink.get_pos().as_millis(),
         is_playing: !sink.is_paused(),
+        music: MUSIC_PLAYLIST.lock().unwrap().first().cloned(),
     }
 }
 

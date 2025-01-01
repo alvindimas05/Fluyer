@@ -7,8 +7,6 @@
     import { loadingBackground, loadingShow } from "$lib/stores/loading";
     import MusicController from "$lib/controllers/MusicController";
     import { musicList } from "$lib/stores/music";
-    import TitleBar from "$lib/titlebar/TitleBar.svelte";
-    import { BaseDirectory, readDir } from "@tauri-apps/plugin-fs";
     import { isMobile } from "$lib/platform";
     import Intro from "$lib/home/intro/Intro.svelte";
 
