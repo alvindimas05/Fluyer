@@ -18,7 +18,29 @@ import android.graphics.Rect
 import android.app.Activity
 import android.widget.Toast
 
+
+import android.content.BroadcastReceiver
+import android.content.Intent
+import android.content.IntentFilter
+
 class FluyerMain(private val activity: Activity) {
+    val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            if (Intent.ACTION_HEADSET_PLUG == action) {
+                val state = intent.getIntExtra("state", -1)
+                when (state) {
+                    0 -> toast("Headset not plugged in")
+                    1 -> toast("Headset plugged in")
+                }
+            }
+        }
+    }
+
+    fun listenToHeadsetChange() {
+        val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
+        activity.registerReceiver(broadcastReceiver, receiverFilter)
+    }
     fun toast(value: String) {
         activity.runOnUiThread {
             Toast.makeText(activity, value, Toast.LENGTH_SHORT).show()

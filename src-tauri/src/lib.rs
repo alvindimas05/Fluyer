@@ -1,3 +1,5 @@
+#[cfg(mobile)]
+use crate::music::player::handle_music_player_background;
 use crate::store::init_store;
 use music::player::MusicPlayer;
 use std::sync::{Mutex, OnceLock};
@@ -5,7 +7,7 @@ use tauri::AppHandle;
 #[allow(unused)]
 use tauri::{Manager, RunEvent};
 #[cfg(mobile)]
-use crate::music::player::handle_music_player_background;
+use tauri_plugin_fluyer::FluyerExt;
 
 mod commands;
 mod file;
@@ -75,8 +77,10 @@ pub fn run() {
                 GLOBAL_APP_HANDLE
                     .set(app_handle.clone())
                     .expect("Failed to set GLOBAL_APP_HANDLE");
-                #[cfg(mobile)]{
+                #[cfg(mobile)]
+                {
                     handle_music_player_background();
+                    app_handle.fluyer().listen_to_headset_change().expect("Failed to listen to headset change");
                 }
             }
         });

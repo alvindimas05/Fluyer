@@ -91,6 +91,12 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("watchState", WatchPayload { channel })
             .map_err(Into::into)
     }
+    
+    pub fn listen_to_headset_change(&self) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("listenToHeadsetChange", ())
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]

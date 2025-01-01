@@ -51,6 +51,10 @@ impl<R: Runtime> Fluyer<R> {
     pub(crate) fn watch_state_inner(&self, _channel: Channel) -> crate::Result<WatchResponse> {
         Ok(WatchResponse { value: false })
     }
+    
+    pub fn listen_to_headset_change(&self) -> crate::Result<()> {
+        Ok(())
+    }
 }
 
 impl<R: Runtime> Fluyer<R> {}

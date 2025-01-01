@@ -12,6 +12,7 @@ import app.tauri.plugin.Channel
 import android.Manifest
 import android.util.Log
 import com.fasterxml.jackson.annotation.JsonProperty
+import android.os.Bundle
 
 @InvokeArg
 class ToastArgs {
@@ -88,5 +89,11 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
         val args = invoke.parseArgs(StateWatcherArgs::class.java)
         stateChannel = args.channel
         invoke.resolve(JSObject().put("value", stateChannel != null))
+    }
+    
+    @Command
+    fun listenToHeadsetChange(invoke: Invoke) {
+        implementation.listenToHeadsetChange()
+        invoke.resolve()
     }
 }
