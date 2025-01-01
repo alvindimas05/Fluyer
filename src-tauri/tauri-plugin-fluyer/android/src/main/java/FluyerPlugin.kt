@@ -11,12 +11,11 @@ import app.tauri.annotation.Permission
 import app.tauri.plugin.Channel
 import android.Manifest
 import android.util.Log
-import com.fasterxml.jackson.annotation.JsonProperty
 import android.os.Bundle
 
 @InvokeArg
 class ToastArgs {
-  lateinit var value: String
+    lateinit var value: String
 }
 
 @InvokeArg
@@ -24,11 +23,9 @@ class StateWatcherArgs {
     lateinit var channel: Channel
 }
 
-enum class WatcherStateType {
-    @JsonProperty("pause")
-    Pause,
-    @JsonProperty("resume")
-    Resume;
+enum class WatcherStateType(val value: String) {
+    Pause("pause"),
+    Resume("resume");
 }
 
 private const val ALIAS_READ_AUDIO: String = "audio"
@@ -48,7 +45,7 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     override fun onPause(){
         super.onPause()
         stateChannel?.let{
-            it.send(JSObject().put("value", "pause"))
+            it.send(JSObject().put("value", WatcherStateType.Pause.value))
         }
     }
 
@@ -56,7 +53,7 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     override fun onResume(){
         super.onResume()
         stateChannel?.let{
-            it.send(JSObject().put("value", "resume"))
+            it.send(JSObject().put("value", WatcherStateType.Resume))
         }
     }
 
