@@ -49,7 +49,6 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
         }
     }
 
-
     override fun onResume(){
         super.onResume()
         stateChannel?.let{
