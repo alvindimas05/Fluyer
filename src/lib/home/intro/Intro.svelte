@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { CommandsRoute } from "$lib/commands";
     import LoadingController from "$lib/controllers/LoadingController";
     import MusicController from "$lib/controllers/MusicController";
     import { isMobile } from "$lib/platform";
@@ -7,15 +8,15 @@
 
     let animatedClasses = $state("animate__fadeIn");
     async function chooseDirPath() {
-        await invoke("music_request_dir");
-        const unlisten = await listen("music_request_dir", (e) => {
+        await invoke(CommandsRoute.MUSIC_REQUEST_DIRECTORY);
+        const unlisten = await listen(CommandsRoute.MUSIC_REQUEST_DIRECTORY, (e) => {
             animatedClasses = "animate__fadeOut";
             unlisten();
         });
     }
 
     async function requestReadAudioPermission() {
-        const res = await invoke<boolean>("request_read_audio_permission");
+        const res = await invoke<boolean>(CommandsRoute.REQUEST_READ_AUDIO_PERMISSION);
         if (!res) return;
         animatedClasses = "animate__fadeOut";
     }

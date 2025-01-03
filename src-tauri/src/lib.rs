@@ -52,7 +52,7 @@ pub fn run() {
             commands::music::music_playlist_add,
             commands::music::music_get_info,
             #[cfg(desktop)]
-            commands::music::music_request_dir,
+            commands::music::music_request_directory,
             commands::log::log_error,
             #[cfg(mobile)]
             commands::log::toast,

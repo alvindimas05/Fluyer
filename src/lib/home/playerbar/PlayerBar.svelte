@@ -10,6 +10,7 @@
     } from "$lib/stores/music";
     import { invoke } from "@tauri-apps/api/core";
     import { isMobile } from "$lib/platform";
+    import { CommandsRoute } from "$lib/commands";
 
     // Based on Rust Rodio fade effect (Please check player.rs)
     let pauseDelay = 400;
@@ -76,7 +77,7 @@
     }
 
     async function getNavigationBarHeight() {
-        const navbarHeight = await invoke<number>("get_navigation_bar_height");
+        const navbarHeight = await invoke<number>(CommandsRoute.GET_NAVIGATION_BAR_HEIGHT);
         navigationBarHeight = navbarHeight > 32 ? 32 : navbarHeight;
     }
     if (isMobile()) getNavigationBarHeight();

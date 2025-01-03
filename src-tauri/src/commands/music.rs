@@ -63,27 +63,25 @@ pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<Strin
 
 #[cfg(desktop)]
 #[tauri::command]
-pub fn music_request_dir(app: AppHandle) {
+pub fn music_request_directory(app: AppHandle) {
     app.dialog().file().pick_folder(|dir_path| {
-        if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
-            let dir = dir_path
-                .unwrap()
-                .into_path()
-                .expect("Failed to get music dir path.")
-                .into_os_string()
-                .into_string()
-                .expect("Failed to get music dir path.");
+        let dir = dir_path
+            .unwrap()
+            .into_path()
+            .expect("Failed to get music dir path.")
+            .into_os_string()
+            .into_string()
+            .expect("Failed to get music dir path.");
 
-            GLOBAL_APP_STORE
-                .get()
-                .expect("Failed to get GLOBAL_APP_STORE")
-                .set(STORE_PATH_NAME, dir);
+        GLOBAL_APP_STORE
+            .get()
+            .expect("Failed to get GLOBAL_APP_STORE")
+            .set(STORE_PATH_NAME, dir);
 
-            app_handle
-                .emit("music_request_dir", ())
-                .expect("Can't emit music_get_dir_path");
-        } else {
-            log::error!("Failed to get GLOBAL_APP_HANDLE");
-        }
+        GLOBAL_APP_HANDLE
+            .get()
+            .unwrap()
+            .emit(crate::commands::route::MUSIC_REQUEST_DIR, ())
+            .expect(format!("Failed to emit {}", crate::commands::route::MUSIC_REQUEST_DIR).as_str())
     });
 }

@@ -1,7 +1,7 @@
 use anyhow::Result;
 use crossbeam_channel::unbounded;
 use crossbeam_channel::{Receiver, SendError, Sender};
-use rodio::{OutputStream, OutputStreamBuilder, Sink};
+use rodio::Sink;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
@@ -111,7 +111,10 @@ pub fn handle_music_player_background() {
                 GLOBAL_APP_HANDLE
                     .get()
                     .unwrap()
-                    .emit("music_player_sync", MusicPlayerSync { skip: *count })
+                    .emit(
+                        crate::commands::route::MUSIC_PLAYER_SYNC,
+                        MusicPlayerSync { skip: *count },
+                    )
                     .expect("Failed to sync music player");
                 *count = 0;
             }
@@ -129,7 +132,7 @@ pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
             // sender_sink_reset.send(payload.value).unwrap();
             // FIXME: Reset Sink after headset plugged/unplugged. Probably not possible but let's see...
             // FIXME: As workaround, restart app but with UI button and saves music state when headset plugged/unplugged on mobile
-            GLOBAL_APP_HANDLE.get().unwrap().restart()
+            // GLOBAL_APP_HANDLE.get().unwrap();
         })
         .expect("Failed to watch headset change");
 }
@@ -214,13 +217,17 @@ fn spawn_next_listener(
                     .unwrap()
                     .push(MusicMetadata::new(path.clone()).get());
             }
-            if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
-                app_handle
-                    .emit("music_playlist_add", ())
-                    .expect("Can't emit music_playlist_add");
-            } else {
-                log::error!("Failed to get GLOBAL_APP_HANDLE");
-            }
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .emit(crate::commands::route::MUSIC_PLAYLIST_ADD, ())
+                .expect(
+                    format!(
+                        "Failed to emit {}",
+                        crate::commands::route::MUSIC_PLAYLIST_ADD
+                    )
+                    .as_str(),
+                );
         }
 
         if let Ok(position) = receiver_next_position.try_recv() {
@@ -246,8 +253,14 @@ fn spawn_next_listener(
                     GLOBAL_APP_HANDLE
                         .get()
                         .expect("Failed to get GLOBAL_APP_HANDLE")
-                        .emit("music_player_next", ())
-                        .expect("Failed to emit music_player_next");
+                        .emit(crate::commands::route::MUSIC_PLAYER_NEXT, ())
+                        .expect(
+                            format!(
+                                "Failed to emit {}",
+                                crate::commands::route::MUSIC_PLAYER_NEXT
+                            )
+                            .as_str(),
+                        );
                 }
                 playlist.remove(0);
             }
@@ -319,7 +332,7 @@ fn play(
             }
             // if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
             //     app_handle
-            //         .emit("music_playlist_add", ())
+            //         .emit(crate::commands::route::MUSIC_PLAYLIST_ADD, ())
             //         .expect("Can't emit music_playlist_add");
             // } else {
             //     log::error!("Failed to get GLOBAL_APP_HANDLE");
@@ -337,13 +350,16 @@ fn play(
         }
 
         if receiver_info.try_recv().is_ok() {
-            if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
-                app_handle
-                    .emit("music_get_info", get_music_player_info(&sink))
-                    .expect("Can't emit music_get_info");
-            } else {
-                log::error!("Failed to get GLOBAL_APP_HANDLE");
-            }
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .emit(
+                    crate::commands::route::MUSIC_GET_INFO,
+                    get_music_player_info(&sink),
+                )
+                .expect(
+                    format!("Failed to emit {}", crate::commands::route::MUSIC_GET_INFO).as_str(),
+                );
         }
 
         thread::sleep(Duration::from_millis(100));
@@ -359,18 +375,18 @@ fn sink_add_music(sink: &Sink, path: String) {
     }
 }
 
-fn sink_continue_latest_music(sink: &Sink) {
-    let playlist = MUSIC_PLAYLIST.lock().unwrap();
-    if playlist.is_empty() {
-        return;
-    }
+// fn sink_continue_latest_music(sink: &Sink) {
+//     let playlist = MUSIC_PLAYLIST.lock().unwrap();
+//     if playlist.is_empty() {
+//         return;
+//     }
 
-    sink_add_music(sink, playlist.first().unwrap().path.to_string());
-    sink.try_seek(Duration::from_millis(
-        *MUSIC_NEXT_COUNTER.lock().unwrap() as u64
-    ))
-    .expect("Failed to seek latest music");
-}
+//     sink_add_music(sink, playlist.first().unwrap().path.to_string());
+//     sink.try_seek(Duration::from_millis(
+//         *MUSIC_NEXT_COUNTER.lock().unwrap() as u64
+//     ))
+//     .expect("Failed to seek latest music");
+// }
 
 fn get_music_player_info(sink: &Sink) -> MusicPlayerInfo {
     MusicPlayerInfo {

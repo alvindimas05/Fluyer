@@ -27,7 +27,7 @@ export async function checkPermissions(): Promise<PermissionStatus> {
 export async function requestPermissions(
     permissions: PermissionType[] | null
 ): Promise<PermissionStatus> {
-    return await invoke('plugin:geolocation|request_permissions', {
+    return await invoke('plugin:fluyer|request_permissions', {
         permissions
     })
 }

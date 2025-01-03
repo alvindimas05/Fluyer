@@ -15,6 +15,7 @@ import type {
 } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
+import { CommandsRoute } from "$lib/commands";
 
 export const MusicConfig = {
     step: 0.01,
@@ -31,7 +32,7 @@ const MusicController = {
     setMusicList: (value: MusicData[] | null) => musicList.set(value),
     getMusics: async () => {
         if (MusicController.musicList()?.length) return;
-        const musics = await invoke<MusicData[] | null>("music_get_all");
+        const musics = await invoke<MusicData[] | null>(CommandsRoute.MUSIC_GET_ALL);
         MusicController.setMusicList(musics);
         LoadingController.setLoadingMusicList(true);
     },
@@ -122,7 +123,7 @@ const MusicController = {
     },
 
     listenNextMusic: () => {
-        listen("music_player_next", () => {
+        listen(CommandsRoute.MUSIC_PLAYER_NEXT, () => {
             MusicController.resetProgress();
             const nextMusics = MusicController.nextMusics();
             if (nextMusics.length > 0) {
@@ -140,16 +141,16 @@ const MusicController = {
         });
     },
     listenSyncMusic: () => {
-        listen<MusicPlayerSync>("music_player_sync", async (e) => {
+        listen<MusicPlayerSync>(CommandsRoute.MUSIC_PLAYER_SYNC, async (e) => {
             const skip = e.payload.skip;
-            await invoke("music_get_info");
+            await invoke(CommandsRoute.MUSIC_GET_INFO);
 
             if (skip < 1) return;
             MusicController.setNextMusics(
                 MusicController.nextMusics()!.splice(0, skip),
             );
         });
-        listen<MusicPlayerInfo>("music_get_info", (e) => {
+        listen<MusicPlayerInfo>(CommandsRoute.MUSIC_GET_INFO, (e) => {
             if (e.payload.music != null) {
                 MusicController.setProgressValue(
                     MusicController.parseProgressDurationIntoValue(
@@ -202,11 +203,13 @@ const MusicController = {
         if (sendCommand) MusicController.sendCommandController("pause");
     },
     sendCommandController: (command: string) => {
-        invoke("music_controller", { command });
+        invoke(CommandsRoute.MUSIC_CONTROLLER, { command });
     },
 
     sendCommandSetPosition: (position: number) => {
-        invoke("music_position_set", { position: Math.trunc(position) });
+        invoke(CommandsRoute.MUSIC_POSITION_SET, {
+            position: Math.trunc(position),
+        });
     },
 
     addMusic: async (music: MusicData) => {
@@ -224,7 +227,9 @@ const MusicController = {
         await MusicController.addMusicListToPlayList([musicPath]);
     },
     addMusicListToPlayList: async (musicPaths: string[]) => {
-        await invoke("music_playlist_add", { playlist: musicPaths });
+        await invoke(CommandsRoute.MUSIC_PLAYLIST_ADD, {
+            playlist: musicPaths,
+        });
     },
 
     addMusicList: async (musicDataList: MusicData[]) => {

@@ -7,6 +7,7 @@
     import { invoke } from "@tauri-apps/api/core";
     import { isMobile } from "$lib/platform";
     import MusicController from "$lib/controllers/MusicController";
+    import { CommandsRoute } from "$lib/commands";
     interface Props {
         children?: import("svelte").Snippet;
     }
@@ -17,7 +18,7 @@
     let statusBarHeight: number | null = $state(0);
 
     async function getStatusBarHeight() {
-        const barHeight = await invoke<number>("get_status_bar_height");
+        const barHeight = await invoke<number>(CommandsRoute.GET_STATUS_BAR_HEIGHT);
         statusBarHeight = barHeight > 28 ? 28 : barHeight;
     }
     if (isMobile()) {
