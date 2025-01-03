@@ -125,7 +125,7 @@ pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
         .get()
         .unwrap()
         .fluyer()
-        .watch_headset_change(move |payload| {
+        .watch_headset_change(move |_payload| {
             // sender_sink_reset.send(payload.value).unwrap();
             // FIXME: Reset Sink after headset plugged/unplugged. Probably not possible but let's see...
             // FIXME: As workaround, restart app but with UI button and saves music state when headset plugged/unplugged on mobile
@@ -279,7 +279,7 @@ fn play(
 ) {
     let stream_handle =
         rodio::OutputStreamBuilder::open_default_stream().expect("Failed to open default stream");
-    let mut sink = rodio::Sink::connect_new(&stream_handle.mixer());
+    let sink = rodio::Sink::connect_new(&stream_handle.mixer());
 
     if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
         sink.pause();
