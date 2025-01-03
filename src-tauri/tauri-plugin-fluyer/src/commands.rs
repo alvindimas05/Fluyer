@@ -35,12 +35,12 @@ pub(crate) async fn request_permissions<R: Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-pub async fn watch_state<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<WatchResponse> {
+pub async fn watch_state<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<WatchStateResponse> {
     app.fluyer().watch_state_inner(channel)
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn listen_to_headset_change<R: Runtime>(app: AppHandle<R>) -> Result<()> {
-    app.fluyer().listen_to_headset_change()
+pub async fn watch_headset_change<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<WatchHeadsetChangeResponse> {
+    app.fluyer().watch_headset_change_inner(channel)
 }

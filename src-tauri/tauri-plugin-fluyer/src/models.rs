@@ -55,6 +55,19 @@ pub struct WatcherState {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
-pub struct WatchResponse {
+pub struct WatchStateResponse {
+    pub value: bool,
+}
+
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct WatcherHeadsetChange {
+    pub value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct WatchHeadsetChangeResponse {
     pub value: bool,
 }

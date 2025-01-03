@@ -6,8 +6,10 @@ use simplelog::{
 use std::{env::temp_dir, fs::File};
 
 fn main() {
-    init_logging();
-    init_android_logging();
+    #[cfg(desktop)]
+    {
+        init_logging();
+    }
     fluyer_lib::run()
 }
 
@@ -30,15 +32,4 @@ fn init_logging() {
         ),
     ])
     .unwrap();
-}
-
-fn init_android_logging() {
-    #[cfg(target_os = "android")]
-    {
-        android_logger::init_once(
-            android_logger::Config::default()
-                .with_max_level(log::LevelFilter::Trace)
-                .with_tag("{{app.name}}"),
-        );
-    }
 }

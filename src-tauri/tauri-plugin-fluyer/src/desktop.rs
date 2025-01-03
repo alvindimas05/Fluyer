@@ -44,16 +44,26 @@ impl<R: Runtime> Fluyer<R> {
     pub fn watch_state<F: Fn(WatcherState) + Send + Sync + 'static>(
         &self,
         _callback: F,
-    ) -> crate::Result<WatchResponse> {
-        Ok(WatchResponse { value: false })
+    ) -> crate::Result<WatchStateResponse> {
+        Ok(WatchStateResponse { value: false })
     }
 
-    pub(crate) fn watch_state_inner(&self, _channel: Channel) -> crate::Result<WatchResponse> {
-        Ok(WatchResponse { value: false })
+    pub(crate) fn watch_state_inner(&self, _channel: Channel) -> crate::Result<WatchStateResponse> {
+        Ok(WatchStateResponse { value: false })
     }
     
-    pub fn listen_to_headset_change(&self) -> crate::Result<()> {
-        Ok(())
+    pub fn watch_headset_change<F: Fn(WatcherHeadsetChange) + Send + Sync + 'static>(
+        &self,
+        _callback: F,
+    ) -> crate::Result<WatchHeadsetChangeResponse> {
+        Ok(WatchHeadsetChangeResponse { value: false })
+    }
+
+    pub(crate) fn watch_headset_change_inner(
+        &self,
+        _channel: Channel,
+    ) -> crate::Result<WatchHeadsetChangeResponse> {
+        Ok(WatchHeadsetChangeResponse { value: false })
     }
 }
 

@@ -52,7 +52,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             commands::check_permissions,
             commands::request_permissions,
             commands::watch_state,
-            commands::listen_to_headset_change,
+            commands::watch_headset_change,
         ])
         .setup(|app, api| {
             #[cfg(mobile)]

@@ -23,6 +23,11 @@ class StateWatcherArgs {
     lateinit var channel: Channel
 }
 
+@InvokeArg
+class HeadsetChangeWatcherArgs {
+    lateinit var channel: Channel
+}
+
 enum class WatcherStateType(val value: String) {
     Pause("pause"),
     Resume("resume");
@@ -44,15 +49,15 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
 
     override fun onPause(){
         super.onPause()
-        stateChannel?.let{
+        stateChannel?.let {
             it.send(JSObject().put("value", WatcherStateType.Pause.value))
         }
     }
 
     override fun onResume(){
         super.onResume()
-        stateChannel?.let{
-            it.send(JSObject().put("value", WatcherStateType.Resume))
+        stateChannel?.let {
+            it.send(JSObject().put("value", WatcherStateType.Resume.value))
         }
     }
 
@@ -78,18 +83,25 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
     @Command
     fun watchState(invoke: Invoke) {
         if (stateChannel != null) {
-            invoke.resolve(JSObject().put("value", true))
+            invoke.resolve(JSObject().put("value", false))
             return
         }
 
         val args = invoke.parseArgs(StateWatcherArgs::class.java)
         stateChannel = args.channel
-        invoke.resolve(JSObject().put("value", stateChannel != null))
+        invoke.resolve(JSObject().put("value", true))
     }
     
     @Command
-    fun listenToHeadsetChange(invoke: Invoke) {
-        implementation.listenToHeadsetChange()
-        invoke.resolve()
+    fun watchHeadsetChange(invoke: Invoke) {
+        if (implementation.headsetChangeChannel != null) {
+            invoke.resolve(JSObject().put("value", false))
+            return
+        }
+        
+        val args = invoke.parseArgs(HeadsetChangeWatcherArgs::class.java)
+        implementation.headsetChangeChannel = args.channel
+        implementation.watchHeadsetChange()
+        invoke.resolve(JSObject().put("value", true))
     }
 }

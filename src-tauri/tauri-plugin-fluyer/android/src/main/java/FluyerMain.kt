@@ -5,39 +5,35 @@ import android.graphics.Point
 import android.os.Build
 import android.view.Display
 import android.view.WindowManager
-
 import android.util.TypedValue
 import kotlin.math.roundToInt
 import android.view.WindowInsets
-
 import android.content.res.Resources
 import android.content.res.Configuration
-
 import android.graphics.Rect
-
 import android.app.Activity
 import android.widget.Toast
-
-
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
+import app.tauri.plugin.JSObject
+import app.tauri.plugin.Channel
+import android.util.Log
 
 class FluyerMain(private val activity: Activity) {
+    var headsetChangeChannel: Channel? = null
+
     val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            if (Intent.ACTION_HEADSET_PLUG == action) {
-                val state = intent.getIntExtra("state", -1)
-                when (state) {
-                    0 -> toast("Headset not plugged in")
-                    1 -> toast("Headset plugged in")
+            if (Intent.ACTION_HEADSET_PLUG == intent.action) {
+                headsetChangeChannel?.let {
+                    it.send(JSObject().put("value", intent.getIntExtra("state", 0) == 1))
                 }
             }
         }
     }
 
-    fun listenToHeadsetChange() {
+    fun watchHeadsetChange() {
         val receiverFilter = IntentFilter(Intent.ACTION_HEADSET_PLUG)
         activity.registerReceiver(broadcastReceiver, receiverFilter)
     }

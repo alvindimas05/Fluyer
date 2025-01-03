@@ -22,7 +22,7 @@ tauri = { version = "2.1.1", features = ["macos-private-api"] }
 tauri-plugin-shell = "2.2.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rodio = { version = "0.20.1", features = ["symphonia-all"] }
+rodio = { git = "https://github.com/RustAudio/rodio.git", rev = "1d01704", features = ["symphonia-all"] }
 anyhow = "1.0.89"
 symphonia = "0.5.4"
 log = "0.4.22"
@@ -35,3 +35,5 @@ tauri-plugin-dialog = "2"
 tauri-plugin-os = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-fluyer = { path = "./tauri-plugin-fluyer" }
+crossbeam-channel = "0.5.14"
+android_logger = "0.14.1"

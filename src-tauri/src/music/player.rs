@@ -1,18 +1,19 @@
-use anyhow::{Error, Result};
-use rodio::Sink;
+use anyhow::Result;
+use crossbeam_channel::unbounded;
+use crossbeam_channel::{Receiver, SendError, Sender};
+use rodio::{OutputStream, OutputStreamBuilder, Sink};
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
-use std::sync::mpsc::{self, SendError};
-use std::sync::mpsc::{Receiver, Sender};
 use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
 #[cfg(mobile)]
 use tauri_plugin_fluyer::models::WatcherStateType;
-#[cfg(mobile)]
 use tauri_plugin_fluyer::FluyerExt;
+// #[cfg(mobile)]
+// use tauri_plugin_fluyer::FluyerExt;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 
 use crate::GLOBAL_APP_HANDLE;
@@ -30,9 +31,9 @@ pub enum MusicCommand {
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MusicState {
+    Play,
     #[default]
-    Playing,
-    Paused,
+    Pause,
 }
 // FIXME: Android Music Player requires restart app when audio jack is connected/disconnected
 pub struct MusicPlayer {
@@ -62,10 +63,11 @@ static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
 static MUSIC_IS_BACKGROUND: Mutex<bool> = Mutex::new(false);
 #[cfg(mobile)]
 static MUSIC_BACKGROUND_COUNT: Mutex<u8> = Mutex::new(0);
+static MUSIC_STATE: Mutex<MusicState> = Mutex::new(MusicState::Play);
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
-        let music_spawn = spawn(MusicState::Paused);
+        let music_spawn = spawn();
         Self {
             command: music_spawn.0,
             position: music_spawn.1,
@@ -117,22 +119,40 @@ pub fn handle_music_player_background() {
         .expect("Failed to watch app state");
 }
 
-fn spawn(
-    initial_state: MusicState,
-) -> (
+pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
+) {
+    GLOBAL_APP_HANDLE
+        .get()
+        .unwrap()
+        .fluyer()
+        .watch_headset_change(move |payload| {
+            // sender_sink_reset.send(payload.value).unwrap();
+            // FIXME: Reset Sink after headset plugged/unplugged. Probably not possible but let's see...
+            // FIXME: As workaround, restart app but with UI button and saves music state when headset plugged/unplugged on mobile
+            GLOBAL_APP_HANDLE.get().unwrap().restart()
+        })
+        .expect("Failed to watch headset change");
+}
+
+fn spawn() -> (
     Sender<MusicCommand>,
     Sender<Duration>,
     Sender<Vec<String>>,
     Sender<()>,
 ) {
-    let (sender_command, receiver_command) = mpsc::channel();
-    let (sender_position, receiver_position) = mpsc::channel();
-    let (sender_info, receiver_info) = mpsc::channel();
+    let (sender_command, receiver_command) = unbounded();
+    let (sender_position, receiver_position) = unbounded();
+    let (sender_info, receiver_info) = unbounded();
 
-    let (sender_next, receiver_next) = mpsc::channel();
-    let (sender_next_playlist, receiver_next_playlist) = mpsc::channel();
-    let (sender_next_position, receiver_next_position) = mpsc::channel();
-    let (sender_player_playlist, receiver_player_playlist) = mpsc::channel();
+    let (sender_next, receiver_next) = unbounded();
+    let (sender_next_playlist, receiver_next_playlist) = unbounded();
+    let (sender_next_position, receiver_next_position) = unbounded();
+    let (sender_player_playlist, receiver_player_playlist) = unbounded();
+    // let (sender_sink_reset, receiver_sink_reset) = unbounded();
+
+    handle_headset_change(
+        // sender_sink_reset
+    );
 
     ThreadBuilder::default()
         .name("Music Player Next")
@@ -150,17 +170,15 @@ fn spawn(
         .name("Music Player")
         .priority(ThreadPriority::Max)
         .spawn_careless(move || {
-            if let Err(e) = play(
-                initial_state,
+            play(
                 receiver_command,
                 receiver_position,
                 receiver_player_playlist,
                 receiver_info,
+                // receiver_sink_reset,
                 sender_next,
                 sender_next_position,
-            ) {
-                log::error!("Music thread crashed: {:#}", e);
-            }
+            );
         })
         .expect("Failed to create music thread");
     (
@@ -171,6 +189,7 @@ fn spawn(
     )
 }
 
+static MUSIC_NEXT_COUNTER: Mutex<i128> = Mutex::new(0);
 fn spawn_next_listener(
     receiver_playlist: Receiver<Vec<String>>,
     receiver_next: Receiver<()>,
@@ -178,9 +197,14 @@ fn spawn_next_listener(
     sender_player_playlist: Sender<Vec<String>>,
 ) {
     let ms_countdown: u64 = 100;
-    let mut counter: i128 = 0;
+    let mut counter = MUSIC_NEXT_COUNTER.lock().unwrap();
     let mut current_music_duration: u128 = 0;
     loop {
+        if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
+            thread::sleep(Duration::from_millis(ms_countdown));
+            continue;
+        }
+
         let mut is_receiving_playlist = false;
         if let Ok(playlist) = receiver_playlist.try_recv() {
             is_receiving_playlist = true;
@@ -195,20 +219,20 @@ fn spawn_next_listener(
                     .emit("music_playlist_add", ())
                     .expect("Can't emit music_playlist_add");
             } else {
-                log::error!("Failed to get GLOBAL_APP_HAzNDLE");
+                log::error!("Failed to get GLOBAL_APP_HANDLE");
             }
         }
 
         if let Ok(position) = receiver_next_position.try_recv() {
-            counter = (current_music_duration - position.as_millis()) as i128;
+            *counter = (current_music_duration - position.as_millis()) as i128;
         }
 
         if receiver_next.try_recv().is_ok() {
-            counter = 0;
+            *counter = 0;
         }
 
         let mut playlist = MUSIC_PLAYLIST.lock().unwrap();
-        if counter <= 0 && !playlist.is_empty() {
+        if *counter <= 0 && !playlist.is_empty() {
             #[cfg(mobile)]
             {
                 if *MUSIC_IS_BACKGROUND.lock().unwrap() {
@@ -232,36 +256,41 @@ fn spawn_next_listener(
                 sender_player_playlist
                     .send(vec![music.path.clone()])
                     .expect("Failed to send sender_player_playlist");
-                counter = music.duration.unwrap() as i128;
+                *counter = music.duration.unwrap() as i128;
             }
         }
-        if counter > 0 {
-            counter -= ms_countdown as i128;
+        if *counter > 0 {
+            *counter -= ms_countdown as i128;
         }
 
         thread::sleep(Duration::from_millis(ms_countdown));
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn play(
-    initial_state: MusicState,
     receiver_command: Receiver<MusicCommand>,
     receiver_position: Receiver<Duration>,
-    receiver_playlist: Receiver<Vec<String>>,
+    receiver_player_playlist: Receiver<Vec<String>>,
     receiver_info: Receiver<()>,
+    // receiver_sink_reset: Receiver<bool>,
     sender_next: Sender<()>,
     sender_next_position: Sender<Duration>,
-) -> Result<(), Error> {
-    let (_stream, stream_handle) = rodio::OutputStream::try_default()?;
+) {
+    let stream_handle =
+        rodio::OutputStreamBuilder::open_default_stream().expect("Failed to open default stream");
+    let mut sink = rodio::Sink::connect_new(&stream_handle.mixer());
 
-    let sink = Sink::try_new(&stream_handle)?;
-    // let mut state = initial_state;
-
-    if initial_state == MusicState::Paused {
+    if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
         sink.pause();
     }
-
     loop {
+        // if let Ok(plugged) = receiver_sink_reset.try_recv() {
+        //     if plugged {
+        //         sink = Sink::connect_new(&stream_handle.mixer());
+        //     }
+        // }
+
         if let Ok(cmd) = receiver_command.try_recv() {
             match cmd {
                 MusicCommand::Pause => {
@@ -284,14 +313,9 @@ fn play(
             }
         }
 
-        if let Ok(playlist) = receiver_playlist.try_recv() {
+        if let Ok(playlist) = receiver_player_playlist.try_recv() {
             for path in playlist.iter() {
-                if let Ok(file) = File::open(path) {
-                    let source = rodio::Decoder::new(BufReader::new(file))?;
-                    sink.append(source);
-                } else {
-                    log::error!("Failed to open file: {}", path);
-                }
+                sink_add_music(&sink, path.to_string());
             }
             // if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
             //     app_handle
@@ -312,10 +336,10 @@ fn play(
             }
         }
 
-        if let Ok(_info) = receiver_info.try_recv() {
+        if receiver_info.try_recv().is_ok() {
             if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
                 app_handle
-                    .emit("music_get_info", get_music_player_info_from_sink(&sink))
+                    .emit("music_get_info", get_music_player_info(&sink))
                     .expect("Can't emit music_get_info");
             } else {
                 log::error!("Failed to get GLOBAL_APP_HANDLE");
@@ -326,7 +350,29 @@ fn play(
     }
 }
 
-fn get_music_player_info_from_sink(sink: &Sink) -> MusicPlayerInfo {
+fn sink_add_music(sink: &Sink, path: String) {
+    if let Ok(file) = File::open(&path) {
+        let source = rodio::Decoder::new(BufReader::new(file)).expect("Failed to read file");
+        sink.append(source);
+    } else {
+        log::error!("Failed to open file: {}", path);
+    }
+}
+
+fn sink_continue_latest_music(sink: &Sink) {
+    let playlist = MUSIC_PLAYLIST.lock().unwrap();
+    if playlist.is_empty() {
+        return;
+    }
+
+    sink_add_music(sink, playlist.first().unwrap().path.to_string());
+    sink.try_seek(Duration::from_millis(
+        *MUSIC_NEXT_COUNTER.lock().unwrap() as u64
+    ))
+    .expect("Failed to seek latest music");
+}
+
+fn get_music_player_info(sink: &Sink) -> MusicPlayerInfo {
     MusicPlayerInfo {
         current_position: sink.get_pos().as_millis(),
         is_playing: !sink.is_paused(),
@@ -347,6 +393,7 @@ fn fade(sink: &Sink, out: bool) {
     if out {
         range.reverse();
     } else {
+        *MUSIC_STATE.lock().unwrap() = MusicState::Play;
         sink.play();
     }
 
@@ -356,17 +403,20 @@ fn fade(sink: &Sink, out: bool) {
     }
 
     if out {
+        *MUSIC_STATE.lock().unwrap() = MusicState::Pause;
         sink.pause();
     }
 
     if out {
+        *MUSIC_STATE.lock().unwrap() = MusicState::Pause;
         sink.pause();
     } else {
+        *MUSIC_STATE.lock().unwrap() = MusicState::Play;
         sink.play();
     }
 }
 
-// Note: I have no idea what is this for but it's required for Rodio
+// Note: I have no idea what is this for but it's required for Rodio Android
 #[no_mangle]
 #[allow(clippy::empty_loop)]
 pub extern "C" fn __cxa_pure_virtual() {
