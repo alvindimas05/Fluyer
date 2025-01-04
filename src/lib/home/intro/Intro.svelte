@@ -1,31 +1,33 @@
 <script lang="ts">
-    import { CommandsRoute } from "$lib/commands";
-    import LoadingController from "$lib/controllers/LoadingController";
-    import MusicController from "$lib/controllers/MusicController";
-    import { isMobile } from "$lib/platform";
-    import { invoke } from "@tauri-apps/api/core";
-    import { listen } from "@tauri-apps/api/event";
+import { CommandsRoute } from "$lib/commands";
+import LoadingController from "$lib/controllers/LoadingController";
+import MusicController from "$lib/controllers/MusicController";
+import { isMobile } from "$lib/platform";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
-    let animatedClasses = $state("animate__fadeIn");
-    async function chooseDirPath() {
-        await invoke(CommandsRoute.MUSIC_REQUEST_DIRECTORY);
-        const unlisten = await listen(CommandsRoute.MUSIC_REQUEST_DIRECTORY, (e) => {
-            animatedClasses = "animate__fadeOut";
-            unlisten();
-        });
-    }
+let animatedClasses = $state("animate__fadeIn");
+async function chooseDirPath() {
+	await invoke(CommandsRoute.MUSIC_REQUEST_DIRECTORY);
+	const unlisten = await listen(CommandsRoute.MUSIC_REQUEST_DIRECTORY, (e) => {
+		animatedClasses = "animate__fadeOut";
+		unlisten();
+	});
+}
 
-    async function requestReadAudioPermission() {
-        const res = await invoke<boolean>(CommandsRoute.REQUEST_READ_AUDIO_PERMISSION);
-        if (!res) return;
-        animatedClasses = "animate__fadeOut";
-    }
+async function requestReadAudioPermission() {
+	const res = await invoke<boolean>(
+		CommandsRoute.REQUEST_READ_AUDIO_PERMISSION,
+	);
+	if (!res) return;
+	animatedClasses = "animate__fadeOut";
+}
 
-    function onAnimationEnd() {
-        if (animatedClasses === "animate__fadeIn") return;
-        LoadingController.setLoadingMusicList(false);
-        MusicController.getMusics();
-    }
+function onAnimationEnd() {
+	if (animatedClasses === "animate__fadeIn") return;
+	LoadingController.setLoadingMusicList(false);
+	MusicController.getMusics();
+}
 </script>
 
 <div

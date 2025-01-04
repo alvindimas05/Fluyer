@@ -1,86 +1,90 @@
 <script lang="ts">
-    import MusicController, {
-        MusicConfig,
-    } from "$lib/controllers/MusicController";
-    import "./playerbar.scss";
-    import {
-        musicCurrent,
-        musicIsPlaying,
-        musicProgressValue,
-    } from "$lib/stores/music";
-    import { invoke } from "@tauri-apps/api/core";
-    import { isMobile } from "$lib/platform";
-    import { CommandsRoute } from "$lib/commands";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import "./playerbar.scss";
+import {
+	musicCurrent,
+	musicIsPlaying,
+	musicProgressValue,
+} from "$lib/stores/music";
+import { invoke } from "@tauri-apps/api/core";
+import { isMobile } from "$lib/platform";
+import { CommandsRoute } from "$lib/commands";
 
-    // Based on Rust Rodio fade effect (Please check player.rs)
-    let pauseDelay = 400;
-    let title = $state(MusicConfig.defaultTitle);
-    let artist = $state(MusicConfig.defaultArtist);
-    let albumImage = $state(MusicConfig.defaultAlbumImage);
+// Based on Rust Rodio fade effect (Please check player.rs)
+let pauseDelay = 400;
+let title = $state(MusicConfig.defaultTitle);
+let artist = $state(MusicConfig.defaultArtist);
+let albumImage = $state(MusicConfig.defaultAlbumImage);
 
-    let isPlaying = $state(MusicController.isPlaying());
-    let progressPercentage = $state(MusicController.progressPercentage());
-    let navigationBarHeight = $state(0);
+let isPlaying = $state(MusicController.isPlaying());
+let progressPercentage = $state(MusicController.progressPercentage());
+let navigationBarHeight = $state(0);
 
-    musicProgressValue.subscribe(updateStates);
-    musicCurrent.subscribe(updateStates);
-    musicIsPlaying.subscribe(updateStates);
+musicProgressValue.subscribe(updateStates);
+musicCurrent.subscribe(updateStates);
+musicIsPlaying.subscribe(updateStates);
 
-    function handleButtonPlayPause() {
-        if (MusicController.currentMusic() === null || MusicController.isProgressValueEnd()) return;
+function handleButtonPlayPause() {
+	if (
+		MusicController.currentMusic() === null ||
+		MusicController.isProgressValueEnd()
+	)
+		return;
 
-        if (MusicController.isPlaying()) {
-            MusicController.setIsPlaying(false);
-            setTimeout(MusicController.pause, pauseDelay);
-        } else MusicController.play();
+	if (MusicController.isPlaying()) {
+		MusicController.setIsPlaying(false);
+		setTimeout(MusicController.pause, pauseDelay);
+	} else MusicController.play();
 
-        updateStates();
-    }
+	updateStates();
+}
 
-    function handleButtonNext() {
-        MusicController.nextMusic();
-    }
+function handleButtonNext() {
+	MusicController.nextMusic();
+}
 
-    function onPlayerBarChange() {
-        if (MusicController.isProgressValueEnd()) {
-            MusicController.setProgressValue(0);
-            return;
-        }
+function onPlayerBarChange() {
+	if (MusicController.isProgressValueEnd()) {
+		MusicController.setProgressValue(0);
+		return;
+	}
 
-        if (MusicController.isProgressValueEnd()) {
-            MusicController.addMusic(MusicController.currentMusic()!);
-        }
+	if (MusicController.isProgressValueEnd()) {
+		MusicController.addMusic(MusicController.currentMusic()!);
+	}
 
-        MusicController.sendCommandSetPosition(
-            MusicController.realProgressDuration(),
-        );
-    }
+	MusicController.sendCommandSetPosition(
+		MusicController.realProgressDuration(),
+	);
+}
 
-    function updateStates() {
-        isPlaying = MusicController.isPlaying();
-        progressPercentage = MusicController.progressPercentage();
+function updateStates() {
+	isPlaying = MusicController.isPlaying();
+	progressPercentage = MusicController.progressPercentage();
 
-        let music = MusicController.currentMusic();
-        if (music == null) return;
+	let music = MusicController.currentMusic();
+	if (music == null) return;
 
-        title = music.title!;
-        artist = MusicController.getFullArtistFromMusic(music);
-        albumImage = MusicController.currentMusicAlbumImage();
-    }
+	title = music.title!;
+	artist = MusicController.getFullArtistFromMusic(music);
+	albumImage = MusicController.currentMusicAlbumImage();
+}
 
-    async function onKeyDown(
-        e: KeyboardEvent & {
-            currentTarget: EventTarget & Document;
-        },
-    ) {
-        if (e.key === " ") handleButtonPlayPause();
-    }
+async function onKeyDown(
+	e: KeyboardEvent & {
+		currentTarget: EventTarget & Document;
+	},
+) {
+	if (e.key === " ") handleButtonPlayPause();
+}
 
-    async function getNavigationBarHeight() {
-        const navbarHeight = await invoke<number>(CommandsRoute.GET_NAVIGATION_BAR_HEIGHT);
-        navigationBarHeight = navbarHeight > 32 ? 32 : navbarHeight;
-    }
-    if (isMobile()) getNavigationBarHeight();
+async function getNavigationBarHeight() {
+	const navbarHeight = await invoke<number>(
+		CommandsRoute.GET_NAVIGATION_BAR_HEIGHT,
+	);
+	navigationBarHeight = navbarHeight > 32 ? 32 : navbarHeight;
+}
+if (isMobile()) getNavigationBarHeight();
 </script>
 
 <svelte:document onkeydown={onKeyDown} />

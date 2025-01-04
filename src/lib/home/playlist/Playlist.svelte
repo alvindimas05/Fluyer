@@ -1,53 +1,52 @@
 <script lang="ts">
-	import { musicCurrent, musicsNext } from "$lib/stores/music";
-	import PlaylistItem from "./PlaylistItem.svelte";
-	import { isMobile } from "$lib/platform";
-	import { swipeable } from "@react2svelte/swipeable";
-	import type { SwipeEventData } from "@react2svelte/swipeable";
+import { musicCurrent, musicsNext } from "$lib/stores/music";
+import PlaylistItem from "./PlaylistItem.svelte";
+import { isMobile } from "$lib/platform";
+import { swipeable } from "@react2svelte/swipeable";
+import type { SwipeEventData } from "@react2svelte/swipeable";
 
-	let isMouseInsideArea = $state(false);
-	let animationClass = $state("");
+let isMouseInsideArea = $state(false);
+let animationClass = $state("");
 
-	function onMouseMove(
-		e: MouseEvent & {
-			currentTarget: EventTarget & Document;
-		},
+function onMouseMove(
+	e: MouseEvent & {
+		currentTarget: EventTarget & Document;
+	},
+) {
+	if (isMobile()) return;
+	if (
+		e.clientX > window.innerWidth - 20 &&
+		e.clientY <= window.innerHeight - 8 * 16 &&
+		!isMouseInsideArea
 	) {
-		if (isMobile()) return;
-		if (
-			e.clientX > window.innerWidth - 20 &&
-			e.clientY <= window.innerHeight - 8 * 16 &&
-			!isMouseInsideArea
-		) {
-			isMouseInsideArea = true;
-			animationClass = "animate__fadeInRight";
-		}
+		isMouseInsideArea = true;
+		animationClass = "animate__fadeInRight";
 	}
+}
 
-	function onMouseLeave(
-		e: MouseEvent & {
-			currentTarget: EventTarget & HTMLDivElement;
-		},
-	) {
-		if (!isMouseInsideArea) return;
+function onMouseLeave(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	if (!isMouseInsideArea) return;
+	animationClass = "animate__fadeOutRight";
+}
+
+function onAnimationEnd() {
+	if (animationClass != "animate__fadeOutRight") return;
+	isMouseInsideArea = false;
+}
+
+function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
+	if (!isMobile() || (e.detail.initial[1] < 250 && !isMouseInsideArea)) return;
+	if (e.detail.deltaX < -100 && !isMouseInsideArea) {
+		isMouseInsideArea = true;
+		animationClass = "animate__fadeInRight";
+	} else if (e.detail.deltaX > 100 && isMouseInsideArea) {
 		animationClass = "animate__fadeOutRight";
 	}
-
-	function onAnimationEnd() {
-		if (animationClass != "animate__fadeOutRight") return;
-		isMouseInsideArea = false;
-	}
-
-	function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
-		if (!isMobile() || (e.detail.initial[1] < 250 && !isMouseInsideArea))
-			return;
-		if (e.detail.deltaX < -100 && !isMouseInsideArea) {
-			isMouseInsideArea = true;
-			animationClass = "animate__fadeInRight";
-		} else if (e.detail.deltaX > 100 && isMouseInsideArea) {
-			animationClass = "animate__fadeOutRight";
-		}
-	}
+}
 </script>
 
 <svelte:body use:swipeable on:swiped={onSwipeLeft} />
