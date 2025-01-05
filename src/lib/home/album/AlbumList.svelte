@@ -3,6 +3,8 @@
     import { musicList } from "$lib/stores/music";
     import AlbumItem from "./AlbumItem.svelte";
     import MusicController from "$lib/controllers/MusicController";
+    import { swipeMinimumTop } from "$lib/stores";
+    import { onMount } from "svelte";
 
     let element: HTMLDivElement;
     let grouppedAlbums = $state(groupByAlbum());
@@ -33,11 +35,20 @@
             currentTarget: EventTarget & HTMLDivElement;
         },
     ) {
-        e.preventDefault();
-        element.scrollLeft += e.deltaY;
+        if(e.deltaX == -0){
+            e.preventDefault();
+            element.scrollLeft += e.deltaY;
+        }
     }
 
-    musicList.subscribe(() => (grouppedAlbums = groupByAlbum()));
+    onMount(() => {
+        musicList.subscribe(() => {
+            grouppedAlbums = groupByAlbum();
+            setTimeout(() => {
+                $swipeMinimumTop = element.clientHeight;
+            }, 1);
+        });
+    });
 </script>
 
 <div

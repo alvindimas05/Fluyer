@@ -4,6 +4,7 @@ import PlaylistItem from "./PlaylistItem.svelte";
 import { isMobile } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
+    import { swipeMinimumTop } from "$lib/stores";
 
 let isMouseInsideArea = $state(false);
 let animationClass = $state("");
@@ -40,7 +41,7 @@ function onAnimationEnd() {
 
 // FIXME: Swipe area based on AlbumList height
 function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
-	if (!isMobile() || (e.detail.initial[1] < 250 && !isMouseInsideArea)) return;
+	if (!isMobile() || (e.detail.initial[1] < $swipeMinimumTop && !isMouseInsideArea)) return;
 	if (e.detail.deltaX < -100 && !isMouseInsideArea) {
 		isMouseInsideArea = true;
 		animationClass = "animate__fadeInRight";
