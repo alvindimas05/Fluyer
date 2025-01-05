@@ -11,9 +11,8 @@ use std::time::Duration;
 use tauri::Emitter;
 #[cfg(mobile)]
 use tauri_plugin_fluyer::models::WatcherStateType;
+#[cfg(mobile)]
 use tauri_plugin_fluyer::FluyerExt;
-// #[cfg(mobile)]
-// use tauri_plugin_fluyer::FluyerExt;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 
 use crate::GLOBAL_APP_HANDLE;
