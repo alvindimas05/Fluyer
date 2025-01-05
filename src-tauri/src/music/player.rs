@@ -129,7 +129,8 @@ pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
         .fluyer()
         .watch_headset_change(move |_payload| {
             // sender_sink_reset.send(payload.value).unwrap();
-            // FIXME: Reset Sink after headset plugged/unplugged. Probably not possible but let's see...
+            // FIXME: Reset Sink after headset plugged/unplugged. 
+            // Note: Probably not possible but let's see...
             GLOBAL_APP_HANDLE
                 .get()
                 .unwrap()
