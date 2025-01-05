@@ -39,7 +39,6 @@ function onAnimationEnd() {
 	isMouseInsideArea = false;
 }
 
-// FIXME: Swipe area based on AlbumList height
 function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
 	if (!isMobile() || (e.detail.initial[1] < $swipeMinimumTop && !isMouseInsideArea)) return;
 	if (e.detail.deltaX < -100 && !isMouseInsideArea) {
