@@ -35,7 +35,6 @@ pub enum MusicState {
     #[default]
     Pause,
 }
-// FIXME: Android Music Player requires restart app when audio jack is connected/disconnected
 pub struct MusicPlayer {
     command: Sender<MusicCommand>,
     position: Sender<Duration>,
