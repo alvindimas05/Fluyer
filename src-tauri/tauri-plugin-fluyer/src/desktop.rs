@@ -51,7 +51,7 @@ impl<R: Runtime> Fluyer<R> {
     pub(crate) fn watch_state_inner(&self, _channel: Channel) -> crate::Result<WatchStateResponse> {
         Ok(WatchStateResponse { value: false })
     }
-    
+
     pub fn watch_headset_change<F: Fn(WatcherHeadsetChange) + Send + Sync + 'static>(
         &self,
         _callback: F,
@@ -64,6 +64,10 @@ impl<R: Runtime> Fluyer<R> {
         _channel: Channel,
     ) -> crate::Result<WatchHeadsetChangeResponse> {
         Ok(WatchHeadsetChangeResponse { value: false })
+    }
+
+    pub fn restart_app(&self) -> crate::Result<()> {
+        Ok(())
     }
 }
 

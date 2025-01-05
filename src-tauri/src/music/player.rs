@@ -122,6 +122,7 @@ pub fn handle_music_player_background() {
         .expect("Failed to watch app state");
 }
 
+#[cfg(mobile)]
 pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
 ) {
     GLOBAL_APP_HANDLE
@@ -131,8 +132,16 @@ pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
         .watch_headset_change(move |_payload| {
             // sender_sink_reset.send(payload.value).unwrap();
             // FIXME: Reset Sink after headset plugged/unplugged. Probably not possible but let's see...
-            // FIXME: As workaround, restart app but with UI button and saves music state when headset plugged/unplugged on mobile
-            // GLOBAL_APP_HANDLE.get().unwrap();
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .emit(crate::commands::route::MUSIC_HEADSET_CHANGE, ())
+                .unwrap_or_else(|_| {
+                    eprintln!(
+                        "Failed to emit {}",
+                        crate::commands::route::MUSIC_HEADSET_CHANGE
+                    )
+                });
         })
         .expect("Failed to watch headset change");
 }
@@ -152,10 +161,6 @@ fn spawn() -> (
     let (sender_next_position, receiver_next_position) = unbounded();
     let (sender_player_playlist, receiver_player_playlist) = unbounded();
     // let (sender_sink_reset, receiver_sink_reset) = unbounded();
-
-    handle_headset_change(
-        // sender_sink_reset
-    );
 
     ThreadBuilder::default()
         .name("Music Player Next")
@@ -221,13 +226,12 @@ fn spawn_next_listener(
                 .get()
                 .unwrap()
                 .emit(crate::commands::route::MUSIC_PLAYLIST_ADD, ())
-                .expect(
-                    format!(
+                .unwrap_or_else(|_| {
+                    eprintln!(
                         "Failed to emit {}",
                         crate::commands::route::MUSIC_PLAYLIST_ADD
                     )
-                    .as_str(),
-                );
+                });
         }
 
         if let Ok(position) = receiver_next_position.try_recv() {
@@ -254,13 +258,12 @@ fn spawn_next_listener(
                         .get()
                         .expect("Failed to get GLOBAL_APP_HANDLE")
                         .emit(crate::commands::route::MUSIC_PLAYER_NEXT, ())
-                        .expect(
-                            format!(
+                        .unwrap_or_else(|_| {
+                            eprintln!(
                                 "Failed to emit {}",
                                 crate::commands::route::MUSIC_PLAYER_NEXT
                             )
-                            .as_str(),
-                        );
+                        });
                 }
                 playlist.remove(0);
             }
@@ -335,7 +338,7 @@ fn play(
             //         .emit(crate::commands::route::MUSIC_PLAYLIST_ADD, ())
             //         .expect("Can't emit music_playlist_add");
             // } else {
-            //     log::error!("Failed to get GLOBAL_APP_HANDLE");
+            //     eprintln!("Failed to get GLOBAL_APP_HANDLE");
             // }
         }
 
@@ -344,8 +347,8 @@ fn play(
                 .send(position)
                 .expect("Failed to send sender_next_position");
             if let Err(err) = sink.try_seek(position) {
-                log::error!("Failed to change position of music");
-                log::error!("{:#}", err);
+                eprintln!("Failed to change position of music");
+                eprintln!("{:#}", err);
             }
         }
 
@@ -357,9 +360,9 @@ fn play(
                     crate::commands::route::MUSIC_GET_INFO,
                     get_music_player_info(&sink),
                 )
-                .expect(
-                    format!("Failed to emit {}", crate::commands::route::MUSIC_GET_INFO).as_str(),
-                );
+                .unwrap_or_else(|_| {
+                    eprintln!("Failed to emit {}", crate::commands::route::MUSIC_GET_INFO)
+                });
         }
 
         thread::sleep(Duration::from_millis(100));
@@ -371,7 +374,7 @@ fn sink_add_music(sink: &Sink, path: String) {
         let source = rodio::Decoder::new(BufReader::new(file)).expect("Failed to read file");
         sink.append(source);
     } else {
-        log::error!("Failed to open file: {}", path);
+        eprintln!("Failed to open file: {}", path);
     }
 }
 

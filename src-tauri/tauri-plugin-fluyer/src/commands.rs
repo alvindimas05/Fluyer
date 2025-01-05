@@ -44,3 +44,9 @@ pub async fn watch_state<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Res
 pub async fn watch_headset_change<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<WatchHeadsetChangeResponse> {
     app.fluyer().watch_headset_change_inner(channel)
 }
+
+#[tauri::command]
+#[specta::specta]
+pub async fn restart_app<R: Runtime>(app: AppHandle<R>) -> Result<()> {
+    app.fluyer().restart_app()
+}

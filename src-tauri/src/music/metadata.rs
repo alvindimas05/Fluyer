@@ -46,7 +46,7 @@ impl MusicMetadata {
         let src = match std::fs::File::open(&path) {
             Ok(file) => file,
             Err(_) => {
-                log::error!("Can't open music at path: {}", &path);
+                eprintln!("Can't open music at path: {}", &path);
                 return metadata;
             }
         };
@@ -64,7 +64,7 @@ impl MusicMetadata {
         ) {
             Ok(probed) => probed,
             Err(_) => {
-                log::error!("Unsupported format music: {}", &path);
+                eprintln!("Unsupported format music: {}", &path);
                 return metadata;
             }
         };
@@ -114,7 +114,7 @@ impl MusicMetadata {
         let track = match format.default_track() {
             Some(track) => track,
             None => {
-                log::error!("Can't find the track of music: {}", &path);
+                eprintln!("Can't find the track of music: {}", &path);
                 return metadata;
             }
         };
@@ -122,7 +122,7 @@ impl MusicMetadata {
         let sample_rate = match track.codec_params.sample_rate {
             Some(sample_rate) => sample_rate,
             None => {
-                log::error!("Unknown sample rate of music: {}", &path);
+                eprintln!("Unknown sample rate of music: {}", &path);
                 return metadata;
             }
         };
@@ -130,7 +130,7 @@ impl MusicMetadata {
         let total_frames = match track.codec_params.n_frames {
             Some(total_frames) => total_frames,
             None => {
-                log::error!("Unknown sample of frames of music: {}", &path);
+                eprintln!("Unknown sample of frames of music: {}", &path);
                 return metadata;
             }
         };

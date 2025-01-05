@@ -22,7 +22,7 @@ tauri = { version = "2.1.1", features = ["macos-private-api"] }
 tauri-plugin-shell = "2.2.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rodio = { git = "https://github.com/RustAudio/rodio.git", rev = "1d01704", features = ["symphonia-all"] }
+rodio = { git = "https://github.com/RustAudio/rodio.git", rev = "ea45c17", features = ["symphonia-all"] }
 anyhow = "1.0.89"
 symphonia = "0.5.4"
 log = "0.4.22"

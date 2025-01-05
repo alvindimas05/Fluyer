@@ -17,6 +17,7 @@
 		"os:default",
 		"fs:default",
 		"fluyer:allow-toast",
+		"fluyer:allow-restart-app",
 		"fluyer:allow-check-permissions",
 		"fluyer:deny-check-permissions",
 		{

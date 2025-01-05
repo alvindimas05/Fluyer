@@ -19,6 +19,7 @@ import android.content.IntentFilter
 import app.tauri.plugin.JSObject
 import app.tauri.plugin.Channel
 import android.util.Log
+import java.lang.Runtime
 
 class FluyerMain(private val activity: Activity) {
     var headsetChangeChannel: Channel? = null
@@ -65,5 +66,13 @@ class FluyerMain(private val activity: Activity) {
         } else {
             0
         }
+    }
+    
+    fun restartApp() {
+        val context = activity.applicationContext
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val mainIntent = Intent.makeRestartActivityTask(intent!!.component)
+        context.startActivity(mainIntent)
+        Runtime.getRuntime().exit(0);
     }
 }

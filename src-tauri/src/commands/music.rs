@@ -81,7 +81,12 @@ pub fn music_request_directory(app: AppHandle) {
         GLOBAL_APP_HANDLE
             .get()
             .unwrap()
-            .emit(crate::commands::route::MUSIC_REQUEST_DIR, ())
-            .expect(format!("Failed to emit {}", crate::commands::route::MUSIC_REQUEST_DIR).as_str())
+            .emit(crate::commands::route::MUSIC_REQUEST_DIRECTORY, ())
+            .unwrap_or_else(|_| {
+                eprintln!(
+                    "Failed to emit {}",
+                    crate::commands::route::MUSIC_REQUEST_DIRECTORY
+                )
+            })
     });
 }

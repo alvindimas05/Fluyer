@@ -1,8 +1,13 @@
-const COMMANDS: &[&str] = &["toast", "check_permissions", "request_permissions"];
+const COMMANDS: &[&str] = &[
+    "toast",
+    "check_permissions",
+    "request_permissions",
+    "restart_app",
+];
 
 fn main() {
-  tauri_plugin::Builder::new(COMMANDS)
-    .android_path("android")
-    .ios_path("ios")
-    .build();
+    tauri_plugin::Builder::new(COMMANDS)
+        .android_path("android")
+        .ios_path("ios")
+        .build();
 }

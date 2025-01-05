@@ -11,6 +11,6 @@ pub fn init_store(app: &mut App) {
         .store(GLOBAL_STORE_NAME)
         .expect("Failed to initialize store.");
     if GLOBAL_APP_STORE.set(store).is_err() {
-        log::error!("Failed to set GLOBAL_APP_STORE");
+        eprintln!("Failed to set GLOBAL_APP_STORE");
     }
 }

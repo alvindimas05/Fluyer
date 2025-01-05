@@ -77,6 +77,7 @@ pub fn run() {
                 #[cfg(mobile)]
                 {
                     crate::music::player::handle_music_player_background();
+                    crate::music::player::handle_headset_change();
                 }
             }
         });

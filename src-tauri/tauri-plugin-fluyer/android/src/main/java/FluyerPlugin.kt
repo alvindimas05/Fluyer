@@ -104,4 +104,10 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
         implementation.watchHeadsetChange()
         invoke.resolve(JSObject().put("value", true))
     }
+    
+    @Command
+    fun restartApp(invoke: Invoke) {
+        implementation.restartApp()
+        invoke.resolve()
+    }
 }

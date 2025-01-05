@@ -3,6 +3,7 @@
 Default permissions for the plugin
 
 - `allow-toast`
+- `allow-restart-app`
 - `allow-check-permissions`
 - `allow-request-permissions`
 
@@ -63,6 +64,32 @@ Enables the request_permissions command without any pre-configured scope.
 <td>
 
 Denies the request_permissions command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`fluyer:allow-restart-app`
+
+</td>
+<td>
+
+Enables the restart_app command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`fluyer:deny-restart-app`
+
+</td>
+<td>
+
+Denies the restart_app command without any pre-configured scope.
 
 </td>
 </tr>

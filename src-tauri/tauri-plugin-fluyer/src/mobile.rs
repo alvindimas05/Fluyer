@@ -120,6 +120,12 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("watchHeadsetChange", WatchHeadsetChangePayload { channel })
             .map_err(Into::into)
     }
+
+    pub fn restart_app(&self) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("restartApp", ())
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]

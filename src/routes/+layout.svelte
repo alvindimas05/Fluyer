@@ -8,6 +8,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { isMobile } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import { CommandsRoute } from "$lib/commands";
+import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
 interface Props {
 	children?: import("svelte").Snippet;
 }
@@ -36,4 +37,7 @@ MusicController.listenNextMusic();
 >
     {@render children?.()}
 </div>
+{#if isMobile()}
+    <HeadsetChange/>
+{/if}
 <TitleBar />

@@ -24,7 +24,6 @@ loadingShow.subscribe(() => {
 
 LoadingController.listen();
 </script>
-
 {#if isLoadingDone}
     {#if $musicList === null}
         <Intro />
