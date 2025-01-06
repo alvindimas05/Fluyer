@@ -7,6 +7,5 @@ You can grab the alpha version on the Releases page or just [click this](https:/
 ![Preview App](preview.png)
 
 ## Credits
-- [Music Icons](https://www.flaticon.com/packs/music-249)
+- [Thank you, Freepik for the free Icons](https://www.flaticon.com/authors/special/lineal/2?author_id=1)
 - [Default/Empty Album Cover](https://www.freepik.com/free-vector/music-notes-rainbow-colourful-with-vinyl-record-white-backgro_24459713.htm)
-- [Title Bar Buttons](https://www.flaticon.com/authors/sonnycandra)
