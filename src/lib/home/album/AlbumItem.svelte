@@ -46,6 +46,7 @@ async function sortMusicList() {
 
 async function addMusicListAndPlay() {
 	music.image = albumImage;
+	sortMusicList();
 	await MusicController.clear();
 	await MusicController.addMusicList(musicList);
 	MusicController.play(true);

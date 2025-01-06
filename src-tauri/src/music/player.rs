@@ -213,13 +213,12 @@ fn spawn_next_listener(
 ) {
     let ms_countdown: u64 = 100;
     let mut counter = MUSIC_NEXT_COUNTER.lock().unwrap();
-    let mut music_playlist = MUSIC_PLAYLIST.lock().unwrap();
     let mut current_music_duration: u128 = 0;
     loop {
-        // if receiver_clear.try_recv().is_ok() {
-        //     music_playlist.clear();
-        //     *counter = 0;
-        // }
+        if receiver_clear.try_recv().is_ok() {
+            MUSIC_PLAYLIST.lock().unwrap().clear();
+            *counter = 0;
+        }
 
         if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
             thread::sleep(Duration::from_millis(ms_countdown));
@@ -255,6 +254,7 @@ fn spawn_next_listener(
             *counter = 0;
         }
 
+        let mut music_playlist = MUSIC_PLAYLIST.lock().unwrap();
         if *counter <= 0 && !music_playlist.is_empty() {
             #[cfg(mobile)]
             {
