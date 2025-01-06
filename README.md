@@ -1,5 +1,5 @@
 # Fluyer
-Music Player with Beautiful UI, Lightweight Performance (Desktop Only :)), and Cross-Platform.
+Music Player with Beautiful UI, Lightweight Performance (Not sure on mobile), and Cross-Platform.
 
 ## Installation
 You can grab the alpha version on the Releases page or just [click this](https://github.com/alvindimas05/Fluyer/releases/tag/v0.0.1-alpha).
