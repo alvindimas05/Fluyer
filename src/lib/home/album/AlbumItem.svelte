@@ -46,14 +46,9 @@ async function sortMusicList() {
 
 async function addMusicListAndPlay() {
 	music.image = albumImage;
-	const previousMusic = MusicController.currentMusic();
-	console.log(musicList);
+	await MusicController.clear();
 	await MusicController.addMusicList(musicList);
-	if (
-		previousMusic === null ||
-		(!previousMusic !== null && MusicController.isCurrentMusicFinished())
-	)
-		MusicController.play();
+	MusicController.play(true);
 }
 
 onMount(() => {

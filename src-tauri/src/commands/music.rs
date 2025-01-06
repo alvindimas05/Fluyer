@@ -17,16 +17,10 @@ pub static STORE_PATH_NAME: &str = "music-path";
 #[tauri::command]
 pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String) {
     let mut state = state.lock().unwrap();
-    if command == "play" {
-        state.music_player.play().expect("Can't play music player.");
-    } else if command == "pause" || command == "stop" {
-        state
-            .music_player
-            .pause()
-            .expect("Can't pause music player.");
-    } else if command == "next" {
-        state.music_player.next().expect("Can't next music player.");
-    }
+    state
+        .music_player
+        .send_command(command.clone())
+        .unwrap_or_else(|_| eprintln!("Failed to send command {}", command));
 }
 
 #[tauri::command]

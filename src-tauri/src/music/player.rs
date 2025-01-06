@@ -19,11 +19,14 @@ use crate::GLOBAL_APP_HANDLE;
 
 use super::metadata::MusicMetadata;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub enum MusicCommand {
+    #[default]
+    None,
     Pause,
     Play,
     Next,
+    Clear,
     // WeakPause,
     // WeakPlay,
 }
@@ -73,14 +76,15 @@ impl MusicPlayer {
             info: music_spawn.3,
         }
     }
-    pub fn play(&mut self) -> Result<(), SendError<MusicCommand>> {
-        self.command.send(MusicCommand::Play)
-    }
-    pub fn pause(&mut self) -> Result<(), SendError<MusicCommand>> {
-        self.command.send(MusicCommand::Pause)
-    }
-    pub fn next(&mut self) -> Result<(), SendError<MusicCommand>> {
-        self.command.send(MusicCommand::Next)
+    pub fn send_command(&mut self, command: String) -> Result<(), SendError<MusicCommand>> {
+        let _command = match command.as_str() {
+            "play" => MusicCommand::Play,
+            "pause" | "stop" => MusicCommand::Pause,
+            "next" => MusicCommand::Next,
+            "clear" => MusicCommand::Clear,
+            _ => MusicCommand::None,
+        };
+        self.command.send(_command)
     }
     pub fn set_pos(&mut self, position: u64) -> Result<(), SendError<Duration>> {
         self.position.send(Duration::from_millis(position))
@@ -129,7 +133,7 @@ pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
         .fluyer()
         .watch_headset_change(move |_payload| {
             // sender_sink_reset.send(payload.value).unwrap();
-            // FIXME: Reset Sink after headset plugged/unplugged. 
+            // FIXME: Reset Sink after headset plugged/unplugged.
             // Note: Probably not possible but let's see...
             GLOBAL_APP_HANDLE
                 .get()
@@ -159,6 +163,7 @@ fn spawn() -> (
     let (sender_next_playlist, receiver_next_playlist) = unbounded();
     let (sender_next_position, receiver_next_position) = unbounded();
     let (sender_player_playlist, receiver_player_playlist) = unbounded();
+    let (sender_clear, receiver_clear) = unbounded();
     // let (sender_sink_reset, receiver_sink_reset) = unbounded();
 
     ThreadBuilder::default()
@@ -168,6 +173,7 @@ fn spawn() -> (
                 receiver_next_playlist,
                 receiver_next,
                 receiver_next_position,
+                receiver_clear,
                 sender_player_playlist,
             );
         })
@@ -185,6 +191,7 @@ fn spawn() -> (
                 // receiver_sink_reset,
                 sender_next,
                 sender_next_position,
+                sender_clear,
             );
         })
         .expect("Failed to create music thread");
@@ -201,12 +208,19 @@ fn spawn_next_listener(
     receiver_playlist: Receiver<Vec<String>>,
     receiver_next: Receiver<()>,
     receiver_next_position: Receiver<Duration>,
+    receiver_clear: Receiver<()>,
     sender_player_playlist: Sender<Vec<String>>,
 ) {
     let ms_countdown: u64 = 100;
     let mut counter = MUSIC_NEXT_COUNTER.lock().unwrap();
+    let mut music_playlist = MUSIC_PLAYLIST.lock().unwrap();
     let mut current_music_duration: u128 = 0;
     loop {
+        // if receiver_clear.try_recv().is_ok() {
+        //     music_playlist.clear();
+        //     *counter = 0;
+        // }
+
         if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
             thread::sleep(Duration::from_millis(ms_countdown));
             continue;
@@ -241,8 +255,7 @@ fn spawn_next_listener(
             *counter = 0;
         }
 
-        let mut playlist = MUSIC_PLAYLIST.lock().unwrap();
-        if *counter <= 0 && !playlist.is_empty() {
+        if *counter <= 0 && !music_playlist.is_empty() {
             #[cfg(mobile)]
             {
                 if *MUSIC_IS_BACKGROUND.lock().unwrap() {
@@ -252,7 +265,7 @@ fn spawn_next_listener(
             }
 
             if !is_receiving_playlist {
-                if playlist.len() > 1 {
+                if music_playlist.len() > 1 {
                     GLOBAL_APP_HANDLE
                         .get()
                         .expect("Failed to get GLOBAL_APP_HANDLE")
@@ -264,9 +277,9 @@ fn spawn_next_listener(
                             )
                         });
                 }
-                playlist.remove(0);
+                music_playlist.remove(0);
             }
-            if let Some(music) = playlist.first() {
+            if let Some(music) = music_playlist.first() {
                 current_music_duration = music.duration.unwrap();
                 sender_player_playlist
                     .send(vec![music.path.clone()])
@@ -291,6 +304,7 @@ fn play(
     // receiver_sink_reset: Receiver<bool>,
     sender_next: Sender<()>,
     sender_next_position: Sender<Duration>,
+    sender_clear: Sender<()>,
 ) {
     let stream_handle =
         rodio::OutputStreamBuilder::open_default_stream().expect("Failed to open default stream");
@@ -319,12 +333,15 @@ fn play(
                 MusicCommand::Next => {
                     sender_next.send(()).expect("Failed to send sender_next");
                     sink.skip_one();
-                } // MusicCommand::WeakPause => fade(&sink, true),
-                  // MusicCommand::WeakPlay => {
-                  //     if state == MusicState::Playing {
-                  //         fade(&sink, false);
-                  //     }
-                  // }
+                }
+                MusicCommand::Clear => {
+                    sender_clear.send(()).expect("Failed to send sender_clear");
+                    sink.clear();
+                }
+                MusicCommand::None => {} // MusicCommand::WeakPause => fade(&sink, true),
+                                         // MusicCommand::WeakPlay => {
+                                         //     fade(&sink, false);
+                                         // }
             }
         }
 
