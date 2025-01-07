@@ -54,7 +54,7 @@ function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full md:w-[50%] lg:w-[25%] ps-3 md:ps-0 pe-3 pt-8
+	class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full sm:w-[70%] md:w-[50%] tb:w-[40%] lg:w-[40%] xl:w-[25%] ps-3 md:ps-0 pe-3 pt-8
     ${isMouseInsideArea ? "" : "hidden"}`}
 	onmouseleave={onMouseLeave}
 >
@@ -68,10 +68,10 @@ function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
 			<p class="text-[1.5rem] font-semibold p-3">Playlist</p>
 			<div class="flex-1 w-full overflow-auto scrollbar-hidden">
 				{#if $musicCurrent}
-					<PlaylistItem music={$musicCurrent} isPlaying={true} />
+					<PlaylistItem music={$musicCurrent} index={0} isPlaying={true} />
 				{/if}
-				{#each $musicsNext as music}
-					<PlaylistItem {music} />
+				{#each $musicsNext as music, index}
+					<PlaylistItem {music} index={index + 1} />
 				{/each}
 			</div>
 		</div>

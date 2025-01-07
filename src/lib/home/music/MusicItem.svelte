@@ -38,7 +38,7 @@ onMount(checkAlbumImage);
 <div
     class="grid grid-cols-[max-content_auto] py-2 animate__animated animate__fadeInDown animate__slow"
 >
-    <button class="w-12 h-12 lg:w-16 lg:h-16 relative" onclick={addMusicAndPlay}>
+    <button class="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 relative" onclick={addMusicAndPlay}>
         <div
             class="music-item-play bg-black bg-opacity-40 absolute grid w-full h-full
         justify-items-center items-center animate__animated animate__faster animate__fadeOut rounded"
@@ -49,7 +49,7 @@ onMount(checkAlbumImage);
                 alt="Play"
             />
         </div>
-        <img class="rounded" src={albumImage} alt="Album" />
+        <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
     </button>
     <div class="ms-3">
         <p class="font-medium">{music.title}</p>

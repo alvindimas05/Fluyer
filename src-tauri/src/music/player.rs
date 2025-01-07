@@ -43,6 +43,7 @@ pub struct MusicPlayer {
     position: Sender<Duration>,
     playlist: Sender<Vec<String>>,
     info: Sender<()>,
+    playlist_remove: Sender<usize>,
 }
 
 #[derive(Clone, Serialize)]
@@ -75,6 +76,7 @@ impl MusicPlayer {
             position: music_spawn.1,
             playlist: music_spawn.2,
             info: music_spawn.3,
+            playlist_remove: music_spawn.4,
         }
     }
     pub fn send_command(&mut self, command: String) -> Result<(), SendError<MusicCommand>> {
@@ -95,6 +97,9 @@ impl MusicPlayer {
     }
     pub fn add_playlist(&mut self, playlist: Vec<String>) -> Result<(), SendError<Vec<String>>> {
         self.playlist.send(playlist)
+    }
+    pub fn remove_playlist(&mut self, index: usize) -> Result<(), SendError<usize>> {
+        self.playlist_remove.send(index)
     }
 }
 
@@ -155,6 +160,7 @@ fn spawn() -> (
     Sender<Duration>,
     Sender<Vec<String>>,
     Sender<()>,
+    Sender<usize>,
 ) {
     let (sender_command, receiver_command) = unbounded();
     let (sender_position, receiver_position) = unbounded();
@@ -165,6 +171,7 @@ fn spawn() -> (
     let (sender_next_position, receiver_next_position) = unbounded();
     let (sender_player_playlist, receiver_player_playlist) = unbounded();
     let (sender_clear, receiver_clear) = unbounded();
+    let (sender_playlist_remove, receiver_playlist_remove) = unbounded();
     // let (sender_sink_reset, receiver_sink_reset) = unbounded();
 
     ThreadBuilder::default()
@@ -175,6 +182,7 @@ fn spawn() -> (
                 receiver_next,
                 receiver_next_position,
                 receiver_clear,
+                receiver_playlist_remove,
                 sender_player_playlist,
             );
         })
@@ -201,6 +209,7 @@ fn spawn() -> (
         sender_position,
         sender_next_playlist,
         sender_info,
+        sender_playlist_remove,
     )
 }
 
@@ -210,6 +219,7 @@ fn spawn_next_listener(
     receiver_next: Receiver<()>,
     receiver_next_position: Receiver<Duration>,
     receiver_clear: Receiver<()>,
+    receiver_playlist_remove: Receiver<usize>,
     sender_player_playlist: Sender<Vec<String>>,
 ) {
     let ms_countdown: u64 = 100;
@@ -232,6 +242,10 @@ fn spawn_next_listener(
                         crate::commands::route::MUSIC_CONTROLLER
                     )
                 });
+        }
+
+        if let Ok(playlist_remove_index) = receiver_playlist_remove.try_recv() {
+            MUSIC_PLAYLIST.lock().unwrap().remove(playlist_remove_index);
         }
 
         if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
@@ -367,7 +381,7 @@ fn play(
             // if let Some(app_handle) = GLOBAL_APP_HANDLE.get() {
             //     app_handle
             //         .emit(crate::commands::route::MUSIC_PLAYLIST_ADD, ())
-            //         .expect("Can't emit music_playlist_add");
+            //         .expect("Failed to emit music_playlist_add");
             // } else {
             //     eprintln!("Failed to get GLOBAL_APP_HANDLE");
             // }

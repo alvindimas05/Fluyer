@@ -46,7 +46,7 @@ impl MusicMetadata {
         let src = match std::fs::File::open(&path) {
             Ok(file) => file,
             Err(_) => {
-                eprintln!("Can't open music at path: {}", &path);
+                eprintln!("Failed to open music at path: {}", &path);
                 return metadata;
             }
         };
@@ -114,7 +114,7 @@ impl MusicMetadata {
         let track = match format.default_track() {
             Some(track) => track,
             None => {
-                eprintln!("Can't find the track of music: {}", &path);
+                eprintln!("Failed to find the track of music: {}", &path);
                 return metadata;
             }
         };

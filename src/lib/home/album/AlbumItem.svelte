@@ -72,7 +72,7 @@
 </script>
 
 <div
-    class={`px-3 pb-6 lg:pt-6 text-white row-[1] col-auto ${animationClasses}`}
+    class={`px-3 pb-6 text-white row-[1] col-auto ${animationClasses}`}
 >
     <div class="relative w-full">
         <div

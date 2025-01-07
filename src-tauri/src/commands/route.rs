@@ -12,3 +12,4 @@ pub const MUSIC_REQUEST_DIRECTORY: &str = "music_request_directory";
 // pub const REQUEST_READ_AUDIO_PERMISSION: &str = "request_read_audio_permission";
 #[cfg(mobile)]
 pub const MUSIC_HEADSET_CHANGE: &str = "music_headset_change";
+// pub const MUSIC_PLAYLIST_REMOVE: &str = "music_playlist_remove";

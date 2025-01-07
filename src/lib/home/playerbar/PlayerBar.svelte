@@ -108,15 +108,15 @@ if (isMobile()) getNavigationBarHeight();
         <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
             <div class="flex items-center">
                 <!-- TODO: Button Previous Functionality -->
-                <button class="w-8 lg:w-10 invert mx-2"
+                <button class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
                     ><img
                         class="music-icon"
-                        src="/icons/default/previous.png"
+                        src={MusicConfig.defaultPreviousButton}
                         alt="Icon Previous"
                     /></button
                 >
                 <button
-                    class="w-8 lg:w-10 invert mx-2"
+                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonPlayPause}
                     ><img
                         class="music-icon"
@@ -127,11 +127,11 @@ if (isMobile()) getNavigationBarHeight();
                     /></button
                 >
                 <button
-                    class="w-8 lg:w-10 invert mx-2"
+                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonNext}
                     ><img
                         class="music-icon"
-                        src="/icons/default/next.png"
+                        src={MusicConfig.defaultNextButton}
                         alt="Icon Next"
                     /></button
                 >
@@ -142,7 +142,7 @@ if (isMobile()) getNavigationBarHeight();
                 <div
                     class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
                 >
-                    <img class="rounded" src={albumImage} alt="Album" />
+                    <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
                     <div class="ms-3 overflow-hidden">
                         <p class="font-medium">
                             {title}

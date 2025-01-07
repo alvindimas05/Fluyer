@@ -5,7 +5,7 @@ import logHandler from "$lib/handlers/log";
 import "../app.scss";
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
 import { invoke } from "@tauri-apps/api/core";
-import { isMobile } from "$lib/platform";
+import { isDesktop, isMobile } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import { CommandsRoute } from "$lib/commands";
 import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
@@ -32,8 +32,8 @@ MusicController.listenNextMusic();
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
 <AnimatedBackground />
 <div
-    class="w-screen h-screen fixed overflow-x-hidden scrollbar-hidden lg:pt-6"
-    style={`padding-top: ${statusBarHeight}px`}
+    class={`w-screen h-screen fixed overflow-x-hidden scrollbar-hidden pt-6`}
+    style={isMobile() ? `padding-top: ${statusBarHeight}px` : ""}
 >
     {@render children?.()}
 </div>

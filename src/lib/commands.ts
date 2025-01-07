@@ -8,6 +8,7 @@ export const CommandsRoute = {
     MUSIC_PLAYLIST_ADD: "music_playlist_add",
     MUSIC_REQUEST_DIRECTORY: "music_request_directory",
     MUSIC_HEADSET_CHANGE: "music_headset_change",
+    MUSIC_PLAYLIST_REMOVE: "music_playlist_remove",
 
     CHECK_READ_AUDIO_PERMISSION: "check_read_audio_permission",
     REQUEST_READ_AUDIO_PERMISSION: "request_read_audio_permission",

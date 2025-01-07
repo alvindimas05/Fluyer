@@ -29,7 +29,7 @@ pub fn music_position_set(state: State<'_, Mutex<AppState>>, position: u64) {
     state
         .music_player
         .set_pos(position)
-        .expect("Can't set music player position.");
+        .expect("Failed to set music player position");
 }
 
 #[tauri::command]
@@ -38,7 +38,7 @@ pub fn music_get_info(state: State<'_, Mutex<AppState>>) {
     state
         .music_player
         .get_info()
-        .expect("Can't get music player position.");
+        .expect("Failed to get music player position");
 }
 
 #[tauri::command]
@@ -52,7 +52,7 @@ pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<Strin
     state
         .music_player
         .add_playlist(playlist)
-        .expect("Can't set playlist.");
+        .expect("Failed to set playlist");
 }
 
 #[cfg(desktop)]
@@ -83,4 +83,10 @@ pub fn music_request_directory(app: AppHandle) {
                 )
             })
     });
+}
+
+#[tauri::command]
+pub fn music_playlist_remove(state: State<'_, Mutex<AppState>>, index: usize){
+    let mut state = state.lock().unwrap();
+    state.music_player.remove_playlist(index).expect("Failed to remove playlist")
 }
