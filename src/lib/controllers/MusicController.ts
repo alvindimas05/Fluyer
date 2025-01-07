@@ -99,7 +99,9 @@ const MusicController = {
             (MusicController.currentMusicDuration() / MusicConfig.max) *
             MusicConfig.step *
             1000;
-
+        
+        MusicController.resetProgress();
+        MusicController.stopProgress();
         musicProgressIntervalId.set(
             setInterval(() => {
                 MusicController.setProgressValue(
@@ -126,10 +128,10 @@ const MusicController = {
 
     listenNextMusic: () => {
         listen(CommandsRoute.MUSIC_PLAYER_NEXT, () => {
-            MusicController.resetProgress();
             const nextMusics = MusicController.nextMusics();
             if (nextMusics.length > 0) {
                 MusicController.setCurrentMusic(nextMusics[0]);
+                MusicController.startProgress();
                 MusicController.play(!MusicController.isPlaying());
             } else {
                 MusicController.pause();
@@ -207,9 +209,16 @@ const MusicController = {
     clear: async () => {
         MusicController.stopProgress();
         MusicController.resetProgress();
-        MusicController.setCurrentMusic(null);
         MusicController.setNextMusics([]);
         await MusicController.sendCommandController("clear");
+        return new Promise<void>(async (resolve, _) => {
+            const unlisten = await listen("music_controller", (e) => {
+                if (e.payload === "clear") {
+                    resolve();
+                    unlisten();
+                }
+            });
+        });
     },
     sendCommandController: async (command: string) => {
         await invoke(CommandsRoute.MUSIC_CONTROLLER, { command });
@@ -222,19 +231,10 @@ const MusicController = {
     },
 
     addMusic: async (music: MusicData) => {
-        if (MusicController.isCurrentMusicFinished()) {
-            MusicController.setCurrentMusic(music);
-            await MusicController.addMusicToPlayList(music.path);
-        } else {
-            if (MusicController.nextMusics().length < 2) {
-                await MusicController.addMusicToPlayList(music.path);
-            }
-            MusicController.addNextMusics([music]);
-        }
+        await MusicController.addMusicList([music]);
     },
-    addMusicToPlayList: async (musicPath: string) => {
-        await MusicController.addMusicListToPlayList([musicPath]);
-    },
+    addMusicToPlayList: async (path: string) =>
+        await MusicController.addMusicListToPlayList([path]),
     addMusicListToPlayList: async (musicPaths: string[]) => {
         await invoke(CommandsRoute.MUSIC_PLAYLIST_ADD, {
             playlist: musicPaths,
@@ -242,15 +242,22 @@ const MusicController = {
     },
 
     addMusicList: async (musicDataList: MusicData[]) => {
-        if (MusicController.isCurrentMusicFinished()) {
-            const firstMusic = musicDataList.shift()!;
-            MusicController.setCurrentMusic(firstMusic);
-            await MusicController.addMusicToPlayList(firstMusic.path);
+        let isCurrentMusicSet = false;
+        if (
+            MusicController.isCurrentMusicFinished() &&
+            musicDataList.length > 0
+        ) {
+            isCurrentMusicSet = true;
+            MusicController.setCurrentMusic(musicDataList[0]);
         }
-        if (musicDataList.length !== 0) {
-            await MusicController.addMusicToPlayList(musicDataList[0].path);
-            MusicController.addNextMusics(musicDataList);
-        }
+
+        MusicController.addNextMusics(
+            isCurrentMusicSet ? musicDataList.slice(1) : musicDataList,
+        );
+
+        let musicPaths: string[] = [];
+        musicDataList.forEach((music) => musicPaths.push(music.path));
+        MusicController.addMusicListToPlayList(musicPaths);
     },
 
     nextMusics: () => get(musicsNext),

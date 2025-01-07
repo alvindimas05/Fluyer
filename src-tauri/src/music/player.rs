@@ -19,7 +19,8 @@ use crate::GLOBAL_APP_HANDLE;
 
 use super::metadata::MusicMetadata;
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum MusicCommand {
     #[default]
     None,
@@ -218,6 +219,19 @@ fn spawn_next_listener(
         if receiver_clear.try_recv().is_ok() {
             MUSIC_PLAYLIST.lock().unwrap().clear();
             *counter = 0;
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .emit(
+                    crate::commands::route::MUSIC_CONTROLLER,
+                    MusicCommand::Clear,
+                )
+                .unwrap_or_else(|_| {
+                    eprintln!(
+                        "Failed to emit {}",
+                        crate::commands::route::MUSIC_CONTROLLER
+                    )
+                });
         }
 
         if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
@@ -244,10 +258,6 @@ fn spawn_next_listener(
                         crate::commands::route::MUSIC_PLAYLIST_ADD
                     )
                 });
-        }
-
-        if let Ok(position) = receiver_next_position.try_recv() {
-            *counter = (current_music_duration - position.as_millis()) as i128;
         }
 
         if receiver_next.try_recv().is_ok() {
@@ -287,6 +297,11 @@ fn spawn_next_listener(
                 *counter = music.duration.unwrap() as i128;
             }
         }
+
+        if let Ok(position) = receiver_next_position.try_recv() {
+            *counter = (current_music_duration - position.as_millis()) as i128;
+        }
+
         if *counter > 0 {
             *counter -= ms_countdown as i128;
         }
