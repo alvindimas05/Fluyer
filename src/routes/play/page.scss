@@ -8,22 +8,3 @@
         @apply mt-[-6px] invisible;
     }
 }
-
-.music-icon {
-    -webkit-filter: invert(1);
-    filter: invert(1);
-}
-
-.btn-music-player {
-    .btn-music-player-animation {
-        animation-name: btn-music-player-click;
-        animation-duration: 1s;
-        animation-timing-function: ease;
-    }
-}
-
-@keyframes btn-music-player-click-animation {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.75); }
-    100% { transform: scale(1); }
-}

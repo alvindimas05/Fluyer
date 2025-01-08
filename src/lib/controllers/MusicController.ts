@@ -70,8 +70,9 @@ const MusicController = {
         }
     },
 
-    getFullArtistFromMusic: (music: MusicData) => {
-        if (music.artist === null) return "";
+    getFullArtistFromMusic: (music: MusicData | null) => {
+        if (music === null || music.artist === null)
+            return MusicConfig.defaultArtist;
         return music.artist.replace(/\|\|/g, " • ");
     },
 
@@ -92,11 +93,31 @@ const MusicController = {
         MusicController.currentMusic() != null
             ? (MusicController.progressValue() / MusicConfig.max) *
               MusicController.currentMusicDuration()
-            : -1,
+            : 0,
     realProgressDuration: () => MusicController.progressDuration() * 1000,
     parseProgressDuration: (value: number) => value / 1000,
     parseProgressDurationIntoValue: (value: number, max: number) =>
         (value / max) * MusicConfig.max,
+    parseProgressValueIntoDuration: (value: number, max: number) =>
+        (value / MusicConfig.max) * max,
+
+    progressDurationText: (negative = false): string => {
+        let minutes = 0;
+        let seconds = 0;
+        for (
+            seconds = negative
+                ? MusicController.currentMusicDuration() -
+                  MusicController.progressDuration()
+                : MusicController.progressDuration();
+            seconds >= 60;
+            seconds -= 60
+        ) {
+            minutes++;
+        }
+        if (seconds < 0) seconds = seconds + 60;
+        seconds = Math.round(seconds);
+        return `${negative ? "-" : ""}${minutes}.${seconds > 9 ? seconds : "0" + seconds.toString()}`;
+    },
 
     startProgress: () => {
         const updateInterval =
@@ -216,12 +237,15 @@ const MusicController = {
         MusicController.setNextMusics([]);
         await MusicController.sendCommandController("clear");
         return new Promise<void>(async (resolve, _) => {
-            const unlisten = await listen("music_controller", (e) => {
-                if (e.payload === "clear") {
-                    resolve();
-                    unlisten();
-                }
-            });
+            const unlisten = await listen(
+                CommandsRoute.MUSIC_CONTROLLER,
+                (e) => {
+                    if (e.payload === "clear") {
+                        resolve();
+                        unlisten();
+                    }
+                },
+            );
         });
     },
     sendCommandController: async (command: string) => {

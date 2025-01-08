@@ -110,7 +110,6 @@ if (isMobile()) getNavigationBarHeight();
                 <!-- TODO: Button Previous Functionality -->
                 <button class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
                     ><img
-                        class="music-icon"
                         src={MusicConfig.defaultPreviousButton}
                         alt="Icon Previous"
                     /></button
@@ -119,7 +118,6 @@ if (isMobile()) getNavigationBarHeight();
                     class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonPlayPause}
                     ><img
-                        class="music-icon"
                         src={isPlaying
                             ? MusicConfig.defaultPauseButton
                             : MusicConfig.defaultPlayButton}
@@ -130,7 +128,6 @@ if (isMobile()) getNavigationBarHeight();
                     class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonNext}
                     ><img
-                        class="music-icon"
                         src={MusicConfig.defaultNextButton}
                         alt="Icon Next"
                     /></button
