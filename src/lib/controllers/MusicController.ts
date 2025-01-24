@@ -119,14 +119,15 @@ const MusicController = {
         return `${negative ? "-" : ""}${minutes}.${seconds > 9 ? seconds : "0" + seconds.toString()}`;
     },
 
-    startProgress: () => {
+    startProgress: ({ resetProgress } = { resetProgress: true }) => {
         const updateInterval =
             (MusicController.currentMusicDuration() / MusicConfig.max) *
             MusicConfig.step *
             1000;
 
-        MusicController.resetProgress();
+        if (resetProgress) MusicController.resetProgress();
         MusicController.stopProgress();
+
         musicProgressIntervalId.set(
             setInterval(() => {
                 MusicController.setProgressValue(
@@ -223,7 +224,7 @@ const MusicController = {
     },
     play: (sendCommand: boolean = true) => {
         musicIsPlaying.set(true);
-        MusicController.startProgress();
+        MusicController.startProgress({ resetProgress: false });
         if (sendCommand) MusicController.sendCommandController("play");
     },
     pause: (sendCommand: boolean = true) => {
