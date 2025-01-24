@@ -64,9 +64,21 @@
             MusicController.realProgressDuration(),
         );
     }
+    
+    
+    async function onKeyDown(
+	e: KeyboardEvent & {
+		currentTarget: EventTarget & Document;
+	},
+    ) {
+        if (e.key === " ") handleButtonPlayPause();
+    }
+    
     // Note: Used for testing
     // MusicController.getMusics();
 </script>
+
+<svelte:document onkeydown={onKeyDown} />
 
 <div class="w-full h-full grid items-center justify-center">
     <div class="w-[36rem]">
