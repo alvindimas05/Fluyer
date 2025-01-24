@@ -75,14 +75,14 @@
                 <img class="rounded-lg" src={albumImage} alt="Music Album" />
             </div>
             <div class="w-full grid grid-cols-[auto,1fr,auto] mt-4">
-                <div class="text-sm flex">
+                <div class="text-sm flex w-10">
                     <span class="self-end">{progressDurationText}</span>
                 </div>
                 <div class="font-medium text text-center mt-2">
                     {music?.albumArtist ?? MusicConfig.defaultArtist} - {music?.title ??
                         MusicConfig.defaultTitle}
                 </div>
-                <div class="text-sm flex justify-end">
+                <div class="text-sm flex justify-end w-10">
                     <span class="self-end">{progressDurationNegativeText}</span>
                 </div>
             </div>
