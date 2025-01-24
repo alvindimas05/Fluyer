@@ -14,9 +14,14 @@ fn main() {
 }
 
 fn init_logging() {
+    println!("The log file is saved at {}", temp_dir().display());
     CombinedLogger::init(vec![
         WriteLogger::new(
-            LevelFilter::Warn,
+            if cfg!(debug_assertions) {
+                LevelFilter::Debug
+            } else {
+                LevelFilter::Warn
+            },
             Config::default(),
             File::create(format!("{}/fluyer.log", temp_dir().display())).unwrap(),
         ),

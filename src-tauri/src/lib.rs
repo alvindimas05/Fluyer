@@ -10,6 +10,7 @@ mod file;
 mod music;
 mod platform;
 mod store;
+mod logger;
 
 struct AppState {
     music_player: MusicPlayer,

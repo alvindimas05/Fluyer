@@ -15,7 +15,7 @@ use tauri_plugin_fluyer::models::WatcherStateType;
 use tauri_plugin_fluyer::FluyerExt;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 
-use crate::GLOBAL_APP_HANDLE;
+use crate::{logger, GLOBAL_APP_HANDLE};
 
 use super::metadata::MusicMetadata;
 
@@ -146,7 +146,7 @@ pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
                 .unwrap()
                 .emit(crate::commands::route::MUSIC_HEADSET_CHANGE, ())
                 .unwrap_or_else(|_| {
-                    eprintln!(
+                    logger::error!(
                         "Failed to emit {}",
                         crate::commands::route::MUSIC_HEADSET_CHANGE
                     )
@@ -237,7 +237,7 @@ fn spawn_next_listener(
                     MusicCommand::Clear,
                 )
                 .unwrap_or_else(|_| {
-                    eprintln!(
+                    logger::error!(
                         "Failed to emit {}",
                         crate::commands::route::MUSIC_CONTROLLER
                     )
@@ -267,7 +267,7 @@ fn spawn_next_listener(
                 .unwrap()
                 .emit(crate::commands::route::MUSIC_PLAYLIST_ADD, ())
                 .unwrap_or_else(|_| {
-                    eprintln!(
+                    logger::error!(
                         "Failed to emit {}",
                         crate::commands::route::MUSIC_PLAYLIST_ADD
                     )
@@ -295,7 +295,7 @@ fn spawn_next_listener(
                         .expect("Failed to get GLOBAL_APP_HANDLE")
                         .emit(crate::commands::route::MUSIC_PLAYER_NEXT, ())
                         .unwrap_or_else(|_| {
-                            eprintln!(
+                            logger::error!(
                                 "Failed to emit {}",
                                 crate::commands::route::MUSIC_PLAYER_NEXT
                             )
@@ -383,7 +383,7 @@ fn play(
             //         .emit(crate::commands::route::MUSIC_PLAYLIST_ADD, ())
             //         .expect("Failed to emit music_playlist_add");
             // } else {
-            //     eprintln!("Failed to get GLOBAL_APP_HANDLE");
+            //     logger::error!("Failed to get GLOBAL_APP_HANDLE");
             // }
         }
 
@@ -392,8 +392,8 @@ fn play(
                 .send(position)
                 .expect("Failed to send sender_next_position");
             if let Err(err) = sink.try_seek(position) {
-                eprintln!("Failed to change position of music");
-                eprintln!("{:#}", err);
+                logger::error!("Failed to change position of music");
+                logger::error!("{:#}", err);
             }
         }
 
@@ -406,7 +406,7 @@ fn play(
                     get_music_player_info(&sink),
                 )
                 .unwrap_or_else(|_| {
-                    eprintln!("Failed to emit {}", crate::commands::route::MUSIC_GET_INFO)
+                    logger::error!("Failed to emit {}", crate::commands::route::MUSIC_GET_INFO)
                 });
         }
 
@@ -419,7 +419,7 @@ fn sink_add_music(sink: &Sink, path: String) {
         let source = rodio::Decoder::new(BufReader::new(file)).expect("Failed to read file");
         sink.append(source);
     } else {
-        eprintln!("Failed to open file: {}", path);
+        logger::error!("Failed to open file: {}", path);
     }
 }
 

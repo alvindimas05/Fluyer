@@ -1,6 +1,8 @@
+use crate::logger;
+
 #[tauri::command]
 pub fn log_error(message: String) {
-    eprintln!("{}", message);
+    logger::error!("{}", message);
 }
 
 #[cfg(mobile)]

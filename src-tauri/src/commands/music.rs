@@ -10,7 +10,7 @@ use tauri_plugin_dialog::DialogExt;
 #[cfg(desktop)]
 use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
 
-use crate::{music::metadata::MusicMetadata, AppState};
+use crate::{logger, music::metadata::MusicMetadata, AppState};
 
 pub static STORE_PATH_NAME: &str = "music-path";
 
@@ -20,7 +20,7 @@ pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String) {
     state
         .music_player
         .send_command(command.clone())
-        .unwrap_or_else(|_| eprintln!("Failed to send command {}", command));
+        .unwrap_or_else(|_| logger::error!("Failed to send command {}", command));
 }
 
 #[tauri::command]
