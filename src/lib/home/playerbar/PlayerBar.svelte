@@ -1,6 +1,5 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import "./playerbar.scss";
 import {
 	musicCurrent,
 	musicIsPlaying,
@@ -9,6 +8,7 @@ import {
 import { invoke } from "@tauri-apps/api/core";
 import { isMobile } from "$lib/platform";
 import { CommandsRoute } from "$lib/commands";
+    import { goto } from "$app/navigation";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = 400;
@@ -78,6 +78,10 @@ async function onKeyDown(
 	if (e.key === " ") handleButtonPlayPause();
 }
 
+function redirectToPlay(){
+    goto("/play");
+}
+
 async function getNavigationBarHeight() {
 	const navbarHeight = await invoke<number>(
 		CommandsRoute.GET_NAVIGATION_BAR_HEIGHT,
@@ -139,7 +143,9 @@ if (isMobile()) getNavigationBarHeight();
                 <div
                     class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
                 >
-                    <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
+                    <button onclick={redirectToPlay}>
+                        <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
+                    </button>
                     <div class="ms-3 overflow-hidden">
                         <p class="font-medium">
                             {title}
@@ -155,3 +161,16 @@ if (isMobile()) getNavigationBarHeight();
         </div>
     </div>
 </div>
+
+<style lang="scss">
+    #music-progress-bar {
+        @apply cursor-pointer outline-0;
+        &::-webkit-slider-runnable-track {
+            @apply h-[.2rem] rounded;
+            background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
+        }
+        &::-webkit-slider-thumb {
+            @apply mt-[.2rem] invisible;
+        }
+    }    
+</style>

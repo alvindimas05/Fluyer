@@ -30,6 +30,7 @@ export const MusicConfig = {
     defaultNextButton: "/icons/default/next.png",
     defaultPlaylistRemoveButton: "/icons/default/remove.png",
     defaultPlayingIcon: "/icons/default/playing.png",
+    defaultBackButton: "/icons/default/back.png",
 };
 const MusicController = {
     musicList: () => get(musicList),

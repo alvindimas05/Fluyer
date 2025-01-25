@@ -32,7 +32,7 @@ MusicController.listenNextMusic();
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
 <AnimatedBackground />
 <div
-    class={`w-screen h-screen fixed overflow-x-hidden scrollbar-hidden pt-6`}
+    class={`w-screen h-screen fixed scrollbar-hidden`}
     style={isMobile() ? `padding-top: ${statusBarHeight}px` : ""}
 >
     {@render children?.()}
