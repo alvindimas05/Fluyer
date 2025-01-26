@@ -138,7 +138,7 @@ onMount(async () => {
 <svelte:document onkeydown={onKeyDown} />
 
 <div class="w-full h-full flex items-center justify-center">
-    <div class="h-full grid gap-y-0 md:grid-cols-[40%_55%] justify-center">
+    <div class="h-full grid grid-rows-[auto_30%_auto] md:gap-y-0 md:grid-cols-[40%_55%] justify-center">
         <div class="md:row-[1] md:col-[1] h-fit p-6 md:p-0 self-end">
             <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] text-white aspect-square ms-auto">
                 <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
@@ -174,7 +174,7 @@ onMount(async () => {
                 </div>
                 <div class="w-full grid grid-cols-5 mt-4">
                     <div class="grid items-center">
-                        <button class="w-8 md:w-8 tb:w-8 xl:w-9 invert mx-2"
+                        <button class="w-8 xl:w-9 invert mx-2"
                             onclick={handleButtonBack}
                             ><img
                                 src={MusicConfig.defaultBackButton}
@@ -184,7 +184,7 @@ onMount(async () => {
                     </div>
                     <!-- TODO: Button Previous Functionality -->
                     <div class="flex justify-end">
-                        <button class="w-12 xl:w-11 invert mx-2"
+                        <button class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
                         ><img
                             src={MusicConfig.defaultPreviousButton}
                             alt="Icon Previous"
@@ -193,7 +193,7 @@ onMount(async () => {
                     </div>
                     <div class="flex justify-center">
                         <button
-                            class="w-12 xl:w-11 invert mx-2"
+                            class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
                             onclick={handleButtonPlayPause}
                             ><img
                                 src={$musicIsPlaying
@@ -205,7 +205,7 @@ onMount(async () => {
                     </div>
                     <div class="flex justify-start">
                         <button
-                            class="w-12 xl:w-11 invert mx-2"
+                            class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
                             onclick={handleButtonNext}
                             ><img
                                 src={MusicConfig.defaultNextButton}
@@ -216,10 +216,10 @@ onMount(async () => {
                 </div>
             </div>
         </div>
-        <div class="w-full h-[50%] md:h-full md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
+        <div class="w-full md:h-full md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
             [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
             md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]">
-            <div class="overflow-hidden ps-2">
+            <div class="flex">
                 <div id="lyrics" class="w-full md:w-[55vw] h-fit md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
                     {#each lyrics as lyric, i}
                         {#if selectedLyricIndex == i}
