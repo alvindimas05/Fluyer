@@ -133,7 +133,7 @@ onMount(async () => {
 <svelte:document onkeydown={onKeyDown} />
 
 <div class="w-full h-full flex items-center justify-center">
-    <div class="h-full grid gap-y-0 md:grid-cols-[40%_55%] justify-center">
+    <div class="h-full grid gap-y-0 grid-rows-[auto_25%_auto] md:grid-cols-[40%_55%] justify-center">
         <div class="md:row-[1] md:col-[1] h-fit p-6 md:p-0 self-end">
             <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] text-white aspect-square ms-auto">
                 <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
@@ -211,8 +211,8 @@ onMount(async () => {
                 </div>
             </div>
         </div>
-        <div class="w-full md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,0))]">
-            <div class="overflow-hidden">
+        <div class="w-full md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_70%,rgba(0,0,0,0))]">
+            <!-- <div class="overflow-hidden"> -->
                 <div id="lyrics" class="w-full md:w-[55vw] h-fit md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
                     {#each lyrics as lyric, i}
                         {#if selectedLyricIndex == i}
@@ -222,7 +222,7 @@ onMount(async () => {
                         {/if}
                     {/each}
                 </div>    
-            </div>
+            <!-- </div> -->
         </div>
     </div>
 </div>
