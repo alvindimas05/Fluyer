@@ -2,6 +2,7 @@ use std::path::Path;
 use std::time::Duration;
 
 use base64::Engine;
+use regex::Regex;
 use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
@@ -108,9 +109,20 @@ impl MusicMetadata {
                     Some(base64::engine::general_purpose::STANDARD.encode(visual.data.clone()));
             }
         }
-        
-        if metadata.artist.is_none() {
-            metadata.title = metadata.clone().filename;
+
+        if metadata.title.is_none() || metadata.artist.is_none() {
+            if let Some((artist, title)) = MusicMetadata::get_artist_title_from_file_name(
+                metadata.filename.clone().unwrap().as_str(),
+            ) {
+                if metadata.title.is_none() {
+                    metadata.title = Some(title);
+                }
+                if metadata.artist.is_none() {
+                    metadata.artist = Some(artist);
+                }
+            } else {
+                metadata.title = metadata.filename.clone();
+            }
         }
 
         let track = match format.default_track() {
@@ -145,5 +157,35 @@ impl MusicMetadata {
 
     fn get_value(&self, tag: &Tag) -> Option<String> {
         Some(tag.value.to_string())
+    }
+
+    fn get_artist_title_from_file_name(file_name: &str) -> Option<(String, String)> {
+        let without_extension = file_name
+            .rsplit_once('.')
+            .map(|(name, _)| name)
+            .unwrap_or(file_name);
+
+        let patterns = vec![
+            Regex::new(r"^(.*)\s-\s(.*)$").unwrap(),  // "Artist - Title"
+            Regex::new(r"^(.*)\sby\s(.*)$").unwrap(), // "Title by Artist"
+            Regex::new(r"^(.*)_(.*)$").unwrap(),      // "Artist_Title"
+            Regex::new(r"^(.*)\s-\s(.*)\s\(.*\)$").unwrap(), // "Artist - Title (Remix)"
+            Regex::new(r"^(.*)\s-\s(.*)\[.*\]$").unwrap(), // "Artist - Title [Remastered]"
+        ];
+
+        for pattern in patterns {
+            if let Some(captures) = pattern.captures(without_extension) {
+                let artist = captures.get(1).map_or("", |m| m.as_str()).to_string();
+                let title = captures.get(2).map_or("", |m| m.as_str()).to_string();
+
+                if pattern.as_str().contains("by") {
+                    return Some((title, artist));
+                }
+
+                return Some((artist, title));
+            }
+        }
+
+        None
     }
 }

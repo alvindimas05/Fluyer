@@ -7,6 +7,9 @@
     import MusicController, {
         MusicConfig,
     } from "$lib/controllers/MusicController";
+    import API from "$lib/api/api";
+    import type MusicLyric from "$lib/home/music/lyric";
+    import { onMount } from "svelte";
 
     // Based on Rust Rodio fade effect (Please check player.rs)
     let pauseDelay = 400;
@@ -17,16 +20,22 @@
         MusicController.progressDurationText(true),
     );
     let albumImage = $state(MusicConfig.defaultAlbumImage);
-
+    
+    let lyrics: MusicLyric[] = $state([]);
+    let selectedLyricIndex = $state(0);
+    
     musicProgressValue.subscribe(() => {
         progressPercentage = MusicController.progressPercentage();
         progressDurationText = MusicController.progressDurationText();
         progressDurationNegativeText =
             MusicController.progressDurationText(true);
+        
+        resetSelectedLyricIndex();
     });
     musicCurrent.subscribe(() => {
         music = MusicController.currentMusic();
         albumImage = MusicController.currentMusicAlbumImage();
+        resetLyrics();
     });
 
     function handleButtonPlayPause() {
@@ -64,7 +73,7 @@
         );
     }
     
-    function backToHome(){
+    function handleButtonBack(){
         window.history.back();
     }
     
@@ -76,6 +85,38 @@
         if (e.key === " ") handleButtonPlayPause();
     }
     
+    async function resetLyrics(){
+        selectedLyricIndex = 0;
+        
+        if(MusicController.currentMusic() == null) return;
+        const resLyrics = await API.getLyrics(MusicController.currentMusic()!);
+        if(resLyrics == null) return;
+        lyrics = resLyrics;
+    }
+    
+    function resetSelectedLyricIndex(){
+        if(lyrics.length < 1) return;
+        
+        if(MusicController.progressDuration() < lyrics[0].duration){
+            document.getElementById("selected-lyric")?.scrollIntoView({ block: window.innerWidth > 768 ? 'center' : 'start',  behavior: 'smooth' });
+            return;
+        }
+        // Using for loop since it's the fastest. Just in case though :)
+        for(var i = 0; i < lyrics.length; i++){
+            if(MusicController.progressDuration() < lyrics[i].duration){
+                selectedLyricIndex = i - 1;
+                document.getElementById("selected-lyric")?.scrollIntoView({ block: window.innerWidth > 768 ? 'center' : 'start',  behavior: 'smooth' });
+                return;
+            }
+        }
+        document.getElementById("lyrics")?.scrollIntoView({ block: 'end',  behavior: 'smooth' });
+    }
+    
+    onMount(async () => {
+        await resetLyrics();
+        resetSelectedLyricIndex();
+    });
+    
     // Note: Used for testing
     // MusicController.getMusics();
 </script>
@@ -85,23 +126,22 @@
 <div class="w-full h-full flex items-center justify-center">
     <div class="h-full grid gap-y-0 md:grid-cols-[40%_55%] justify-center">
         <div class="md:row-[1] md:col-[1] h-fit p-6 md:p-0 self-end">
-            <div class="w-full md:w-[60%] text-white aspect-square ms-auto">
+            <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] text-white aspect-square ms-auto">
                 <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
                 <!-- <img class="rounded-lg w-full [mask-image:radial-gradient(rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
                 <img class="rounded-lg w-full" src={albumImage} alt="Music Album" />
             </div>
         </div>
-        <div class="md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 h-fit">
-            <div class="w-full md:w-[60%] ms-auto">
+        <div class="md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 pb-10 md:pb-0 h-fit">
+            <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%]  ms-auto">
                 <div class="grid grid-cols-[auto,1fr,auto] mt-4 ms-auto">
-                    <div class="text-xs lg:text-sm flex w-10">
+                    <div class="text-xs lg:text-sm flex w-12">
                         <span class="self-end opacity-75">{progressDurationText}</span>
                     </div>
-                    <div class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90">
-                        {music?.albumArtist ?? MusicConfig.defaultArtist} - {music?.title ??
-                            MusicConfig.defaultTitle}
+                    <div class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90 text-ellipsis overflow-hidden whitespace-nowrap ">
+                        {music?.albumArtist ?? MusicConfig.defaultArtist} - {music?.title ?? MusicConfig.defaultTitle}
                     </div>
-                    <div class="text-xs lg:text-sm flex justify-end w-10">
+                    <div class="text-xs lg:text-sm flex justify-end w-12">
                         <span class="self-end opacity-75">{progressDurationNegativeText}</span>
                     </div>
                 </div>
@@ -120,8 +160,8 @@
                 </div>
                 <div class="w-full grid grid-cols-5 mt-4">
                     <div class="grid items-center">
-                        <button class="w-6 md:w-8 tb:w-8 xl:w-9 invert mx-2"
-                            onclick={backToHome}
+                        <button class="w-8 md:w-8 tb:w-8 xl:w-9 invert mx-2"
+                            onclick={handleButtonBack}
                             ><img
                                 src={MusicConfig.defaultBackButton}
                                 alt="Icon Back"
@@ -130,7 +170,7 @@
                     </div>
                     <!-- TODO: Button Previous Functionality -->
                     <div class="flex justify-end">
-                        <button class="w-10 xl:w-11 invert mx-2"
+                        <button class="w-12 xl:w-11 invert mx-2"
                         ><img
                             src={MusicConfig.defaultPreviousButton}
                             alt="Icon Previous"
@@ -139,7 +179,7 @@
                     </div>
                     <div class="flex justify-center">
                         <button
-                            class="w-10 xl:w-11 invert mx-2"
+                            class="w-12 xl:w-11 invert mx-2"
                             onclick={handleButtonPlayPause}
                             ><img
                                 src={$musicIsPlaying
@@ -151,7 +191,7 @@
                     </div>
                     <div class="flex justify-start">
                         <button
-                            class="w-10 xl:w-11 invert mx-2"
+                            class="w-12 xl:w-11 invert mx-2"
                             onclick={handleButtonNext}
                             ><img
                                 src={MusicConfig.defaultNextButton}
@@ -162,17 +202,17 @@
                 </div>
             </div>
         </div>
-        <div class="md:row-[1/span_2] md:col-[2] mx-6 md:mx-20 overflow-auto scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,0))]">
-            <div class="w-full h-fit md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
-                <p class="py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
-                <p class="opacity-50 py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
-                <p class="opacity-50 py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
-                <p class="opacity-50 py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
-                <p class="opacity-50 py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
-                <p class="opacity-50 py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
-                <p class="opacity-50 py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
-                <p class="opacity-50 py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
-                <p class="opacity-50 py-5 md:py-10">Lorem Ipsum Dolor Sit Amet</p>
+        <div class="w-full md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,0))]">
+            <div class="overflow-hidden">
+                <div id="lyrics" class="w-full md:w-[55vw] h-fit md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
+                    {#each lyrics as lyric, i}
+                        {#if selectedLyricIndex == i}
+                            <p id="selected-lyric" class="text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
+                        {:else}
+                            <p class="opacity-50 py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
+                        {/if}
+                    {/each}
+                </div>    
             </div>
         </div>
     </div>
@@ -191,4 +231,17 @@
             @apply mt-[-6px] invisible;
         }
     }
+    
+    /* @keyframes grow-grid {
+      from {
+        grid-template-columns: 40% 0%;
+      }
+      to {
+        grid-template-columns: 40% 55%;
+      }
+    }
+
+    .animate-grow-grid {
+      animation: grow-grid 1s ease-in-out;
+    } */
 </style>

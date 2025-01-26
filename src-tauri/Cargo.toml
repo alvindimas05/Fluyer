@@ -37,3 +37,4 @@ tauri-plugin-fs = "2"
 tauri-plugin-fluyer = { path = "./tauri-plugin-fluyer" }
 crossbeam-channel = "0.5.14"
 android_logger = "0.14.1"
+regex = "1.11.1"
