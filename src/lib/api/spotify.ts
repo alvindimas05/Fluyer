@@ -39,7 +39,7 @@ export default class SpotifyApi {
 	}
 
 	public async searchMusic(music: MusicData): Promise<SpotifyMusic | null> {
-	    return null;
+		return null;
 		// await this.auth();
 
 		// const url = new URL(`${this.apiEndpoint}/search`);

@@ -1,74 +1,69 @@
 <script lang="ts">
-    import SpotifyApi from "$lib/api/spotify";
-    import { onMount } from "svelte";
-    import type { MusicData } from "../music/types";
-    import MusicController, {
-        MusicConfig,
-    } from "$lib/controllers/MusicController";
+import SpotifyApi from "$lib/api/spotify";
+import { onMount } from "svelte";
+import type { MusicData } from "../music/types";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 
-    interface Props {
-        musicList: MusicData[];
-        index: number;
-    }
+interface Props {
+	musicList: MusicData[];
+	index: number;
+}
 
-    let { musicList, index }: Props = $props();
-    let music = musicList[0];
+let { musicList, index }: Props = $props();
+let music = musicList[0];
 
-    const animationDelay = 200;
-    let animationClasses = $state("hidden");
-    let isSorted = false;
+const animationDelay = 200;
+let animationClasses = $state("hidden");
+let isSorted = false;
 
-    const spotifyApi = new SpotifyApi();
-    let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
+const spotifyApi = new SpotifyApi();
+let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
-    async function checkAlbumImage() {
-        if (music.image !== null) return;
-        const spotifyMusic = await spotifyApi.searchMusic(music);
-        if (spotifyMusic == null) return;
-        albumImage = spotifyMusic?.imageUrl;
-        musicList = musicList.map((m) => {
-            m.image = albumImage;
-            return m;
-        });
-    }
+async function checkAlbumImage() {
+	if (music.image !== null) return;
+	const spotifyMusic = await spotifyApi.searchMusic(music);
+	if (spotifyMusic == null) return;
+	albumImage = spotifyMusic?.imageUrl;
+	musicList = musicList.map((m) => {
+		m.image = albumImage;
+		return m;
+	});
+}
 
-    async function sortMusicList() {
-        const hasTrackNumber = music.trackNumber != null;
-        musicList = musicList.sort((a, b) => {
-            if (hasTrackNumber) {
-                if (
-                    a.trackNumber?.includes("/") ||
-                    b.trackNumber?.includes("/")
-                ) {
-                    a.trackNumber = a.trackNumber!.split("/")[0];
-                    b.trackNumber = b.trackNumber!.split("/")[0];
-                }
-                return +a.trackNumber! - +b.trackNumber!;
-            } else {
-                return a.filename.localeCompare(b.filename);
-            }
-        });
-    }
+async function sortMusicList() {
+	const hasTrackNumber = music.trackNumber != null;
+	musicList = musicList.sort((a, b) => {
+		if (hasTrackNumber) {
+			if (a.trackNumber?.includes("/") || b.trackNumber?.includes("/")) {
+				a.trackNumber = a.trackNumber!.split("/")[0];
+				b.trackNumber = b.trackNumber!.split("/")[0];
+			}
+			return +a.trackNumber! - +b.trackNumber!;
+		} else {
+			return a.filename.localeCompare(b.filename);
+		}
+	});
+}
 
-    async function addMusicListAndPlay() {
-        music.image = albumImage;
-        if (!isSorted) {
-            isSorted = true;
-            sortMusicList();
-        }
-        await MusicController.clear();
-        await MusicController.addMusicList(musicList);
-        MusicController.play(true);
-    }
+async function addMusicListAndPlay() {
+	music.image = albumImage;
+	if (!isSorted) {
+		isSorted = true;
+		sortMusicList();
+	}
+	await MusicController.clear();
+	await MusicController.addMusicList(musicList);
+	MusicController.play(true);
+}
 
-    onMount(() => {
-        checkAlbumImage();
-    });
+onMount(() => {
+	checkAlbumImage();
+});
 
-    setTimeout(
-        () => (animationClasses = "animate__animated animate__fadeInDown"),
-        animationDelay * index,
-    );
+setTimeout(
+	() => (animationClasses = "animate__animated animate__fadeInDown"),
+	animationDelay * index,
+);
 </script>
 
 <div

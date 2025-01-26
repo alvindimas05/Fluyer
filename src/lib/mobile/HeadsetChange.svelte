@@ -1,29 +1,29 @@
 <script lang="ts">
-    import { CommandsRoute } from "$lib/commands";
-    import MusicController from "$lib/controllers/MusicController";
-    import { invoke } from "@tauri-apps/api/core";
-    import { listen } from "@tauri-apps/api/event";
+import { CommandsRoute } from "$lib/commands";
+import MusicController from "$lib/controllers/MusicController";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
-    let show = $state(false);
-    let seconds = $state(10);
-    let interval: ReturnType<typeof setInterval> | null = null;
+let show = $state(false);
+let seconds = $state(10);
+let interval: ReturnType<typeof setInterval> | null = null;
 
-    function restartApp() {
-        invoke("plugin:fluyer|restart_app");
-    }
+function restartApp() {
+	invoke("plugin:fluyer|restart_app");
+}
 
-    listen(CommandsRoute.MUSIC_HEADSET_CHANGE, () => {
-        show = true;
-        interval = setInterval(() => {
-            if (seconds > 0) seconds--;
-            else {
-                clearInterval(interval!);
-                restartApp();
-            }
-        }, 1000);
-    });
+listen(CommandsRoute.MUSIC_HEADSET_CHANGE, () => {
+	show = true;
+	interval = setInterval(() => {
+		if (seconds > 0) seconds--;
+		else {
+			clearInterval(interval!);
+			restartApp();
+		}
+	}, 1000);
+});
 
-    MusicController.pause();
+MusicController.pause();
 </script>
 
 {#if show}

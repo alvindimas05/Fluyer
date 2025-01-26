@@ -8,7 +8,7 @@ import {
 import { invoke } from "@tauri-apps/api/core";
 import { isMobile } from "$lib/platform";
 import { CommandsRoute } from "$lib/commands";
-    import { goto } from "$app/navigation";
+import { goto } from "$app/navigation";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = 400;
@@ -78,8 +78,8 @@ async function onKeyDown(
 	if (e.key === " ") handleButtonPlayPause();
 }
 
-function redirectToPlay(){
-    goto("/play");
+function redirectToPlay() {
+	goto("/play");
 }
 
 async function getNavigationBarHeight() {

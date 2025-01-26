@@ -1,54 +1,54 @@
 <script lang="ts">
-    import type { MusicData } from "../music/types";
-    import { musicList } from "$lib/stores/music";
-    import AlbumItem from "./AlbumItem.svelte";
-    import MusicController from "$lib/controllers/MusicController";
-    import { swipeMinimumTop } from "$lib/stores";
-    import { onMount } from "svelte";
+import type { MusicData } from "../music/types";
+import { musicList } from "$lib/stores/music";
+import AlbumItem from "./AlbumItem.svelte";
+import MusicController from "$lib/controllers/MusicController";
+import { swipeMinimumTop } from "$lib/stores";
+import { onMount } from "svelte";
 
-    let element: HTMLDivElement;
-    let grouppedAlbums = $state(groupByAlbum());
+let element: HTMLDivElement;
+let grouppedAlbums = $state(groupByAlbum());
 
-    function groupByAlbum(): MusicData[][] {
-        const albumsMap = MusicController.musicList()!.reduce(
-            (acc, item) => {
-                if (item.album === null || item.album.trim() === "") {
-                    return acc;
-                }
+function groupByAlbum(): MusicData[][] {
+	const albumsMap = MusicController.musicList()!.reduce(
+		(acc, item) => {
+			if (item.album === null || item.album.trim() === "") {
+				return acc;
+			}
 
-                if (!acc[item.album]) {
-                    acc[item.album] = [];
-                }
+			if (!acc[item.album]) {
+				acc[item.album] = [];
+			}
 
-                acc[item.album].push(item);
+			acc[item.album].push(item);
 
-                return acc;
-            },
-            {} as Record<string, MusicData[]>,
-        );
+			return acc;
+		},
+		{} as Record<string, MusicData[]>,
+	);
 
-        return Object.values(albumsMap);
-    }
+	return Object.values(albumsMap);
+}
 
-    function onMouseWheel(
-        e: WheelEvent & {
-            currentTarget: EventTarget & HTMLDivElement;
-        },
-    ) {
-        if(e.deltaX == -0){
-            e.preventDefault();
-            element.scrollLeft += e.deltaY;
-        }
-    }
+function onMouseWheel(
+	e: WheelEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	if (e.deltaX == -0) {
+		e.preventDefault();
+		element.scrollLeft += e.deltaY;
+	}
+}
 
-    onMount(() => {
-        musicList.subscribe(() => {
-            grouppedAlbums = groupByAlbum();
-            setTimeout(() => {
-                $swipeMinimumTop = element.clientHeight;
-            }, 1);
-        });
-    });
+onMount(() => {
+	musicList.subscribe(() => {
+		grouppedAlbums = groupByAlbum();
+		setTimeout(() => {
+			$swipeMinimumTop = element.clientHeight;
+		}, 1);
+	});
+});
 </script>
 
 <div
