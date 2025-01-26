@@ -28,6 +28,7 @@ musicProgressValue.subscribe(() => {
 	progressDurationNegativeText = MusicController.progressDurationText(true);
 
 	resetSelectedLyricIndex();
+	console.log(selectedLyricIndex);
 });
 musicCurrent.subscribe(() => {
 	music = MusicController.currentMusic();
@@ -116,9 +117,13 @@ function resetSelectedLyricIndex() {
 			return;
 		}
 	}
+	selectedLyricIndex = lyrics.length - 1;
 	document
-		.getElementById("lyrics")
-		?.scrollIntoView({ block: "end", behavior: "smooth" });
+		.getElementById("selected-lyric")
+		?.scrollIntoView({
+			block: window.innerWidth > 768 ? "center" : "start",
+			behavior: "smooth",
+		});
 }
 
 onMount(async () => {
@@ -211,8 +216,10 @@ onMount(async () => {
                 </div>
             </div>
         </div>
-        <div class="w-full h-[50%] md:h-full md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]">
-            <div class="overflow-hidden">
+        <div class="w-full h-[50%] md:h-full md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
+            [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
+            md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]">
+            <div class="overflow-hidden ps-2">
                 <div id="lyrics" class="w-full md:w-[55vw] h-fit md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
                     {#each lyrics as lyric, i}
                         {#if selectedLyricIndex == i}
