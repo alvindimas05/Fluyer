@@ -141,8 +141,8 @@ onMount(async () => {
                     <div class="text-xs lg:text-sm flex w-12">
                         <span class="self-end opacity-75">{progressDurationText}</span>
                     </div>
-                    <div class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90 text-ellipsis overflow-hidden whitespace-nowrap ">
-                        {music?.albumArtist ?? MusicConfig.defaultArtist} - {music?.title ?? MusicConfig.defaultTitle}
+                    <div class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90 text-ellipsis overflow-hidden whitespace-nowrap">
+                        {music?.albumArtist ?? music?.artist ?? MusicConfig.defaultArtist} - {music?.title ?? MusicConfig.defaultTitle}
                     </div>
                     <div class="text-xs lg:text-sm flex justify-end w-12">
                         <span class="self-end opacity-75">{progressDurationNegativeText}</span>
