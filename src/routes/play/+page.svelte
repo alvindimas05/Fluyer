@@ -41,8 +41,6 @@ function handleButtonPlayPause() {
 		MusicController.currentMusic() === null ||
 		MusicController.isProgressValueEnd()
 	) {
-		// Note: Used for testing
-		// MusicController.addMusic(MusicController.musicList()![0]);
 		return;
 	}
 
@@ -96,43 +94,34 @@ function resetSelectedLyricIndex() {
 	if (lyrics.length < 1) return;
 
 	if (MusicController.progressDuration() < lyrics[0].duration) {
-		document
-			.getElementById("selected-lyric")
-			?.scrollIntoView({
-				block: window.innerWidth > 768 ? "center" : "start",
-				behavior: "smooth",
-			});
+		document.getElementById("selected-lyric")?.scrollIntoView({
+			block: window.innerWidth > 768 ? "center" : "start",
+			behavior: "smooth",
+		});
 		return;
 	}
-	// Using for loop since it's the fastest. Just in case though :)
+	// Note: Using for loop since it's the fastest. Just in case though :)
 	for (var i = 0; i < lyrics.length; i++) {
 		if (MusicController.progressDuration() < lyrics[i].duration) {
 			selectedLyricIndex = i - 1;
-			document
-				.getElementById("selected-lyric")
-				?.scrollIntoView({
-					block: window.innerWidth > 768 ? "center" : "start",
-					behavior: "smooth",
-				});
+			document.getElementById("selected-lyric")?.scrollIntoView({
+				block: window.innerWidth > 768 ? "center" : "start",
+				behavior: "smooth",
+			});
 			return;
 		}
 	}
 	selectedLyricIndex = lyrics.length - 1;
-	document
-		.getElementById("selected-lyric")
-		?.scrollIntoView({
-			block: window.innerWidth > 768 ? "center" : "start",
-			behavior: "smooth",
-		});
+	document.getElementById("selected-lyric")?.scrollIntoView({
+		block: window.innerWidth > 768 ? "center" : "start",
+		behavior: "smooth",
+	});
 }
 
 onMount(async () => {
 	await resetLyrics();
 	resetSelectedLyricIndex();
 });
-
-// Note: Used for testing
-// MusicController.getMusics();
 </script>
 
 <svelte:document onkeydown={onKeyDown} />
@@ -147,7 +136,7 @@ onMount(async () => {
             </div>
         </div>
         <div class="md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 pb-10 md:pb-0 h-fit">
-            <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%]  ms-auto">
+            <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] ms-auto">
                 <div class="grid grid-cols-[auto,1fr,auto] mt-4 ms-auto">
                     <div class="text-xs lg:text-sm flex w-12">
                         <span class="self-end opacity-75">{progressDurationText}</span>
