@@ -28,7 +28,6 @@ musicProgressValue.subscribe(() => {
 	progressDurationNegativeText = MusicController.progressDurationText(true);
 
 	resetSelectedLyricIndex();
-	console.log(selectedLyricIndex);
 });
 musicCurrent.subscribe(() => {
 	music = MusicController.currentMusic();
@@ -94,28 +93,26 @@ function resetSelectedLyricIndex() {
 	if (lyrics.length < 1) return;
 
 	if (MusicController.progressDuration() < lyrics[0].duration) {
-		document.getElementById("selected-lyric")?.scrollIntoView({
-			block: window.innerWidth > 768 ? "center" : "start",
-			behavior: "smooth",
-		});
+	    scrollToSelectedLyric();
 		return;
 	}
 	// Note: Using for loop since it's the fastest. Just in case though :)
 	for (var i = 0; i < lyrics.length; i++) {
 		if (MusicController.progressDuration() < lyrics[i].duration) {
 			selectedLyricIndex = i - 1;
-			document.getElementById("selected-lyric")?.scrollIntoView({
-				block: window.innerWidth > 768 ? "center" : "start",
-				behavior: "smooth",
-			});
+			scrollToSelectedLyric();
 			return;
 		}
 	}
 	selectedLyricIndex = lyrics.length - 1;
-	document.getElementById("selected-lyric")?.scrollIntoView({
-		block: window.innerWidth > 768 ? "center" : "start",
-		behavior: "smooth",
-	});
+	scrollToSelectedLyric();
+}
+
+function scrollToSelectedLyric(){
+    document.getElementById("selected-lyric")?.scrollIntoView({
+  		block: window.innerWidth > 768 ? "center" : "start",
+  		behavior: "smooth",
+   	});
 }
 
 onMount(async () => {
@@ -126,7 +123,7 @@ onMount(async () => {
 
 <svelte:document onkeydown={onKeyDown} />
 
-<div class="w-full h-full flex items-center justify-center">
+<div class="w-full h-full flex items-center justify-center initial-fade-in">
     <div class="h-full grid grid-rows-[auto_30%_auto] md:gap-y-0 md:grid-cols-[40%_55%] justify-center">
         <div class="md:row-[1] md:col-[1] h-fit p-6 md:p-0 self-end">
             <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] text-white aspect-square ms-auto">
@@ -235,6 +232,15 @@ onMount(async () => {
         &::-webkit-slider-thumb {
             @apply mt-[-6px] invisible;
         }
+    }
+    
+    .initial-fade-in {
+        animation: 2s ease 0s normal forwards 1 fade-in;
+    }
+    @keyframes fade-in {
+        0% { opacity:0; }
+        66% { opacity:0; }
+        100% { opacity:1; }
     }
     
     /* @keyframes grow-grid {
