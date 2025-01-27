@@ -123,99 +123,97 @@ onMount(async () => {
 
 <svelte:document onkeydown={onKeyDown} />
 
-<div class="w-full h-full flex items-center justify-center initial-fade-in">
-    <div class="h-full grid grid-rows-[auto_30%_auto] md:gap-y-0 md:grid-cols-[40%_55%] justify-center">
-        <div class="md:row-[1] md:col-[1] h-fit p-6 md:p-0 self-end">
-            <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] text-white aspect-square ms-auto">
-                <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
-                <!-- <img class="rounded-lg w-full [mask-image:radial-gradient(rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
-                <img class="rounded-lg w-full" src={albumImage} alt="Music Album" />
-            </div>
+<div class="w-full h-full grid grid-rows-[auto_30%_auto] md:gap-y-0 md:grid-cols-[40%_55%]">
+    <div class="md:row-[1] md:col-[1] p-6 md:p-0 flex justify-end items-end">
+        <div class="w-full lg:w-[80%] xl:w-[65%] text-white ms-auto">
+            <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
+            <!-- <img class="rounded-lg w-full [mask-image:radial-gradient(rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
+            <img class="w-full rounded-lg aspect-square" src={albumImage} alt="Music Album" />
         </div>
-        <div class="md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 pb-10 md:pb-0 h-fit">
-            <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] ms-auto">
-                <div class="grid grid-cols-[auto,1fr,auto] mt-4 ms-auto">
-                    <div class="text-xs lg:text-sm flex w-12">
-                        <span class="self-end opacity-75">{progressDurationText}</span>
-                    </div>
-                    <div class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90 text-ellipsis overflow-hidden whitespace-nowrap">
-                        {music?.albumArtist ?? music?.artist ?? MusicConfig.defaultArtist} - {music?.title ?? MusicConfig.defaultTitle}
-                    </div>
-                    <div class="text-xs lg:text-sm flex justify-end w-12">
-                        <span class="self-end opacity-75">{progressDurationNegativeText}</span>
-                    </div>
+    </div>
+    <div class="md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 pb-10 md:pb-0 flex justify-end">
+        <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] ms-auto">
+            <div class="w-full grid grid-cols-[auto,1fr,auto] mt-4 ms-auto">
+                <div class="text-xs lg:text-sm flex w-12">
+                    <span class="self-end opacity-75">{progressDurationText}</span>
                 </div>
-                <div class="w-full mt-[-4px]">
-                    <input
-                        id="music-progress-bar"
-                        class="w-full"
-                        type="range"
-                        style={`--progress-width: ${progressPercentage}%`}
-                        bind:value={$musicProgressValue}
-                        min={MusicConfig.min}
-                        max={MusicConfig.max}
-                        step={MusicConfig.step}
-                        onchange={onPlayerBarChange}
-                    />
+                <div class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90 text-ellipsis overflow-hidden whitespace-nowrap">
+                    {music?.albumArtist ?? music?.artist ?? MusicConfig.defaultArtist} - {music?.title ?? MusicConfig.defaultTitle}
                 </div>
-                <div class="w-full grid grid-cols-5 mt-4">
-                    <div class="grid items-center">
-                        <button class="w-8 xl:w-9 invert mx-2"
-                            onclick={handleButtonBack}
-                            ><img
-                                src={MusicConfig.defaultBackButton}
-                                alt="Icon Back"
-                            /></button
-                        >
-                    </div>
-                    <!-- TODO: Button Previous Functionality -->
-                    <div class="flex justify-end">
-                        <button class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                <div class="text-xs lg:text-sm flex justify-end w-12">
+                    <span class="self-end opacity-75">{progressDurationNegativeText}</span>
+                </div>
+            </div>
+            <div class="w-full mt-[-4px]">
+                <input
+                    id="music-progress-bar"
+                    class="w-full"
+                    type="range"
+                    style={`--progress-width: ${progressPercentage}%`}
+                    bind:value={$musicProgressValue}
+                    min={MusicConfig.min}
+                    max={MusicConfig.max}
+                    step={MusicConfig.step}
+                    onchange={onPlayerBarChange}
+                />
+            </div>
+            <div class="w-full grid grid-cols-5 mt-4">
+                <div class="grid items-center">
+                    <button class="w-8 xl:w-9 invert mx-2"
+                        onclick={handleButtonBack}
                         ><img
-                            src={MusicConfig.defaultPreviousButton}
-                            alt="Icon Previous"
+                            src={MusicConfig.defaultBackButton}
+                            alt="Icon Back"
                         /></button
                     >
-                    </div>
-                    <div class="flex justify-center">
-                        <button
-                            class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
-                            onclick={handleButtonPlayPause}
-                            ><img
-                                src={$musicIsPlaying
-                                    ? MusicConfig.defaultPauseButton
-                                    : MusicConfig.defaultPlayButton}
-                                alt="Icon Play"
-                            /></button
-                        >
-                    </div>
-                    <div class="flex justify-start">
-                        <button
-                            class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
-                            onclick={handleButtonNext}
-                            ><img
-                                src={MusicConfig.defaultNextButton}
-                                alt="Icon Next"
-                            /></button
-                        >
-                    </div>
+                </div>
+                <!-- TODO: Button Previous Functionality -->
+                <div class="flex justify-end">
+                    <button class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                    ><img
+                        src={MusicConfig.defaultPreviousButton}
+                        alt="Icon Previous"
+                    /></button
+                >
+                </div>
+                <div class="flex justify-center">
+                    <button
+                        class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        onclick={handleButtonPlayPause}
+                        ><img
+                            src={$musicIsPlaying
+                                ? MusicConfig.defaultPauseButton
+                                : MusicConfig.defaultPlayButton}
+                            alt="Icon Play"
+                        /></button
+                    >
+                </div>
+                <div class="flex justify-start">
+                    <button
+                        class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        onclick={handleButtonNext}
+                        ><img
+                            src={MusicConfig.defaultNextButton}
+                            alt="Icon Next"
+                        /></button
+                    >
                 </div>
             </div>
         </div>
-        <div class="w-full md:h-full md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
-            [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
-            md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]">
-            <div class="flex">
-                <div id="lyrics" class="w-full md:w-[55vw] h-fit md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
-                    {#each lyrics as lyric, i}
-                        {#if selectedLyricIndex == i}
-                            <p id="selected-lyric" class="text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
-                        {:else}
-                            <p class="opacity-50 py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
-                        {/if}
-                    {/each}
-                </div>    
-            </div>
+    </div>
+    <div class="w-full md:h-screen md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
+        [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
+        md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]">
+        <div class="flex">
+            <div id="lyrics" class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
+                {#each lyrics as lyric, i}
+                    {#if selectedLyricIndex == i}
+                        <p id="selected-lyric" class="text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
+                    {:else}
+                        <p class="opacity-50 py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
+                    {/if}
+                {/each}
+            </div>    
         </div>
     </div>
 </div>
