@@ -12,7 +12,7 @@ const API = {
 				`${music.title} ${music.artist ?? ""}`.trim(),
 			);
 			const res = await axios.get<any[]>(url.toString());
-			if (res.data.length < 1) return null;
+			if (res.data.length < 1 || res.data[0]["syncedLyrics"] == null) return null;
 
 			const rawLyrics = (res.data[0]["syncedLyrics"] as string).split("\n");
 			let lyrics: MusicLyric[] = [];
