@@ -5,6 +5,8 @@ import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
+    import { platform } from "@tauri-apps/plugin-os";
+    import { isDesktop, isMobile } from "$lib/platform";
 
 let element: HTMLDivElement;
 let grouppedAlbums = $state(groupByAlbum());
@@ -52,7 +54,9 @@ onMount(() => {
 </script>
 
 <div
-    class="grid auto-cols-[50%] sm:auto-cols-[33.3334%] md:auto-cols-[25%] tb:auto-cols-[20%] lg:auto-cols-[20%] xl:auto-cols-[16.6667%] grid-rows-[1fr] w-full mt-2 overflow-x-auto scrollbar-hidden"
+    class={`grid auto-cols-[50%] sm:auto-cols-[33.3334%] md:auto-cols-[25%] tb:auto-cols-[20%] lg:auto-cols-[20%]
+    xl:auto-cols-[16.6667%] grid-rows-[1fr] w-full mt-2 overflow-x-auto scrollbar-hidden
+    ${platform() == "macos" && "pt-5"} ${isDesktop() && platform() != "macos" && "pt-6"}`}
     bind:this={element}
     onwheel={onMouseWheel}
 >
