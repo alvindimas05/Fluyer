@@ -180,6 +180,6 @@ jobs:
                 tag: v${{ steps.package-version.outputs.current-version }}
                 name: Fluyer v${{ steps.package-version.outputs.current-version }}
                 allowUpdates: true
+                prerelease: true
                 artifactErrorsFailBuild: false
-                draft: true
                 token: ${{ secrets.GITHUB_TOKEN }}
