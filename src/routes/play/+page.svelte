@@ -125,14 +125,14 @@ onMount(async () => {
 
 <div class="w-full h-full grid grid-rows-[auto_30%_auto] md:gap-y-0 md:grid-cols-[40%_55%] initial-fade-in">
     <div class="md:row-[1] md:col-[1] p-6 md:p-0 flex justify-end items-end">
-        <div class="w-full lg:w-[80%] xl:w-[65%] text-white ms-auto">
+        <div class="w-full md:w-[80%] xl:w-[65%] text-white ms-auto">
             <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
             <!-- <img class="rounded-lg w-full [mask-image:radial-gradient(rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
             <img class="w-full rounded-lg aspect-square" src={albumImage} alt="Music Album" />
         </div>
     </div>
     <div class="md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 pb-10 md:pb-0 flex justify-end">
-        <div class="w-full md:w-[100%] tb:w-[100%] lg:w-[80%] xl:w-[65%] ms-auto">
+        <div class="w-full md:w-[80%] xl:w-[65%] ms-auto">
             <div class="w-full grid grid-cols-[auto,1fr,auto] mt-4 ms-auto">
                 <div class="text-xs lg:text-sm flex w-12">
                     <span class="self-end opacity-75">{progressDurationText}</span>
