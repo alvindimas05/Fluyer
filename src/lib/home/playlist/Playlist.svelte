@@ -30,7 +30,7 @@ function onMouseLeave(
 		currentTarget: EventTarget & HTMLDivElement;
 	},
 ) {
-	if (!isMouseInsideArea) return;
+	if (!isMouseInsideArea || e.clientX >= window.innerWidth) return;
 	animationClass = "animate__fadeOutRight";
 }
 
