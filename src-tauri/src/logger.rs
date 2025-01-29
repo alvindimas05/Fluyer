@@ -4,7 +4,7 @@ macro_rules! debug {
         if !cfg!(debug_assertions) {
             return
         }
-        if(platform::is_mobile()){
+        if(crate::platform::is_mobile()){
             println!("{}", $msg);
         } else {
             log::debug!("{}", $msg);
@@ -14,7 +14,7 @@ macro_rules! debug {
         if !cfg!(debug_assertions) {
             return
         }
-        if(platform::is_mobile()){
+        if(crate::platform::is_mobile()){
             println!($msg, $( $args ),+);
         } else {
             log::debug!($msg, $( $args ),+);
@@ -25,14 +25,14 @@ macro_rules! debug {
 #[macro_export]
 macro_rules! error {
     ($msg:expr) => {
-        if(crate::platform::is_mobile() && cfg!(debug_assertions)){
+        if(crate::platform::is_mobile()){
             eprintln!("{}", $msg);
         } else {
             log::error!("{}", $msg);
         }
     };
     ($msg:expr, $( $args:expr ),+ ) => {
-        if(crate::platform::is_mobile() && cfg!(debug_assertions)){
+        if(crate::platform::is_mobile()){
             eprintln!($msg, $( $args ),+);
         } else {
             log::error!($msg, $( $args ),+);
