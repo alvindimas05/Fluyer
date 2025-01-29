@@ -8,7 +8,7 @@ use std::io::BufReader;
 use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
-use tauri::Emitter;
+use tauri::{Emitter, Listener};
 #[cfg(mobile)]
 use tauri_plugin_fluyer::models::WatcherStateType;
 #[cfg(mobile)]
@@ -17,7 +17,7 @@ use thread_priority::{ThreadBuilder, ThreadPriority};
 #[cfg(windows)]
 use thread_priority::windows::WinAPIThreadPriority;
 
-use crate::{logger, GLOBAL_APP_HANDLE};
+use crate::{logger, GLOBAL_APP_HANDLE, GLOBAL_MAIN_WINDOW};
 
 use super::metadata::MusicMetadata;
 
@@ -64,9 +64,7 @@ pub struct MusicPlayerSync {
 
 // Bunch of music paths
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
-#[cfg(mobile)]
 static MUSIC_IS_BACKGROUND: Mutex<bool> = Mutex::new(false);
-#[cfg(mobile)]
 static MUSIC_BACKGROUND_COUNT: Mutex<u8> = Mutex::new(0);
 static MUSIC_STATE: Mutex<MusicState> = Mutex::new(MusicState::Play);
 
@@ -105,31 +103,51 @@ impl MusicPlayer {
     }
 }
 
-#[cfg(mobile)]
 pub fn handle_music_player_background() {
-    GLOBAL_APP_HANDLE
-        .get()
-        .unwrap()
-        .fluyer()
-        .watch_state(|payload| {
-            let is_resuming = matches!(payload.value, WatcherStateType::Resume);
-            let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
-            *state = !is_resuming;
+    GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://focus", |_|{
+        let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
+        *state = false;
+        let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .emit(
+                    crate::commands::route::MUSIC_PLAYER_SYNC,
+                    MusicPlayerSync { skip: *count },
+                )
+                .expect("Failed to sync music player");
+            *count = 0;
+    });
+    
+    GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://blur", |_|{
+        let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
+        *state = true;
+    });
+    
+    
+    // GLOBAL_APP_HANDLE
+    //     .get()
+    //     .unwrap()
+    //     .fluyer()
+    //     .watch_state(|payload| {
+    //         let is_resuming = matches!(payload.value, WatcherStateType::Resume);
+    //         let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
+    //         *state = !is_resuming;
 
-            if is_resuming {
-                let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
-                GLOBAL_APP_HANDLE
-                    .get()
-                    .unwrap()
-                    .emit(
-                        crate::commands::route::MUSIC_PLAYER_SYNC,
-                        MusicPlayerSync { skip: *count },
-                    )
-                    .expect("Failed to sync music player");
-                *count = 0;
-            }
-        })
-        .expect("Failed to watch app state");
+    //         if is_resuming {
+    //             let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
+    //             GLOBAL_APP_HANDLE
+    //                 .get()
+    //                 .unwrap()
+    //                 .emit(
+    //                     crate::commands::route::MUSIC_PLAYER_SYNC,
+    //                     MusicPlayerSync { skip: *count },
+    //                 )
+    //                 .expect("Failed to sync music player");
+    //             *count = 0;
+    //         }
+    //     })
+    //     .expect("Failed to watch app state");
 }
 
 #[cfg(mobile)]
@@ -301,12 +319,9 @@ fn spawn_next_listener(
 
         let mut music_playlist = MUSIC_PLAYLIST.lock().unwrap();
         if *counter <= 0 && !music_playlist.is_empty() {
-            #[cfg(mobile)]
-            {
-                if *MUSIC_IS_BACKGROUND.lock().unwrap() {
-                    let mut background_count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
-                    *background_count += 1;
-                }
+            if *MUSIC_IS_BACKGROUND.lock().unwrap() {
+                let mut background_count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
+                *background_count += 1;
             }
 
             if !is_receiving_playlist {

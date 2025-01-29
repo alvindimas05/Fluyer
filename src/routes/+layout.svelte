@@ -9,6 +9,7 @@ import { isDesktop, isMobile } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import { CommandsRoute } from "$lib/commands";
 import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
+
 interface Props {
 	children?: import("svelte").Snippet;
 }
@@ -24,8 +25,8 @@ async function getStatusBarHeight() {
 }
 if (isMobile()) {
 	getStatusBarHeight();
-	MusicController.listenSyncMusic();
 }
+MusicController.listenSyncMusic();
 MusicController.listenNextMusic();
 </script>
 

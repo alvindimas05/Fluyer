@@ -1,5 +1,4 @@
 pub const MUSIC_CONTROLLER: &str = "music_controller";
-#[cfg(mobile)]
 pub const MUSIC_PLAYER_SYNC: &str = "music_player_sync";
 pub const MUSIC_PLAYER_NEXT: &str = "music_player_next";
 // pub const MUSIC_GET_ALL: &str = "music_get_all";

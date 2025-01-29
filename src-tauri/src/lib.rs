@@ -1,7 +1,7 @@
 use crate::store::init_store;
 use music::player::MusicPlayer;
 use std::sync::{Mutex, OnceLock};
-use tauri::AppHandle;
+use tauri::{AppHandle, WebviewWindow};
 #[allow(unused)]
 use tauri::{Manager, RunEvent};
 
@@ -24,6 +24,7 @@ impl AppState {
 }
 
 static GLOBAL_APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
+static GLOBAL_MAIN_WINDOW: OnceLock<WebviewWindow> = OnceLock::new();
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -35,9 +36,10 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_fluyer::init())
         .setup(|app| {
+            let window = app.get_webview_window("main").unwrap();
+            GLOBAL_MAIN_WINDOW.set(window).expect("Failed to set GLOBAL_APP_WINDOW");
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             {
-                let window = app.get_webview_window("main").unwrap();
                 window
                     .set_decorations(false)
                     .expect("Failed to set decorations on Windows/Linux");
@@ -75,10 +77,9 @@ pub fn run() {
                     .set(app_handle.clone())
                     .expect("Failed to set GLOBAL_APP_HANDLE");
                 app_handle.manage(Mutex::new(AppState::default()));
-
+                crate::music::player::handle_music_player_background();
                 #[cfg(mobile)]
                 {
-                    crate::music::player::handle_music_player_background();
                     crate::music::player::handle_headset_change();
                 }
             }
