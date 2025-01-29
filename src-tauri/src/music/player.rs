@@ -14,6 +14,8 @@ use tauri_plugin_fluyer::models::WatcherStateType;
 #[cfg(mobile)]
 use tauri_plugin_fluyer::FluyerExt;
 use thread_priority::{ThreadBuilder, ThreadPriority};
+#[cfg(windows)]
+use thread_priority::windows::WinAPIThreadPriority;
 
 use crate::{logger, GLOBAL_APP_HANDLE};
 
@@ -188,6 +190,25 @@ fn spawn() -> (
         })
         .expect("Failed to create music next thread");
 
+    #[cfg(windows)]
+    ThreadBuilder::default()
+        .name("Music Player")
+        .winapi_priority(WinAPIThreadPriority::TimeCritical)
+        .spawn_careless(move || {
+            play(
+                receiver_command,
+                receiver_position,
+                receiver_player_playlist,
+                receiver_info,
+                // receiver_sink_reset,
+                sender_next,
+                sender_next_position,
+                sender_clear,
+            );
+        })
+        .expect("Failed to create music thread");
+    
+    #[cfg(not(windows))]
     ThreadBuilder::default()
         .name("Music Player")
         .priority(ThreadPriority::Max)
