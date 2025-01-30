@@ -1,7 +1,15 @@
 import { platform } from "@tauri-apps/plugin-os";
 
+export function isAndroid(): boolean {
+    return platform() == "android";
+}
+
+export function isIos(): boolean {
+    return platform() == "ios";
+}
+
 export function isMobile(): boolean {
-	return ["android", "ios"].includes(platform());
+	return isAndroid() || isIos();
 }
 
 export function isDesktop(): boolean {

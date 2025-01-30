@@ -5,7 +5,7 @@ import logHandler from "$lib/handlers/log";
 import "../app.scss";
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
 import { invoke } from "@tauri-apps/api/core";
-import { isDesktop, isMobile } from "$lib/platform";
+import { isAndroid, isDesktop, isMobile } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import { CommandsRoute } from "$lib/commands";
 import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
@@ -23,7 +23,7 @@ async function getStatusBarHeight() {
 	const barHeight = await invoke<number>(CommandsRoute.GET_STATUS_BAR_HEIGHT);
 	statusBarHeight = barHeight > 28 ? 28 : barHeight;
 }
-if (isMobile()) {
+if (isAndroid()) {
 	getStatusBarHeight();
 }
 MusicController.listenSyncMusic();
@@ -34,11 +34,11 @@ MusicController.listenNextMusic();
 <AnimatedBackground />
 <div
     class={`w-screen h-screen fixed scrollbar-hidden`}
-    style={isMobile() ? `padding-top: ${statusBarHeight}px` : ""}
+    style={isAndroid() ? `padding-top: ${statusBarHeight}px` : ""}
 >
     {@render children?.()}
 </div>
-{#if isMobile()}
+{#if isAndroid()}
     <HeadsetChange/>
 {/if}
 <TitleBar />
