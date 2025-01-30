@@ -1,23 +1,21 @@
 #[macro_export]
 macro_rules! debug {
     ($msg:expr) => {
-        if !cfg!(debug_assertions) {
-            return
-        }
-        if(crate::platform::is_mobile()){
-            println!("{}", $msg);
-        } else {
-            log::debug!("{}", $msg);
+        if cfg!(debug_assertions) {
+            if(crate::platform::is_mobile()){
+                println!("{}", $msg);
+            } else {
+                log::debug!("{}", $msg);
+            }
         }
     };
     ($msg:expr, $( $args:expr ),+ ) => {
-        if !cfg!(debug_assertions) {
-            return
-        }
-        if(crate::platform::is_mobile()){
-            println!($msg, $( $args ),+);
-        } else {
-            log::debug!($msg, $( $args ),+);
+        if cfg!(debug_assertions) {
+            if(crate::platform::is_mobile()){
+                println!($msg, $( $args ),+);
+            } else {
+                log::debug!($msg, $( $args ),+);
+            }
         }
     };
 }
