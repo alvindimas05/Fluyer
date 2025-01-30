@@ -20,7 +20,7 @@
 	"dependencies": {
 		"@fabianlars/tauri-plugin-oauth": "^2.0.0",
 		"@react2svelte/swipeable": "^0.1.4",
-		"@tauri-apps/api": "^2.1.1",
+		"@tauri-apps/api": "^2.2.0",
 		"@tauri-apps/plugin-dialog": "~2",
 		"@tauri-apps/plugin-fs": "~2",
 		"@tauri-apps/plugin-os": "~2",
@@ -40,7 +40,7 @@
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@sveltejs/kit": "^2.5.27",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
-		"@tauri-apps/cli": "^2.1.0",
+		"@tauri-apps/cli": "^2.2.7",
 		"autoprefixer": "^10.4.20",
 		"postcss": "^8.4.47",
 		"rimraf": "^6.0.1",
