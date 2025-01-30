@@ -17,7 +17,7 @@ let isLoadingDone = LoadingController.loadingShow();
 loadingBackground.subscribe(() => {
 	if (!LoadingController.loadingBackground()) return;
 	// FIXME: Can't read Musics on iOS
-	// MusicController.getMusics();
+	MusicController.getMusics();
 });
 loadingShow.subscribe(() => {
 	isLoadingDone = LoadingController.loadingShow();
