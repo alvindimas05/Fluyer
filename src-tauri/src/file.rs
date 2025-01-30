@@ -1,7 +1,7 @@
 #[cfg(mobile)]
 use crate::commands::mobile::check_read_audio_permission;
 use crate::{
-    commands::music::STORE_PATH_NAME, logger, music::metadata::MusicMetadata, platform::{is_desktop, is_mobile}, store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE
+    commands::music::STORE_PATH_NAME, logger, music::metadata::MusicMetadata, platform::{is_android, is_desktop, is_ios}, store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE
 };
 use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
@@ -31,14 +31,14 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
         dirs = WalkDir::new(dir).into_iter().collect();
     }
     
-    if cfg!(android) {
+    if is_android() {
         let android_dirs = get_android_audio_dirs();
         for dir in android_dirs {
             dirs.extend(WalkDir::new(dir).into_iter().collect::<Vec<Result<DirEntry, walkdir::Error>>>());
         }
     }
     
-    if cfg!(ios){
+    if is_ios() {
         dirs = WalkDir::new(get_home_dir()).into_iter().collect();
     }
     
@@ -87,7 +87,7 @@ fn get_android_audio_dirs() -> Vec<String> {
     ]
 }
 
-fn get_home_dir(){
+fn get_home_dir() -> String {
     GLOBAL_APP_HANDLE
         .get()
         .expect("Failed to get GLOBAL_APP_HANDLE")
@@ -95,5 +95,5 @@ fn get_home_dir(){
         .home_dir()
         .expect("Failed to get home dir on mobile.")
         .into_os_string()
-        .into_string().unwrap();
+        .into_string().unwrap()
 }
