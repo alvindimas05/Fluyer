@@ -1,8 +1,7 @@
 #[cfg(mobile)]
 use crate::commands::mobile::check_read_audio_permission;
 use crate::{
-    commands::music::STORE_PATH_NAME, music::metadata::MusicMetadata, platform::is_mobile,
-    store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE,
+    commands::music::STORE_PATH_NAME, logger, music::metadata::MusicMetadata, platform::{is_desktop, is_mobile}, store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE
 };
 use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
@@ -22,23 +21,32 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
             return None;
         }
     }
-    let mut dir: String = if is_mobile() {
-        get_android_audio_dir()
-    } else {
-        GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string()
-    };
+    
+    let mut dirs: Vec<Result<DirEntry, walkdir::Error>> = vec![];
 
-    if !is_mobile() {
+    if is_desktop() {
+        let mut dir = GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string();
         dir.remove(0);
         dir.pop();
+        dirs = WalkDir::new(dir).into_iter().collect();
     }
-
+    
+    if cfg!(android) {
+        let android_dirs = get_android_audio_dirs();
+        for dir in android_dirs {
+            dirs.extend(WalkDir::new(dir).into_iter().collect::<Vec<Result<DirEntry, walkdir::Error>>>());
+        }
+    }
+    
+    if cfg!(ios){
+        dirs = WalkDir::new(get_home_dir()).into_iter().collect();
+    }
+    
     let mut musics: Vec<MusicMetadata> = vec![];
-    for entry in WalkDir::new(&dir)
-        .into_iter()
+    for entry in dirs.into_iter()
         .filter_map(|e| {
             if let Err(err) = &e {
-                log::warn!("Error reading entry: {}", err);
+                logger::error!("Error reading entry: {}", err);
             }
             e.ok()
         })
@@ -62,7 +70,7 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
                 musics.push(metadata);
             }
             None => {
-                log::warn!("Skipping invalid UTF-8 path: {:?}", entry.path());
+                logger::error!("Skipping invalid UTF-8 path: {:?}", entry.path());
             }
         }
     }
@@ -70,17 +78,22 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
     Some(musics)
 }
 
-pub fn get_android_audio_dir() -> String {
-    format!(
-        "{}/Music",
-        GLOBAL_APP_HANDLE
-            .get()
-            .expect("Failed to get GLOBAL_APP_HANDLE")
-            .path()
-            .home_dir()
-            .expect("Failed to get home dir on mobile.")
-            .into_os_string()
-            .into_string()
-            .unwrap()
-    )
+fn get_android_audio_dirs() -> Vec<String> {
+    let home_dir = get_home_dir();
+    vec![
+        format!("{}/Music", home_dir).to_string(),
+        format!("{}/Downloads", home_dir).to_string(),
+        format!("{}/Documents", home_dir).to_string(),
+    ]
+}
+
+fn get_home_dir(){
+    GLOBAL_APP_HANDLE
+        .get()
+        .expect("Failed to get GLOBAL_APP_HANDLE")
+        .path()
+        .home_dir()
+        .expect("Failed to get home dir on mobile.")
+        .into_os_string()
+        .into_string().unwrap();
 }
