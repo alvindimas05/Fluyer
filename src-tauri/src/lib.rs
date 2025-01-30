@@ -78,7 +78,7 @@ pub fn run() {
                     .expect("Failed to set GLOBAL_APP_HANDLE");
                 app_handle.manage(Mutex::new(AppState::default()));
                 crate::music::player::handle_music_player_background();
-                #[cfg(mobile)]
+                #[cfg(target_os = "android")]
                 {
                     crate::music::player::handle_headset_change();
                 }

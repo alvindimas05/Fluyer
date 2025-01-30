@@ -14,6 +14,8 @@
 		8F4AB89069577231608964AB /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D284A76171D4A350F0C0F6A3 /* MetalKit.framework */; };
 		9F4BF398FBB83C0BD2127597 /* libapp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 30C5C8C5EC66312E2C181E7F /* libapp.a */; };
 		A11E0B5E4919ECC0E758CE68 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E144FBE6F58B434F90F1D66 /* Security.framework */; };
+		A2B8E5E12D4BCC78001A0D31 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B8E5E02D4BCC78001A0D31 /* CoreAudio.framework */; };
+		A2C6A3A92D4BC90400BA5F55 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2C6A3A82D4BC90400BA5F55 /* AudioToolbox.framework */; };
 		A873B599CDEF359E191056BE /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33D9092D9505E56EEE5306DD /* UIKit.framework */; };
 		B2338D5DFE36927BE3C2A387 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D414FE577A4B341E0845C3A /* Metal.framework */; };
 		C3D1A669087A12431E55E4C2 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3DBFDE928F763DFDAD32730B /* main.mm */; };
@@ -36,6 +38,9 @@
 		6FFE53A4CB495A7571D53D2D /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		828C11FDEB059344442476C8 /* bindings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bindings.h; sourceTree = "<group>"; };
 		8D2BEE7C275F261522C18756 /* lib.rs */ = {isa = PBXFileReference; lastKnownFileType = text; path = lib.rs; sourceTree = "<group>"; };
+		A2B8E5E02D4BCC78001A0D31 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		A2B8E5E22D4BCC7F001A0D31 /* CoreAudioTypes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioTypes.framework; path = System/Library/Frameworks/CoreAudioTypes.framework; sourceTree = SDKROOT; };
+		A2C6A3A82D4BC90400BA5F55 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		D284A76171D4A350F0C0F6A3 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		D3C80351FC77C6031E4545F5 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		EC86381E5CD1294844D88347 /* fluyer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fluyer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,8 +57,10 @@
 				B2338D5DFE36927BE3C2A387 /* Metal.framework in Frameworks */,
 				8F4AB89069577231608964AB /* MetalKit.framework in Frameworks */,
 				C686DF490BEC20B3FAFFF88D /* QuartzCore.framework in Frameworks */,
+				A2C6A3A92D4BC90400BA5F55 /* AudioToolbox.framework in Frameworks */,
 				A11E0B5E4919ECC0E758CE68 /* Security.framework in Frameworks */,
 				A873B599CDEF359E191056BE /* UIKit.framework in Frameworks */,
+				A2B8E5E12D4BCC78001A0D31 /* CoreAudio.framework in Frameworks */,
 				6876496C8392271CCA94F54E /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -106,6 +113,9 @@
 		616ACC90B7E88B4E4B77B5C1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A2B8E5E22D4BCC7F001A0D31 /* CoreAudioTypes.framework */,
+				A2B8E5E02D4BCC78001A0D31 /* CoreAudio.framework */,
+				A2C6A3A82D4BC90400BA5F55 /* AudioToolbox.framework */,
 				231AD4892494724EC856EED9 /* CoreGraphics.framework */,
 				30C5C8C5EC66312E2C181E7F /* libapp.a */,
 				2D414FE577A4B341E0845C3A /* Metal.framework */,

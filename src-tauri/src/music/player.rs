@@ -150,7 +150,7 @@ pub fn handle_music_player_background() {
     //     .expect("Failed to watch app state");
 }
 
-#[cfg(mobile)]
+#[cfg(target_os = "android")]
 pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
 ) {
     GLOBAL_APP_HANDLE
