@@ -8,9 +8,13 @@ let show = $state(false);
 // let seconds = $state(10);
 // let interval: ReturnType<typeof setInterval> | null = null;
 
-// function restartA/pp() {
-	// invoke("plugin:fluyer|restart_app");
-// }
+function restartApp() {
+	invoke("plugin:fluyer|restart_app");
+}
+
+function hideAlert(){
+    show = false;
+}
 
 listen(CommandsRoute.MUSIC_HEADSET_CHANGE, () => {
 	show = true;
@@ -42,10 +46,17 @@ MusicController.pause();
                 functionality.
             </p>
             <button
-                class="border border-gray-300 bg-gray-500 bg-opacity-10 hover:bg-opacity-20 rounded w-fit mt-5 p-2"
+                class="w-32 border border-gray-300 bg-gray-500 bg-opacity-10 hover:bg-opacity-20 rounded mt-2 p-2"
                 onclick={restartApp}
             >
                 Restart Now
+            </button>
+            
+            <button
+                class="w-32 border border-gray-300 bg-gray-500 bg-opacity-10 hover:bg-opacity-20 rounded mt-2 p-2"
+                onclick={hideAlert}
+            >
+                Abort
             </button>
         </div>
     </div>
