@@ -39,23 +39,22 @@ export default class SpotifyApi {
 	}
 
 	public async searchMusic(music: MusicData): Promise<SpotifyMusic | null> {
+		await this.auth();
+
+		const url = new URL(`${this.apiEndpoint}/search`);
+		url.searchParams.set("type", "album");
+		url.searchParams.set("limit", "1");
+		url.searchParams.set("q", `${music.album || music.title} ${music.artist}`);
+
+		try {
+			const res = await axios.get(url.toString(), { headers: this.headers });
+			if (res.data.albums.items.length < 1) return null;
+
+			return new SpotifyMusic(res.data.albums.items[0]);
+		} catch (err) {
+			console.error(err);
+		}
 		return null;
-		// await this.auth();
-
-		// const url = new URL(`${this.apiEndpoint}/search`);
-		// url.searchParams.set("type", "album");
-		// url.searchParams.set("limit", "1");
-		// url.searchParams.set("q", `${music.album || music.title} ${music.artist}`);
-
-		// try {
-		// 	const res = await axios.get(url.toString(), { headers: this.headers });
-		// 	if (res.data.albums.items.length < 1) return null;
-
-		// 	return new SpotifyMusic(res.data.albums.items[0]);
-		// } catch (err) {
-		// 	console.error(err);
-		// }
-		// return null;
 	}
 }
 

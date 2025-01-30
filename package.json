@@ -18,6 +18,7 @@
 	},
 	"license": "MIT",
 	"dependencies": {
+		"@fabianlars/tauri-plugin-oauth": "^2.0.0",
 		"@react2svelte/swipeable": "^0.1.4",
 		"@tauri-apps/api": "^2.1.1",
 		"@tauri-apps/plugin-dialog": "~2",
