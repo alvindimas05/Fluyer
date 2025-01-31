@@ -13,6 +13,7 @@ use tauri::{Emitter, Listener};
 use tauri_plugin_fluyer::models::WatcherStateType;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
+#[cfg(not(windows))]
 use thread_priority::{ThreadBuilder, ThreadPriority};
 #[cfg(windows)]
 use thread_priority::windows::WinAPIThreadPriority;

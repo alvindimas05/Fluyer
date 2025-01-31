@@ -38,10 +38,10 @@ pub fn run() {
         .plugin(tauri_plugin_fluyer::init())
         .setup(|app| {
             let main_window = app.get_webview_window("main").unwrap();
- 			#[cfg(desktop)]{
-                main_window.create_overlay_titlebar().unwrap();
-     			main_window.make_transparent().unwrap();
-            }
+ 			#[cfg(desktop)]
+            main_window.create_overlay_titlebar().unwrap();
+            #[cfg(target_os = "macos")]
+ 			main_window.make_transparent().unwrap();
 			
             GLOBAL_MAIN_WINDOW.set(main_window).expect("Failed to set GLOBAL_APP_WINDOW");
 
