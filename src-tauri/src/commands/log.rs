@@ -5,7 +5,7 @@ pub fn log_error(message: String) {
     logger::error!("{}", message);
 }
 
-#[cfg(mobile)]
+#[cfg(target_os = "android")]
 #[tauri::command]
 pub fn toast(message: String) {
     use crate::GLOBAL_APP_HANDLE;

@@ -1,11 +1,9 @@
 #[cfg(mobile)]
 use crate::GLOBAL_APP_HANDLE;
 #[cfg(mobile)]
-use tauri_plugin_fluyer::models::NavigationBarSize;
-#[cfg(mobile)]
 use tauri_plugin_fluyer::FluyerExt;
 
-#[cfg(mobile)]
+#[cfg(target_os = "android")]
 #[tauri::command]
 pub fn check_read_audio_permission() -> bool {
     use tauri::plugin::PermissionState;

@@ -9,9 +9,9 @@ use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 use tauri::{Emitter, Listener};
-#[cfg(mobile)]
+#[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::WatcherStateType;
-#[cfg(mobile)]
+#[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 #[cfg(windows)]

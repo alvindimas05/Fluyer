@@ -1,5 +1,6 @@
 use crate::store::init_store;
 use music::player::MusicPlayer;
+#[cfg(desktop)]
 use tauri_plugin_decorum::WebviewWindowExt;
 use std::sync::{Mutex, OnceLock};
 use tauri::{AppHandle, WebviewWindow};

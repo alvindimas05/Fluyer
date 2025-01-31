@@ -23,7 +23,7 @@ async function getStatusBarHeight() {
 	const barHeight = await invoke<number>(CommandsRoute.GET_STATUS_BAR_HEIGHT);
 	statusBarHeight = barHeight > 28 ? 28 : barHeight;
 }
-if (isAndroid()) {
+if (isMobile()) {
 	getStatusBarHeight();
 }
 MusicController.listenSyncMusic();
@@ -34,7 +34,7 @@ MusicController.listenNextMusic();
 <AnimatedBackground />
 <div
     class={`w-screen h-screen fixed scrollbar-hidden`}
-    style={isAndroid() ? `padding-top: ${statusBarHeight}px` : ""}
+    style={isMobile() ? `padding-top: ${statusBarHeight}px` : ""}
 >
     {@render children?.()}
 </div>
