@@ -165,6 +165,8 @@ if (isMobile()) getNavigationBarHeight();
 <style lang="scss">
     #music-progress-bar {
         @apply cursor-pointer outline-0;
+        appearance: none;
+        
         &::-webkit-slider-runnable-track {
             @apply h-[.2rem] rounded;
             background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));

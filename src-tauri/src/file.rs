@@ -3,7 +3,7 @@ use crate::commands::mobile::check_read_audio_permission;
 use crate::{
     commands::music::STORE_PATH_NAME, logger, music::metadata::MusicMetadata, platform::{is_android, is_desktop, is_ios}, store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE
 };
-use tauri::{Emitter, Manager};
+use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
 
 fn is_audio_file(entry: &DirEntry) -> bool {

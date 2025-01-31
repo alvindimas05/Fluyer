@@ -66,6 +66,8 @@ pub fn run() {
             commands::mobile::get_navigation_bar_height,
             #[cfg(mobile)]
             commands::mobile::get_status_bar_height,
+            #[cfg(mobile)]
+            commands::mobile::home_dir,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
