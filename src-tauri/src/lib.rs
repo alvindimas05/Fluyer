@@ -37,11 +37,11 @@ pub fn run() {
         .plugin(tauri_plugin_fluyer::init())
         .setup(|app| {
             let main_window = app.get_webview_window("main").unwrap();
- 			main_window.create_overlay_titlebar().unwrap();
-			main_window.make_transparent().unwrap();
-			#[cfg(target_os = "macos")]
-			main_window.set_traffic_lights_inset(12.0, 20.0).unwrap();			
-
+ 			#[cfg(desktop)]{
+                main_window.create_overlay_titlebar().unwrap();
+     			main_window.make_transparent().unwrap();
+            }
+			
             GLOBAL_MAIN_WINDOW.set(main_window).expect("Failed to set GLOBAL_APP_WINDOW");
 
             init_store(app);
@@ -61,7 +61,7 @@ pub fn run() {
             commands::log::toast,
             #[cfg(target_os = "android")]
             commands::mobile::request_read_audio_permission,
-            #[cfg(target_os = "android")]
+            #[cfg(mobile)]
             commands::mobile::get_navigation_bar_height,
             #[cfg(mobile)]
             commands::mobile::get_status_bar_height,
