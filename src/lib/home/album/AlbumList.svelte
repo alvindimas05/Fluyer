@@ -55,7 +55,7 @@ onMount(() => {
 
 <div
     class={`grid auto-cols-[50%] sm:auto-cols-[33.3334%] md:auto-cols-[25%] tb:auto-cols-[20%] lg:auto-cols-[20%]
-    xl:auto-cols-[16.6667%] grid-rows-[1fr] w-full mt-2 overflow-x-auto scrollbar-hidden
+    xl:auto-cols-[16.6667%] grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden
     ${isDesktop() && "pt-8"}`}
     bind:this={element}
     onwheel={onMouseWheel}

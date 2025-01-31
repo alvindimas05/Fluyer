@@ -1,7 +1,7 @@
 <script lang="ts">
 import { musicCurrent, musicsNext } from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
-import { isMobile } from "$lib/platform";
+import { isDesktop, isMobile } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
@@ -56,10 +56,10 @@ function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
 
 <svelte:body use:swipeable on:swiped={onSwipeLeft} />
 <svelte:document onmousemove={onMouseMove} />
-<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->  
 <div
-	class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full sm:w-[70%] md:w-[50%] tb:w-[40%] lg:w-[40%] xl:w-[25%] ps-3 md:ps-0 pe-3 pt-8
-    ${isMouseInsideArea ? "" : "hidden"}`}
+	class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full sm:w-[70%] md:w-[50%] tb:w-[40%] lg:w-[50%] xl:w-[25%] px-3
+	${isDesktop() && "pt-8"} ${isMouseInsideArea ? "" : "hidden"}`}
 	onmouseleave={onMouseLeave}
 >
 	<div
