@@ -35,3 +35,4 @@ tauri-plugin-os = "2"
 tauri-plugin-fluyer = { path = "./tauri-plugin-fluyer" }
 crossbeam-channel = "0.5.14"
 regex = "1.11.1"
+tauri-plugin-decorum = "1.1.1"

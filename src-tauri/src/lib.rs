@@ -1,5 +1,6 @@
 use crate::store::init_store;
 use music::player::MusicPlayer;
+use tauri_plugin_decorum::WebviewWindowExt;
 use std::sync::{Mutex, OnceLock};
 use tauri::{AppHandle, WebviewWindow};
 #[allow(unused)]
@@ -32,16 +33,16 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
+  		.plugin(tauri_plugin_decorum::init())
         .plugin(tauri_plugin_fluyer::init())
         .setup(|app| {
-            let window = app.get_webview_window("main").unwrap();
-            GLOBAL_MAIN_WINDOW.set(window).expect("Failed to set GLOBAL_APP_WINDOW");
-            #[cfg(any(target_os = "windows", target_os = "linux"))]
-            {
-                window
-                    .set_decorations(false)
-                    .expect("Failed to set decorations on Windows/Linux");
-            }
+            let main_window = app.get_webview_window("main").unwrap();
+ 			main_window.create_overlay_titlebar().unwrap();
+			main_window.make_transparent().unwrap();
+			#[cfg(target_os = "macos")]
+			main_window.set_traffic_lights_inset(12.0, 20.0).unwrap();			
+
+            GLOBAL_MAIN_WINDOW.set(main_window).expect("Failed to set GLOBAL_APP_WINDOW");
 
             init_store(app);
             Ok(())
@@ -56,14 +57,12 @@ pub fn run() {
             #[cfg(desktop)]
             commands::music::music_request_directory,
             commands::log::log_error,
-            #[cfg(mobile)]
+            #[cfg(target_os = "android")]
             commands::log::toast,
-            #[cfg(mobile)]
+            #[cfg(target_os = "android")]
             commands::mobile::request_read_audio_permission,
-            #[cfg(mobile)]
+            #[cfg(target_os = "android")]
             commands::mobile::get_navigation_bar_height,
-            #[cfg(mobile)]
-            commands::mobile::get_navigation_bar_size,
             #[cfg(mobile)]
             commands::mobile::get_status_bar_height,
         ])

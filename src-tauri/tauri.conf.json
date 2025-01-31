@@ -10,7 +10,7 @@
 		"frontendDist": "../build"
 	},
 	"app": {
-		"macOSPrivateApi": true,
+	   "macOSPrivateApi": true,
 		"windows": [
 			{
 				"title": "Fluyer",
