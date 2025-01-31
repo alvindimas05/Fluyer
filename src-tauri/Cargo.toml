@@ -1,6 +1,6 @@
 [package]
 name = "fluyer"
-version = "0.0.1-alpha"
+version = "0.0.1"
 description = "Beautiful Lightweight Music Player"
 authors = ["alvindimas05"]
 edition = "2021"
