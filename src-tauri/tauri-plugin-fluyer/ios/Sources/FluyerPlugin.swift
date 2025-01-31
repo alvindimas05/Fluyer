@@ -5,7 +5,7 @@ import WebKit
 
 class FluyerPlugin: Plugin {
     @objc open override func load(webview: WKWebView) {
-        guard let rootViewController = UIApplication.shared.keyWindow?.rootViewController else { return }
+        guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else { return }
         
         rootViewController.edgesForExtendedLayout = .all
         rootViewController.extendedLayoutIncludesOpaqueBars = true
@@ -16,16 +16,14 @@ class FluyerPlugin: Plugin {
         
         webview.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webview.frame = rootViewController.view.bounds
-        
-        UIApplication.shared.keyWindow?.backgroundColor = .white
     }
     
     @objc public func getStatusBarHeight(_ invoke: Invoke){
-        invoke.resolve(["value": UIApplication.shared.keyWindow?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0])
+        invoke.resolve(["value": UIApplication.shared.windows.first?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0])
     }
     
     @objc public func getNavigationBarHeight(_ invoke: Invoke){
-        invoke.resolve(["value": UIApplication.shared.windows.first?.safeAreaInsets.bottom])
+        invoke.resolve(["value": UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0])
     }
 }
 
