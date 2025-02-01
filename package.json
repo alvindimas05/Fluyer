@@ -27,7 +27,7 @@
 		"animate.css": "^4.1.1",
 		"axios": "^1.7.7",
 		"color.js": "^1.2.0",
-		"sass": "^1.79.4",
+		"sass": "^1.79.4"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
