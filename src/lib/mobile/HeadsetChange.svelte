@@ -12,8 +12,8 @@ function restartApp() {
 	invoke("plugin:fluyer|restart_app");
 }
 
-function hideAlert(){
-    show = false;
+function hideAlert() {
+	show = false;
 }
 
 listen(CommandsRoute.MUSIC_HEADSET_CHANGE, () => {

@@ -93,7 +93,7 @@ function resetSelectedLyricIndex() {
 	if (lyrics.length < 1) return;
 
 	if (MusicController.progressDuration() < lyrics[0].duration) {
-	    scrollToSelectedLyric();
+		scrollToSelectedLyric();
 		return;
 	}
 	// Note: Using for loop since it's the fastest. Just in case though :)
@@ -108,11 +108,11 @@ function resetSelectedLyricIndex() {
 	scrollToSelectedLyric();
 }
 
-function scrollToSelectedLyric(){
-    document.getElementById("selected-lyric")?.scrollIntoView({
-  		block: window.innerWidth > 768 ? "center" : "start",
-  		behavior: "smooth",
-   	});
+function scrollToSelectedLyric() {
+	document.getElementById("selected-lyric")?.scrollIntoView({
+		block: window.innerWidth > 768 ? "center" : "start",
+		behavior: "smooth",
+	});
 }
 
 onMount(async () => {

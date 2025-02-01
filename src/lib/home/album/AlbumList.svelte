@@ -5,8 +5,8 @@ import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
-    import { platform } from "@tauri-apps/plugin-os";
-    import { isDesktop, isMobile } from "$lib/platform";
+import { platform } from "@tauri-apps/plugin-os";
+import { isDesktop, isMobile } from "$lib/platform";
 
 let element: HTMLDivElement;
 let grouppedAlbums = $state(groupByAlbum());
