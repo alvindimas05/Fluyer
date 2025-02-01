@@ -29,5 +29,3 @@ You can grab the alpha version on the Releases page or just [click here](https:/
 ## Credits
 - [Thank you, Freepik for the free Icons](https://www.flaticon.com/authors/special/lineal/2?author_id=1)
 - [Default/Empty Album Cover](https://www.freepik.com/free-vector/music-notes-rainbow-colourful-with-vinyl-record-white-backgro_24459713.htm)
-
-[![CC BY 4.0][cc-by-shield]][cc-by]
