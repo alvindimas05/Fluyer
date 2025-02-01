@@ -10,14 +10,11 @@
 		"frontendDist": "../build"
 	},
 	"app": {
-	   "macOSPrivateApi": true,
 		"windows": [
 			{
 				"title": "Fluyer",
 				"width": 675,
 				"height": 1200,
-				"decorations": false,
-				"transparent": true,
 				"resizable": true,
 				"maximized": true,
 				"titleBarStyle": "Overlay",
