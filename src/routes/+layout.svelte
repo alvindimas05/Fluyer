@@ -17,25 +17,13 @@ interface Props {
 let { children }: Props = $props();
 logHandler();
 
-let statusBarHeight: number | null = $state(0);
-
-async function getStatusBarHeight() {
-	const barHeight = await invoke<number>(CommandsRoute.GET_STATUS_BAR_HEIGHT);
-	statusBarHeight = barHeight > 28 && !isIos() ? 28 : barHeight;
-}
-if (isMobile()) {
-	getStatusBarHeight();
-}
 MusicController.listenSyncMusic();
 MusicController.listenNextMusic();
 </script>
 
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
 <AnimatedBackground />
-<div
-    class={`w-screen h-screen fixed scrollbar-hidden`}
-    style={isMobile() ? `padding-top: ${statusBarHeight}px` : ""}
->
+<div class="w-screen h-screen fixed scrollbar-hidden">
     {@render children?.()}
 </div>
 {#if isAndroid()}

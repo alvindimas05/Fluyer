@@ -5,6 +5,7 @@ import { isDesktop, isMobile } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
+    import { mobileStatusBarHeight } from "$lib/stores/mobile";
 
 let isMouseInsideArea = $state(false);
 let animationClass = $state("");
@@ -59,7 +60,8 @@ function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
 <!-- svelte-ignore a11y_no_static_element_interactions -->  
 <div
 	class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full sm:w-[70%] md:w-[50%] tb:w-[40%] lg:w-[50%] xl:w-[25%] px-3
-	${isDesktop() && "pt-8"} ${isMouseInsideArea ? "" : "hidden"}`}
+	${isMouseInsideArea ? "" : "hidden"}`}
+	style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 32}px`}
 	onmouseleave={onMouseLeave}
 >
 	<div

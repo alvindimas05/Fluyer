@@ -7,6 +7,7 @@ import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
 import { platform } from "@tauri-apps/plugin-os";
 import { isDesktop, isMobile } from "$lib/platform";
+    import { mobileStatusBarHeight } from "$lib/stores/mobile";
 
 let element: HTMLDivElement;
 let grouppedAlbums = $state(groupByAlbum());
@@ -55,8 +56,8 @@ onMount(() => {
 
 <div
     class={`grid auto-cols-[50%] sm:auto-cols-[33.3334%] md:auto-cols-[25%] tb:auto-cols-[20%] lg:auto-cols-[20%]
-    xl:auto-cols-[16.6667%] grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden
-    ${isDesktop() && "pt-8"}`}
+    xl:auto-cols-[16.6667%] grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden`}
+    style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 32}px`}
     bind:this={element}
     onwheel={onMouseWheel}
 >

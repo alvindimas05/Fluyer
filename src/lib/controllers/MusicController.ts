@@ -16,6 +16,8 @@ import type {
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
 import { CommandsRoute } from "$lib/commands";
+import { isIos, isMobile } from "$lib/platform";
+import { mobileNavigationBarHeight, mobileStatusBarHeight } from "$lib/stores/mobile";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -305,6 +307,17 @@ const MusicController = {
 	isProgressValueEnd: () =>
 		MusicController.progressValue() >= MusicConfig.max ||
 		MusicController.progressValue() <= MusicConfig.min,
+		
+	setStatusBarHeight: async () => {
+	    if(isMobile()) return;
+		const barHeight = await invoke<number>(CommandsRoute.GET_STATUS_BAR_HEIGHT);
+		mobileStatusBarHeight.set(barHeight > 28 && !isIos() ? 28 : barHeight);
+	},
+	setNavigationBarHeight: async () => {
+	    if(isMobile()) return;
+    	const barHeight = await invoke<number>(CommandsRoute.GET_NAVIGATION_BAR_HEIGHT);
+        mobileNavigationBarHeight.set(barHeight > 32 ? 32 : barHeight)
+    }
 };
 
 export default MusicController;

@@ -5,10 +5,8 @@ import {
 	musicIsPlaying,
 	musicProgressValue,
 } from "$lib/stores/music";
-import { invoke } from "@tauri-apps/api/core";
-import { isMobile } from "$lib/platform";
-import { CommandsRoute } from "$lib/commands";
 import { goto } from "$app/navigation";
+import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = 400;
@@ -81,21 +79,13 @@ async function onKeyDown(
 function redirectToPlay() {
 	goto("/play");
 }
-
-async function getNavigationBarHeight() {
-	const navbarHeight = await invoke<number>(
-		CommandsRoute.GET_NAVIGATION_BAR_HEIGHT,
-	);
-	navigationBarHeight = navbarHeight > 32 ? 32 : navbarHeight;
-}
-if (isMobile()) getNavigationBarHeight();
 </script>
 
 <svelte:document onkeydown={onKeyDown} />
 
 <div
     class="fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 backdrop-blur-md text-white animate__animated animate__slideInUp animate__slow"
-    style={`padding-bottom: ${navigationBarHeight}px`}
+    style={`padding-bottom: ${$mobileNavigationBarHeight}px`}
 >
     <input
         id="music-progress-bar"
