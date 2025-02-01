@@ -202,6 +202,7 @@ jobs:
             run: sudo bash setup-workflow.sh
             env:
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
+                ANDROID_ARCH: armv7
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
@@ -256,6 +257,7 @@ jobs:
             run: sudo bash setup-workflow.sh
             env:
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
+                ANDROID_ARCH: aarch64
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
@@ -310,6 +312,7 @@ jobs:
             run: sudo bash setup-workflow.sh
             env:
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
+                ANDROID_ARCH: i686
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
@@ -364,6 +367,7 @@ jobs:
             run: sudo bash setup-workflow.sh
             env:
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
+                ANDROID_ARCH: x86_64
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
