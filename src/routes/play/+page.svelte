@@ -123,7 +123,7 @@ onMount(async () => {
 
 <svelte:document onkeydown={onKeyDown} />
 
-<div class="w-full h-full grid grid-rows-[auto_30%_auto] md:gap-y-0 md:grid-cols-[40%_55%] initial-fade-in">
+<div class="w-full h-full grid grid-rows-[auto_30%_auto] mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:grid-cols-[40%_55%] initial-fade-in">
     <div class="md:row-[1] md:col-[1] p-6 md:p-0 flex justify-end items-end">
         <div class="w-full md:w-[80%] xl:w-[65%] text-white ms-auto">
             <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
