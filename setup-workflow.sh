@@ -1,14 +1,16 @@
 #!/bin/bash
 
-echo "Running workflow on $os"
-if [[ "$os" == "windows" || "$os" == "macos" ]]; then
-    bun i
-elif [[ "$os" == "linux" ]]; then
+# Install Linux Dependencies
+if [[ "$os" == "linux" ]]; then
     sudo apt-get update
     sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
-    bun i
-elif [[ "$os" == "android" ]]; then
-    bun i
+fi
+
+# Install NPM Packages
+bun i
+
+# Setup Android
+if [[ "$os" == "android" ]]; then
     cd src-tauri/gen/android || exit
     {
         echo "keyAlias=$ANDROID_KEY_ALIAS"
