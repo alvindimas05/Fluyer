@@ -1,10 +1,11 @@
 #!/bin/bash
 
+echo "Running workflow on $os"
 if [[ "$os" == "windows" || "$os" == "macos" ]]; then
     bun i
 elif [[ "$os" == "linux" ]]; then
-    apt-get update
-    apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
+    sudo apt-get update
+    sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
     bun i
 elif [[ "$os" == "android" ]]; then
     bun i
