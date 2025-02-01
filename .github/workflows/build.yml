@@ -394,7 +394,7 @@ jobs:
       runs-on: macos-latest
       permissions:
           contents: write
-      if: ${{ github.event.inputs.build-build-ios == 'true' }}
+      if: ${{ github.event.inputs.build-ios == 'true' }}
       steps: 
           - uses: actions/checkout@v4
           - uses: oven-sh/setup-bun@v2
