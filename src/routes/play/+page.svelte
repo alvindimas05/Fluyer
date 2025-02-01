@@ -123,17 +123,20 @@ onMount(async () => {
 
 <svelte:document onkeydown={onKeyDown} />
 
-<div class="w-full h-full grid grid-rows-[auto_30%_auto] mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:grid-cols-[40%_55%] initial-fade-in">
-    <div class="md:row-[1] md:col-[1] p-6 md:p-0 flex justify-end items-end">
-        <div class="w-full md:w-[80%] xl:w-[65%] text-white ms-auto">
+<!-- <div class="w-full h-full grid grid-rows-[auto_30%_auto] mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:grid-cols-[40%_55%] initial-fade-in"> -->
+<div class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 initial-fade-in
+    ${lyrics.length > 1 ? "grid-rows-[auto_30%_auto] md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center"}`}>
+    <div class={`md:row-[1] md:col-[1] p-6 md:p-0 flex items-end
+        ${lyrics.length > 1 ? "justify-end" : "justify-center"}`}>
+        <div class={`w-full md:w-[80%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}>
             <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
             <!-- <img class="rounded-lg w-full [mask-image:radial-gradient(rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
             <img class="w-full rounded-lg aspect-square" src={albumImage} alt="Music Album" />
         </div>
     </div>
-    <div class="md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 pb-10 md:pb-0 flex justify-end">
-        <div class="w-full md:w-[80%] xl:w-[65%] ms-auto">
-            <div class="w-full grid grid-cols-[auto,1fr,auto] mt-4 ms-auto">
+    <div class={`md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 pb-10 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}>
+        <div class="w-full md:w-[80%] xl:w-[65%]">
+            <div class="w-full grid grid-cols-[auto,1fr,auto] mt-4">
                 <div class="text-xs lg:text-sm flex w-12">
                     <span class="self-end opacity-75">{progressDurationText}</span>
                 </div>
@@ -201,21 +204,23 @@ onMount(async () => {
             </div>
         </div>
     </div>
-    <div class="w-full md:h-screen md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
-        [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
-        md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]">
-        <div class="flex">
-            <div id="lyrics" class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
-                {#each lyrics as lyric, i}
-                    {#if selectedLyricIndex == i}
-                        <p id="selected-lyric" class="text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
-                    {:else}
-                        <p class="opacity-50 py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
-                    {/if}
-                {/each}
-            </div>    
+    {#if lyrics.length > 0}
+        <div class="w-full md:h-screen md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
+            [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
+            md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]">
+            <div class="flex">
+                <div id="lyrics" class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]">
+                    {#each lyrics as lyric, i}
+                        {#if selectedLyricIndex == i}
+                            <p id="selected-lyric" class="text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
+                        {:else}
+                            <p class="opacity-50 py-5 md:py-7 lg:py-10">{lyric.lyric}</p>
+                        {/if}
+                    {/each}
+                </div>    
+            </div>
         </div>
-    </div>
+    {/if}
 </div>
 
 <style lang="scss">

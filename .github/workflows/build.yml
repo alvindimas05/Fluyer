@@ -11,12 +11,28 @@ on:
         description: "Build for MacOS (Intel)"
         required: false
         type: boolean
+      build-macos-silicon:
+        description: "Build for MacOS (Silicon)"
+        required: false
+        type: boolean
       build-linux:
         description: "Build for Linux"
         required: false
         type: boolean
-      build-android:
-        description: "Build for Android"
+      build-android-armv7:
+        description: "Build for Android (armv7)"
+        required: false
+        type: boolean
+      build-android-aarch64:
+        description: "Build for Android (aarch64)"
+        required: false
+        type: boolean
+      build-android-i686:
+        description: "Build for Android (i686)"
+        required: false
+        type: boolean
+      build-android-x86_64:
+        description: "Build for Android (x86_64)"
         required: false
         type: boolean
 
@@ -37,8 +53,11 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Install Front-End dependencies
-        run: bun i
+      - name: Setup Workflow
+        shell: bash
+        run: sudo bash setup-workflow.sh
+        env:
+            os: windows
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -46,8 +65,8 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'Fluyer v__VERSION__'
-          releaseDraft: true
-          prerelease: false  
+          releaseDraft: false
+          prerelease: true
 
   build-macos-intel:
     name: Build MacOS (Intel)
@@ -65,8 +84,11 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Install Front-End dependencies
-        run: bun i
+      - name: Setup Workflow
+        run: sudo bash setup-workflow.sh
+        env:
+            os: macos
+            macos_type: intel
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -74,9 +96,39 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'Fluyer v__VERSION__'
-          releaseDraft: true
-          prerelease: false  
+          releaseDraft: false
+          prerelease: true
 
+  build-macos-silicon:
+    name: Build MacOS (Silicon)
+    runs-on: macos-latest
+    permissions: write-all
+    if: ${{ github.event.inputs.build-macos-silicon == 'true' }}
+    steps: 
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Setup Workflow
+        run: sudo bash setup-workflow.sh
+        env:
+            os: macos
+            macos_type: silicon
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'Fluyer v__VERSION__'
+          releaseDraft: false
+          prerelease: true
       
   build-linux:
     name: Build Linux
@@ -86,10 +138,10 @@ jobs:
     steps: 
       - uses: actions/checkout@v4
 
-      - name: Install Ubuntu Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
+      - name: Setup Workflow
+        run: sudo bash setup-workflow.sh
+        env:
+            os: linux
 
       - uses: oven-sh/setup-bun@v2
 
@@ -109,15 +161,15 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'Fluyer v__VERSION__'
-          releaseDraft: true
-          prerelease: false
+          releaseDraft: false
+          prerelease: true
 
-  build-android:
-      name: Build Android
+  build-android-armv7:
+      name: Build Android (armv7)
       runs-on: ubuntu-latest
       permissions:
           contents: write
-      if: ${{ github.event.inputs.build-android == 'true' }}
+      if: ${{ github.event.inputs.build-android-armv7 == 'true' }}
       steps:
           - uses: actions/checkout@v4
           - name: Setup Java
@@ -137,46 +189,191 @@ jobs:
             uses: dtolnay/rust-toolchain@stable
             with:
               target: armv7-linux-androideabi
-              # targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
           - name: Rust cache
             uses: swatinem/rust-cache@v2
             with:
               workspaces: './src-tauri -> target'
-
-          - name: Install Front-End dependencies
-            run: bun i
-          
-          - name: Setup Android signing
-            run: |
-              cd src-tauri/gen/android
-              echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" > keystore.properties
-              echo "password=${{ secrets.ANDROID_KEY_PASSWORD }}" >> keystore.properties
-              base64 -d <<< "${{ secrets.ANDROID_KEY_BASE64 }}" > $RUNNER_TEMP/keystore.jks
-              echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
-
-          - name: Build App Bundle
-            run: bun tauri android build -v --target armv7
-            env:
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
-
+        
           - name: Get Node Project Version
             id: package-version
             uses: martinbeentjes/npm-get-version-action@v1.3.1
 
-          - name: Rename APK file
-            run: |
-                mkdir apks
-                mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}.apk
-                # mv ./src-tauri/gen/android/app/build/outputs/apk/arm/release/app-arm-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm.apk
-                # mv ./src-tauri/gen/android/app/build/outputs/apk/arm64/release/app-arm64-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm64.apk
-                # mv ./src-tauri/gen/android/app/build/outputs/apk/x86/release/app-x86-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86.apk
-                # mv ./src-tauri/gen/android/app/build/outputs/apk/x86_64/release/app-x86_64-release.apk ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk
+          - name: Setup Workflow
+            run: sudo bash setup-workflow.sh
+            env:
+                APP_VERSION: ${{ steps.package-version.outputs.current-version }}
+                ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+                ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+                ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+                RUNNER_TEMP: ${{ runner.temp }}
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
           
           - name: Publish release
             uses: ncipollo/release-action@v1
             with:
-                artifacts: ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}.apk
-                # artifacts: "./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_arm64.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86.apk,./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk"
+                artifacts: ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_armv7.apk
+                tag: v${{ steps.package-version.outputs.current-version }}
+                name: Fluyer v${{ steps.package-version.outputs.current-version }}
+                allowUpdates: true
+                prerelease: true
+                artifactErrorsFailBuild: false
+                token: ${{ secrets.GITHUB_TOKEN }}
+  build-android-aarch64:
+      name: Build Android (aarch64)
+      runs-on: ubuntu-latest
+      permissions:
+          contents: write
+      if: ${{ github.event.inputs.build-android-aarch64 == 'true' }}
+      steps:
+          - uses: actions/checkout@v4
+          - name: Setup Java
+            uses: actions/setup-java@v4
+            with:
+                distribution: 'zulu'
+                java-version: '17'
+          - uses: oven-sh/setup-bun@v2
+
+          - name: Setup Android SDK
+            uses: android-actions/setup-android@v3
+
+          - name: Install NDK
+            run: sdkmanager "ndk;27.0.11902837"
+
+          - name: Install Rust stable
+            uses: dtolnay/rust-toolchain@stable
+            with:
+              target: aarch64-linux-android
+          - name: Rust cache
+            uses: swatinem/rust-cache@v2
+            with:
+              workspaces: './src-tauri -> target'
+        
+          - name: Get Node Project Version
+            id: package-version
+            uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+          - name: Setup Workflow
+            run: sudo bash setup-workflow.sh
+            env:
+                APP_VERSION: ${{ steps.package-version.outputs.current-version }}
+                ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+                ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+                ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+                RUNNER_TEMP: ${{ runner.temp }}
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+          
+          - name: Publish release
+            uses: ncipollo/release-action@v1
+            with:
+                artifacts: ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_aarch64.apk
+                tag: v${{ steps.package-version.outputs.current-version }}
+                name: Fluyer v${{ steps.package-version.outputs.current-version }}
+                allowUpdates: true
+                prerelease: true
+                artifactErrorsFailBuild: false
+                token: ${{ secrets.GITHUB_TOKEN }}
+  build-android-i686:
+      name: Build Android (i686)
+      runs-on: ubuntu-latest
+      permissions:
+          contents: write
+      if: ${{ github.event.inputs.build-android-i686 == 'true' }}
+      steps:
+          - uses: actions/checkout@v4
+          - name: Setup Java
+            uses: actions/setup-java@v4
+            with:
+                distribution: 'zulu'
+                java-version: '17'
+          - uses: oven-sh/setup-bun@v2
+
+          - name: Setup Android SDK
+            uses: android-actions/setup-android@v3
+
+          - name: Install NDK
+            run: sdkmanager "ndk;27.0.11902837"
+
+          - name: Install Rust stable
+            uses: dtolnay/rust-toolchain@stable
+            with:
+              target: i686-linux-android
+          - name: Rust cache
+            uses: swatinem/rust-cache@v2
+            with:
+              workspaces: './src-tauri -> target'
+        
+          - name: Get Node Project Version
+            id: package-version
+            uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+          - name: Setup Workflow
+            run: sudo bash setup-workflow.sh
+            env:
+                APP_VERSION: ${{ steps.package-version.outputs.current-version }}
+                ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+                ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+                ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+                RUNNER_TEMP: ${{ runner.temp }}
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+          
+          - name: Publish release
+            uses: ncipollo/release-action@v1
+            with:
+                artifacts: ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_i686.apk
+                tag: v${{ steps.package-version.outputs.current-version }}
+                name: Fluyer v${{ steps.package-version.outputs.current-version }}
+                allowUpdates: true
+                prerelease: true
+                artifactErrorsFailBuild: false
+                token: ${{ secrets.GITHUB_TOKEN }}
+  build-android-x86_64:
+      name: Build Android (x86_64)
+      runs-on: ubuntu-latest
+      permissions:
+          contents: write
+      if: ${{ github.event.inputs.build-android-x86_64 == 'true' }}
+      steps:
+          - uses: actions/checkout@v4
+          - name: Setup Java
+            uses: actions/setup-java@v4
+            with:
+                distribution: 'zulu'
+                java-version: '17'
+          - uses: oven-sh/setup-bun@v2
+
+          - name: Setup Android SDK
+            uses: android-actions/setup-android@v3
+
+          - name: Install NDK
+            run: sdkmanager "ndk;27.0.11902837"
+
+          - name: Install Rust stable
+            uses: dtolnay/rust-toolchain@stable
+            with:
+              target: x86_64-linux-android
+          - name: Rust cache
+            uses: swatinem/rust-cache@v2
+            with:
+              workspaces: './src-tauri -> target'
+        
+          - name: Get Node Project Version
+            id: package-version
+            uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+          - name: Setup Workflow
+            run: sudo bash setup-workflow.sh
+            env:
+                APP_VERSION: ${{ steps.package-version.outputs.current-version }}
+                ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+                ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+                ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+                RUNNER_TEMP: ${{ runner.temp }}
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+          
+          - name: Publish release
+            uses: ncipollo/release-action@v1
+            with:
+                artifacts: ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk
                 tag: v${{ steps.package-version.outputs.current-version }}
                 name: Fluyer v${{ steps.package-version.outputs.current-version }}
                 allowUpdates: true
