@@ -13,8 +13,8 @@
 		"tauri": "tauri",
 		"android": "tauri android dev",
 		"android:build": "tauri android build --apk --target aarch64",
-		"android:install": "adb install src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk",
-		"android:run": "bun android:build && bun android:install"
+		"ios": "tauri ios dev",
+		"ios:build": "tauri ios build"
 	},
 	"license": "MIT",
 	"dependencies": {

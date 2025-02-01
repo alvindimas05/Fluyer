@@ -23,3 +23,10 @@ if [[ "$os" == "android" ]]; then
     mkdir -p apks
     mv "./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk" "./apks/Fluyer_${APP_VERSION}_${ANDROID_ARCH}.apk"
 fi
+
+# Setup iOS
+if [[ "$os" == "ios" ]]; then
+    bun tauri ios build -v
+    mkdir -p ipas
+    mv "./src-tauri/gen/apple/build/arm64/Fluyer.ipa" "./ipas/Fluyer_${APP_VERSION}.ipa"
+fi

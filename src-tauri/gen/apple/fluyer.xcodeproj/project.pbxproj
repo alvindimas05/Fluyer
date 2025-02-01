@@ -43,7 +43,7 @@
 		A2C6A3A82D4BC90400BA5F55 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		D284A76171D4A350F0C0F6A3 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		D3C80351FC77C6031E4545F5 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		EC86381E5CD1294844D88347 /* fluyer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fluyer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC86381E5CD1294844D88347 /* Fluyer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fluyer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F45B19150135F1288C821731 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -146,7 +146,7 @@
 		D7009B50BF000D00DDB1A0F1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EC86381E5CD1294844D88347 /* fluyer.app */,
+				EC86381E5CD1294844D88347 /* Fluyer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -178,7 +178,7 @@
 			);
 			name = fluyer_iOS;
 			productName = fluyer_iOS;
-			productReference = EC86381E5CD1294844D88347 /* fluyer.app */;
+			productReference = EC86381E5CD1294844D88347 /* Fluyer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -307,7 +307,7 @@
 					"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
 					"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)",
 				);
-				MARKETING_VERSION = "0.0.1";
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = org.alvindimas05.fluyer;
 				PRODUCT_NAME = Fluyer;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -352,6 +352,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -416,6 +417,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -485,7 +487,7 @@
 					"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
 					"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)",
 				);
-				MARKETING_VERSION = "0.0.1";
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = org.alvindimas05.fluyer;
 				PRODUCT_NAME = Fluyer;
 				PROVISIONING_PROFILE_SPECIFIER = "";
