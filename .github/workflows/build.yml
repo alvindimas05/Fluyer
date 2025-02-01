@@ -55,9 +55,7 @@ jobs:
 
       - name: Setup Workflow
         shell: bash
-        run: bash setup-workflow.sh
-        env:
-            os: windows
+        run: os=windows bash setup-workflow.sh
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -137,13 +135,11 @@ jobs:
     if: ${{ github.event.inputs.build-linux == 'true' }}
     steps: 
       - uses: actions/checkout@v4
-
+      - uses: oven-sh/setup-bun@v2
       - name: Setup Workflow
         run: bash setup-workflow.sh
         env:
             os: linux
-
-      - uses: oven-sh/setup-bun@v2
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -201,6 +197,7 @@ jobs:
           - name: Setup Workflow
             run: bash setup-workflow.sh
             env:
+                os: android
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
                 ANDROID_ARCH: armv7
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -256,6 +253,7 @@ jobs:
           - name: Setup Workflow
             run: bash setup-workflow.sh
             env:
+                os: android
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
                 ANDROID_ARCH: aarch64
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -311,6 +309,7 @@ jobs:
           - name: Setup Workflow
             run: bash setup-workflow.sh
             env:
+                os: android
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
                 ANDROID_ARCH: i686
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -366,6 +365,7 @@ jobs:
           - name: Setup Workflow
             run: bash setup-workflow.sh
             env:
+                os: android
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
                 ANDROID_ARCH: x86_64
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
