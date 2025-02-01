@@ -28,5 +28,5 @@ fi
 if [[ "$os" == "ios" ]]; then
     bun tauri ios build -v
     mkdir -p ipas
-    mv "./src-tauri/gen/apple/build/arm64/Fluyer.ipa" "./ipas/Fluyer_${APP_VERSION}.ipa"
+    mv "./src-tauri/gen/apple/build/arm64/Fluyer.ipa" "./ipas/Fluyer.ipa"
 fi
