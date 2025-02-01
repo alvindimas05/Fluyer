@@ -35,6 +35,10 @@ on:
         description: "Build for Android (x86_64)"
         required: false
         type: boolean
+      build-ios:
+        description: "Build for iOS"
+        required: false
+        type: boolean
 
 jobs:
   build-windows:
@@ -385,13 +389,12 @@ jobs:
                 artifactErrorsFailBuild: false
                 token: ${{ secrets.GITHUB_TOKEN }}
 
-
-  build-android-x86_64:
-      name: Build Android (x86_64)
-      runs-on: ubuntu-latest
+  build-ios:
+      name: Build iOS
+      runs-on: macos-latest
       permissions:
           contents: write
-      if: ${{ github.event.inputs.build-android-x86_64 == 'true' }}
+      if: ${{ github.event.inputs.build-build-ios == 'true' }}
       steps: 
           - uses: actions/checkout@v4
           - uses: oven-sh/setup-bun@v2
@@ -401,7 +404,7 @@ jobs:
           - name: Rust cache
             uses: swatinem/rust-cache@v2
             with:
-            workspaces: './src-tauri -> target'
+                workspaces: './src-tauri -> target'
           - name: Get Node Project Version
             id: package-version
             uses: martinbeentjes/npm-get-version-action@v1.3.1
