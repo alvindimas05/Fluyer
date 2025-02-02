@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cp .env.example .env
+
 # Install Linux Dependencies
 if [[ "$os" == "linux" ]]; then
     sudo apt-get update
