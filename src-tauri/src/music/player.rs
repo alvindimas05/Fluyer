@@ -289,11 +289,6 @@ fn spawn_next_listener(
             MUSIC_PLAYLIST.lock().unwrap().remove(playlist_remove_index);
         }
 
-        if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
-            thread::sleep(Duration::from_millis(ms_countdown));
-            continue;
-        }
-
         let mut is_receiving_playlist = false;
         if let Ok(playlist) = receiver_playlist.try_recv() {
             is_receiving_playlist = true;
@@ -352,6 +347,11 @@ fn spawn_next_listener(
 
         if let Ok(position) = receiver_next_position.try_recv() {
             *counter = (current_music_duration - position.as_millis()) as i128;
+        }
+        
+        if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
+            thread::sleep(Duration::from_millis(ms_countdown));
+            continue;
         }
 
         if *counter > 0 {

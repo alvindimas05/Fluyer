@@ -151,6 +151,6 @@ musicCurrent.subscribe(() => !isMobile() && getColors());
 		<div class="bg-blur"></div>
 	</div>
 {/if}
-<!-- {#if isLight}
+{#if isLight}
 	<div class="bg-blur-dark"></div>
-{/if} -->
+{/if}
