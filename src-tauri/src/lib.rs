@@ -34,12 +34,11 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
-  		.plugin(tauri_plugin_decorum::init())
         .plugin(tauri_plugin_fluyer::init())
         .setup(|app| {
             let main_window = app.get_webview_window("main").unwrap();
-            #[cfg(desktop)]
-            main_window.create_overlay_titlebar().unwrap();
+            #[cfg(windows)]
+            main_window.set_decorations(false).unwrap();
             #[cfg(target_os = "macos")]
       		main_window.make_transparent().unwrap();
             

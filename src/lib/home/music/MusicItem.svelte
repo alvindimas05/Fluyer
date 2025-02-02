@@ -32,7 +32,7 @@ async function addMusicAndPlay() {
 		MusicController.play();
 }
 
-onMount(checkAlbumImage);
+// onMount(checkAlbumImage);
 </script>
 
 <div

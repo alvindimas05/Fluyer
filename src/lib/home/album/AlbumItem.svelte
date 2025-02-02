@@ -3,6 +3,7 @@ import SpotifyApi from "$lib/api/spotify";
 import { onMount } from "svelte";
 import type { MusicData } from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+    import MusicBrainzApi from "$lib/api/musicbrainz";
 
 interface Props {
 	musicList: MusicData[];
@@ -16,16 +17,20 @@ const animationDelay = 200;
 let animationClasses = $state("hidden");
 let isSorted = false;
 
-const spotifyApi = new SpotifyApi();
+// const spotifyApi = new SpotifyApi();
+const mbApi = new MusicBrainzApi();
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
 	if (music.image !== null) return;
-	const spotifyMusic = await spotifyApi.searchMusic(music);
-	if (spotifyMusic == null) return;
-	albumImage = spotifyMusic?.imageUrl;
+	// const spotifyMusic = await spotifyApi.searchMusic(music);
+	// if (spotifyMusic == null) return;
+	// albumImage = spotifyMusic?.imageUrl;
+	const mbImage = await mbApi.getAlbumImageFromAlbum(music.album!);
+	if(mbImage == null) return;
+	albumImage = mbImage;
 	musicList = musicList.map((m) => {
-		m.image = albumImage;
+		m.image = mbImage;
 		return m;
 	});
 }
