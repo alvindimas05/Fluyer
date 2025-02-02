@@ -76,7 +76,7 @@ setTimeout(
 >
     <div class="relative w-full">
         <div
-            class="album-item-actions w-full h-full absolute rounded-lg bg-gradient-to-b from-transparent to-black/75
+            class="album-item-actions w-full h-full absolute rounded-lg bg-gradient-to-b from-transparent to-black/50
 			animate__animated animate__faster animate__fadeOut"
         >
             <button
