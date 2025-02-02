@@ -29,9 +29,12 @@ You can grab the latest version of the app below or check the [release page](htt
 ### Advanced Functionality
 - [ ] Search
 - [ ] Group by Folder
+- [x] Lyrics
+- [x] Animated Background
 
 ### API Functionality
-- [ ] Spotify Integration (For Cover Art and Canvas)
+- [ ] MusicBrainz Integration (For Cover Art)
+- [ ] Spotify Integration (For Spotify Canvas)
 - [ ] Soulseek Integration (We love FLACs <3)
 
 
