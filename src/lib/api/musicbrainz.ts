@@ -44,7 +44,7 @@ export default class MusicBrainzApi {
             const albumRes = await this.browse("release-group", album);
             const id = albumRes.data["release-groups"][0].id;
             const coverArt = await axios.get(`${this.baseCoverArtUrl}/release-group/${id}`);
-            return coverArt.data.images[0].thumbnails["500"] as string;
+            return (coverArt.data.images[0].thumbnails["500"] as string).replace(/^http:\/\//ig, 'https://');
         } catch (e) {
             console.error("There is an error when getting the image.");
             return null;
