@@ -156,7 +156,7 @@ function handleVolumeButton(){
                     </div>
                 </div>
             </div>
-            <div class="hidden md:grid justify-end">
+            <div class="hidden lg:grid justify-end">
                 <div class="grid grid-cols-[auto_auto] items-center gap-3">
                     <button onclick={handleVolumeButton}>
                         <img class="invert w-5"
