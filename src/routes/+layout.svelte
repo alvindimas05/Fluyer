@@ -19,6 +19,8 @@ logHandler();
 
 MusicController.listenSyncMusic();
 MusicController.listenNextMusic();
+MusicController.setStatusBarHeight();
+MusicController.setNavigationBarHeight();
 </script>
 
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
