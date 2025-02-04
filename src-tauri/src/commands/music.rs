@@ -90,3 +90,9 @@ pub fn music_playlist_remove(state: State<'_, Mutex<AppState>>, index: usize){
     let mut state = state.lock().unwrap();
     state.music_player.remove_playlist(index).expect("Failed to remove playlist")
 }
+
+#[tauri::command]
+pub fn music_set_volume(state: State<'_, Mutex<AppState>>, volume: f32){
+    let mut state = state.lock().unwrap();
+    state.music_player.set_volume(volume).expect("Failed to set volume")
+}

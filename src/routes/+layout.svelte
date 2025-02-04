@@ -15,12 +15,7 @@ interface Props {
 }
 
 let { children }: Props = $props();
-logHandler();
-
-MusicController.listenSyncMusic();
-MusicController.listenNextMusic();
-MusicController.setStatusBarHeight();
-MusicController.setNavigationBarHeight();
+MusicController.handleInitialize();
 </script>
 
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->

@@ -4,6 +4,7 @@ import {
 	musicCurrent,
 	musicIsPlaying,
 	musicProgressValue,
+	musicVolume,
 } from "$lib/stores/music";
 import { goto } from "$app/navigation";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
@@ -16,11 +17,14 @@ let albumImage = $state(MusicConfig.defaultAlbumImage);
 
 let isPlaying = $state(MusicController.isPlaying());
 let progressPercentage = $state(MusicController.progressPercentage());
-let navigationBarHeight = $state(0);
+let volumePercentage = $state(MusicController.volumePercentage());
 
 musicProgressValue.subscribe(updateStates);
 musicCurrent.subscribe(updateStates);
 musicIsPlaying.subscribe(updateStates);
+musicVolume.subscribe(() => {
+    volumePercentage = MusicController.volumePercentage();
+});
 
 function handleButtonPlayPause() {
 	if (
@@ -148,6 +152,18 @@ function redirectToPlay() {
                     </div>
                 </div>
             </div>
+            <div class="hidden md:grid justify-end">
+                <div class="grid grid-cols-[auto_auto] items-center gap-3">
+                    <img class="invert w-5" src={volumePercentage > 0 ? MusicConfig.defaultSpeakerButton : MusicConfig.defaultMuteButton} alt="Volume">
+                    <input id="volume-bar" type="range"
+                        style={`--progress-width: ${volumePercentage}%`}
+                        bind:value={$musicVolume}
+                        min={MusicConfig.vmin}
+                        max={MusicConfig.vmax}
+                        step={MusicConfig.vstep}>
+                        
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -164,5 +180,17 @@ function redirectToPlay() {
         &::-webkit-slider-thumb {
             @apply mt-[.2rem] invisible;
         }
-    }    
+    }
+    
+    #volume-bar {
+        @apply w-20 cursor-pointer outline-0;
+        
+        &::-webkit-slider-runnable-track {
+            @apply h-[.2rem] rounded;
+            background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
+        }
+        &::-webkit-slider-thumb {
+            @apply mt-[.2rem] invisible;
+        }
+    }
 </style>

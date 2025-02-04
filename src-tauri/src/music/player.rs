@@ -48,6 +48,7 @@ pub struct MusicPlayer {
     playlist: Sender<Vec<String>>,
     info: Sender<()>,
     playlist_remove: Sender<usize>,
+    volume: Sender<f32>
 }
 
 #[derive(Clone, Serialize)]
@@ -79,6 +80,7 @@ impl MusicPlayer {
             playlist: music_spawn.2,
             info: music_spawn.3,
             playlist_remove: music_spawn.4,
+            volume: music_spawn.5,
         }
     }
     pub fn send_command(&mut self, command: String) -> Result<(), SendError<MusicCommand>> {
@@ -102,6 +104,9 @@ impl MusicPlayer {
     }
     pub fn remove_playlist(&mut self, index: usize) -> Result<(), SendError<usize>> {
         self.playlist_remove.send(index)
+    }
+    pub fn set_volume(&mut self, volume: f32) -> Result<(), SendError<f32>> {
+        self.volume.send(volume)
     }
 }
 
@@ -183,6 +188,7 @@ fn spawn() -> (
     Sender<Vec<String>>,
     Sender<()>,
     Sender<usize>,
+    Sender<f32>,
 ) {
     let (sender_command, receiver_command) = unbounded();
     let (sender_position, receiver_position) = unbounded();
@@ -194,6 +200,7 @@ fn spawn() -> (
     let (sender_player_playlist, receiver_player_playlist) = unbounded();
     let (sender_clear, receiver_clear) = unbounded();
     let (sender_playlist_remove, receiver_playlist_remove) = unbounded();
+    let (sender_volume, receiver_volume) = unbounded();
     // let (sender_sink_reset, receiver_sink_reset) = unbounded();
 
     ThreadBuilder::default()
@@ -238,6 +245,7 @@ fn spawn() -> (
                 receiver_position,
                 receiver_player_playlist,
                 receiver_info,
+                receiver_volume,
                 // receiver_sink_reset,
                 sender_next,
                 sender_next_position,
@@ -251,6 +259,7 @@ fn spawn() -> (
         sender_next_playlist,
         sender_info,
         sender_playlist_remove,
+        sender_volume
     )
 }
 
@@ -368,6 +377,7 @@ fn play(
     receiver_position: Receiver<Duration>,
     receiver_player_playlist: Receiver<Vec<String>>,
     receiver_info: Receiver<()>,
+    receiver_volume: Receiver<f32>,
     // receiver_sink_reset: Receiver<bool>,
     sender_next: Sender<()>,
     sender_next_position: Sender<Duration>,
@@ -376,7 +386,7 @@ fn play(
     let stream_handle =
         rodio::OutputStreamBuilder::open_default_stream().expect("Failed to open default stream");
     let sink = rodio::Sink::connect_new(&stream_handle.mixer());
-
+    
     if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
         sink.pause();
     }
@@ -411,7 +421,11 @@ fn play(
                                          // }
             }
         }
-
+        
+            if let Ok(volume) = receiver_volume.try_recv() {
+            sink.set_volume(volume);
+        }
+        
         if let Ok(playlist) = receiver_player_playlist.try_recv() {
             for path in playlist.iter() {
                 sink_add_music(&sink, path.to_string());

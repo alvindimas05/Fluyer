@@ -5,6 +5,7 @@ export let musicList = writable<MusicData[] | null | undefined>(undefined);
 export let musicIsPlaying = writable(false);
 export let musicCurrent = writable<MusicData | null>(null);
 export let musicProgressValue = writable(0);
+export let musicVolume = writable(1);
 export let musicProgressIntervalId = writable<null | ReturnType<
 	typeof setInterval
 >>(null);
