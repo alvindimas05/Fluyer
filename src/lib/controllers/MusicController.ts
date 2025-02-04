@@ -335,12 +335,17 @@ const MusicController = {
         mobileNavigationBarHeight.set(barHeight > 32 ? 32 : barHeight)
     },
     
-    volumePercentage: () => ((get(musicVolume) - MusicConfig.vmin) /
+    volume: () => get(musicVolume),
+    setVolume: (value: number) => {
+        musicVolume.set(value);
+        invoke(CommandsRoute.MUSIC_SET_VOLUME, { volume: MusicController.volume() });
+    },
+    volumePercentage: () => ((MusicController.volume() - MusicConfig.vmin) /
 		(MusicConfig.vmax - MusicConfig.vmin)) *
 	100,
 	handleVolumeChange: () => {
 	    musicVolume.subscribe(() => {
-			invoke(CommandsRoute.MUSIC_SET_VOLUME, { volume: get(musicVolume) });
+			invoke(CommandsRoute.MUSIC_SET_VOLUME, { volume: MusicController.volume() });
 		});
 	}
 };

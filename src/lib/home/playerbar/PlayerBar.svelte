@@ -83,6 +83,10 @@ async function onKeyDown(
 function redirectToPlay() {
 	goto("/play");
 }
+
+function handleVolumeButton(){
+    MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
+}
 </script>
 
 <svelte:document onkeydown={onKeyDown} />
@@ -154,7 +158,11 @@ function redirectToPlay() {
             </div>
             <div class="hidden md:grid justify-end">
                 <div class="grid grid-cols-[auto_auto] items-center gap-3">
-                    <img class="invert w-5" src={volumePercentage > 0 ? MusicConfig.defaultSpeakerButton : MusicConfig.defaultMuteButton} alt="Volume">
+                    <button onclick={handleVolumeButton}>
+                        <img class="invert w-5"
+                            alt="Volume"
+                            src={volumePercentage > 0 ? MusicConfig.defaultSpeakerButton : MusicConfig.defaultMuteButton}>
+                    </button>
                     <input id="volume-bar" type="range"
                         style={`--progress-width: ${volumePercentage}%`}
                         bind:value={$musicVolume}
