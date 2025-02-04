@@ -33,7 +33,8 @@ You can grab the latest version of the app below or check the [release page](htt
 - [x] Animated Background
 
 ### API Functionality
-- [ ] MusicBrainz Integration (For Cover Art)
+- [x] MusicBrainz Integration (For Cover Art)
+- [ ] Cover Art Caching
 - [ ] Spotify Integration (For Spotify Canvas)
 - [ ] Soulseek Integration (We love FLACs <3)
 
