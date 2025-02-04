@@ -21,8 +21,8 @@ You can grab the latest version of the app below or check the [release page](htt
 - [x] Play & Pause 
 - [x] Next
 - [ ] Previous
-- [ ] Volume Control
-- [ ] Mute
+- [x] Volume Control
+- [x] Mute
 - [ ] Shuffle & Repeat
 - [x] Playlist
 
