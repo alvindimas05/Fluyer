@@ -28,19 +28,19 @@ const COVER_ART_QUEUE: Mutex<Vec<CoverArtRequest>> = Mutex::new(vec![]);
 pub async fn cover_art_from_album(album: String) -> Option<String> {
     let file_path = format!("{}/album/{}", cover_art_cache_directory(), album);
     let data = std::fs::read(file_path.clone());
-    if data.is_err() && cover_art_get_queue(album.clone()).is_none() {
-        return None;
+    if data.is_err() {
+        let queue = cover_art_get_queue(album.clone());
+        // Note: Assume it's not found for now
+        if queue.is_none() || queue.unwrap().status == CoverArtRequestStatus::Failed {
+            return None
+        }
     }
     
-    // Note: Assume it's not found for now
-    if cover_art_get_queue(album.clone()).unwrap().status == CoverArtRequestStatus::Failed {
-        return None;
-    }
     wait_until_file_created(file_path);
 
     let reader = ImageReader::new(std::io::Cursor::new(data.unwrap())).with_guessed_format();
     if reader.is_err() {
-        return None;
+        return None
     }
 
     let mut buf = Cursor::new(vec![]);
@@ -51,7 +51,7 @@ pub async fn cover_art_from_album(album: String) -> Option<String> {
         .write_to(&mut buf, image::ImageFormat::Png)
         .is_err()
     {
-        return None;
+        return None
     }
 
     Some(base64::engine::general_purpose::STANDARD.encode(buf.get_ref()))
@@ -66,29 +66,29 @@ pub async fn cover_art_request_album(album: String, url: String) -> Option<Strin
     let res = reqwest::get(url).await;
     if res.is_err() {
         cover_art_set_failed(album);
-        return None;
+        return None
     }
 
     let bytes = res.unwrap().bytes().await;
     if bytes.is_err() {
         cover_art_set_failed(album);
-        return None;
+        return None
     }
     let cache = cover_art_cache_directory();
     if std::fs::create_dir_all(format!("{}/album", cache.clone())).is_err(){
         cover_art_set_failed(album.clone());
-        return None;
+        return None
     }    
     let mut file =
         std::fs::File::create(format!("{}/album/{}", cache, album)).unwrap();
     let mut content = Cursor::new(bytes.unwrap());
     if copy(&mut content, &mut file).is_err() {
         cover_art_set_failed(album);
-        return None;
+        return None
     }
     if file.sync_all().is_err() {
         cover_art_set_failed(album);
-        return None;
+        return None
     }
 
     Some(base64::engine::general_purpose::STANDARD.encode(content.into_inner()))
