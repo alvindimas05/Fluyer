@@ -5,9 +5,9 @@ import {
 	musicProgressValue,
 } from "$lib/stores/music";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import API from "$lib/api/api";
 import type MusicLyric from "$lib/home/music/lyric";
 import { onMount } from "svelte";
+import LrcLib from "$lib/api/lrclib";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = 400;
@@ -84,7 +84,7 @@ async function resetLyrics() {
 	selectedLyricIndex = 0;
 
 	if (MusicController.currentMusic() == null) return;
-	const resLyrics = await API.getLyrics(MusicController.currentMusic()!);
+	const resLyrics = await LrcLib.getLyrics(MusicController.currentMusic()!);
 	if (resLyrics == null) return;
 	lyrics = resLyrics;
 }
@@ -140,6 +140,7 @@ onMount(async () => {
                 <div class="text-xs lg:text-sm flex w-12">
                     <span class="self-end opacity-75">{progressDurationText}</span>
                 </div>
+                <!-- FIXME: Overflow Text Animation -->
                 <div class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90 text-ellipsis overflow-hidden whitespace-nowrap">
                     {music?.albumArtist ?? music?.artist ?? MusicConfig.defaultArtist} - {music?.title ?? MusicConfig.defaultTitle}
                 </div>

@@ -144,6 +144,7 @@ function handleVolumeButton(){
                     <button onclick={redirectToPlay}>
                         <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
                     </button>
+                    <!-- FIXME: Overflow Text Animation -->
                     <div class="ms-3 overflow-hidden">
                         <p class="font-medium">
                             {title}

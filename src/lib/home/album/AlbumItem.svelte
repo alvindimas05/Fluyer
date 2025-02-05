@@ -4,6 +4,7 @@ import { onMount } from "svelte";
 import type { MusicData } from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
     import MusicBrainzApi from "$lib/api/musicbrainz";
+    import CoverArt from "$lib/handlers/coverart";
 
 interface Props {
 	musicList: MusicData[];
@@ -26,7 +27,7 @@ async function checkAlbumImage() {
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const mbImage = await mbApi.getAlbumImageFromAlbum(music.album!);
+	const mbImage = await CoverArt.fromAlbum(music.album!);
 	if(mbImage == null) return;
 	albumImage = mbImage;
 	musicList = musicList.map((m) => {

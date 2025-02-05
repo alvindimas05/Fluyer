@@ -31,10 +31,10 @@ You can grab the latest version of the app below or check the [release page](htt
 - [ ] Group by Folder
 - [x] Lyrics
 - [x] Animated Background
+- [ ] Cover Art Caching
 
 ### API Functionality
 - [x] MusicBrainz Integration (For Cover Art)
-- [ ] Cover Art Caching
 - [ ] Spotify Integration (For Spotify Canvas)
 - [ ] Soulseek Integration (We love FLACs <3)
 

@@ -65,6 +65,8 @@ pub fn run() {
             commands::mobile::get_navigation_bar_height,
             #[cfg(mobile)]
             commands::mobile::get_status_bar_height,
+            commands::coverart::cover_art_from_album,
+            commands::coverart::cover_art_request_album,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
@@ -79,6 +81,8 @@ pub fn run() {
                 {
                     crate::music::player::handle_headset_change();
                 }
+                
+                println!("The app cache dir is located at: {}", app_handle.path().app_cache_dir().unwrap().display());
             }
         });
 }

@@ -18,4 +18,7 @@ export const CommandsRoute = {
 	GET_STATUS_BAR_HEIGHT: "get_status_bar_height",
 
 	LOG_ERROR: "log_error",
+	
+	COVER_ART_FROM_ALBUM: "cover_art_from_album",
+	COVER_ART_REQUEST_ALBUM: "cover_art_request_album",
 };
