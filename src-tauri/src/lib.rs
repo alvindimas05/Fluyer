@@ -13,6 +13,7 @@ mod music;
 mod platform;
 mod store;
 mod logger;
+mod api;
 
 struct AppState {
     music_player: MusicPlayer,
@@ -66,7 +67,6 @@ pub fn run() {
             #[cfg(mobile)]
             commands::mobile::get_status_bar_height,
             commands::coverart::cover_art_from_album,
-            commands::coverart::cover_art_request_album,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

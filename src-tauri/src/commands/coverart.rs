@@ -8,35 +8,46 @@ use tauri::Manager;
 use notify::{RecommendedWatcher, Watcher, RecursiveMode, EventKind};
 use std::path::Path;
 use std::time::Duration;
+use lazy_static::lazy_static;
 
-use crate::GLOBAL_APP_HANDLE;
+use crate::{GLOBAL_APP_HANDLE, api::musicbrainz::MusicBrainz};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct CoverArtRequest {
     name: String,
     status: CoverArtRequestStatus
 }
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum CoverArtRequestStatus {
     Loading,
     Failed
 }
 
-const COVER_ART_QUEUE: Mutex<Vec<CoverArtRequest>> = Mutex::new(vec![]);
+lazy_static! {
+    static ref COVER_ART_QUEUE: Mutex<Vec<CoverArtRequest>> = Mutex::new(vec![]);
+}
 
 #[tauri::command]
-pub async fn cover_art_from_album(album: String) -> Option<String> {
+pub fn cover_art_from_album(album: String) -> Option<String> {
     let file_path = format!("{}/album/{}", cover_art_cache_directory(), album);
-    let data = std::fs::read(file_path.clone());
-    if data.is_err() {
+    
+    let path = Path::new(file_path.as_str());
+    if !path.exists() {
         let queue = cover_art_get_queue(album.clone());
         // Note: Assume it's not found for now
         if queue.is_none() || queue.unwrap().status == CoverArtRequestStatus::Failed {
-            return None
+            COVER_ART_QUEUE.lock().unwrap().push(CoverArtRequest { name: album.clone(), status: CoverArtRequestStatus::Loading });
+            let cover_art = cover_art_request_album(album);
+            return cover_art
         }
     }
     
-    wait_until_file_created(file_path);
+    wait_until_file_created(file_path.clone());
+    
+    let data = std::fs::read(file_path.clone());
+    if data.is_err(){
+        return None
+    }
 
     let reader = ImageReader::new(std::io::Cursor::new(data.unwrap())).with_guessed_format();
     if reader.is_err() {
@@ -57,19 +68,20 @@ pub async fn cover_art_from_album(album: String) -> Option<String> {
     Some(base64::engine::general_purpose::STANDARD.encode(buf.get_ref()))
 }
 
-#[tauri::command]
-pub async fn cover_art_request_album(album: String, url: String) -> Option<String> {
-    COVER_ART_QUEUE.lock().unwrap().push(CoverArtRequest {
-        name: album.clone(),
-        status: CoverArtRequestStatus::Loading
-    });
-    let res = reqwest::get(url).await;
+fn cover_art_request_album(album: String) -> Option<String> {
+    let url = MusicBrainz::get_cover_art_from_album(album.clone());
+    
+    if url.is_none() {
+        return None
+    }
+    
+    let res = reqwest::blocking::get(url.unwrap());
     if res.is_err() {
         cover_art_set_failed(album);
         return None
     }
 
-    let bytes = res.unwrap().bytes().await;
+    let bytes = res.unwrap().bytes();
     if bytes.is_err() {
         cover_art_set_failed(album);
         return None
@@ -134,7 +146,7 @@ fn wait_until_file_created(file_path: String) {
 
     let parent_dir = path.parent().unwrap();
     let (tx, rx) = std::sync::mpsc::channel::<notify::Result<notify::Event>>();
-
+    
     let mut watcher: RecommendedWatcher = Watcher::new(tx, notify::Config::default()
         .with_poll_interval(Duration::from_secs(1)))
         .expect("Failed to create watcher");
@@ -142,8 +154,9 @@ fn wait_until_file_created(file_path: String) {
     watcher.watch(parent_dir, RecursiveMode::NonRecursive)
         .expect("Failed to watch directory");
 
-    while let Ok(result) = rx.recv() {
-        if let Ok(event) = result {
+    #[allow(for_loops_over_fallibles)]
+    for event in rx.recv() {
+        if let Ok(event) = event {
             if matches!(event.kind, EventKind::Create(_)) {
                 if event.paths.iter().any(|p| p == path) {
                     break;

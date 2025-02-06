@@ -8,15 +8,8 @@ const CoverArt = {
     fromAlbum: async (album: string) => {
         try {
             let albumCover = await invoke(CommandsRoute.COVER_ART_FROM_ALBUM, { album });
-            if(albumCover != null) return `data:image/png;base64,${albumCover}`;
-            
-            const url  = await mbApi.getAlbumImageFromAlbum(album);
-            if(url == null) return null;
-            
-            let reqAlbum = await invoke(CommandsRoute.COVER_ART_REQUEST_ALBUM, { album, url });
-            if(reqAlbum == null) return null;
-            
-            return `data:image/png;base64,${reqAlbum}`;
+            if(albumCover == null) return null;
+            return `data:image/png;base64,${albumCover}`;
         } catch(err){
             console.error(err)
             return null;
