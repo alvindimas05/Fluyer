@@ -167,8 +167,7 @@ jobs:
   build-android-armv7:
       name: Build Android (armv7)
       runs-on: ubuntu-latest
-      permissions:
-          contents: write
+      permissions: write-all
       if: ${{ github.event.inputs.build-android-armv7 == 'true' }}
       steps:
           - uses: actions/checkout@v4
@@ -223,8 +222,7 @@ jobs:
   build-android-aarch64:
       name: Build Android (aarch64)
       runs-on: ubuntu-latest
-      permissions:
-          contents: write
+      permissions: write-all
       if: ${{ github.event.inputs.build-android-aarch64 == 'true' }}
       steps:
           - uses: actions/checkout@v4
@@ -279,8 +277,7 @@ jobs:
   build-android-i686:
       name: Build Android (i686)
       runs-on: ubuntu-latest
-      permissions:
-          contents: write
+      permissions: write-all
       if: ${{ github.event.inputs.build-android-i686 == 'true' }}
       steps:
           - uses: actions/checkout@v4
@@ -335,8 +332,7 @@ jobs:
   build-android-x86_64:
       name: Build Android (x86_64)
       runs-on: ubuntu-latest
-      permissions:
-          contents: write
+      permissions: write-all
       if: ${{ github.event.inputs.build-android-x86_64 == 'true' }}
       steps:
           - uses: actions/checkout@v4
