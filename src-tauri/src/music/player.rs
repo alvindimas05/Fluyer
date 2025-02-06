@@ -227,6 +227,7 @@ fn spawn() -> (
                 receiver_position,
                 receiver_player_playlist,
                 receiver_info,
+                receiver_volume,
                 // receiver_sink_reset,
                 sender_next,
                 sender_next_position,
@@ -262,6 +263,8 @@ fn spawn() -> (
         sender_volume
     )
 }
+
+
 
 static MUSIC_NEXT_COUNTER: Mutex<i128> = Mutex::new(0);
 fn spawn_next_listener(
