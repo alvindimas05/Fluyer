@@ -15,9 +15,11 @@ bun i
 if [[ "$os" == "android" ]]; then
     export ANDROID_NDK_HOME=$NDK_HOME
     export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME/ndk/28.0.13004108/toolchains/llvm/prebuilt/linux-x86_64/bin"
-    export PATH=$PATH:$ANDROID_NDK_ROOT
-    ln -s $ANDROID_NDK_ROOT/llvm-ranlib $ANDROID_NDK_ROOT/$ANDROID_ARCH-linux-android-ranlib
-
+    export RANLIB=$ANDROID_NDK_ROOT/llvm-ranlib
+    export AR=$ANDROID_NDK_ROOT/llvm-ar
+    export STRIP=$ANDROID_NDK_ROOT/llvm-strip
+    export LD=$ANDROID_NDK_ROOT/ld
+    
     cd src-tauri/gen/android
     echo "keyAlias=$ANDROID_KEY_ALIAS" > keystore.properties
     echo "password=$ANDROID_KEY_PASSWORD" >> keystore.properties
