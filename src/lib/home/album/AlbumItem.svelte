@@ -3,8 +3,8 @@ import SpotifyApi from "$lib/api/spotify";
 import { onMount } from "svelte";
 import type { MusicData } from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-    import MusicBrainzApi from "$lib/api/musicbrainz";
-    import CoverArt from "$lib/handlers/coverart";
+import MusicBrainzApi from "$lib/api/musicbrainz";
+import CoverArt from "$lib/handlers/coverart";
 
 interface Props {
 	musicList: MusicData[];
@@ -28,7 +28,7 @@ async function checkAlbumImage() {
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
 	const mbImage = await CoverArt.fromAlbum(music.album!);
-	if(mbImage == null) return;
+	if (mbImage == null) return;
 	albumImage = mbImage;
 	musicList = musicList.map((m) => {
 		m.image = mbImage;
@@ -62,9 +62,7 @@ async function addMusicListAndPlay() {
 	MusicController.play(true);
 }
 
-onMount(() => {
-	checkAlbumImage();
-});
+onMount(checkAlbumImage);
 
 setTimeout(
 	() => (animationClasses = "animate__animated animate__fadeInDown"),

@@ -5,20 +5,23 @@ import { invoke } from "@tauri-apps/api/core";
 
 const mbApi = new MusicBrainzApi();
 const CoverArt = {
-    fromAlbum: async (album: string) => {
-        try {
-            let albumCover = await invoke(CommandsRoute.COVER_ART_FROM_ALBUM, { album });
-            if(albumCover == null) return null;
-            return `data:image/png;base64,${albumCover}`;
-        } catch(err){
-            console.error(err)
-            return null;
-        }
-    },
-    fromMusic: async (music: MusicData) => {
-        if(music.album == null) return null;
-        return CoverArt.fromAlbum(music.album);
-    }
-}
+	// FIXME: Instead of reading one file for multiple music/album, add checking and only read one file if it request the same album
+	fromAlbum: async (album: string) => {
+		try {
+			let albumCover = await invoke(CommandsRoute.COVER_ART_FROM_ALBUM, {
+				album,
+			});
+			if (albumCover == null) return null;
+			return `data:image/png;base64,${albumCover}`;
+		} catch (err) {
+			console.error(err);
+			return null;
+		}
+	},
+	fromMusic: async (music: MusicData) => {
+		if (music.album == null) return null;
+		return CoverArt.fromAlbum(music.album);
+	},
+};
 
 export default CoverArt;

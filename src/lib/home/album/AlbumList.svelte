@@ -7,7 +7,7 @@ import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
 import { platform } from "@tauri-apps/plugin-os";
 import { isDesktop, isMobile } from "$lib/platform";
-    import { mobileStatusBarHeight } from "$lib/stores/mobile";
+import { mobileStatusBarHeight } from "$lib/stores/mobile";
 
 let element: HTMLDivElement;
 let grouppedAlbums = $state(groupByAlbum());

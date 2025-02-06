@@ -5,7 +5,7 @@ import { isDesktop, isMobile } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
-    import { mobileStatusBarHeight } from "$lib/stores/mobile";
+import { mobileStatusBarHeight } from "$lib/stores/mobile";
 
 let isMouseInsideArea = $state(false);
 let animationClass = $state("");

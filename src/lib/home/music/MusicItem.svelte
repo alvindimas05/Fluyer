@@ -3,7 +3,7 @@ import { onMount } from "svelte";
 import type { MusicData } from "./types";
 import SpotifyApi from "$lib/api/spotify";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-    import CoverArt from "$lib/handlers/coverart";
+import CoverArt from "$lib/handlers/coverart";
 
 interface Props {
 	music: MusicData;
@@ -21,7 +21,7 @@ async function checkAlbumImage() {
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
 	const mbImage = await CoverArt.fromMusic(music);
-	if(mbImage == null) return;
+	if (mbImage == null) return;
 	albumImage = mbImage;
 }
 

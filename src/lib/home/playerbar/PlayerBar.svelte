@@ -23,7 +23,7 @@ musicProgressValue.subscribe(updateStates);
 musicCurrent.subscribe(updateStates);
 musicIsPlaying.subscribe(updateStates);
 musicVolume.subscribe(() => {
-    volumePercentage = MusicController.volumePercentage();
+	volumePercentage = MusicController.volumePercentage();
 });
 
 function handleButtonPlayPause() {
@@ -84,8 +84,8 @@ function redirectToPlay() {
 	goto("/play");
 }
 
-function handleVolumeButton(){
-    MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
+function handleVolumeButton() {
+	MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
 }
 </script>
 

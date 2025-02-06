@@ -6,7 +6,7 @@ import {
 	musicProgressValue,
 	musicList,
 	musicsNext,
-    musicVolume,
+	musicVolume,
 } from "$lib/stores/music";
 import { get } from "svelte/store";
 import type {
@@ -18,7 +18,10 @@ import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
 import { CommandsRoute } from "$lib/commands";
 import { isDesktop, isIos, isMobile } from "$lib/platform";
-import { mobileNavigationBarHeight, mobileStatusBarHeight } from "$lib/stores/mobile";
+import {
+	mobileNavigationBarHeight,
+	mobileStatusBarHeight,
+} from "$lib/stores/mobile";
 import logHandler from "$lib/handlers/log";
 
 export const MusicConfig = {
@@ -42,15 +45,15 @@ export const MusicConfig = {
 	defaultMuteButton: "/icons/default/mute.png",
 };
 const MusicController = {
-    handleInitialize: () => {
-        logHandler();
-        
-        MusicController.listenSyncMusic();
-        MusicController.listenNextMusic();
-        MusicController.setStatusBarHeight();
-        MusicController.setNavigationBarHeight();
-        MusicController.handleVolumeChange();
-    },
+	handleInitialize: () => {
+		logHandler();
+
+		MusicController.listenSyncMusic();
+		MusicController.listenNextMusic();
+		MusicController.setStatusBarHeight();
+		MusicController.setNavigationBarHeight();
+		MusicController.handleVolumeChange();
+	},
 	musicList: () => get(musicList),
 	setMusicList: (value: MusicData[] | null) => musicList.set(value),
 	getMusics: async () => {
@@ -323,31 +326,38 @@ const MusicController = {
 	isProgressValueEnd: () =>
 		MusicController.progressValue() >= MusicConfig.max ||
 		MusicController.progressValue() <= MusicConfig.min,
-		
+
 	setStatusBarHeight: async () => {
-	    if(isDesktop()) return;
+		if (isDesktop()) return;
 		const barHeight = await invoke<number>(CommandsRoute.GET_STATUS_BAR_HEIGHT);
 		mobileStatusBarHeight.set(barHeight > 28 && !isIos() ? 28 : barHeight);
 	},
 	setNavigationBarHeight: async () => {
-	    if(isDesktop()) return;
-    	const barHeight = await invoke<number>(CommandsRoute.GET_NAVIGATION_BAR_HEIGHT);
-        mobileNavigationBarHeight.set(barHeight > 32 ? 32 : barHeight)
-    },
-    
-    volume: () => get(musicVolume),
-    setVolume: (value: number) => {
-        musicVolume.set(value);
-        invoke(CommandsRoute.MUSIC_SET_VOLUME, { volume: MusicController.volume() });
-    },
-    volumePercentage: () => ((MusicController.volume() - MusicConfig.vmin) /
-		(MusicConfig.vmax - MusicConfig.vmin)) *
-	100,
-	handleVolumeChange: () => {
-	    musicVolume.subscribe(() => {
-			invoke(CommandsRoute.MUSIC_SET_VOLUME, { volume: MusicController.volume() });
+		if (isDesktop()) return;
+		const barHeight = await invoke<number>(
+			CommandsRoute.GET_NAVIGATION_BAR_HEIGHT,
+		);
+		mobileNavigationBarHeight.set(barHeight > 32 ? 32 : barHeight);
+	},
+
+	volume: () => get(musicVolume),
+	setVolume: (value: number) => {
+		musicVolume.set(value);
+		invoke(CommandsRoute.MUSIC_SET_VOLUME, {
+			volume: MusicController.volume(),
 		});
-	}
+	},
+	volumePercentage: () =>
+		((MusicController.volume() - MusicConfig.vmin) /
+			(MusicConfig.vmax - MusicConfig.vmin)) *
+		100,
+	handleVolumeChange: () => {
+		musicVolume.subscribe(() => {
+			invoke(CommandsRoute.MUSIC_SET_VOLUME, {
+				volume: MusicController.volume(),
+			});
+		});
+	},
 };
 
 export default MusicController;
