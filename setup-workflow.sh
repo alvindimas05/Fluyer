@@ -13,6 +13,8 @@ bun i
 
 # Setup Android
 if [[ "$os" == "android" ]]; then
+    export ANDROID_NDK_HOME=$NDK_HOME
+
     cd src-tauri/gen/android
     echo "keyAlias=$ANDROID_KEY_ALIAS" > keystore.properties
     echo "password=$ANDROID_KEY_PASSWORD" >> keystore.properties
