@@ -42,3 +42,5 @@ notify = "8.0.0"
 lazy_static = "1.5.0"
 dotenvy = "0.15.7"
 openssl = { version = "*", features = ["vendored"] }
+[target.'cfg(target_os = "windows")'.dependencies]
+enigo = "0.3.0"

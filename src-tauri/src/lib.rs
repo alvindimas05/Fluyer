@@ -1,6 +1,6 @@
 use crate::store::init_store;
 use music::player::MusicPlayer;
-#[cfg(desktop)]
+#[cfg(target_os = "macos")]
 use tauri_plugin_decorum::WebviewWindowExt;
 use std::sync::{Mutex, OnceLock};
 use tauri::{AppHandle, WebviewWindow};
@@ -67,6 +67,8 @@ pub fn run() {
             #[cfg(mobile)]
             commands::mobile::get_status_bar_height,
             commands::coverart::cover_art_from_album,
+            #[cfg(windows)]
+            commands::decorum::decorum_show_snap_overlay,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

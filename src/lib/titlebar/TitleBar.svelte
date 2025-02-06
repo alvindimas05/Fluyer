@@ -17,7 +17,7 @@ function onMouseDown(
 
 let snapOverlayTimer: ReturnType<typeof setTimeout> | null = null;
 function showSnapOverlay(){
-    window.setFocus().then(() => invoke("plugin:decorum|show_snap_overlay"));
+    window.setFocus().then(() => invoke("decorum_show_snap_overlay"));
 }
 
 function handleMaximizeMouseEnter(){
@@ -43,17 +43,17 @@ window.onResized(async (_) => {
         <div class="pe-3">
             <button class="tb-button" 
                 onclick={() => window.minimize()}>
-                \uE921
+                &#59681;
             </button>
             <button class="tb-button" 
                 onmouseenter={handleMaximizeMouseEnter}
                 onmouseleave={handleMaximizeMouseLeave}
                 onclick={() => window.maximize()}>
-                \uE922
+                &#59682;
             </button>
             <button class="tb-button" 
                 onclick={() => window.close()}>
-                \uE8BB
+                &#59579;
             </button>
         </div>
     {/if}
