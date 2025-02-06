@@ -3,16 +3,13 @@ use crossbeam_channel::unbounded;
 use crossbeam_channel::{Receiver, SendError, Sender};
 use rodio::Sink;
 use serde::{Deserialize, Serialize};
+use tauri_plugin_fluyer::FluyerExt;
 use std::fs::File;
 use std::io::BufReader;
 use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 use tauri::{Emitter, Listener};
-#[cfg(target_os = "android")]
-use tauri_plugin_fluyer::models::WatcherStateType;
-#[cfg(target_os = "android")]
-use tauri_plugin_fluyer::FluyerExt;
 use thread_priority::ThreadBuilder;
 #[cfg(not(windows))]
 use thread_priority::ThreadPriority;
@@ -111,50 +108,54 @@ impl MusicPlayer {
 }
 
 pub fn handle_music_player_background() {
-    GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://focus", |_|{
-        let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
-        *state = false;
-        let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
-                .emit(
-                    crate::commands::route::MUSIC_PLAYER_SYNC,
-                    MusicPlayerSync { skip: *count },
-                )
-                .expect("Failed to sync music player");
-            *count = 0;
-    });
+    #[cfg(desktop)]{
+        GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://focus", |_|{
+            let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
+            *state = false;
+            let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
+                GLOBAL_APP_HANDLE
+                    .get()
+                    .unwrap()
+                    .emit(
+                        crate::commands::route::MUSIC_PLAYER_SYNC,
+                        MusicPlayerSync { skip: *count },
+                    )
+                    .expect("Failed to sync music player");
+                *count = 0;
+        });
+        
+        GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://blur", |_|{
+            let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
+            *state = true;
+        });
+    }
+    #[cfg(target_os = "android")]{        
+        use tauri_plugin_fluyer::models::WatcherStateType;
+        use tauri_plugin_fluyer::FluyerExt;
+        GLOBAL_APP_HANDLE
+            .get()
+            .unwrap()
+            .fluyer()
+            .watch_state(|payload| {
+                let is_resuming = matches!(payload.value, WatcherStateType::Resume);
+                let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
+                *state = !is_resuming;
     
-    GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://blur", |_|{
-        let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
-        *state = true;
-    });
-    
-    
-    // GLOBAL_APP_HANDLE
-    //     .get()
-    //     .unwrap()
-    //     .fluyer()
-    //     .watch_state(|payload| {
-    //         let is_resuming = matches!(payload.value, WatcherStateType::Resume);
-    //         let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
-    //         *state = !is_resuming;
-
-    //         if is_resuming {
-    //             let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
-    //             GLOBAL_APP_HANDLE
-    //                 .get()
-    //                 .unwrap()
-    //                 .emit(
-    //                     crate::commands::route::MUSIC_PLAYER_SYNC,
-    //                     MusicPlayerSync { skip: *count },
-    //                 )
-    //                 .expect("Failed to sync music player");
-    //             *count = 0;
-    //         }
-    //     })
-    //     .expect("Failed to watch app state");
+                if is_resuming {
+                    let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
+                    GLOBAL_APP_HANDLE
+                        .get()
+                        .unwrap()
+                        .emit(
+                            crate::commands::route::MUSIC_PLAYER_SYNC,
+                            MusicPlayerSync { skip: *count },
+                        )
+                        .expect("Failed to sync music player");
+                    *count = 0;
+                }
+            })
+            .expect("Failed to watch app state");
+    }
 }
 
 #[cfg(target_os = "android")]
