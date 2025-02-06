@@ -201,13 +201,14 @@ jobs:
             run: bash setup-workflow.sh
             env:
                 os: android
-                APP_VERSION: ${{ steps.package-version.outputs.current-version }}
                 ANDROID_ARCH: armv7
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
                 RUNNER_TEMP: ${{ runner.temp }}
                 NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
+          - name: Rename APK
+            run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ steps.package-version.outputs.current-version }}_armv7.apk
           
           - name: Publish release
             uses: ncipollo/release-action@v1
@@ -256,18 +257,19 @@ jobs:
             run: bash setup-workflow.sh
             env:
                 os: android
-                APP_VERSION: ${{ steps.package-version.outputs.current-version }}
                 ANDROID_ARCH: aarch64
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
                 RUNNER_TEMP: ${{ runner.temp }}
                 NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
+          - name: Rename APK
+            run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ steps.package-version.outputs.current-version }}_aarch64.apk
           
           - name: Publish release
             uses: ncipollo/release-action@v1
             with:
-                artifacts: ./apks/Fluyer_${{ steps.package-version.outputs.current-version }}_aarch64.apk
+                artifacts: ./Fluyer_${{ steps.package-version.outputs.current-version }}_aarch64.apk
                 tag: v${{ steps.package-version.outputs.current-version }}
                 name: Fluyer v${{ steps.package-version.outputs.current-version }}
                 allowUpdates: true
@@ -312,12 +314,13 @@ jobs:
             env:
                 os: android
                 APP_VERSION: ${{ steps.package-version.outputs.current-version }}
-                ANDROID_ARCH: i686
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
                 RUNNER_TEMP: ${{ runner.temp }}
                 NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
+          - name: Rename APK
+            run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ steps.package-version.outputs.current-version }}_i686.apk
           
           - name: Publish release
             uses: ncipollo/release-action@v1
@@ -366,13 +369,13 @@ jobs:
             run: bash setup-workflow.sh
             env:
                 os: android
-                APP_VERSION: ${{ steps.package-version.outputs.current-version }}
-                ANDROID_ARCH: x86_64
                 ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
                 RUNNER_TEMP: ${{ runner.temp }}
                 NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
+          - name: Rename APK
+            run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk
           
           - name: Publish release
             uses: ncipollo/release-action@v1
