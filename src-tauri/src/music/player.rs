@@ -3,7 +3,6 @@ use crossbeam_channel::unbounded;
 use crossbeam_channel::{Receiver, SendError, Sender};
 use rodio::Sink;
 use serde::{Deserialize, Serialize};
-use tauri_plugin_fluyer::FluyerExt;
 use std::fs::File;
 use std::io::BufReader;
 use std::sync::Mutex;

@@ -16,6 +16,17 @@ export function isDesktop(): boolean {
 	return !isMobile();
 }
 
+export function isMacos(): boolean {
+    return platform() == "macos";
+}
+
+export function isWindows(): boolean {
+    return platform() == "windows";
+}
+
+export function isLinux(): boolean {
+    return platform() == "linux";
+}
 export function isTablet() {
 	return window.innerWidth > 768 && isMobile();
 }
