@@ -8,26 +8,31 @@ import { get } from "svelte/store";
 const mbApi = new MusicBrainzApi();
 
 export enum CoverArtStatus {
-    Loaded = "loaded",
-    Loading = "loading",
-    Failed = "failed",
+	Loaded = "loaded",
+	Loading = "loading",
+	Failed = "failed",
 }
 export interface CoverArtResponse {
-    name: string,
-    status: CoverArtStatus,
-    image: string
+	name: string;
+	status: CoverArtStatus;
+	image: string;
 }
-
 
 const CoverArt = {
 	// FIXME: Instead of reading one file for multiple music/album, add checking and only read one time if it request the same album
 	fromAlbum: async (album: string) => {
 		try {
-			let albumCover = await invoke<CoverArtResponse>(CommandsRoute.COVER_ART_FROM_ALBUM, {
-				album,
-			});
+			let albumCover = await invoke<CoverArtResponse>(
+				CommandsRoute.COVER_ART_FROM_ALBUM,
+				{
+					album,
+				},
+			);
 			if (albumCover.status == CoverArtStatus.Failed) return false;
-			if (albumCover.status == CoverArtStatus.Loaded || albumCover.image != null){
+			if (
+				albumCover.status == CoverArtStatus.Loaded ||
+				albumCover.image != null
+			) {
 				let caches = get(coverArtAlbumCaches);
 				caches.push(albumCover);
 				coverArtAlbumCaches.set(caches);

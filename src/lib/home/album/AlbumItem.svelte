@@ -27,11 +27,11 @@ async function checkAlbumImage() {
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
 	const res = await CoverArt.fromAlbum(music.album!);
-	if(!res) return;
-	
+	if (!res) return;
+
 	const cache = MusicController.getCoverArtAlbumCache(music.album!);
-	if(cache == null) return;
-	
+	if (cache == null) return;
+
 	albumImage = cache;
 	musicList = musicList.map((m) => {
 		m.image = cache;

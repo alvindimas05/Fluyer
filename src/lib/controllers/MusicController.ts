@@ -359,14 +359,14 @@ const MusicController = {
 			});
 		});
 	},
-	
+
 	getCoverArtAlbumCache: (album: string) => {
-	    try {
-			return `data:image/png;base64,${get(coverArtAlbumCaches).find(cache => cache.name == album)!.image}`;
-		} catch(err){
-		    return null;
+		try {
+			return `data:image/png;base64,${get(coverArtAlbumCaches).find((cache) => cache.name == album)!.image}`;
+		} catch (err) {
+			return null;
 		}
-	}
+	},
 };
 
 export default MusicController;
