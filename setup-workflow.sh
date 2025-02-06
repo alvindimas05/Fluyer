@@ -14,7 +14,9 @@ bun i
 # Setup Android
 if [[ "$os" == "android" ]]; then
     export ANDROID_NDK_HOME=$NDK_HOME
-    export PATH="$PATH:$ANDROID_NDK_HOME/ndk/28.0.13004108/toolchains/llvm/prebuilt/linux-x86_64/bin"
+    export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME/ndk/28.0.13004108/toolchains/llvm/prebuilt/linux-x86_64/bin"
+    export PATH=$PATH:$ANDROID_NDK_ROOT
+    ln -s $ANDROID_NDK_ROOT/llvm-ranlib $ANDROID_NDK_ROOT/$ANDROID_ARCH-linux-android-ranlib
 
     cd src-tauri/gen/android
     echo "keyAlias=$ANDROID_KEY_ALIAS" > keystore.properties
