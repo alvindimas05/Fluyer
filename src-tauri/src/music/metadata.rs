@@ -164,7 +164,7 @@ impl MusicMetadata {
             .rsplit_once('.')
             .map(|(name, _)| name)
             .unwrap_or(file_name);
-
+    
         let patterns = vec![
             Regex::new(r"^(.*)\s-\s(.*)$").unwrap(),  // "Artist - Title"
             Regex::new(r"^(.*)\sby\s(.*)$").unwrap(), // "Title by Artist"
@@ -172,20 +172,26 @@ impl MusicMetadata {
             Regex::new(r"^(.*)\s-\s(.*)\s\(.*\)$").unwrap(), // "Artist - Title (Remix)"
             Regex::new(r"^(.*)\s-\s(.*)\[.*\]$").unwrap(), // "Artist - Title [Remastered]"
         ];
-
+    
+        let cleanup_re = Regex::new(r"(?:\s+\([^)]*\)|\s+\[[^]]*\])$").unwrap();
+    
         for pattern in patterns {
             if let Some(captures) = pattern.captures(without_extension) {
-                let artist = captures.get(1).map_or("", |m| m.as_str()).to_string();
-                let title = captures.get(2).map_or("", |m| m.as_str()).to_string();
-
+                let mut artist = captures.get(1).map_or("", |m| m.as_str()).trim().to_string();
+                let mut title = captures.get(2).map_or("", |m| m.as_str()).trim().to_string();
+    
+                // Clean up both artist and title
+                artist = cleanup_re.replace_all(&artist, "").trim().to_string();
+                title = cleanup_re.replace_all(&title, "").trim().to_string();
+    
                 if pattern.as_str().contains("by") {
                     return Some((title, artist));
                 }
-
+    
                 return Some((artist, title));
             }
         }
-
+    
         None
     }
 }
