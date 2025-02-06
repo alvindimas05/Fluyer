@@ -27,8 +27,11 @@ if [[ "$os" == "android" ]]; then
     echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
     cd ../../../
     bun tauri android build -v --target $ANDROID_ARCH
+    ls ./apks
     mkdir apks
+    ls ./src-tauri/gen/android/app/build/outputs/apk/universal/release/
     mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./apks/Fluyer_$APP_VERSION_$ANDROID_ARCH.apk
+    ls ./apks
 fi
 
 # Setup iOS
