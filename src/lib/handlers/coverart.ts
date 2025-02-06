@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 const mbApi = new MusicBrainzApi();
 const CoverArt = {
-	// FIXME: Instead of reading one file for multiple music/album, add checking and only read one file if it request the same album
+	// FIXME: Instead of reading one file for multiple music/album, add checking and only read one time if it request the same album
 	fromAlbum: async (album: string) => {
 		try {
 			let albumCover = await invoke(CommandsRoute.COVER_ART_FROM_ALBUM, {
