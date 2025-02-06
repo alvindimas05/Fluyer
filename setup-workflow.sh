@@ -13,17 +13,15 @@ bun i
 
 # Setup Android
 if [[ "$os" == "android" ]]; then
-    cd src-tauri/gen/android || exit
-    {
-        echo "keyAlias=$ANDROID_KEY_ALIAS"
-        echo "password=$ANDROID_KEY_PASSWORD"
-        base64 -d <<< "$ANDROID_KEY_BASE64" > "$RUNNER_TEMP/keystore.jks"
-        echo "storeFile=$RUNNER_TEMP/keystore.jks"
-    } > keystore.properties
+    cd src-tauri/gen/android
+    echo "keyAlias=$ANDROID_KEY_ALIAS" > keystore.properties
+    echo "password=$ANDROID_KEY_PASSWORD" >> keystore.properties
+    base64 -d <<< "$ANDROID_KEY_BASE64" > $RUNNER_TEMP/keystore.jks
+    echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
     cd ../../../
-    bun tauri android build -v --target "$ANDROID_ARCH"
-    mkdir -p apks
-    mv "./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk" "./apks/Fluyer_${APP_VERSION}_${ANDROID_ARCH}.apk"
+    bun tauri android build -v --target $ANDROID_ARCH
+    mkdir apks
+    mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./apks/Fluyer_$APP_VERSION_$ANDROID_ARCH.apk
 fi
 
 # Setup iOS
