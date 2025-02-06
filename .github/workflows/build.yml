@@ -182,7 +182,7 @@ jobs:
             uses: android-actions/setup-android@v3
 
           - name: Install NDK
-            run: sdkmanager "ndk;27.0.11902837"
+            run: sdkmanager "ndk;28.0.13004108"
 
           - name: Install Rust stable
             uses: dtolnay/rust-toolchain@stable
@@ -207,7 +207,7 @@ jobs:
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
                 RUNNER_TEMP: ${{ runner.temp }}
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
           
           - name: Publish release
             uses: ncipollo/release-action@v1
@@ -237,7 +237,7 @@ jobs:
             uses: android-actions/setup-android@v3
 
           - name: Install NDK
-            run: sdkmanager "ndk;27.0.11902837"
+            run: sdkmanager "ndk;28.0.13004108"
 
           - name: Install Rust stable
             uses: dtolnay/rust-toolchain@stable
@@ -262,7 +262,7 @@ jobs:
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
                 RUNNER_TEMP: ${{ runner.temp }}
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
           
           - name: Publish release
             uses: ncipollo/release-action@v1
@@ -292,7 +292,7 @@ jobs:
             uses: android-actions/setup-android@v3
 
           - name: Install NDK
-            run: sdkmanager "ndk;27.0.11902837"
+            run: sdkmanager "ndk;28.0.13004108"
 
           - name: Install Rust stable
             uses: dtolnay/rust-toolchain@stable
@@ -317,7 +317,7 @@ jobs:
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
                 RUNNER_TEMP: ${{ runner.temp }}
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
           
           - name: Publish release
             uses: ncipollo/release-action@v1
@@ -347,7 +347,7 @@ jobs:
             uses: android-actions/setup-android@v3
 
           - name: Install NDK
-            run: sdkmanager "ndk;27.0.11902837"
+            run: sdkmanager "ndk;28.0.13004108"
 
           - name: Install Rust stable
             uses: dtolnay/rust-toolchain@stable
@@ -372,7 +372,7 @@ jobs:
                 ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
                 ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
                 RUNNER_TEMP: ${{ runner.temp }}
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.0.11902837
+                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
           
           - name: Publish release
             uses: ncipollo/release-action@v1
