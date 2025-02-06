@@ -13,5 +13,6 @@ function onMouseDown(
 }
 </script>
 
+<!-- FIXME: Windows and Linux Title Bar -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="fixed top-0 left-0 w-full h-8 z-[99999]" onmousedown={onMouseDown}></div>
