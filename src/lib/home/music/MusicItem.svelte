@@ -20,8 +20,11 @@ async function checkAlbumImage() {
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const mbImage = await CoverArt.fromMusic(music);
-	if (mbImage == null) return;
+	const res = await CoverArt.fromMusic(music);
+	if(!res) return;
+	
+	const mbImage = MusicController.getCoverArtAlbumCache(music.album!);
+	if(mbImage == null) return;
 	albumImage = mbImage;
 }
 

@@ -23,6 +23,7 @@ import {
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
 import logHandler from "$lib/handlers/log";
+import { coverArtAlbumCaches } from "$lib/stores/coverart";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -358,6 +359,14 @@ const MusicController = {
 			});
 		});
 	},
+	
+	getCoverArtAlbumCache: (album: string) => {
+	    try {
+			return `data:image/png;base64,${get(coverArtAlbumCaches).find(cache => cache.name == album)!.image}`;
+		} catch(err){
+		    return null;
+		}
+	}
 };
 
 export default MusicController;

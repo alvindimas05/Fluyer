@@ -19,7 +19,6 @@ let animationClasses = $state("hidden");
 let isSorted = false;
 
 // const spotifyApi = new SpotifyApi();
-const mbApi = new MusicBrainzApi();
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
@@ -27,11 +26,15 @@ async function checkAlbumImage() {
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const mbImage = await CoverArt.fromAlbum(music.album!);
-	if (mbImage == null) return;
-	albumImage = mbImage;
+	const res = await CoverArt.fromAlbum(music.album!);
+	if(!res) return;
+	
+	const cache = MusicController.getCoverArtAlbumCache(music.album!);
+	if(cache == null) return;
+	
+	albumImage = cache;
 	musicList = musicList.map((m) => {
-		m.image = mbImage;
+		m.image = cache;
 		return m;
 	});
 }
