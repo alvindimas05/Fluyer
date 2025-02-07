@@ -25,7 +25,6 @@ const CoverArt = {
 				status: CoverArtStatus.Loading,
 				image: null
 			});
-			console.log("Adding album cache");
 		    
 			let albumCover = await invoke<CoverArtResponse>(
 				CommandsRoute.COVER_ART_FROM_ALBUM,

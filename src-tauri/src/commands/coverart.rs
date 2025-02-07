@@ -41,7 +41,7 @@ lazy_static! {
 }
 
 #[tauri::command]
-pub fn cover_art_from_album(album: String) -> CoverArtResponse {
+pub async fn cover_art_from_album(album: String) -> CoverArtResponse {
     let file_path = format!("{}/album/{}", cover_art_cache_directory(), album);
     let queue = cover_art_get_queue(album.clone());
     if queue.is_none() {
@@ -76,7 +76,7 @@ pub fn cover_art_from_album(album: String) -> CoverArtResponse {
             }
         }
         
-        let cover_art = cover_art_request_album(album.clone());
+        let cover_art = cover_art_request_album(album.clone()).await;
         if cover_art.is_none() {
             cover_art_set_status(album.clone(), CoverArtRequestStatus::Failed);
             return CoverArtResponse {
@@ -110,19 +110,19 @@ pub fn cover_art_from_album(album: String) -> CoverArtResponse {
     }
 }
 
-fn cover_art_request_album(album: String) -> Option<String> {    
-    let url = MusicBrainz::get_cover_art_from_album(album.clone());
+async fn cover_art_request_album(album: String) -> Option<String> {    
+    let url = MusicBrainz::get_cover_art_from_album(album.clone()).await;
 
     if url.is_none() {
         return None;
     }
 
-    let res = reqwest::blocking::get(url.unwrap());
+    let res = reqwest::get(url.unwrap()).await;
     if res.is_err() {
         return None;
     }
 
-    let bytes = res.unwrap().bytes();
+    let bytes = res.unwrap().bytes().await;
     if bytes.is_err() {
         return None;
     }

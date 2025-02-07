@@ -50,22 +50,29 @@ fn headers() -> HeaderMap {
     headers
 }
 
-fn browse(browse_type: BrowseType, query: String) -> Option<ReleaseGroupResponse> {
+async fn browse(browse_type: BrowseType, query: String) -> Option<ReleaseGroupResponse> {
     let btype = match browse_type {
         // BrowseType::Release => "release",
         BrowseType::ReleaseGroup => "release-group",
     };
     let url = format!("{}/{}?query={}&fmt=json&limit=1", BASE_URL, btype, query);
     
-    let response = reqwest::blocking::Client::new()
+    let client = reqwest::Client::builder()
+        .default_headers(headers())
+        .build();
+    if client.is_err(){
+        return None
+    }
+    
+    let response = client.unwrap()
         .get(url)
         .headers(headers())
-        .send();
+        .send().await;
     if response.is_err(){
         return None
     }
     
-    let json = response.unwrap().json::<ReleaseGroupResponse>();
+    let json = response.unwrap().json::<ReleaseGroupResponse>().await;
     if json.is_err() {
         return None
     }
@@ -76,8 +83,8 @@ fn browse(browse_type: BrowseType, query: String) -> Option<ReleaseGroupResponse
 pub struct MusicBrainz;
 
 impl MusicBrainz {
-    pub fn get_cover_art_from_album(album: String) -> Option<String> {
-        let bresponse = browse(BrowseType::ReleaseGroup, album);
+    pub async fn get_cover_art_from_album(album: String) -> Option<String> {
+        let bresponse = browse(BrowseType::ReleaseGroup, album).await;
         if bresponse.is_none() {
             return None
         }
@@ -87,14 +94,21 @@ impl MusicBrainz {
             return None
         }
         
-        let response = reqwest::blocking::Client::new()
+        let client = reqwest::Client::builder()
+            .default_headers(headers())
+            .build();
+        if client.is_err(){
+            return None
+        }
+        
+        let response = client.unwrap()
             .get(format!("{}/release-group/{}", BASE_COVER_ART_URL, release_groups[0].id))
             .headers(headers())
-            .send();
+            .send().await;
         if response.is_err(){
             return None
         }
-        let json = response.unwrap().json::<CoverArtResponse>();
+        let json = response.unwrap().json::<CoverArtResponse>().await;
         if json.is_err() {
             return None
         }
