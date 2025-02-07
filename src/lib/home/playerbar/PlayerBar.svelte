@@ -145,7 +145,7 @@ function handleVolumeButton() {
                         <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
                     </button>
                     <!-- FIXME: Overflow Text Animation -->
-                    <div class="ms-3">
+                    <div class="ms-3 overflow-hidden">
                         <p class="font-medium whitespace-nowrap overflow-hidden">
                             {title}
                         </p>
