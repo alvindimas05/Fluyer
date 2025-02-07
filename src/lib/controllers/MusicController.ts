@@ -364,7 +364,6 @@ const MusicController = {
 
 	getCoverArtCache: (query: CoverArtCacheQuery) => {
 		let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
-		console.log(fquery);
 		return get(coverArtCaches).find((cache) => cache.name == fquery) ?? null;
 	},
 	addCoverArtCache: (value: CoverArtResponse) => {

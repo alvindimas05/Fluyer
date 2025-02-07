@@ -35,7 +35,6 @@ const CoverArt = {
 			let cover = await invoke<CoverArtResponse>(CommandsRoute.COVER_ART_GET, {
 				query,
 			});
-			console.log(cover);
 			MusicController.setCoverArtCache(query, cover);
 			return cover.status;
 		} catch (err) {

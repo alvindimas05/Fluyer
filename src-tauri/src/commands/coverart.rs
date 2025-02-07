@@ -58,14 +58,17 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
     }
     
     let mut name = String::from("");
+    let mut folder_name = String::from("");
     if query.album.is_some(){
         name = format!("{} {}", query.artist, query.album.clone().unwrap());
+        folder_name = "album".to_string();
     }
     if query.title.is_some(){
         name = format!("{} {}", query.artist, query.title.clone().unwrap());
+        folder_name = "music".to_string();
     }
     
-    let file_path = format!("{}/album/{}", cover_art_cache_directory(), name);
+    let file_path = format!("{}/{}/{}", cover_art_cache_directory(), folder_name, name);
     let queue = cover_art_get_queue(name.clone());
     if queue.is_none() {
         COVER_ART_QUEUE.lock().unwrap().push(CoverArtRequest {
@@ -151,16 +154,20 @@ async fn cover_art_request(query: CoverArtQuery) -> Option<String> {
         return None;
     }
     let cache = cover_art_cache_directory();
-    if std::fs::create_dir_all(format!("{}/album", cache.clone())).is_err() {
-        return None;
-    }
     
-    let mut file_path: String = String::from("");
+    let mut folder_name = String::from("");
+    let mut file_path = String::from("");
     if query.album.is_some(){
-        file_path = format!("{}/album/{} {}", cache, query.artist, query.album.unwrap());
+        folder_name = "album".to_string();
+        file_path = format!("{}/{}/{} {}", cache, folder_name, query.artist, query.album.unwrap());
     }
     if query.title.is_some(){
-        file_path = format!("{}/album/{} {}", cache, query.artist, query.title.unwrap());
+        folder_name = "music".to_string();
+        file_path = format!("{}/{}/{} {}", cache, folder_name, query.artist, query.title.unwrap());
+    }
+    
+    if std::fs::create_dir_all(format!("{}/{}", cache.clone(), folder_name)).is_err() {
+        return None;
     }
     
     let mut file = std::fs::File::create(file_path).unwrap();
