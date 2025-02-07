@@ -21,35 +21,27 @@ export interface CoverArtCacheQuery {
 }
 
 const CoverArt = {
-	fromAlbum: async (album: string, artist: string) => {
+    // FIXME: Hangs Rust if it has too many requests
+	fromQuery: async (query: CoverArtCacheQuery) => {
 		try {
-		    let albumCache = MusicController.getCoverArtCache({ artist, album });
-		    if(albumCache != null) return albumCache.status;
+		    let cache = MusicController.getCoverArtCache(query);
+		    if(cache != null) return cache.status;
 		    MusicController.addCoverArtCache({
-				name: `${artist} ${album}`,
+				name: `${query.artist} ${query.album ?? query.title ?? ""}`,
 				status: CoverArtStatus.Loading,
 				image: null
 			});
 		    
-			let albumCover = await invoke<CoverArtResponse>(
-				CommandsRoute.COVER_ART_FROM_ALBUM,
-				{
-					album, artist
-				},
+			let cover = await invoke<CoverArtResponse>(
+				CommandsRoute.COVER_ART_GET, { query }
 			);
-			MusicController.setCoverArtCache({ artist, album }, albumCover);
-			return albumCover.status;
+			console.log(cover);
+			MusicController.setCoverArtCache(query, cover);
+			return cover.status;
 		} catch (err) {
 			console.error(err);
 			return CoverArtStatus.Failed;
 		}
-	},
-	fromMusic: async (music: MusicData) => {
-		if (music.album != null && music.artist != null){
-		    return CoverArt.fromAlbum(music.album, music.artist);
-		}
-		
-		if(music.title == null || music.artist == null) return CoverArtStatus.Failed;
 	},
 };
 

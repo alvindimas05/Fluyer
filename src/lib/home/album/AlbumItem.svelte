@@ -24,11 +24,11 @@ let isSorted = false;
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
-	if (music.image !== null || music.artist == null) return;
+	if (music.image !== null || music.artist == null || music.album == null) return;
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const status = await CoverArt.fromAlbum(music.album!, music.artist!);
+	const status = await CoverArt.fromQuery({ artist: music.artist!, album: music.album! });
 	if (status == CoverArtStatus.Failed) return;
 	if (status == CoverArtStatus.Loading){
         // Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)

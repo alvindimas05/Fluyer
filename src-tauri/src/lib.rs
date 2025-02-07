@@ -66,7 +66,7 @@ pub fn run() {
             commands::mobile::get_navigation_bar_height,
             #[cfg(mobile)]
             commands::mobile::get_status_bar_height,
-            commands::coverart::cover_art_from_album,
+            commands::coverart::cover_art_get,
             #[cfg(windows)]
             commands::decorum::decorum_show_snap_overlay,
         ])

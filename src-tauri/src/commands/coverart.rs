@@ -7,7 +7,7 @@ use base64::Engine;
 use image::ImageReader;
 use lazy_static::lazy_static;
 // use notify::{EventKind, RecommendedWatcher, RecursiveMode, Watcher};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 use tauri::Manager;
 
@@ -36,13 +36,35 @@ pub struct CoverArtResponse {
     image: Option<String>,
 }
 
+#[derive(Clone, Deserialize)]
+pub struct CoverArtQuery {
+    pub artist: String,
+    pub album: Option<String>,
+    pub title: Option<String>
+}
+
 lazy_static! {
     static ref COVER_ART_QUEUE: Mutex<Vec<CoverArtRequest>> = Mutex::new(vec![]);
 }
 
 #[tauri::command]
-pub async fn cover_art_from_album(album: String, artist: String) -> CoverArtResponse {
-    let name = format!("{} {}", artist, album);
+pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
+    if query.album.is_none() && query.title.is_none() {
+        return CoverArtResponse {
+            name: String::from(""),
+            status: CoverArtRequestStatus::Failed,
+            image: None
+        }
+    }
+    
+    let mut name = String::from("");
+    if query.album.is_some(){
+        name = format!("{} {}", query.artist, query.album.clone().unwrap());
+    }
+    if query.title.is_some(){
+        name = format!("{} {}", query.artist, query.title.clone().unwrap());
+    }
+    
     let file_path = format!("{}/album/{}", cover_art_cache_directory(), name);
     let queue = cover_art_get_queue(name.clone());
     if queue.is_none() {
@@ -77,7 +99,8 @@ pub async fn cover_art_from_album(album: String, artist: String) -> CoverArtResp
             }
         }
         
-        let cover_art = cover_art_request_album(album.clone(), artist.clone()).await;
+        let cover_art = cover_art_request(query).await;
+        
         if cover_art.is_none() {
             cover_art_set_status(name.clone(), CoverArtRequestStatus::Failed);
             return CoverArtResponse {
@@ -111,8 +134,8 @@ pub async fn cover_art_from_album(album: String, artist: String) -> CoverArtResp
     }
 }
 
-async fn cover_art_request_album(album: String, artist: String) -> Option<String> {    
-    let url = MusicBrainz::get_cover_art_from_album(album.clone(), artist.clone()).await;
+async fn cover_art_request(query: CoverArtQuery) -> Option<String> {    
+    let url = MusicBrainz::get_cover_art(query.clone()).await;
 
     if url.is_none() {
         return None;
@@ -131,7 +154,16 @@ async fn cover_art_request_album(album: String, artist: String) -> Option<String
     if std::fs::create_dir_all(format!("{}/album", cache.clone())).is_err() {
         return None;
     }
-    let mut file = std::fs::File::create(format!("{}/album/{} {}", cache, artist, album)).unwrap();
+    
+    let mut file_path: String = String::from("");
+    if query.album.is_some(){
+        file_path = format!("{}/album/{} {}", cache, query.artist, query.album.unwrap());
+    }
+    if query.title.is_some(){
+        file_path = format!("{}/album/{} {}", cache, query.artist, query.title.unwrap());
+    }
+    
+    let mut file = std::fs::File::create(file_path).unwrap();
     let mut content = Cursor::new(bytes.unwrap());
     if copy(&mut content, &mut file).is_err() {
         return None;

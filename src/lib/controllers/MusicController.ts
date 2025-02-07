@@ -360,7 +360,9 @@ const MusicController = {
 	},
 	
 	getCoverArtCache: (query: CoverArtCacheQuery) => {
-	   return get(coverArtCaches).find((cache) => cache.name == `${query.artist} ${query.album}`) ?? null;
+	    let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
+		console.log(fquery);
+		return get(coverArtCaches).find((cache) => cache.name == fquery) ?? null;
 	},
 	addCoverArtCache: (value: CoverArtResponse) => {
 	    let caches = get(coverArtCaches);
@@ -368,8 +370,9 @@ const MusicController = {
 		coverArtCaches.set(caches);
 	},
 	setCoverArtCache: (query: CoverArtCacheQuery, value: CoverArtResponse) => {
+        let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
 	    let caches = get(coverArtCaches);
-		caches[caches.findIndex(c => c.name == `${query.artist} ${query.album}`)] = value;
+		caches[caches.findIndex(c => c.name == fquery)] = value;
 		coverArtCaches.set(caches);
 	},
 	withBase64: (value: string) => {

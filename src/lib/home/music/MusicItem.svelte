@@ -15,11 +15,15 @@ let { music }: Props = $props();
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
-	if (music.image !== null) return;
+	if (music.image !== null || music.artist == null) return;
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const status = await CoverArt.fromMusic(music);
+	const status = await CoverArt.fromQuery({
+	    artist: music.artist!,
+		title: music.title!,
+		album: music.album ?? undefined
+	});
 	if (status == CoverArtStatus.Failed) return;
 	if (status == CoverArtStatus.Loading){
 	    // Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
@@ -42,7 +46,7 @@ async function checkAlbumImage() {
 function setAlbumImageFromCache(){
     if(albumImage != MusicConfig.defaultAlbumImage) return true;
     
-	const cache = MusicController.getCoverArtCache({ artist: music.artist!, album: music.album! });
+	const cache = MusicController.getCoverArtCache({ artist: music.artist!, title: music.title!, album: music.album ?? undefined });
 	if (cache == null) return false;
 	if (cache.status == CoverArtStatus.Failed || cache.image == null) return true;
    
@@ -61,7 +65,7 @@ async function addMusicAndPlay() {
 		MusicController.play();
 }
 
-onMount(checkAlbumImage);
+// onMount(checkAlbumImage);
 </script>
 
 <div
