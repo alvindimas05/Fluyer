@@ -14,7 +14,17 @@ struct ReleaseGroupResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+struct ReleaseResponse {
+    releases: Vec<Release>
+}
+
+#[derive(Serialize, Deserialize)]
 struct ReleaseGroup {
+    id: String
+}
+
+#[derive(Serialize, Deserialize)]
+struct Release {
     id: String
 }
 
@@ -55,7 +65,7 @@ fn headers() -> HeaderMap {
 pub struct MusicBrainz;
 
 impl MusicBrainz {
-    async fn browse(query: CoverArtQuery) -> Option<ReleaseGroupResponse> {
+    async fn browse(query: CoverArtQuery) -> Option<reqwest::Response> {
         let mut btype = String::from("");
         let mut bquery = String::from("");
         if query.album.is_some(){
@@ -84,23 +94,66 @@ impl MusicBrainz {
             return None
         }
         
+        Some(response.unwrap())
+    }
+    
+    async fn browse_release_group(query: CoverArtQuery) -> Option<ReleaseGroupResponse> {
+        let response = MusicBrainz::browse(query).await;
+        if response.is_none(){
+            return None
+        }
+        
         let json = response.unwrap().json::<ReleaseGroupResponse>().await;
         if json.is_err() {
             return None
         }
+        Some(json.unwrap())
+    }
+    
+    async fn browse_release(query: CoverArtQuery) -> Option<ReleaseResponse> {
+        let response = MusicBrainz::browse(query).await;
+        if response.is_none(){
+            return None
+        }
         
+        let json = response.unwrap().json::<ReleaseResponse>().await;
+        if json.is_err() {
+            return None
+        }
         Some(json.unwrap())
     }
     
     pub async fn get_cover_art(query: CoverArtQuery) -> Option<String> {
-        let bresponse = MusicBrainz::browse(query).await;
-        if bresponse.is_none() {
-            return None
+        let mut id = String::from("");
+        let mut ctype = String::from("");
+        
+        if query.album.is_some(){
+            let rg_browse = MusicBrainz::browse_release_group(query.clone()).await;
+            if rg_browse.is_none(){
+                return None
+            }
+            
+            let release_groups = rg_browse.unwrap().release_groups;
+            if release_groups.len() < 1 {
+                return None
+            }
+            ctype = "release-group".to_string(); 
+            id = release_groups.first().unwrap().id.clone();
         }
         
-        let release_groups = bresponse.unwrap().release_groups;
-        if release_groups.len() < 1 {
-            return None
+        if query.title.is_some(){
+            let r_browse = MusicBrainz::browse_release(query.clone()).await;
+            if r_browse.is_none(){
+                return None
+            }
+            
+            let releases = r_browse.unwrap().releases;
+            if releases.len() < 1 {
+                return None
+            }
+
+            ctype = "release".to_string(); 
+            id = releases.first().unwrap().id.clone();
         }
         
         let client = reqwest::Client::builder()
@@ -111,7 +164,7 @@ impl MusicBrainz {
         }
         
         let response = client.unwrap()
-            .get(format!("{}/release-group/{}", BASE_COVER_ART_URL, release_groups[0].id))
+            .get(format!("{}/{}/{}", BASE_COVER_ART_URL, ctype, id))
             .headers(headers())
             .send().await;
         if response.is_err(){
