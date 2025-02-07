@@ -6,7 +6,7 @@ import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import MusicBrainzApi from "$lib/api/musicbrainz";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtAlbumCaches } from "$lib/stores/coverart";
-    import { isAndroid, isIos, isMacos } from "$lib/platform";
+import { isAndroid, isIos, isMacos } from "$lib/platform";
 
 interface Props {
 	musicList: MusicData[];
@@ -116,8 +116,8 @@ setTimeout(
         </div>
         <img class="rounded-lg w-full" src={albumImage} alt="Album" />
     </div>
-    <p class="font-medium text-xl mt-2">{music.album}</p>
-    <p class="text-lg text-gray-200">
+    <p class="font-medium text-xl mt-2 whitespace-nowrap overflow-hidden">{music.album}</p>
+    <p class="text-lg text-gray-200 whitespace-nowrap overflow-hidden">
         {MusicController.getFullArtistFromMusic(music)}
     </p>
 </div>

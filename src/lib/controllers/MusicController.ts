@@ -332,14 +332,14 @@ const MusicController = {
 	setStatusBarHeight: async () => {
 		if (isDesktop()) return;
 		const barHeight = await invoke<number>(CommandsRoute.GET_STATUS_BAR_HEIGHT);
-		mobileStatusBarHeight.set(barHeight > 28 && !isIos() ? 28 : barHeight);
+		mobileStatusBarHeight.set(barHeight);
 	},
 	setNavigationBarHeight: async () => {
 		if (isDesktop()) return;
 		const barHeight = await invoke<number>(
 			CommandsRoute.GET_NAVIGATION_BAR_HEIGHT,
 		);
-		mobileNavigationBarHeight.set(barHeight > 32 ? 32 : barHeight);
+		mobileNavigationBarHeight.set(barHeight);
 	},
 
 	volume: () => get(musicVolume),

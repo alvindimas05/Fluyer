@@ -8,6 +8,7 @@ import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
 import { onMount } from "svelte";
 import LrcLib from "$lib/api/lrclib";
+    import { mobileNavigationBarHeight, mobileStatusBarHeight } from "$lib/stores/mobile";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = 400;
@@ -125,7 +126,8 @@ onMount(async () => {
 
 <!-- <div class="w-full h-full grid grid-rows-[auto_30%_auto] mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:grid-cols-[40%_55%] initial-fade-in"> -->
 <div class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 initial-fade-in
-    ${lyrics.length > 1 ? "grid-rows-[auto_30%_auto] md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center"}`}>
+    ${lyrics.length > 1 ? "grid-rows-[auto_30%_auto] md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center"}`}
+    style={`padding-top: ${$mobileStatusBarHeight / 2}px; padding-bottom: ${$mobileNavigationBarHeight * 2}px;`}>
     <div class={`md:row-[1] md:col-[1] p-6 md:p-0 flex items-end
         ${lyrics.length > 1 ? "justify-end" : "justify-center"}`}>
         <div class={`w-full md:w-[80%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}>
@@ -134,7 +136,7 @@ onMount(async () => {
             <img class="w-full rounded-lg aspect-square" src={albumImage} alt="Music Album" />
         </div>
     </div>
-    <div class={`md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 pb-10 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}>
+    <div class={`md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 mb-10 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}>
         <div class="w-full md:w-[80%] xl:w-[65%]">
             <div class="w-full grid grid-cols-[auto,1fr,auto] mt-4">
                 <div class="text-xs lg:text-sm flex w-12">

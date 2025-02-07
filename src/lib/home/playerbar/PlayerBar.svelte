@@ -6,7 +6,7 @@ import {
 	musicProgressValue,
 	musicVolume,
 } from "$lib/stores/music";
-// import { goto } from "$app/navigation";
+import { goto } from "$app/navigation";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
@@ -81,7 +81,7 @@ async function onKeyDown(
 }
 
 function redirectToPlay() {
-	// goto("/play");
+	goto("/play");
 }
 
 function handleVolumeButton() {
@@ -145,12 +145,12 @@ function handleVolumeButton() {
                         <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
                     </button>
                     <!-- FIXME: Overflow Text Animation -->
-                    <div class="ms-3 overflow-hidden">
-                        <p class="font-medium">
+                    <div class="ms-3">
+                        <p class="font-medium whitespace-nowrap overflow-hidden">
                             {title}
                         </p>
                         <p
-                            class="text-gray-200 whitespace-nowrap overflow-ellipsis"
+                            class="text-gray-200 whitespace-nowrap overflow-hidden"
                         >
                             {artist}
                         </p>
