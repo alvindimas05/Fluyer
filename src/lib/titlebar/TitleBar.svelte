@@ -16,18 +16,18 @@ function onMouseDown(
 }
 
 let snapOverlayTimer: ReturnType<typeof setTimeout> | null = null;
-function showSnapOverlay(){
-    window.setFocus().then(() => invoke("decorum_show_snap_overlay"));
+function showSnapOverlay() {
+	window.setFocus().then(() => invoke("decorum_show_snap_overlay"));
 }
 
-function handleMaximizeMouseEnter(){
-    if(!isWindows()) return;
-    snapOverlayTimer = setTimeout(showSnapOverlay, 620);
+function handleMaximizeMouseEnter() {
+	if (!isWindows()) return;
+	snapOverlayTimer = setTimeout(showSnapOverlay, 620);
 }
 
-function handleMaximizeMouseLeave(){
-    if(!isWindows()) return;
-    if(snapOverlayTimer != null) clearTimeout(snapOverlayTimer);
+function handleMaximizeMouseLeave() {
+	if (!isWindows()) return;
+	if (snapOverlayTimer != null) clearTimeout(snapOverlayTimer);
 }
 
 window.onResized(async (_) => {

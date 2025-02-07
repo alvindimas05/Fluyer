@@ -24,7 +24,10 @@ import {
 } from "$lib/stores/mobile";
 import logHandler from "$lib/handlers/log";
 import { coverArtCaches } from "$lib/stores/coverart";
-import type { CoverArtCacheQuery, CoverArtResponse } from "$lib/handlers/coverart";
+import type {
+	CoverArtCacheQuery,
+	CoverArtResponse,
+} from "$lib/handlers/coverart";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -197,9 +200,9 @@ const MusicController = {
 		listen<MusicPlayerSync>(CommandsRoute.MUSIC_PLAYER_SYNC, async (e) => {
 			const skip = e.payload.skip;
 			if (skip < 1) return;
- 			MusicController.setNextMusics(
+			MusicController.setNextMusics(
 				MusicController.nextMusics()!.splice(0, skip),
- 			);
+			);
 		});
 		listen<MusicPlayerInfo>(CommandsRoute.MUSIC_GET_INFO, (e) => {
 			if (e.payload.music != null) {
@@ -358,26 +361,26 @@ const MusicController = {
 			});
 		});
 	},
-	
+
 	getCoverArtCache: (query: CoverArtCacheQuery) => {
-	    let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
+		let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
 		console.log(fquery);
 		return get(coverArtCaches).find((cache) => cache.name == fquery) ?? null;
 	},
 	addCoverArtCache: (value: CoverArtResponse) => {
-	    let caches = get(coverArtCaches);
+		let caches = get(coverArtCaches);
 		caches.push(value);
 		coverArtCaches.set(caches);
 	},
 	setCoverArtCache: (query: CoverArtCacheQuery, value: CoverArtResponse) => {
-        let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
-	    let caches = get(coverArtCaches);
-		caches[caches.findIndex(c => c.name == fquery)] = value;
+		let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
+		let caches = get(coverArtCaches);
+		caches[caches.findIndex((c) => c.name == fquery)] = value;
 		coverArtCaches.set(caches);
 	},
 	withBase64: (value: string) => {
-	    return `data:image/png;base64,${value}`;
-	}
+		return `data:image/png;base64,${value}`;
+	},
 };
 
 export default MusicController;

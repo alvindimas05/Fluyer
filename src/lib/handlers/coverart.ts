@@ -15,26 +15,26 @@ export interface CoverArtResponse {
 }
 
 export interface CoverArtCacheQuery {
-    artist: string;
-    album?: string;
-    title?: string;
+	artist: string;
+	album?: string;
+	title?: string;
 }
 
 const CoverArt = {
-    // FIXME: Hangs Rust if it has too many requests
+	// FIXME: Hangs Rust if it has too many requests
 	fromQuery: async (query: CoverArtCacheQuery) => {
 		try {
-		    let cache = MusicController.getCoverArtCache(query);
-		    if(cache != null) return cache.status;
-		    MusicController.addCoverArtCache({
+			let cache = MusicController.getCoverArtCache(query);
+			if (cache != null) return cache.status;
+			MusicController.addCoverArtCache({
 				name: `${query.artist} ${query.album ?? query.title ?? ""}`,
 				status: CoverArtStatus.Loading,
-				image: null
+				image: null,
 			});
-		    
-			let cover = await invoke<CoverArtResponse>(
-				CommandsRoute.COVER_ART_GET, { query }
-			);
+
+			let cover = await invoke<CoverArtResponse>(CommandsRoute.COVER_ART_GET, {
+				query,
+			});
 			console.log(cover);
 			MusicController.setCoverArtCache(query, cover);
 			return cover.status;

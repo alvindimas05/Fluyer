@@ -8,7 +8,10 @@ import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
 import { onMount } from "svelte";
 import LrcLib from "$lib/api/lrclib";
-    import { mobileNavigationBarHeight, mobileStatusBarHeight } from "$lib/stores/mobile";
+import {
+	mobileNavigationBarHeight,
+	mobileStatusBarHeight,
+} from "$lib/stores/mobile";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = 400;

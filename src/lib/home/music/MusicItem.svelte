@@ -3,8 +3,8 @@ import { onMount } from "svelte";
 import type { MusicData } from "./types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
-    import { isAndroid, isIos, isMacos } from "$lib/platform";
-    import { coverArtCaches } from "$lib/stores/coverart";
+import { isAndroid, isIos, isMacos } from "$lib/platform";
+import { coverArtCaches } from "$lib/stores/coverart";
 
 interface Props {
 	music: MusicData;
@@ -20,36 +20,40 @@ async function checkAlbumImage() {
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
 	const status = await CoverArt.fromQuery({
-	    artist: music.artist!,
+		artist: music.artist!,
 		title: music.title!,
-		album: music.album ?? undefined
+		album: music.album ?? undefined,
 	});
 	if (status == CoverArtStatus.Failed) return;
-	if (status == CoverArtStatus.Loading){
-	    // Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
+	if (status == CoverArtStatus.Loading) {
+		// Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
 		// Note: I have no idea why this happens on Android as well.
-        if(isMacos() || isIos() || isAndroid()){
-            coverArtCaches.subscribe(() => {
-                setAlbumImageFromCache()
-            });
-        } else {
-            const unsub = coverArtCaches.subscribe(() => {
-                if(setAlbumImageFromCache()) unsub()
-            });
-        }
-        return;
+		if (isMacos() || isIos() || isAndroid()) {
+			coverArtCaches.subscribe(() => {
+				setAlbumImageFromCache();
+			});
+		} else {
+			const unsub = coverArtCaches.subscribe(() => {
+				if (setAlbumImageFromCache()) unsub();
+			});
+		}
+		return;
 	}
-	
+
 	setAlbumImageFromCache();
 }
 
-function setAlbumImageFromCache(){
-    if(albumImage != MusicConfig.defaultAlbumImage) return true;
-    
-	const cache = MusicController.getCoverArtCache({ artist: music.artist!, title: music.title!, album: music.album ?? undefined });
+function setAlbumImageFromCache() {
+	if (albumImage != MusicConfig.defaultAlbumImage) return true;
+
+	const cache = MusicController.getCoverArtCache({
+		artist: music.artist!,
+		title: music.title!,
+		album: music.album ?? undefined,
+	});
 	if (cache == null) return false;
 	if (cache.status == CoverArtStatus.Failed || cache.image == null) return true;
-   
+
 	albumImage = MusicController.withBase64(cache.image!);
 	return true;
 }

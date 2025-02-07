@@ -24,35 +24,42 @@ let isSorted = false;
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
-	if (music.image !== null || music.artist == null || music.album == null) return;
+	if (music.image !== null || music.artist == null || music.album == null)
+		return;
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const status = await CoverArt.fromQuery({ artist: music.artist!, album: music.album! });
+	const status = await CoverArt.fromQuery({
+		artist: music.artist!,
+		album: music.album!,
+	});
 	if (status == CoverArtStatus.Failed) return;
-	if (status == CoverArtStatus.Loading){
-        // Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
-        // Note: I have no idea why this happens on Android as well.
-        if(isMacos() || isIos() || isAndroid()){
-            coverArtCaches.subscribe(() => {
-                setAlbumImageFromCache()
-            });
-        } else {
-            const unsub = coverArtCaches.subscribe(() => {
-                if(setAlbumImageFromCache()) unsub()
-            });
-        }
-        return;
+	if (status == CoverArtStatus.Loading) {
+		// Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
+		// Note: I have no idea why this happens on Android as well.
+		if (isMacos() || isIos() || isAndroid()) {
+			coverArtCaches.subscribe(() => {
+				setAlbumImageFromCache();
+			});
+		} else {
+			const unsub = coverArtCaches.subscribe(() => {
+				if (setAlbumImageFromCache()) unsub();
+			});
+		}
+		return;
 	}
-	
+
 	setAlbumImageFromCache();
 }
 
-function setAlbumImageFromCache(){
-	const cache = MusicController.getCoverArtCache({ artist: music.artist!, album: music.album! });
+function setAlbumImageFromCache() {
+	const cache = MusicController.getCoverArtCache({
+		artist: music.artist!,
+		album: music.album!,
+	});
 	if (cache == null) return false;
 	if (cache.status == CoverArtStatus.Failed || cache.image == null) return true;
-   
+
 	albumImage = MusicController.withBase64(cache.image!);
 	musicList = musicList.map((m) => {
 		m.image = MusicController.withBase64(cache.image!);
