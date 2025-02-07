@@ -24,6 +24,7 @@ import {
 } from "$lib/stores/mobile";
 import logHandler from "$lib/handlers/log";
 import { coverArtAlbumCaches } from "$lib/stores/coverart";
+import type { CoverArtResponse } from "$lib/handlers/coverart";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -359,14 +360,23 @@ const MusicController = {
 			});
 		});
 	},
-
+	
 	getCoverArtAlbumCache: (album: string) => {
-		try {
-			return `data:image/png;base64,${get(coverArtAlbumCaches).find((cache) => cache.name == album)!.image}`;
-		} catch (err) {
-			return null;
-		}
+	   return get(coverArtAlbumCaches).find((cache) => cache.name == album) ?? null;
 	},
+	addCoverArtAlbumCache: (value: CoverArtResponse) => {
+	    let caches = get(coverArtAlbumCaches);
+		caches.push(value);
+		coverArtAlbumCaches.set(caches);
+	},
+	setCoverArtAlbumCache: (album: String, value: CoverArtResponse) => {
+	    let caches = get(coverArtAlbumCaches);
+		caches[caches.findIndex(c => c.name == album)] = value;
+		coverArtAlbumCaches.set(caches);
+	},
+	withBase64: (value: string) => {
+	    return `data:image/png;base64,${value}`;
+	}
 };
 
 export default MusicController;

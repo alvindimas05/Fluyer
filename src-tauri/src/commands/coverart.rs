@@ -5,12 +5,10 @@ use std::{
 
 use base64::Engine;
 use image::ImageReader;
-// use image::ImageReader;
 use lazy_static::lazy_static;
-use notify::{EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+// use notify::{EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::Serialize;
 use std::path::Path;
-use std::time::Duration;
 use tauri::Manager;
 
 use crate::{api::musicbrainz::MusicBrainz, GLOBAL_APP_HANDLE};
@@ -18,6 +16,7 @@ use crate::{api::musicbrainz::MusicBrainz, GLOBAL_APP_HANDLE};
 #[derive(Clone, Debug)]
 struct CoverArtRequest {
     name: String,
+    #[allow(dead_code)]
     status: CoverArtRequestStatus,
 }
 
@@ -94,24 +93,24 @@ pub fn cover_art_from_album(album: String) -> CoverArtResponse {
         };
     }
 
-    if queue.unwrap().status == CoverArtRequestStatus::Loading {
-        let status = wait_until_file_created(album.clone(), file_path.clone());
+    // if queue.unwrap().status == CoverArtRequestStatus::Loading {
+    //     let status = wait_until_file_created(album.clone(), file_path.clone());
 
-        return CoverArtResponse {
-            name: album,
-            status,
-            image: None,
-        };
-    }
+    //     return CoverArtResponse {
+    //         name: album,
+    //         status,
+    //         image: None,
+    //     };
+    // }
 
     CoverArtResponse {
         name: album.clone(),
-        status: cover_art_get_queue(album).unwrap().status,
+        status: CoverArtRequestStatus::Failed,
         image: None,
     }
 }
 
-fn cover_art_request_album(album: String) -> Option<String> {
+fn cover_art_request_album(album: String) -> Option<String> {    
     let url = MusicBrainz::get_cover_art_from_album(album.clone());
 
     if url.is_none() {
@@ -163,16 +162,15 @@ fn cover_art_get_queue(album: String) -> Option<CoverArtRequest> {
 }
 
 fn cover_art_set_status(album: String, status: CoverArtRequestStatus) {
-    let binding = COVER_ART_QUEUE.lock().unwrap();
-    let index = binding.iter().position(|e| e.name == album);
-    if index.is_none() {
-        return;
-    }
-    let queue = binding.get(index.unwrap()).unwrap();
-    COVER_ART_QUEUE.lock().unwrap()[index.unwrap()] = CoverArtRequest {
-        name: queue.name.clone(),
+    cover_art_remove(album.clone());
+    COVER_ART_QUEUE.lock().unwrap().push(CoverArtRequest {
+        name: album,
         status,
-    }
+    });
+}
+
+fn cover_art_remove(album: String){
+    COVER_ART_QUEUE.lock().unwrap().retain(|c| c.name == album);
 }
 
 fn cover_art_cache_directory() -> String {
@@ -190,39 +188,43 @@ fn cover_art_cache_directory() -> String {
     dir
 }
 
-fn wait_until_file_created(album: String, file_path: String) -> CoverArtRequestStatus {
-    let path = Path::new(file_path.as_str());
-    if path.exists() {
-        return CoverArtRequestStatus::Loaded;
-    }
+// fn wait_until_file_created(album: String, file_path: String) -> CoverArtRequestStatus {
+//     let path = Path::new(file_path.as_str());
+//     if path.exists() {
+//         return CoverArtRequestStatus::Loaded
+//     }
 
-    let parent_dir = path.parent().unwrap();
-    let (tx, rx) = std::sync::mpsc::channel::<notify::Result<notify::Event>>();
+//     let parent_dir = path.parent().unwrap();
+//     let (tx, rx) = std::sync::mpsc::channel::<notify::Result<notify::Event>>();
 
-    let mut watcher: RecommendedWatcher = Watcher::new(
-        tx,
-        notify::Config::default().with_poll_interval(Duration::from_secs(1)),
-    )
-    .expect("Failed to create watcher");
+//     let mut watcher: RecommendedWatcher = Watcher::new(
+//         tx,
+//         notify::Config::default().with_poll_interval(Duration::from_secs(1)),
+//     )
+//     .expect("Failed to create watcher");
 
-    watcher
-        .watch(parent_dir, RecursiveMode::NonRecursive)
-        .expect("Failed to watch directory");
+//     watcher
+//         .watch(parent_dir, RecursiveMode::NonRecursive)
+//         .expect("Failed to watch directory");
 
-    #[allow(for_loops_over_fallibles)]
-    for event in rx.recv() {
-        let queue = cover_art_get_queue(album.clone());
-        if queue.is_some() && queue.unwrap().status == CoverArtRequestStatus::Failed {
-            return CoverArtRequestStatus::Failed;
-        }
+//     logger::debug!("Waiting");
+//     #[allow(for_loops_over_fallibles)]
+//     for res in rx {
+//         logger::debug!("Looping");
+        
+//         let queue = cover_art_get_queue(album.clone());
+//         if queue.is_some() && queue.unwrap().status == CoverArtRequestStatus::Failed {
+//             logger::debug!("Returning");
+//             return CoverArtRequestStatus::Failed
+//         }
 
-        if let Ok(event) = event {
-            if matches!(event.kind, EventKind::Create(_)) {
-                if event.paths.iter().any(|p| p == path) {
-                    return CoverArtRequestStatus::Loaded;
-                }
-            }
-        }
-    }
-    CoverArtRequestStatus::Failed
-}
+//         if let Ok(event) = res {
+//             if matches!(event.kind, EventKind::Create(_)) {
+//                 if event.paths.iter().any(|p| p == path) {
+//                     return CoverArtRequestStatus::Loaded
+//                 }
+//             }
+//         }
+//     }
+//     CoverArtRequestStatus::Failed
+// }

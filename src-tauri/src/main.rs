@@ -6,11 +6,11 @@ use simplelog::{
 use std::{env::temp_dir, fs::File};
 
 fn main() {
-    dotenvy::dotenv().expect("Failed to load .env");
     #[cfg(desktop)]
     {
         init_logging();
     }
+    dotenvy::dotenv().ok();
     fluyer_lib::run()
 }
 

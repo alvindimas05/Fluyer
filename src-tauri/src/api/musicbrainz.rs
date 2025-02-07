@@ -1,3 +1,4 @@
+use dotenvy_macro::dotenv;
 use serde::{Deserialize, Serialize};
 use tauri::http::HeaderMap;
 
@@ -38,9 +39,9 @@ enum BrowseType {
 
 fn user_agent() -> String {
     format!("{}/{} ( {} )",
-        std::env::var("VITE_APP_NAME").unwrap(),
-        std::env::var("VITE_APP_VERSION").unwrap(),
-        std::env::var("VITE_APP_CONTACT_INFO").unwrap())
+        dotenv!("VITE_APP_NAME").to_string(),
+        dotenv!("VITE_APP_VERSION").to_string(),
+        dotenv!("VITE_APP_CONTACT_INFO").to_string())
 }
 
 fn headers() -> HeaderMap {

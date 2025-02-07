@@ -4,7 +4,9 @@ import { onMount } from "svelte";
 import type { MusicData } from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import MusicBrainzApi from "$lib/api/musicbrainz";
-import CoverArt from "$lib/handlers/coverart";
+import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
+import { coverArtAlbumCaches } from "$lib/stores/coverart";
+    import { isIos, isMacos } from "$lib/platform";
 
 interface Props {
 	musicList: MusicData[];
@@ -26,17 +28,36 @@ async function checkAlbumImage() {
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const res = await CoverArt.fromAlbum(music.album!);
-	if (!res) return;
+	const status = await CoverArt.fromAlbum(music.album!);
+	if (status == CoverArtStatus.Failed) return;
+	if (status == CoverArtStatus.Loading){
+        // Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
+        if(isMacos() || isIos()){
+            coverArtAlbumCaches.subscribe(() => {
+                setAlbumImageFromCache()
+            });
+        } else {
+            let unlisten = coverArtAlbumCaches.subscribe(() => {
+                if(setAlbumImageFromCache()) unlisten()
+            });
+        }
+        return;
+	}
+	
+	setAlbumImageFromCache();
+}
 
+function setAlbumImageFromCache(){
 	const cache = MusicController.getCoverArtAlbumCache(music.album!);
-	if (cache == null) return;
-
-	albumImage = cache;
+	if (cache == null) return false;
+	if (cache.status == CoverArtStatus.Failed || cache.image == null) return true;
+   
+	albumImage = MusicController.withBase64(cache.image!);
 	musicList = musicList.map((m) => {
-		m.image = cache;
+		m.image = MusicController.withBase64(cache.image!);
 		return m;
 	});
+	return true;
 }
 
 async function sortMusicList() {

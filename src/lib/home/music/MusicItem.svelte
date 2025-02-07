@@ -1,9 +1,10 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import type { MusicData } from "./types";
-import SpotifyApi from "$lib/api/spotify";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import CoverArt from "$lib/handlers/coverart";
+import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
+import { coverArtAlbumCaches } from "$lib/stores/coverart";
+    import { isIos, isMacos } from "$lib/platform";
 
 interface Props {
 	music: MusicData;
@@ -11,21 +12,41 @@ interface Props {
 
 let { music }: Props = $props();
 
-const spotifyApi = new SpotifyApi();
-
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
-	if (music.image !== null) return;
+	if (music.image !== null || music.album == null) return;
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const res = await CoverArt.fromMusic(music);
-	if (!res) return;
+	const status = await CoverArt.fromAlbum(music.album!);
+	if (status == CoverArtStatus.Failed) return;
+	if (status == CoverArtStatus.Loading){
+	    // Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
+        if(isMacos() || isIos()){
+            coverArtAlbumCaches.subscribe(() => {
+                setAlbumImageFromCache()
+            });
+        } else {
+            let unlisten = coverArtAlbumCaches.subscribe(() => {
+                if(setAlbumImageFromCache()) unlisten()
+            });
+        }
+        return;
+	}
+	
+	setAlbumImageFromCache();
+}
 
-	const mbImage = MusicController.getCoverArtAlbumCache(music.album!);
-	if (mbImage == null) return;
-	albumImage = mbImage;
+function setAlbumImageFromCache(){
+    if(albumImage != MusicConfig.defaultAlbumImage) return true;
+    
+	const cache = MusicController.getCoverArtAlbumCache(music.album!);
+	if (cache == null) return false;
+	if (cache.status == CoverArtStatus.Failed || cache.image == null) return true;
+   
+	albumImage = MusicController.withBase64(cache.image!);
+	return true;
 }
 
 async function addMusicAndPlay() {
