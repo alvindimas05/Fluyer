@@ -106,53 +106,55 @@ impl MusicPlayer {
     }
 }
 
-pub fn handle_music_player_background() {
+pub fn handle_music_player_background(sender_sync_info: Sender<()>) {
     #[cfg(desktop)]{
         use tauri::Listener;
         use crate::GLOBAL_MAIN_WINDOW;
-        
+
         GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://focus", |_|{
             let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
             *state = false;
             let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
-                GLOBAL_APP_HANDLE
-                    .get()
-                    .unwrap()
-                    .emit(
-                        crate::commands::route::MUSIC_PLAYER_SYNC,
-                        MusicPlayerSync { skip: *count },
-                    )
-                    .expect("Failed to sync music player");
-                *count = 0;
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .emit(
+                    crate::commands::route::MUSIC_PLAYER_SYNC,
+                    MusicPlayerSync { skip: *count },
+                )
+                .expect("Failed to sync music player");
+            sender_sync_info.send(());
+            *count = 0;
         });
-        
+
         GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://blur", |_|{
             let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
             *state = true;
         });
     }
-    #[cfg(target_os = "android")]{        
+    #[cfg(target_os = "android")]{
         use tauri_plugin_fluyer::models::WatcherStateType;
         use tauri_plugin_fluyer::FluyerExt;
+
+        let app_handle =
         GLOBAL_APP_HANDLE
             .get()
-            .unwrap()
-            .fluyer()
-            .watch_state(|payload| {
+            .unwrap();
+        app_handle.fluyer()
+            .watch_state(move |payload| {
                 let is_resuming = matches!(payload.value, WatcherStateType::Resume);
                 let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
                 *state = !is_resuming;
-    
+
                 if is_resuming {
                     let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
-                    GLOBAL_APP_HANDLE
-                        .get()
-                        .unwrap()
+                    app_handle
                         .emit(
                             crate::commands::route::MUSIC_PLAYER_SYNC,
                             MusicPlayerSync { skip: *count },
                         )
                         .expect("Failed to sync music player");
+                    sender_sync_info.send(());
                     *count = 0;
                 }
             })
@@ -206,6 +208,9 @@ fn spawn() -> (
     let (sender_playlist_remove, receiver_playlist_remove) = unbounded();
     let (sender_volume, receiver_volume) = unbounded();
     // let (sender_sink_reset, receiver_sink_reset) = unbounded();
+    let (sender_sync_info, receiver_sync_info) = unbounded();
+    
+    handle_music_player_background(sender_sync_info);
 
     ThreadBuilder::default()
         .name("Music Player Next")
@@ -232,6 +237,7 @@ fn spawn() -> (
                 receiver_player_playlist,
                 receiver_info,
                 receiver_volume,
+                receiver_sync_info,
                 // receiver_sink_reset,
                 sender_next,
                 sender_next_position,
@@ -239,7 +245,7 @@ fn spawn() -> (
             );
         })
         .expect("Failed to create music thread");
-    
+
     #[cfg(not(windows))]
     ThreadBuilder::default()
         .name("Music Player")
@@ -251,6 +257,7 @@ fn spawn() -> (
                 receiver_player_playlist,
                 receiver_info,
                 receiver_volume,
+                receiver_sync_info,
                 // receiver_sink_reset,
                 sender_next,
                 sender_next_position,
@@ -364,7 +371,7 @@ fn spawn_next_listener(
         if let Ok(position) = receiver_next_position.try_recv() {
             *counter = (current_music_duration - position.as_millis()) as i128;
         }
-        
+
         if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
             thread::sleep(Duration::from_millis(ms_countdown));
             continue;
@@ -385,6 +392,7 @@ fn play(
     receiver_player_playlist: Receiver<Vec<String>>,
     receiver_info: Receiver<()>,
     receiver_volume: Receiver<f32>,
+    receiver_sync_info: Receiver<()>,
     // receiver_sink_reset: Receiver<bool>,
     sender_next: Sender<()>,
     sender_next_position: Sender<Duration>,
@@ -393,7 +401,7 @@ fn play(
     let stream_handle =
         rodio::OutputStreamBuilder::open_default_stream().expect("Failed to open default stream");
     let sink = rodio::Sink::connect_new(&stream_handle.mixer());
-    
+
     if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
         sink.pause();
     }
@@ -428,11 +436,11 @@ fn play(
                                          // }
             }
         }
-        
+
             if let Ok(volume) = receiver_volume.try_recv() {
             sink.set_volume(volume);
         }
-        
+
         if let Ok(playlist) = receiver_player_playlist.try_recv() {
             for path in playlist.iter() {
                 sink_add_music(&sink, path.to_string());
@@ -456,7 +464,7 @@ fn play(
             }
         }
 
-        if receiver_info.try_recv().is_ok() {
+        if receiver_info.try_recv().is_ok() || receiver_sync_info.try_recv().is_ok() {
             GLOBAL_APP_HANDLE
                 .get()
                 .unwrap()

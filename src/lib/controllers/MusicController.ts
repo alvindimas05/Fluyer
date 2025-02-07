@@ -196,12 +196,10 @@ const MusicController = {
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandsRoute.MUSIC_PLAYER_SYNC, async (e) => {
 			const skip = e.payload.skip;
-			await invoke(CommandsRoute.MUSIC_GET_INFO);
-
 			if (skip < 1) return;
-			MusicController.setNextMusics(
+ 			MusicController.setNextMusics(
 				MusicController.nextMusics()!.splice(0, skip),
-			);
+ 			);
 		});
 		listen<MusicPlayerInfo>(CommandsRoute.MUSIC_GET_INFO, (e) => {
 			if (e.payload.music != null) {
