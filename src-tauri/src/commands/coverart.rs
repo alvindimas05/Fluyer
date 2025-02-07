@@ -207,14 +207,11 @@ fn cover_art_cache_directory() -> String {
 //         .watch(parent_dir, RecursiveMode::NonRecursive)
 //         .expect("Failed to watch directory");
 
-//     logger::debug!("Waiting");
 //     #[allow(for_loops_over_fallibles)]
 //     for res in rx {
-//         logger::debug!("Looping");
         
 //         let queue = cover_art_get_queue(album.clone());
 //         if queue.is_some() && queue.unwrap().status == CoverArtRequestStatus::Failed {
-//             logger::debug!("Returning");
 //             return CoverArtRequestStatus::Failed
 //         }
 

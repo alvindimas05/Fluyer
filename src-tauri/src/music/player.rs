@@ -8,14 +8,14 @@ use std::io::BufReader;
 use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
-use tauri::{Emitter, Listener};
+use tauri::Emitter;
 use thread_priority::ThreadBuilder;
 #[cfg(not(windows))]
 use thread_priority::ThreadPriority;
 #[cfg(windows)]
 use thread_priority::windows::WinAPIThreadPriority;
 
-use crate::{logger, GLOBAL_APP_HANDLE, GLOBAL_MAIN_WINDOW};
+use crate::{logger, GLOBAL_APP_HANDLE};
 
 use super::metadata::MusicMetadata;
 
@@ -108,6 +108,9 @@ impl MusicPlayer {
 
 pub fn handle_music_player_background() {
     #[cfg(desktop)]{
+        use tauri::Listener;
+        use crate::GLOBAL_MAIN_WINDOW;
+        
         GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://focus", |_|{
             let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
             *state = false;
@@ -160,6 +163,7 @@ pub fn handle_music_player_background() {
 #[cfg(target_os = "android")]
 pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
 ) {
+    use tauri_plugin_fluyer::FluyerExt;
     GLOBAL_APP_HANDLE
         .get()
         .unwrap()

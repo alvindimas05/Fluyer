@@ -6,7 +6,7 @@ import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import MusicBrainzApi from "$lib/api/musicbrainz";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtAlbumCaches } from "$lib/stores/coverart";
-    import { isIos, isMacos } from "$lib/platform";
+    import { isAndroid, isIos, isMacos } from "$lib/platform";
 
 interface Props {
 	musicList: MusicData[];
@@ -32,13 +32,14 @@ async function checkAlbumImage() {
 	if (status == CoverArtStatus.Failed) return;
 	if (status == CoverArtStatus.Loading){
         // Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
-        if(isMacos() || isIos()){
+        // Note: I have no idea why this happens on Android as well.
+        if(isMacos() || isIos() || isAndroid()){
             coverArtAlbumCaches.subscribe(() => {
                 setAlbumImageFromCache()
             });
         } else {
-            let unlisten = coverArtAlbumCaches.subscribe(() => {
-                if(setAlbumImageFromCache()) unlisten()
+            const unsub = coverArtAlbumCaches.subscribe(() => {
+                if(setAlbumImageFromCache()) unsub()
             });
         }
         return;

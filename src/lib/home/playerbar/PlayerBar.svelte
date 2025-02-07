@@ -6,7 +6,7 @@ import {
 	musicProgressValue,
 	musicVolume,
 } from "$lib/stores/music";
-import { goto } from "$app/navigation";
+// import { goto } from "$app/navigation";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
@@ -81,7 +81,7 @@ async function onKeyDown(
 }
 
 function redirectToPlay() {
-	goto("/play");
+	// goto("/play");
 }
 
 function handleVolumeButton() {

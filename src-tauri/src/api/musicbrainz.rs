@@ -1,6 +1,10 @@
+use std::error::Error;
+
 use dotenvy_macro::dotenv;
 use serde::{Deserialize, Serialize};
 use tauri::http::HeaderMap;
+
+use crate::logger;
 
 const BASE_URL: &str = "https://musicbrainz.org/ws/2";
 const BASE_COVER_ART_URL: &str = "https://coverartarchive.org";
@@ -108,6 +112,7 @@ impl MusicBrainz {
         if response.is_err(){
             return None
         }
+        
         let json = response.unwrap().json::<CoverArtResponse>().await;
         if json.is_err() {
             return None
