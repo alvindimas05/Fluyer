@@ -20,5 +20,6 @@ export const CommandsRoute = {
 	LOG_ERROR: "log_error",
 
 	COVER_ART_FROM_ALBUM: "cover_art_from_album",
+	COVER_ART_FROM_MUSIC: "cover_art_from_album",
 	COVER_ART_REQUEST_ALBUM: "cover_art_request_album",
 };

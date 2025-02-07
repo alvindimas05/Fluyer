@@ -83,8 +83,8 @@ async fn browse(browse_type: BrowseType, query: String) -> Option<ReleaseGroupRe
 pub struct MusicBrainz;
 
 impl MusicBrainz {
-    pub async fn get_cover_art_from_album(album: String) -> Option<String> {
-        let bresponse = browse(BrowseType::ReleaseGroup, album).await;
+    pub async fn get_cover_art_from_album(album: String, artist: String) -> Option<String> {
+        let bresponse = browse(BrowseType::ReleaseGroup, format!("{} {}", artist, album)).await;
         if bresponse.is_none() {
             return None
         }

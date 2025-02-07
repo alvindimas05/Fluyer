@@ -1,4 +1,3 @@
-import MusicBrainzApi from "$lib/api/musicbrainz";
 import { CommandsRoute } from "$lib/commands";
 import MusicController from "$lib/controllers/MusicController";
 import type { MusicData } from "$lib/home/music/types";
@@ -15,13 +14,19 @@ export interface CoverArtResponse {
 	image: string | null;
 }
 
+export interface CoverArtCacheQuery {
+    artist: string;
+    album?: string;
+    title?: string;
+}
+
 const CoverArt = {
-	fromAlbum: async (album: string) => {
+	fromAlbum: async (album: string, artist: string) => {
 		try {
-		    let albumCache = MusicController.getCoverArtAlbumCache(album);
+		    let albumCache = MusicController.getCoverArtCache({ artist, album });
 		    if(albumCache != null) return albumCache.status;
-		    MusicController.addCoverArtAlbumCache({
-				name: album,
+		    MusicController.addCoverArtCache({
+				name: `${artist} ${album}`,
 				status: CoverArtStatus.Loading,
 				image: null
 			});
@@ -29,10 +34,10 @@ const CoverArt = {
 			let albumCover = await invoke<CoverArtResponse>(
 				CommandsRoute.COVER_ART_FROM_ALBUM,
 				{
-					album,
+					album, artist
 				},
 			);
-			MusicController.setCoverArtAlbumCache(album, albumCover);
+			MusicController.setCoverArtCache({ artist, album }, albumCover);
 			return albumCover.status;
 		} catch (err) {
 			console.error(err);
@@ -40,8 +45,11 @@ const CoverArt = {
 		}
 	},
 	fromMusic: async (music: MusicData) => {
-		if (music.album == null) return null;
-		return CoverArt.fromAlbum(music.album);
+		if (music.album != null && music.artist != null){
+		    return CoverArt.fromAlbum(music.album, music.artist);
+		}
+		
+		if(music.title == null || music.artist == null) return CoverArtStatus.Failed;
 	},
 };
 

@@ -23,8 +23,8 @@ import {
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
 import logHandler from "$lib/handlers/log";
-import { coverArtAlbumCaches } from "$lib/stores/coverart";
-import type { CoverArtResponse } from "$lib/handlers/coverart";
+import { coverArtCaches } from "$lib/stores/coverart";
+import type { CoverArtCacheQuery, CoverArtResponse } from "$lib/handlers/coverart";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -359,18 +359,18 @@ const MusicController = {
 		});
 	},
 	
-	getCoverArtAlbumCache: (album: string) => {
-	   return get(coverArtAlbumCaches).find((cache) => cache.name == album) ?? null;
+	getCoverArtCache: (query: CoverArtCacheQuery) => {
+	   return get(coverArtCaches).find((cache) => cache.name == `${query.artist} ${query.album}`) ?? null;
 	},
-	addCoverArtAlbumCache: (value: CoverArtResponse) => {
-	    let caches = get(coverArtAlbumCaches);
+	addCoverArtCache: (value: CoverArtResponse) => {
+	    let caches = get(coverArtCaches);
 		caches.push(value);
-		coverArtAlbumCaches.set(caches);
+		coverArtCaches.set(caches);
 	},
-	setCoverArtAlbumCache: (album: String, value: CoverArtResponse) => {
-	    let caches = get(coverArtAlbumCaches);
-		caches[caches.findIndex(c => c.name == album)] = value;
-		coverArtAlbumCaches.set(caches);
+	setCoverArtCache: (query: CoverArtCacheQuery, value: CoverArtResponse) => {
+	    let caches = get(coverArtCaches);
+		caches[caches.findIndex(c => c.name == `${query.artist} ${query.album}`)] = value;
+		coverArtCaches.set(caches);
 	},
 	withBase64: (value: string) => {
 	    return `data:image/png;base64,${value}`;

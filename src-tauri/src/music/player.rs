@@ -111,7 +111,7 @@ pub fn handle_music_player_background(sender_sync_info: Sender<()>) {
         use tauri::Listener;
         use crate::GLOBAL_MAIN_WINDOW;
 
-        GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://focus", |_|{
+        GLOBAL_MAIN_WINDOW.get().unwrap().listen("tauri://focus", move |_|{
             let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
             *state = false;
             let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
@@ -123,7 +123,7 @@ pub fn handle_music_player_background(sender_sync_info: Sender<()>) {
                     MusicPlayerSync { skip: *count },
                 )
                 .expect("Failed to sync music player");
-            sender_sync_info.send(());
+            sender_sync_info.send(()).unwrap();
             *count = 0;
         });
 
@@ -154,7 +154,7 @@ pub fn handle_music_player_background(sender_sync_info: Sender<()>) {
                             MusicPlayerSync { skip: *count },
                         )
                         .expect("Failed to sync music player");
-                    sender_sync_info.send(());
+                    sender_sync_info.send(()).unwrap();
                     *count = 0;
                 }
             })

@@ -5,7 +5,7 @@ import type { MusicData } from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import MusicBrainzApi from "$lib/api/musicbrainz";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
-import { coverArtAlbumCaches } from "$lib/stores/coverart";
+import { coverArtCaches } from "$lib/stores/coverart";
 import { isAndroid, isIos, isMacos } from "$lib/platform";
 
 interface Props {
@@ -24,21 +24,21 @@ let isSorted = false;
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
-	if (music.image !== null) return;
+	if (music.image !== null || music.artist == null) return;
 	// const spotifyMusic = await spotifyApi.searchMusic(music);
 	// if (spotifyMusic == null) return;
 	// albumImage = spotifyMusic?.imageUrl;
-	const status = await CoverArt.fromAlbum(music.album!);
+	const status = await CoverArt.fromAlbum(music.album!, music.artist!);
 	if (status == CoverArtStatus.Failed) return;
 	if (status == CoverArtStatus.Loading){
         // Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
         // Note: I have no idea why this happens on Android as well.
         if(isMacos() || isIos() || isAndroid()){
-            coverArtAlbumCaches.subscribe(() => {
+            coverArtCaches.subscribe(() => {
                 setAlbumImageFromCache()
             });
         } else {
-            const unsub = coverArtAlbumCaches.subscribe(() => {
+            const unsub = coverArtCaches.subscribe(() => {
                 if(setAlbumImageFromCache()) unsub()
             });
         }
@@ -49,7 +49,7 @@ async function checkAlbumImage() {
 }
 
 function setAlbumImageFromCache(){
-	const cache = MusicController.getCoverArtAlbumCache(music.album!);
+	const cache = MusicController.getCoverArtCache({ artist: music.artist!, album: music.album! });
 	if (cache == null) return false;
 	if (cache.status == CoverArtStatus.Failed || cache.image == null) return true;
    

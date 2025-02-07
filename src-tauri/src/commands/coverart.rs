@@ -41,12 +41,13 @@ lazy_static! {
 }
 
 #[tauri::command]
-pub async fn cover_art_from_album(album: String) -> CoverArtResponse {
-    let file_path = format!("{}/album/{}", cover_art_cache_directory(), album);
-    let queue = cover_art_get_queue(album.clone());
+pub async fn cover_art_from_album(album: String, artist: String) -> CoverArtResponse {
+    let name = format!("{} {}", artist, album);
+    let file_path = format!("{}/album/{}", cover_art_cache_directory(), name);
+    let queue = cover_art_get_queue(name.clone());
     if queue.is_none() {
         COVER_ART_QUEUE.lock().unwrap().push(CoverArtRequest {
-            name: album.clone(),
+            name: name.clone(),
             status: CoverArtRequestStatus::Loading,
         });
         if Path::new(file_path.as_str()).exists() {
@@ -65,7 +66,7 @@ pub async fn cover_art_from_album(album: String) -> CoverArtResponse {
                         .is_ok()
                     {
                         return CoverArtResponse {
-                            name: album,
+                            name,
                             status: CoverArtRequestStatus::Loaded,
                             image: Some(
                                 base64::engine::general_purpose::STANDARD.encode(buf.get_ref()),
@@ -76,18 +77,18 @@ pub async fn cover_art_from_album(album: String) -> CoverArtResponse {
             }
         }
         
-        let cover_art = cover_art_request_album(album.clone()).await;
+        let cover_art = cover_art_request_album(album.clone(), artist.clone()).await;
         if cover_art.is_none() {
-            cover_art_set_status(album.clone(), CoverArtRequestStatus::Failed);
+            cover_art_set_status(name.clone(), CoverArtRequestStatus::Failed);
             return CoverArtResponse {
-                name: album,
+                name,
                 status: CoverArtRequestStatus::Failed,
                 image: None,
             };
         }
 
         return CoverArtResponse {
-            name: album,
+            name,
             status: CoverArtRequestStatus::Loaded,
             image: cover_art,
         };
@@ -104,14 +105,14 @@ pub async fn cover_art_from_album(album: String) -> CoverArtResponse {
     // }
 
     CoverArtResponse {
-        name: album.clone(),
+        name,
         status: CoverArtRequestStatus::Failed,
         image: None,
     }
 }
 
-async fn cover_art_request_album(album: String) -> Option<String> {    
-    let url = MusicBrainz::get_cover_art_from_album(album.clone()).await;
+async fn cover_art_request_album(album: String, artist: String) -> Option<String> {    
+    let url = MusicBrainz::get_cover_art_from_album(album.clone(), artist.clone()).await;
 
     if url.is_none() {
         return None;
@@ -130,7 +131,7 @@ async fn cover_art_request_album(album: String) -> Option<String> {
     if std::fs::create_dir_all(format!("{}/album", cache.clone())).is_err() {
         return None;
     }
-    let mut file = std::fs::File::create(format!("{}/album/{}", cache, album)).unwrap();
+    let mut file = std::fs::File::create(format!("{}/album/{} {}", cache, artist, album)).unwrap();
     let mut content = Cursor::new(bytes.unwrap());
     if copy(&mut content, &mut file).is_err() {
         return None;
@@ -161,16 +162,16 @@ fn cover_art_get_queue(album: String) -> Option<CoverArtRequest> {
     )
 }
 
-fn cover_art_set_status(album: String, status: CoverArtRequestStatus) {
-    cover_art_remove(album.clone());
+fn cover_art_set_status(name: String, status: CoverArtRequestStatus) {
+    cover_art_remove(name.clone());
     COVER_ART_QUEUE.lock().unwrap().push(CoverArtRequest {
-        name: album,
+        name,
         status,
     });
 }
 
-fn cover_art_remove(album: String){
-    COVER_ART_QUEUE.lock().unwrap().retain(|c| c.name == album);
+fn cover_art_remove(name: String){
+    COVER_ART_QUEUE.lock().unwrap().retain(|c| c.name == name);
 }
 
 fn cover_art_cache_directory() -> String {
