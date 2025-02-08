@@ -8,6 +8,7 @@ import {
 } from "$lib/stores/music";
 import { goto } from "$app/navigation";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
+    import { backgroundIsLight } from "$lib/stores/background";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = 400;
@@ -96,8 +97,7 @@ function handleVolumeButton() {
     style={`padding-bottom: ${$mobileNavigationBarHeight}px`}
 >
     <input
-        id="music-progress-bar"
-        class="w-full absolute"
+        class={`w-full absolute music-progress-bar music-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
         type="range"
         style={`--progress-width: ${progressPercentage}%`}
         bind:value={$musicProgressValue}
@@ -163,7 +163,9 @@ function handleVolumeButton() {
                         <img class="invert w-5" src={volumePercentage > 0 ? MusicConfig.defaultSpeakerButton : MusicConfig.defaultMuteButton}
                             alt="Volume"/>
                     </button>
-                    <input id="volume-bar" type="range"
+                    <input
+                        class={`w-24 volume-progress-bar volume-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
+                        type="range"
                         style={`--progress-width: ${volumePercentage}%`}
                         bind:value={$musicVolume}
                         min={MusicConfig.vmin}
@@ -176,29 +178,4 @@ function handleVolumeButton() {
 </div>
 
 <style lang="scss">
-    #music-progress-bar {
-        @apply cursor-pointer outline-0;
-        appearance: none;
-        
-        &::-webkit-slider-runnable-track {
-            @apply h-[.2rem] rounded;
-            background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
-        }
-        &::-webkit-slider-thumb {
-            @apply mt-[.2rem] invisible;
-        }
-    }
-    
-    #volume-bar {
-        @apply w-20 cursor-pointer outline-0;
-        appearance: none;
-        
-        &::-webkit-slider-runnable-track {
-            @apply h-[.2rem] rounded;
-            background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
-        }
-        &::-webkit-slider-thumb {
-            @apply mt-[.2rem] invisible;
-        }
-    }
 </style>

@@ -1,12 +1,13 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import { observerCounts } from "$lib/stores/background";
+import { backgroundIsLight, observerCounts } from "$lib/stores/background";
 import { musicCurrent } from "$lib/stores/music";
 import { prominent } from "color.js";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
 import { platform } from "@tauri-apps/plugin-os";
 import { isMobile } from "$lib/platform";
+    import BackgroundController from "$lib/controllers/BackgroundController";
 
 const SIZE = 10;
 
@@ -18,7 +19,6 @@ let animatedClasses = $state("hidden");
 let lastImage = "";
 let position: string[][] = $state([]);
 let secondPosition: string[][] = $state([]);
-let isLight = $state(false);
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
 	const bigint = parseInt(hex.slice(1), 16);
@@ -66,7 +66,7 @@ async function getColors() {
 		amount: 10,
 		format: "hex",
 	});
-	isLight = isMajorityLight(colors);
+	BackgroundController.setIsLight(isMajorityLight(colors));
 
 	position = Array.from({ length: SIZE }, () =>
 		Array.from(
@@ -151,6 +151,6 @@ musicCurrent.subscribe(() => !isMobile() && getColors());
 		<div class="bg-blur"></div>
 	</div>
 {/if}
-{#if isLight}
+{#if $backgroundIsLight}
 	<div class="bg-blur-dark"></div>
 {/if}

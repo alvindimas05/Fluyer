@@ -13,6 +13,7 @@ import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
+    import { backgroundIsLight } from "$lib/stores/background";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = 400;
@@ -161,8 +162,7 @@ onMount(async () => {
             </div>
             <div class="w-full mt-[-4px]">
                 <input
-                    id="music-progress-bar"
-                    class="w-full"
+                    class={`w-full music-progress-bar music-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
                     type="range"
                     style={`--progress-width: ${progressPercentage}%`}
                     bind:value={$musicProgressValue}
@@ -221,7 +221,9 @@ onMount(async () => {
                             alt="Volume"
                             src={MusicConfig.defaultMuteButton}>
                     </button>
-                    <input id="volume-bar" type="range"
+                    <input
+                        class={`volume-progress-bar volume-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
+                        type="range"
                         style={`--progress-width: ${volumePercentage}%`}
                         bind:value={$musicVolume}
                         min={MusicConfig.vmin}
@@ -256,32 +258,6 @@ onMount(async () => {
 </div>
 
 <style lang="scss">
-    #music-progress-bar {
-        @apply cursor-pointer outline-0;
-        appearance: none;
-
-        &::-webkit-slider-runnable-track {
-            @apply h-[.2rem] rounded;
-            background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
-        }
-        &::-webkit-slider-thumb {
-            @apply mt-[-6px] invisible;
-        }
-    }
-    
-    #volume-bar {
-        @apply cursor-pointer outline-0 mx-2;
-        appearance: none;
-        
-        &::-webkit-slider-runnable-track {
-            @apply h-[.2rem] rounded;
-            background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
-        }
-        &::-webkit-slider-thumb {
-            @apply mt-[.2rem] invisible;
-        }
-    }
-    
     .volume-action:hover {
         animation-name: fadeIn;
     }
