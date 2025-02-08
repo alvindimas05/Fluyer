@@ -12,7 +12,7 @@ You can grab the latest version of the app below or check the [release page](htt
 - [Android aarch64](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_aarch64.apk) (For most android mobile devices)
 - [Android armv7](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_armv7.apk) (For older android mobile devices)
 - [Android x86_64](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x86_64.apk) (Usually for chromebooks)
-- [Android i686](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_i686.apk) (For older chromebooks I guess?)
+- [Android i686](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_i686.apk) (Usually for older chromebooks)
 
 ## Features Progress
 
