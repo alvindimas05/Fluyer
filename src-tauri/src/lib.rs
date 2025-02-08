@@ -3,7 +3,7 @@ use music::player::MusicPlayer;
 #[cfg(target_os = "macos")]
 use tauri_plugin_decorum::WebviewWindowExt;
 use std::sync::{Mutex, OnceLock};
-use tauri::{AppHandle, WebviewWindow};
+use tauri::{AppHandle, WebviewWindow, WindowEvent};
 #[allow(unused)]
 use tauri::{Manager, RunEvent};
 
@@ -40,8 +40,10 @@ pub fn run() {
             let main_window = app.get_webview_window("main").unwrap();
             #[cfg(windows)]
             main_window.set_decorations(false).unwrap();
-            #[cfg(target_os = "macos")]
-      		main_window.make_transparent().unwrap();
+            #[cfg(target_os = "macos")]{
+          		main_window.make_transparent().unwrap();
+                main_window.set_traffic_lights_inset(16.0, 8.0).unwrap();
+            }
             
             GLOBAL_MAIN_WINDOW.set(main_window).expect("Failed to set GLOBAL_APP_WINDOW");
             init_store(app);
@@ -70,6 +72,18 @@ pub fn run() {
             #[cfg(windows)]
             commands::decorum::decorum_show_snap_overlay,
         ])
+        .on_window_event(|_, event| {
+            match event {
+                WindowEvent::Resized(_) => {
+                    #[cfg(target_os = "macos")]
+                    {
+                        GLOBAL_MAIN_WINDOW.get().unwrap()
+                            .set_traffic_lights_inset(16.0, 8.0).unwrap();
+                    }
+                }
+                _ => {}
+            }
+        })
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(|app_handle, event| {
