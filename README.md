@@ -40,4 +40,4 @@ You can grab the latest version of the app below or check the [release page](htt
 
 ## Credits
 - [Thank you, Freepik, for the free Icons](https://www.flaticon.com/authors/special/lineal/2?author_id=1)
-- [Default/Empty Album Cover](https://www.freepik.com/free-vector/music-notes-rainbow-colourful-with-vinyl-record-white-backgro_24459713.htm)
+- [Default Album Cover](https://www.freepik.com/free-vector/music-notes-rainbow-colourful-with-vinyl-record-white-backgro_24459713.htm)
