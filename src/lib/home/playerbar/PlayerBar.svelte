@@ -160,9 +160,8 @@ function handleVolumeButton() {
             <div class="hidden lg:grid justify-end">
                 <div class="grid grid-cols-[auto_auto] items-center gap-3">
                     <button onclick={handleVolumeButton}>
-                        <img class="invert w-5"
-                            alt="Volume"
-                            src={volumePercentage > 0 ? MusicConfig.defaultSpeakerButton : MusicConfig.defaultMuteButton}>
+                        <img class="invert w-5" src={volumePercentage > 0 ? MusicConfig.defaultSpeakerButton : MusicConfig.defaultMuteButton}
+                            alt="Volume"/>
                     </button>
                     <input id="volume-bar" type="range"
                         style={`--progress-width: ${volumePercentage}%`}
@@ -170,7 +169,6 @@ function handleVolumeButton() {
                         min={MusicConfig.vmin}
                         max={MusicConfig.vmax}
                         step={MusicConfig.vstep}>
-                        
                 </div>
             </div>
         </div>
@@ -193,6 +191,7 @@ function handleVolumeButton() {
     
     #volume-bar {
         @apply w-20 cursor-pointer outline-0;
+        appearance: none;
         
         &::-webkit-slider-runnable-track {
             @apply h-[.2rem] rounded;

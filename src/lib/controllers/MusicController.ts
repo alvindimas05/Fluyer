@@ -46,8 +46,8 @@ export const MusicConfig = {
 	defaultPlaylistRemoveButton: "/icons/default/remove.png",
 	defaultPlayingIcon: "/icons/default/playing.png",
 	defaultBackButton: "/icons/default/back.png",
-	defaultSpeakerButton: "/icons/default/speaker.png",
-	defaultMuteButton: "/icons/default/mute.png",
+	defaultSpeakerButton: "/icons/default/speaker.svg",
+	defaultMuteButton: "/icons/default/mute.svg",
 };
 const MusicController = {
 	handleInitialize: () => {

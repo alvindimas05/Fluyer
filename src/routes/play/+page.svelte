@@ -3,6 +3,7 @@ import {
 	musicCurrent,
 	musicIsPlaying,
 	musicProgressValue,
+    musicVolume,
 } from "$lib/stores/music";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
@@ -25,6 +26,7 @@ let albumImage = $state(MusicConfig.defaultAlbumImage);
 
 let lyrics: MusicLyric[] = $state([]);
 let selectedLyricIndex = $state(0);
+let volumePercentage = $state(MusicController.volumePercentage());
 
 musicProgressValue.subscribe(() => {
 	progressPercentage = MusicController.progressPercentage();
@@ -119,6 +121,10 @@ function scrollToSelectedLyric() {
 	});
 }
 
+musicVolume.subscribe(() => {
+	volumePercentage = MusicController.volumePercentage();
+});
+
 onMount(async () => {
 	await resetLyrics();
 	resetSelectedLyricIndex();
@@ -208,6 +214,26 @@ onMount(async () => {
                     >
                 </div>
             </div>
+            <div class="mt-5 volume-action animate__animated animate__faster animate__fadeOut">
+                <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+                    <button onclick={() => MusicController.setVolume(0)}>
+                        <img class="invert w-5"
+                            alt="Volume"
+                            src={MusicConfig.defaultMuteButton}>
+                    </button>
+                    <input id="volume-bar" type="range"
+                        style={`--progress-width: ${volumePercentage}%`}
+                        bind:value={$musicVolume}
+                        min={MusicConfig.vmin}
+                        max={MusicConfig.vmax}
+                        step={MusicConfig.vstep}>
+                    <button onclick={() => MusicController.setVolume(1)}>
+                        <img class="invert w-5"
+                            alt="Volume"
+                            src={MusicConfig.defaultSpeakerButton}>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     {#if lyrics.length > 0}
@@ -236,11 +262,28 @@ onMount(async () => {
 
         &::-webkit-slider-runnable-track {
             @apply h-[.2rem] rounded;
-            background: linear-gradient(to right, #fff var(--progress-width), #ccd0d6 var(--progress-width));
+            background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
         }
         &::-webkit-slider-thumb {
             @apply mt-[-6px] invisible;
         }
+    }
+    
+    #volume-bar {
+        @apply cursor-pointer outline-0 mx-2;
+        appearance: none;
+        
+        &::-webkit-slider-runnable-track {
+            @apply h-[.2rem] rounded;
+            background: linear-gradient(to right, #fff var(--progress-width), #9ca3af var(--progress-width));
+        }
+        &::-webkit-slider-thumb {
+            @apply mt-[.2rem] invisible;
+        }
+    }
+    
+    .volume-action:hover {
+        animation-name: fadeIn;
     }
     
     .initial-fade-in {
