@@ -14,7 +14,6 @@ You can grab the latest version of the app below or check the [release page](htt
 - [Android x86_64](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x86_64.apk) (Usually for chromebooks)
 - [Android i686](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_i686.apk) (For older chromebooks I guess?)
 
-
 ## Features Progress
 
 ### Basic Functionality
@@ -31,7 +30,7 @@ You can grab the latest version of the app below or check the [release page](htt
 - [ ] Group by Folder
 - [x] Lyrics
 - [x] Animated Background
-- [ ] Cover Art Caching
+- [x] Cover Art Caching
 
 ### API Functionality
 - [x] MusicBrainz Integration (For Cover Art)
