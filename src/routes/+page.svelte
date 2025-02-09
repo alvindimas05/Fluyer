@@ -9,6 +9,7 @@ import MusicController from "$lib/controllers/MusicController";
 import { musicList } from "$lib/stores/music";
 import { isMobile } from "$lib/platform";
 import Intro from "$lib/home/intro/Intro.svelte";
+    import SearchBar from "$lib/searchbar/SearchBar.svelte";
 
 if (isMobile()) LoadingController.setLoadingBackground(true);
 
@@ -28,6 +29,7 @@ LoadingController.listen();
     {#if $musicList === null}
         <Intro />
     {:else if Array.isArray($musicList)}
+        <SearchBar />
         <PlayerBar />
         <Playlist />
         <div class="h-full grid grid-rows-[min-content_1fr]">

@@ -7,6 +7,7 @@ import {
 	musicList,
 	musicsNext,
 	musicVolume,
+    musicAlbumList,
 } from "$lib/stores/music";
 import { get } from "svelte/store";
 import type {
@@ -380,6 +381,25 @@ const MusicController = {
 	withBase64: (value: string) => {
 		return `data:image/png;base64,${value}`;
 	},
+	
+	setMusicAlbumList: (value: MusicData[][]) => {
+	   musicAlbumList.set(value);
+	},
+	
+	sortMusicList: (list: MusicData[]) => {
+		const hasTrackNumber = list[0].trackNumber != null;
+		return list.sort((a, b) => {
+			if (hasTrackNumber) {
+				if (a.trackNumber?.includes("/") || b.trackNumber?.includes("/")) {
+					a.trackNumber = a.trackNumber!.split("/")[0];
+					b.trackNumber = b.trackNumber!.split("/")[0];
+				}
+				return +a.trackNumber! - +b.trackNumber!;
+			} else {
+				return a.filename.localeCompare(b.filename);
+			}
+		});
+	}
 };
 
 export default MusicController;

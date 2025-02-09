@@ -68,33 +68,16 @@ function setAlbumImageFromCache() {
 	return true;
 }
 
-async function sortMusicList() {
-	const hasTrackNumber = music.trackNumber != null;
-	musicList = musicList.sort((a, b) => {
-		if (hasTrackNumber) {
-			if (a.trackNumber?.includes("/") || b.trackNumber?.includes("/")) {
-				a.trackNumber = a.trackNumber!.split("/")[0];
-				b.trackNumber = b.trackNumber!.split("/")[0];
-			}
-			return +a.trackNumber! - +b.trackNumber!;
-		} else {
-			return a.filename.localeCompare(b.filename);
-		}
-	});
-}
-
 async function addMusicListAndPlay() {
 	music.image = albumImage;
-	if (!isSorted) {
-		isSorted = true;
-		sortMusicList();
-	}
 	await MusicController.clear();
-	await MusicController.addMusicList(musicList);
+	await MusicController.addMusicList(MusicController.sortMusicList(musicList));
 	MusicController.play(true);
 }
 
-onMount(checkAlbumImage);
+onMount(() => {
+    checkAlbumImage();
+});
 
 setTimeout(
 	() => (animationClasses = "animate__animated animate__fadeInDown"),

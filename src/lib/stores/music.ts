@@ -10,3 +10,4 @@ export let musicProgressIntervalId = writable<null | ReturnType<
 	typeof setInterval
 >>(null);
 export let musicsNext = writable<MusicData[]>([]);
+export let musicAlbumList = writable<MusicData[][]>([]);

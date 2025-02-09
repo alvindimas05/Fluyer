@@ -1,17 +1,16 @@
 <script lang="ts">
 import type { MusicData } from "../music/types";
-import { musicList } from "$lib/stores/music";
+import { musicAlbumList, musicList } from "$lib/stores/music";
 import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
-import { platform } from "@tauri-apps/plugin-os";
-import { isDesktop, isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
+import { isMobile } from "$lib/platform";
 
 let element: HTMLDivElement;
-let grouppedAlbums = $state(groupByAlbum());
 
+MusicController.setMusicAlbumList(groupByAlbum());
 function groupByAlbum(): MusicData[][] {
 	const albumsMap = MusicController.musicList()!.reduce(
 		(acc, item) => {
@@ -46,7 +45,7 @@ function onMouseWheel(
 
 onMount(() => {
 	musicList.subscribe(() => {
-		grouppedAlbums = groupByAlbum();
+		MusicController.setMusicAlbumList(groupByAlbum());
 		setTimeout(() => {
 			$swipeMinimumTop = element.clientHeight;
 		}, 1);
@@ -61,7 +60,7 @@ onMount(() => {
     bind:this={element}
     onwheel={onMouseWheel}
 >
-    {#each Object.entries(grouppedAlbums) as [album, musicList], index}
+    {#each Object.entries($musicAlbumList) as [_, musicList], index}
         <AlbumItem {musicList} {index} />
     {/each}
 </div>
