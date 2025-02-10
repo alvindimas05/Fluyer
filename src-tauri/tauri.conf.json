@@ -19,7 +19,8 @@
 				"maximized": true,
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
-				"transparent": true
+				"transparent": true,
+				"shadow": false
 			}
 		],
 		"security": {
