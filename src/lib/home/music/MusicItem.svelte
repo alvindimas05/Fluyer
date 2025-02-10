@@ -26,17 +26,9 @@ async function checkAlbumImage() {
 	});
 	if (status == CoverArtStatus.Failed) return;
 	if (status == CoverArtStatus.Loading) {
-		// Note: Blame Webkit for this shit. Always gives error "Uninitialized variable" when trying to call unlisten :)
-		// Note: I have no idea why this happens on Android as well.
-		if (isMacos() || isIos() || isAndroid()) {
-			coverArtCaches.subscribe(() => {
-				setAlbumImageFromCache();
-			});
-		} else {
-			const unsub = coverArtCaches.subscribe(() => {
-				if (setAlbumImageFromCache()) unsub();
-			});
-		}
+	    const unlisten = coverArtCaches.subscribe(() => {
+			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 5000);
+		});
 		return;
 	}
 
