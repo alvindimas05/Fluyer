@@ -16,6 +16,7 @@
 		"core:window:allow-is-maximized",
 		"core:window:allow-start-dragging",
 		"core:window:allow-toggle-maximize",
+		"core:window:allow-show",
 		"decorum:allow-show-snap-overlay",
 		"os:default",
 		"fluyer:allow-toast",
