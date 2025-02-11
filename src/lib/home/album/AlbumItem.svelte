@@ -21,14 +21,15 @@ let isSorted = false;
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
-	if (music.image !== null || music.artist == null || music.album == null) return;
+	if (music.image !== null || music.artist == null || music.album == null)
+		return;
 	const status = await CoverArt.fromQuery({
 		artist: music.artist!,
 		album: music.album!,
 	});
 	if (status == CoverArtStatus.Failed) return;
 	if (status == CoverArtStatus.Loading) {
-        const unlisten = coverArtCaches.subscribe(() => {
+		const unlisten = coverArtCaches.subscribe(() => {
 			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
 		});
 		return;
@@ -42,7 +43,11 @@ function setAlbumImageFromCache() {
 		artist: music.artist!,
 		album: music.album!,
 	});
-	if (cache == null || (cache.status == CoverArtStatus.Loading && cache.image == null)) return false;
+	if (
+		cache == null ||
+		(cache.status == CoverArtStatus.Loading && cache.image == null)
+	)
+		return false;
 	if (cache.status == CoverArtStatus.Failed) return true;
 
 	albumImage = MusicController.withBase64(cache.image!);
@@ -61,7 +66,7 @@ async function addMusicListAndPlay() {
 }
 
 onMount(() => {
-    checkAlbumImage();
+	checkAlbumImage();
 });
 
 setTimeout(

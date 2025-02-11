@@ -6,7 +6,7 @@ import TitleBar from "$lib/titlebar/TitleBar.svelte";
 import { isAndroid, isDesktop } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
-    import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 interface Props {
 	children?: import("svelte").Snippet;

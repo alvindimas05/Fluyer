@@ -7,7 +7,7 @@ import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
 import { platform } from "@tauri-apps/plugin-os";
 import { isMobile } from "$lib/platform";
-    import BackgroundController from "$lib/controllers/BackgroundController";
+import BackgroundController from "$lib/controllers/BackgroundController";
 
 const SIZE = 10;
 

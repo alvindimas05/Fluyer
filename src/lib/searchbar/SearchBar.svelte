@@ -1,49 +1,52 @@
 <script lang="ts">
-    import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-    import type { MusicData } from "$lib/home/music/types";
-    import { musicAlbumList, musicList } from "$lib/stores/music";
-    
-    let searchInput: HTMLInputElement;
-    let searchValue = $state("");
-    let showSearchBar = $state(false);
-    
-    function musicListFilterPredicate(music: MusicData){
-        let search = searchValue.toLowerCase();
-        return music.title?.toLowerCase().includes(search) || music.albumArtist?.toLowerCase()
-            .includes(search);
-    }
-    
-    function musicAlbumListFilterPredicate(album: MusicData[]){
-        let search = searchValue.toLowerCase();
-        return album[0].album?.toLowerCase().includes(search) || album[0].albumArtist?.toLowerCase()
-            .includes(search)
-    }
-    
-    
-    async function addMusicListAndPlay(list: MusicData[]) {
-    	await MusicController.addMusicList(MusicController.sortMusicList(list));
-        
-        const previousMusic = MusicController.currentMusic();
-    	if (
-    		previousMusic === null ||
-    		(previousMusic !== null && MusicController.isCurrentMusicFinished())
-    	)
-    		MusicController.play();
-    }
-    
-    
-    function onKeyDown(
-    	e: KeyboardEvent & {
-    		currentTarget: EventTarget & Document;
-    	},
-    ) {
-        if (e.ctrlKey){ showSearchBar = true;
-            setTimeout(() => {
-                searchInput.focus();
-            }, 0);
-        }
-        if (e.key === "Escape") showSearchBar = false;
-    }
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import type { MusicData } from "$lib/home/music/types";
+import { musicAlbumList, musicList } from "$lib/stores/music";
+
+let searchInput: HTMLInputElement;
+let searchValue = $state("");
+let showSearchBar = $state(false);
+
+function musicListFilterPredicate(music: MusicData) {
+	let search = searchValue.toLowerCase();
+	return (
+		music.title?.toLowerCase().includes(search) ||
+		music.albumArtist?.toLowerCase().includes(search)
+	);
+}
+
+function musicAlbumListFilterPredicate(album: MusicData[]) {
+	let search = searchValue.toLowerCase();
+	return (
+		album[0].album?.toLowerCase().includes(search) ||
+		album[0].albumArtist?.toLowerCase().includes(search)
+	);
+}
+
+async function addMusicListAndPlay(list: MusicData[]) {
+	await MusicController.addMusicList(MusicController.sortMusicList(list));
+
+	const previousMusic = MusicController.currentMusic();
+	if (
+		previousMusic === null ||
+		(previousMusic !== null && MusicController.isCurrentMusicFinished())
+	)
+		MusicController.play();
+}
+
+function onKeyDown(
+	e: KeyboardEvent & {
+		currentTarget: EventTarget & Document;
+	},
+) {
+	if (e.ctrlKey) {
+		showSearchBar = true;
+		setTimeout(() => {
+			searchInput.focus();
+		}, 0);
+	}
+	if (e.key === "Escape") showSearchBar = false;
+}
 </script>
 
 <svelte:document onkeydown={onKeyDown}/>

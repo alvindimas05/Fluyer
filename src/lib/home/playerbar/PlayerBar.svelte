@@ -8,8 +8,8 @@ import {
 } from "$lib/stores/music";
 import { goto } from "$app/navigation";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
-    import { backgroundIsLight } from "$lib/stores/background";
-    import { isAndroid } from "$lib/platform";
+import { backgroundIsLight } from "$lib/stores/background";
+import { isAndroid } from "$lib/platform";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = isAndroid() ? 0 : 400;

@@ -9,7 +9,7 @@ import MusicController from "$lib/controllers/MusicController";
 import { musicList } from "$lib/stores/music";
 import { isMobile } from "$lib/platform";
 import Intro from "$lib/home/intro/Intro.svelte";
-    import SearchBar from "$lib/searchbar/SearchBar.svelte";
+import SearchBar from "$lib/searchbar/SearchBar.svelte";
 
 if (isMobile()) LoadingController.setLoadingBackground(true);
 

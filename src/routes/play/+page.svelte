@@ -3,7 +3,7 @@ import {
 	musicCurrent,
 	musicIsPlaying,
 	musicProgressValue,
-    musicVolume,
+	musicVolume,
 } from "$lib/stores/music";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
@@ -13,8 +13,8 @@ import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
-    import { backgroundIsLight } from "$lib/stores/background";
-    import { isAndroid } from "$lib/platform";
+import { backgroundIsLight } from "$lib/stores/background";
+import { isAndroid } from "$lib/platform";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = isAndroid() ? 0 : 400;
