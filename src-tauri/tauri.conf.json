@@ -13,14 +13,13 @@
 		"windows": [
 			{
 				"title": "Fluyer",
-				"width": 675,
-				"height": 1200,
+				"width": 1200,
+				"height": 675,
 				"resizable": true,
-				"maximized": true,
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
 				"transparent": true,
-				"shadow": false
+				"visible": false
 			}
 		],
 		"security": {
@@ -29,7 +28,12 @@
 	},
 	"bundle": {
 		"active": true,
-		"targets": ["nsis", "dmg", "deb", "appimage"],
+		"targets": [
+			"nsis",
+			"dmg",
+			"deb",
+			"appimage"
+		],
 		"icon": [
 			"icons/32x32.png",
 			"icons/128x128.png",

@@ -3,22 +3,41 @@ import "animate.css";
 import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 import "../app.scss";
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
-import { isAndroid, isDesktop } from "$lib/platform";
+import { isAndroid, isDesktop, isWindows } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { onMount } from "svelte";
 
 interface Props {
 	children?: import("svelte").Snippet;
 }
 
 let { children }: Props = $props();
-MusicController.handleInitialize();
-getCurrentWindow().show();
+let isAppReady = $state(false);
+
+function initialize(){
+    getCurrentWindow().show();
+    MusicController.handleInitialize();
+    isAppReady = true;
+}
+
+if(isWindows()){
+    onMount(() => {
+        setTimeout(() => {
+            getCurrentWindow().toggleMaximize();
+            initialize();
+        }, 300);
+    });
+} else {
+    initialize();
+}
 </script>
 
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
-<AnimatedBackground />
+{#if isAppReady}
+    <AnimatedBackground />
+{/if}
 <div class="w-screen h-screen fixed scrollbar-hidden">
     {@render children?.()}
 </div>

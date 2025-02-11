@@ -38,12 +38,16 @@ pub fn run() {
         .plugin(tauri_plugin_fluyer::init())
         .setup(|app| {
             let main_window = app.get_webview_window("main").unwrap();
-            #[cfg(windows)]
-            main_window.set_decorations(false).unwrap();
+            #[cfg(windows)]{
+                main_window.set_decorations(false).unwrap();
+                main_window.set_shadow(false).unwrap();
+            }
             #[cfg(target_os = "macos")]{
           		main_window.make_transparent().unwrap();
                 main_window.set_traffic_lights_inset(16.0, 8.0).unwrap();
             }
+            #[cfg(all(desktop, not(windows)))]
+            main_window.maximize().unwrap();
             
             GLOBAL_MAIN_WINDOW.set(main_window).expect("Failed to set GLOBAL_APP_WINDOW");
             init_store(app);
