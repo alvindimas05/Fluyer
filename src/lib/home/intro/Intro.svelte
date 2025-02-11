@@ -40,8 +40,7 @@ function onAnimationEnd() {
                 Please give us the permission to read the musics.
             </p>
             <p class="mt-3">
-                Due to privacy and limtation issues, we will only scan your
-                "Music" directory.
+                We will only scan your Music and Downloads directory.
             </p>
         {:else}
             <p class="font-medium text-3xl">
