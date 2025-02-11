@@ -286,7 +286,7 @@ fn spawn_next_listener(
     receiver_playlist_remove: Receiver<usize>,
     sender_player_playlist: Sender<Vec<String>>,
 ) {
-    let ms_countdown: u64 = 100;
+    let ms_countdown: u64 = 1;
     let mut counter = MUSIC_NEXT_COUNTER.lock().unwrap();
     let mut current_music_duration: u128 = 0;
     loop {
@@ -477,7 +477,7 @@ fn play(
                 });
         }
 
-        thread::sleep(Duration::from_millis(100));
+        // thread::sleep(Duration::from_millis(100));
     }
 }
 
