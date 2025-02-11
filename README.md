@@ -23,7 +23,7 @@ You can grab the latest version of the app below or check the [release page](htt
 - Some features are disabled like animated background to prevent performance issues but it's planned to add option to enable this if you assume that your device can handle it.
 - Sometimes it stops itself when running on background due to android security. Planned to fix this.
 
-## iOS
+### iOS
 - Even though it's already tested, iOS release is not planned for now due to Apple Developer pricing.
 
 ## Features Progress
