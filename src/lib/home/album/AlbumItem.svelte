@@ -11,11 +11,10 @@ interface Props {
 }
 
 let { musicList, index }: Props = $props();
-let music = musicList[0];
+let music = MusicController.sortMusicList(musicList)[0];
 
 const animationDelay = 200;
 let animationClasses = $state("hidden");
-let isSorted = false;
 
 // const spotifyApi = new SpotifyApi();
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
@@ -60,9 +59,9 @@ function setAlbumImageFromCache() {
 
 async function addMusicListAndPlay() {
 	music.image = albumImage;
-	await MusicController.clear();
+	// await MusicController.clear();
 	await MusicController.addMusicList(MusicController.sortMusicList(musicList));
-	MusicController.play(true);
+	MusicController.play();
 }
 
 onMount(() => {
