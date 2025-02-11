@@ -3,6 +3,7 @@ Music Player with Beautiful UI and Cross-Platform.
 ![Preview App](preview.png)
 
 ## Downloads
+Keep in mind that this app is still in beta and has some issues. Scroll below to check.
 You can grab the latest version of the app below or check the [release page](https://github.com/alvindimas05/Fluyer/releases).
 - [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64-setup.exe)
 - [MacOS Intel](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64.dmg)
@@ -13,6 +14,16 @@ You can grab the latest version of the app below or check the [release page](htt
 - [Android armv7](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_armv7.apk) (For older android mobile devices)
 - [Android x86_64](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x86_64.apk) (Usually for chromebooks)
 - [Android i686](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_i686.apk) (Usually for older chromebooks)
+
+## Issues
+
+### Android
+- It has some delay when the Frontend communicate with the Backend. For example, when trying to pause, it will not pause instantly.
+- Some features are disabled like animated background to prevent performance issues but it's planned to add option to enable this if you assume that your device can handle it.
+- Sometimes it stops itself when running on background due to android security. Planned to fix this.
+
+## iOS
+- Even though it's already tested, iOS release is not planned for now due to Apple Developer pricing.
 
 ## Features Progress
 
