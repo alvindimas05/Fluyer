@@ -18,7 +18,7 @@ import type {
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
 import { CommandsRoute } from "$lib/commands";
-import { isDesktop, isIos, isMobile } from "$lib/platform";
+import { isDesktop, isMobile } from "$lib/platform";
 import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
@@ -59,6 +59,7 @@ const MusicController = {
 		MusicController.setStatusBarHeight();
 		MusicController.setNavigationBarHeight();
 		MusicController.handleVolumeChange();
+		MusicController.listenMediaSession();
 	},
 	musicList: () => get(musicList),
 	setMusicList: (value: MusicData[] | null) => musicList.set(value),
@@ -400,6 +401,35 @@ const MusicController = {
 			}
 		});
 	},
+	
+	listenMediaSession: () => {
+        if(!("mediaSession" in navigator) || isMobile()) return;
+        navigator.mediaSession.setActionHandler("play", () => {
+            MusicController.setIsPlaying(false);
+            MusicController.play();
+        });
+        navigator.mediaSession.setActionHandler("pause", () => MusicController.pause());
+        navigator.mediaSession.setActionHandler("nexttrack", () => {
+            MusicController.nextMusic();
+        });
+        musicCurrent.subscribe(MusicController.setMediaSession);
+	}, 
+	setMediaSession: () => {	
+	    const music = get(musicCurrent);
+		if(music === null) return;
+		navigator.mediaSession.metadata = new MediaMetadata({
+		    title: music.title ?? MusicConfig.defaultTitle,
+			artist: MusicController.getFullArtistFromMusic(music),
+			album: music.album ?? MusicConfig.defaultArtist,
+			artwork: music.image ? [ { src: MusicController.getAlbumImageFromMusic(music) } ] : undefined
+		});
+		navigator.mediaSession.setPositionState({
+		    duration: MusicController.currentMusicDuration(),
+			playbackRate: MusicConfig.step,
+			position: 0,
+		});
+		navigator.mediaSession.playbackState = "playing";
+	}
 };
 
 export default MusicController;
