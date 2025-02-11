@@ -1,4 +1,4 @@
-use std::{f32::consts::PI, path::Path};
+use std::path::Path;
 
 #[cfg(target_os = "android")]
 use crate::commands::mobile::check_read_audio_permission;
@@ -89,7 +89,7 @@ fn get_android_audio_dirs() -> Vec<String> {
         format!("{}/Downloads", home_dir).to_string(),
     ];
     
-    dirs.iter().filter(|dir|{
+    dirs.into_iter().filter(|dir|{
         Path::new(dir).exists()
     }).collect()
 }
