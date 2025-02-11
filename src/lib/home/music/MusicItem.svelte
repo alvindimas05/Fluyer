@@ -3,7 +3,6 @@ import { onMount } from "svelte";
 import type { MusicData } from "./types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
-import { isAndroid, isIos, isMacos } from "$lib/platform";
 import { coverArtCaches } from "$lib/stores/coverart";
 
 interface Props {
@@ -16,9 +15,6 @@ let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
 	if (music.image !== null || music.artist == null) return;
-	// const spotifyMusic = await spotifyApi.searchMusic(music);
-	// if (spotifyMusic == null) return;
-	// albumImage = spotifyMusic?.imageUrl;
 	const status = await CoverArt.fromQuery({
 		artist: music.artist!,
 		title: music.title!,
@@ -27,7 +23,7 @@ async function checkAlbumImage() {
 	if (status == CoverArtStatus.Failed) return;
 	if (status == CoverArtStatus.Loading) {
 	    const unlisten = coverArtCaches.subscribe(() => {
-			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 5000);
+			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
 		});
 		return;
 	}
@@ -43,9 +39,10 @@ function setAlbumImageFromCache() {
 		title: music.title!,
 		album: music.album ?? undefined,
 	});
-	if (cache == null) return false;
-	if (cache.status == CoverArtStatus.Failed || cache.image == null) return true;
 
+	if (cache == null || (cache.status == CoverArtStatus.Loading && cache.image == null)) return false;
+	if (cache.status == CoverArtStatus.Failed) return true;
+	
 	albumImage = MusicController.withBase64(cache.image!);
 	return true;
 }

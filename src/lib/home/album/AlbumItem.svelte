@@ -1,12 +1,9 @@
 <script lang="ts">
-import SpotifyApi from "$lib/api/spotify";
 import { onMount } from "svelte";
 import type { MusicData } from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import MusicBrainzApi from "$lib/api/musicbrainz";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
-import { isAndroid, isIos, isMacos } from "$lib/platform";
 
 interface Props {
 	musicList: MusicData[];
@@ -24,11 +21,7 @@ let isSorted = false;
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
-	if (music.image !== null || music.artist == null || music.album == null)
-		return;
-	// const spotifyMusic = await spotifyApi.searchMusic(music);
-	// if (spotifyMusic == null) return;
-	// albumImage = spotifyMusic?.imageUrl;
+	if (music.image !== null || music.artist == null || music.album == null) return;
 	const status = await CoverArt.fromQuery({
 		artist: music.artist!,
 		album: music.album!,
@@ -36,7 +29,7 @@ async function checkAlbumImage() {
 	if (status == CoverArtStatus.Failed) return;
 	if (status == CoverArtStatus.Loading) {
         const unlisten = coverArtCaches.subscribe(() => {
-			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 5000);
+			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
 		});
 		return;
 	}
@@ -49,8 +42,8 @@ function setAlbumImageFromCache() {
 		artist: music.artist!,
 		album: music.album!,
 	});
-	if (cache == null) return false;
-	if (cache.status == CoverArtStatus.Failed || cache.image == null) return true;
+	if (cache == null || (cache.status == CoverArtStatus.Loading && cache.image == null)) return false;
+	if (cache.status == CoverArtStatus.Failed) return true;
 
 	albumImage = MusicController.withBase64(cache.image!);
 	musicList = musicList.map((m) => {
