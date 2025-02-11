@@ -18,7 +18,8 @@ You can grab the latest version of the app below or check the [release page](htt
 ## Issues
 
 ### Android
-- It has some delay when the Frontend communicate with the Backend. For example, when trying to pause, it will not pause instantly.
+- When headset is plugged/unplugged, the app requires restart. This issue is caused due to Rust [cpal](https://github.com/RustAudio/cpal) limitation.
+- The app might has some delay when the Frontend communicate with the Backend. For example, when trying to pause, it might have miliseconds delay.
 - Some features are disabled like animated background to prevent performance issues but it's planned to add option to enable this if you assume that your device can handle it.
 - Sometimes it stops itself when running on background due to android security. Planned to fix this.
 
