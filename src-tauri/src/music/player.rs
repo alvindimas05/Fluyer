@@ -15,7 +15,7 @@ use thread_priority::ThreadPriority;
 #[cfg(windows)]
 use thread_priority::windows::WinAPIThreadPriority;
 
-use crate::{logger, GLOBAL_APP_HANDLE};
+use crate::{logger, platform, GLOBAL_APP_HANDLE};
 
 use super::metadata::MusicMetadata;
 
@@ -520,22 +520,20 @@ fn get_music_player_info(sink: &Sink) -> MusicPlayerInfo {
 // }
 
 fn fade(sink: &Sink, out: bool) {
-    let mut range: Vec<i32> = (1..20).collect();
-    if out {
-        range.reverse();
-    } else {
-        *MUSIC_STATE.lock().unwrap() = MusicState::Play;
-        sink.play();
-    }
-
-    for i in range {
-        sink.set_volume(i as f32 / 20.);
-        thread::sleep(Duration::from_millis(20));
-    }
-
-    if out {
-        *MUSIC_STATE.lock().unwrap() = MusicState::Pause;
-        sink.pause();
+    // Note : Due to delay issues on android. Disable smooth pause and play.
+    if platform::is_desktop() {
+        let mut range: Vec<i32> = (1..20).collect();
+        if out {
+            range.reverse();
+        } else {
+            *MUSIC_STATE.lock().unwrap() = MusicState::Play;
+            sink.play();
+        }
+    
+        for i in range {
+            sink.set_volume(i as f32 / 20.);
+            thread::sleep(Duration::from_millis(20));
+        }
     }
 
     if out {

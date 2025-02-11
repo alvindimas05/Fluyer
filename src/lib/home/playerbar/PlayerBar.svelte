@@ -9,9 +9,10 @@ import {
 import { goto } from "$app/navigation";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
     import { backgroundIsLight } from "$lib/stores/background";
+    import { isAndroid } from "$lib/platform";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
-let pauseDelay = 400;
+let pauseDelay = isAndroid() ? 0 : 400;
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
 let albumImage = $state(MusicConfig.defaultAlbumImage);

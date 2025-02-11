@@ -14,9 +14,10 @@ import {
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
     import { backgroundIsLight } from "$lib/stores/background";
+    import { isAndroid } from "$lib/platform";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
-let pauseDelay = 400;
+let pauseDelay = isAndroid() ? 0 : 400;
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
 let progressDurationText = $state(MusicController.progressDurationText());

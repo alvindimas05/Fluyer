@@ -105,13 +105,13 @@ musicCurrent.subscribe(() => !isMobile() && getColors());
 				alt="Background"
 			/>
 		</div>
-		<div class="bg-blur-heart">
+		<!-- <div class="bg-blur-heart">
 			<img
 				class="bg-blur-colors object-cover"
 				src="/images/mobile-background.png"
 				alt="Background"
 			/>
-		</div>
+		</div> -->
 	</div>
 {:else}
 	<div
