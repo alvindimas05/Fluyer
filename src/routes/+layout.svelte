@@ -27,7 +27,7 @@ if(isWindows()){
         setTimeout(() => {
             getCurrentWindow().toggleMaximize();
             initialize();
-        }, 300);
+        }, 1000);
     });
 } else {
     initialize();
