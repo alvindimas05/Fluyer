@@ -5,7 +5,7 @@ use rodio::Sink;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
-use std::sync::Mutex;
+use std::sync::{Mutex, OnceLock};
 use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
@@ -19,7 +19,7 @@ use crate::{logger, platform, GLOBAL_APP_HANDLE};
 
 use super::metadata::MusicMetadata;
 
-#[derive(Clone, Copy, Debug, Default, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum MusicCommand {
     #[default]
@@ -61,6 +61,7 @@ pub struct MusicPlayerSync {
     skip: u8,
 }
 
+pub static GLOBAL_MUSIC_SINK: OnceLock<Sink> = OnceLock::new();
 // Bunch of music paths
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
 static MUSIC_IS_BACKGROUND: Mutex<bool> = Mutex::new(false);
@@ -87,6 +88,10 @@ impl MusicPlayer {
             "clear" => MusicCommand::Clear,
             _ => MusicCommand::None,
         };
+        if _command == MusicCommand::Play || _command == MusicCommand::Pause {
+            music_play_pause(_command == MusicCommand::Pause);
+            return Ok(())
+        }
         self.command.send(_command)
     }
     pub fn set_pos(&mut self, position: u64) -> Result<(), SendError<Duration>> {
@@ -400,8 +405,10 @@ fn play(
 ) {
     let stream_handle =
         rodio::OutputStreamBuilder::open_default_stream().expect("Failed to open default stream");
-    let sink = rodio::Sink::connect_new(&stream_handle.mixer());
+    // let sink = rodio::Sink::connect_new(&stream_handle.mixer());
+    GLOBAL_MUSIC_SINK.set(rodio::Sink::connect_new(&stream_handle.mixer())).ok();
 
+    let sink = GLOBAL_MUSIC_SINK.get().unwrap();
     if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
         sink.pause();
     }
@@ -416,11 +423,11 @@ fn play(
             match cmd {
                 MusicCommand::Pause => {
                     // state = MusicState::Paused;
-                    fade(&sink, true);
+                    // fade(&sink, true);
                 }
                 MusicCommand::Play => {
                     // state = MusicState::Playing;
-                    fade(&sink, false);
+                    // fade(&sink, false);
                 }
                 MusicCommand::Next => {
                     sender_next.send(()).expect("Failed to send sender_next");
@@ -519,7 +526,8 @@ fn get_music_player_info(sink: &Sink) -> MusicPlayerInfo {
 //     }
 // }
 
-fn fade(sink: &Sink, out: bool) {
+pub fn player_play_pause(out: bool) {
+    let sink = GLOBAL_MUSIC_SINK.get().unwrap();
     // Note : Due to delay issues on android. Disable smooth pause and play.
     if platform::is_desktop() {
         let mut range: Vec<i32> = (1..20).collect();
