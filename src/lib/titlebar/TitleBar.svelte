@@ -48,8 +48,12 @@ window.onResized(async (_) => {
             <button class="tb-button" 
                 onmouseenter={handleMaximizeMouseEnter}
                 onmouseleave={handleMaximizeMouseLeave}
-                onclick={() => window.maximize()}>
-                &#59682;
+                onclick={() => window.toggleMaximize()}>
+                {#if isMaximized}
+                    &#59683;
+                {:else}
+                    &#59682;
+                {/if}
             </button>
             <button class="tb-button" 
                 onclick={() => window.close()}>
