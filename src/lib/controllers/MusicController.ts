@@ -59,7 +59,7 @@ const MusicController = {
 		MusicController.setStatusBarHeight();
 		MusicController.setNavigationBarHeight();
 		MusicController.handleVolumeChange();
-		MusicController.listenMediaSession();
+		// MusicController.listenMediaSession();
 	},
 	musicList: () => get(musicList),
 	setMusicList: (value: MusicData[] | null) => musicList.set(value),
@@ -412,6 +412,8 @@ const MusicController = {
         navigator.mediaSession.setActionHandler("nexttrack", () => {
             MusicController.nextMusic();
         });
+        navigator.mediaSession.setActionHandler("previoustrack", () => {});
+        navigator.mediaSession.setActionHandler("seekto", () => {});
         musicCurrent.subscribe(MusicController.setMediaSession);
 	}, 
 	setMediaSession: () => {	
@@ -419,9 +421,16 @@ const MusicController = {
 		if(music === null) return;
 		navigator.mediaSession.metadata = new MediaMetadata({
 		    title: music.title ?? MusicConfig.defaultTitle,
-			artist: MusicController.getFullArtistFromMusic(music),
+			// artist: MusicController.getFullArtistFromMusic(music),
 			album: music.album ?? MusicConfig.defaultArtist,
-			artwork: music.image ? [ { src: MusicController.getAlbumImageFromMusic(music) } ] : undefined
+			artwork: music.image ? [
+                { src: MusicController.getAlbumImageFromMusic(music), sizes: "96x96", type: "image/png" },
+                { src: MusicController.getAlbumImageFromMusic(music), sizes: "128x128", type: "image/png" },
+                { src: MusicController.getAlbumImageFromMusic(music), sizes: "192x192", type: "image/png" },
+                { src: MusicController.getAlbumImageFromMusic(music), sizes: "256x256", type: "image/png" },
+                { src: MusicController.getAlbumImageFromMusic(music), sizes: "384x384", type: "image/png" },
+			    { src: MusicController.getAlbumImageFromMusic(music), sizes: "512x512", type: "image/png" },
+			] : undefined
 		});
 		navigator.mediaSession.setPositionState({
 		    duration: MusicController.currentMusicDuration(),
