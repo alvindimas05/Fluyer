@@ -53,7 +53,7 @@ pub static GLOBAL_MUSIC_SINK: OnceLock<Sink> = OnceLock::new();
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
 static MUSIC_IS_BACKGROUND: AtomicBool = AtomicBool::new(false);
 static MUSIC_BACKGROUND_COUNT: AtomicU8 = AtomicU8::new(0);
-static MUSIC_STATE: Mutex<MusicState> = Mutex::new(MusicState::Play);
+static MUSIC_IS_PLAYING: AtomicBool = AtomicBool::new(true);
 static MUSIC_CURRENT_INDEX: AtomicUsize = AtomicUsize::new(0);
 
 impl MusicPlayer {
@@ -68,7 +68,7 @@ impl MusicPlayer {
                 .ok();
 
             let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-            if MUSIC_STATE.lock().unwrap().eq(&MusicState::Pause) {
+            if MUSIC_IS_PLAYING.load(Ordering::SeqCst) {
                 sink.pause();
             }
             MusicPlayer::start_playback_monitor();
@@ -180,7 +180,7 @@ impl MusicPlayer {
             if out {
                 range.reverse();
             } else {
-                *MUSIC_STATE.lock().unwrap() = MusicState::Play;
+                MUSIC_IS_PLAYING.store(true, Ordering::SeqCst);
                 sink.play();
             }
 
@@ -191,10 +191,10 @@ impl MusicPlayer {
         }
 
         if out {
-            *MUSIC_STATE.lock().unwrap() = MusicState::Pause;
+            MUSIC_IS_PLAYING.store(false, Ordering::SeqCst);
             sink.pause();
         } else {
-            *MUSIC_STATE.lock().unwrap() = MusicState::Play;
+            MUSIC_IS_PLAYING.store(true, Ordering::SeqCst);
             sink.play();
         }
     }
