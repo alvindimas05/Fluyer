@@ -8,7 +8,7 @@ use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
 
-use crate::{logger, platform, GLOBAL_APP_HANDLE};
+use crate::{platform, GLOBAL_APP_HANDLE};
 
 use super::metadata::MusicMetadata;
 
@@ -248,17 +248,15 @@ pub fn handle_music_player_background() {
             .fluyer()
             .watch_state(move |payload| {
                 let is_resuming = matches!(payload.value, WatcherStateType::Resume);
-                let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
                 MUSIC_IS_BACKGROUND.store(!is_resuming, Ordering::SeqCst);
 
                 if is_resuming {
-                    let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
                     app_handle
                         .emit(
                             crate::commands::route::MUSIC_PLAYER_SYNC,
                             MusicPlayerSync {
-                                skip: *count,
-                                info: sink_get_player_info(),
+                                skip: MUSIC_BACKGROUND_COUNT.load(Ordering::SeqCst),
+                                info: MusicPlayer::get_info(),
                             },
                         )
                         .expect("Failed to sync music player");
@@ -284,7 +282,7 @@ pub fn handle_headset_change(/* sender_sink_reset: Sender<bool> */) {
                 .get()
                 .unwrap()
                 .emit(crate::commands::route::MUSIC_HEADSET_CHANGE, ())
-                .ok()
+                .ok();
         })
         .expect("Failed to watch headset change");
 }

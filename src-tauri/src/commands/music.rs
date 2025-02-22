@@ -11,7 +11,8 @@ use tauri_plugin_dialog::DialogExt;
 use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
 
 use crate::{
-    logger, music::{metadata::MusicMetadata, player::MusicPlayer}, AppState
+    music::{metadata::MusicMetadata, player::MusicPlayer},
+    AppState,
 };
 
 pub static STORE_PATH_NAME: &str = "music-path";
@@ -41,9 +42,7 @@ pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
 #[tauri::command]
 pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<String>) {
     let mut state = state.lock().unwrap();
-    state
-        .music_player
-        .add_playlist(playlist);
+    state.music_player.add_playlist(playlist);
 }
 
 #[cfg(desktop)]
