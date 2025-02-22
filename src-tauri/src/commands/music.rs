@@ -33,12 +33,11 @@ pub fn music_position_set(state: State<'_, Mutex<AppState>>, position: u64) {
 }
 
 #[tauri::command]
-pub fn music_get_info(state: State<'_, Mutex<AppState>>) {
+pub fn music_get_info(state: State<'_, Mutex<AppState>>) -> crate::music::player::MusicPlayerInfo {
     let mut state = state.lock().unwrap();
     state
         .music_player
         .get_info()
-        .expect("Failed to get music player position");
 }
 
 #[tauri::command]

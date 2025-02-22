@@ -19,4 +19,5 @@ export interface MusicPlayerInfo {
 
 export interface MusicPlayerSync {
 	skip: number;
+	info: MusicPlayerInfo;
 }

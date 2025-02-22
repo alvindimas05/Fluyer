@@ -42,7 +42,6 @@ pub struct MusicPlayer {
     command: Sender<MusicCommand>,
     position: Sender<Duration>,
     playlist: Sender<Vec<String>>,
-    info: Sender<()>,
     playlist_remove: Sender<usize>,
     volume: Sender<f32>
 }
@@ -59,6 +58,7 @@ pub struct MusicPlayerInfo {
 #[serde(rename_all = "camelCase")]
 pub struct MusicPlayerSync {
     skip: u8,
+    info: MusicPlayerInfo
 }
 
 pub static GLOBAL_MUSIC_SINK: OnceLock<Sink> = OnceLock::new();
@@ -75,9 +75,8 @@ impl MusicPlayer {
             command: music_spawn.0,
             position: music_spawn.1,
             playlist: music_spawn.2,
-            info: music_spawn.3,
-            playlist_remove: music_spawn.4,
-            volume: music_spawn.5,
+            playlist_remove: music_spawn.3,
+            volume: music_spawn.4,
         }
     }
     pub fn send_command(&mut self, command: String) -> Result<(), SendError<MusicCommand>> {
@@ -88,17 +87,18 @@ impl MusicPlayer {
             "clear" => MusicCommand::Clear,
             _ => MusicCommand::None,
         };
-        if _command == MusicCommand::Play || _command == MusicCommand::Pause {
-            music_play_pause(_command == MusicCommand::Pause);
-            return Ok(())
+        sink_play_pause(_command == MusicCommand::Play)
+        if _command == MusicCommand::Clear {
+            
         }
+        
         self.command.send(_command)
     }
     pub fn set_pos(&mut self, position: u64) -> Result<(), SendError<Duration>> {
         self.position.send(Duration::from_millis(position))
     }
-    pub fn get_info(&mut self) -> Result<(), SendError<()>> {
-        self.info.send(())
+    pub fn get_info(&mut self) -> MusicPlayerInfo {
+        sink_get_player_info()
     }
     pub fn add_playlist(&mut self, playlist: Vec<String>) -> Result<(), SendError<Vec<String>>> {
         self.playlist.send(playlist)
@@ -111,7 +111,7 @@ impl MusicPlayer {
     }
 }
 
-pub fn handle_music_player_background(sender_sync_info: Sender<()>) {
+pub fn handle_music_player_background() {
     #[cfg(desktop)]{
         use tauri::Listener;
         use crate::GLOBAL_MAIN_WINDOW;
@@ -125,10 +125,12 @@ pub fn handle_music_player_background(sender_sync_info: Sender<()>) {
                 .unwrap()
                 .emit(
                     crate::commands::route::MUSIC_PLAYER_SYNC,
-                    MusicPlayerSync { skip: *count },
+                    MusicPlayerSync {
+                        skip: *count,
+                        info: sink_get_player_info()
+                    },
                 )
                 .expect("Failed to sync music player");
-            sender_sync_info.send(()).unwrap();
             *count = 0;
         });
 
@@ -156,7 +158,10 @@ pub fn handle_music_player_background(sender_sync_info: Sender<()>) {
                     app_handle
                         .emit(
                             crate::commands::route::MUSIC_PLAYER_SYNC,
-                            MusicPlayerSync { skip: *count },
+                            MusicPlayerSync {
+                                skip: *count,
+                                info: sink_get_player_info()
+                            },
                         )
                         .expect("Failed to sync music player");
                     sender_sync_info.send(()).unwrap();
@@ -197,13 +202,11 @@ fn spawn() -> (
     Sender<MusicCommand>,
     Sender<Duration>,
     Sender<Vec<String>>,
-    Sender<()>,
     Sender<usize>,
     Sender<f32>,
 ) {
     let (sender_command, receiver_command) = unbounded();
     let (sender_position, receiver_position) = unbounded();
-    let (sender_info, receiver_info) = unbounded();
 
     let (sender_next, receiver_next) = unbounded();
     let (sender_next_playlist, receiver_next_playlist) = unbounded();
@@ -213,9 +216,8 @@ fn spawn() -> (
     let (sender_playlist_remove, receiver_playlist_remove) = unbounded();
     let (sender_volume, receiver_volume) = unbounded();
     // let (sender_sink_reset, receiver_sink_reset) = unbounded();
-    let (sender_sync_info, receiver_sync_info) = unbounded();
     
-    handle_music_player_background(sender_sync_info);
+    handle_music_player_background();
 
     ThreadBuilder::default()
         .name("Music Player Next")
@@ -231,27 +233,27 @@ fn spawn() -> (
         })
         .expect("Failed to create music next thread");
 
-    #[cfg(windows)]
-    ThreadBuilder::default()
-        .name("Music Player")
-        .winapi_priority(WinAPIThreadPriority::TimeCritical)
-        .spawn_careless(move || {
-            play(
-                receiver_command,
-                receiver_position,
-                receiver_player_playlist,
-                receiver_info,
-                receiver_volume,
-                receiver_sync_info,
-                // receiver_sink_reset,
-                sender_next,
-                sender_next_position,
-                sender_clear,
-            );
-        })
-        .expect("Failed to create music thread");
+    // #[cfg(windows)]
+    // ThreadBuilder::default()
+    //     .name("Music Player")
+    //     .winapi_priority(WinAPIThreadPriority::TimeCritical)
+    //     .spawn_careless(move || {
+    //         play(
+    //             receiver_command,
+    //             receiver_position,
+    //             receiver_player_playlist,
+    //             receiver_info,
+    //             receiver_volume,
+    //             receiver_sync_info,
+    //             // receiver_sink_reset,
+    //             sender_next,
+    //             sender_next_position,
+    //             sender_clear,
+    //         );
+    //     })
+    //     .expect("Failed to create music thread");
 
-    #[cfg(not(windows))]
+    // #[cfg(not(windows))]
     ThreadBuilder::default()
         .name("Music Player")
         .priority(ThreadPriority::Max)
@@ -260,9 +262,7 @@ fn spawn() -> (
                 receiver_command,
                 receiver_position,
                 receiver_player_playlist,
-                receiver_info,
                 receiver_volume,
-                receiver_sync_info,
                 // receiver_sink_reset,
                 sender_next,
                 sender_next_position,
@@ -274,7 +274,6 @@ fn spawn() -> (
         sender_command,
         sender_position,
         sender_next_playlist,
-        sender_info,
         sender_playlist_remove,
         sender_volume
     )
@@ -395,9 +394,7 @@ fn play(
     receiver_command: Receiver<MusicCommand>,
     receiver_position: Receiver<Duration>,
     receiver_player_playlist: Receiver<Vec<String>>,
-    receiver_info: Receiver<()>,
     receiver_volume: Receiver<f32>,
-    receiver_sync_info: Receiver<()>,
     // receiver_sink_reset: Receiver<bool>,
     sender_next: Sender<()>,
     sender_next_position: Sender<Duration>,
@@ -471,19 +468,6 @@ fn play(
             }
         }
 
-        if receiver_info.try_recv().is_ok() || receiver_sync_info.try_recv().is_ok() {
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
-                .emit(
-                    crate::commands::route::MUSIC_GET_INFO,
-                    get_music_player_info(&sink),
-                )
-                .unwrap_or_else(|_| {
-                    logger::error!("Failed to emit {}", crate::commands::route::MUSIC_GET_INFO)
-                });
-        }
-
         // thread::sleep(Duration::from_millis(100));
     }
 }
@@ -510,7 +494,8 @@ fn sink_add_music(sink: &Sink, path: String) {
 //     .expect("Failed to seek latest music");
 // }
 
-fn get_music_player_info(sink: &Sink) -> MusicPlayerInfo {
+fn sink_get_player_info() -> MusicPlayerInfo {
+    let sink = GLOBAL_MUSIC_SINK.get().unwrap();
     MusicPlayerInfo {
         current_position: sink.get_pos().as_millis(),
         is_playing: !sink.is_paused(),
@@ -526,7 +511,7 @@ fn get_music_player_info(sink: &Sink) -> MusicPlayerInfo {
 //     }
 // }
 
-pub fn player_play_pause(out: bool) {
+pub fn sink_play_pause(out: bool) {
     let sink = GLOBAL_MUSIC_SINK.get().unwrap();
     // Note : Due to delay issues on android. Disable smooth pause and play.
     if platform::is_desktop() {
