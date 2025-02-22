@@ -171,8 +171,7 @@ pub fn handle_music_player_background() {
 }
 
 #[cfg(target_os = "android")]
-pub fn handle_headset_change(// sender_sink_reset: Sender<bool>
-) {
+pub fn handle_headset_change(/* sender_sink_reset: Sender<bool> */) {
     use tauri_plugin_fluyer::FluyerExt;
     GLOBAL_APP_HANDLE
         .get()
@@ -272,7 +271,6 @@ fn spawn() -> (
         sender_playlist_remove,
     )
 }
-
 
 
 static MUSIC_NEXT_COUNTER: Mutex<i128> = Mutex::new(0);
