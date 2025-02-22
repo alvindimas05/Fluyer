@@ -10,34 +10,28 @@ use tauri_plugin_dialog::DialogExt;
 #[cfg(desktop)]
 use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
 
-use crate::{logger, music::metadata::MusicMetadata, AppState};
+use crate::{
+    music::{metadata::MusicMetadata, player::MusicPlayer},
+    AppState,
+};
 
 pub static STORE_PATH_NAME: &str = "music-path";
 
 #[tauri::command]
 pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String) {
     let mut state = state.lock().unwrap();
-    state
-        .music_player
-        .send_command(command.clone())
-        .unwrap_or_else(|_| logger::error!("Failed to send command {}", command));
+    state.music_player.send_command(command.clone());
 }
 
 #[tauri::command]
 pub fn music_position_set(state: State<'_, Mutex<AppState>>, position: u64) {
     let mut state = state.lock().unwrap();
-    state
-        .music_player
-        .set_pos(position)
-        .expect("Failed to set music player position");
+    state.music_player.set_pos(position);
 }
 
 #[tauri::command]
-pub fn music_get_info(state: State<'_, Mutex<AppState>>) -> crate::music::player::MusicPlayerInfo {
-    let mut state = state.lock().unwrap();
-    state
-        .music_player
-        .get_info()
+pub fn music_get_info() -> crate::music::player::MusicPlayerInfo {
+    MusicPlayer::get_info()
 }
 
 #[tauri::command]
@@ -50,8 +44,7 @@ pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<Strin
     let mut state = state.lock().unwrap();
     state
         .music_player
-        .add_playlist(playlist)
-        .expect("Failed to set playlist");
+        .add_playlist(playlist);
 }
 
 #[cfg(desktop)]
@@ -85,13 +78,13 @@ pub fn music_request_directory(app: AppHandle) {
 }
 
 #[tauri::command]
-pub fn music_playlist_remove(state: State<'_, Mutex<AppState>>, index: usize){
+pub fn music_playlist_remove(state: State<'_, Mutex<AppState>>, index: usize) {
     let mut state = state.lock().unwrap();
-    state.music_player.remove_playlist(index).expect("Failed to remove playlist")
+    state.music_player.remove_playlist(index);
 }
 
 #[tauri::command]
-pub fn music_set_volume(state: State<'_, Mutex<AppState>>, volume: f32){
+pub fn music_set_volume(state: State<'_, Mutex<AppState>>, volume: f32) {
     let mut state = state.lock().unwrap();
     state.music_player.set_volume(volume);
 }
