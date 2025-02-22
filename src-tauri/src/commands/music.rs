@@ -11,8 +11,7 @@ use tauri_plugin_dialog::DialogExt;
 use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
 
 use crate::{
-    music::{metadata::MusicMetadata, player::MusicPlayer},
-    AppState,
+    logger, music::{metadata::MusicMetadata, player::MusicPlayer}, AppState
 };
 
 pub static STORE_PATH_NAME: &str = "music-path";

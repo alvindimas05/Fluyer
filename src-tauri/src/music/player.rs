@@ -55,6 +55,7 @@ static MUSIC_IS_BACKGROUND: AtomicBool = AtomicBool::new(false);
 static MUSIC_BACKGROUND_COUNT: AtomicU8 = AtomicU8::new(0);
 static MUSIC_IS_PLAYING: AtomicBool = AtomicBool::new(true);
 static MUSIC_CURRENT_INDEX: AtomicUsize = AtomicUsize::new(0);
+static MUSIC_IGNORE_NEXT: AtomicBool = AtomicBool::new(true);
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
@@ -141,7 +142,9 @@ impl MusicPlayer {
                 let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
                 GLOBAL_MUSIC_SINK.get().unwrap().append(source);
 
-                if current_idx > 0 {
+                if MUSIC_IGNORE_NEXT.load(Ordering::SeqCst) {
+                    MUSIC_IGNORE_NEXT.store(false, Ordering::SeqCst);
+                } else {
                     GLOBAL_APP_HANDLE
                         .get()
                         .unwrap()
@@ -149,6 +152,9 @@ impl MusicPlayer {
                         .ok();
                 }
                 MUSIC_CURRENT_INDEX.store(current_idx + 1, Ordering::SeqCst);
+                if MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) >= playlist.len() {
+                    MUSIC_IGNORE_NEXT.store(true, Ordering::SeqCst);
+                }
             }
         }
     }
