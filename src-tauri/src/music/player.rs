@@ -2,6 +2,7 @@ use rodio::Sink;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
+use std::sync::atomic::{AtomicBool, AtomicU8, AtomicUsize, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::thread;
 use std::time::Duration;
@@ -50,11 +51,10 @@ pub struct MusicPlayerSync {
 pub static GLOBAL_MUSIC_SINK: OnceLock<Sink> = OnceLock::new();
 // Bunch of music paths
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
-static MUSIC_IS_BACKGROUND: Mutex<bool> = Mutex::new(false);
-static MUSIC_BACKGROUND_COUNT: Mutex<u8> = Mutex::new(0);
+static MUSIC_IS_BACKGROUND: AtomicBool = AtomicBool::new(false);
+static MUSIC_BACKGROUND_COUNT: AtomicU8 = AtomicU8::new(0);
 static MUSIC_STATE: Mutex<MusicState> = Mutex::new(MusicState::Play);
-static MUSIC_CURRENT_INDEX: Mutex<usize> = Mutex::new(0);
-static MUSIC_CURRENT_INDEX: Mutex<usize> = Mutex::new(0);
+static MUSIC_CURRENT_INDEX: AtomicUsize = AtomicUsize::new(0);
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
@@ -134,7 +134,7 @@ impl MusicPlayer {
 
     fn next() {
         let playlist = MUSIC_PLAYLIST.lock().unwrap();
-        let current_idx = *MUSIC_CURRENT_INDEX.lock().unwrap();
+        let current_idx = MUSIC_CURRENT_INDEX.load(Ordering::SeqCst);
 
         if let Some(music) = playlist.get(current_idx) {
             if let Ok(file) = File::open(music.path.clone()) {
@@ -148,8 +148,7 @@ impl MusicPlayer {
                         .emit(crate::commands::route::MUSIC_PLAYER_NEXT, ())
                         .ok();
                 }
-                *MUSIC_CURRENT_INDEX.lock().unwrap() += 1;
-                logger::debug!("Current music index is {}", MUSIC_CURRENT_INDEX.lock().unwrap());
+                MUSIC_CURRENT_INDEX.store(current_idx + 1, Ordering::SeqCst);
             }
         }
     }
@@ -211,29 +210,26 @@ pub fn handle_music_player_background() {
             .get()
             .unwrap()
             .listen("tauri://focus", move |_| {
-                let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
-                *state = false;
-                let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
+                MUSIC_IS_BACKGROUND.store(false, Ordering::SeqCst);
                 GLOBAL_APP_HANDLE
                     .get()
                     .unwrap()
                     .emit(
                         crate::commands::route::MUSIC_PLAYER_SYNC,
                         MusicPlayerSync {
-                            skip: *count,
+                            skip: MUSIC_BACKGROUND_COUNT.load(Ordering::SeqCst),
                             info: MusicPlayer::get_info(),
                         },
                     )
                     .expect("Failed to sync music player");
-                *count = 0;
+                MUSIC_BACKGROUND_COUNT.store(0, Ordering::SeqCst);
             });
 
         GLOBAL_MAIN_WINDOW
             .get()
             .unwrap()
             .listen("tauri://blur", |_| {
-                let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
-                *state = true;
+                MUSIC_IS_BACKGROUND.store(true, Ordering::SeqCst);
             });
     }
     #[cfg(target_os = "android")]
@@ -247,7 +243,7 @@ pub fn handle_music_player_background() {
             .watch_state(move |payload| {
                 let is_resuming = matches!(payload.value, WatcherStateType::Resume);
                 let mut state = MUSIC_IS_BACKGROUND.lock().unwrap();
-                *state = !is_resuming;
+                MUSIC_IS_BACKGROUND.store(!is_resuming, Ordering::SeqCst);
 
                 if is_resuming {
                     let mut count = MUSIC_BACKGROUND_COUNT.lock().unwrap();
@@ -260,8 +256,7 @@ pub fn handle_music_player_background() {
                             },
                         )
                         .expect("Failed to sync music player");
-                    sender_sync_info.send(()).unwrap();
-                    *count = 0;
+                    MUSIC_BACKGROUND_COUNT.store(0, Ordering::SeqCst);
                 }
             })
             .expect("Failed to watch app state");
@@ -283,12 +278,7 @@ pub fn handle_headset_change(/* sender_sink_reset: Sender<bool> */) {
                 .get()
                 .unwrap()
                 .emit(crate::commands::route::MUSIC_HEADSET_CHANGE, ())
-                .unwrap_or_else(|_| {
-                    logger::error!(
-                        "Failed to emit {}",
-                        crate::commands::route::MUSIC_HEADSET_CHANGE
-                    )
-                });
+                .ok()
         })
         .expect("Failed to watch headset change");
 }
