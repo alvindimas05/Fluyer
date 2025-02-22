@@ -191,9 +191,6 @@ const MusicController = {
                 MusicController.pause();
                 return;
             }
-            if (nextMusics.length > 1) {
-                MusicController.addMusicToPlayList(nextMusics[1].path);
-            }
             MusicController.removeFirstNextMusics();
             MusicController.setIsPlaying(true);
         });
