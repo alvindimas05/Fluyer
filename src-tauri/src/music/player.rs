@@ -21,8 +21,6 @@ pub enum MusicCommand {
     Play,
     Next,
     Clear,
-    // WeakPause,
-    // WeakPlay,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -49,17 +47,15 @@ pub struct MusicPlayerSync {
 }
 
 pub static GLOBAL_MUSIC_SINK: OnceLock<Sink> = OnceLock::new();
-// Bunch of music paths
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
 static MUSIC_IS_BACKGROUND: AtomicBool = AtomicBool::new(false);
 static MUSIC_BACKGROUND_COUNT: AtomicU8 = AtomicU8::new(0);
-static MUSIC_IS_PLAYING: AtomicBool = AtomicBool::new(true);
 static MUSIC_CURRENT_INDEX: AtomicUsize = AtomicUsize::new(0);
 static MUSIC_IGNORE_NEXT: AtomicBool = AtomicBool::new(true);
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
-        // handle_music_player_background();
+        handle_music_player_background();
 
         thread::spawn(|| {
             let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
@@ -68,10 +64,6 @@ impl MusicPlayer {
                 .set(rodio::Sink::connect_new(&stream_handle.mixer()))
                 .ok();
 
-            let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-            if MUSIC_IS_PLAYING.load(Ordering::SeqCst) {
-                sink.pause();
-            }
             MusicPlayer::start_playback_monitor();
             thread::sleep(Duration::from_secs(99999));
         });
@@ -95,9 +87,9 @@ impl MusicPlayer {
             GLOBAL_MUSIC_SINK.get().unwrap().clear();
             return;
         }
-
+        
         if _command == MusicCommand::Next {
-            MusicPlayer::next();
+            GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
             return;
         }
     }
@@ -186,7 +178,6 @@ impl MusicPlayer {
             if out {
                 range.reverse();
             } else {
-                MUSIC_IS_PLAYING.store(true, Ordering::SeqCst);
                 sink.play();
             }
 
@@ -197,10 +188,8 @@ impl MusicPlayer {
         }
 
         if out {
-            MUSIC_IS_PLAYING.store(false, Ordering::SeqCst);
             sink.pause();
         } else {
-            MUSIC_IS_PLAYING.store(true, Ordering::SeqCst);
             sink.play();
         }
     }
