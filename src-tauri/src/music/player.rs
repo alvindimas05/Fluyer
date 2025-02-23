@@ -171,14 +171,6 @@ impl MusicPlayer {
         }
     }
 
-    fn initialize_sink() {
-        let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-            .expect("Failed to open default stream");
-        GLOBAL_MUSIC_SINK
-            .set(rodio::Sink::connect_new(&stream_handle.mixer()))
-            .ok();
-    }
-
     pub fn start_playback_monitor() {
         loop {
             let should_play_next = {
