@@ -7,6 +7,9 @@ use std::sync::{Mutex, OnceLock};
 use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
+#[cfg(windows)]
+use thread_priority::windows::WinAPIThreadPriority;
+use thread_priority::{ThreadBuilder, ThreadPriority, ThreadSchedulePolicy};
 
 use crate::{platform, GLOBAL_APP_HANDLE};
 
@@ -57,16 +60,39 @@ impl MusicPlayer {
     pub fn spawn() -> Self {
         handle_music_player_background();
 
-        thread::spawn(|| {
-            let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-                .expect("Failed to open default stream");
-            GLOBAL_MUSIC_SINK
-                .set(rodio::Sink::connect_new(&stream_handle.mixer()))
-                .ok();
+        #[cfg(windows)]
+        ThreadBuilder::default()
+            .name("Music Player")
+            .winapi_priority(WinAPIThreadPriority::TimeCritical)
+            .spawn(|| {
+                MusicPlayer::initialize_sink();
+                MusicPlayer::start_playback_monitor();
+            })
+            .ok();
 
-            MusicPlayer::start_playback_monitor();
-            thread::sleep(Duration::from_secs(99999));
-        });
+        #[cfg(any(target_os = "linux", target_os = "android"))]
+        ThreadBuilder::default()
+            .name("Music Player")
+            .policy(ThreadSchedulePolicy::Realtime(
+                thread_priority::RealtimeThreadSchedulePolicy::Deadline,
+            ))
+            .spawn(|| {
+                MusicPlayer::initialize_sink();
+                MusicPlayer::start_playback_monitor();
+            })
+            .ok();
+
+        #[cfg(target_os = "macos", target_os = "ios")]
+        ThreadBuilder::default()
+            .name("Music Player")
+            .policy(ThreadSchedulePolicy::Realtime(
+                thread_priority::RealtimeThreadSchedulePolicy::Fifo,
+            ))
+            .spawn(|| {
+                MusicPlayer::initialize_sink();
+                MusicPlayer::start_playback_monitor();
+            })
+            .ok();
 
         Self {}
     }
@@ -87,7 +113,7 @@ impl MusicPlayer {
             GLOBAL_MUSIC_SINK.get().unwrap().clear();
             return;
         }
-        
+
         if _command == MusicCommand::Next {
             GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
             return;
@@ -151,8 +177,16 @@ impl MusicPlayer {
         }
     }
 
+    fn initialize_sink() {
+        let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
+            .expect("Failed to open default stream");
+        GLOBAL_MUSIC_SINK
+            .set(rodio::Sink::connect_new(&stream_handle.mixer()))
+            .ok();
+    }
+
     pub fn start_playback_monitor() {
-        thread::spawn(|| loop {
+        loop {
             let should_play_next = {
                 let sink = GLOBAL_MUSIC_SINK.get().unwrap();
                 sink.empty() && !sink.is_paused()
@@ -163,7 +197,7 @@ impl MusicPlayer {
             }
 
             thread::sleep(Duration::from_millis(100));
-        });
+        }
     }
 
     pub fn set_volume(&mut self, volume: f32) {
