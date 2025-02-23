@@ -9,7 +9,7 @@ use std::time::Duration;
 use tauri::Emitter;
 #[cfg(windows)]
 use thread_priority::windows::WinAPIThreadPriority;
-use thread_priority::{ThreadBuilder, ThreadPriority, ThreadSchedulePolicy};
+use thread_priority::{ThreadBuilder, ThreadSchedulePolicy};
 
 use crate::{platform, GLOBAL_APP_HANDLE};
 
@@ -64,7 +64,7 @@ impl MusicPlayer {
         ThreadBuilder::default()
             .name("Music Player")
             .winapi_priority(WinAPIThreadPriority::TimeCritical)
-            .spawn(|| {
+            .spawn(|_| {
                 MusicPlayer::initialize_sink();
                 MusicPlayer::start_playback_monitor();
             })
@@ -76,19 +76,19 @@ impl MusicPlayer {
             .policy(ThreadSchedulePolicy::Realtime(
                 thread_priority::RealtimeThreadSchedulePolicy::Deadline,
             ))
-            .spawn(|| {
+            .spawn(|_| {
                 MusicPlayer::initialize_sink();
                 MusicPlayer::start_playback_monitor();
             })
             .ok();
 
-        #[cfg(target_os = "macos", target_os = "ios")]
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
         ThreadBuilder::default()
             .name("Music Player")
             .policy(ThreadSchedulePolicy::Realtime(
                 thread_priority::RealtimeThreadSchedulePolicy::Fifo,
             ))
-            .spawn(|| {
+            .spawn(|_| {
                 MusicPlayer::initialize_sink();
                 MusicPlayer::start_playback_monitor();
             })
