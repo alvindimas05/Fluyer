@@ -2,7 +2,7 @@ use rodio::Sink;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
-use std::sync::atomic::{AtomicBool, AtomicU8, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::thread;
 use std::time::Duration;
@@ -11,7 +11,7 @@ use tauri::Emitter;
 // use thread_priority::windows::WinAPIThreadPriority;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 
-use crate::{logger, platform, GLOBAL_APP_HANDLE};
+use crate::{platform, GLOBAL_APP_HANDLE};
 
 use super::metadata::MusicMetadata;
 
@@ -238,19 +238,14 @@ pub fn handle_music_player_background() {
             .fluyer()
             .watch_state(move |payload| {
                 let is_resuming = matches!(payload.value, WatcherStateType::Resume);
-                MUSIC_IS_BACKGROUND.store(!is_resuming, Ordering::SeqCst);
 
                 if is_resuming {
                     app_handle
                         .emit(
                             crate::commands::route::MUSIC_PLAYER_SYNC,
-                            MusicPlayerSync {
-                                skip: MUSIC_BACKGROUND_COUNT.load(Ordering::SeqCst),
-                                info: MusicPlayer::get_info(),
-                            },
+                            MusicPlayer::get_sync_info(false),
                         )
                         .expect("Failed to sync music player");
-                    MUSIC_BACKGROUND_COUNT.store(0, Ordering::SeqCst);
                 }
             })
             .expect("Failed to watch app state");

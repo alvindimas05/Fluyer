@@ -11,7 +11,7 @@ use tauri_plugin_dialog::DialogExt;
 use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
 
 use crate::{
-    music::{metadata::MusicMetadata, player::MusicPlayer},
+    music::metadata::MusicMetadata,
     AppState,
 };
 
