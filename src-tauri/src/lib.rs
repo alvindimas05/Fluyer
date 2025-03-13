@@ -58,9 +58,10 @@ pub fn run() {
             commands::music::music_position_set,
             commands::music::music_get_all,
             commands::music::music_playlist_add,
-            commands::music::music_get_info,
+            // commands::music::music_get_info,
             commands::music::music_playlist_remove,
             commands::music::music_set_volume,
+            commands::music::music_playlist_goto,
             #[cfg(desktop)]
             commands::music::music_request_directory,
             commands::log::log_error,

@@ -16,8 +16,8 @@ interface Props {
 let { children }: Props = $props();
 let isAppReady = $state(false);
 
-function initialize(){
-    getCurrentWindow().show();
+async function initialize(){
+    await getCurrentWindow().show();
     MusicController.handleInitialize();
     isAppReady = true;
 }

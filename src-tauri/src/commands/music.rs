@@ -29,10 +29,10 @@ pub fn music_position_set(state: State<'_, Mutex<AppState>>, position: u64) {
     state.music_player.set_pos(position);
 }
 
-#[tauri::command]
-pub fn music_get_info() -> crate::music::player::MusicPlayerInfo {
-    MusicPlayer::get_info()
-}
+// #[tauri::command]
+// pub fn music_get_info() -> crate::music::player::MusicPlayerSync {
+//     MusicPlayer::get_sync_info()
+// }
 
 #[tauri::command]
 pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
@@ -85,4 +85,10 @@ pub fn music_playlist_remove(state: State<'_, Mutex<AppState>>, index: usize) {
 pub fn music_set_volume(state: State<'_, Mutex<AppState>>, volume: f32) {
     let mut state = state.lock().unwrap();
     state.music_player.set_volume(volume);
+}
+
+#[tauri::command]
+pub fn music_playlist_goto(state: State<'_, Mutex<AppState>>, index: usize) {
+    let mut state = state.lock().unwrap();
+    state.music_player.goto_playlist(index);
 }

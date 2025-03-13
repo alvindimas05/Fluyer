@@ -1,6 +1,6 @@
 <script lang="ts">
 import {
-	musicCurrent,
+	musicCurrentIndex,
 	musicIsPlaying,
 	musicProgressValue,
 	musicVolume,
@@ -37,7 +37,7 @@ musicProgressValue.subscribe(() => {
 
 	resetSelectedLyricIndex();
 });
-musicCurrent.subscribe(() => {
+musicCurrentIndex.subscribe(() => {
 	music = MusicController.currentMusic();
 	albumImage = MusicController.currentMusicAlbumImage();
 	resetLyrics();

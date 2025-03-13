@@ -7,11 +7,11 @@ use std::sync::{Mutex, OnceLock};
 use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
-#[cfg(windows)]
-use thread_priority::windows::WinAPIThreadPriority;
+// #[cfg(windows)]
+// use thread_priority::windows::WinAPIThreadPriority;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 
-use crate::{platform, GLOBAL_APP_HANDLE};
+use crate::{logger, platform, GLOBAL_APP_HANDLE};
 
 use super::metadata::MusicMetadata;
 
@@ -34,47 +34,22 @@ pub enum MusicState {
 }
 pub struct MusicPlayer {}
 
-#[derive(Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MusicPlayerInfo {
-    current_position: u128,
-    is_playing: bool,
-    music: Option<MusicMetadata>,
-}
-
-#[derive(Clone, Serialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MusicPlayerSync {
-    skip: u8,
-    info: MusicPlayerInfo,
+    index: usize,
+    current_position: u128,
+    is_playing: bool,
 }
 
 pub static GLOBAL_MUSIC_SINK: OnceLock<Sink> = OnceLock::new();
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
-static MUSIC_IS_BACKGROUND: AtomicBool = AtomicBool::new(false);
-static MUSIC_BACKGROUND_COUNT: AtomicU8 = AtomicU8::new(0);
 static MUSIC_CURRENT_INDEX: AtomicUsize = AtomicUsize::new(0);
-static MUSIC_IGNORE_NEXT: AtomicBool = AtomicBool::new(true);
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
         handle_music_player_background();
 
-        #[cfg(windows)]
-        ThreadBuilder::default()
-            .name("Music Player")
-            .winapi_priority(WinAPIThreadPriority::TimeCritical)
-            .spawn(|_| {
-                let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-                    .expect("Failed to open default stream");
-                GLOBAL_MUSIC_SINK
-                    .set(rodio::Sink::connect_new(&stream_handle.mixer()))
-                    .ok();
-                MusicPlayer::start_playback_monitor();
-            })
-            .ok();
-
-        #[cfg(not(windows))]
         ThreadBuilder::default()
             .name("Music Player")
             .priority(ThreadPriority::Max)
@@ -120,12 +95,12 @@ impl MusicPlayer {
             .try_seek(Duration::from_millis(position))
             .ok();
     }
-    pub fn get_info() -> MusicPlayerInfo {
+    pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
         let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-        MusicPlayerInfo {
-            current_position: sink.get_pos().as_millis(),
+        MusicPlayerSync {
+            index: MUSIC_CURRENT_INDEX.load(Ordering::SeqCst),
+            current_position: if is_from_next { 0 } else { sink.get_pos().as_millis() },
             is_playing: !sink.is_paused(),
-            music: MUSIC_PLAYLIST.lock().unwrap().first().cloned(),
         }
     }
     pub fn add_playlist(&mut self, playlist: Vec<String>) {
@@ -145,6 +120,11 @@ impl MusicPlayer {
         }
     }
 
+    pub fn goto_playlist(&mut self, index: usize) {
+        MUSIC_CURRENT_INDEX.store(index + 1, Ordering::SeqCst);
+        GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
+    }
+
     fn next() {
         let playlist = MUSIC_PLAYLIST.lock().unwrap();
         let current_idx = MUSIC_CURRENT_INDEX.load(Ordering::SeqCst);
@@ -154,19 +134,15 @@ impl MusicPlayer {
                 let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
                 GLOBAL_MUSIC_SINK.get().unwrap().append(source);
 
-                if MUSIC_IGNORE_NEXT.load(Ordering::SeqCst) {
-                    MUSIC_IGNORE_NEXT.store(false, Ordering::SeqCst);
-                } else {
-                    GLOBAL_APP_HANDLE
-                        .get()
-                        .unwrap()
-                        .emit(crate::commands::route::MUSIC_PLAYER_NEXT, ())
-                        .ok();
-                }
+                GLOBAL_APP_HANDLE
+                    .get()
+                    .unwrap()
+                    .emit(
+                        crate::commands::route::MUSIC_PLAYER_SYNC,
+                        MusicPlayer::get_sync_info(true),
+                    )
+                    .ok();
                 MUSIC_CURRENT_INDEX.store(current_idx + 1, Ordering::SeqCst);
-                if MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) >= playlist.len() {
-                    MUSIC_IGNORE_NEXT.store(true, Ordering::SeqCst);
-                }
             }
         }
     }
@@ -175,7 +151,7 @@ impl MusicPlayer {
         loop {
             let should_play_next = {
                 let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-                sink.empty() && !sink.is_paused()
+                sink.empty()
             };
 
             if should_play_next {
@@ -216,37 +192,38 @@ impl MusicPlayer {
 }
 
 pub fn handle_music_player_background() {
-    #[cfg(desktop)]
-    {
-        use crate::GLOBAL_MAIN_WINDOW;
-        use tauri::Listener;
+    // Note: Disabled due to giving more issues than solving. Probably unnecessary though.
+    // #[cfg(desktop)]
+    // {
+    //     use crate::GLOBAL_MAIN_WINDOW;
+    //     use tauri::Listener;
 
-        GLOBAL_MAIN_WINDOW
-            .get()
-            .unwrap()
-            .listen("tauri://focus", move |_| {
-                MUSIC_IS_BACKGROUND.store(false, Ordering::SeqCst);
-                GLOBAL_APP_HANDLE
-                    .get()
-                    .unwrap()
-                    .emit(
-                        crate::commands::route::MUSIC_PLAYER_SYNC,
-                        MusicPlayerSync {
-                            skip: MUSIC_BACKGROUND_COUNT.load(Ordering::SeqCst),
-                            info: MusicPlayer::get_info(),
-                        },
-                    )
-                    .expect("Failed to sync music player");
-                MUSIC_BACKGROUND_COUNT.store(0, Ordering::SeqCst);
-            });
+    //     GLOBAL_MAIN_WINDOW
+    //         .get()
+    //         .unwrap()
+    //         .listen("tauri://focus", move |_| {
+    //             MUSIC_IS_BACKGROUND.store(false, Ordering::SeqCst);
+    //             GLOBAL_APP_HANDLE
+    //                 .get()
+    //                 .unwrap()
+    //                 .emit(
+    //                     crate::commands::route::MUSIC_PLAYER_SYNC,
+    //                     MusicPlayerSync {
+    //                         skip: MUSIC_BACKGROUND_COUNT.load(Ordering::SeqCst),
+    //                         info: MusicPlayer::get_info(),
+    //                     },
+    //                 )
+    //                 .expect("Failed to sync music player");
+    //             MUSIC_BACKGROUND_COUNT.store(0, Ordering::SeqCst);
+    //         });
 
-        GLOBAL_MAIN_WINDOW
-            .get()
-            .unwrap()
-            .listen("tauri://blur", |_| {
-                MUSIC_IS_BACKGROUND.store(true, Ordering::SeqCst);
-            });
-    }
+    //     GLOBAL_MAIN_WINDOW
+    //         .get()
+    //         .unwrap()
+    //         .listen("tauri://blur", |_| {
+    //             MUSIC_IS_BACKGROUND.store(true, Ordering::SeqCst);
+    //         });
+    // }
     #[cfg(target_os = "android")]
     {
         use tauri_plugin_fluyer::models::WatcherStateType;

@@ -1,20 +1,16 @@
 import { invoke } from "@tauri-apps/api/core";
 import {
     musicIsPlaying,
-    musicCurrent,
     musicProgressIntervalId,
     musicProgressValue,
     musicList,
-    musicsNext,
     musicVolume,
     musicAlbumList,
+    musicPlaylist,
+    musicCurrentIndex,
 } from "$lib/stores/music";
 import { get } from "svelte/store";
-import type {
-    MusicPlayerSync,
-    MusicData,
-    MusicPlayerInfo,
-} from "$lib/home/music/types";
+import type { MusicPlayerSync, MusicData } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
 import { CommandsRoute } from "$lib/commands";
@@ -55,7 +51,6 @@ const MusicController = {
         logHandler();
 
         MusicController.listenSyncMusic();
-        MusicController.listenNextMusic();
         MusicController.setStatusBarHeight();
         MusicController.setNavigationBarHeight();
         MusicController.handleVolumeChange();
@@ -74,8 +69,13 @@ const MusicController = {
     isPlaying: () => get(musicIsPlaying),
     setIsPlaying: (value: boolean) => musicIsPlaying.set(value),
 
-    currentMusic: () => get(musicCurrent),
-    setCurrentMusic: (value: MusicData | null) => musicCurrent.set(value),
+    currentMusic: () => get(musicPlaylist)[get(musicCurrentIndex)] ?? null,
+    currentMusicIndex: () => get(musicCurrentIndex),
+    setCurrentMusicIndex: (value: number) => musicCurrentIndex.set(value),
+
+    musicPlaylist: () => get(musicPlaylist),
+    addMusicPlaylist: (value: MusicData[]) =>
+        musicPlaylist.set([...MusicController.musicPlaylist(), ...value]),
 
     currentMusicAlbumImage: () => {
         return MusicController.getAlbumImageFromMusic(
@@ -176,60 +176,27 @@ const MusicController = {
 
     nextMusic: () => {
         MusicController.sendCommandController("next");
-        MusicController.stopProgress();
-        MusicController.resetProgress();
     },
 
-    listenNextMusic: () => {
-        listen(CommandsRoute.MUSIC_PLAYER_NEXT, () => {
-            const nextMusics = MusicController.nextMusics();
-            if (nextMusics.length > 0) {
-                MusicController.setCurrentMusic(nextMusics[0]);
-                MusicController.startProgress();
-                MusicController.play(!MusicController.isPlaying());
-            } else {
-                MusicController.pause();
-                return;
-            }
-            MusicController.removeFirstNextMusics();
-            MusicController.setIsPlaying(true);
-        });
-    },
     listenSyncMusic: () => {
         listen<MusicPlayerSync>(CommandsRoute.MUSIC_PLAYER_SYNC, async (e) => {
-            const skip = e.payload.skip;
-            if (skip > 0) {
-                MusicController.setNextMusics(
-                    MusicController.nextMusics()!.splice(0, skip),
-                );
+            if (e.payload.index != MusicController.currentMusicIndex()) {
+                MusicController.setCurrentMusicIndex(e.payload.index);
             }
 
-            const info = e.payload.info;
-            if (info.music != null) {
-                MusicController.setProgressValue(
-                    MusicController.parseProgressDurationIntoValue(
-                        MusicController.parseProgressDuration(
-                            info.currentPosition,
-                        ),
-                        MusicController.parseProgressDuration(
-                            info.music.duration,
-                        ),
+            MusicController.setProgressValue(
+                MusicController.parseProgressDurationIntoValue(
+                    MusicController.parseProgressDuration(
+                        e.payload.currentPosition,
                     ),
-                );
-            }
-            MusicController.setIsPlaying(info.isPlaying);
+                    MusicController.parseProgressDuration(
+                        MusicController.musicPlaylist()[e.payload.index]
+                            .duration,
+                    ),
+                ),
+            );
+            MusicController.setIsPlaying(e.payload.isPlaying);
         });
-        // listen<MusicPlayerInfo>(CommandsRoute.MUSIC_GET_INFO, (e) => {
-        // 	if (e.payload.music != null) {
-        // 		MusicController.setProgressValue(
-        // 			MusicController.parseProgressDurationIntoValue(
-        // 				MusicController.parseProgressDuration(e.payload.currentPosition),
-        // 				MusicController.parseProgressDuration(e.payload.music.duration),
-        // 			),
-        // 		);
-        // 	}
-        // 	MusicController.setIsPlaying(e.payload.isPlaying);
-        // });
     },
 
     resetProgress: () => musicProgressValue.set(MusicConfig.min),
@@ -258,32 +225,38 @@ const MusicController = {
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     },
     play: (sendCommand: boolean = true) => {
-        musicIsPlaying.set(true);
-        MusicController.startProgress({ resetProgress: false });
-        if (sendCommand) MusicController.sendCommandController("play");
+        const previousMusic = MusicController.currentMusic();
+        if (
+            previousMusic === null ||
+            (previousMusic !== null && MusicController.isCurrentMusicFinished())
+        ) {
+            musicIsPlaying.set(true);
+            MusicController.startProgress({ resetProgress: false });
+            if (sendCommand) MusicController.sendCommandController("play");
+        }
     },
     pause: (sendCommand: boolean = true) => {
         musicIsPlaying.set(false);
         MusicController.stopProgress();
         if (sendCommand) MusicController.sendCommandController("pause");
     },
-    clear: async () => {
-        MusicController.stopProgress();
-        MusicController.resetProgress();
-        MusicController.setNextMusics([]);
-        await MusicController.sendCommandController("clear");
-        return new Promise<void>(async (resolve, _) => {
-            const unlisten = await listen(
-                CommandsRoute.MUSIC_CONTROLLER,
-                (e) => {
-                    if (e.payload === "clear") {
-                        resolve();
-                        unlisten();
-                    }
-                },
-            );
-        });
-    },
+    // clear: async () => {
+    //     MusicController.stopProgress();
+    //     MusicController.resetProgress();
+    //     // MusicController.setNextMusics([]);
+    //     await MusicController.sendCommandController("clear");
+    //     return new Promise<void>(async (resolve, _) => {
+    //         const unlisten = await listen(
+    //             CommandsRoute.MUSIC_CONTROLLER,
+    //             (e) => {
+    //                 if (e.payload === "clear") {
+    //                     resolve();
+    //                     unlisten();
+    //                 }
+    //             },
+    //         );
+    //     });
+    // },
     sendCommandController: async (command: string) => {
         await invoke(CommandsRoute.MUSIC_CONTROLLER, { command });
     },
@@ -297,50 +270,46 @@ const MusicController = {
     addMusic: async (music: MusicData) => {
         await MusicController.addMusicList([music]);
     },
-    addMusicToPlayList: async (path: string) =>
-        await MusicController.addMusicListToPlayList([path]),
-    addMusicListToPlayList: async (musicPaths: string[]) => {
+    addSinkMusic: async (path: string) =>
+        await MusicController.addSinkMusics([path]),
+    addSinkMusics: async (musicPaths: string[]) => {
         await invoke(CommandsRoute.MUSIC_PLAYLIST_ADD, {
             playlist: musicPaths,
         });
     },
 
     addMusicList: async (musicDataList: MusicData[]) => {
-        let isCurrentMusicSet = false;
         if (
             MusicController.isCurrentMusicFinished() &&
             musicDataList.length > 0
         ) {
-            isCurrentMusicSet = true;
-            MusicController.setCurrentMusic(musicDataList[0]);
+            MusicController.setCurrentMusicIndex(0);
         }
-
-        MusicController.addNextMusics(
-            isCurrentMusicSet ? musicDataList.slice(1) : musicDataList,
-        );
 
         let musicPaths: string[] = [];
         musicDataList.forEach((music) => musicPaths.push(music.path));
-        MusicController.addMusicListToPlayList(musicPaths);
+        MusicController.addSinkMusics(musicPaths);
+
+        MusicController.addMusicPlaylist(musicDataList);
     },
 
     removeMusic: (index: number) => {
-        MusicController.removeNextMusicsAt(index);
+        // MusicController.removeNextMusicsAt(index);
         invoke(CommandsRoute.MUSIC_PLAYLIST_REMOVE, { index: index + 1 });
     },
 
-    nextMusics: () => get(musicsNext),
-    setNextMusics: (value: MusicData[]) => musicsNext.set(value),
-    addNextMusics: (musics: MusicData[]) => {
-        musicsNext.set([...get(musicsNext), ...musics]);
-    },
+    // nextMusics: () => get(musicsNext),
+    // setNextMusics: (value: MusicData[]) => musicsNext.set(value),
+    // addNextMusics: (musics: MusicData[]) => {
+    //     musicsNext.set([...get(musicsNext), ...musics]);
+    // },
 
-    removeNextMusicsAt: (index: number) =>
-        musicsNext.set(
-            MusicController.nextMusics().filter((_, i) => i !== index),
-        ),
-    removeFirstNextMusics: () =>
-        musicsNext.set(MusicController.nextMusics().slice(1)),
+    // removeNextMusicsAt: (index: number) =>
+    //     musicsNext.set(
+    //         MusicController.nextMusics().filter((_, i) => i !== index),
+    //     ),
+    // removeFirstNextMusics: () =>
+    //     musicsNext.set(MusicController.nextMusics().slice(1)),
     isCurrentMusicFinished: () => {
         return (
             MusicController.isProgressValueEnd() ||
@@ -428,6 +397,21 @@ const MusicController = {
                 return a.filename.localeCompare(b.filename);
             }
         });
+    },
+
+    // previousMusics: () => get(musicsPrevious),
+
+    // addCurrentMusicToPrevious: () => {
+    //     if (MusicController.currentMusic() != null) {
+    //         musicsPrevious.set([
+    //             ...get(musicsPrevious),
+    //             MusicController.currentMusic()!,
+    //         ]);
+    //     }
+    // },
+
+    gotoPlaylist: (index: number) => {
+        invoke(CommandsRoute.MUSIC_PLAYLIST_GOTO, { index });
     },
 };
 

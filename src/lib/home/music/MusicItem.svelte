@@ -53,13 +53,8 @@ function setAlbumImageFromCache() {
 
 async function addMusicAndPlay() {
 	music.image = albumImage;
-	const previousMusic = MusicController.currentMusic();
 	await MusicController.addMusic(music);
-	if (
-		previousMusic === null ||
-		(previousMusic !== null && MusicController.isCurrentMusicFinished())
-	)
-		MusicController.play();
+	MusicController.play();
 }
 
 onMount(checkAlbumImage);

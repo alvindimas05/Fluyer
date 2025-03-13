@@ -1,13 +1,13 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import { backgroundIsLight, observerCounts } from "$lib/stores/background";
-import { musicCurrent } from "$lib/stores/music";
 import { prominent } from "color.js";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
 import { platform } from "@tauri-apps/plugin-os";
 import { isMobile } from "$lib/platform";
 import BackgroundController from "$lib/controllers/BackgroundController";
+    import { musicCurrentIndex } from "$lib/stores/music";
 
 const SIZE = 10;
 
@@ -90,7 +90,7 @@ async function getColors() {
 		animatedClasses = "animate__animated animate__fadeIn";
 	}
 }
-musicCurrent.subscribe(() => !isMobile() && getColors());
+musicCurrentIndex.subscribe(() => !isMobile() && getColors());
 </script>
 
 {#if isMobile()}

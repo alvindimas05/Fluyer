@@ -1,7 +1,7 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import {
-	musicCurrent,
+    musicCurrentIndex,
 	musicIsPlaying,
 	musicProgressValue,
 	musicVolume,
@@ -22,7 +22,7 @@ let progressPercentage = $state(MusicController.progressPercentage());
 let volumePercentage = $state(MusicController.volumePercentage());
 
 musicProgressValue.subscribe(updateStates);
-musicCurrent.subscribe(updateStates);
+musicCurrentIndex.subscribe(updateStates);
 musicIsPlaying.subscribe(updateStates);
 musicVolume.subscribe(() => {
 	volumePercentage = MusicController.volumePercentage();

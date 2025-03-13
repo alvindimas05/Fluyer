@@ -11,13 +11,9 @@ export interface MusicData {
 	image: string | null;
 }
 
-export interface MusicPlayerInfo {
-	currentPosition: number;
-	isPlaying: boolean;
-	music: MusicData | null;
-}
-
 export interface MusicPlayerSync {
-	skip: number;
-	info: MusicPlayerInfo;
+	index: number;
+	currentPosition: number;
+    isPlaying: boolean;
+    duration: number;
 }
