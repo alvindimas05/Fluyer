@@ -294,22 +294,8 @@ const MusicController = {
     },
 
     removeMusic: (index: number) => {
-        // MusicController.removeNextMusicsAt(index);
-        invoke(CommandsRoute.MUSIC_PLAYLIST_REMOVE, { index: index + 1 });
+        invoke(CommandsRoute.MUSIC_PLAYLIST_REMOVE, { index });
     },
-
-    // nextMusics: () => get(musicsNext),
-    // setNextMusics: (value: MusicData[]) => musicsNext.set(value),
-    // addNextMusics: (musics: MusicData[]) => {
-    //     musicsNext.set([...get(musicsNext), ...musics]);
-    // },
-
-    // removeNextMusicsAt: (index: number) =>
-    //     musicsNext.set(
-    //         MusicController.nextMusics().filter((_, i) => i !== index),
-    //     ),
-    // removeFirstNextMusics: () =>
-    //     musicsNext.set(MusicController.nextMusics().slice(1)),
     isCurrentMusicFinished: () => {
         return (
             MusicController.isProgressValueEnd() ||
@@ -398,17 +384,6 @@ const MusicController = {
             }
         });
     },
-
-    // previousMusics: () => get(musicsPrevious),
-
-    // addCurrentMusicToPrevious: () => {
-    //     if (MusicController.currentMusic() != null) {
-    //         musicsPrevious.set([
-    //             ...get(musicsPrevious),
-    //             MusicController.currentMusic()!,
-    //         ]);
-    //     }
-    // },
 
     gotoPlaylist: (index: number) => {
         invoke(CommandsRoute.MUSIC_PLAYLIST_GOTO, { index });

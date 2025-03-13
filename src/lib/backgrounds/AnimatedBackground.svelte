@@ -90,7 +90,7 @@ async function getColors() {
 		animatedClasses = "animate__animated animate__fadeIn";
 	}
 }
-musicCurrentIndex.subscribe(() => !isMobile() && getColors());
+musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
 </script>
 
 {#if isMobile()}

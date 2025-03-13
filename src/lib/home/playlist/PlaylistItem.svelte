@@ -19,8 +19,8 @@
     }: Props = $props();
 
     function removePlaylist() {
-        if (index === 0) MusicController.nextMusic();
-        else MusicController.removeMusic(index - 1);
+        // if (index === 0) MusicController.nextMusic();
+        // else MusicController.removeMusic(index);
     }
 
     function gotoPlaylist() {

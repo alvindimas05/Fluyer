@@ -99,7 +99,11 @@ impl MusicPlayer {
         let sink = GLOBAL_MUSIC_SINK.get().unwrap();
         MusicPlayerSync {
             index: MUSIC_CURRENT_INDEX.load(Ordering::SeqCst),
-            current_position: if is_from_next { 0 } else { sink.get_pos().as_millis() },
+            current_position: if is_from_next {
+                0
+            } else {
+                sink.get_pos().as_millis()
+            },
             is_playing: !sink.is_paused(),
         }
     }
@@ -121,7 +125,7 @@ impl MusicPlayer {
     }
 
     pub fn goto_playlist(&mut self, index: usize) {
-        MUSIC_CURRENT_INDEX.store(index + 1, Ordering::SeqCst);
+        MUSIC_CURRENT_INDEX.store(index, Ordering::SeqCst);
         GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
     }
 
