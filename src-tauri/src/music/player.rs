@@ -120,6 +120,9 @@ impl MusicPlayer {
         let mut playlist = MUSIC_PLAYLIST.lock().unwrap();
 
         if let Some(_) = playlist.get(index) {
+            if index > MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) {
+                MUSIC_CURRENT_INDEX.store(index + 1, Ordering::SeqCst);
+            }
             playlist.remove(index);
         }
     }

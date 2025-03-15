@@ -14,7 +14,7 @@ import type { MusicPlayerSync, MusicData } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
 import { CommandsRoute } from "$lib/commands";
-import { isDesktop, isMobile } from "$lib/platform";
+import { isDesktop } from "$lib/platform";
 import {
     mobileNavigationBarHeight,
     mobileStatusBarHeight,
@@ -76,6 +76,11 @@ const MusicController = {
     musicPlaylist: () => get(musicPlaylist),
     addMusicPlaylist: (value: MusicData[]) =>
         musicPlaylist.set([...MusicController.musicPlaylist(), ...value]),
+    removeMusicPlaylist: (index: number) => {
+        let playlist = MusicController.musicPlaylist();
+        playlist.splice(index, 1);
+        musicPlaylist.set(playlist);
+    },
 
     currentMusicAlbumImage: () => {
         return MusicController.getAlbumImageFromMusic(
@@ -246,23 +251,6 @@ const MusicController = {
         MusicController.stopProgress();
         if (sendCommand) MusicController.sendCommandController("pause");
     },
-    // clear: async () => {
-    //     MusicController.stopProgress();
-    //     MusicController.resetProgress();
-    //     // MusicController.setNextMusics([]);
-    //     await MusicController.sendCommandController("clear");
-    //     return new Promise<void>(async (resolve, _) => {
-    //         const unlisten = await listen(
-    //             CommandsRoute.MUSIC_CONTROLLER,
-    //             (e) => {
-    //                 if (e.payload === "clear") {
-    //                     resolve();
-    //                     unlisten();
-    //                 }
-    //             },
-    //         );
-    //     });
-    // },
     sendCommandController: async (command: string) => {
         await invoke(CommandsRoute.MUSIC_CONTROLLER, { command });
     },
@@ -276,6 +264,12 @@ const MusicController = {
     addMusic: async (music: MusicData) => {
         await MusicController.addMusicList([music]);
     },
+    removeMusic: (index: number) => {
+        MusicController.removeMusicPlaylist(index);
+        if(index <= MusicController.currentMusicIndex()) MusicController.setCurrentMusicIndex(MusicController.currentMusicIndex() - 1);
+        invoke(CommandsRoute.MUSIC_PLAYLIST_REMOVE, { index });
+    },
+
     addSinkMusic: async (path: string) =>
         await MusicController.addSinkMusics([path]),
     addSinkMusics: async (musicPaths: string[]) => {
@@ -299,9 +293,6 @@ const MusicController = {
         MusicController.addMusicPlaylist(musicDataList);
     },
 
-    removeMusic: (index: number) => {
-        invoke(CommandsRoute.MUSIC_PLAYLIST_REMOVE, { index });
-    },
     isCurrentMusicFinished: () => {
         return (
             MusicController.isProgressValueEnd() ||

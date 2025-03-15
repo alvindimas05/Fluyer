@@ -19,8 +19,7 @@
     }: Props = $props();
 
     function removePlaylist() {
-        // if (index === 0) MusicController.nextMusic();
-        // else MusicController.removeMusic(index);
+        MusicController.removeMusic(index);
     }
 
     function gotoPlaylist() {
@@ -68,7 +67,7 @@
     <button
         class={`w-12 lg:w-16 flex justify-center items-center animate__animated
         ${isPlaying ? "animate__pulse animate__infinite cursor-default" : "animate__faster animate__fadeOut playlist-item-remove"}`}
-        onclick={() => isPlaying && removePlaylist()}
+        onclick={() => !isPlaying && removePlaylist()}
     >
         <img
             class={`w-10 h-10 invert`}
