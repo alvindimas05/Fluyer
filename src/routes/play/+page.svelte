@@ -57,6 +57,10 @@ function handleButtonPlayPause() {
 	} else MusicController.play();
 }
 
+function handleButtonPrevious() {
+    MusicController.previousMusic();
+}
+
 function handleButtonNext() {
 	MusicController.nextMusic();
 }
@@ -186,6 +190,7 @@ onMount(async () => {
                 <!-- TODO: Button Previous Functionality -->
                 <div class="flex justify-end">
                     <button class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        onclick={handleButtonPrevious}
                     ><img
                         src={MusicConfig.defaultPreviousButton}
                         alt="Icon Previous"

@@ -174,6 +174,11 @@ const MusicController = {
         );
     },
 
+    previousMusic: () => {
+        if (MusicController.currentMusicIndex() <= 0) return;
+        MusicController.gotoPlaylist(MusicController.currentMusicIndex() - 1);
+    },
+
     nextMusic: () => {
         MusicController.sendCommandController("next");
     },

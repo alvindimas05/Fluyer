@@ -1,94 +1,100 @@
 <script lang="ts">
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import {
-    musicCurrentIndex,
-	musicIsPlaying,
-	musicProgressValue,
-	musicVolume,
-} from "$lib/stores/music";
-import { goto } from "$app/navigation";
-import { mobileNavigationBarHeight } from "$lib/stores/mobile";
-import { backgroundIsLight } from "$lib/stores/background";
-import { isAndroid } from "$lib/platform";
+    import MusicController, {
+        MusicConfig,
+    } from "$lib/controllers/MusicController";
+    import {
+        musicCurrentIndex,
+        musicIsPlaying,
+        musicProgressValue,
+        musicVolume,
+    } from "$lib/stores/music";
+    import { goto } from "$app/navigation";
+    import { mobileNavigationBarHeight } from "$lib/stores/mobile";
+    import { backgroundIsLight } from "$lib/stores/background";
+    import { isAndroid } from "$lib/platform";
 
-// Based on Rust Rodio fade effect (Please check player.rs)
-let pauseDelay = isAndroid() ? 0 : 400;
-let title = $state(MusicConfig.defaultTitle);
-let artist = $state(MusicConfig.defaultArtist);
-let albumImage = $state(MusicConfig.defaultAlbumImage);
+    // Based on Rust Rodio fade effect (Please check player.rs)
+    let pauseDelay = isAndroid() ? 0 : 400;
+    let title = $state(MusicConfig.defaultTitle);
+    let artist = $state(MusicConfig.defaultArtist);
+    let albumImage = $state(MusicConfig.defaultAlbumImage);
 
-let isPlaying = $state(MusicController.isPlaying());
-let progressPercentage = $state(MusicController.progressPercentage());
-let volumePercentage = $state(MusicController.volumePercentage());
+    let isPlaying = $state(MusicController.isPlaying());
+    let progressPercentage = $state(MusicController.progressPercentage());
+    let volumePercentage = $state(MusicController.volumePercentage());
 
-musicProgressValue.subscribe(updateStates);
-musicCurrentIndex.subscribe(updateStates);
-musicIsPlaying.subscribe(updateStates);
-musicVolume.subscribe(() => {
-	volumePercentage = MusicController.volumePercentage();
-});
+    musicProgressValue.subscribe(updateStates);
+    musicCurrentIndex.subscribe(updateStates);
+    musicIsPlaying.subscribe(updateStates);
+    musicVolume.subscribe(() => {
+        volumePercentage = MusicController.volumePercentage();
+    });
 
-function handleButtonPlayPause() {
-	if (
-		MusicController.currentMusic() === null ||
-		MusicController.isProgressValueEnd()
-	)
-		return;
+    function handleButtonPlayPause() {
+        if (
+            MusicController.currentMusic() === null ||
+            MusicController.isProgressValueEnd()
+        )
+            return;
 
-	if (MusicController.isPlaying()) {
-		MusicController.setIsPlaying(false);
-		setTimeout(MusicController.pause, pauseDelay);
-	} else MusicController.play();
+        if (MusicController.isPlaying()) {
+            MusicController.setIsPlaying(false);
+            setTimeout(MusicController.pause, pauseDelay);
+        } else MusicController.play();
 
-	updateStates();
-}
+        updateStates();
+    }
 
-function handleButtonNext() {
-	MusicController.nextMusic();
-}
+    function handleButtonPrevious() {
+        MusicController.previousMusic();
+    }
 
-function onPlayerBarChange() {
-	if (MusicController.isProgressValueEnd()) {
-		MusicController.setProgressValue(0);
-		return;
-	}
+    function handleButtonNext() {
+        MusicController.nextMusic();
+    }
 
-	if (MusicController.isProgressValueEnd()) {
-		MusicController.addMusic(MusicController.currentMusic()!);
-	}
+    function onPlayerBarChange() {
+        if (MusicController.isProgressValueEnd()) {
+            MusicController.setProgressValue(0);
+            return;
+        }
 
-	MusicController.sendCommandSetPosition(
-		MusicController.realProgressDuration(),
-	);
-}
+        if (MusicController.isProgressValueEnd()) {
+            MusicController.addMusic(MusicController.currentMusic()!);
+        }
 
-function updateStates() {
-	isPlaying = MusicController.isPlaying();
-	progressPercentage = MusicController.progressPercentage();
+        MusicController.sendCommandSetPosition(
+            MusicController.realProgressDuration(),
+        );
+    }
 
-	let music = MusicController.currentMusic();
-	if (music == null) return;
+    function updateStates() {
+        isPlaying = MusicController.isPlaying();
+        progressPercentage = MusicController.progressPercentage();
 
-	title = music.title!;
-	artist = MusicController.getFullArtistFromMusic(music);
-	albumImage = MusicController.currentMusicAlbumImage();
-}
+        let music = MusicController.currentMusic();
+        if (music == null) return;
 
-async function onKeyDown(
-	e: KeyboardEvent & {
-		currentTarget: EventTarget & Document;
-	},
-) {
-	if (e.key === " ") handleButtonPlayPause();
-}
+        title = music.title!;
+        artist = MusicController.getFullArtistFromMusic(music);
+        albumImage = MusicController.currentMusicAlbumImage();
+    }
 
-function redirectToPlay() {
-	goto("/play");
-}
+    async function onKeyDown(
+        e: KeyboardEvent & {
+            currentTarget: EventTarget & Document;
+        },
+    ) {
+        if (e.key === " ") handleButtonPlayPause();
+    }
 
-function handleVolumeButton() {
-	MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
-}
+    function redirectToPlay() {
+        goto("/play");
+    }
+
+    function handleVolumeButton() {
+        MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
+    }
 </script>
 
 <svelte:document onkeydown={onKeyDown} />
@@ -111,7 +117,9 @@ function handleVolumeButton() {
         <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
             <div class="flex items-center">
                 <!-- TODO: Button Previous Functionality -->
-                <button class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
+                <button
+                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
+                    onclick={handleButtonPrevious}
                     ><img
                         src={MusicConfig.defaultPreviousButton}
                         alt="Icon Previous"
@@ -143,11 +151,17 @@ function handleVolumeButton() {
                     class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
                 >
                     <button onclick={redirectToPlay}>
-                        <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
+                        <img
+                            class="w-12 lg:w-16 rounded"
+                            src={albumImage}
+                            alt="Album"
+                        />
                     </button>
                     <!-- FIXME: Overflow Text Animation -->
                     <div class="ms-3 overflow-hidden">
-                        <p class="font-medium whitespace-nowrap overflow-hidden">
+                        <p
+                            class="font-medium whitespace-nowrap overflow-hidden"
+                        >
                             {title}
                         </p>
                         <p
@@ -161,8 +175,13 @@ function handleVolumeButton() {
             <div class="hidden lg:grid justify-end">
                 <div class="grid grid-cols-[auto_auto] items-center gap-3">
                     <button onclick={handleVolumeButton}>
-                        <img class="invert w-5" src={volumePercentage > 0 ? MusicConfig.defaultSpeakerButton : MusicConfig.defaultMuteButton}
-                            alt="Volume"/>
+                        <img
+                            class="invert w-5"
+                            src={volumePercentage > 0
+                                ? MusicConfig.defaultSpeakerButton
+                                : MusicConfig.defaultMuteButton}
+                            alt="Volume"
+                        />
                     </button>
                     <input
                         class={`w-24 volume-progress-bar volume-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
@@ -171,7 +190,8 @@ function handleVolumeButton() {
                         bind:value={$musicVolume}
                         min={MusicConfig.vmin}
                         max={MusicConfig.vmax}
-                        step={MusicConfig.vstep}>
+                        step={MusicConfig.vstep}
+                    />
                 </div>
             </div>
         </div>
