@@ -98,7 +98,7 @@ impl MusicPlayer {
     pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
         let sink = GLOBAL_MUSIC_SINK.get().unwrap();
         MusicPlayerSync {
-            index: MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) - if is_from_next { 1 } else { 0 },
+            index: MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) - if is_from_next { 0 } else { 1 },
             current_position: if is_from_next {
                 0
             } else {
@@ -240,9 +240,7 @@ pub fn handle_music_player_background() {
         app_handle
             .fluyer()
             .watch_state(move |payload| {
-                let is_resuming = matches!(payload.value, WatcherStateType::Resume);
-
-                if is_resuming {
+                if matches!(payload.value, WatcherStateType::Resume) && MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) > 0 {
                     app_handle
                         .emit(
                             crate::commands::route::MUSIC_PLAYER_SYNC,
