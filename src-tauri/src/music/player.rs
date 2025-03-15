@@ -98,7 +98,7 @@ impl MusicPlayer {
     pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
         let sink = GLOBAL_MUSIC_SINK.get().unwrap();
         MusicPlayerSync {
-            index: MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) - 1,
+            index: MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) - if is_from_next { 1 } else { 0 },
             current_position: if is_from_next {
                 0
             } else {
