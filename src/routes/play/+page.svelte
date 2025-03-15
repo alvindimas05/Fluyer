@@ -29,6 +29,7 @@ let albumImage = $state(MusicConfig.defaultAlbumImage);
 let lyrics: MusicLyric[] = $state([]);
 let selectedLyricIndex = $state(0);
 let volumePercentage = $state(MusicController.volumePercentage());
+let marginVertical = $derived(($mobileStatusBarHeight / 2) + ($mobileNavigationBarHeight / 2))
 
 musicProgressValue.subscribe(() => {
 	progressPercentage = MusicController.progressPercentage();
@@ -141,8 +142,9 @@ onMount(async () => {
 
 <!-- <div class="w-full h-full grid grid-rows-[auto_30%_auto] mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:grid-cols-[40%_55%] initial-fade-in"> -->
 <div class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 initial-fade-in
-    ${lyrics.length > 1 ? "grid-rows-[auto_30%_auto] md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center"}
-    pt-[${$mobileStatusBarHeight / 2}px] md:pt-0 pb-[${$mobileNavigationBarHeight * 2}px]`}>
+    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center"} md:pt-0`}
+    style={`margin-top: ${marginVertical}px; margin-bottom: ${marginVertical}px;
+    ${lyrics.length > 1 ? "grid-template-rows: auto calc((30% - " + $mobileStatusBarHeight + "px) - " + $mobileNavigationBarHeight + "px) auto;" : ''}`}>
     <div class={`md:row-[1] md:col-[1] p-6 md:p-0 flex items-end
         ${lyrics.length > 1 ? "justify-end" : "justify-center"}`}>
         <div class={`w-full md:w-[80%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}>
