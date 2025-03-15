@@ -31,7 +31,7 @@ You can grab the latest version of the app below or check the [release page](htt
 ### Basic Functionality
 - [x] Play & Pause 
 - [x] Next
-- [ ] Previous
+- [x] Previous
 - [x] Volume Control
 - [x] Mute
 - [ ] Shuffle & Repeat
