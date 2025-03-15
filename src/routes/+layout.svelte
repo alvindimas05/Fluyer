@@ -17,7 +17,7 @@ let { children }: Props = $props();
 let isAppReady = $state(false);
 
 async function initialize(){
-    await getCurrentWindow().show();
+    if(isDesktop()) await getCurrentWindow().show();
     MusicController.handleInitialize();
     isAppReady = true;
 }
