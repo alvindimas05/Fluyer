@@ -8,6 +8,7 @@ import MusicController from "$lib/controllers/MusicController";
 import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
+    import Font from "$lib/font/Font.svelte";
 
 interface Props {
 	children?: import("svelte").Snippet;
@@ -33,7 +34,7 @@ if(isWindows()){
     initialize();
 }
 </script>
-
+<Font />
 <!-- TODO: Add option to enable AnimatedBackground on Mobile -->
 {#if isAppReady}
     <AnimatedBackground />
