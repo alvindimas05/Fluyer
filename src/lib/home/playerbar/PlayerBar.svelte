@@ -156,9 +156,8 @@
                             alt="Album"
                         />
                     </button>
-                    <!-- FIXME: Overflow Text Animation -->
                     <div class="ms-3 overflow-hidden">
-                        <!-- Note: Idk why the title scroll doesn't work without sacrificing this element -->
+                        <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                         <p class="animate-scroll-overflow-text"></p>
                         <p
                             class="font-medium whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"

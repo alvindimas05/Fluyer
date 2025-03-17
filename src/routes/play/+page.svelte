@@ -144,9 +144,8 @@
 
 <svelte:document onkeydown={onKeyDown} />
 
-<!-- <div class="w-full h-full grid grid-rows-[auto_30%_auto] mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:grid-cols-[40%_55%] initial-fade-in"> -->
 <div
-    id="root-play"  
+    id="root-play"
     class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 initial-fade-in
     ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center"} md:pt-0`}
     style={`--mobile-status-bar-height: ${$mobileStatusBarHeight}px; --mobile-navigation-bar-height: ${$mobileNavigationBarHeight}px;`}
@@ -158,8 +157,6 @@
         <div
             class={`w-full md:w-[80%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}
         >
-            <!-- <img class="rounded-lg w-full [mask-image:linear-gradient(to_right,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
-            <!-- <img class="rounded-lg w-full [mask-image:radial-gradient(rgba(0,0,0,1),rgba(0,0,0,0))] md:[mask-image:none]" src={albumImage} alt="Music Album" /> -->
             <img
                 class="w-full rounded-lg aspect-square"
                 src={albumImage}
@@ -179,12 +176,14 @@
                 </div>
                 <!-- FIXME: Overflow Text Animation -->
                 <div
-                    class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90 text-ellipsis overflow-hidden whitespace-nowrap"
+                    class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90"
                 >
-                    {music?.albumArtist ??
-                        music?.artist ??
-                        MusicConfig.defaultArtist} - {music?.title ??
-                        MusicConfig.defaultTitle}
+                    <p>
+                        {music?.albumArtist ??
+                            music?.artist ??
+                            MusicConfig.defaultArtist} - {music?.title ??
+                            MusicConfig.defaultTitle}
+                    </p>
                 </div>
                 <div class="text-xs lg:text-sm flex justify-end w-12">
                     <span class="self-end opacity-75"
@@ -331,21 +330,28 @@
     }
 
     #root-play {
-        --margin-vertical: calc((var(--mobile-status-bar-height) / 2) + (var(--mobile-navigation-bar-height) / 2));
+        --margin-vertical: calc(
+            (var(--mobile-status-bar-height) / 2) +
+                (var(--mobile-navigation-bar-height) / 2)
+        );
         margin-top: var(--margin-vertical);
         margin-bottom: var(--margin-vertical);
-        grid-template-rows: auto calc((30% - var(--mobile-status-bar-height)) - var(--mobile-navigation-bar-height)) auto;
-        
+        grid-template-rows: auto calc(
+                (30% - var(--mobile-status-bar-height)) - var(
+                        --mobile-navigation-bar-height
+                    )
+            ) auto;
+
         @media (min-width: 40rem) {
             margin-top: 0;
             margin-bottom: 0;
             grid-template-rows: auto 45% auto;
         }
-        
+
         @media (min-width: 48rem) {
             grid-template-rows: auto 40% auto;
         }
-        
+
         @media (min-width: 64rem) {
             grid-template-rows: auto 35% auto;
         }

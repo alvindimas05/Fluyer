@@ -21,7 +21,6 @@ export interface CoverArtCacheQuery {
 }
 
 const CoverArt = {
-	// FIXME: Hangs Rust if it has too many requests
 	fromQuery: async (query: CoverArtCacheQuery) => {
 		try {
 			let cache = MusicController.getCoverArtCache(query);
