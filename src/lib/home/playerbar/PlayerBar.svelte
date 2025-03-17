@@ -158,13 +158,15 @@
                     </button>
                     <!-- FIXME: Overflow Text Animation -->
                     <div class="ms-3 overflow-hidden">
+                        <!-- Note: Idk why the title scroll doesn't work without sacrificing this element -->
+                        <p class="animate-scroll-overflow-text"></p>
                         <p
-                            class="font-medium whitespace-nowrap overflow-hidden"
+                            class="font-medium whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
                         >
                             {title}
                         </p>
                         <p
-                            class="text-gray-200 whitespace-nowrap overflow-hidden"
+                            class="text-gray-200 whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
                         >
                             {artist}
                         </p>

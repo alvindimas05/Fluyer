@@ -76,9 +76,9 @@ onMount(checkAlbumImage);
         </div>
         <img class="w-12 lg:w-16 rounded" src={albumImage} alt="Album" />
     </button>
-    <div class="ms-3">
-        <p class="font-medium">{music.title}</p>
-        <p class="text-gray-200">
+    <div class="ms-3 overflow-hidden">
+        <p class="font-medium whitespace-nowrap overflow-hidden animate-scroll-overflow-text">{music.title}</p>
+        <p class="text-gray-200 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
             {MusicController.getFullArtistFromMusic(music)}
         </p>
     </div>

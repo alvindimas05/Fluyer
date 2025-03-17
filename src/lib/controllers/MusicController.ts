@@ -25,6 +25,8 @@ import type {
     CoverArtCacheQuery,
     CoverArtResponse,
 } from "$lib/handlers/coverart";
+// @ts-ignore
+import { fluidScroll } from "fluidscroll";
 
 export const MusicConfig = {
     step: 0.01,
@@ -54,6 +56,7 @@ const MusicController = {
         MusicController.setStatusBarHeight();
         MusicController.setNavigationBarHeight();
         MusicController.handleVolumeChange();
+        MusicController.listenAnimateScrollOverflowText();
     },
     musicList: () => get(musicList),
     setMusicList: (value: MusicData[] | null) => musicList.set(value),
@@ -385,6 +388,22 @@ const MusicController = {
     gotoPlaylist: (index: number) => {
         invoke(CommandsRoute.MUSIC_PLAYLIST_GOTO, { index });
     },
+    
+    listenAnimateScrollOverflowText: () => {
+        const scrollDuration = 3000;
+        let scrollEnd = true;
+        setInterval(() => {
+            let elements = document.querySelectorAll('.animate-scroll-overflow-text');
+            for(let i = elements.length; i > 0; --i){
+                fluidScroll({
+                    scrollingElement: elements[i],
+                    xPos: scrollEnd ? "end" : "start",
+                    duration: scrollDuration,
+                });
+            }
+            scrollEnd = !scrollEnd;
+        }, scrollDuration + 2000);
+    }
 };
 
 export default MusicController;
