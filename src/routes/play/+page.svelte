@@ -174,15 +174,12 @@
                         >{progressDurationText}</span
                     >
                 </div>
-                <!-- FIXME: Overflow Text Animation -->
-                <div
-                    class="font-medium text-lg xl:text-xl text-center mt-2 opacity-90"
-                >
+                <div class="text-lg text-center mt-2 opacity-90">
                     <p>
                         {music?.albumArtist ??
                             music?.artist ??
-                            MusicConfig.defaultArtist} - {music?.title ??
-                            MusicConfig.defaultTitle}
+                            MusicConfig.defaultArtist} - 
+                        {music?.title ?? MusicConfig.defaultTitle}
                     </p>
                 </div>
                 <div class="text-xs lg:text-sm flex justify-end w-12">
@@ -191,9 +188,19 @@
                     >
                 </div>
             </div>
-            <div class="w-full mt-[-4px]">
+            <div class="w-full pt-4 pb-2 relative">
                 <input
-                    class={`w-full music-progress-bar music-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
+                    class={`w-full absolute music-progress-bar`}
+                    type="range"
+                    style={`--progress-width: ${progressPercentage}%`}
+                    bind:value={$musicProgressValue}
+                    min={MusicConfig.min}
+                    max={MusicConfig.max}
+                    step={MusicConfig.step}
+                    onchange={onPlayerBarChange}
+                />
+                <input
+                    class={`w-full absolute music-progress-bar music-progress-bar-end`}
                     type="range"
                     style={`--progress-width: ${progressPercentage}%`}
                     bind:value={$musicProgressValue}
@@ -247,9 +254,7 @@
                     >
                 </div>
             </div>
-            <div
-                class="mt-5 volume-action animate__animated animate__faster animate__fadeOut"
-            >
+            <div class="mt-5 volume-action animate__animated animate__faster">
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <button onclick={() => MusicController.setVolume(0)}>
                         <img
@@ -310,8 +315,13 @@
 </div>
 
 <style lang="scss">
-    .volume-action:hover {
-        animation-name: fadeIn;
+    @media (min-width: 40rem) {
+        .volume-action {
+            animation-name: fadeOut;
+            &:hover {
+                animation-name: fadeIn;
+            }
+        }
     }
 
     .initial-fade-in {
@@ -336,11 +346,13 @@
         );
         margin-top: var(--margin-vertical);
         margin-bottom: var(--margin-vertical);
-        grid-template-rows: auto calc(
+        grid-template-rows:
+            auto calc(
                 (30% - var(--mobile-status-bar-height)) - var(
                         --mobile-navigation-bar-height
                     )
-            ) auto;
+            )
+            auto;
 
         @media (min-width: 40rem) {
             margin-top: 0;

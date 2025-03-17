@@ -103,16 +103,28 @@
     class="fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 backdrop-blur-md text-white animate__animated animate__slideInUp animate__slow"
     style={`padding-bottom: ${$mobileNavigationBarHeight}px`}
 >
-    <input
-        class={`w-full absolute music-progress-bar music-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
-        type="range"
-        style={`--progress-width: ${progressPercentage}%`}
-        bind:value={$musicProgressValue}
-        min={MusicConfig.min}
-        max={MusicConfig.max}
-        step={MusicConfig.step}
-        onchange={onPlayerBarChange}
-    />
+    <div class="relative">
+        <input
+            class={`w-full absolute music-progress-bar`}
+            type="range"
+            style={`--progress-width: ${progressPercentage}%`}
+            bind:value={$musicProgressValue}
+            min={MusicConfig.min}
+            max={MusicConfig.max}
+            step={MusicConfig.step}
+            onchange={onPlayerBarChange}
+        />
+        <input
+            class={`w-full absolute music-progress-bar music-progress-bar-end`}
+            type="range"
+            style={`--progress-width: ${progressPercentage}%`}
+            bind:value={$musicProgressValue}
+            min={MusicConfig.min}
+            max={MusicConfig.max}
+            step={MusicConfig.step}
+            onchange={onPlayerBarChange}
+        />
+    </div>
     <div class="p-3 mt-1">
         <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
             <div class="flex items-center">
