@@ -1,4 +1,4 @@
-<script lang="ts">
+    <script lang="ts">
     import MusicController, {
         MusicConfig,
     } from "$lib/controllers/MusicController";
@@ -177,7 +177,7 @@
                             {title}
                         </p>
                         <p
-                            class="text-gray-200 whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
+                            class="text-opacity-80 whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
                         >
                             {artist}
                         </p>

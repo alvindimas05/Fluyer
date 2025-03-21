@@ -78,7 +78,7 @@ onMount(checkAlbumImage);
     </button>
     <div class="ms-3 overflow-hidden">
         <p class="font-medium whitespace-nowrap overflow-hidden animate-scroll-overflow-text">{music.title}</p>
-        <p class="text-gray-200 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
+        <p class="text-opacity-background-80 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
             {MusicController.getFullArtistFromMusic(music)}
         </p>
     </div>

@@ -60,7 +60,7 @@
 
     <div class="ms-3">
         <p class="font-medium">{music.title}</p>
-        <p class="text-gray-200">
+        <p class="text-opacity-background-70">
             {MusicController.getFullArtistFromMusic(music)}
         </p>
     </div>
