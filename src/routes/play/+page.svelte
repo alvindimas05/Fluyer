@@ -147,7 +147,7 @@
 <div
     id="root-play"
     class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 initial-fade-in
-    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center"} md:pt-0`}
+    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center root-nolyrics"} md:pt-0`}
     style={`--mobile-status-bar-height: ${$mobileStatusBarHeight}px; --mobile-navigation-bar-height: ${$mobileNavigationBarHeight}px;`}
 >
     <div
@@ -174,11 +174,11 @@
                         >{progressDurationText}</span
                     >
                 </div>
-                <div class="text-lg text-center mt-2 opacity-90">
+                <div class="text-lg font-medium text-center mt-2 opacity-90">
                     <p>
                         {music?.albumArtist ??
                             music?.artist ??
-                            MusicConfig.defaultArtist} - 
+                            MusicConfig.defaultArtist} {MusicConfig.separator}
                         {music?.title ?? MusicConfig.defaultTitle}
                     </p>
                 </div>
@@ -190,7 +190,7 @@
             </div>
             <div class="w-full pt-4 pb-2 relative">
                 <input
-                    class={`w-full absolute music-progress-bar`}
+                    class={`w-full absolute music-progress-bar-play`}
                     type="range"
                     style={`--progress-width: ${progressPercentage}%`}
                     bind:value={$musicProgressValue}
@@ -200,7 +200,7 @@
                     onchange={onPlayerBarChange}
                 />
                 <input
-                    class={`w-full absolute music-progress-bar music-progress-bar-end`}
+                    class={`w-full absolute music-progress-bar-play-end`}
                     type="range"
                     style={`--progress-width: ${progressPercentage}%`}
                     bind:value={$musicProgressValue}
@@ -263,15 +263,25 @@
                             src={MusicConfig.defaultMuteButton}
                         />
                     </button>
-                    <input
-                        class={`volume-progress-bar volume-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
-                        type="range"
-                        style={`--progress-width: ${volumePercentage}%`}
-                        bind:value={$musicVolume}
-                        min={MusicConfig.vmin}
-                        max={MusicConfig.vmax}
-                        step={MusicConfig.vstep}
-                    />
+                    <div class="relative">
+                        <input
+                            class={`absolute w-full volume-progress-bar-end`}
+                            type="range"
+                            style={`--progress-width: ${volumePercentage}%`}
+                            min={MusicConfig.vmin}
+                            max={MusicConfig.vmax}
+                            step={MusicConfig.vstep}
+                        />
+                        <input
+                            class={`absolute w-full volume-progress-bar`}
+                            type="range"
+                            style={`--progress-width: ${volumePercentage}%`}
+                            bind:value={$musicVolume}
+                            min={MusicConfig.vmin}
+                            max={MusicConfig.vmax}
+                            step={MusicConfig.vstep}
+                        />
+                    </div>
                     <button onclick={() => MusicController.setVolume(1)}>
                         <img
                             class="invert w-5"
@@ -366,6 +376,19 @@
 
         @media (min-width: 64rem) {
             grid-template-rows: auto 35% auto;
+        }
+    }
+    .root-nolyrics {
+        @media (min-width: 40rem) {
+            grid-template-rows: 55% 45% !important;
+        }
+
+        @media (min-width: 48rem) {
+            grid-template-rows: 60% 40% !important;
+        }
+
+        @media (min-width: 64rem) {
+            grid-template-rows: 65% 35% !important;
         }
     }
 

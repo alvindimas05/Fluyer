@@ -115,7 +115,7 @@
             onchange={onPlayerBarChange}
         />
         <input
-            class={`w-full absolute music-progress-bar music-progress-bar-end`}
+            class={`w-full absolute music-progress-bar-end`}
             type="range"
             style={`--progress-width: ${progressPercentage}%`}
             bind:value={$musicProgressValue}
@@ -195,15 +195,25 @@
                             alt="Volume"
                         />
                     </button>
-                    <input
-                        class={`w-24 volume-progress-bar volume-progress-bar-${$backgroundIsLight ? "light" : "dark"}`}
-                        type="range"
-                        style={`--progress-width: ${volumePercentage}%`}
-                        bind:value={$musicVolume}
-                        min={MusicConfig.vmin}
-                        max={MusicConfig.vmax}
-                        step={MusicConfig.vstep}
-                    />
+                    <div class="relative w-24">
+                        <input
+                            class={`absolute w-24 volume-progress-bar-end`}
+                            type="range"
+                            style={`--progress-width: ${volumePercentage}%`}
+                            min={MusicConfig.vmin}
+                            max={MusicConfig.vmax}
+                            step={MusicConfig.vstep}
+                        />
+                        <input
+                            class={`absolute w-24 volume-progress-bar`}
+                            type="range"
+                            style={`--progress-width: ${volumePercentage}%`}
+                            bind:value={$musicVolume}
+                            min={MusicConfig.vmin}
+                            max={MusicConfig.vmax}
+                            step={MusicConfig.vstep}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

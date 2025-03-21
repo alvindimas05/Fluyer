@@ -35,6 +35,7 @@ export const MusicConfig = {
     vstep: 0.01,
     vmin: 0,
     vmax: 1,
+    separator: "•",
     defaultTitle: "The Meaning of Life",
     defaultArtist: "Musician",
     defaultAlbumImage: "/icons/default/default-album-cover.jpg",
@@ -109,7 +110,7 @@ const MusicController = {
     getFullArtistFromMusic: (music: MusicData | null) => {
         if (music === null || music.artist === null)
             return MusicConfig.defaultArtist;
-        return music.artist.replace(/\|\|/g, " • ");
+        return music.artist.replace(/\|\|/g, ` ${MusicConfig.separator} `);
     },
 
     currentMusicDuration: () =>
