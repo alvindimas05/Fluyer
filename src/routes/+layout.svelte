@@ -19,14 +19,14 @@ let isAppReady = $state(false);
 
 async function initialize(){
     if(isDesktop()) await getCurrentWindow().show();
+    if(isWindows()) await getCurrentWindow().toggleMaximize();
     MusicController.handleInitialize();
     isAppReady = true;
 }
 
 if(isWindows()){
-    onMount(() => {
+    onMount(async () => {
         setTimeout(() => {
-            getCurrentWindow().toggleMaximize();
             initialize();
         }, 1000);
     });
