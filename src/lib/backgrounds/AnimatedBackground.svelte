@@ -7,7 +7,8 @@ import LoadingController from "$lib/controllers/LoadingController";
 import { platform } from "@tauri-apps/plugin-os";
 import { isMobile } from "$lib/platform";
 import BackgroundController from "$lib/controllers/BackgroundController";
-    import { musicCurrentIndex } from "$lib/stores/music";
+import { musicCurrentIndex } from "$lib/stores/music";
+import { v4 as uuidv4 } from "uuid";
 
 const SIZE = 10;
 
@@ -16,9 +17,7 @@ const GRID_COLS = Array.apply(null, Array(SIZE))
 	.join(" ");
 
 let animatedClasses = $state("hidden");
-let lastImage = "";
-let position: string[][] = $state([]);
-let secondPosition: string[][] = $state([]);
+let previousBackground: PreviousBackground | null = null;
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
 	const bigint = parseInt(hex.slice(1), 16);
@@ -54,11 +53,18 @@ function isMajorityLight(colors: string[]): boolean {
 }
 
 async function getColors() {
-	if (lastImage === MusicController.currentMusicAlbumImage()) return;
-	position = [];
+    const currentMusic = MusicController.currentMusic();
+	if (previousBackground !== null && previousBackground!.image === currentMusic?.image) return;
+	const index = previousBackground?.index ?? 0;
+	
+	const queueForRemoval = previousBackground !== null;
 
+	const id = uuidv4();
 	let image = new Image();
-	image.src = lastImage = MusicController.currentMusicAlbumImage();
+	image.src = MusicController.currentMusicAlbumImage();
+    previousBackground = {
+        id, image: currentMusic?.image ?? MusicConfig.defaultAlbumImage, index: index + 1
+    };
 
 	// @ts-ignore
 	let colors: Hex[] = await prominent(image, {
@@ -67,28 +73,78 @@ async function getColors() {
 	});
 	BackgroundController.setIsLight(isMajorityLight(colors));
 
-	position = Array.from({ length: SIZE }, () =>
-		Array.from(
-			{ length: SIZE },
-			() => colors[Math.floor(Math.random() * colors.length)],
-		),
-	);
-	secondPosition = Array.from({ length: SIZE }, () =>
-		Array.from(
-			{ length: SIZE },
-			() => colors[Math.floor(Math.random() * colors.length)],
-		),
-	);
-
-	// FIXME: Visible Animated Colored Squares on Linux
-	// Note: Probably won't be fixed soon since it's WebView issue
-	if (platform() == "linux") {
-		LoadingController.setLoadingBackground(true);
-		animatedClasses = "";
-	} else {
-		animatedClasses = "animate__animated animate__fadeIn";
+	// let position = Array.from({ length: SIZE }, () =>
+	// 	Array.from(
+	// 		{ length: SIZE },
+	// 		() => colors[Math.floor(Math.random() * colors.length)],
+	// 	),
+	// );
+	// let secondPosition = Array.from({ length: SIZE }, () =>
+	// 	Array.from(
+	// 		{ length: SIZE },
+	// 		() => colors[Math.floor(Math.random() * colors.length)],
+	// 	),
+	// );
+	
+	let bgBlurChildren = "";
+	for (let i = 0; i < SIZE; i++) {
+        for (let j = 0; j < SIZE; j++) {
+            bgBlurChildren += `
+                <div
+                    class="bg-blur-pixel"
+                    style="background: ${colors[Math.floor(Math.random() * colors.length)]}"
+                ></div>
+            `;
+        }
+    }
+    
+    let bgBlurHeartChildren = "";
+    for (let i = 0; i < SIZE; i++) {
+        for (let j = 0; j < SIZE; j++) {
+            bgBlurHeartChildren += `
+                <div
+                    class="bg-blur-pixel"
+                    style="background: ${colors[Math.floor(Math.random() * colors.length)]}"
+                ></div>
+            `;
+        }
+    }
+	document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
+   	<div class="absolute ${currentMusic !== null && 'animate__animated animate__slower animate__fadeIn'}" id="bg-blur-${id}">
+  		<div
+ 			class="bg-blur-colors"
+ 			style="grid-template-columns: ${GRID_COLS}"
+  		>
+ 			${bgBlurChildren}
+  		</div>
+   	</div>
+   	<div class="absolute ${currentMusic !== null && 'animate__animated animate__slower animate__fadeIn'}" id="bg-blur-heart-${id}">
+  		<div
+ 			class="bg-blur-colors bg-blur-heart"
+ 			style="grid-template-columns: ${GRID_COLS}"
+  		>
+ 			${bgBlurHeartChildren}
+  		</div>
+   	</div>`;
+	
+	if(queueForRemoval){
+        setTimeout(() => {
+            document.getElementById(`bg-blur-slot-${index - 1}`)!.remove();
+        }, 3000);
+	}
+	
+	if(!LoadingController.loadingBackground()){
+    	// FIXME: Visible Animated Colored Squares on Linux
+    	// Note: Probably won't be fixed soon since it's WebView issue
+    	if (platform() == "linux") {
+    		LoadingController.setLoadingBackground(true);
+    		animatedClasses = "";
+    	} else {
+    		animatedClasses = "animate__animated animate__fadeIn";
+    	}
 	}
 }
+
 musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
 </script>
 
@@ -117,37 +173,11 @@ musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
 		class={`fixed ${animatedClasses}`}
 		onanimationend={() => LoadingController.setLoadingBackground(true)}
 	>
-		<div>
-			<div
-				class="bg-blur-colors"
-				style={`grid-template-columns: ${GRID_COLS}`}
-			>
-				{#each position as row}
-					{#each row as col}
-						<div
-							class="bg-blur-pixel"
-							style={`background: ${col}`}
-						></div>
-					{/each}
-				{/each}
-			</div>
-		</div>
-		<div>
-			<div
-				class="bg-blur-colors bg-blur-heart"
-				style={`grid-template-columns: ${GRID_COLS}`}
-			>
-				{#each secondPosition as row}
-					{#each row as col}
-						<div
-							class="bg-blur-pixel"
-							style={`background: ${col}`}
-						></div>
-					{/each}
-				{/each}
-			</div>
-		</div>
-		<div class="bg-blur"></div>
+	    <!-- Note: Dirty solution for temporary. Or permanent... -->
+	    {#each Array.apply(null, Array(1000)) as _, i}
+			<div id={`bg-blur-slot-${i}`} class="absolute"></div>
+		{/each}
+        <div class="bg-blur"></div>
 	</div>
 {/if}
 {#if $backgroundIsLight}

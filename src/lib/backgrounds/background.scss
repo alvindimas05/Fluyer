@@ -9,7 +9,7 @@
 }
 
 .bg-blur-colors {
-    @apply w-screen h-screen grid bg-black absolute z-[-99999];
+    @apply w-screen h-screen grid bg-black z-[-99999];
 
     .bg-blur-pixel {
         @apply min-w-[30px] relative;
