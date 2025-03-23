@@ -114,7 +114,7 @@ async function getColors() {
 		}
 	}
 	document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
-   	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}" id="bg-blur-${id}">
+   	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
   		<div
  			class="bg-blur-colors"
  			style="grid-template-columns: ${GRID_COLS}"
@@ -122,7 +122,7 @@ async function getColors() {
  			${bgBlurChildren}
   		</div>
    	</div>
-   	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}" id="bg-blur-heart-${id}">
+   	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
   		<div
  			class="bg-blur-colors bg-blur-heart"
  			style="grid-template-columns: ${GRID_COLS}"
