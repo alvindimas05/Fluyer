@@ -153,14 +153,14 @@ musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
 		class="fixed z-[-10] w-full h-full animate__animated animate__fadeIn"
 		onanimationend={() => LoadingController.setLoadingBackground(true)}
 	>
-		<div>
+		<div class="absolute">
 			<img
 				class="bg-blur-colors object-cover scale-x-[-1]"
 				src="/images/mobile-background.png"
 				alt="Background"
 			/>
 		</div>
-		<div class="bg-blur-heart">
+		<div class="bg-blur-heart absolute">
 			<img
 				class="bg-blur-colors object-cover"
 				src="/images/mobile-background.png"
