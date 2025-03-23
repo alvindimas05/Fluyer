@@ -8,6 +8,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import { isMobile } from "$lib/platform";
 import BackgroundController from "$lib/controllers/BackgroundController";
 import { musicCurrentIndex } from "$lib/stores/music";
+import type { PreviousBackground } from "./types";
 
 const SIZE = 10;
 
@@ -58,11 +59,10 @@ async function getColors() {
 	
 	const queueForRemoval = previousBackground !== null;
 
-	const id = uuidv4();
 	let image = new Image();
 	image.src = MusicController.currentMusicAlbumImage();
     previousBackground = {
-        id, image: currentMusic?.image ?? MusicConfig.defaultAlbumImage, index: index + 1
+        image: currentMusic?.image ?? MusicConfig.defaultAlbumImage, index: index + 1
     };
 
 	// @ts-ignore
