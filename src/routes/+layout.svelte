@@ -8,7 +8,7 @@ import MusicController from "$lib/controllers/MusicController";
 import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
-    import Font from "$lib/font/Font.svelte";
+import Font from "$lib/font/Font.svelte";
 
 interface Props {
 	children?: import("svelte").Snippet;
@@ -17,21 +17,21 @@ interface Props {
 let { children }: Props = $props();
 let isAppReady = $state(false);
 
-async function initialize(){
-    if(isDesktop()) await getCurrentWindow().show();
-    if(isWindows()) await getCurrentWindow().toggleMaximize();
-    MusicController.handleInitialize();
-    isAppReady = true;
+async function initialize() {
+	if (isDesktop()) await getCurrentWindow().show();
+	if (isWindows()) await getCurrentWindow().toggleMaximize();
+	MusicController.handleInitialize();
+	isAppReady = true;
 }
 
-if(isWindows()){
-    onMount(async () => {
-        setTimeout(() => {
-            initialize();
-        }, 1000);
-    });
+if (isWindows()) {
+	onMount(async () => {
+		setTimeout(() => {
+			initialize();
+		}, 1000);
+	});
 } else {
-    initialize();
+	initialize();
 }
 </script>
 <Font />

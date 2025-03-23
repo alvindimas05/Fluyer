@@ -53,17 +53,22 @@ function isMajorityLight(colors: string[]): boolean {
 }
 
 async function getColors() {
-    const currentMusic = MusicController.currentMusic();
-	if (previousBackground !== null && previousBackground!.image === currentMusic?.image) return;
+	const currentMusic = MusicController.currentMusic();
+	if (
+		previousBackground !== null &&
+		previousBackground!.image === currentMusic?.image
+	)
+		return;
 	const index = previousBackground?.index ?? 0;
-	
+
 	const queueForRemoval = previousBackground !== null;
 
 	let image = new Image();
 	image.src = MusicController.currentMusicAlbumImage();
-    previousBackground = {
-        image: currentMusic?.image ?? MusicConfig.defaultAlbumImage, index: index + 1
-    };
+	previousBackground = {
+		image: currentMusic?.image ?? MusicConfig.defaultAlbumImage,
+		index: index + 1,
+	};
 
 	// @ts-ignore
 	let colors: Hex[] = await prominent(image, {
@@ -84,32 +89,32 @@ async function getColors() {
 	// 		() => colors[Math.floor(Math.random() * colors.length)],
 	// 	),
 	// );
-	
+
 	let bgBlurChildren = "";
 	for (let i = 0; i < SIZE; i++) {
-        for (let j = 0; j < SIZE; j++) {
-            bgBlurChildren += `
+		for (let j = 0; j < SIZE; j++) {
+			bgBlurChildren += `
                 <div
                     class="bg-blur-pixel"
                     style="background: ${colors[Math.floor(Math.random() * colors.length)]}"
                 ></div>
             `;
-        }
-    }
-    
-    let bgBlurHeartChildren = "";
-    for (let i = 0; i < SIZE; i++) {
-        for (let j = 0; j < SIZE; j++) {
-            bgBlurHeartChildren += `
+		}
+	}
+
+	let bgBlurHeartChildren = "";
+	for (let i = 0; i < SIZE; i++) {
+		for (let j = 0; j < SIZE; j++) {
+			bgBlurHeartChildren += `
                 <div
                     class="bg-blur-pixel"
                     style="background: ${colors[Math.floor(Math.random() * colors.length)]}"
                 ></div>
             `;
-        }
-    }
+		}
+	}
 	document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
-   	<div class="absolute ${currentMusic !== null && 'animate__animated animate__slower animate__fadeIn'}" id="bg-blur-${id}">
+   	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}" id="bg-blur-${id}">
   		<div
  			class="bg-blur-colors"
  			style="grid-template-columns: ${GRID_COLS}"
@@ -117,7 +122,7 @@ async function getColors() {
  			${bgBlurChildren}
   		</div>
    	</div>
-   	<div class="absolute ${currentMusic !== null && 'animate__animated animate__slower animate__fadeIn'}" id="bg-blur-heart-${id}">
+   	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}" id="bg-blur-heart-${id}">
   		<div
  			class="bg-blur-colors bg-blur-heart"
  			style="grid-template-columns: ${GRID_COLS}"
@@ -125,22 +130,22 @@ async function getColors() {
  			${bgBlurHeartChildren}
   		</div>
    	</div>`;
-	
-	if(queueForRemoval){
-        setTimeout(() => {
-            document.getElementById(`bg-blur-slot-${index - 1}`)!.remove();
-        }, 3000);
+
+	if (queueForRemoval) {
+		setTimeout(() => {
+			document.getElementById(`bg-blur-slot-${index - 1}`)!.remove();
+		}, 3000);
 	}
-	
-	if(!LoadingController.loadingBackground()){
-    	// FIXME: Visible Animated Colored Squares on Linux
-    	// Note: Probably won't be fixed soon since it's WebView issue
-    	if (platform() == "linux") {
-    		LoadingController.setLoadingBackground(true);
-    		animatedClasses = "";
-    	} else {
-    		animatedClasses = "animate__animated animate__fadeIn";
-    	}
+
+	if (!LoadingController.loadingBackground()) {
+		// FIXME: Visible Animated Colored Squares on Linux
+		// Note: Probably won't be fixed soon since it's WebView issue
+		if (platform() == "linux") {
+			LoadingController.setLoadingBackground(true);
+			animatedClasses = "";
+		} else {
+			animatedClasses = "animate__animated animate__fadeIn";
+		}
 	}
 }
 

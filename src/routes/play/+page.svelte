@@ -1,145 +1,140 @@
 <script lang="ts">
-    import {
-        musicCurrentIndex,
-        musicIsPlaying,
-        musicProgressValue,
-        musicVolume,
-    } from "$lib/stores/music";
-    import MusicController, {
-        MusicConfig,
-    } from "$lib/controllers/MusicController";
-    import type MusicLyric from "$lib/home/music/lyric";
-    import { onMount } from "svelte";
-    import LrcLib from "$lib/api/lrclib";
-    import {
-        mobileNavigationBarHeight,
-        mobileStatusBarHeight,
-    } from "$lib/stores/mobile";
-    import { backgroundIsLight } from "$lib/stores/background";
-    import { isAndroid } from "$lib/platform";
+import {
+	musicCurrentIndex,
+	musicIsPlaying,
+	musicProgressValue,
+	musicVolume,
+} from "$lib/stores/music";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import type MusicLyric from "$lib/home/music/lyric";
+import { onMount } from "svelte";
+import LrcLib from "$lib/api/lrclib";
+import {
+	mobileNavigationBarHeight,
+	mobileStatusBarHeight,
+} from "$lib/stores/mobile";
+import { backgroundIsLight } from "$lib/stores/background";
+import { isAndroid } from "$lib/platform";
 
-    // Based on Rust Rodio fade effect (Please check player.rs)
-    let pauseDelay = isAndroid() ? 0 : 400;
-    let music = $state(MusicController.currentMusic());
-    let progressPercentage = $state(MusicController.progressPercentage());
-    let progressDurationText = $state(MusicController.progressDurationText());
-    let progressDurationNegativeText = $state(
-        MusicController.progressDurationText(true),
-    );
-    let albumImage = $state(MusicConfig.defaultAlbumImage);
+// Based on Rust Rodio fade effect (Please check player.rs)
+let pauseDelay = isAndroid() ? 0 : 400;
+let music = $state(MusicController.currentMusic());
+let progressPercentage = $state(MusicController.progressPercentage());
+let progressDurationText = $state(MusicController.progressDurationText());
+let progressDurationNegativeText = $state(
+	MusicController.progressDurationText(true),
+);
+let albumImage = $state(MusicConfig.defaultAlbumImage);
 
-    let lyrics: MusicLyric[] = $state([]);
-    let selectedLyricIndex = $state(0);
-    let volumePercentage = $state(MusicController.volumePercentage());
+let lyrics: MusicLyric[] = $state([]);
+let selectedLyricIndex = $state(0);
+let volumePercentage = $state(MusicController.volumePercentage());
 
-    musicProgressValue.subscribe(() => {
-        progressPercentage = MusicController.progressPercentage();
-        progressDurationText = MusicController.progressDurationText();
-        progressDurationNegativeText =
-            MusicController.progressDurationText(true);
+musicProgressValue.subscribe(() => {
+	progressPercentage = MusicController.progressPercentage();
+	progressDurationText = MusicController.progressDurationText();
+	progressDurationNegativeText = MusicController.progressDurationText(true);
 
-        resetSelectedLyricIndex();
-    });
-    musicCurrentIndex.subscribe(() => {
-        music = MusicController.currentMusic();
-        albumImage = MusicController.currentMusicAlbumImage();
-        resetLyrics();
-    });
+	resetSelectedLyricIndex();
+});
+musicCurrentIndex.subscribe(() => {
+	music = MusicController.currentMusic();
+	albumImage = MusicController.currentMusicAlbumImage();
+	resetLyrics();
+});
 
-    function handleButtonPlayPause() {
-        if (
-            MusicController.currentMusic() === null ||
-            MusicController.isProgressValueEnd()
-        ) {
-            return;
-        }
+function handleButtonPlayPause() {
+	if (
+		MusicController.currentMusic() === null ||
+		MusicController.isProgressValueEnd()
+	) {
+		return;
+	}
 
-        if (MusicController.isPlaying()) {
-            MusicController.setIsPlaying(false);
-            setTimeout(MusicController.pause, pauseDelay);
-        } else MusicController.play();
-    }
+	if (MusicController.isPlaying()) {
+		MusicController.setIsPlaying(false);
+		setTimeout(MusicController.pause, pauseDelay);
+	} else MusicController.play();
+}
 
-    function handleButtonPrevious() {
-        MusicController.previousMusic();
-    }
+function handleButtonPrevious() {
+	MusicController.previousMusic();
+}
 
-    function handleButtonNext() {
-        MusicController.nextMusic();
-    }
+function handleButtonNext() {
+	MusicController.nextMusic();
+}
 
-    function onPlayerBarChange() {
-        if (MusicController.isProgressValueEnd()) {
-            MusicController.setProgressValue(0);
-            return;
-        }
+function onPlayerBarChange() {
+	if (MusicController.isProgressValueEnd()) {
+		MusicController.setProgressValue(0);
+		return;
+	}
 
-        if (MusicController.isProgressValueEnd()) {
-            MusicController.addMusic(MusicController.currentMusic()!);
-        }
+	if (MusicController.isProgressValueEnd()) {
+		MusicController.addMusic(MusicController.currentMusic()!);
+	}
 
-        MusicController.sendCommandSetPosition(
-            MusicController.realProgressDuration(),
-        );
-    }
+	MusicController.sendCommandSetPosition(
+		MusicController.realProgressDuration(),
+	);
+}
 
-    function handleButtonBack() {
-        window.history.back();
-    }
+function handleButtonBack() {
+	window.history.back();
+}
 
-    async function onKeyDown(
-        e: KeyboardEvent & {
-            currentTarget: EventTarget & Document;
-        },
-    ) {
-        if (e.key === " ") handleButtonPlayPause();
-    }
+async function onKeyDown(
+	e: KeyboardEvent & {
+		currentTarget: EventTarget & Document;
+	},
+) {
+	if (e.key === " ") handleButtonPlayPause();
+}
 
-    async function resetLyrics() {
-        selectedLyricIndex = 0;
+async function resetLyrics() {
+	selectedLyricIndex = 0;
 
-        if (MusicController.currentMusic() == null) return;
-        const resLyrics = await LrcLib.getLyrics(
-            MusicController.currentMusic()!,
-        );
-        if (resLyrics == null) return;
-        lyrics = resLyrics;
-    }
+	if (MusicController.currentMusic() == null) return;
+	const resLyrics = await LrcLib.getLyrics(MusicController.currentMusic()!);
+	if (resLyrics == null) return;
+	lyrics = resLyrics;
+}
 
-    function resetSelectedLyricIndex() {
-        if (lyrics.length < 1) return;
+function resetSelectedLyricIndex() {
+	if (lyrics.length < 1) return;
 
-        if (MusicController.progressDuration() < lyrics[0].duration) {
-            scrollToSelectedLyric();
-            return;
-        }
-        // Note: Using for loop since it's the fastest. Just in case though :)
-        for (var i = 0; i < lyrics.length; i++) {
-            if (MusicController.progressDuration() < lyrics[i].duration) {
-                selectedLyricIndex = i - 1;
-                scrollToSelectedLyric();
-                return;
-            }
-        }
-        selectedLyricIndex = lyrics.length - 1;
-        scrollToSelectedLyric();
-    }
+	if (MusicController.progressDuration() < lyrics[0].duration) {
+		scrollToSelectedLyric();
+		return;
+	}
+	// Note: Using for loop since it's the fastest. Just in case though :)
+	for (var i = 0; i < lyrics.length; i++) {
+		if (MusicController.progressDuration() < lyrics[i].duration) {
+			selectedLyricIndex = i - 1;
+			scrollToSelectedLyric();
+			return;
+		}
+	}
+	selectedLyricIndex = lyrics.length - 1;
+	scrollToSelectedLyric();
+}
 
-    function scrollToSelectedLyric() {
-        document.getElementById("selected-lyric")?.scrollIntoView({
-            block: window.innerWidth > 768 ? "center" : "start",
-            behavior: "smooth",
-        });
-    }
+function scrollToSelectedLyric() {
+	document.getElementById("selected-lyric")?.scrollIntoView({
+		block: window.innerWidth > 768 ? "center" : "start",
+		behavior: "smooth",
+	});
+}
 
-    musicVolume.subscribe(() => {
-        volumePercentage = MusicController.volumePercentage();
-    });
+musicVolume.subscribe(() => {
+	volumePercentage = MusicController.volumePercentage();
+});
 
-    onMount(async () => {
-        await resetLyrics();
-        resetSelectedLyricIndex();
-    });
+onMount(async () => {
+	await resetLyrics();
+	resetSelectedLyricIndex();
+});
 </script>
 
 <svelte:document onkeydown={onKeyDown} />

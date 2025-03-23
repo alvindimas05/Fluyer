@@ -14,6 +14,6 @@ export interface MusicData {
 export interface MusicPlayerSync {
 	index: number;
 	currentPosition: number;
-    isPlaying: boolean;
-    duration: number;
+	isPlaying: boolean;
+	duration: number;
 }

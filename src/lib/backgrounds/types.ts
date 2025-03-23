@@ -1,4 +1,4 @@
 export interface PreviousBackground {
-    image: string;
-    index: number;
+	image: string;
+	index: number;
 }
