@@ -1,6 +1,6 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import { backgroundIsLight, observerCounts } from "$lib/stores/background";
+import { backgroundIsLight } from "$lib/stores/background";
 import { prominent } from "color.js";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
@@ -55,7 +55,6 @@ function isMajorityLight(colors: string[]): boolean {
 
 async function getColors() {
 	if (lastImage === MusicController.currentMusicAlbumImage()) return;
-	$observerCounts = 0;
 	position = [];
 
 	let image = new Image();
