@@ -25,7 +25,7 @@ let splittedMusics = $derived(splitMusics($musicList));
 </script>
 
 <div
-	class="md:grid md:grid-cols-2 tb:grid-cols-2 lg:grid-cols-3 text-white px-3 overflow-y-auto scrollbar-hidden pb-20"
+	class="md:grid md:grid-cols-2 tb:grid-cols-2 lg:grid-cols-3 h-fit text-white px-3 overflow-y-auto scrollbar-hidden pb-20"
 >
 	{#if Array.isArray($musicList)}
 		{#each $musicList as music}
