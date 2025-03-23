@@ -8,7 +8,6 @@ import { platform } from "@tauri-apps/plugin-os";
 import { isMobile } from "$lib/platform";
 import BackgroundController from "$lib/controllers/BackgroundController";
 import { musicCurrentIndex } from "$lib/stores/music";
-import { v4 as uuidv4 } from "uuid";
 
 const SIZE = 10;
 
