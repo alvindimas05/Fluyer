@@ -32,7 +32,7 @@ LoadingController.listen();
         <SearchBar />
         <PlayerBar />
         <Playlist />
-        <div class="h-full grid grid-rows-[min-content_1fr]">
+        <div class="h-full grid grid-rows-[min-content_auto]">
             <AlbumList />
             <MusicList />
         </div>
