@@ -352,6 +352,15 @@ const MusicController = {
 	gotoPlaylist: (index: number) => {
 		invoke(CommandsRoute.MUSIC_PLAYLIST_GOTO, { index });
 	},
+	
+	reset: () => {
+	    MusicController.pause();
+	    MusicController.sendCommandController('clear');
+		musicCurrentIndex.set(-1);
+		musicPlaylist.set([]);
+		MusicController.stopProgress();
+		MusicController.resetProgress()
+	},
 };
 
 export default MusicController;
