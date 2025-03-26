@@ -14,12 +14,6 @@ import type { MusicPlayerSync, MusicData } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
 import { CommandsRoute } from "$lib/commands";
-import { isDesktop } from "$lib/platform";
-import {
-	mobileNavigationBarHeight,
-	mobileStatusBarHeight,
-} from "$lib/stores/mobile";
-import logHandler from "$lib/handlers/log";
 import { coverArtCaches } from "$lib/stores/coverart";
 import type {
 	CoverArtCacheQuery,

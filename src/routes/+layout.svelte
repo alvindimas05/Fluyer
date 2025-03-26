@@ -11,6 +11,7 @@ import { onMount } from "svelte";
 import Font from "$lib/font/Font.svelte";
 import UIController from "$lib/controllers/UIController";
 import MobileController from "$lib/controllers/MobileController";
+import logHandler from "$lib/handlers/log";
 
 interface Props {
 	children?: import("svelte").Snippet;
@@ -22,6 +23,8 @@ let isAppReady = $state(false);
 async function initialize() {
 	if (isDesktop()) await getCurrentWindow().show();
 	if (isWindows()) await getCurrentWindow().toggleMaximize();
+	
+	logHandler();
 	MusicController.initialize();
 	UIController.initialize();
 	MobileController.initialize();
