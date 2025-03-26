@@ -79,6 +79,8 @@ impl MusicPlayer {
         }
 
         if _command == MusicCommand::Clear {
+            MUSIC_PLAYLIST.lock().unwrap().clear();
+            MUSIC_CURRENT_INDEX.store(0, Ordering::SeqCst);
             GLOBAL_MUSIC_SINK.get().unwrap().clear();
             return;
         }

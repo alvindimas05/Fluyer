@@ -9,6 +9,8 @@ import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
 import Font from "$lib/font/Font.svelte";
+import UIController from "$lib/controllers/UIController";
+import MobileController from "$lib/controllers/MobileController";
 
 interface Props {
 	children?: import("svelte").Snippet;
@@ -20,7 +22,9 @@ let isAppReady = $state(false);
 async function initialize() {
 	if (isDesktop()) await getCurrentWindow().show();
 	if (isWindows()) await getCurrentWindow().toggleMaximize();
-	MusicController.handleInitialize();
+	MusicController.initialize();
+	UIController.initialize();
+	MobileController.initialize();
 	isAppReady = true;
 }
 
