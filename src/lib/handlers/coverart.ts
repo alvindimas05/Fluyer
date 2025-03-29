@@ -1,4 +1,4 @@
-import { CommandsRoute } from "$lib/commands";
+import { CommandRoutes } from "$lib/commands";
 import MusicController from "$lib/controllers/MusicController";
 import type { MusicData } from "$lib/home/music/types";
 import { invoke } from "@tauri-apps/api/core";
@@ -31,7 +31,7 @@ const CoverArt = {
 				image: null,
 			});
 
-			let cover = await invoke<CoverArtResponse>(CommandsRoute.COVER_ART_GET, {
+			let cover = await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
 				query,
 			});
 			MusicController.setCoverArtCache(query, cover);

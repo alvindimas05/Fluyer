@@ -13,8 +13,10 @@ import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
-import { backgroundIsLight } from "$lib/stores/background";
 import { isAndroid } from "$lib/platform";
+import PageController from "$lib/controllers/PageController";
+import { PageRoutes } from "$lib/pages";
+    import { pageHomePlayerBarShow } from "$lib/stores/page";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = isAndroid() ? 0 : 400;
@@ -81,7 +83,8 @@ function onPlayerBarChange() {
 }
 
 function handleButtonBack() {
-	window.history.back();
+    $pageHomePlayerBarShow = true;
+    PageController.goto(PageRoutes.HOME);
 }
 
 async function onKeyDown(
@@ -141,7 +144,7 @@ onMount(async () => {
 
 <div
     id="root-play"
-    class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 initial-fade-in
+    class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0
     ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center root-nolyrics"} md:pt-0`}
     style={`--mobile-status-bar-height: ${$mobileStatusBarHeight}px; --mobile-navigation-bar-height: ${$mobileNavigationBarHeight}px;`}
 >
@@ -326,21 +329,6 @@ onMount(async () => {
             &:hover {
                 animation-name: fadeIn;
             }
-        }
-    }
-
-    .initial-fade-in {
-        animation: 2s ease 0s normal forwards 1 fade-in;
-    }
-    @keyframes fade-in {
-        0% {
-            opacity: 0;
-        }
-        66% {
-            opacity: 0;
-        }
-        100% {
-            opacity: 1;
         }
     }
 

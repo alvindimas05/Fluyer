@@ -13,7 +13,7 @@ import { get } from "svelte/store";
 import type { MusicPlayerSync, MusicData } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
-import { CommandsRoute } from "$lib/commands";
+import { CommandRoutes } from "$lib/commands";
 import { coverArtCaches } from "$lib/stores/coverart";
 import type {
 	CoverArtCacheQuery,
@@ -51,7 +51,7 @@ const MusicController = {
 	getMusics: async () => {
 		if (MusicController.musicList()?.length) return;
 		const musics = await invoke<MusicData[] | null>(
-			CommandsRoute.MUSIC_GET_ALL,
+			CommandRoutes.MUSIC_GET_ALL,
 		);
 		MusicController.setMusicList(musics);
 		LoadingController.setLoadingMusicList(true);
@@ -179,7 +179,7 @@ const MusicController = {
 	},
 
 	listenSyncMusic: () => {
-		listen<MusicPlayerSync>(CommandsRoute.MUSIC_PLAYER_SYNC, async (e) => {
+		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
 			if (e.payload.index != MusicController.currentMusicIndex()) {
 				MusicController.setCurrentMusicIndex(e.payload.index);
 			}
@@ -239,11 +239,11 @@ const MusicController = {
 		if (sendCommand) MusicController.sendCommandController("pause");
 	},
 	sendCommandController: async (command: string) => {
-		await invoke(CommandsRoute.MUSIC_CONTROLLER, { command });
+		await invoke(CommandRoutes.MUSIC_CONTROLLER, { command });
 	},
 
 	sendCommandSetPosition: (position: number) => {
-		invoke(CommandsRoute.MUSIC_POSITION_SET, {
+		invoke(CommandRoutes.MUSIC_POSITION_SET, {
 			position: Math.trunc(position),
 		});
 	},
@@ -257,13 +257,13 @@ const MusicController = {
 			MusicController.setCurrentMusicIndex(
 				MusicController.currentMusicIndex() - 1,
 			);
-		invoke(CommandsRoute.MUSIC_PLAYLIST_REMOVE, { index });
+		invoke(CommandRoutes.MUSIC_PLAYLIST_REMOVE, { index });
 	},
 
 	addSinkMusic: async (path: string) =>
 		await MusicController.addSinkMusics([path]),
 	addSinkMusics: async (musicPaths: string[]) => {
-		await invoke(CommandsRoute.MUSIC_PLAYLIST_ADD, {
+		await invoke(CommandRoutes.MUSIC_PLAYLIST_ADD, {
 			playlist: musicPaths,
 		});
 	},
@@ -295,7 +295,7 @@ const MusicController = {
 	volume: () => get(musicVolume),
 	setVolume: (value: number) => {
 		musicVolume.set(value);
-		invoke(CommandsRoute.MUSIC_SET_VOLUME, {
+		invoke(CommandRoutes.MUSIC_SET_VOLUME, {
 			volume: MusicController.volume(),
 		});
 	},
@@ -305,7 +305,7 @@ const MusicController = {
 		100,
 	handleVolumeChange: () => {
 		musicVolume.subscribe(() => {
-			invoke(CommandsRoute.MUSIC_SET_VOLUME, {
+			invoke(CommandRoutes.MUSIC_SET_VOLUME, {
 				volume: MusicController.volume(),
 			});
 		});
@@ -350,7 +350,7 @@ const MusicController = {
 	},
 
 	gotoPlaylist: (index: number) => {
-		invoke(CommandsRoute.MUSIC_PLAYLIST_GOTO, { index });
+		invoke(CommandRoutes.MUSIC_PLAYLIST_GOTO, { index });
 	},
 	
 	reset: () => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { CommandsRoute } from "$lib/commands";
+import { CommandRoutes } from "$lib/commands";
 import LoadingController from "$lib/controllers/LoadingController";
 import MusicController from "$lib/controllers/MusicController";
 import { isMobile } from "$lib/platform";
@@ -8,8 +8,8 @@ import { listen } from "@tauri-apps/api/event";
 
 let animatedClasses = $state("animate__fadeIn");
 async function chooseDirPath() {
-	await invoke(CommandsRoute.MUSIC_REQUEST_DIRECTORY);
-	const unlisten = await listen(CommandsRoute.MUSIC_REQUEST_DIRECTORY, (e) => {
+	await invoke(CommandRoutes.MUSIC_REQUEST_DIRECTORY);
+	const unlisten = await listen(CommandRoutes.MUSIC_REQUEST_DIRECTORY, (e) => {
 		animatedClasses = "animate__fadeOut";
 		unlisten();
 	});
@@ -17,7 +17,7 @@ async function chooseDirPath() {
 
 async function requestReadAudioPermission() {
 	const res = await invoke<boolean>(
-		CommandsRoute.REQUEST_READ_AUDIO_PERMISSION,
+		CommandRoutes.REQUEST_READ_AUDIO_PERMISSION,
 	);
 	if (!res) return;
 	animatedClasses = "animate__fadeOut";

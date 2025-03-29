@@ -1,5 +1,5 @@
 <script lang="ts">
-import { CommandsRoute } from "$lib/commands";
+import { CommandRoutes } from "$lib/commands";
 import MusicController from "$lib/controllers/MusicController";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -16,7 +16,7 @@ function hideAlert() {
 	show = false;
 }
 
-listen(CommandsRoute.MUSIC_HEADSET_CHANGE, () => {
+listen(CommandRoutes.MUSIC_HEADSET_CHANGE, () => {
 	show = true;
 	// interval = setInterval(() => {
 	// 	if (seconds > 0) seconds--;

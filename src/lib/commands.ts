@@ -1,4 +1,4 @@
-export const CommandsRoute = {
+export const CommandRoutes = {
 	MUSIC_CONTROLLER: "music_controller",
 	MUSIC_PLAYER_SYNC: "music_player_sync",
 	MUSIC_PLAYER_NEXT: "music_player_next",
