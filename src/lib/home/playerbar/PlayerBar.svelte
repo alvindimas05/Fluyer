@@ -11,7 +11,7 @@
     import { goto } from "$app/navigation";
     import { mobileNavigationBarHeight } from "$lib/stores/mobile";
     import { backgroundIsLight } from "$lib/stores/background";
-    import { isAndroid } from "$lib/platform";
+    import { isAndroid, isMacos } from "$lib/platform";
     import PageController from "$lib/controllers/PageController";
     import { PageRoutes } from "$lib/pages";
     import { pageHomePlayerBarShow } from "$lib/stores/page";
@@ -92,7 +92,8 @@
     }
 
     function redirectToPlay() {
-        $pageHomePlayerBarShow = false;
+        if (isMacos()) $pageHomePlayerBarShow = false;
+        else PageController.goto(PageRoutes.PLAY);
     }
 
     function onAnimationEnd() {
@@ -108,7 +109,10 @@
 <svelte:document onkeydown={onKeyDown} />
 
 <div
-    class={`fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 text-white ${$pageHomePlayerBarShow ? "playerbar-in" : "playerbar-out"}`}
+    class={`fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 text-white ` +
+        (isMacos()
+            ? `${$pageHomePlayerBarShow ? "playerbar-in" : "playerbar-out"}`
+            : "backdrop-blur-md")}
     style={`padding-bottom: ${$mobileNavigationBarHeight}px`}
     onanimationend={onAnimationEnd}
 >
@@ -237,7 +241,7 @@
     }
     .playerbar-out {
         @apply backdrop-blur-md;
-        animation: slideOutDown .5s forwards;
+        animation: slideOutDown 0.5s forwards;
     }
     @keyframes blurIn {
         25% {
