@@ -18,7 +18,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.0.3", features = [] }
 
 [dependencies]
-tauri = { version = "2.2.5", features = [] }
+tauri = { version = "2.5.0", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rodio = { git = "https://github.com/RustAudio/rodio.git", rev = "8fd0337", features = ["symphonia-all"] }

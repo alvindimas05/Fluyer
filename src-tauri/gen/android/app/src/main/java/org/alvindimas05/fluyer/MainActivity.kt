@@ -1,9 +1,12 @@
 package org.alvindimas05.fluyer
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.annotation.RequiresApi
 import androidx.core.view.WindowCompat
 
 class MainActivity : TauriActivity() {
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.attributes.layoutInDisplayCutoutMode =

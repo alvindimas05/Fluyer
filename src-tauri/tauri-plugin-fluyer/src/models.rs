@@ -71,3 +71,52 @@ pub struct WatcherHeadsetChange {
 pub struct WatchHeadsetChangeResponse {
     pub value: bool,
 }
+
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum PlayerCommand {
+    Play,
+    Pause,
+    Resume,
+    Stop,
+    Next,
+    Seek,
+    Volume,
+    AddPlaylist,
+    RemovePlaylist,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerCommandArguments {
+    pub command: PlayerCommand,
+    pub seek_position: Option<u64>,
+    pub volume: Option<f32>,
+    pub playlist_file_path: Option<String>,
+}
+
+impl PlayerCommandArguments {
+    pub fn new(command: PlayerCommand) -> Self {
+        Self {
+            command,
+            seek_position: None,
+            volume: None,
+            playlist_file_path: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerGetInfo {
+    pub current_position: u128,
+    pub is_empty: bool,
+    pub is_playing: bool,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerIsEmpty {
+    pub value: bool,
+}

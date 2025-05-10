@@ -1,5 +1,7 @@
 use rodio::Sink;
 use serde::{Deserialize, Serialize};
+use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
+use tauri_plugin_fluyer::FluyerExt;
 use std::fs::File;
 use std::io::BufReader;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -11,6 +13,7 @@ use tauri::Emitter;
 // use thread_priority::windows::WinAPIThreadPriority;
 use thread_priority::{ThreadBuilder, ThreadPriority};
 
+use crate::platform::is_android;
 use crate::{platform, GLOBAL_APP_HANDLE};
 
 use super::metadata::MusicMetadata;
@@ -54,11 +57,13 @@ impl MusicPlayer {
             .name("Music Player")
             .priority(ThreadPriority::Max)
             .spawn(|_| {
-                let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-                    .expect("Failed to open default stream");
-                GLOBAL_MUSIC_SINK
-                    .set(rodio::Sink::connect_new(&stream_handle.mixer()))
-                    .ok();
+                #[cfg(not(target_os = "android"))]{
+                    let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
+                        .expect("Failed to open default stream");
+                    GLOBAL_MUSIC_SINK
+                        .set(rodio::Sink::connect_new(&stream_handle.mixer()))
+                        .ok();
+                }
                 MusicPlayer::start_playback_monitor();
             })
             .ok();
@@ -81,32 +86,64 @@ impl MusicPlayer {
         if _command == MusicCommand::Clear {
             MUSIC_PLAYLIST.lock().unwrap().clear();
             MUSIC_CURRENT_INDEX.store(0, Ordering::SeqCst);
-            GLOBAL_MUSIC_SINK.get().unwrap().clear();
+            if platform::is_android() {
+                GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                    .player_run_command(PlayerCommandArguments::new(PlayerCommand::RemovePlaylist)).ok();
+            } else {
+                GLOBAL_MUSIC_SINK.get().unwrap().clear();
+            }
             return;
         }
 
         if _command == MusicCommand::Next {
-            GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
+            if platform::is_android() {
+                GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                    .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next)).ok();
+            } else {
+                GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
+            }
             return;
         }
     }
     pub fn set_pos(&mut self, position: u64) {
-        GLOBAL_MUSIC_SINK
-            .get()
-            .unwrap()
-            .try_seek(Duration::from_millis(position))
-            .ok();
+        if platform::is_android() {
+            let mut args = PlayerCommandArguments::new(PlayerCommand::Seek);
+            args.seek_position = Some(position);
+            GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                .player_run_command(args).ok();
+        } else {
+            GLOBAL_MUSIC_SINK
+                .get()
+                .unwrap()
+                .try_seek(Duration::from_millis(position))
+                .ok();
+        }
     }
     pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
-        let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-        MusicPlayerSync {
-            index: MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) - if is_from_next { 0 } else { 1 },
-            current_position: if is_from_next {
-                0
-            } else {
-                sink.get_pos().as_millis()
-            },
-            is_playing: !sink.is_paused(),
+        let index = MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) - if is_from_next { 0 } else { 1 };
+        if is_android() {
+            let info = GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                .player_get_info().unwrap();
+            MusicPlayerSync {
+                index,
+                current_position: if is_from_next {
+                    0
+                } else {
+                    info.current_position
+                },
+                is_playing: info.is_playing,
+            }
+        } else {
+            let sink = GLOBAL_MUSIC_SINK.get().unwrap();
+            MusicPlayerSync {
+                index,
+                current_position: if is_from_next {
+                    0
+                } else {
+                    sink.get_pos().as_millis()
+                },
+                is_playing: !sink.is_paused(),
+            }
         }
     }
     pub fn add_playlist(&mut self, playlist: Vec<String>) {
@@ -140,9 +177,16 @@ impl MusicPlayer {
 
         if let Some(music) = playlist.get(current_idx) {
             if let Ok(file) = File::open(music.path.clone()) {
-                let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
-                GLOBAL_MUSIC_SINK.get().unwrap().append(source);
-
+                if is_android() {
+                    let mut args = PlayerCommandArguments::new(PlayerCommand::AddPlaylist);
+                    args.playlist_file_path = Some(music.path.clone());
+                    GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                        .player_run_command(args).ok();
+                } else {
+                    let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
+                    GLOBAL_MUSIC_SINK.get().unwrap().append(source);
+                }
+                
                 GLOBAL_APP_HANDLE
                     .get()
                     .unwrap()
@@ -158,7 +202,10 @@ impl MusicPlayer {
 
     pub fn start_playback_monitor() {
         loop {
-            let should_play_next = {
+            let should_play_next = if is_android() {
+                GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                    .player_is_empty().unwrap().value
+            } else {
                 let sink = GLOBAL_MUSIC_SINK.get().unwrap();
                 sink.empty()
             };
@@ -172,10 +219,29 @@ impl MusicPlayer {
     }
 
     pub fn set_volume(&mut self, volume: f32) {
-        GLOBAL_MUSIC_SINK.get().unwrap().set_volume(volume);
+        if is_android() {
+            let mut args = PlayerCommandArguments::new(PlayerCommand::Volume);
+            args.volume = Some(volume);
+            GLOBAL_APP_HANDLE.get().unwrap().fluyer().player_run_command(args).ok();
+        } else {
+            GLOBAL_MUSIC_SINK.get().unwrap().set_volume(volume);
+        }
+    }
+    
+    fn play_pause(&self, pause: bool){
+        if is_android() {
+            GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                .player_run_command(PlayerCommandArguments::new(if pause {
+                    PlayerCommand::Pause
+                } else {
+                    PlayerCommand::Play
+                })).ok();
+        } else {
+            self.sink_play_pause(pause);
+        }
     }
 
-    fn play_pause(&self, out: bool) {
+    fn sink_play_pause(&self, out: bool) {
         let sink = GLOBAL_MUSIC_SINK.get().unwrap();
         // Note : Due to delay issues on android. Disable smooth pause and play.
         if platform::is_desktop() {
@@ -243,37 +309,23 @@ pub fn handle_music_player_background() {
             .fluyer()
             .watch_state(move |payload| {
                 if matches!(payload.value, WatcherStateType::Resume) && MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) > 0 {
-                    app_handle
-                        .emit(
-                            crate::commands::route::MUSIC_PLAYER_SYNC,
-                            MusicPlayer::get_sync_info(false),
-                        )
-                        .expect("Failed to sync music player");
+                    // FIXME: Probably can't be fixed. The app needs to be fully loaded somehow.
+                    // Calling the get_sync_info crashes the app without delay.
+                    thread::spawn(||{
+                        thread::sleep(Duration::from_millis(500));
+                        app_handle
+                            .emit(
+                                crate::commands::route::MUSIC_PLAYER_SYNC,
+                                MusicPlayer::get_sync_info(false),
+                            )
+                            .expect("Failed to sync music player");
+                    });
                 }
             })
             .expect("Failed to watch app state");
     }
 }
 
-#[cfg(target_os = "android")]
-pub fn handle_headset_change(/* sender_sink_reset: Sender<bool> */) {
-    use tauri_plugin_fluyer::FluyerExt;
-    GLOBAL_APP_HANDLE
-        .get()
-        .unwrap()
-        .fluyer()
-        .watch_headset_change(move |_payload| {
-            // sender_sink_reset.send(payload.value).unwrap();
-            // FIXME: Reset Sink after headset plugged/unplugged.
-            // Note: Probably not possible but let's see...
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
-                .emit(crate::commands::route::MUSIC_HEADSET_CHANGE, ())
-                .ok();
-        })
-        .expect("Failed to watch headset change");
-}
 // Note: I have no idea what is this for but it's required for Rodio Android
 #[no_mangle]
 #[allow(clippy::empty_loop)]

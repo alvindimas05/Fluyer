@@ -1,0 +1,71 @@
+package org.alvindimas05.fluyerplugin
+
+import android.app.Activity
+import androidx.media3.exoplayer.ExoPlayer
+import java.io.File
+import android.net.Uri
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import app.tauri.annotation.InvokeArg
+import androidx.media3.common.MediaItem
+import java.util.Locale
+
+enum class PlayerCommand(val value: String) {
+    Play("play"),
+    Pause("pause"),
+    Stop("stop"),
+    Next("next"),
+    Seek("seek"),
+    Volume("volume"),
+    AddPlaylist("addPlaylist"),
+    RemovePlaylist("removePlaylist")
+}
+
+@InvokeArg
+class PlayerCommandArgs {
+    lateinit var command: String
+    var seekPosition: Long? = null
+    var volume: Float? = null
+    var playlistFilePath: String? = null
+}
+
+data class PlayerGetInfo (
+    val currentPosition: Long,
+    val isEmpty: Boolean,
+    val isPlaying: Boolean,
+)
+
+class FluyerPlayer(activity: Activity) {
+    val player = ExoPlayer.Builder(activity).build()
+    
+    @RequiresApi(Build.VERSION_CODES.GINGERBREAD)
+    fun sendCommand(args: PlayerCommandArgs) {
+        Log.d("Fluyer", "Running Player Command ${args.command}")
+        val command = PlayerCommand.valueOf(args.command.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
+            Locale.ROOT
+        ) else it.toString() })
+        when(command){
+            PlayerCommand.Play -> player.play()
+            PlayerCommand.Pause, PlayerCommand.Stop -> player.pause()
+            PlayerCommand.Seek -> player.seekTo(args.seekPosition!!)
+            PlayerCommand.Volume -> player.volume = args.volume!!
+            PlayerCommand.AddPlaylist -> {
+                val file = File(args.playlistFilePath!!)
+                player.addMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
+                player.prepare()
+            }
+            PlayerCommand.Next, PlayerCommand.RemovePlaylist -> {
+                player.removeMediaItem(0)
+            }
+        }
+    }
+
+    fun getInfo(): PlayerGetInfo {
+        return PlayerGetInfo (
+            currentPosition = player.currentPosition,
+            isEmpty = player.mediaItemCount == 0,
+            isPlaying = player.isPlaying,
+        )
+    }
+}

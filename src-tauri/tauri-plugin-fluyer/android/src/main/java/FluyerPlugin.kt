@@ -10,8 +10,9 @@ import app.tauri.plugin.JSObject
 import app.tauri.annotation.Permission
 import app.tauri.plugin.Channel
 import android.Manifest
+import android.os.Build
 import android.util.Log
-import android.os.Bundle
+import androidx.annotation.RequiresApi
 
 @InvokeArg
 class ToastArgs {
@@ -43,22 +44,19 @@ private const val ALIAS_READ_AUDIO: String = "audio"
         )
     ]
 )
-class FluyerPlugin(private val activity: Activity): Plugin(activity) {
+class FluyerPlugin(activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
     private var stateChannel: Channel? = null
+    private val player = FluyerPlayer(activity)
 
     override fun onPause(){
         super.onPause()
-        stateChannel?.let {
-            it.send(JSObject().put("value", WatcherStateType.Pause.value))
-        }
+        stateChannel?.send(JSObject().put("value", WatcherStateType.Pause.value))
     }
 
     override fun onResume(){
         super.onResume()
-        stateChannel?.let {
-            it.send(JSObject().put("value", WatcherStateType.Resume.value))
-        }
+        stateChannel?.send(JSObject().put("value", WatcherStateType.Resume.value))
     }
 
     @Command
@@ -70,13 +68,14 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
 
     @Command
     fun getNavigationBarHeight(invoke: Invoke){
-        var obj = JSObject().put("value", implementation.getNavigationBarHeight())
+        val obj = JSObject().put("value", implementation.getNavigationBarHeight())
         invoke.resolve(obj)
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     @Command
     fun getStatusBarHeight(invoke: Invoke){
-        var obj = JSObject().put("value", implementation.getStatusBarHeight())
+        val obj = JSObject().put("value", implementation.getStatusBarHeight())
         invoke.resolve(obj)
     }
 
@@ -105,9 +104,48 @@ class FluyerPlugin(private val activity: Activity): Plugin(activity) {
         invoke.resolve(JSObject().put("value", true))
     }
     
+    @RequiresApi(Build.VERSION_CODES.HONEYCOMB)
     @Command
     fun restartApp(invoke: Invoke) {
         implementation.restartApp()
         invoke.resolve()
+    }
+    
+    @RequiresApi(Build.VERSION_CODES.GINGERBREAD)
+    @Command
+    fun playerRunCommand(invoke: Invoke) {
+        try {
+            val args = invoke.parseArgs(PlayerCommandArgs::class.java)
+            player.sendCommand(args)
+        } catch (err: Exception){
+            Log.e("Fluyer", err.toString())
+        }
+        invoke.resolve()
+    }
+
+    @Command
+    fun playerGetInfo(invoke: Invoke){
+        try {
+            val info = player.getInfo()
+            invoke.resolve(JSObject()
+                .put("currentPosition", info.currentPosition)
+                .put("isEmpty", info.isEmpty)
+                .put("isPlaying", info.isPlaying)
+            )
+        } catch (err: Exception){
+            Log.e("Fluyer", err.toString())
+        }
+    }
+
+    @Command
+    fun playerIsEmpty(invoke: Invoke){
+        try {
+            val info = player.getInfo()
+            invoke.resolve(JSObject()
+                .put("value", info.isEmpty)
+            )
+        } catch (err: Exception){
+            Log.e("Fluyer", err.toString())
+        }
     }
 }

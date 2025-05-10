@@ -97,8 +97,6 @@ pub fn run() {
                     .set(app_handle.clone())
                     .expect("Failed to set GLOBAL_APP_HANDLE");
                 app_handle.manage(Mutex::new(AppState::default()));
-                #[cfg(target_os = "android")]
-                crate::music::player::handle_headset_change();
                 
                 println!("The app cache dir is located at: {}", app_handle.path().app_cache_dir().unwrap().display());
             }

@@ -126,6 +126,24 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("restartApp", ())
             .map_err(Into::into)
     }
+
+    pub fn player_run_command(&self, args: PlayerCommandArguments) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("playerRunCommand", args)
+            .map_err(Into::into)
+    }
+    
+    pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
+        self.0
+            .run_mobile_plugin("playerGetInfo", ())
+            .map_err(Into::into)
+    }
+    
+    pub fn player_is_empty(&self) -> crate::Result<PlayerIsEmpty> {
+        self.0
+            .run_mobile_plugin("playerIsEmpty", ())
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]

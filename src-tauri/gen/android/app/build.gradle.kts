@@ -15,7 +15,7 @@ val tauriProperties = Properties().apply {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
     namespace = "org.alvindimas05.fluyer"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"

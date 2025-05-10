@@ -1,16 +1,11 @@
 package org.alvindimas05.fluyerplugin
 
 import android.content.Context
-import android.graphics.Point
 import android.os.Build
-import android.view.Display
-import android.view.WindowManager
-import android.util.TypedValue
 import kotlin.math.roundToInt
 import android.view.WindowInsets
 import android.content.res.Resources
 import android.content.res.Configuration
-import android.graphics.Rect
 import android.app.Activity
 import android.widget.Toast
 import android.content.BroadcastReceiver
@@ -18,18 +13,16 @@ import android.content.Intent
 import android.content.IntentFilter
 import app.tauri.plugin.JSObject
 import app.tauri.plugin.Channel
-import android.util.Log
+import androidx.annotation.RequiresApi
 import java.lang.Runtime
 
 class FluyerMain(private val activity: Activity) {
     var headsetChangeChannel: Channel? = null
 
-    val broadcastReceiver = object : BroadcastReceiver() {
+    private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Intent.ACTION_HEADSET_PLUG == intent.action) {
-                headsetChangeChannel?.let {
-                    it.send(JSObject().put("value", intent.getIntExtra("state", 0) == 1))
-                }
+                headsetChangeChannel?.send(JSObject().put("value", intent.getIntExtra("state", 0) == 1))
             }
         }
     }
@@ -43,9 +36,10 @@ class FluyerMain(private val activity: Activity) {
             Toast.makeText(activity, value, Toast.LENGTH_SHORT).show()
         }
     }
-    fun dpToPx(value: Int): Int {
+    private fun dpToPx(value: Int): Int {
         return (value / activity.resources.displayMetrics.density).roundToInt()
     }
+    @RequiresApi(Build.VERSION_CODES.R)
     fun getStatusBarHeight(): Int {
         return dpToPx(activity.window.decorView.rootWindowInsets
             .getInsets(WindowInsets.Type.statusBars()).top)
@@ -67,7 +61,7 @@ class FluyerMain(private val activity: Activity) {
             0
         }
     }
-    
+    @RequiresApi(Build.VERSION_CODES.HONEYCOMB)
     fun restartApp() {
         val context = activity.applicationContext
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)

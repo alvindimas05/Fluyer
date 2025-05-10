@@ -69,6 +69,18 @@ impl<R: Runtime> Fluyer<R> {
     pub fn restart_app(&self) -> crate::Result<()> {
         Ok(())
     }
+    
+    pub fn player_run_command(&self, _args: PlayerCommandArguments) -> crate::Result<()> {
+        Ok(())
+    }
+    
+    pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
+        Ok(PlayerGetInfo::default())
+    }
+    
+    pub fn player_is_empty(&self) -> crate::Result<PlayerIsEmpty> {
+        Ok(PlayerIsEmpty::default())
+    }
 }
 
 impl<R: Runtime> Fluyer<R> {}
