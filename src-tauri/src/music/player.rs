@@ -131,7 +131,7 @@ impl MusicPlayer {
                 } else {
                     info.current_position
                 },
-                is_playing: info.is_playing,
+                is_playing: if is_from_next { true } else { info.is_playing },
             }
         } else {
             let sink = GLOBAL_MUSIC_SINK.get().unwrap();
@@ -142,7 +142,7 @@ impl MusicPlayer {
                 } else {
                     sink.get_pos().as_millis()
                 },
-                is_playing: !sink.is_paused(),
+                is_playing: if is_from_next { true } else { !sink.is_paused() },
             }
         }
     }
