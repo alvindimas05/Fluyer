@@ -168,7 +168,12 @@ impl MusicPlayer {
 
     pub fn goto_playlist(&mut self, index: usize) {
         MUSIC_CURRENT_INDEX.store(index, Ordering::SeqCst);
-        GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
+        if is_android() {
+            GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next)).ok();
+        } else {
+            GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
+        }
     }
 
     fn next() {
@@ -243,19 +248,16 @@ impl MusicPlayer {
 
     fn sink_play_pause(&self, out: bool) {
         let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-        // Note : Due to delay issues on android. Disable smooth pause and play.
-        if platform::is_desktop() {
-            let mut range: Vec<i32> = (1..20).collect();
-            if out {
-                range.reverse();
-            } else {
-                sink.play();
-            }
+        let mut range: Vec<i32> = (1..20).collect();
+        if out {
+            range.reverse();
+        } else {
+            sink.play();
+        }
 
-            for i in range {
-                sink.set_volume(i as f32 / 20.);
-                thread::sleep(Duration::from_millis(20));
-            }
+        for i in range {
+            sink.set_volume(i as f32 / 20.);
+            thread::sleep(Duration::from_millis(20));
         }
 
         if out {

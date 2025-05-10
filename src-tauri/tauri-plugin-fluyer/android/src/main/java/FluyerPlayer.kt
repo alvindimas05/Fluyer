@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import app.tauri.annotation.InvokeArg
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import java.util.Locale
 
 enum class PlayerCommand(val value: String) {
@@ -38,10 +39,19 @@ data class PlayerGetInfo (
 
 class FluyerPlayer(activity: Activity) {
     val player = ExoPlayer.Builder(activity).build()
+
+    init {
+        player.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_ENDED) {
+                    player.clearMediaItems()
+                }
+            }
+        })
+    }
     
     @RequiresApi(Build.VERSION_CODES.GINGERBREAD)
     fun sendCommand(args: PlayerCommandArgs) {
-        Log.d("Fluyer", "Running Player Command ${args.command}")
         val command = PlayerCommand.valueOf(args.command.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
             Locale.ROOT
         ) else it.toString() })
@@ -56,7 +66,7 @@ class FluyerPlayer(activity: Activity) {
                 player.prepare()
             }
             PlayerCommand.Next, PlayerCommand.RemovePlaylist -> {
-                player.removeMediaItem(0)
+                player.clearMediaItems()
             }
         }
     }
