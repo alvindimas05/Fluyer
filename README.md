@@ -8,6 +8,7 @@ Music Player with Beautiful UI and Cross-Platform.
 ## Downloads
 > [!WARNING]
 > Keep in mind that this app is still in beta and has some issues. Scroll below to check.
+
 You can grab the latest version of the app below or check the [release page](https://github.com/alvindimas05/Fluyer/releases).
 - [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64-setup.exe)
 - [MacOS Intel](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64.dmg)
