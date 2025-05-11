@@ -1,9 +1,12 @@
 # Fluyer
 Music Player with Beautiful UI and Cross-Platform.
+> [!NOTE]
+> This project is on slow progress. I'm working on it to have fun :)
 ![Preview App](preview.png)
 
 ## Downloads
-Keep in mind that this app is still in beta and has some issues. Scroll below to check.
+> [!WARNING]
+> Keep in mind that this app is still in beta and has some issues. Scroll below to check.
 You can grab the latest version of the app below or check the [release page](https://github.com/alvindimas05/Fluyer/releases).
 - [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64-setup.exe)
 - [MacOS Intel](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64.dmg)
@@ -17,11 +20,13 @@ You can grab the latest version of the app below or check the [release page](htt
 
 ## Issues
 
+### Universal
+- High resource usage due to Animated Background. The attempt to fix this is to animate the background on play screen only.
+
 ### Android
-- When headset is plugged/unplugged, the app requires restart. This issue is caused due to Rust [cpal](https://github.com/RustAudio/cpal) limitation.
-- The app might has some delay when the Frontend communicate with the Backend. For example, when trying to pause, it might have miliseconds delay.
-- Some features are disabled like Cover Art Animated Background to prevent performance issues but it's planned to add option to enable this if you assume that your device can handle it.
-- Sometimes it stops itself when running on background due to android security. Planned to fix this.
+- The play screen is ugly af. Still trying to figure the alternative design.
+- Some features are disabled like Animated Background to prevent performance issues.
+- Sometimes it stops itself when running on background due to android security. Planned to fix.
 
 ### iOS
 - Even though it's already tested, iOS release is not planned for now due to Apple Developer pricing.
