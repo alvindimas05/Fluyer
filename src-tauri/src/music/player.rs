@@ -65,6 +65,7 @@ impl MusicPlayer {
                         .ok();
                     MusicPlayer::start_playback_monitor();
                 }
+                // Note: This need to be seperated for unknown reasons. The rodio won't work if the playback monitor ran outside cfg.
                 #[cfg(target_os = "android")]
                 MusicPlayer::start_playback_monitor();
             })
