@@ -1,9 +1,8 @@
-use rodio::Sink;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Mutex, OnceLock};
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
@@ -13,6 +12,8 @@ use thread_priority::{ThreadBuilder, ThreadPriority};
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
+#[cfg(not(target_os = "android"))]
+use std::sync::OnceLock;
 
 use crate::GLOBAL_APP_HANDLE;
 
@@ -46,7 +47,7 @@ pub struct MusicPlayerSync {
 }
 
 #[cfg(not(target_os = "android"))]
-pub static GLOBAL_MUSIC_SINK: OnceLock<Sink> = OnceLock::new();
+pub static GLOBAL_MUSIC_SINK: OnceLock<rodio::Sink> = OnceLock::new();
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
 static MUSIC_CURRENT_INDEX: AtomicUsize = AtomicUsize::new(0);
 
