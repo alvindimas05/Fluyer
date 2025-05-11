@@ -63,7 +63,9 @@ impl MusicPlayer {
                     GLOBAL_MUSIC_SINK
                         .set(rodio::Sink::connect_new(&stream_handle.mixer()))
                         .ok();
+                    MusicPlayer::start_playback_monitor();
                 }
+                #[cfg(target_os = "android")]
                 MusicPlayer::start_playback_monitor();
             })
             .ok();
