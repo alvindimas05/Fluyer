@@ -21,7 +21,6 @@ tauri-build = { version = "2.0.3", features = [] }
 tauri = { version = "2.5.0", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rodio = { git = "https://github.com/RustAudio/rodio.git", rev = "8fd0337", features = ["symphonia-all"] }
 anyhow = "1.0.89"
 symphonia = "0.5.4"
 log = "0.4.22"
@@ -43,5 +42,9 @@ lazy_static = "1.5.0"
 dotenvy = "0.15.7"
 openssl = { version = "*", features = ["vendored"] }
 dotenvy_macro = "0.15.7"
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+rodio = { git = "https://github.com/RustAudio/rodio.git", rev = "8fd0337", features = ["symphonia-all"] }
+
 [target.'cfg(target_os = "windows")'.dependencies]
 enigo = "0.3.0"
