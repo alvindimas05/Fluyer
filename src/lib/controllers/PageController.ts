@@ -10,7 +10,7 @@ const PageController = {
         } else {
             goto(route);
         }
-    },
+    }
 };
 
 export default PageController;
