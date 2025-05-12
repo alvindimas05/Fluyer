@@ -1,15 +1,18 @@
 import { CommandRoutes } from "$lib/commands";
 import { isDesktop } from "$lib/platform";
-import { mobileNavigationBarHeight, mobileStatusBarHeight } from "$lib/stores/mobile";
+import {
+	mobileNavigationBarHeight,
+	mobileStatusBarHeight,
+} from "$lib/stores/mobile";
 import { invoke } from "@tauri-apps/api/core";
 
 const MobileController = {
-    initialize: () => {
-        if(isDesktop()) return;
-        MobileController.setNavigationBarHeight();
-        MobileController.setStatusBarHeight();
-    },
-    setStatusBarHeight: async () => {
+	initialize: () => {
+		if (isDesktop()) return;
+		MobileController.setNavigationBarHeight();
+		MobileController.setStatusBarHeight();
+	},
+	setStatusBarHeight: async () => {
 		const barHeight = await invoke<number>(CommandRoutes.GET_STATUS_BAR_HEIGHT);
 		mobileStatusBarHeight.set(barHeight);
 	},
@@ -19,6 +22,6 @@ const MobileController = {
 		);
 		mobileNavigationBarHeight.set(barHeight);
 	},
-}
+};
 
 export default MobileController;

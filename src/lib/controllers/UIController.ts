@@ -2,9 +2,9 @@
 import { fluidScroll } from "fluidscroll";
 
 const UIController = {
-    initialize: () => {
-        UIController.listenAnimateScrollOverflowText();
-    },
+	initialize: () => {
+		UIController.listenAnimateScrollOverflowText();
+	},
 	listenAnimateScrollOverflowText: () => {
 		const scrollDuration = 3000;
 		let scrollEnd = true;
@@ -20,6 +20,6 @@ const UIController = {
 			scrollEnd = !scrollEnd;
 		}, scrollDuration + 2000);
 	},
-}
+};
 
 export default UIController;

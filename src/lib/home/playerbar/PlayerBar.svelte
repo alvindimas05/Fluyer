@@ -1,109 +1,107 @@
 <script lang="ts">
-    import MusicController, {
-        MusicConfig,
-    } from "$lib/controllers/MusicController";
-    import {
-        musicCurrentIndex,
-        musicIsPlaying,
-        musicProgressValue,
-        musicVolume,
-    } from "$lib/stores/music";
-    import { goto } from "$app/navigation";
-    import { mobileNavigationBarHeight } from "$lib/stores/mobile";
-    import { backgroundIsLight } from "$lib/stores/background";
-    import { isAndroid, isMacos } from "$lib/platform";
-    import PageController from "$lib/controllers/PageController";
-    import { PageRoutes } from "$lib/pages";
-    import { pageHomePlayerBarShow } from "$lib/stores/page";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import {
+	musicCurrentIndex,
+	musicIsPlaying,
+	musicProgressValue,
+	musicVolume,
+} from "$lib/stores/music";
+import { goto } from "$app/navigation";
+import { mobileNavigationBarHeight } from "$lib/stores/mobile";
+import { backgroundIsLight } from "$lib/stores/background";
+import { isAndroid, isMacos } from "$lib/platform";
+import PageController from "$lib/controllers/PageController";
+import { PageRoutes } from "$lib/pages";
+import { pageHomePlayerBarShow } from "$lib/stores/page";
 
-    // Based on Rust Rodio fade effect (Please check player.rs)
-    let pauseDelay = isAndroid() ? 0 : 400;
-    let title = $state(MusicConfig.defaultTitle);
-    let artist = $state(MusicConfig.defaultArtist);
-    let albumImage = $state(MusicConfig.defaultAlbumImage);
+// Based on Rust Rodio fade effect (Please check player.rs)
+let pauseDelay = isAndroid() ? 0 : 400;
+let title = $state(MusicConfig.defaultTitle);
+let artist = $state(MusicConfig.defaultArtist);
+let albumImage = $state(MusicConfig.defaultAlbumImage);
 
-    let isPlaying = $state(MusicController.isPlaying());
-    let progressPercentage = $state(MusicController.progressPercentage());
-    let volumePercentage = $state(MusicController.volumePercentage());
+let isPlaying = $state(MusicController.isPlaying());
+let progressPercentage = $state(MusicController.progressPercentage());
+let volumePercentage = $state(MusicController.volumePercentage());
 
-    musicProgressValue.subscribe(updateStates);
-    musicCurrentIndex.subscribe(updateStates);
-    musicIsPlaying.subscribe(updateStates);
-    musicVolume.subscribe(() => {
-        volumePercentage = MusicController.volumePercentage();
-    });
+musicProgressValue.subscribe(updateStates);
+musicCurrentIndex.subscribe(updateStates);
+musicIsPlaying.subscribe(updateStates);
+musicVolume.subscribe(() => {
+	volumePercentage = MusicController.volumePercentage();
+});
 
-    function handleButtonPlayPause() {
-        if (
-            MusicController.currentMusic() === null ||
-            MusicController.isProgressValueEnd()
-        )
-            return;
+function handleButtonPlayPause() {
+	if (
+		MusicController.currentMusic() === null ||
+		MusicController.isProgressValueEnd()
+	)
+		return;
 
-        if (MusicController.isPlaying()) {
-            MusicController.setIsPlaying(false);
-            setTimeout(MusicController.pause, pauseDelay);
-        } else MusicController.play();
+	if (MusicController.isPlaying()) {
+		MusicController.setIsPlaying(false);
+		setTimeout(MusicController.pause, pauseDelay);
+	} else MusicController.play();
 
-        updateStates();
-    }
+	updateStates();
+}
 
-    function handleButtonPrevious() {
-        MusicController.previousMusic();
-    }
+function handleButtonPrevious() {
+	MusicController.previousMusic();
+}
 
-    function handleButtonNext() {
-        MusicController.nextMusic();
-    }
+function handleButtonNext() {
+	MusicController.nextMusic();
+}
 
-    function onPlayerBarChange() {
-        if (MusicController.isProgressValueEnd()) {
-            MusicController.setProgressValue(0);
-            return;
-        }
+function onPlayerBarChange() {
+	if (MusicController.isProgressValueEnd()) {
+		MusicController.setProgressValue(0);
+		return;
+	}
 
-        if (MusicController.isProgressValueEnd()) {
-            MusicController.addMusic(MusicController.currentMusic()!);
-        }
+	if (MusicController.isProgressValueEnd()) {
+		MusicController.addMusic(MusicController.currentMusic()!);
+	}
 
-        MusicController.sendCommandSetPosition(
-            MusicController.realProgressDuration(),
-        );
-    }
+	MusicController.sendCommandSetPosition(
+		MusicController.realProgressDuration(),
+	);
+}
 
-    function updateStates() {
-        isPlaying = MusicController.isPlaying();
-        progressPercentage = MusicController.progressPercentage();
+function updateStates() {
+	isPlaying = MusicController.isPlaying();
+	progressPercentage = MusicController.progressPercentage();
 
-        let music = MusicController.currentMusic();
-        if (music == null) return;
+	let music = MusicController.currentMusic();
+	if (music == null) return;
 
-        title = music.title!;
-        artist = MusicController.getFullArtistFromMusic(music);
-        albumImage = MusicController.currentMusicAlbumImage();
-    }
+	title = music.title!;
+	artist = MusicController.getFullArtistFromMusic(music);
+	albumImage = MusicController.currentMusicAlbumImage();
+}
 
-    async function onKeyDown(
-        e: KeyboardEvent & {
-            currentTarget: EventTarget & Document;
-        },
-    ) {
-        if (e.key === " ") handleButtonPlayPause();
-    }
+async function onKeyDown(
+	e: KeyboardEvent & {
+		currentTarget: EventTarget & Document;
+	},
+) {
+	if (e.key === " ") handleButtonPlayPause();
+}
 
-    function redirectToPlay() {
-        if (isMacos()) $pageHomePlayerBarShow = false;
-        else PageController.goto(PageRoutes.PLAY);
-    }
+function redirectToPlay() {
+	if (isMacos()) $pageHomePlayerBarShow = false;
+	else PageController.goto(PageRoutes.PLAY);
+}
 
-    function onAnimationEnd() {
-        if ($pageHomePlayerBarShow) return;
-        PageController.goto(PageRoutes.PLAY);
-    }
+function onAnimationEnd() {
+	if ($pageHomePlayerBarShow) return;
+	PageController.goto(PageRoutes.PLAY);
+}
 
-    function handleVolumeButton() {
-        MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
-    }
+function handleVolumeButton() {
+	MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
+}
 </script>
 
 <svelte:document onkeydown={onKeyDown} />

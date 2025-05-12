@@ -1,4 +1,4 @@
 export const PageRoutes = {
-    HOME: '/',
-    PLAY: '/play',
-}
+	HOME: "/",
+	PLAY: "/play",
+};

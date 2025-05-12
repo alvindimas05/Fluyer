@@ -2,8 +2,8 @@
 import { isWindows } from "$lib/platform";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
-    import { PageRoutes } from "$lib/pages";
-    import { afterNavigate } from "$app/navigation";
+import { PageRoutes } from "$lib/pages";
+import { afterNavigate } from "$app/navigation";
 
 let isMaximized = $state(true);
 let isPlayPage = $state(false);
@@ -38,7 +38,7 @@ window.onResized(async (_) => {
 });
 
 afterNavigate((navigation) => {
-    isPlayPage = navigation.to?.route.id === PageRoutes.PLAY;
+	isPlayPage = navigation.to?.route.id === PageRoutes.PLAY;
 });
 </script>
 

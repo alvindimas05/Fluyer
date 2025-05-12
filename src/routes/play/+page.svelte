@@ -16,7 +16,7 @@ import {
 import { isAndroid } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
-    import { pageHomePlayerBarShow } from "$lib/stores/page";
+import { pageHomePlayerBarShow } from "$lib/stores/page";
 
 // Based on Rust Rodio fade effect (Please check player.rs)
 let pauseDelay = isAndroid() ? 0 : 400;
@@ -83,8 +83,8 @@ function onPlayerBarChange() {
 }
 
 function handleButtonBack() {
-    $pageHomePlayerBarShow = true;
-    PageController.goto(PageRoutes.HOME);
+	$pageHomePlayerBarShow = true;
+	PageController.goto(PageRoutes.HOME);
 }
 
 async function onKeyDown(

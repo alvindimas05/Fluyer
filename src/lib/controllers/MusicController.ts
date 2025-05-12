@@ -183,7 +183,8 @@ const MusicController = {
 			if (e.payload.index != MusicController.currentMusicIndex()) {
 				MusicController.setCurrentMusicIndex(e.payload.index);
 			}
-			if(e.payload.isPlaying)  MusicController.startProgress({ resetProgress: true });
+			if (e.payload.isPlaying)
+				MusicController.startProgress({ resetProgress: true });
 			else MusicController.stopProgress();
 
 			MusicController.setProgressValue(
@@ -353,14 +354,14 @@ const MusicController = {
 	gotoPlaylist: (index: number) => {
 		invoke(CommandRoutes.MUSIC_PLAYLIST_GOTO, { index });
 	},
-	
+
 	reset: () => {
-	    MusicController.pause();
-	    MusicController.sendCommandController('clear');
+		MusicController.pause();
+		MusicController.sendCommandController("clear");
 		musicCurrentIndex.set(-1);
 		musicPlaylist.set([]);
 		MusicController.stopProgress();
-		MusicController.resetProgress()
+		MusicController.resetProgress();
 	},
 };
 
