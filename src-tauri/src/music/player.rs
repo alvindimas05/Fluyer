@@ -252,8 +252,6 @@ impl MusicPlayer {
 
     #[cfg(not(target_os = "android"))]
     fn sink_play_pause(&self, play: bool) {
-        use crate::logger;
-
         let sink = GLOBAL_MUSIC_SINK.get().unwrap();
         let max_volume = MUSIC_VOLUME.load(Ordering::SeqCst);
         let mut range: Vec<f32> = (if play { 1..21 } else { 0..20 })
