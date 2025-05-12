@@ -183,7 +183,8 @@ const MusicController = {
 			if (e.payload.index != MusicController.currentMusicIndex()) {
 				MusicController.setCurrentMusicIndex(e.payload.index);
 			}
-			MusicController.startProgress({ resetProgress: true });
+			if(e.payload.isPlaying)  MusicController.startProgress({ resetProgress: true });
+			else MusicController.stopProgress();
 
 			MusicController.setProgressValue(
 				MusicController.parseProgressDurationIntoValue(

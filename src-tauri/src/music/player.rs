@@ -197,14 +197,7 @@ impl MusicPlayer {
                     GLOBAL_MUSIC_SINK.get().unwrap().append(source);
                 }
                 
-                GLOBAL_APP_HANDLE
-                    .get()
-                    .unwrap()
-                    .emit(
-                        crate::commands::route::MUSIC_PLAYER_SYNC,
-                        MusicPlayer::get_sync_info(true),
-                    )
-                    .ok();
+                MusicPlayer::emit_sync(true);
                 MUSIC_CURRENT_INDEX.store(current_idx + 1, Ordering::SeqCst);
             }
         }
@@ -272,41 +265,33 @@ impl MusicPlayer {
             sink.pause();
         }
     }
+
+    pub fn emit_sync(is_from_next: bool){
+        GLOBAL_APP_HANDLE.get().unwrap().emit(
+            crate::commands::route::MUSIC_PLAYER_SYNC,
+            MusicPlayer::get_sync_info(is_from_next),
+        )
+        .expect("Failed to sync music player");
+    }
 }
 
 pub fn handle_music_player_background() {
     // Note: Disabled due to giving more issues than solving. Probably unnecessary though.
-    // #[cfg(desktop)]
-    // {
-    //     use crate::GLOBAL_MAIN_WINDOW;
-    //     use tauri::Listener;
+    #[cfg(not(target_os = "android"))]
+    {
+        use crate::GLOBAL_MAIN_WINDOW;
+        use tauri::Listener;
 
-    //     GLOBAL_MAIN_WINDOW
-    //         .get()
-    //         .unwrap()
-    //         .listen("tauri://focus", move |_| {
-    //             MUSIC_IS_BACKGROUND.store(false, Ordering::SeqCst);
-    //             GLOBAL_APP_HANDLE
-    //                 .get()
-    //                 .unwrap()
-    //                 .emit(
-    //                     crate::commands::route::MUSIC_PLAYER_SYNC,
-    //                     MusicPlayerSync {
-    //                         skip: MUSIC_BACKGROUND_COUNT.load(Ordering::SeqCst),
-    //                         info: MusicPlayer::get_info(),
-    //                     },
-    //                 )
-    //                 .expect("Failed to sync music player");
-    //             MUSIC_BACKGROUND_COUNT.store(0, Ordering::SeqCst);
-    //         });
-
-    //     GLOBAL_MAIN_WINDOW
-    //         .get()
-    //         .unwrap()
-    //         .listen("tauri://blur", |_| {
-    //             MUSIC_IS_BACKGROUND.store(true, Ordering::SeqCst);
-    //         });
-    // }
+        GLOBAL_MAIN_WINDOW
+            .get()
+            .unwrap()
+            .listen("tauri://focus", move |_| {
+                if MUSIC_PLAYLIST.lock().unwrap().len() < 1 {
+                    return
+                }
+                MusicPlayer::emit_sync(false);
+            });
+    }
     #[cfg(target_os = "android")]
     {
         use tauri_plugin_fluyer::models::WatcherStateType;
@@ -317,16 +302,11 @@ pub fn handle_music_player_background() {
             .fluyer()
             .watch_state(move |payload| {
                 if matches!(payload.value, WatcherStateType::Resume) && MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) > 0 {
-                    // FIXME: Probably can't be fixed. The app needs to be fully loaded somehow.
-                    // Calling the get_sync_info crashes the app without delay.
+                    // Note: Probably can't be fixed. The app needs to be fully loaded somehow.
+                    // Calling the emit_sync crashes the app without delay.
                     thread::spawn(||{
                         thread::sleep(Duration::from_millis(500));
-                        app_handle
-                            .emit(
-                                crate::commands::route::MUSIC_PLAYER_SYNC,
-                                MusicPlayer::get_sync_info(false),
-                            )
-                            .expect("Failed to sync music player");
+                        MusicPlayer::emit_sync(false);
                     });
                 }
             })
