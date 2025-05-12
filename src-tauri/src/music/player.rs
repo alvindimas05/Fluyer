@@ -7,6 +7,8 @@ use std::thread;
 use std::time::Duration;
 use tauri::Emitter;
 use thread_priority::{ThreadBuilder, ThreadPriority};
+#[cfg(not(target_os = "android"))]
+use atomic_float::AtomicF32;
 
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
@@ -50,6 +52,8 @@ pub struct MusicPlayerSync {
 pub static GLOBAL_MUSIC_SINK: OnceLock<rodio::Sink> = OnceLock::new();
 static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
 static MUSIC_CURRENT_INDEX: AtomicUsize = AtomicUsize::new(0);
+#[cfg(not(target_os = "android"))]
+static MUSIC_VOLUME: AtomicF32 = AtomicF32::new(1.0);
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
@@ -228,8 +232,10 @@ impl MusicPlayer {
             args.volume = Some(volume);
             GLOBAL_APP_HANDLE.get().unwrap().fluyer().player_run_command(args).ok();
         }
-        #[cfg(not(target_os = "android"))]
-        GLOBAL_MUSIC_SINK.get().unwrap().set_volume(volume);
+        #[cfg(not(target_os = "android"))]{
+            MUSIC_VOLUME.store(volume, Ordering::SeqCst);
+            GLOBAL_MUSIC_SINK.get().unwrap().set_volume(volume);
+        }
     }
     
     fn play_pause(&self, play: bool){
@@ -246,8 +252,13 @@ impl MusicPlayer {
 
     #[cfg(not(target_os = "android"))]
     fn sink_play_pause(&self, play: bool) {
+        use crate::logger;
+
         let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-        let mut range: Vec<i32> = (1..20).collect();
+        let max_volume = MUSIC_VOLUME.load(Ordering::SeqCst);
+        let mut range: Vec<f32> = (if play { 1..21 } else { 0..20 })
+            .map(|i| i as f32 * max_volume / 20.)
+            .collect();
         if play {
             sink.play();
         } else {
@@ -255,7 +266,7 @@ impl MusicPlayer {
         }
 
         for i in range {
-            sink.set_volume(i as f32 / 20.);
+            sink.set_volume(i);
             thread::sleep(Duration::from_millis(20));
         }
 
