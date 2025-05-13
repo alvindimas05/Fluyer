@@ -1,30 +1,28 @@
 <script lang="ts">
-    import type { MusicData } from "../music/types";
+import type { MusicData } from "../music/types";
 
-    interface Props {
-        music: MusicData;
-        index: number;
-        isPlaying?: boolean;
-        isPrevious?: boolean;
-    }
-    import MusicController, {
-        MusicConfig,
-    } from "$lib/controllers/MusicController";
+interface Props {
+	music: MusicData;
+	index: number;
+	isPlaying?: boolean;
+	isPrevious?: boolean;
+}
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 
-    let {
-        music,
-        index = -1,
-        isPlaying = false,
-        isPrevious = false,
-    }: Props = $props();
+let {
+	music,
+	index = -1,
+	isPlaying = false,
+	isPrevious = false,
+}: Props = $props();
 
-    function removePlaylist() {
-        MusicController.removeMusic(index);
-    }
+function removePlaylist() {
+	MusicController.removeMusic(index);
+}
 
-    function gotoPlaylist() {
-        MusicController.gotoPlaylist(index);
-    }
+function gotoPlaylist() {
+	MusicController.gotoPlaylist(index);
+}
 </script>
 
 <div class="relative">

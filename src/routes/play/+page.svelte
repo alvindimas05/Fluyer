@@ -83,8 +83,8 @@ function onPlayerBarChange() {
 }
 
 function handleButtonBack() {
-    unlistenMusicProgressValue();
-    unlistenMusicCurrentIndex();
+	unlistenMusicProgressValue();
+	unlistenMusicCurrentIndex();
 	$pageHomePlayerBarShow = true;
 	PageController.goto(PageRoutes.HOME);
 }
@@ -102,10 +102,10 @@ async function resetLyrics() {
 
 	if (MusicController.currentMusic() == null) return;
 	const resLyrics = await LrcLib.getLyrics(MusicController.currentMusic()!);
-	if (resLyrics == null){
-        lyrics = [];
-        return;
-    }
+	if (resLyrics == null) {
+		lyrics = [];
+		return;
+	}
 	lyrics = resLyrics;
 }
 

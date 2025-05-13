@@ -1,66 +1,64 @@
 <script lang="ts">
-	import { onMount } from "svelte";
-	import type { MusicData } from "./types";
-	import MusicController, {
-		MusicConfig,
-	} from "$lib/controllers/MusicController";
-	import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
-	import { coverArtCaches } from "$lib/stores/coverart";
+import { onMount } from "svelte";
+import type { MusicData } from "./types";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
+import { coverArtCaches } from "$lib/stores/coverart";
 
-	interface Props {
-		music: MusicData;
-	}
+interface Props {
+	music: MusicData;
+}
 
-	let { music }: Props = $props();
+let { music }: Props = $props();
 
-	let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
+let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
-	async function checkAlbumImage() {
-		if (music.image !== null || music.artist == null) return;
-		const status = await CoverArt.fromQuery({
-			artist: music.artist!,
-			title: music.title!,
-			album: music.album ?? undefined,
+async function checkAlbumImage() {
+	if (music.image !== null || music.artist == null) return;
+	const status = await CoverArt.fromQuery({
+		artist: music.artist!,
+		title: music.title!,
+		album: music.album ?? undefined,
+	});
+	if (status == CoverArtStatus.Failed) return;
+	if (status == CoverArtStatus.Loading) {
+		const unlisten = coverArtCaches.subscribe(() => {
+			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
 		});
-		if (status == CoverArtStatus.Failed) return;
-		if (status == CoverArtStatus.Loading) {
-			const unlisten = coverArtCaches.subscribe(() => {
-				if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
-			});
-			return;
-		}
-
-		setAlbumImageFromCache();
+		return;
 	}
 
-	function setAlbumImageFromCache() {
-		if (albumImage != MusicConfig.defaultAlbumImage) return true;
+	setAlbumImageFromCache();
+}
 
-		const cache = MusicController.getCoverArtCache({
-			artist: music.artist!,
-			title: music.title!,
-			album: music.album ?? undefined,
-		});
+function setAlbumImageFromCache() {
+	if (albumImage != MusicConfig.defaultAlbumImage) return true;
 
-		if (
-			cache == null ||
-			(cache.status == CoverArtStatus.Loading && cache.image == null)
-		)
-			return false;
-		if (cache.status == CoverArtStatus.Failed) return true;
+	const cache = MusicController.getCoverArtCache({
+		artist: music.artist!,
+		title: music.title!,
+		album: music.album ?? undefined,
+	});
 
-		albumImage = MusicController.withBase64(cache.image!);
-		return true;
-	}
+	if (
+		cache == null ||
+		(cache.status == CoverArtStatus.Loading && cache.image == null)
+	)
+		return false;
+	if (cache.status == CoverArtStatus.Failed) return true;
 
-	async function addMusicAndPlay() {
-		music.image = albumImage;
-		await MusicController.reset();
-		await MusicController.addMusic(music);
-		MusicController.play();
-	}
+	albumImage = MusicController.withBase64(cache.image!);
+	return true;
+}
 
-	onMount(checkAlbumImage);
+async function addMusicAndPlay() {
+	music.image = albumImage;
+	await MusicController.reset();
+	await MusicController.addMusic(music);
+	MusicController.play();
+}
+
+onMount(checkAlbumImage);
 </script>
 
 <div class="relative animate__animated animate__fadeInDown animate__slow">
