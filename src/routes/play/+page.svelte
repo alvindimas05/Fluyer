@@ -162,7 +162,7 @@ musicVolume.subscribe(() => {
         </div>
     </div>
     <div
-        class={`md:row-[2] md:col-[1] order-last md:order-2 p-5 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
+        class={`md:row-[2] md:col-[1] order-last md:order-2 px-5 pb-5 pt-2 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
     >
         <div class="w-full md:w-[80%] xl:w-[65%]">
             <div class="w-full grid grid-cols-[auto,1fr,auto] md:mt-4">
@@ -171,7 +171,7 @@ musicVolume.subscribe(() => {
                         >{progressDurationText}</span
                     >
                 </div>
-                <div class="text-sm sm:text-md md:text-lg font-medium text-center mt-2 opacity-90 overflow-hidden">
+                <div class="text-sm sm:text-base md:text-lg font-medium text-center mt-2 opacity-90 overflow-hidden">
                     <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                     <p class="animate-scroll-overflow-text"></p>
                     <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">

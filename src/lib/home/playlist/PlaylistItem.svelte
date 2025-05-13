@@ -37,7 +37,7 @@ function gotoPlaylist() {
                 alt="Album"
             />
         </div>
-        <div class="ms-3">
+        <div class="ms-3 text-sm md:text-base">
             <p class="font-medium">{music.title}</p>
             <p class="text-opacity-background-70">
                 {MusicController.getFullArtistFromMusic(music)}

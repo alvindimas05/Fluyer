@@ -61,7 +61,7 @@ async function addMusicAndPlay() {
 onMount(checkAlbumImage);
 </script>
 
-<div class="relative animate__animated animate__fadeInDown animate__slow">
+<div class="relative text-sm md:text-base animate__animated animate__fadeInDown animate__slow">
 	<div
 		class="grid grid-cols-[max-content_auto] py-2"
 	>

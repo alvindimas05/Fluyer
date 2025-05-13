@@ -6,9 +6,7 @@ import {
 	musicProgressValue,
 	musicVolume,
 } from "$lib/stores/music";
-import { goto } from "$app/navigation";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
-import { backgroundIsLight } from "$lib/stores/background";
 import { isAndroid, isMacos } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
@@ -140,7 +138,7 @@ function handleVolumeButton() {
         <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
             <div class="flex items-center">
                 <button
-                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
+                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2 hidden md:block"
                     onclick={handleButtonPrevious}
                     ><img
                         src={MusicConfig.defaultPreviousButton}
@@ -158,7 +156,7 @@ function handleVolumeButton() {
                     /></button
                 >
                 <button
-                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
+                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2 hidden md:block"
                     onclick={handleButtonNext}
                     ><img
                         src={MusicConfig.defaultNextButton}
@@ -167,7 +165,7 @@ function handleVolumeButton() {
                 >
             </div>
             <div
-                class="ms-2 lg:ms-0 lg:flex items-center justify-center order-first lg:order-none"
+                class="ms-2 lg:ms-0 lg:flex items-center justify-center order-first lg:order-none text-sm md:text-base"
             >
                 <div
                     class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
