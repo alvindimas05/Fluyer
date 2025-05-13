@@ -32,14 +32,14 @@ let lyrics: MusicLyric[] = $state([]);
 let selectedLyricIndex = $state(0);
 let volumePercentage = $state(MusicController.volumePercentage());
 
-musicProgressValue.subscribe(() => {
+const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
 	progressPercentage = MusicController.progressPercentage();
 	progressDurationText = MusicController.progressDurationText();
 	progressDurationNegativeText = MusicController.progressDurationText(true);
 
 	resetSelectedLyricIndex();
 });
-musicCurrentIndex.subscribe(() => {
+const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => {
 	music = MusicController.currentMusic();
 	albumImage = MusicController.currentMusicAlbumImage();
 	resetLyrics();
@@ -83,6 +83,8 @@ function onPlayerBarChange() {
 }
 
 function handleButtonBack() {
+    unlistenMusicProgressValue();
+    unlistenMusicCurrentIndex();
 	$pageHomePlayerBarShow = true;
 	PageController.goto(PageRoutes.HOME);
 }
