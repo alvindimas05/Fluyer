@@ -138,7 +138,7 @@ function handleVolumeButton() {
         <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
             <div class="flex items-center">
                 <button
-                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2 hidden md:block"
+                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonPrevious}
                     ><img
                         src={MusicConfig.defaultPreviousButton}
@@ -156,7 +156,7 @@ function handleVolumeButton() {
                     /></button
                 >
                 <button
-                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2 hidden md:block"
+                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonNext}
                     ><img
                         src={MusicConfig.defaultNextButton}
