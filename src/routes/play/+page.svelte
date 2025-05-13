@@ -7,13 +7,12 @@ import {
 } from "$lib/stores/music";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
-import { onMount } from "svelte";
 import LrcLib from "$lib/api/lrclib";
 import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
-import { isAndroid } from "$lib/platform";
+import { isAndroid, isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
 import { pageHomePlayerBarShow } from "$lib/stores/page";
@@ -163,7 +162,7 @@ musicVolume.subscribe(() => {
         </div>
     </div>
     <div
-        class={`md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
+        class={`md:row-[2] md:col-[1] order-last md:order-2 p-5 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
     >
         <div class="w-full md:w-[80%] xl:w-[65%]">
             <div class="w-full grid grid-cols-[auto,1fr,auto] md:mt-4">
