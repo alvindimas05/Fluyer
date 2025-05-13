@@ -174,7 +174,7 @@ const MusicController = {
 		MusicController.gotoPlaylist(MusicController.currentMusicIndex() - 1);
 	},
 
-	nextMusic: () => {
+	nextMusic: async () => {
 		MusicController.sendCommandController("next");
 	},
 
