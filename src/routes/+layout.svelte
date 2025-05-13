@@ -3,9 +3,8 @@ import "animate.css";
 import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 import "../app.scss";
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
-import { isAndroid, isDesktop, isMacos, isWindows } from "$lib/platform";
+import { isDesktop, isMacos, isWindows } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
-import HeadsetChange from "$lib/mobile/HeadsetChange.svelte";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
 import Font from "$lib/font/Font.svelte";
@@ -59,7 +58,6 @@ if (isWindows()) {
 </script>
 
 <Font />
-<!-- TODO: Add option to enable AnimatedBackground on Mobile -->
 {#if isAppReady}
     <AnimatedBackground />
 {/if}
@@ -72,9 +70,6 @@ if (isWindows()) {
 >
     {@render children?.()}
 </div>
-{#if isAndroid()}
-    <HeadsetChange />
-{/if}
 {#if isDesktop()}
     <TitleBar />
 {/if}

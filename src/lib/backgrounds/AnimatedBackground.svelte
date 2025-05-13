@@ -4,11 +4,10 @@ import { backgroundIsLight } from "$lib/stores/background";
 import { prominent } from "color.js";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
-import { platform } from "@tauri-apps/plugin-os";
-import { isMobile } from "$lib/platform";
 import BackgroundController from "$lib/controllers/BackgroundController";
 import { musicCurrentIndex } from "$lib/stores/music";
 import type { PreviousBackground } from "./types";
+    import { isLinux } from "$lib/platform";
 
 const SIZE = 10;
 
@@ -149,7 +148,7 @@ async function getColors() {
 	if (!LoadingController.loadingBackground()) {
 		// FIXME: Visible Animated Colored Squares on Linux
 		// Note: Probably won't be fixed soon since it's WebView issue
-		if (platform() == "linux") {
+		if (isLinux()) {
 			LoadingController.setLoadingBackground(true);
 			animatedClasses = "";
 		} else {
@@ -158,7 +157,8 @@ async function getColors() {
 	}
 }
 
-musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
+// musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
+musicCurrentIndex.subscribe(() => setTimeout(getColors, 0));
 </script>
 
 <!-- {#if isMobile()} -->

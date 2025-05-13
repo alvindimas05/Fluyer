@@ -11,8 +11,6 @@ import { isMobile } from "$lib/platform";
 import Intro from "$lib/home/intro/Intro.svelte";
 import SearchBar from "$lib/searchbar/SearchBar.svelte";
 
-if (isMobile()) LoadingController.setLoadingBackground(true);
-
 let isLoadingDone = LoadingController.loadingShow();
 
 loadingBackground.subscribe(() => {
