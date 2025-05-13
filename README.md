@@ -27,8 +27,6 @@ You can grab the latest version of the app below or check the [release page](htt
 
 ### Android
 - The play screen is not bad on potrait mode but definitely need some improvement.
-- Some features are disabled like Animated Background to prevent performance issues.
-- Sometimes it stops itself when running on background due to android security. Planned to fix.
 
 ### iOS
 - Even though it's already tested, iOS release is not planned for now due to Apple Developer pricing.
