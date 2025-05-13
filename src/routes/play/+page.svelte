@@ -163,19 +163,19 @@ musicVolume.subscribe(() => {
         </div>
     </div>
     <div
-        class={`md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 mb-10 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
+        class={`md:row-[2] md:col-[1] order-last md:order-2 p-5 md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
     >
         <div class="w-full md:w-[80%] xl:w-[65%]">
-            <div class="w-full grid grid-cols-[auto,1fr,auto] mt-4">
+            <div class="w-full grid grid-cols-[auto,1fr,auto] md:mt-4">
                 <div class="text-xs lg:text-sm flex w-12">
                     <span class="self-end opacity-75"
                         >{progressDurationText}</span
                     >
                 </div>
-                <div class="text-lg font-medium text-center mt-2 opacity-90 overflow-hidden">
+                <div class="text-sm sm:text-md md:text-lg font-medium text-center mt-2 opacity-90 overflow-hidden">
                     <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                     <p class="animate-scroll-overflow-text"></p>
-                    <p class="whitespace-nowrap overflow-x-hidden  animate-scroll-overflow-text">
+                    <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">
                         {music?.albumArtist ??
                             music?.artist ??
                             MusicConfig.defaultArtist} {MusicConfig.separator}
@@ -211,9 +211,9 @@ musicVolume.subscribe(() => {
                 />
             </div>
             <div class="w-full grid grid-cols-5 mt-4">
-                <div class="grid items-center">
+                <div class="flex items-center">
                     <button
-                        class="w-8 xl:w-9 invert mx-2"
+                        class="w-7 md:w-8 xl:w-9 invert mx-2"
                         onclick={handleButtonBack}
                         ><img
                             src={MusicConfig.defaultBackButton}
@@ -223,7 +223,7 @@ musicVolume.subscribe(() => {
                 </div>
                 <div class="flex justify-end">
                     <button
-                        class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        class="w-10 sm:w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
                         onclick={handleButtonPrevious}
                         ><img
                             src={MusicConfig.defaultPreviousButton}
@@ -233,7 +233,7 @@ musicVolume.subscribe(() => {
                 </div>
                 <div class="flex justify-center">
                     <button
-                        class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        class="w-10 sm:w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
                         onclick={handleButtonPlayPause}
                         ><img
                             src={$musicIsPlaying
@@ -245,7 +245,7 @@ musicVolume.subscribe(() => {
                 </div>
                 <div class="flex justify-start">
                     <button
-                        class="w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        class="w-10 sm:w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
                         onclick={handleButtonNext}
                         ><img
                             src={MusicConfig.defaultNextButton}
@@ -303,13 +303,13 @@ musicVolume.subscribe(() => {
             <div class="flex">
                 <div
                     id="lyrics"
-                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.5rem] xl:text-[2rem]"
+                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.1rem] md:text-[1.5rem] xl:text-[2rem]"
                 >
                     {#each lyrics as lyric, i}
                         {#if selectedLyricIndex == i}
                             <p
                                 id="selected-lyric"
-                                class="text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10"
+                                class="text-[1.25rem] md:text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10"
                             >
                                 {lyric.lyric}
                             </p>
@@ -344,7 +344,7 @@ musicVolume.subscribe(() => {
         margin-bottom: var(--margin-vertical);
         grid-template-rows:
             auto calc(
-                (30% - var(--mobile-status-bar-height)) - var(
+                (auto - var(--mobile-status-bar-height)) - var(
                         --mobile-navigation-bar-height
                     )
             )
