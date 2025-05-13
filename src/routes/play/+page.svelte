@@ -172,8 +172,10 @@ musicVolume.subscribe(() => {
                         >{progressDurationText}</span
                     >
                 </div>
-                <div class="text-lg font-medium text-center mt-2 opacity-90">
-                    <p>
+                <div class="text-lg font-medium text-center mt-2 opacity-90 overflow-hidden">
+                    <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
+                    <p class="animate-scroll-overflow-text"></p>
+                    <p class="whitespace-nowrap overflow-x-hidden  animate-scroll-overflow-text">
                         {music?.albumArtist ??
                             music?.artist ??
                             MusicConfig.defaultArtist} {MusicConfig.separator}
