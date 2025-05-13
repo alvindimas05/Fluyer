@@ -3,6 +3,7 @@ import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type { MusicData } from "$lib/home/music/types";
 import { musicAlbumList, musicList } from "$lib/stores/music";
 
+// svelte-ignore non_reactive_update
 let searchInput: HTMLInputElement;
 let searchValue = $state("");
 let showSearchBar = $state(false);
