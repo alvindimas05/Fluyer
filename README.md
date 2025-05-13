@@ -23,7 +23,7 @@ You can grab the latest version of the app below or check the [release page](htt
 ## Issues
 
 ### Universal
-- High resource usage due to Animated Background. The attempt to fix this is to animate the background on play screen only.
+- High resource usage due to Animated Background. The attempt to fix this is to animate the background on play screen only. For now, the animation is disabled but the background is still enabled.
 
 ### Android
 - The play screen is not bad on potrait mode but definitely need some improvement.
