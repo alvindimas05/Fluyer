@@ -113,6 +113,23 @@ async function getColors() {
             `;
 		}
 	}
+	// document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
+   	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
+  	// 	<div
+ 	// 		class="bg-blur-colors"
+ 	// 		style="grid-template-columns: ${GRID_COLS}"
+  	// 	>
+ 	// 		${bgBlurChildren}
+  	// 	</div>
+   	// </div>
+   	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
+  	// 	<div
+ 	// 		class="bg-blur-colors bg-blur-heart"
+ 	// 		style="grid-template-columns: ${GRID_COLS}"
+  	// 	>
+ 	// 		${bgBlurHeartChildren}
+  	// 	</div>
+   	// </div>`;
 	document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
    	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
   		<div
@@ -120,14 +137,6 @@ async function getColors() {
  			style="grid-template-columns: ${GRID_COLS}"
   		>
  			${bgBlurChildren}
-  		</div>
-   	</div>
-   	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
-  		<div
- 			class="bg-blur-colors bg-blur-heart"
- 			style="grid-template-columns: ${GRID_COLS}"
-  		>
- 			${bgBlurHeartChildren}
   		</div>
    	</div>`;
 
@@ -152,7 +161,8 @@ async function getColors() {
 musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
 </script>
 
-{#if isMobile()}
+<!-- {#if isMobile()} -->
+{#if false}
 	<div
 		class="fixed z-[-10] w-full h-full animate__animated animate__fadeIn"
 		onanimationend={() => LoadingController.setLoadingBackground(true)}
@@ -164,13 +174,13 @@ musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
 				alt="Background"
 			/>
 		</div>
-		<div class="bg-blur-heart absolute">
+		<!-- <div class="bg-blur-heart absolute">
 			<img
 				class="bg-blur-colors object-cover"
 				src="/images/mobile-background.png"
 				alt="Background"
 			/>
-		</div>
+		</div> -->
 	</div>
 {:else}
 	<div
