@@ -100,7 +100,10 @@ async function resetLyrics() {
 
 	if (MusicController.currentMusic() == null) return;
 	const resLyrics = await LrcLib.getLyrics(MusicController.currentMusic()!);
-	if (resLyrics == null) return;
+	if (resLyrics == null){
+        lyrics = [];
+        return;
+    }
 	lyrics = resLyrics;
 }
 
@@ -132,11 +135,6 @@ function scrollToSelectedLyric() {
 
 musicVolume.subscribe(() => {
 	volumePercentage = MusicController.volumePercentage();
-});
-
-onMount(async () => {
-	await resetLyrics();
-	resetSelectedLyricIndex();
 });
 </script>
 
@@ -295,7 +293,8 @@ onMount(async () => {
         <div
             class="w-full md:h-screen md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
             [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
-            md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]"
+            md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]
+            animate__animated animate__faster animate__fadeInUp"
         >
             <div class="flex">
                 <div

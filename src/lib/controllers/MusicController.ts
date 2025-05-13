@@ -355,9 +355,9 @@ const MusicController = {
 		invoke(CommandRoutes.MUSIC_PLAYLIST_GOTO, { index });
 	},
 
-	reset: () => {
+	reset: async () => {
 		MusicController.pause();
-		MusicController.sendCommandController("clear");
+		await MusicController.sendCommandController("clear");
 		musicCurrentIndex.set(-1);
 		musicPlaylist.set([]);
 		MusicController.stopProgress();

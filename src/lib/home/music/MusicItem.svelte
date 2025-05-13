@@ -55,7 +55,7 @@
 
 	async function addMusicAndPlay() {
 		music.image = albumImage;
-		MusicController.reset();
+		await MusicController.reset();
 		await MusicController.addMusic(music);
 		MusicController.play();
 	}
