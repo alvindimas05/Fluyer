@@ -26,7 +26,7 @@ You can grab the latest version of the app below or check the [release page](htt
 - High resource usage due to Animated Background. The attempt to fix this is to animate the background on play screen only.
 
 ### Android
-- The play screen is ugly af on potrait mode. Still trying to figure the alternative design.
+- The play screen is not bad on potrait mode but definitely need some improvement.
 - Some features are disabled like Animated Background to prevent performance issues.
 - Sometimes it stops itself when running on background due to android security. Planned to fix.
 
