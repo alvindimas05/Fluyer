@@ -13,3 +13,4 @@ vite.config.ts.timestamp-*
 src-test
 **/test-*
 bundle
+.idea

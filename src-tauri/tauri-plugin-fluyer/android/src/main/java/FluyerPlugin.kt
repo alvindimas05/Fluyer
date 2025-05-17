@@ -55,7 +55,7 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
     }
 
     override fun onResume(){
-        super.onResume()
+            super.onResume()
         stateChannel?.send(JSObject().put("value", WatcherStateType.Resume.value))
     }
 
@@ -104,14 +104,12 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
         invoke.resolve(JSObject().put("value", true))
     }
     
-    @RequiresApi(Build.VERSION_CODES.HONEYCOMB)
     @Command
     fun restartApp(invoke: Invoke) {
         implementation.restartApp()
         invoke.resolve()
     }
     
-    @RequiresApi(Build.VERSION_CODES.GINGERBREAD)
     @Command
     fun playerRunCommand(invoke: Invoke) {
         try {
@@ -131,6 +129,7 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
                 .put("currentPosition", info.currentPosition)
                 .put("isEmpty", info.isEmpty)
                 .put("isPlaying", info.isPlaying)
+                .put("index", info.index)
             )
         } catch (err: Exception){
             Log.e("Fluyer", err.toString())

@@ -4,9 +4,6 @@ import android.app.Activity
 import androidx.media3.exoplayer.ExoPlayer
 import java.io.File
 import android.net.Uri
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import app.tauri.annotation.InvokeArg
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -19,8 +16,10 @@ enum class PlayerCommand(val value: String) {
     Next("next"),
     Seek("seek"),
     Volume("volume"),
+    Clear("clear"),
     AddPlaylist("addPlaylist"),
-    RemovePlaylist("removePlaylist")
+    RemovePlaylist("removePlaylist"),
+    GotoPlaylist("gotoPlaylist"),
 }
 
 @InvokeArg
@@ -29,12 +28,15 @@ class PlayerCommandArgs {
     var seekPosition: Long? = null
     var volume: Float? = null
     var playlistFilePath: String? = null
+    var playlistRemoveIndex: Int? = null
+    var playlistGotoIndex: Int? = null
 }
 
 data class PlayerGetInfo (
     val currentPosition: Long,
     val isEmpty: Boolean,
     val isPlaying: Boolean,
+    val index: Int,
 )
 
 class FluyerPlayer(activity: Activity) {
@@ -50,7 +52,6 @@ class FluyerPlayer(activity: Activity) {
         })
     }
     
-    @RequiresApi(Build.VERSION_CODES.GINGERBREAD)
     fun sendCommand(args: PlayerCommandArgs) {
         val command = PlayerCommand.valueOf(args.command.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
             Locale.ROOT
@@ -65,8 +66,18 @@ class FluyerPlayer(activity: Activity) {
                 player.addMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
                 player.prepare()
             }
-            PlayerCommand.Next, PlayerCommand.RemovePlaylist -> {
+            PlayerCommand.Next -> {
+                player.seekToNext()
+            }
+            PlayerCommand.RemovePlaylist -> {
+                player.removeMediaItem(args.playlistRemoveIndex!!)
+            }
+            PlayerCommand.Clear -> {
                 player.clearMediaItems()
+            }
+
+            PlayerCommand.GotoPlaylist -> {
+                player.seekTo(args.playlistGotoIndex!!, 0)
             }
         }
     }
@@ -76,6 +87,7 @@ class FluyerPlayer(activity: Activity) {
             currentPosition = player.currentPosition,
             isEmpty = player.mediaItemCount == 0,
             isPlaying = player.isPlaying,
+            index = player.currentMediaItemIndex,
         )
     }
 }

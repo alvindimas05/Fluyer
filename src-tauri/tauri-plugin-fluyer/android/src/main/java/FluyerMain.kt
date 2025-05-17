@@ -61,7 +61,6 @@ class FluyerMain(private val activity: Activity) {
             0
         }
     }
-    @RequiresApi(Build.VERSION_CODES.HONEYCOMB)
     fun restartApp() {
         val context = activity.applicationContext
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)

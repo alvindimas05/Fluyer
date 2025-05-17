@@ -83,8 +83,10 @@ pub enum PlayerCommand {
     Next,
     Seek,
     Volume,
+    Clear,
     AddPlaylist,
     RemovePlaylist,
+    GotoPlaylist,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -94,6 +96,8 @@ pub struct PlayerCommandArguments {
     pub seek_position: Option<u64>,
     pub volume: Option<f32>,
     pub playlist_file_path: Option<String>,
+    pub playlist_remove_index: Option<usize>,
+    pub playlist_goto_index: Option<usize>,
 }
 
 impl PlayerCommandArguments {
@@ -103,6 +107,8 @@ impl PlayerCommandArguments {
             seek_position: None,
             volume: None,
             playlist_file_path: None,
+            playlist_remove_index: None,
+            playlist_goto_index: None,
         }
     }
 }
@@ -113,6 +119,7 @@ pub struct PlayerGetInfo {
     pub current_position: u128,
     pub is_empty: bool,
     pub is_playing: bool,
+    pub index: usize,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
