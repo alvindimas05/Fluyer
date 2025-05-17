@@ -26,7 +26,6 @@ symphonia = { version = "0.5.4", features = ["all"] }
 log = "0.4.22"
 base64 = "0.22.1"
 walkdir = "2.5.0"
-thread-priority = "1.2.0"
 tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-os = "2"

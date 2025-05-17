@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
-#[cfg(desktop)]
-use thread_priority::ThreadBuilder;
 
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
@@ -13,7 +11,7 @@ use std::thread;
 #[cfg(desktop)]
 use libmpv2::Mpv;
 
-use crate::{logger, GLOBAL_APP_HANDLE};
+use crate::GLOBAL_APP_HANDLE;
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
