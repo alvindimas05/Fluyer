@@ -56,6 +56,17 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
+      - name: Install Scoop
+        run: |
+            Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+            Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+        shell: pwsh
+    
+      - name: Install mpv with Scoop
+        run: |
+            scoop bucket add extras
+            scoop install extras/mpv
+        shell: pwsh
 
       - name: Setup Workflow
         shell: bash
