@@ -77,8 +77,11 @@ impl MusicPlayer {
             GLOBAL_APP_HANDLE.get().unwrap().fluyer()
                 .player_run_command(PlayerCommandArguments::new(PlayerCommand::RemovePlaylist)).ok();
             #[cfg(not(target_os = "android"))]{
-                GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-clear", &[]).unwrap();
-                // GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-remove", &["0"]).unwrap();
+                let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
+                mpv.command("playlist-clear", &[]).unwrap();
+                if mpv.get_property::<i64>("playlist-pos").unwrap() >= 0 {
+                    mpv.command("playlist-remove", &["0"]).unwrap();
+                }
             }
             return;
         }
@@ -203,7 +206,7 @@ impl MusicPlayer {
     }
 
     pub fn emit_sync(is_from_next: bool){
-        if GLOBAL_MUSIC_MPV.get().unwrap().get_property::<f64>("playlist-pos").unwrap() < 0.0 {
+        if GLOBAL_MUSIC_MPV.get().unwrap().get_property::<i64>("playlist-pos").unwrap() < 0 {
             return
         }
         
