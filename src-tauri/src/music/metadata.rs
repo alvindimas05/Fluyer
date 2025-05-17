@@ -66,8 +66,8 @@ impl MusicMetadata {
             &meta_opts,
         ) {
             Ok(probed) => probed,
-            Err(_) => {
-                logger::error!("Unsupported format music: {}", &path);
+            Err(e) => {
+                logger::error!("Unsupported format music at {}: {:?}", &path, e);
                 return metadata;
             }
         };

@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use simplelog::{
-    ColorChoice, CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode, WriteLogger,
+    ColorChoice, CombinedLogger, LevelFilter, TermLogger, TerminalMode, WriteLogger,
 };
 use std::{env::temp_dir, fs::File};
 
@@ -15,16 +15,21 @@ fn main() {
 }
 
 fn init_logging() {
-    println!("The log file is saved at {}", temp_dir().display());
+    use simplelog::ConfigBuilder;
+
+    let log_path = format!("{}/fluyer.log", temp_dir().display());
+    println!("The log file is saved at {}", log_path);
+
+    let mut config = ConfigBuilder::new();
+    config.add_filter_ignore_str("symphonia_core");
+
+    let config = config.build();
+
     CombinedLogger::init(vec![
         WriteLogger::new(
-            if cfg!(debug_assertions) {
-                LevelFilter::Debug
-            } else {
-                LevelFilter::Warn
-            },
-            Config::default(),
-            File::create(format!("{}/fluyer.log", temp_dir().display())).unwrap(),
+            LevelFilter::Warn,
+            config.clone(),
+            File::create(log_path).unwrap(),
         ),
         TermLogger::new(
             if cfg!(debug_assertions) {
@@ -32,10 +37,10 @@ fn init_logging() {
             } else {
                 LevelFilter::Warn
             },
-            Config::default(),
+            config,
             TerminalMode::Mixed,
             ColorChoice::Auto,
-        ),
+        )
     ])
     .expect("Failed to initialize logger");
 }

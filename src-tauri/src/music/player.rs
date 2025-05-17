@@ -1,7 +1,6 @@
-use libmpv2::events::EventContext;
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
-use thread_priority::{ThreadBuilder, ThreadPriority};
+use thread_priority::ThreadBuilder;
 
 #[cfg(target_os = "android")]
 use std::thread;
@@ -216,9 +215,7 @@ impl MusicPlayer {
     
     #[cfg(not(target_os = "android"))]
     pub fn start_mpv_listener(){
-        use libmpv2::events::{Event, PropertyData};
-
-        use crate::logger;
+        use libmpv2::events::{EventContext, Event};
 
         let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
         ThreadBuilder::default().spawn_careless(move || loop {
