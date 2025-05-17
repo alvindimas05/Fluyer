@@ -8,11 +8,11 @@ if [[ "$os" == "linux" ]]; then
     sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
 fi
 
-
 # Install libmpv on Linux or MacOS
 if [[ "$os" == "linux"  ]] || [[ "$os" == "macos" ]]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install mpv
+    export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib:$(brew --prefix mpv)/lib
 fi
 
 # Install NPM Packages
