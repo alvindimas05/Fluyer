@@ -9,7 +9,7 @@ if [[ "$os" == "linux" ]]; then
 fi
 
 
-# Install MPV on Linux or MacOS
+# Install libmpv on Linux or MacOS
 if [[ "$os" == "linux"  ]] || [[ "$os" == "macos" ]]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install mpv
