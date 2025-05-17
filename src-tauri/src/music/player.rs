@@ -1,25 +1,20 @@
+use libmpv2::events::EventContext;
 use serde::{Deserialize, Serialize};
-use std::fs::File;
-use std::io::BufReader;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Mutex;
-use std::thread;
-use std::time::Duration;
 use tauri::Emitter;
 use thread_priority::{ThreadBuilder, ThreadPriority};
-#[cfg(not(target_os = "android"))]
-use atomic_float::AtomicF32;
 
+#[cfg(target_os = "android")]
+use std::thread;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 #[cfg(not(target_os = "android"))]
 use std::sync::OnceLock;
+#[cfg(not(target_os = "android"))]
+use libmpv2::Mpv;
 
 use crate::GLOBAL_APP_HANDLE;
-
-use super::metadata::MusicMetadata;
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -49,33 +44,19 @@ pub struct MusicPlayerSync {
 }
 
 #[cfg(not(target_os = "android"))]
-pub static GLOBAL_MUSIC_SINK: OnceLock<rodio::Sink> = OnceLock::new();
-static MUSIC_PLAYLIST: Mutex<Vec<MusicMetadata>> = Mutex::new(vec![]);
-static MUSIC_CURRENT_INDEX: AtomicUsize = AtomicUsize::new(0);
-#[cfg(not(target_os = "android"))]
-static MUSIC_VOLUME: AtomicF32 = AtomicF32::new(1.0);
+pub static GLOBAL_MUSIC_MPV: OnceLock<Mpv> = OnceLock::new();
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
         handle_music_player_background();
 
-        ThreadBuilder::default()
-            .name("Music Player")
-            .priority(ThreadPriority::Max)
-            .spawn(|_| {
-                #[cfg(not(target_os = "android"))]{
-                    let stream_handle = rodio::OutputStreamBuilder::open_default_stream()
-                        .expect("Failed to open default stream");
-                    GLOBAL_MUSIC_SINK
-                        .set(rodio::Sink::connect_new(&stream_handle.mixer()))
-                        .ok();
-                    MusicPlayer::start_playback_monitor();
-                }
-                // Note: This need to be seperated for unknown reasons. The rodio won't work if the playback monitor ran outside cfg.
-                #[cfg(target_os = "android")]
-                MusicPlayer::start_playback_monitor();
-            })
-            .ok();
+        #[cfg(not(target_os = "android"))]{
+            GLOBAL_MUSIC_MPV.set(Mpv::with_initializer(|mpv|{
+                mpv.set_property("vo", "null")?;
+                Ok(())
+            }).unwrap()).ok();
+            MusicPlayer::start_mpv_listener();
+        }
 
         Self {}
     }
@@ -93,13 +74,13 @@ impl MusicPlayer {
         }
 
         if _command == MusicCommand::Clear {
-            MUSIC_PLAYLIST.lock().unwrap().clear();
-            MUSIC_CURRENT_INDEX.store(0, Ordering::SeqCst);
             #[cfg(target_os = "android")]
             GLOBAL_APP_HANDLE.get().unwrap().fluyer()
                 .player_run_command(PlayerCommandArguments::new(PlayerCommand::RemovePlaylist)).ok();
-            #[cfg(not(target_os = "android"))]
-            GLOBAL_MUSIC_SINK.get().unwrap().clear();
+            #[cfg(not(target_os = "android"))]{
+                GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-clear", &[]).unwrap();
+                // GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-remove", &["0"]).unwrap();
+            }
             return;
         }
 
@@ -108,7 +89,7 @@ impl MusicPlayer {
             GLOBAL_APP_HANDLE.get().unwrap().fluyer()
                 .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next)).ok();
             #[cfg(not(target_os = "android"))]
-            GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
+            GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-next", &[]).unwrap();
             return;
         }
     }
@@ -120,110 +101,56 @@ impl MusicPlayer {
                 .player_run_command(args).ok();
         } 
         #[cfg(not(target_os = "android"))] 
-        GLOBAL_MUSIC_SINK
-            .get()
-            .unwrap()
-            .try_seek(Duration::from_millis(position))
-            .ok();
+        GLOBAL_MUSIC_MPV.get().unwrap().command("seek", &[
+            format!("{:.3}", position as f64 / 1000.0).as_str(), "absolute"]).unwrap();
     }
     pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
-        let index = MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) - if is_from_next { 0 } else { 1 };
-        #[cfg(target_os = "android")] {
-            let info = GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                .player_get_info().unwrap();
-            MusicPlayerSync {
-                index,
-                current_position: if is_from_next {
-                    0
-                } else {
-                    info.current_position
-                },
-                is_playing: if is_from_next { true } else { info.is_playing },
-            }
-        }
+        // #[cfg(target_os = "android")] {
+        //     let info = GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+        //         .player_get_info().unwrap();
+        //     MusicPlayerSync {
+        //         index,
+        //         current_position: if is_from_next {
+        //             0
+        //         } else {
+        //             info.current_position
+        //         },
+        //         is_playing: if is_from_next { true } else { info.is_playing },
+        //     }
+        // }
         #[cfg(not(target_os = "android"))] {
-            let sink = GLOBAL_MUSIC_SINK.get().unwrap();
+            let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
             MusicPlayerSync {
-                index,
+                index: mpv.get_property::<i64>("playlist-pos").unwrap() as usize,
                 current_position: if is_from_next {
                     0
                 } else {
-                    sink.get_pos().as_millis()
+                    (mpv.get_property::<f64>("time-pos").unwrap() * 1000.0) as u128
                 },
-                is_playing: if is_from_next { true } else { !sink.is_paused() },
+                is_playing: if is_from_next { true } else { !mpv.get_property::<bool>("pause").unwrap() },
             }
         }
     }
     pub fn add_playlist(&mut self, playlist: Vec<String>) {
-        MUSIC_PLAYLIST.lock().unwrap().append(
-            &mut playlist
-                .iter()
-                .map(|path| MusicMetadata::new(path.clone()))
-                .collect::<Vec<MusicMetadata>>(),
-        );
+        let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
+        let playlist_count = mpv.get_property::<i64>("playlist-count").unwrap();
+        for (i, music) in playlist.iter().enumerate() {
+            let path = format!("\"{}\"", music);
+            mpv.command("loadfile", &[path.as_str(),
+                if i < 1 && playlist_count < 1 { "replace" } else { "append" }]).unwrap();
+        }
     }
 
     pub fn remove_playlist(&mut self, index: usize) {
-        let mut playlist = MUSIC_PLAYLIST.lock().unwrap();
-
-        if let Some(_) = playlist.get(index) {
-            if index > MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) {
-                MUSIC_CURRENT_INDEX.store(index + 1, Ordering::SeqCst);
-            }
-            playlist.remove(index);
-        }
+        GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-remove", &[index.to_string().as_str()]).unwrap();
     }
 
     pub fn goto_playlist(&mut self, index: usize) {
-        MUSIC_CURRENT_INDEX.store(index, Ordering::SeqCst);
         #[cfg(target_os = "android")]
         GLOBAL_APP_HANDLE.get().unwrap().fluyer()
             .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next)).ok();
-        #[cfg(not(target_os = "android"))] 
-        GLOBAL_MUSIC_SINK.get().unwrap().skip_one();
-    }
-
-    fn next() {
-        let playlist = MUSIC_PLAYLIST.lock().unwrap();
-        let current_idx = MUSIC_CURRENT_INDEX.load(Ordering::SeqCst);
-
-        if let Some(music) = playlist.get(current_idx) {
-            #[allow(unused_variables)]
-            if let Ok(file) = File::open(music.path.clone()) {
-                #[cfg(target_os = "android")] {
-                    let mut args = PlayerCommandArguments::new(PlayerCommand::AddPlaylist);
-                    args.playlist_file_path = Some(music.path.clone());
-                    GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                        .player_run_command(args).ok();
-                } 
-                #[cfg(not(target_os = "android"))] {
-                    let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
-                    GLOBAL_MUSIC_SINK.get().unwrap().append(source);
-                }
-                
-                MusicPlayer::emit_sync(true);
-                MUSIC_CURRENT_INDEX.store(current_idx + 1, Ordering::SeqCst);
-            }
-        }
-    }
-
-    pub fn start_playback_monitor() {
-        loop {
-            #[cfg(target_os = "android")]
-            let should_play_next = GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                .player_is_empty().unwrap().value;
-            #[cfg(not(target_os = "android"))]
-            let should_play_next = {
-                let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-                sink.empty()
-            };
-
-            if should_play_next {
-                MusicPlayer::next();
-            }
-
-            thread::sleep(Duration::from_millis(100));
-        }
+        #[cfg(not(target_os = "android"))]
+        GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-play-index", &[index.to_string().as_str()]).unwrap();
     }
 
     pub fn set_volume(&mut self, volume: f32) {
@@ -233,8 +160,7 @@ impl MusicPlayer {
             GLOBAL_APP_HANDLE.get().unwrap().fluyer().player_run_command(args).ok();
         }
         #[cfg(not(target_os = "android"))]{
-            MUSIC_VOLUME.store(volume, Ordering::SeqCst);
-            GLOBAL_MUSIC_SINK.get().unwrap().set_volume(volume);
+            GLOBAL_MUSIC_MPV.get().unwrap().set_property("volume", (volume * 100.0).round() as i64).unwrap();
         }
     }
     
@@ -247,40 +173,64 @@ impl MusicPlayer {
                 PlayerCommand::Pause
             })).ok();
         #[cfg(not(target_os = "android"))]
-        self.sink_play_pause(play);
+        self.mpv_play_pause(play);
     }
 
     #[cfg(not(target_os = "android"))]
-    fn sink_play_pause(&self, play: bool) {
-        let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-        let max_volume = MUSIC_VOLUME.load(Ordering::SeqCst);
-        let mut range: Vec<f32> = (if play { 1..21 } else { 0..20 })
-            .map(|i| i as f32 * max_volume / 20.)
-            .collect();
-        if play {
-            sink.play();
-        } else {
-            range.reverse();
-        }
+    fn mpv_play_pause(&self, play: bool) {
+        GLOBAL_MUSIC_MPV.get().unwrap().set_property("pause", !play).unwrap();
+        
+        // let sink = GLOBAL_MUSIC_SINK.get().unwrap();
+        // let max_volume = MUSIC_VOLUME.load(Ordering::SeqCst);
+        // let mut range: Vec<f32> = (if play { 1..21 } else { 0..20 })
+        //     .map(|i| i as f32 * max_volume / 20.)
+        //     .collect();
+        // if play {
+        //     sink.play();
+        // } else {
+        //     range.reverse();
+        // }
 
-        for i in range {
-            sink.set_volume(i);
-            thread::sleep(Duration::from_millis(20));
-        }
+        // for i in range {
+        //     sink.set_volume(i);
+        //     thread::sleep(Duration::from_millis(20));
+        // }
 
-        if play {
-            sink.play();
-        } else {
-            sink.pause();
-        }
+        // if play {
+        //     sink.play();
+        // } else {
+        //     sink.pause();
+        // }
     }
 
     pub fn emit_sync(is_from_next: bool){
+        if GLOBAL_MUSIC_MPV.get().unwrap().get_property::<f64>("playlist-pos").unwrap() < 0.0 {
+            return
+        }
+        
         GLOBAL_APP_HANDLE.get().unwrap().emit(
             crate::commands::route::MUSIC_PLAYER_SYNC,
             MusicPlayer::get_sync_info(is_from_next),
-        )
-        .expect("Failed to sync music player");
+        ).unwrap();
+    }
+    
+    #[cfg(not(target_os = "android"))]
+    pub fn start_mpv_listener(){
+        use libmpv2::events::{Event, PropertyData};
+
+        use crate::logger;
+
+        let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
+        ThreadBuilder::default().spawn_careless(move || loop {
+            let event = event_context.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
+            match event {
+                Ok(Event::FileLoaded) => {
+                    MusicPlayer::emit_sync(true);
+                },
+                Ok(_) => {},
+                Err(_) => {},
+            }
+        }).unwrap();
     }
 }
 
@@ -295,9 +245,6 @@ pub fn handle_music_player_background() {
             .get()
             .unwrap()
             .listen("tauri://focus", move |_| {
-                if MUSIC_PLAYLIST.lock().unwrap().len() < 1 {
-                    return
-                }
                 MusicPlayer::emit_sync(false);
             });
     }

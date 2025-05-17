@@ -42,10 +42,7 @@ lazy_static = "1.5.0"
 dotenvy = "0.15.7"
 openssl = { version = "*", features = ["vendored"] }
 dotenvy_macro = "0.15.7"
-
-[target.'cfg(not(target_os = "android"))'.dependencies]
-rodio = { git = "https://github.com/RustAudio/rodio.git", rev = "8fd0337", features = ["symphonia-all"] }
-atomic_float = "1.1.0"
+libmpv2 = "4.1.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 enigo = "0.3.0"
