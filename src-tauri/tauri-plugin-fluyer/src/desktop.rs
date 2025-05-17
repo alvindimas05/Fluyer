@@ -41,29 +41,15 @@ impl<R: Runtime> Fluyer<R> {
         Ok(PermissionStatus::default())
     }
 
-    pub fn watch_state<F: Fn(WatcherState) + Send + Sync + 'static>(
+    pub fn watch_playlist_change<F: Fn(WatcherPlaylistChange) + Send + Sync + 'static>(
         &self,
         _callback: F,
-    ) -> crate::Result<WatchStateResponse> {
-        Ok(WatchStateResponse { value: false })
+    ) -> crate::Result<WatchPlaylistChangeResponse> {
+        Ok(WatchPlaylistChangeResponse { value: false })
     }
 
-    pub(crate) fn watch_state_inner(&self, _channel: Channel) -> crate::Result<WatchStateResponse> {
-        Ok(WatchStateResponse { value: false })
-    }
-
-    pub fn watch_headset_change<F: Fn(WatcherHeadsetChange) + Send + Sync + 'static>(
-        &self,
-        _callback: F,
-    ) -> crate::Result<WatchHeadsetChangeResponse> {
-        Ok(WatchHeadsetChangeResponse { value: false })
-    }
-
-    pub(crate) fn watch_headset_change_inner(
-        &self,
-        _channel: Channel,
-    ) -> crate::Result<WatchHeadsetChangeResponse> {
-        Ok(WatchHeadsetChangeResponse { value: false })
+    pub(crate) fn watch_playlist_change_inner(&self, _channel: Channel) -> crate::Result<WatchPlaylistChangeResponse> {
+        Ok(WatchPlaylistChangeResponse { value: false })
     }
 
     pub fn restart_app(&self) -> crate::Result<()> {
@@ -76,10 +62,6 @@ impl<R: Runtime> Fluyer<R> {
     
     pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
         Ok(PlayerGetInfo::default())
-    }
-    
-    pub fn player_is_empty(&self) -> crate::Result<PlayerIsEmpty> {
-        Ok(PlayerIsEmpty::default())
     }
 }
 

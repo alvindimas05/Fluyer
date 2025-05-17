@@ -35,14 +35,8 @@ pub(crate) async fn request_permissions<R: Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-pub async fn watch_state<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<WatchStateResponse> {
-    app.fluyer().watch_state_inner(channel)
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn watch_headset_change<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<WatchHeadsetChangeResponse> {
-    app.fluyer().watch_headset_change_inner(channel)
+pub async fn watch_playlist_change<R: Runtime>(app: AppHandle<R>, channel: Channel) -> Result<WatchPlaylistChangeResponse> {
+    app.fluyer().watch_playlist_change_inner(channel)
 }
 
 #[tauri::command]

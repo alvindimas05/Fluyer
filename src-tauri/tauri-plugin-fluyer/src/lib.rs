@@ -51,8 +51,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             commands::get_status_bar_height,
             commands::check_permissions,
             commands::request_permissions,
-            commands::watch_state,
-            commands::watch_headset_change,
+            commands::watch_playlist_change,
             commands::restart_app,
         ])
         .setup(|app, api| {

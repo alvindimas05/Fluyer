@@ -9,10 +9,11 @@ use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 use tauri_plugin_fluyer::FluyerExt;
 #[cfg(desktop)]
 use std::sync::OnceLock;
+use std::thread;
 #[cfg(desktop)]
 use libmpv2::Mpv;
 
-use crate::GLOBAL_APP_HANDLE;
+use crate::{logger, GLOBAL_APP_HANDLE};
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -53,8 +54,8 @@ impl MusicPlayer {
                 mpv.set_property("vo", "null")?;
                 Ok(())
             }).unwrap()).ok();
-            MusicPlayer::start_mpv_listener();
         }
+        MusicPlayer::start_listener();
 
         Self {}
     }
@@ -235,21 +236,31 @@ impl MusicPlayer {
         ).unwrap();
     }
     
-    #[cfg(desktop)]
-    pub fn start_mpv_listener(){
-        use libmpv2::events::{EventContext, Event};
-
-        let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
-        ThreadBuilder::default().spawn_careless(move || loop {
-            let event = event_context.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
-            match event {
-                Ok(Event::FileLoaded) => {
+    pub fn start_listener(){
+        #[cfg(desktop)]{
+            use libmpv2::events::{EventContext, Event};
+    
+            let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
+            thread::spawn(move || loop {
+                let event = event_context.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
+                match event {
+                    Ok(Event::FileLoaded) => {
+                        MusicPlayer::emit_sync(true);
+                    },
+                    Ok(_) => {},
+                    Err(_) => {},
+                }
+            });
+        }
+        
+        #[cfg(target_os = "android")]{
+            GLOBAL_APP_HANDLE.get().unwrap().fluyer().watch_playlist_change(|_|{
+                // Note: Thread spawn is required for unknown reasons.
+                thread::spawn(||{
                     MusicPlayer::emit_sync(true);
-                },
-                Ok(_) => {},
-                Err(_) => {},
-            }
-        }).unwrap();
+                });
+            }).unwrap();
+        }
     }
 }
 
@@ -263,24 +274,4 @@ pub fn handle_music_player_background() {
         .listen("tauri://focus", move |_| {
             MusicPlayer::emit_sync(false);
         });
-    // #[cfg(target_os = "android")]
-    // {
-    //     use tauri_plugin_fluyer::models::WatcherStateType;
-    //     use tauri_plugin_fluyer::FluyerExt;
-
-    //     let app_handle = GLOBAL_APP_HANDLE.get().unwrap();
-    //     app_handle
-    //         .fluyer()
-    //         .watch_state(move |payload| {
-    //             if matches!(payload.value, WatcherStateType::Resume) && MUSIC_CURRENT_INDEX.load(Ordering::SeqCst) > 0 {
-    //                 // Note: Probably can't be fixed. The app needs to be fully loaded somehow.
-    //                 // Calling the emit_sync crashes the app without delay.
-    //                 thread::spawn(||{
-    //                     thread::sleep(Duration::from_millis(500));
-    //                     MusicPlayer::emit_sync(false);
-    //                 });
-    //             }
-    //         })
-    //         .expect("Failed to watch app state");
-    // }
 }

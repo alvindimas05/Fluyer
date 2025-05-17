@@ -68,56 +68,28 @@ impl<R: Runtime> Fluyer<R> {
             .map_err(Into::into)
     }
 
-    pub fn watch_state<F: Fn(WatcherState) + Send + Sync + 'static>(
+    pub fn watch_playlist_change<F: Fn(WatcherPlaylistChange) + Send + Sync + 'static>(
         &self,
         callback: F,
-    ) -> crate::Result<WatchStateResponse> {
+    ) -> crate::Result<WatchPlaylistChangeResponse> {
         let channel = Channel::new(move |event| {
             let payload = match event {
                 InvokeResponseBody::Json(payload) => {
-                    serde_json::from_str::<WatcherState>(&payload).unwrap()
+                    serde_json::from_str::<WatcherPlaylistChange>(&payload).unwrap()
                 }
-                _ => panic!("Failed to parse WatcherState payload"),
+                _ => panic!("Failed to parse WatcherPlaylistChange payload"),
             };
 
             callback(payload);
 
             Ok(())
         });
-        self.watch_state_inner(channel)
+        self.watch_playlist_change_inner(channel)
     }
 
-    pub(crate) fn watch_state_inner(&self, channel: Channel) -> crate::Result<WatchStateResponse> {
+    pub(crate) fn watch_playlist_change_inner(&self, channel: Channel) -> crate::Result<WatchPlaylistChangeResponse> {
         self.0
-            .run_mobile_plugin("watchState", WatchStatePayload { channel })
-            .map_err(Into::into)
-    }
-
-    pub fn watch_headset_change<F: Fn(WatcherHeadsetChange) + Send + Sync + 'static>(
-        &self,
-        callback: F,
-    ) -> crate::Result<WatchHeadsetChangeResponse> {
-        let channel = Channel::new(move |event| {
-            let payload = match event {
-                InvokeResponseBody::Json(payload) => {
-                    serde_json::from_str::<WatcherHeadsetChange>(&payload).unwrap()
-                }
-                _ => panic!("Failed to parse WatcherHeadsetChange payload"),
-            };
-
-            callback(payload);
-
-            Ok(())
-        });
-        self.watch_headset_change_inner(channel)
-    }
-
-    pub(crate) fn watch_headset_change_inner(
-        &self,
-        channel: Channel,
-    ) -> crate::Result<WatchHeadsetChangeResponse> {
-        self.0
-            .run_mobile_plugin("watchHeadsetChange", WatchHeadsetChangePayload { channel })
+            .run_mobile_plugin("watchPlaylistChange", WatchPlaylistChangePayload { channel })
             .map_err(Into::into)
     }
 
@@ -138,20 +110,9 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("playerGetInfo", ())
             .map_err(Into::into)
     }
-    
-    pub fn player_is_empty(&self) -> crate::Result<PlayerIsEmpty> {
-        self.0
-            .run_mobile_plugin("playerIsEmpty", ())
-            .map_err(Into::into)
-    }
 }
 
 #[derive(Serialize)]
-struct WatchStatePayload {
-    pub channel: Channel,
-}
-
-#[derive(Serialize)]
-struct WatchHeadsetChangePayload {
+struct WatchPlaylistChangePayload {
     pub channel: Channel,
 }

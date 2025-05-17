@@ -20,18 +20,8 @@ class ToastArgs {
 }
 
 @InvokeArg
-class StateWatcherArgs {
+class PlaylistChangeWatcherArgs {
     lateinit var channel: Channel
-}
-
-@InvokeArg
-class HeadsetChangeWatcherArgs {
-    lateinit var channel: Channel
-}
-
-enum class WatcherStateType(val value: String) {
-    Pause("pause"),
-    Resume("resume");
 }
 
 private const val ALIAS_READ_AUDIO: String = "audio"
@@ -46,18 +36,7 @@ private const val ALIAS_READ_AUDIO: String = "audio"
 )
 class FluyerPlugin(activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
-    private var stateChannel: Channel? = null
     private val player = FluyerPlayer(activity)
-
-    override fun onPause(){
-        super.onPause()
-        stateChannel?.send(JSObject().put("value", WatcherStateType.Pause.value))
-    }
-
-    override fun onResume(){
-            super.onResume()
-        stateChannel?.send(JSObject().put("value", WatcherStateType.Resume.value))
-    }
 
     @Command
     fun toast(invoke: Invoke) {
@@ -80,27 +59,11 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
     }
 
     @Command
-    fun watchState(invoke: Invoke) {
-        if (stateChannel != null) {
-            invoke.resolve(JSObject().put("value", false))
-            return
+    fun watchPlaylistChange(invoke: Invoke) {
+        val args = invoke.parseArgs(PlaylistChangeWatcherArgs::class.java)
+        player.listenPlaylistChange {
+            args.channel.send(JSObject())
         }
-
-        val args = invoke.parseArgs(StateWatcherArgs::class.java)
-        stateChannel = args.channel
-        invoke.resolve(JSObject().put("value", true))
-    }
-    
-    @Command
-    fun watchHeadsetChange(invoke: Invoke) {
-        if (implementation.headsetChangeChannel != null) {
-            invoke.resolve(JSObject().put("value", false))
-            return
-        }
-        
-        val args = invoke.parseArgs(HeadsetChangeWatcherArgs::class.java)
-        implementation.headsetChangeChannel = args.channel
-        implementation.watchHeadsetChange()
         invoke.resolve(JSObject().put("value", true))
     }
     
@@ -112,6 +75,7 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
     
     @Command
     fun playerRunCommand(invoke: Invoke) {
+        Log.d("Fluyer", invoke.getArgs().toString())
         try {
             val args = invoke.parseArgs(PlayerCommandArgs::class.java)
             player.sendCommand(args)
@@ -130,18 +94,6 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
                 .put("isEmpty", info.isEmpty)
                 .put("isPlaying", info.isPlaying)
                 .put("index", info.index)
-            )
-        } catch (err: Exception){
-            Log.e("Fluyer", err.toString())
-        }
-    }
-
-    @Command
-    fun playerIsEmpty(invoke: Invoke){
-        try {
-            val info = player.getInfo()
-            invoke.resolve(JSObject()
-                .put("value", info.isEmpty)
             )
         } catch (err: Exception){
             Log.e("Fluyer", err.toString())

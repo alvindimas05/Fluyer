@@ -39,39 +39,15 @@ pub enum PermissionType {
     Audio,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
-pub enum WatcherStateType {
-    #[default]
-    Pause,
-    Resume,
-}
+pub struct WatcherPlaylistChange {}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
-pub struct WatcherState {
-    pub value: WatcherStateType,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct WatchStateResponse {
+pub struct WatchPlaylistChangeResponse {
     pub value: bool,
 }
-
-
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct WatcherHeadsetChange {
-    pub value: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct WatchHeadsetChangeResponse {
-    pub value: bool,
-}
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -120,10 +96,4 @@ pub struct PlayerGetInfo {
     pub is_empty: bool,
     pub is_playing: bool,
     pub index: usize,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PlayerIsEmpty {
-    pub value: bool,
 }

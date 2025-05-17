@@ -40,18 +40,8 @@ data class PlayerGetInfo (
 )
 
 class FluyerPlayer(activity: Activity) {
-    val player = ExoPlayer.Builder(activity).build()
+    private val player = ExoPlayer.Builder(activity).build()
 
-    init {
-        player.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_ENDED) {
-                    player.clearMediaItems()
-                }
-            }
-        })
-    }
-    
     fun sendCommand(args: PlayerCommandArgs) {
         val command = PlayerCommand.valueOf(args.command.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
             Locale.ROOT
@@ -89,5 +79,14 @@ class FluyerPlayer(activity: Activity) {
             isPlaying = player.isPlaying,
             index = player.currentMediaItemIndex,
         )
+    }
+
+    fun listenPlaylistChange(callback: () -> Unit){
+        player.addListener(object : Player.Listener {
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                super.onMediaItemTransition(mediaItem, reason)
+                callback()
+            }
+        })
     }
 }

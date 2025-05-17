@@ -31,6 +31,9 @@ static GLOBAL_MAIN_WINDOW: OnceLock<WebviewWindow> = OnceLock::new();
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(all(debug_assertions, desktop))]
+    let builder = tauri::Builder::default().plugin(tauri_plugin_devtools::init());
+    #[cfg(any(not(debug_assertions), mobile))]
     let builder = tauri::Builder::default();
         
     builder
