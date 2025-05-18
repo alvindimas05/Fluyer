@@ -31,12 +31,7 @@ static GLOBAL_MAIN_WINDOW: OnceLock<WebviewWindow> = OnceLock::new();
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    #[cfg(all(debug_assertions, desktop))]
-    let builder = tauri::Builder::default().plugin(tauri_plugin_devtools::init());
-    #[cfg(any(not(debug_assertions), mobile))]
-    let builder = tauri::Builder::default();
-        
-    builder
+    tauri::Builder::default()
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
@@ -103,7 +98,7 @@ pub fn run() {
                     .expect("Failed to set GLOBAL_APP_HANDLE");
                 app_handle.manage(Mutex::new(AppState::default()));
                 
-                println!("The app cache dir is located at: {}", app_handle.path().app_cache_dir().unwrap().display());
+                debug!("The app cache dir is located at: {}", app_handle.path().app_cache_dir().unwrap().display());
             }
         });
 }
