@@ -12,7 +12,7 @@ fi
 if [[ "$os" == "linux"  ]] || [[ "$os" == "macos" ]]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install mpv
-    export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib:$(brew --prefix mpv)/lib
+    export FLUYER_MPV_SOURCE=$(brew --prefix mpv)/lib
 fi
 
 # Install NPM Packages

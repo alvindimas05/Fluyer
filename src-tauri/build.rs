@@ -1,4 +1,8 @@
+use std::env;
+
 fn main() {
-    println!("cargo:rustc-link-search=native=C:\\mpv");
+    if let Ok(source) = env::var("FLUYER_MPV_SOURCE"){
+        println!("cargo:rustc-link-search=native={}", source);
+    }
     tauri_build::build()
 }
