@@ -5,13 +5,14 @@ use tauri::Emitter;
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
+use std::env::temp_dir;
 #[cfg(desktop)]
 use std::sync::OnceLock;
 use std::thread;
 #[cfg(desktop)]
 use libmpv2::Mpv;
 
-use crate::GLOBAL_APP_HANDLE;
+use crate::{logger, GLOBAL_APP_HANDLE};
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -49,7 +50,10 @@ impl MusicPlayer {
 
         #[cfg(desktop)]{
             GLOBAL_MUSIC_MPV.set(Mpv::with_initializer(|mpv|{
+                let log_path = format!("{}/fluyer-mpv.log", temp_dir().display());
+                mpv.set_option("log-file", log_path.clone())?;
                 mpv.set_property("vo", "null")?;
+                logger::debug!("The mpv log file is saved at {}", log_path);
                 Ok(())
             }).unwrap()).ok();
         }
@@ -137,8 +141,8 @@ impl MusicPlayer {
             let playlist_count = mpv.get_property::<i64>("playlist-count").unwrap();
             
             for (i, music) in playlist.iter().enumerate() {
-                let path = format!("\"{}\"", music);
-                mpv.command("loadfile", &[path.as_str(),
+                logger::debug!(music);
+                mpv.command("loadfile", &[music.as_str(),
                     if i < 1 && playlist_count < 1 { "replace" } else { "append" }]).unwrap();
             }
         }

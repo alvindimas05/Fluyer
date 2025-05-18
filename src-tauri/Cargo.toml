@@ -40,7 +40,7 @@ lazy_static = "1.5.0"
 dotenvy = "0.15.7"
 openssl = { version = "*", features = ["vendored"] }
 dotenvy_macro = "0.15.7"
-tauri-plugin-devtools = "2"
+simplelog = "0.12.2"
 
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
 libmpv2 = "4.1.0"
