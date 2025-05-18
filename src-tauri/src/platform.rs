@@ -1,10 +1,10 @@
 use tauri_plugin_os::platform;
 
-pub fn is_android() -> bool{
+pub fn is_android() -> bool {
     platform() == "android"
 }
 
-pub fn is_ios() -> bool{
+pub fn is_ios() -> bool {
     platform() == "ios"
 }
 

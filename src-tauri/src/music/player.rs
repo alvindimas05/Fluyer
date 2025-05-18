@@ -141,8 +141,8 @@ impl MusicPlayer {
             let playlist_count = mpv.get_property::<i64>("playlist-count").unwrap();
             
             for (i, music) in playlist.iter().enumerate() {
-                logger::debug!(music);
-                mpv.command("loadfile", &[music.as_str(),
+                let path = format!("\"{}\"", music).replace("\\", "/").replace("//", "/");
+                mpv.command("loadfile", &[path.as_str(),
                     if i < 1 && playlist_count < 1 { "replace" } else { "append" }]).unwrap();
             }
         }

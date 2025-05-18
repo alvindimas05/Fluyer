@@ -15,7 +15,6 @@ fn main() {
 
 #[cfg(desktop)]
 fn init_logging() {
-    use fluyer_lib::debug;
     use simplelog::ConfigBuilder;
     let log_path = format!("{}/fluyer.log", temp_dir().display());
     
