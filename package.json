@@ -5,6 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
+		"tauri:dev": "bun scripts/tauri-dev.ts",
+		"tauri:build": "bun scripts/tauri-build.ts",
 		"build": "vite build",
 		"preview": "vite preview",
 		"biome": "bunx biome format --write",
@@ -40,6 +42,7 @@
 		"@tauri-apps/cli": "^2.5.0",
 		"autoprefixer": "^10.4.21",
 		"postcss": "^8.5.3",
+		"promisify-child-process": "^4.1.2",
 		"rimraf": "^6.0.1",
 		"svelte": "^5.28.2",
 		"svelte-check": "^4.1.7",
