@@ -46,7 +46,6 @@ async function main() {
     await downloadFile(url, destPath);
     await extract7z(destPath, outputDir);
     await fs.rename(path.resolve(outputDir, libName), libPath);
-    await fs.symlink(libPath, path.resolve(outputDir, libName));
     console.log(`Moving ${libName} to`, libPath);
   } catch (err) {
     console.error("Failed:", err);

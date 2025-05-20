@@ -7,7 +7,6 @@
 		"dev": "vite dev",
 		"tauri:dev": "bun scripts/tauri-dev.ts",
 		"tauri:build": "bun scripts/tauri-build.ts",
-		"tauri:bundle": "bun scripts/tauri-bundle.ts",
 		"build": "vite build",
 		"preview": "vite preview",
 		"biome": "bunx biome format --write",
