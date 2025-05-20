@@ -1,14 +1,30 @@
 import path from "path";
 import { spawn } from "promisify-child-process";
+import os from "os";
 
-const newPath = path.resolve("src-tauri", "resources");
+const mpvSource = path.resolve("src-tauri", "libs");
 
 export async function configure(){
-    await spawn("bun", ["scripts/install-libmpv.ts"], { stdio: "inherit" });
+    switch(os.platform()){
+        case "win32":
+            await configureWindows();
+            break;
+        case "darwin":
+            await configureMacos();
+            break;
+    }
+}
+
+async function configureWindows(){
+    await spawn("bun", ["scripts/install-libmpv-windows.ts"], { stdio: "inherit" });
+}
+
+async function configureMacos(){
+    await spawn("bun", ["scripts/install-libs-macos.ts"], { stdio: "inherit" });
 }
 
 export const env = {
     ...process.env,
-    PATH: `${process.env.PATH};${newPath}`,
-    FLUYER_MPV_SOURCE: newPath,
+    PATH: `${process.env.PATH};${mpvSource}`,
+    FLUYER_MPV_SOURCE: mpvSource,
 };

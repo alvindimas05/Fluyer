@@ -1,13 +1,13 @@
 import axios from "axios";
 import * as path from "path";
-import { pipeline } from "stream/promises";
-import Seven from "node-7z";
 import fs from "fs/promises";
-import { createWriteStream } from "fs";
+import { downloadFile, extract7z } from "./install-helpers";
 
 const owner = "shinchiro";
 const repo = "mpv-winbuild-cmake";
-const outputDir = path.resolve("src-tauri", "resources");
+const outputDir = path.resolve("src-tauri", "libs");
+const libName = "libmpv-2.dll";
+const libPath = path.resolve(outputDir, "..", libName);
 
 async function getLatestAssetUrl(): Promise<string> {
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
@@ -32,32 +32,9 @@ async function getLatestAssetUrl(): Promise<string> {
   return asset.browser_download_url;
 }
 
-async function downloadFile(url: string, destPath: string): Promise<void> {
-  const response = await axios.get(url, { responseType: "stream" });
-  await pipeline(response.data, createWriteStream(destPath));
-  console.log("Downloaded to:", destPath);
-}
-
-async function extract7z(filePath: string, destination: string): Promise<void> {
-  console.log("Extracting...");
-  await new Promise<void>((resolve, reject) => {
-    const extractor = Seven.extractFull(filePath, destination, {
-      $bin: undefined, // let node-7z find binary
-      recursive: true,
-      overwrite: 'a',
-    });
-
-    extractor.on("end", () => resolve());
-    extractor.on("error", (err: any) => reject(err));
-  });
-
-  await fs.rm(filePath);
-  console.log("Extraction complete.");
-}
-
 async function main() {
   try {
-    await fs.access(path.resolve(outputDir, "libmpv-2.dll"));
+    await fs.access(libPath);
     return;
   } catch {}
   try {
@@ -68,6 +45,9 @@ async function main() {
 
     await downloadFile(url, destPath);
     await extract7z(destPath, outputDir);
+    await fs.rename(path.resolve(outputDir, libName), libPath);
+    await fs.symlink(libPath, path.resolve(outputDir, libName));
+    console.log(`Moving ${libName} to`, libPath);
   } catch (err) {
     console.error("Failed:", err);
   }

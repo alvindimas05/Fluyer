@@ -4,9 +4,9 @@
 	"version": "0.0.1",
 	"identifier": "org.alvindimas05.fluyer",
 	"build": {
-		"beforeDevCommand": "bun run dev",
+		"beforeDevCommand": "bun tauri:dev",
 		"devUrl": "http://localhost:1420",
-		"beforeBuildCommand": "bun run build",
+		"beforeBuildCommand": "bun tauri:build",
 		"frontendDist": "../build"
 	},
 	"app": {
