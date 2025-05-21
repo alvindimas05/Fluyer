@@ -7,7 +7,7 @@ import LoadingController from "$lib/controllers/LoadingController";
 import BackgroundController from "$lib/controllers/BackgroundController";
 import { musicCurrentIndex } from "$lib/stores/music";
 import type { PreviousBackground } from "./types";
-    import { isLinux } from "$lib/platform";
+import { isLinux } from "$lib/platform";
 
 const SIZE = 10;
 
@@ -113,22 +113,22 @@ async function getColors() {
 		}
 	}
 	// document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
-   	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
-  	// 	<div
- 	// 		class="bg-blur-colors"
- 	// 		style="grid-template-columns: ${GRID_COLS}"
-  	// 	>
- 	// 		${bgBlurChildren}
-  	// 	</div>
-   	// </div>
-   	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
-  	// 	<div
- 	// 		class="bg-blur-colors bg-blur-heart"
- 	// 		style="grid-template-columns: ${GRID_COLS}"
-  	// 	>
- 	// 		${bgBlurHeartChildren}
-  	// 	</div>
-   	// </div>`;
+	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
+	// 	<div
+	// 		class="bg-blur-colors"
+	// 		style="grid-template-columns: ${GRID_COLS}"
+	// 	>
+	// 		${bgBlurChildren}
+	// 	</div>
+	// </div>
+	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
+	// 	<div
+	// 		class="bg-blur-colors bg-blur-heart"
+	// 		style="grid-template-columns: ${GRID_COLS}"
+	// 	>
+	// 		${bgBlurHeartChildren}
+	// 	</div>
+	// </div>`;
 	document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
    	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
   		<div
