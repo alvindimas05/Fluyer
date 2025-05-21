@@ -12,7 +12,6 @@ import UIController from "$lib/controllers/UIController";
 import MobileController from "$lib/controllers/MobileController";
 import logHandler from "$lib/handlers/log";
 import { goto } from "$app/navigation";
-import { pageGotoRoute, pageGotoShow } from "$lib/stores/page";
 import { PageRoutes } from "$lib/pages";
 
 interface Props {
@@ -33,19 +32,6 @@ async function initialize() {
 	isAppReady = true;
 }
 
-// FIXME: When PlayerBar animation is still running. It will redirect instantly and not waiting for fadeIn effect.
-let pageGotoShowCounter = 0;
-async function onLayoutAnimationEnd() {
-	if ($pageGotoShow) return;
-	if (pageGotoShowCounter < 1 && location.pathname === PageRoutes.HOME) {
-		pageGotoShowCounter = 1;
-		return;
-	}
-	await goto($pageGotoRoute!);
-	$pageGotoShow = true;
-	pageGotoShowCounter = 0;
-}
-
 if (isWindows()) {
 	onMount(async () => {
 		setTimeout(() => {
@@ -61,13 +47,8 @@ if (isWindows()) {
 {#if isAppReady}
     <AnimatedBackground />
 {/if}
-<!-- FIXME: Smooth Redirect doesn't work on Chromium browsers -->
 <div
-    class={`w-screen h-screen fixed scrollbar-hidden ` +
-        (isMacos() &&
-            `animate__animated ${$pageGotoShow ? "animate__fadeIn" : "animate__fadeOut"}`)}
-    onanimationend={onLayoutAnimationEnd}
->
+    class="w-screen h-screen fixed scrollbar-hidden">
     {@render children?.()}
 </div>
 {#if isDesktop()}

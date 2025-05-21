@@ -15,10 +15,7 @@ import {
 import { isAndroid, isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
-import { pageHomePlayerBarShow } from "$lib/stores/page";
 
-// Based on Rust Rodio fade effect (Please check player.rs)
-let pauseDelay = isAndroid() ? 0 : 400;
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
 let progressDurationText = $state(MusicController.progressDurationText());
@@ -54,7 +51,7 @@ function handleButtonPlayPause() {
 
 	if (MusicController.isPlaying()) {
 		MusicController.setIsPlaying(false);
-		setTimeout(MusicController.pause, pauseDelay);
+		MusicController.pause();
 	} else MusicController.play();
 }
 
@@ -84,8 +81,7 @@ function onPlayerBarChange() {
 function handleButtonBack() {
 	unlistenMusicProgressValue();
 	unlistenMusicCurrentIndex();
-	$pageHomePlayerBarShow = true;
-	PageController.goto(PageRoutes.HOME);
+	PageController.back();
 }
 
 async function onKeyDown(

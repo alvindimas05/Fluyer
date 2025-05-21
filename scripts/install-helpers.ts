@@ -5,33 +5,42 @@ import fs from "fs/promises";
 import Seven from "node-7z";
 import extract from "extract-zip";
 
-export async function downloadFile(url: string, destPath: string): Promise<void> {
-  console.log("Downloading", url)
-  const response = await axios.get(url, { responseType: "stream" });
-  await pipeline(response.data, createWriteStream(destPath));
-  console.log("Downloaded to", destPath);
+export async function downloadFile(
+	url: string,
+	destPath: string,
+): Promise<void> {
+	console.log("Downloading", url);
+	const response = await axios.get(url, { responseType: "stream" });
+	await pipeline(response.data, createWriteStream(destPath));
+	console.log("Downloaded to", destPath);
 }
 
-export async function extract7z(filePath: string, destination: string): Promise<void> {
-  console.log("Extracting", filePath);
-  await new Promise<void>((resolve, reject) => {
-    const extractor = Seven.extractFull(filePath, destination, {
-      $bin: undefined, // let node-7z find binary
-      recursive: true,
-      overwrite: 'a',
-    });
+export async function extract7z(
+	filePath: string,
+	destination: string,
+): Promise<void> {
+	console.log("Extracting", filePath);
+	await new Promise<void>((resolve, reject) => {
+		const extractor = Seven.extractFull(filePath, destination, {
+			$bin: undefined, // let node-7z find binary
+			recursive: true,
+			overwrite: "a",
+		});
 
-    extractor.on("end", () => resolve());
-    extractor.on("error", (err: any) => reject(err));
-  });
+		extractor.on("end", () => resolve());
+		extractor.on("error", (err: any) => reject(err));
+	});
 
-  await fs.rm(filePath);
-  console.log("Extraction complete to", destination);
+	await fs.rm(filePath);
+	console.log("Extraction complete to", destination);
 }
 
-export async function extractZip(filePath: string, destination: string): Promise<void> {
-    console.log("Extracting", filePath);
-    await extract(filePath, { dir: destination });
-    await fs.rm(filePath);
-    console.log("Extraction complete to", destination);
+export async function extractZip(
+	filePath: string,
+	destination: string,
+): Promise<void> {
+	console.log("Extracting", filePath);
+	await extract(filePath, { dir: destination });
+	await fs.rm(filePath);
+	console.log("Extraction complete to", destination);
 }

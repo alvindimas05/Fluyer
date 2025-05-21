@@ -7,7 +7,7 @@ import LoadingController from "$lib/controllers/LoadingController";
 import BackgroundController from "$lib/controllers/BackgroundController";
 import { musicCurrentIndex } from "$lib/stores/music";
 import type { PreviousBackground } from "./types";
-    import { isLinux } from "$lib/platform";
+import { isLinux } from "$lib/platform";
 
 const SIZE = 10;
 
@@ -113,22 +113,22 @@ async function getColors() {
 		}
 	}
 	// document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
-   	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
-  	// 	<div
- 	// 		class="bg-blur-colors"
- 	// 		style="grid-template-columns: ${GRID_COLS}"
-  	// 	>
- 	// 		${bgBlurChildren}
-  	// 	</div>
-   	// </div>
-   	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
-  	// 	<div
- 	// 		class="bg-blur-colors bg-blur-heart"
- 	// 		style="grid-template-columns: ${GRID_COLS}"
-  	// 	>
- 	// 		${bgBlurHeartChildren}
-  	// 	</div>
-   	// </div>`;
+	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
+	// 	<div
+	// 		class="bg-blur-colors"
+	// 		style="grid-template-columns: ${GRID_COLS}"
+	// 	>
+	// 		${bgBlurChildren}
+	// 	</div>
+	// </div>
+	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
+	// 	<div
+	// 		class="bg-blur-colors bg-blur-heart"
+	// 		style="grid-template-columns: ${GRID_COLS}"
+	// 	>
+	// 		${bgBlurHeartChildren}
+	// 	</div>
+	// </div>`;
 	document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
    	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
   		<div
@@ -161,39 +161,16 @@ async function getColors() {
 musicCurrentIndex.subscribe(() => setTimeout(getColors, 0));
 </script>
 
-<!-- {#if isMobile()} -->
-{#if false}
-	<div
-		class="fixed z-[-10] w-full h-full animate__animated animate__fadeIn"
-		onanimationend={() => LoadingController.setLoadingBackground(true)}
-	>
-		<div class="absolute">
-			<img
-				class="bg-blur-colors object-cover scale-x-[-1]"
-				src="/images/mobile-background.png"
-				alt="Background"
-			/>
-		</div>
-		<!-- <div class="bg-blur-heart absolute">
-			<img
-				class="bg-blur-colors object-cover"
-				src="/images/mobile-background.png"
-				alt="Background"
-			/>
-		</div> -->
-	</div>
-{:else}
-	<div
-		class={`fixed ${animatedClasses}`}
-		onanimationend={() => LoadingController.setLoadingBackground(true)}
-	>
-	    <!-- Note: Dirty solution for temporary. Or permanent... -->
-	    {#each Array.apply(null, Array(1000)) as _, i}
-			<div id={`bg-blur-slot-${i}`} class="absolute"></div>
-		{/each}
-        <div class="bg-blur"></div>
-	</div>
-{/if}
+<div
+	class={`fixed ${animatedClasses}`}
+	onanimationend={() => LoadingController.setLoadingBackground(true)}
+>
+    <!-- Note: Dirty solution for temporary. Or permanent... -->
+    {#each Array.apply(null, Array(1000)) as _, i}
+		<div id={`bg-blur-slot-${i}`} class="absolute"></div>
+	{/each}
+    <div class="bg-blur"></div>
+</div>
 {#if $backgroundIsLight}
 	<div class="bg-blur-dark"></div>
 {/if}
