@@ -10,10 +10,7 @@ import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 import { isAndroid, isMacos } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
-import { pageHomePlayerBarShow } from "$lib/stores/page";
 
-// Based on Rust Rodio fade effect (Please check player.rs)
-let pauseDelay = isAndroid() ? 0 : 400;
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
 let albumImage = $state(MusicConfig.defaultAlbumImage);
@@ -38,7 +35,7 @@ function handleButtonPlayPause() {
 
 	if (MusicController.isPlaying()) {
 		MusicController.setIsPlaying(false);
-		setTimeout(MusicController.pause, pauseDelay);
+		MusicController.pause();
 	} else MusicController.play();
 
 	updateStates();
@@ -88,12 +85,6 @@ async function onKeyDown(
 }
 
 function redirectToPlay() {
-	if (isMacos()) $pageHomePlayerBarShow = false;
-	else PageController.goto(PageRoutes.PLAY);
-}
-
-function onAnimationEnd() {
-	if ($pageHomePlayerBarShow) return;
 	PageController.goto(PageRoutes.PLAY);
 }
 
@@ -105,12 +96,8 @@ function handleVolumeButton() {
 <svelte:document onkeydown={onKeyDown} />
 
 <div
-    class={`fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 text-white ` +
-        (isMacos()
-            ? `${$pageHomePlayerBarShow ? "playerbar-in" : "playerbar-out"}`
-            : "backdrop-blur-md")}
+    class={`fixed left-0 bottom-0 z-10 w-full bg-gray-700 bg-opacity-30 text-white backdrop-blur-md`}
     style={`padding-bottom: ${$mobileNavigationBarHeight}px`}
-    onanimationend={onAnimationEnd}
 >
     <div class="relative">
         <input
