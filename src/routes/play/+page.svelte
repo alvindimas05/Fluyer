@@ -301,18 +301,17 @@ musicVolume.subscribe(() => {
                     class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.1rem] md:text-[1.5rem] xl:text-[2rem]"
                 >
                     {#each lyrics as lyric, i}
-                        {#if selectedLyricIndex == i}
-                            <p
-                                id="selected-lyric"
-                                class="text-[1.25rem] md:text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10"
-                            >
-                                {lyric.lyric}
-                            </p>
-                        {:else}
-                            <p class="opacity-50 py-5 md:py-7 lg:py-10">
-                                {lyric.lyric}
-                            </p>
-                        {/if}
+                        <p
+                            id={selectedLyricIndex === i ? "selected-lyric" : ""}
+                            class={selectedLyricIndex === i ? "text-[1.25rem] md:text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10" : "opacity-50 py-5 md:py-7 lg:py-10"}
+                        >
+                            {#if lyric.value.length > 0}
+                                {lyric.value}
+                            {:else}
+                                <!-- svelte-ignore a11y_missing_attribute -->
+                                <img class="invert w-[1.1rem] md:w-[1.5rem] xl:w-[2rem]" src={MusicConfig.defaultNoteIcon} />
+                            {/if}
+                        </p>
                     {/each}
                 </div>
             </div>

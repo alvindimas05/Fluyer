@@ -1,6 +1,6 @@
 export default class MusicLyric {
 	duration = 0;
-	lyric = "...";
+	value = "";
 	constructor(text: string | null) {
 		if (text == null) return;
 		let [timestamp, lyric] = text.split(/(?<=^\S+)\s/);
@@ -10,7 +10,7 @@ export default class MusicLyric {
 			this.duration = minutes * 60 + seconds + milliseconds / 100;
 		}
 		if (lyric.length > 0) {
-			this.lyric = lyric;
+			this.value = lyric;
 		}
 	}
 }

@@ -37,6 +37,7 @@ export const MusicConfig = {
 	defaultNextButton: "/icons/default/next.svg",
 	defaultPlaylistRemoveButton: "/icons/default/remove.svg",
 	defaultPlayingIcon: "/icons/default/playing.svg",
+	defaultNoteIcon: "/icons/default/note.svg",
 	defaultBackButton: "/icons/default/back.svg",
 	defaultSpeakerButton: "/icons/default/speaker.svg",
 	defaultMuteButton: "/icons/default/mute.svg",
