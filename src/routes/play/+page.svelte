@@ -12,9 +12,8 @@ import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
-import { isAndroid, isMobile } from "$lib/platform";
+import { isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
-import { PageRoutes } from "$lib/pages";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -39,6 +38,10 @@ const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => {
 	music = MusicController.currentMusic();
 	albumImage = MusicController.currentMusicAlbumImage();
 	resetLyrics();
+});
+
+const unlistenMusicVolume = musicVolume.subscribe(() => {
+	volumePercentage = MusicController.volumePercentage();
 });
 
 function handleButtonPlayPause() {
@@ -81,6 +84,7 @@ function onPlayerBarChange() {
 function handleButtonBack() {
 	unlistenMusicProgressValue();
 	unlistenMusicCurrentIndex();
+    unlistenMusicVolume();
 	PageController.back();
 }
 
@@ -129,10 +133,6 @@ function scrollToSelectedLyric() {
 		behavior: "smooth",
 	});
 }
-
-musicVolume.subscribe(() => {
-	volumePercentage = MusicController.volumePercentage();
-});
 </script>
 
 <svelte:document onkeydown={onKeyDown} />
