@@ -8,13 +8,6 @@ if [[ "$os" == "linux" ]]; then
     sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
 fi
 
-# Install libmpv on Linux or MacOS
-if [[ "$os" == "linux"  ]] || [[ "$os" == "macos" ]]; then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    brew install mpv
-    export FLUYER_MPV_SOURCE=$(brew --prefix mpv)/lib
-fi
-
 # Install NPM Packages
 bun i
 
@@ -38,9 +31,14 @@ if [[ "$os" == "android" ]]; then
     # mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_$APP_VERSION_$ANDROID_ARCH.apk
 fi
 
-# Setup iOS
+# Build iOS
 if [[ "$os" == "ios" ]]; then
     bun tauri ios build -v
     mkdir -p ipas
     mv "./src-tauri/gen/apple/build/arm64/Fluyer.ipa" "./ipas/Fluyer.ipa"
+fi
+
+# Build Desktop
+if [[ "$os" == "linux" ]] || [[ "$os" == "macos" ]] || [[ "$os" == "windows" ]]; then
+    bun tauri:build
 fi

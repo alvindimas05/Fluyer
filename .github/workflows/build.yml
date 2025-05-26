@@ -60,15 +60,17 @@ jobs:
       - name: Setup Workflow
         shell: bash
         run: os=windows bash setup-workflow.sh
-
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Publish release
+        uses: ncipollo/release-action@v1
         with:
-          tagName: v__VERSION__
-          releaseName: 'Fluyer v__VERSION__'
-          releaseDraft: false
-          prerelease: true
+            artifacts: ./src-tauri/target/release/bundle/nsis/Fluyer_${{ steps.package-version.outputs.current-version }}_x64-setup.exe
+            tag: v${{ steps.package-version.outputs.current-version }}
+            name: Fluyer v${{ steps.package-version.outputs.current-version }}
+            allowUpdates: true
+            prerelease: true
+            artifactErrorsFailBuild: false
+            token: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos-intel:
     name: Build MacOS (Intel)
