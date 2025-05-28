@@ -1182,6 +1182,7 @@ dependencies = [
  "log",
  "notify",
  "openssl",
+ "rayon",
  "regex",
  "reqwest",
  "serde",

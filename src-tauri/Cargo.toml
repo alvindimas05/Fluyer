@@ -42,6 +42,7 @@ dotenvy = "0.15.7"
 openssl = { version = "*", features = ["vendored"] }
 dotenvy_macro = "0.15.7"
 simplelog = "0.12.2"
+rayon = "1.10.0"
 
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
 libmpv2 = "4.1.0"
