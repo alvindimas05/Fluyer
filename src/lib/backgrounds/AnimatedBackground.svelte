@@ -6,6 +6,8 @@ import LoadingController from "$lib/controllers/LoadingController";
 import { musicCurrentIndex } from "$lib/stores/music";
 import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
+import type { Unsubscriber } from "svelte/store";
+    import { beforeNavigate } from "$app/navigation";
 
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_SPEED = 0.03;
@@ -16,6 +18,7 @@ let canvas: HTMLCanvasElement;
 let canvasContext: CanvasRenderingContext2D;
 let currentCanvas: HTMLCanvasElement | null = null;
 let newCanvas: HTMLCanvasElement | null = null;
+let unlistenMusicCurrentIndex: Unsubscriber;
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
 	const bigint = parseInt(hex.slice(1), 16);
@@ -99,8 +102,10 @@ function createCanvas(colors: string[]): HTMLCanvasElement {
 
 async function initializeCanvas(){
     canvasContext = canvas.getContext("2d")!;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    
+    // FIXME: The background is not responsive. Temporary solution by increasing size.
+    canvas.width = window.innerWidth * 1.5;
+    canvas.height = window.innerHeight * 1.5;
     
     currentCanvas = createCanvas((await getColors())!);
     
@@ -124,7 +129,7 @@ async function initializeCanvas(){
 
 async function afterInitializeCanvas(){
     LoadingController.setLoadingBackground(true);
-    musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
+    unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
 }
 
 async function transitionToNewCanvas() {
@@ -170,6 +175,10 @@ async function transitionToNewCanvas() {
 
 onMount(() => {
     initializeCanvas();
+});
+
+beforeNavigate(() => {
+    unlistenMusicCurrentIndex();
 });
 </script>
 
