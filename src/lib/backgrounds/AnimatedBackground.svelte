@@ -3,12 +3,11 @@ import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import { prominent } from "color.js";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
-import BackgroundController from "$lib/controllers/BackgroundController";
 import { musicCurrentIndex } from "$lib/stores/music";
 import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
 
-const CANVAS_BLOCK_SIZE = 100;
+const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_SPEED = 0.03;
 const CANVAS_BLUR_RADIUS = 200;
 
@@ -26,6 +25,31 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 	return { r, g, b };
 }
 
+function darkenTooBright(hex: string, threshold = 0.8): string {
+    const { r, g, b } = hexToRgb(hex);
+    const luminance = getLuminance(r, g, b);
+
+    if (luminance > threshold) {
+        const factor = 0.6;
+        const newR = Math.floor(r * factor);
+        const newG = Math.floor(g * factor);
+        const newB = Math.floor(b * factor);
+        return rgbToHex(newR, newG, newB);
+    }
+
+    return hex;
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+    return (
+        "#" +
+        [r, g, b]
+            .map((v) => v.toString(16).padStart(2, "0"))
+            .join("")
+            .toUpperCase()
+    );
+}
+
 function getLuminance(r: number, g: number, b: number): number {
 	const a = [r, g, b].map((v) => {
 		v /= 255;
@@ -34,43 +58,24 @@ function getLuminance(r: number, g: number, b: number): number {
 	return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
 }
 
-function isMajorityLight(colors: string[]): boolean {
-	let lightCount = 0;
-	let darkCount = 0;
-
-	for (const hex of colors) {
-		const { r, g, b } = hexToRgb(hex);
-		const luminance = getLuminance(r, g, b);
-		if (luminance > 0.5) {
-			lightCount++;
-		} else {
-			darkCount++;
-		}
-	}
-
-	return lightCount > darkCount;
-}
-
 async function getColors(): Promise<string[] | null> {
-	const currentAlbumImage = MusicController.currentMusicAlbumImage()
-	if (
-		previousBackground !== null &&
-		previousBackground === currentAlbumImage
-	)
-		return null;
+    const currentAlbumImage = MusicController.currentMusicAlbumImage();
+    if (previousBackground !== null && previousBackground === currentAlbumImage)
+        return null;
 
-	let image = new Image();
-	image.src = previousBackground = currentAlbumImage;
+    let image = new Image();
+    image.src = previousBackground = currentAlbumImage;
 
-	// @ts-ignore
-	let colors: Hex[] = await prominent(image, {
-		amount: 10,
-		format: "hex",
-	});
-	BackgroundController.setIsLight(isMajorityLight(colors));
-	
-	return colors;
+    // @ts-ignore
+    let colors: string[] = await prominent(image, {
+        amount: 10,
+        format: "hex",
+    });
+
+    colors = colors.map((hex) => darkenTooBright(hex));
+    return colors;
 }
+
 
 function createCanvas(colors: string[]): HTMLCanvasElement {
     const canvasBlockSize = CANVAS_BLOCK_SIZE;
