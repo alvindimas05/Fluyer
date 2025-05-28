@@ -9,7 +9,7 @@ import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
 
 const CANVAS_BLOCK_SIZE = 100;
-const CANVAS_TRANSITION_SPEED = 0.02;
+const CANVAS_TRANSITION_SPEED = 0.03;
 const CANVAS_BLUR_RADIUS = 200;
 
 let previousBackground: string | null = null;
