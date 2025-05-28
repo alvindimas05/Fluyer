@@ -32,7 +32,8 @@
 		"caniuse-lite": "^1.0.30001717",
 		"color.js": "^1.2.0",
 		"fluidscroll": "^2.0.0",
-		"sass": "^1.88.0"
+		"sass": "^1.88.0",
+		"stackblur-canvas": "^2.7.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

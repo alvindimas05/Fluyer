@@ -1,22 +1,22 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import { backgroundIsLight } from "$lib/stores/background";
 import { prominent } from "color.js";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
 import BackgroundController from "$lib/controllers/BackgroundController";
 import { musicCurrentIndex } from "$lib/stores/music";
-import type { PreviousBackground } from "./types";
-import { isLinux } from "$lib/platform";
+import { onMount } from "svelte";
+import * as StackBlur from "stackblur-canvas";
 
-const SIZE = 10;
+const CANVAS_BLOCK_SIZE = 100;
+const CANVAS_TRANSITION_SPEED = 0.02;
+const CANVAS_BLUR_RADIUS = 200;
 
-const GRID_COLS = Array.apply(null, Array(SIZE))
-	.map(() => "auto")
-	.join(" ");
-
-let animatedClasses = $state("hidden");
-let previousBackground: PreviousBackground | null = null;
+let previousBackground: string | null = null;
+let canvas: HTMLCanvasElement;
+let canvasContext: CanvasRenderingContext2D;
+let currentCanvas: HTMLCanvasElement | null = null;
+let newCanvas: HTMLCanvasElement | null = null;
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
 	const bigint = parseInt(hex.slice(1), 16);
@@ -51,23 +51,16 @@ function isMajorityLight(colors: string[]): boolean {
 	return lightCount > darkCount;
 }
 
-async function getColors() {
-	const currentMusic = MusicController.currentMusic();
+async function getColors(): Promise<string[] | null> {
+	const currentAlbumImage = MusicController.currentMusicAlbumImage()
 	if (
 		previousBackground !== null &&
-		previousBackground!.image === currentMusic?.image
+		previousBackground === currentAlbumImage
 	)
-		return;
-	const index = previousBackground?.index ?? 0;
-
-	const queueForRemoval = previousBackground !== null;
+		return null;
 
 	let image = new Image();
-	image.src = MusicController.currentMusicAlbumImage();
-	previousBackground = {
-		image: currentMusic?.image ?? MusicConfig.defaultAlbumImage,
-		index: index + 1,
-	};
+	image.src = previousBackground = currentAlbumImage;
 
 	// @ts-ignore
 	let colors: Hex[] = await prominent(image, {
@@ -75,102 +68,104 @@ async function getColors() {
 		format: "hex",
 	});
 	BackgroundController.setIsLight(isMajorityLight(colors));
-
-	// let position = Array.from({ length: SIZE }, () =>
-	// 	Array.from(
-	// 		{ length: SIZE },
-	// 		() => colors[Math.floor(Math.random() * colors.length)],
-	// 	),
-	// );
-	// let secondPosition = Array.from({ length: SIZE }, () =>
-	// 	Array.from(
-	// 		{ length: SIZE },
-	// 		() => colors[Math.floor(Math.random() * colors.length)],
-	// 	),
-	// );
-
-	let bgBlurChildren = "";
-	for (let i = 0; i < SIZE; i++) {
-		for (let j = 0; j < SIZE; j++) {
-			bgBlurChildren += `
-                <div
-                    class="bg-blur-pixel"
-                    style="background: ${colors[Math.floor(Math.random() * colors.length)]}"
-                ></div>
-            `;
-		}
-	}
-
-	let bgBlurHeartChildren = "";
-	for (let i = 0; i < SIZE; i++) {
-		for (let j = 0; j < SIZE; j++) {
-			bgBlurHeartChildren += `
-                <div
-                    class="bg-blur-pixel"
-                    style="background: ${colors[Math.floor(Math.random() * colors.length)]}"
-                ></div>
-            `;
-		}
-	}
-	// document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
-	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
-	// 	<div
-	// 		class="bg-blur-colors"
-	// 		style="grid-template-columns: ${GRID_COLS}"
-	// 	>
-	// 		${bgBlurChildren}
-	// 	</div>
-	// </div>
-	// <div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
-	// 	<div
-	// 		class="bg-blur-colors bg-blur-heart"
-	// 		style="grid-template-columns: ${GRID_COLS}"
-	// 	>
-	// 		${bgBlurHeartChildren}
-	// 	</div>
-	// </div>`;
-	document.getElementById(`bg-blur-slot-${index}`)!.innerHTML = `
-   	<div class="absolute ${currentMusic !== null && "animate__animated animate__slower animate__fadeIn"}">
-  		<div
- 			class="bg-blur-colors"
- 			style="grid-template-columns: ${GRID_COLS}"
-  		>
- 			${bgBlurChildren}
-  		</div>
-   	</div>`;
-
-	if (queueForRemoval) {
-		setTimeout(() => {
-			document.getElementById(`bg-blur-slot-${index - 1}`)!.remove();
-		}, 3000);
-	}
-
-	if (!LoadingController.loadingBackground()) {
-		// FIXME: Visible Animated Colored Squares on Linux
-		// Note: Probably won't be fixed soon since it's WebView issue
-		if (isLinux()) {
-			LoadingController.setLoadingBackground(true);
-			animatedClasses = "";
-		} else {
-			animatedClasses = "animate__animated animate__fadeIn";
-		}
-	}
+	
+	return colors;
 }
 
-// musicCurrentIndex.subscribe(() => !isMobile() && setTimeout(getColors, 0));
-musicCurrentIndex.subscribe(() => setTimeout(getColors, 0));
+function createCanvas(colors: string[]): HTMLCanvasElement {
+    const canvasBlockSize = CANVAS_BLOCK_SIZE;
+    const baseCanvas = document.createElement("canvas");
+    baseCanvas.width = canvas.width;
+    baseCanvas.height = canvas.height;
+    const baseContext = baseCanvas.getContext("2d")!;
+    
+    for (let y = 0; y < canvas.height; y += canvasBlockSize) {
+        for (let x = 0; x < canvas.width; x += canvasBlockSize) {
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            baseContext.fillStyle = color;
+            baseContext.fillRect(x, y, canvasBlockSize, canvasBlockSize);
+        }
+    }
+    
+    StackBlur.canvasRGBA(baseCanvas, 0, 0, canvas.width, canvas.height, CANVAS_BLUR_RADIUS);
+    
+    return baseCanvas;
+}
+
+async function initializeCanvas(){
+    canvasContext = canvas.getContext("2d")!;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    currentCanvas = createCanvas((await getColors())!);
+    
+    let alpha = 0;
+    function fadeIn() {
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        canvasContext.globalAlpha = alpha;
+        canvasContext.drawImage(currentCanvas!, 0, 0);
+        canvasContext.globalAlpha = 1.0;
+        
+        if (alpha < 1) {
+            alpha += CANVAS_TRANSITION_SPEED;
+            requestAnimationFrame(fadeIn);
+        } else {
+            afterInitializeCanvas();
+        }
+    }
+
+    fadeIn();
+}
+
+async function afterInitializeCanvas(){
+    LoadingController.setLoadingBackground(true);
+    musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
+}
+
+async function transitionToNewCanvas() {
+    const colors = await getColors();
+    if (!colors) return;
+
+    newCanvas = createCanvas(colors);
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const buffer = document.createElement("canvas");
+    buffer.width = width;
+    buffer.height = height;
+    const bufferContext = buffer.getContext("2d")!;
+
+    let progress = 0;
+
+    function animate() {
+        bufferContext.clearRect(0, 0, width, height);
+
+        bufferContext.globalAlpha = 1;
+        bufferContext.drawImage(currentCanvas!, 0, 0, width, height);
+
+        bufferContext.globalAlpha = progress;
+        bufferContext.drawImage(newCanvas!, 0, 0, width, height);
+
+        bufferContext.globalAlpha = 1;
+        canvasContext.clearRect(0, 0, width, height);
+        canvasContext.drawImage(buffer, 0, 0);
+
+        if (progress < 1) {
+            progress += CANVAS_TRANSITION_SPEED;
+            requestAnimationFrame(animate);
+        } else {
+            currentCanvas = newCanvas;
+            newCanvas = null;
+        }
+    }
+
+    animate();
+}
+
+onMount(() => {
+    initializeCanvas();
+});
 </script>
 
-<div
-	class={`fixed ${animatedClasses}`}
-	onanimationend={() => LoadingController.setLoadingBackground(true)}
->
-    <!-- Note: Dirty solution for temporary. Or permanent... -->
-    {#each Array.apply(null, Array(1000)) as _, i}
-		<div id={`bg-blur-slot-${i}`} class="absolute"></div>
-	{/each}
-    <div class="bg-blur"></div>
-</div>
-{#if $backgroundIsLight}
-	<div class="bg-blur-dark"></div>
-{/if}
+<canvas class="fixed" bind:this={canvas}></canvas>
