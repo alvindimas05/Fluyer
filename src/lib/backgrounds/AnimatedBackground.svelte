@@ -7,7 +7,7 @@ import { musicCurrentIndex } from "$lib/stores/music";
 import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
 import type { Unsubscriber } from "svelte/store";
-    import { beforeNavigate } from "$app/navigation";
+import { beforeNavigate } from "$app/navigation";
 
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_SPEED = 0.03;
@@ -29,28 +29,28 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 }
 
 function darkenTooBright(hex: string, threshold = 0.8): string {
-    const { r, g, b } = hexToRgb(hex);
-    const luminance = getLuminance(r, g, b);
+	const { r, g, b } = hexToRgb(hex);
+	const luminance = getLuminance(r, g, b);
 
-    if (luminance > threshold) {
-        const factor = 0.6;
-        const newR = Math.floor(r * factor);
-        const newG = Math.floor(g * factor);
-        const newB = Math.floor(b * factor);
-        return rgbToHex(newR, newG, newB);
-    }
+	if (luminance > threshold) {
+		const factor = 0.6;
+		const newR = Math.floor(r * factor);
+		const newG = Math.floor(g * factor);
+		const newB = Math.floor(b * factor);
+		return rgbToHex(newR, newG, newB);
+	}
 
-    return hex;
+	return hex;
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
-    return (
-        "#" +
-        [r, g, b]
-            .map((v) => v.toString(16).padStart(2, "0"))
-            .join("")
-            .toUpperCase()
-    );
+	return (
+		"#" +
+		[r, g, b]
+			.map((v) => v.toString(16).padStart(2, "0"))
+			.join("")
+			.toUpperCase()
+	);
 }
 
 function getLuminance(r: number, g: number, b: number): number {
@@ -62,123 +62,131 @@ function getLuminance(r: number, g: number, b: number): number {
 }
 
 async function getColors(): Promise<string[] | null> {
-    const currentAlbumImage = MusicController.currentMusicAlbumImage();
-    if (previousBackground !== null && previousBackground === currentAlbumImage)
-        return null;
+	const currentAlbumImage = MusicController.currentMusicAlbumImage();
+	if (previousBackground !== null && previousBackground === currentAlbumImage)
+		return null;
 
-    let image = new Image();
-    image.src = previousBackground = currentAlbumImage;
+	let image = new Image();
+	image.src = previousBackground = currentAlbumImage;
 
-    // @ts-ignore
-    let colors: string[] = await prominent(image, {
-        amount: 10,
-        format: "hex",
-    });
+	// @ts-ignore
+	let colors: string[] = await prominent(image, {
+		amount: 10,
+		format: "hex",
+	});
 
-    colors = colors.map((hex) => darkenTooBright(hex));
-    return colors;
+	colors = colors.map((hex) => darkenTooBright(hex));
+	return colors;
 }
-
 
 function createCanvas(colors: string[]): HTMLCanvasElement {
-    const canvasBlockSize = CANVAS_BLOCK_SIZE;
-    const baseCanvas = document.createElement("canvas");
-    baseCanvas.width = canvas.width;
-    baseCanvas.height = canvas.height;
-    const baseContext = baseCanvas.getContext("2d")!;
-    
-    for (let y = 0; y < canvas.height; y += canvasBlockSize) {
-        for (let x = 0; x < canvas.width; x += canvasBlockSize) {
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            baseContext.fillStyle = color;
-            baseContext.fillRect(x, y, canvasBlockSize, canvasBlockSize);
-        }
-    }
-    
-    StackBlur.canvasRGBA(baseCanvas, 0, 0, canvas.width, canvas.height, CANVAS_BLUR_RADIUS);
-    
-    return baseCanvas;
+	const canvasBlockSize = CANVAS_BLOCK_SIZE;
+	const baseCanvas = document.createElement("canvas");
+	baseCanvas.width = canvas.width;
+	baseCanvas.height = canvas.height;
+	const baseContext = baseCanvas.getContext("2d")!;
+
+	for (let y = 0; y < canvas.height; y += canvasBlockSize) {
+		for (let x = 0; x < canvas.width; x += canvasBlockSize) {
+			const color = colors[Math.floor(Math.random() * colors.length)];
+			baseContext.fillStyle = color;
+			baseContext.fillRect(x, y, canvasBlockSize, canvasBlockSize);
+		}
+	}
+
+	StackBlur.canvasRGBA(
+		baseCanvas,
+		0,
+		0,
+		canvas.width,
+		canvas.height,
+		CANVAS_BLUR_RADIUS,
+	);
+
+	return baseCanvas;
 }
 
-async function initializeCanvas(){
-    canvasContext = canvas.getContext("2d")!;
-    
-    // FIXME: The background is not responsive. Temporary solution by increasing size.
-    canvas.width = window.innerWidth * 1.5;
-    canvas.height = window.innerHeight * 1.5;
-    
-    currentCanvas = createCanvas((await getColors())!);
-    
-    let alpha = 0;
-    function fadeIn() {
-        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-        canvasContext.globalAlpha = alpha;
-        canvasContext.drawImage(currentCanvas!, 0, 0);
-        canvasContext.globalAlpha = 1.0;
-        
-        if (alpha < 1) {
-            alpha += CANVAS_TRANSITION_SPEED;
-            requestAnimationFrame(fadeIn);
-        } else {
-            afterInitializeCanvas();
-        }
-    }
+async function initializeCanvas() {
+	canvasContext = canvas.getContext("2d")!;
 
-    fadeIn();
+	// FIXME: The background is not responsive. Temporary solution by increasing size.
+	canvas.width = window.innerWidth * 1.5;
+	canvas.height = window.innerHeight * 1.5;
+
+	currentCanvas = createCanvas((await getColors())!);
+
+	let alpha = 0;
+	function fadeIn() {
+		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+		canvasContext.globalAlpha = alpha;
+		canvasContext.drawImage(currentCanvas!, 0, 0);
+		canvasContext.globalAlpha = 1.0;
+
+		if (alpha < 1) {
+			alpha += CANVAS_TRANSITION_SPEED;
+			requestAnimationFrame(fadeIn);
+		} else {
+			afterInitializeCanvas();
+		}
+	}
+
+	fadeIn();
 }
 
-async function afterInitializeCanvas(){
-    LoadingController.setLoadingBackground(true);
-    unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
+async function afterInitializeCanvas() {
+	LoadingController.setLoadingBackground(true);
+	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() =>
+		setTimeout(transitionToNewCanvas, 0),
+	);
 }
 
 async function transitionToNewCanvas() {
-    const colors = await getColors();
-    if (!colors) return;
+	const colors = await getColors();
+	if (!colors) return;
 
-    newCanvas = createCanvas(colors);
+	newCanvas = createCanvas(colors);
 
-    const width = canvas.width;
-    const height = canvas.height;
+	const width = canvas.width;
+	const height = canvas.height;
 
-    const buffer = document.createElement("canvas");
-    buffer.width = width;
-    buffer.height = height;
-    const bufferContext = buffer.getContext("2d")!;
+	const buffer = document.createElement("canvas");
+	buffer.width = width;
+	buffer.height = height;
+	const bufferContext = buffer.getContext("2d")!;
 
-    let progress = 0;
+	let progress = 0;
 
-    function animate() {
-        bufferContext.clearRect(0, 0, width, height);
+	function animate() {
+		bufferContext.clearRect(0, 0, width, height);
 
-        bufferContext.globalAlpha = 1;
-        bufferContext.drawImage(currentCanvas!, 0, 0, width, height);
+		bufferContext.globalAlpha = 1;
+		bufferContext.drawImage(currentCanvas!, 0, 0, width, height);
 
-        bufferContext.globalAlpha = progress;
-        bufferContext.drawImage(newCanvas!, 0, 0, width, height);
+		bufferContext.globalAlpha = progress;
+		bufferContext.drawImage(newCanvas!, 0, 0, width, height);
 
-        bufferContext.globalAlpha = 1;
-        canvasContext.clearRect(0, 0, width, height);
-        canvasContext.drawImage(buffer, 0, 0);
+		bufferContext.globalAlpha = 1;
+		canvasContext.clearRect(0, 0, width, height);
+		canvasContext.drawImage(buffer, 0, 0);
 
-        if (progress < 1) {
-            progress += CANVAS_TRANSITION_SPEED;
-            requestAnimationFrame(animate);
-        } else {
-            currentCanvas = newCanvas;
-            newCanvas = null;
-        }
-    }
+		if (progress < 1) {
+			progress += CANVAS_TRANSITION_SPEED;
+			requestAnimationFrame(animate);
+		} else {
+			currentCanvas = newCanvas;
+			newCanvas = null;
+		}
+	}
 
-    animate();
+	animate();
 }
 
 onMount(() => {
-    initializeCanvas();
+	initializeCanvas();
 });
 
 beforeNavigate(() => {
-    unlistenMusicCurrentIndex();
+	unlistenMusicCurrentIndex();
 });
 </script>
 

@@ -84,7 +84,7 @@ function onPlayerBarChange() {
 function handleButtonBack() {
 	unlistenMusicProgressValue();
 	unlistenMusicCurrentIndex();
-    unlistenMusicVolume();
+	unlistenMusicVolume();
 	PageController.back();
 }
 
