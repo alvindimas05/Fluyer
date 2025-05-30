@@ -10,7 +10,7 @@ import type { Unsubscriber } from "svelte/store";
 import { beforeNavigate } from "$app/navigation";
 
 const CANVAS_BLOCK_SIZE = 150;
-const CANVAS_TRANSITION_SPEED = 0.03;
+const CANVAS_TRANSITION_SPEED = 0.035;
 const CANVAS_BLUR_RADIUS = 200;
 
 let previousBackground: string | null = null;
@@ -19,6 +19,8 @@ let canvasContext: CanvasRenderingContext2D;
 let currentCanvas: HTMLCanvasElement | null = null;
 let newCanvas: HTMLCanvasElement | null = null;
 let unlistenMusicCurrentIndex: Unsubscriber;
+let previousColors: string[] = [];
+let previousBackgroundColors: string[][] = [];
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
 	const bigint = parseInt(hex.slice(1), 16);
@@ -79,58 +81,88 @@ async function getColors(): Promise<string[] | null> {
 	return colors;
 }
 
-function createCanvas(colors: string[]): HTMLCanvasElement {
-	const canvasBlockSize = CANVAS_BLOCK_SIZE;
-	const baseCanvas = document.createElement("canvas");
-	baseCanvas.width = canvas.width;
-	baseCanvas.height = canvas.height;
-	const baseContext = baseCanvas.getContext("2d")!;
+async function createCanvas(options = {
+    usePreviousColors: false
+}): Promise<HTMLCanvasElement | null> {
+    const canvasBlockSize = CANVAS_BLOCK_SIZE;
 
-	for (let y = 0; y < canvas.height; y += canvasBlockSize) {
-		for (let x = 0; x < canvas.width; x += canvasBlockSize) {
-			const color = colors[Math.floor(Math.random() * colors.length)];
-			baseContext.fillStyle = color;
-			baseContext.fillRect(x, y, canvasBlockSize, canvasBlockSize);
-		}
-	}
+    if (!options.usePreviousColors) {
+        const colors = await getColors();
+        if (colors === null) return null;
 
-	StackBlur.canvasRGBA(
-		baseCanvas,
-		0,
-		0,
-		canvas.width,
-		canvas.height,
-		CANVAS_BLUR_RADIUS,
-	);
+        previousColors = colors;
+        previousBackgroundColors = [];
+    }
 
-	return baseCanvas;
+    const rows = Math.ceil(canvas.height / canvasBlockSize);
+    const cols = Math.ceil(canvas.width / canvasBlockSize);
+
+    for (let y = 0; y < rows; y++) {
+        if (!previousBackgroundColors[y]) {
+            previousBackgroundColors[y] = [];
+        }
+
+        for (let x = 0; x < cols; x++) {
+            if (!previousBackgroundColors[y][x]) {
+                const color = previousColors[Math.floor(Math.random() * previousColors.length)];
+                previousBackgroundColors[y][x] = color;
+            }
+        }
+    }
+
+    const baseCanvas = document.createElement("canvas");
+    baseCanvas.width = canvas.width;
+    baseCanvas.height = canvas.height;
+    const baseContext = baseCanvas.getContext("2d")!;
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            baseContext.fillStyle = previousBackgroundColors[y][x];
+            baseContext.fillRect(x * canvasBlockSize, y * canvasBlockSize, canvasBlockSize, canvasBlockSize);
+        }
+    }
+
+    StackBlur.canvasRGBA(
+        baseCanvas,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+        CANVAS_BLUR_RADIUS,
+    );
+
+    return baseCanvas;
 }
 
-async function initializeCanvas() {
-	canvasContext = canvas.getContext("2d")!;
+async function initializeCanvas(reinitialize = false) {
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 
-	// FIXME: The background is not responsive. Temporary solution by increasing size.
-	canvas.width = window.innerWidth * 1.5;
-	canvas.height = window.innerHeight * 1.5;
-
-	currentCanvas = createCanvas((await getColors())!);
-
-	let alpha = 0;
-	function fadeIn() {
-		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-		canvasContext.globalAlpha = alpha;
-		canvasContext.drawImage(currentCanvas!, 0, 0);
-		canvasContext.globalAlpha = 1.0;
-
-		if (alpha < 1) {
-			alpha += CANVAS_TRANSITION_SPEED;
-			requestAnimationFrame(fadeIn);
-		} else {
-			afterInitializeCanvas();
-		}
+	currentCanvas = await createCanvas({ usePreviousColors: reinitialize });
+	
+	if(reinitialize){
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+  		canvasContext.drawImage(currentCanvas!, 0, 0);
+	} else {
+	    canvasContext = canvas.getContext("2d")!;
+     
+    	let alpha = 0;
+    	function fadeIn() {
+    		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    		canvasContext.globalAlpha = alpha;
+    		canvasContext.drawImage(currentCanvas!, 0, 0);
+    		canvasContext.globalAlpha = 1.0;
+      
+    		if (alpha < 1) {
+    			alpha += CANVAS_TRANSITION_SPEED;
+    			requestAnimationFrame(fadeIn);
+    		} else {
+    			afterInitializeCanvas();
+    		}
+    	}
+    
+    	fadeIn();
 	}
-
-	fadeIn();
 }
 
 async function afterInitializeCanvas() {
@@ -141,10 +173,11 @@ async function afterInitializeCanvas() {
 }
 
 async function transitionToNewCanvas() {
-	const colors = await getColors();
-	if (!colors) return;
+	const _newCanvas = await createCanvas();
 
-	newCanvas = createCanvas(colors);
+	if(!_newCanvas) return;
+	
+	newCanvas = _newCanvas;
 
 	const width = canvas.width;
 	const height = canvas.height;
@@ -181,6 +214,10 @@ async function transitionToNewCanvas() {
 	animate();
 }
 
+function onWindowResize() {
+	initializeCanvas(true);
+}
+
 onMount(() => {
 	initializeCanvas();
 });
@@ -190,4 +227,5 @@ beforeNavigate(() => {
 });
 </script>
 
+<svelte:window onresize={onWindowResize} />
 <canvas class="fixed" bind:this={canvas}></canvas>
