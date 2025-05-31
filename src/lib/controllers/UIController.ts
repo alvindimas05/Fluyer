@@ -4,6 +4,7 @@ import { fluidScroll } from "fluidscroll";
 const UIController = {
 	initialize: () => {
 		UIController.listenAnimateScrollOverflowText();
+		UIController.listenDisableTabSelection();
 	},
 	listenAnimateScrollOverflowText: () => {
 		const scrollDuration = 3000;
@@ -20,6 +21,12 @@ const UIController = {
 			scrollEnd = !scrollEnd;
 		}, scrollDuration + 2000);
 	},
+	listenDisableTabSelection: () => {
+        window.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            e.preventDefault();
+        });
+	}
 };
 
 export default UIController;
