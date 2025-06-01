@@ -39,6 +39,6 @@ if [[ "$os" == "ios" ]]; then
 fi
 
 # Build Desktop
-if [[ "$os" == "linux" ]] || [[ "$os" == "macos" ]] || [[ "$os" == "windows" ]]; then
+if [[ "$os" == "linux" ]] || [[ "$os" == "macos" ]] then
     bun tauri:build
 fi
