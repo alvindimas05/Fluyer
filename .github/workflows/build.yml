@@ -63,7 +63,7 @@ jobs:
         shell: bash
         run: os=windows bash scripts/setup-workflow.sh
       - name: Build Workflow
-        run: os=windows windows_action=build bun tauri:build
+        run: bun tauri:build
       
       - name: Publish release
         uses: ncipollo/release-action@v1
