@@ -1,10 +1,17 @@
 import path from "path";
 import { spawn } from "promisify-child-process";
 import os from "os";
+import fs from "fs/promises";
+import { exit } from "process";
 
 const mpvSource = path.resolve("src-tauri", "libs");
 
 export async function configure() {
+	if(!(await fs.readdir(path.resolve(__dirname, ".."))).includes(".env")){
+		await fs.copyFile(path.resolve(".env.example"), path.resolve(".env"));
+		console.log("Missing .env! The file is now copied from .env.example and make sure to configure it before re-run.");
+		exit();
+	}
 	switch (os.platform()) {
 		case "win32":
 			await configureWindows();
