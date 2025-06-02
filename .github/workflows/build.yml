@@ -129,15 +129,17 @@ jobs:
         env:
             os: macos
             macos_type: silicon
-
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Publish release
+        uses: ncipollo/release-action@v1
         with:
-          tagName: v__VERSION__
-          releaseName: 'Fluyer v__VERSION__'
-          releaseDraft: false
-          prerelease: true
+            artifacts: ./src-tauri/target/release/bundle/dmg/Fluyer_${{ env.APP_VERSION }}_aarch64.dmg
+            tag: v${{ env.APP_VERSION }}
+            name: Fluyer v${{ env.APP_VERSION }}
+            allowUpdates: true
+            prerelease: true
+            artifactErrorsFailBuild: true
+            token: ${{ secrets.GITHUB_TOKEN }}
       
   build-linux:
     name: Build Linux
