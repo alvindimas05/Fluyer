@@ -67,13 +67,14 @@ jobs:
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
-            artifacts: ./src-tauri/target/release/bundle/nsis/Fluyer_$APP_VERSION_x64-setup.exe
-            tag: v$APP_VERSION
-            name: Fluyer v$APP_VERSION
-            allowUpdates: true
-            prerelease: true
-            artifactErrorsFailBuild: true
-            token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: ./src-tauri/target/release/bundle/nsis/Fluyer_${{ env.APP_VERSION }}_x64-setup.exe
+          tag: v${{ env.APP_VERSION }}
+          name: Fluyer v${{ env.APP_VERSION }}
+          allowUpdates: true
+          prerelease: true
+          artifactErrorsFailBuild: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
 
   build-macos-intel:
     name: Build MacOS (Intel)
@@ -100,9 +101,9 @@ jobs:
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
-            artifacts: ./src-tauri/target/release/bundle/dmg/Fluyer_$APP_VERSION_x64.dmg
-            tag: v$APP_VERSION
-            name: Fluyer v$APP_VERSION
+            artifacts: ./src-tauri/target/release/bundle/dmg/Fluyer_${{ env.APP_VERSION }}_x64.dmg
+            tag: v${{ env.APP_VERSION }}
+            name: Fluyer v${{ env.APP_VERSION }}
             allowUpdates: true
             prerelease: true
             artifactErrorsFailBuild: true
