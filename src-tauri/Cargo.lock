@@ -1178,6 +1178,7 @@ dependencies = [
  "enigo 0.3.0",
  "image",
  "lazy_static",
+ "libc",
  "libmpv2",
  "log",
  "notify",

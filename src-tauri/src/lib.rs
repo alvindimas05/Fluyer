@@ -39,7 +39,7 @@ pub fn run() {
         .plugin(tauri_plugin_fluyer::init())
         .setup(|app| {
             let main_window = app.get_webview_window("main").unwrap();
-            #[cfg(windows)]{
+            #[cfg(any(windows, target_os = "linux"))]{
                 main_window.set_decorations(false).unwrap();
                 main_window.set_shadow(false).unwrap();
             }

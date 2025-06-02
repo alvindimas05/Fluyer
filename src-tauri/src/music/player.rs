@@ -48,6 +48,14 @@ impl MusicPlayer {
     pub fn spawn() -> Self {
         handle_music_player_background();
 
+        #[cfg(target_os = "linux")]
+        unsafe {
+            extern crate libc;
+            use std::ffi::CString;
+            use libc::{setlocale, LC_NUMERIC};
+            setlocale(LC_NUMERIC, CString::new("C").unwrap().as_ptr());
+        }
+
         #[cfg(desktop)]{
             GLOBAL_MUSIC_MPV.set(Mpv::with_initializer(|mpv|{
                 let log_path = format!("{}/fluyer-mpv.log", temp_dir().display());
