@@ -7,7 +7,9 @@ import { exit } from "process";
 const mpvSource = path.resolve("src-tauri", "libs");
 
 export async function configure() {
-	if(!(await fs.readdir(path.resolve(__dirname, ".."))).includes(".env")){
+	try {
+		await fs.access(path.resolve(".env"));
+	} catch {
 		await fs.copyFile(path.resolve(".env.example"), path.resolve(".env"));
 		console.log("Missing .env! The file is now copied from .env.example and make sure to configure it before re-run.");
 		exit();
