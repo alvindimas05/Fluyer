@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cp .env.example .env
+VERAPP_VERSIONSION=$(bun -p "require('./package.json').version")
+echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
 # Install Linux Dependencies
 if [[ "$os" == "linux" ]]; then
