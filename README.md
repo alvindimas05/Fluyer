@@ -1,4 +1,4 @@
-# Fluyer
+********# Fluyer
 Music Player with Beautiful UI and Cross-Platform.
 > [!NOTE]
 > This project is on slow progress. I'm working on it to have fun :)
@@ -12,7 +12,7 @@ Music Player with Beautiful UI and Cross-Platform.
 You can grab the latest version of the app below or check the [release page](https://github.com/alvindimas05/Fluyer/releases).
 - [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64-setup.exe)
 - [MacOS Intel](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64.dmg)
-- [MacOS Silicon](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_aarch64.dmg)
+- [MacOS Silicon](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_aarch64.dmg) ([CLICK HERE](#macos) before installing)
 - [Debian/Ubuntu](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_amd64.deb)
 - [Linux AppImage](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_amd64.AppImage)
 - [Android aarch64](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_aarch64.apk) (For most android mobile devices)
@@ -22,11 +22,14 @@ You can grab the latest version of the app below or check the [release page](htt
 
 ## Issues
 
-### Universal
-- High resource usage due to Animated Background. The attempt to fix this is to animate the background on play screen only. For now, the animation is disabled but the background is still enabled.
+### MacOS
+- Due to MacOS Silicon security restriction, after moving `Fluyer` to the `Applications` directory, run this command at the terminal.
+```
+/usr/bin/xattr -cr /Applications/Fluyer
+```
 
-### Android
-- The play screen is not bad on potrait mode but definitely need some improvement.
+### Universal
+- High resource usage due to Animated Background. For now, the animation is disabled but the background is still enabled.
 
 ### iOS
 - Even though it's already tested, iOS release is not planned for now due to Apple Developer pricing.
