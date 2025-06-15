@@ -18,7 +18,7 @@ let canvas: HTMLCanvasElement;
 let canvasContext: CanvasRenderingContext2D;
 let currentCanvas: HTMLCanvasElement | null = null;
 let newCanvas: HTMLCanvasElement | null = null;
-let unlistenMusicCurrentIndex: Unsubscriber;
+let unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
 let previousColors: string[] = [];
 let previousBackgroundColors: string[][] = [];
 
@@ -167,9 +167,6 @@ async function initializeCanvas(reinitialize = false) {
 
 async function afterInitializeCanvas() {
 	LoadingController.setLoadingBackground(true);
-	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() =>
-		setTimeout(transitionToNewCanvas, 0),
-	);
 }
 
 async function transitionToNewCanvas() {
@@ -220,10 +217,6 @@ function onWindowResize() {
 
 onMount(() => {
 	initializeCanvas();
-});
-
-beforeNavigate(() => {
-	unlistenMusicCurrentIndex();
 });
 </script>
 
