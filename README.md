@@ -47,16 +47,17 @@ You can grab the latest version of the app below or check the [release page](htt
 
 ### Advanced Functionality
 - [ ] Search
-- [ ] Group by Folder
+- [ ] Music Grouping
 - [x] Lyrics
 - [x] Animated Background
 - [x] Cover Art Caching
 
 ### API Functionality
 - [x] MusicBrainz Integration (For Cover Art)
-- [ ] Spotify Integration (For Spotify Canvas)
-- [ ] Soulseek Integration (We love FLACs <3)
 
+[//]: # (- [ ] Spotify Integration &#40;For Spotify Canvas&#41;)
+
+[//]: # (- [ ] Soulseek Integration &#40;We love FLACs <3&#41;)
 
 ## Credits
 - [Thank you, Freepik, for the free Icons](https://www.flaticon.com/authors/special/lineal/2?author_id=1)
