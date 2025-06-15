@@ -20,8 +20,6 @@ tauri-build = { version = "2.0.3", features = [] }
 [dependencies]
 tauri = { version = "2.5.0", features = [] }
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-anyhow = "1.0.89"
 symphonia = { version = "0.5.4", features = ["all"] }
 log = "0.4.22"
 base64 = "0.22.1"
@@ -31,15 +29,12 @@ tauri-plugin-dialog = "2"
 tauri-plugin-os = "2"
 tauri-plugin-prevent-default = "2"
 tauri-plugin-fluyer = { path = "./tauri-plugin-fluyer" }
-crossbeam-channel = "0.5.14"
 regex = "1.11.1"
 tauri-plugin-decorum = "1.1.1"
 image = "0.25.5"
 reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
-notify = "8.0.0"
 lazy_static = "1.5.0"
 dotenvy = "0.15.7"
-openssl = { version = "*", features = ["vendored"] }
 dotenvy_macro = "0.15.7"
 simplelog = "0.12.2"
 rayon = "1.10.0"
@@ -49,4 +44,4 @@ libc = "0.2.172"
 libmpv2 = "4.1.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-enigo = "0.3.0"
+enigo = "0.5.0"
