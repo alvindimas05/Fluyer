@@ -218,7 +218,7 @@ function scrollToSelectedLyric() {
                 </div>
                 <div class="flex justify-end">
                     <button
-                        class="w-10 sm:w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        class="w-10 sm:w-12 md:w-10 hdpi:w-10 lg:w-11 invert mx-2"
                         onclick={handleButtonPrevious}
                         ><img
                             src={MusicConfig.defaultPreviousButton}
@@ -228,7 +228,7 @@ function scrollToSelectedLyric() {
                 </div>
                 <div class="flex justify-center">
                     <button
-                        class="w-10 sm:w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        class="w-10 sm:w-12 md:w-10 hdpi:w-10 lg:w-11 invert mx-2"
                         onclick={handleButtonPlayPause}
                         ><img
                             src={$musicIsPlaying
@@ -240,7 +240,7 @@ function scrollToSelectedLyric() {
                 </div>
                 <div class="flex justify-start">
                     <button
-                        class="w-10 sm:w-12 md:w-10 tb:w-10 lg:w-11 invert mx-2"
+                        class="w-10 sm:w-12 md:w-10 hdpi:w-10 lg:w-11 invert mx-2"
                         onclick={handleButtonNext}
                         ><img
                             src={MusicConfig.defaultNextButton}

@@ -54,7 +54,7 @@ onMount(() => {
 </script>
 
 <div
-    class={`grid auto-cols-[50%] sm:auto-cols-[33.3334%] md:auto-cols-[25%] tb:auto-cols-[20%] lg:auto-cols-[20%]
+    class={`grid auto-cols-[50%] sm:auto-cols-[33.3334%] md:auto-cols-[25%] hdpi:auto-cols-[20%] lg:auto-cols-[20%]
     xl:auto-cols-[16.6667%] grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden`}
     style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 32}px`}
     bind:this={element}

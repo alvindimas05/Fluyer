@@ -5,7 +5,7 @@ import MusicItem from "./MusicItem.svelte";
 
 <div class="px-3 overflow-y-auto scrollbar-hidden pb-20">
     <div
-    	class="md:grid md:grid-cols-2 tb:grid-cols-2 lg:grid-cols-3 text-white"
+    	class="md:grid md:grid-cols-2 hdpi:grid-cols-2 lg:grid-cols-3 text-white"
         >
     	{#if Array.isArray($musicList)}
     		{#each $musicList as music}

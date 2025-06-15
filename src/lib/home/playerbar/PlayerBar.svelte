@@ -7,7 +7,6 @@ import {
 	musicVolume,
 } from "$lib/stores/music";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
-import { isAndroid, isMacos } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
 
@@ -122,10 +121,10 @@ function handleVolumeButton() {
         />
     </div>
     <div class="p-3 mt-1">
-        <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
+        <div class="grid grid-cols-[auto_min-content] xhdpi:grid-cols-3 lg:grid-cols-3">
             <div class="flex items-center">
                 <button
-                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
+                    class="w-8 md:w-10 hdpi:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonPrevious}
                     ><img
                         src={MusicConfig.defaultPreviousButton}
@@ -133,7 +132,7 @@ function handleVolumeButton() {
                     /></button
                 >
                 <button
-                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
+                    class="w-8 md:w-10 hdpi:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonPlayPause}
                     ><img
                         src={isPlaying
@@ -143,7 +142,7 @@ function handleVolumeButton() {
                     /></button
                 >
                 <button
-                    class="w-8 md:w-10 tb:w-10 lg:w-10 invert mx-2"
+                    class="w-8 md:w-10 hdpi:w-10 lg:w-10 invert mx-2"
                     onclick={handleButtonNext}
                     ><img
                         src={MusicConfig.defaultNextButton}
@@ -152,7 +151,7 @@ function handleVolumeButton() {
                 >
             </div>
             <div
-                class="ms-2 lg:ms-0 lg:flex items-center justify-center order-first lg:order-none text-sm md:text-base"
+                class="ms-2 lg:ms-0 xhdpi:flex lg:flex items-center justify-center order-first xhdpi:order-none lg:order-none text-sm md:text-base"
             >
                 <div
                     class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
@@ -180,7 +179,7 @@ function handleVolumeButton() {
                     </div>
                 </div>
             </div>
-            <div class="hidden lg:grid justify-end">
+            <div class="hidden xhdpi:grid lg:grid justify-end">
                 <div class="grid grid-cols-[auto_auto] items-center gap-3">
                     <button onclick={handleVolumeButton}>
                         <img
