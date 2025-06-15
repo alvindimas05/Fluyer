@@ -1,13 +1,11 @@
 <script lang="ts">
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import MusicController from "$lib/controllers/MusicController";
 import { prominent } from "color.js";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
 import { musicCurrentIndex } from "$lib/stores/music";
 import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
-import type { Unsubscriber } from "svelte/store";
-import { beforeNavigate } from "$app/navigation";
 
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_SPEED = 0.035;
@@ -104,8 +102,7 @@ async function createCanvas(options = {
 
         for (let x = 0; x < cols; x++) {
             if (!previousBackgroundColors[y][x]) {
-                const color = previousColors[Math.floor(Math.random() * previousColors.length)];
-                previousBackgroundColors[y][x] = color;
+                previousBackgroundColors[y][x] = previousColors[Math.floor(Math.random() * previousColors.length)];
             }
         }
     }
