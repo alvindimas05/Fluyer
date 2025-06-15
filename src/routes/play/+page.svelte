@@ -167,7 +167,7 @@ function scrollToSelectedLyric() {
                         >{progressDurationText}</span
                     >
                 </div>
-                <div class="text-sm sm:text-base md:text-lg font-medium text-center mt-2 opacity-90 overflow-hidden">
+                <div class="text-sm md:text-base lg:text-lg font-medium text-center mt-2 opacity-90 overflow-hidden">
                     <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                     <p class="animate-scroll-overflow-text"></p>
                     <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">
@@ -298,12 +298,12 @@ function scrollToSelectedLyric() {
             <div class="flex">
                 <div
                     id="lyrics"
-                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.1rem] md:text-[1.5rem] xl:text-[2rem]"
+                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.1rem] md:text-[1.5rem] lg:text-[2rem]"
                 >
                     {#each lyrics as lyric, i}
                         <p
                             id={selectedLyricIndex === i ? "selected-lyric" : ""}
-                            class={selectedLyricIndex === i ? "text-[1.25rem] md:text-[1.65rem] xl:text-[2.15rem] py-5 md:py-7 lg:py-10" : "opacity-50 py-5 md:py-7 lg:py-10"}
+                            class={selectedLyricIndex === i ? "text-[1.25rem] md:text-[1.65rem] lg:text-[2.15rem] py-5 md:py-7 lg:py-10" : "opacity-50 py-5 md:py-7 lg:py-10"}
                         >
                             {#if lyric.value.length > 0}
                                 {lyric.value}
