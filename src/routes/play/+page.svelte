@@ -298,18 +298,20 @@ function scrollToSelectedLyric() {
             <div class="flex">
                 <div
                     id="lyrics"
-                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.1rem] md:text-[1.5rem] lg:text-[2rem]"
+                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.1rem] md:text-[1.7rem] lg:text-[2rem]"
                 >
                     {#each lyrics as lyric, i}
                         <p
                             id={selectedLyricIndex === i ? "selected-lyric" : ""}
-                            class={selectedLyricIndex === i ? "text-[1.25rem] md:text-[1.65rem] lg:text-[2.15rem] py-5 md:py-7 lg:py-10" : "opacity-50 py-5 md:py-7 lg:py-10"}
+                            class={selectedLyricIndex === i ? "text-[1.25rem] md:text-[1.65rem] lg:text-[2.15rem] py-5 md:py-7 lg:py-10"
+                                : "opacity-50 py-5 md:py-7 lg:py-10"}
                         >
                             {#if lyric.value.length > 0}
                                 {lyric.value}
                             {:else}
                                 <!-- svelte-ignore a11y_missing_attribute -->
-                                <img class="invert w-[1.1rem] md:w-[1.5rem] xl:w-[2rem]" src={MusicConfig.defaultNoteIcon} />
+                                <img class={`invert ${selectedLyricIndex === i ? 'w-[1.1rem] md:w-[1.7rem] lg:w-[2rem]'
+                                    : 'w-[1.25rem] md:w-[1.65rem] lg:w-[2.15rem]'}`} src={MusicConfig.defaultNoteIcon} />
                             {/if}
                         </p>
                     {/each}
