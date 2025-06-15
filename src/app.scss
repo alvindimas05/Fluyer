@@ -134,3 +134,8 @@
         @apply text-opacity-90;
     }
 }
+
+.backdrop-blur-md {
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}

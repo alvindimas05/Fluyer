@@ -27,7 +27,6 @@ LoadingController.listen();
     {#if $musicList === null}
         <Intro />
     {:else if Array.isArray($musicList)}
-        <SearchBar />
         <PlayerBar />
         <Playlist />
         <div class="h-full grid grid-rows-[min-content_auto]">
