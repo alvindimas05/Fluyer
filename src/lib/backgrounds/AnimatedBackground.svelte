@@ -8,7 +8,7 @@ import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
 
 const CANVAS_BLOCK_SIZE = 150;
-const CANVAS_TRANSITION_SPEED = 0.035;
+const CANVAS_TRANSITION_SPEED = 0.03;
 const CANVAS_BLUR_RADIUS = 200;
 
 let previousBackground: string | null = null;
@@ -16,7 +16,6 @@ let canvas: HTMLCanvasElement;
 let canvasContext: CanvasRenderingContext2D;
 let currentCanvas: HTMLCanvasElement | null = null;
 let newCanvas: HTMLCanvasElement | null = null;
-let unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
 let previousColors: string[] = [];
 let previousBackgroundColors: string[][] = [];
 
@@ -214,6 +213,7 @@ function onWindowResize() {
 
 onMount(() => {
 	initializeCanvas();
+    musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0))
 });
 </script>
 
