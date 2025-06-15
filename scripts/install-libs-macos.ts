@@ -2,6 +2,7 @@ import path from "path";
 import { downloadFile, extractZip } from "./install-helpers";
 import fs from "fs/promises";
 import axios from "axios";
+import {spawn} from "promisify-child-process";
 
 const confPath = path.resolve("src-tauri", "tauri.macos.conf.json");
 const destPath = path.resolve("src-tauri", "libs");
@@ -22,6 +23,12 @@ async function updateConfWithFileList() {
 	console.log(`Updated conf with dylib paths at ${confPath}.`);
 }
 
+async function forceSignLibs(){
+	await spawn("bash", ["-c", `find ${destPath} -name "*.dylib" -exec codesign --force --sign - {} \\;`],
+		{ stdio: "inherit" });
+	console.log(`Successfully force signing dylibs.`);
+}
+
 async function main() {
 	// Assume it only contains .gitignore
 	if ((await fs.readdir(destPath)).length > 1) return;
@@ -37,6 +44,7 @@ async function main() {
 		path.resolve(destPath, "libmpv.dylib"),
 	);
 
+	await forceSignLibs();
 	await updateConfWithFileList();
 }
 
