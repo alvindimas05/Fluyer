@@ -27,19 +27,20 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 	return { r, g, b };
 }
 
-function darkenTooBright(hex: string, threshold = 0.8): string {
+function darkenTooBright(hex: string, targetMax = 180): string {
 	const { r, g, b } = hexToRgb(hex);
 	const luminance = getLuminance(r, g, b);
 
-	if (luminance > threshold) {
-		const factor = 0.6;
-		const newR = Math.floor(r * factor);
-		const newG = Math.floor(g * factor);
-		const newB = Math.floor(b * factor);
-		return rgbToHex(newR, newG, newB);
-	}
+	if (luminance <= 0.5 && Math.max(r, g, b) <= targetMax) return hex;
 
-	return hex;
+	const maxChannel = Math.max(r, g, b);
+	const scale = maxChannel > targetMax ? targetMax / maxChannel : 1;
+
+	const newR = Math.floor(r * scale);
+	const newG = Math.floor(g * scale);
+	const newB = Math.floor(b * scale);
+
+	return rgbToHex(newR, newG, newB);
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
