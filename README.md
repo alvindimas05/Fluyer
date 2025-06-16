@@ -1,4 +1,4 @@
-********# Fluyer
+# Fluyer
 Music Player with Beautiful UI and Cross-Platform.
 > [!NOTE]
 > This project is on slow progress. I'm working on it to have fun :)
