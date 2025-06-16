@@ -1,11 +1,11 @@
 <script lang="ts">
 import MusicController from "$lib/controllers/MusicController";
-import { prominent } from "color.js";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
 import { musicCurrentIndex } from "$lib/stores/music";
 import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
+import ColorThief from "colorthief/dist/color-thief.mjs";
 
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_SPEED = 0.03;
@@ -68,15 +68,23 @@ async function getColors(): Promise<string[] | null> {
 
 	let image = new Image();
 	image.src = previousBackground = currentAlbumImage;
+    if(!image.complete){
+        await new Promise((resolve, reject) => {
+            image.onload = () => resolve();
+            image.onerror = (err) => reject(err);
+        })
+    }
 
-	// @ts-ignore
-	let colors: string[] = await prominent(image, {
-		amount: 10,
-		format: "hex",
-	});
+    // @ts-ignore
+    // let colors: string[] = await prominent(image, {
+    // 	amount: 10,
+    // 	format: "hex",
+    // });
+    const colorThief = new ColorThief();
+    let colors = (await colorThief.getPalette(image, 10)).map(rgb => rgbToHex(rgb[0], rgb[1], rgb[2]));
 
-	colors = colors.map((hex) => darkenTooBright(hex));
-	return colors;
+    colors = colors.map((hex) => darkenTooBright(hex));
+    return colors;
 }
 
 async function createCanvas(options = {
