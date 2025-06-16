@@ -59,7 +59,7 @@ function onSwipeLeft(e: CustomEvent<SwipeEventData>) {
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-    class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full sm:w-[70%] md:w-[50%] hdpi:w-[40%] lg:w-[50%] xl:w-[25%] px-3
+    class={`fixed right-0 top-0 z-10 h-[calc(100%-8rem)] w-full sm:w-[70%] md:w-[50%] hdpi:w-[40%] xhdpi:w-[35%] lg:w-[50%] xl:w-[25%] px-3
 	${isMouseInsideArea ? "" : "hidden"}`}
     style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 32}px`}
     onmouseleave={onMouseLeave}
