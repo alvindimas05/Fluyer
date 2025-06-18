@@ -4,6 +4,8 @@ import type { MusicData } from "./types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
+import Icon from "$lib/icon/Icon.svelte";
+import {IconType} from "$lib/icon/types";
 
 interface Props {
 	music: MusicData;
@@ -89,14 +91,8 @@ onMount(checkAlbumImage);
 			onclick={addMusicAndPlay}
 		>
 			<div
-				class="bg-black bg-opacity-40 grid w-full h-full justify-items-center items-center rounded"
-			>
-				<img
-					class="w-10 h-10 lg:w-12 lg:h-12 invert"
-					src={MusicConfig.defaultPlayButton}
-					alt="Play"
-				/>
-			</div>
+				class="bg-black bg-opacity-40 grid w-full h-full p-2 justify-items-center items-center rounded"
+			><Icon type={IconType.Play}/></div>
 		</button>
 	</div>
 </div>

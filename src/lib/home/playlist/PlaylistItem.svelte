@@ -8,6 +8,8 @@ interface Props {
 	isPrevious?: boolean;
 }
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import Icon from "$lib/icon/Icon.svelte";
+import {IconType} from "$lib/icon/types";
 
 let {
 	music,
@@ -51,12 +53,10 @@ function gotoPlaylist() {
         >
             <div class="w-12 h-12 lg:w-16 lg:h-16"></div>
             <div></div>
-            <div class="w-12 lg:w-16 flex justify-center items-center">
-                <img
-                    class="w-10 h-10 invert animate__animated animate__pulse animate__infinite"
-                    src={MusicConfig.defaultPlayingIcon}
-                    alt="Playing"
-                />
+            <div class="w-12 lg:w-16 p-2 flex justify-center items-center">
+                <div class="w-full animate__animated animate__infinite animate__pulse">
+                    <Icon type={IconType.Playing} />
+                </div>
             </div>
         </div>
     {:else}
@@ -73,23 +73,16 @@ function gotoPlaylist() {
                         class="playlist-item-goto bg-black bg-opacity-40 grid w-full h-full
                     justify-items-center items-center rounded"
                     >
-                        <img
-                            class="w-10 h-10 lg:w-12 lg:h-12 invert"
-                            src={isPrevious
-                                ? MusicConfig.defaultPreviousButton
-                                : MusicConfig.defaultNextButton}
-                            alt="Go To"
-                        />
+                        <Icon type={isPrevious ? IconType.Previous : IconType.Next} />
                     </div>
                 {/if}
             </button>
             <div></div>
             <button class="w-12 lg:w-16 flex justify-center items-center"
                 onclick={removePlaylist}>
-                <img
-                    class="w-10 h-10 invert"
-                    src={MusicConfig.defaultPlaylistRemoveButton}
-                    alt="Remove"
+                <Icon
+                    class="w-10 h-10"
+                    type={IconType.Remove}
                 />
             </button>
         </div>

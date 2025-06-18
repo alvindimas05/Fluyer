@@ -14,6 +14,8 @@ import {
 } from "$lib/stores/mobile";
 import { isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
+import Icon from "$lib/icon/Icon.svelte";
+import {IconType} from "$lib/icon/types";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -208,55 +210,42 @@ function scrollToSelectedLyric() {
             <div class="w-full grid grid-cols-5 mt-4">
                 <div class="flex items-center">
                     <button
-                        class="w-7 md:w-8 xl:w-9 invert mx-2"
+                        class="w-7 md:w-8 xl:w-9 mx-2"
                         onclick={handleButtonBack}
-                        ><img
-                            src={MusicConfig.defaultBackButton}
-                            alt="Icon Back"
-                        /></button
+                        ><Icon type={IconType.Back} /></button
                     >
                 </div>
                 <div class="flex justify-end">
                     <button
-                        class="w-10 sm:w-12 md:w-10 hdpi:w-10 lg:w-11 invert mx-2"
+                        class="w-12 sm:w-14 md:w-12 hdpi:w-12 lg:w-13 mx-2"
                         onclick={handleButtonPrevious}
-                        ><img
-                            src={MusicConfig.defaultPreviousButton}
-                            alt="Icon Previous"
-                        /></button
+                        ><Icon type={IconType.Previous} /></button
                     >
                 </div>
                 <div class="flex justify-center">
                     <button
-                        class="w-10 sm:w-12 md:w-10 hdpi:w-10 lg:w-11 invert mx-2"
+                        class="w-12 sm:w-14 md:w-12 hdpi:w-12 lg:w-13 mx-2"
                         onclick={handleButtonPlayPause}
-                        ><img
-                            src={$musicIsPlaying
-                                ? MusicConfig.defaultPauseButton
-                                : MusicConfig.defaultPlayButton}
-                            alt="Icon Play"
-                        /></button
-                    >
+                        >
+                        {#if $musicIsPlaying}
+                            <Icon type={IconType.Pause} />
+                        {:else}
+                            <Icon type={IconType.Play} />
+                        {/if}
+                    </button>
                 </div>
                 <div class="flex justify-start">
                     <button
-                        class="w-10 sm:w-12 md:w-10 hdpi:w-10 lg:w-11 invert mx-2"
+                        class="w-12 sm:w-14 md:w-12 hdpi:w-12 lg:w-13 mx-2"
                         onclick={handleButtonNext}
-                        ><img
-                            src={MusicConfig.defaultNextButton}
-                            alt="Icon Next"
-                        /></button
+                        ><Icon type={IconType.Next} /></button
                     >
                 </div>
             </div>
             <div class="mt-5 volume-action animate__animated animate__faster">
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-                    <button onclick={() => MusicController.setVolume(0)}>
-                        <img
-                            class="invert w-5"
-                            alt="Volume"
-                            src={MusicConfig.defaultMuteButton}
-                        />
+                    <button class="w-5" onclick={() => MusicController.setVolume(0)}>
+                        <Icon type={IconType.Mute} />
                     </button>
                     <div class="relative">
                         <input
@@ -277,12 +266,8 @@ function scrollToSelectedLyric() {
                             step={MusicConfig.vstep}
                         />
                     </div>
-                    <button onclick={() => MusicController.setVolume(1)}>
-                        <img
-                            class="invert w-5"
-                            alt="Volume"
-                            src={MusicConfig.defaultSpeakerButton}
-                        />
+                    <button class="w-5" onclick={() => MusicController.setVolume(1)}>
+                        <Icon type={IconType.Speaker} />
                     </button>
                 </div>
             </div>
@@ -309,9 +294,10 @@ function scrollToSelectedLyric() {
                             {#if lyric.value.length > 0}
                                 {lyric.value}
                             {:else}
-                                <!-- svelte-ignore a11y_missing_attribute -->
-                                <img class={`invert ${selectedLyricIndex === i ? 'w-[1.1rem] md:w-[1.7rem] lg:w-[2rem]'
-                                    : 'w-[1.25rem] md:w-[1.65rem] lg:w-[2.15rem]'}`} src={MusicConfig.defaultNoteIcon} />
+                                <div class={`${selectedLyricIndex === i ? 'w-[1.2rem] md:w-[1.8rem] lg:w-[2.1rem]'
+                                    : 'w-[1.35rem] md:w-[1.75rem] lg:w-[2.25rem]'}`}>
+                                    <Icon type={IconType.Note} />
+                                </div>
                             {/if}
                         </p>
                     {/each}

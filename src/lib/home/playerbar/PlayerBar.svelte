@@ -9,6 +9,8 @@ import {
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
+import Icon from "$lib/icon/Icon.svelte";
+import {IconType} from "$lib/icon/types";
 
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
@@ -124,30 +126,25 @@ function handleVolumeButton() {
         <div class="grid grid-cols-[auto_min-content] xhdpi:grid-cols-3 lg:grid-cols-3">
             <div class="flex items-center">
                 <button
-                    class="w-8 md:w-10 hdpi:w-10 lg:w-10 invert mx-2"
+                    class="w-10 md:w-12 hdpi:w-12 lg:w-12 mx-2"
                     onclick={handleButtonPrevious}
-                    ><img
-                        src={MusicConfig.defaultPreviousButton}
-                        alt="Icon Previous"
-                    /></button
+                    ><Icon type={IconType.Previous} /></button
                 >
                 <button
-                    class="w-8 md:w-10 hdpi:w-10 lg:w-10 invert mx-2"
+                    class="w-10 md:w-12 hdpi:w-12 lg:w-12 mx-2"
                     onclick={handleButtonPlayPause}
-                    ><img
-                        src={isPlaying
-                            ? MusicConfig.defaultPauseButton
-                            : MusicConfig.defaultPlayButton}
-                        alt="Icon Play"
-                    /></button
+                    >
+                    {#if isPlaying}
+                        <Icon type={IconType.Pause} />
+                    {:else}
+                        <Icon type={IconType.Play} />
+                    {/if}
+                    </button
                 >
                 <button
-                    class="w-8 md:w-10 hdpi:w-10 lg:w-10 invert mx-2"
+                    class="w-10 md:w-12 hdpi:w-12 lg:w-12 mx-2"
                     onclick={handleButtonNext}
-                    ><img
-                        src={MusicConfig.defaultNextButton}
-                        alt="Icon Next"
-                    /></button
+                    ><Icon type={IconType.Next} /></button
                 >
             </div>
             <div
@@ -181,14 +178,12 @@ function handleVolumeButton() {
             </div>
             <div class="hidden xhdpi:grid lg:grid justify-end">
                 <div class="grid grid-cols-[auto_auto] items-center gap-3">
-                    <button onclick={handleVolumeButton}>
-                        <img
-                            class="invert w-5"
-                            src={volumePercentage > 0
-                                ? MusicConfig.defaultSpeakerButton
-                                : MusicConfig.defaultMuteButton}
-                            alt="Volume"
-                        />
+                    <button class="w-5" onclick={handleVolumeButton}>
+                        {#if volumePercentage > 0}
+                            <Icon type={IconType.Speaker} />
+                        {:else}
+                            <Icon type={IconType.Mute} />
+                        {/if}
                     </button>
                     <div class="relative w-24">
                         <input
