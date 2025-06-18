@@ -285,19 +285,19 @@ function scrollToSelectedLyric() {
             <div class="flex">
                 <div
                     id="lyrics"
-                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1rem] md:text-[1.6rem] lg:text-[1.9rem]"
+                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[.95rem] md:text-[1.4rem] lg:text-[1.7rem]"
                 >
                     {#each lyrics as lyric, i}
                         <p
                             id={selectedLyricIndex === i ? "selected-lyric" : ""}
-                            class={selectedLyricIndex === i ? "text-[1.05rem] md:text-[1.45rem] lg:text-[1.95rem] py-5 md:py-7 lg:py-10"
+                            class={selectedLyricIndex === i ? "text-[1.05rem] md:text-[1.55rem] lg:text-[1.85rem] py-5 md:py-7 lg:py-10"
                                 : "opacity-50 py-5 md:py-7 lg:py-10"}
                         >
                             {#if lyric.value.length > 0}
                                 {lyric.value}
                             {:else}
-                                <div class={`${selectedLyricIndex === i ? 'w-[1.2rem] md:w-[1.8rem] lg:w-[2.1rem]'
-                                    : 'w-[1.35rem] md:w-[1.75rem] lg:w-[2.25rem]'}`}>
+                                <div class={`${selectedLyricIndex === i ? 'w-[1.35rem] md:w-[1.85rem] lg:w-[2.25rem]'
+                                : 'w-[1.2rem] md:w-[1.7rem] lg:w-[2.1rem]'}`}>
                                     <Icon type={IconType.Note} weight="bold" />
                                 </div>
                             {/if}
