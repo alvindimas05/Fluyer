@@ -47,7 +47,6 @@ You can grab the latest version of the app below or check the [release page](htt
 
 ### Advanced Functionality
 - [ ] Search
-- [ ] Music Grouping
 - [x] Lyrics
 - [x] Animated Background
 - [x] Cover Art Caching
