@@ -3,14 +3,18 @@ import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
 import {IconType} from "$lib/icon/types";
 import SettingMusicPaths from "$lib/settings/music-paths/SettingMusicPaths.svelte";
-import {isDesktop} from "$lib/platform";
+import {isDesktop, isMobile} from "$lib/platform";
 import SettingAnimatedBackground from "$lib/settings/animated-background/SettingAnimatedBackground.svelte";
-let isLoading = $state(false);
+import {mobileNavigationBarHeight, mobileStatusBarHeight} from "$lib/stores/mobile";
+import {settingIsLoading} from "$lib/stores/setting";
+let isLoading = $derived($settingIsLoading);
 </script>
 
-<div class="w-full h-full px-4 pb-4 pt-8">
-    <div class="w-full h-full p-6 bg-gray-700 bg-opacity-30 rounded-xl shadow-xl">
-        <div class="w-full h-full grid grid-rows-[min-content_auto_min-content] rounded-lg border border-white/20 p-4 bg-white/5">
+<div class="w-full h-full md:px-4 md:pb-4 md:pt-8">
+    <div class="w-full h-full md:p-6 bg-gray-700 bg-opacity-30 rounded-xl shadow-xl">
+        <div class="w-full h-full grid grid-rows-[min-content_auto_min-content] rounded-lg border border-white/20 p-4 bg-white/5"
+             style={isMobile() && `padding-top: ${$mobileStatusBarHeight}px;
+             padding-bottom: ${$mobileNavigationBarHeight > 0 ? $mobileNavigationBarHeight : 24}px`}>
             <p class="text-2xl font-semibold text-white mb-4">Settings</p>
             <div class="overflow-auto mb-3 scrollbar-hidden">
                 {#if isDesktop()}

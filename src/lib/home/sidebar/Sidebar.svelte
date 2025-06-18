@@ -13,6 +13,8 @@ import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
+import {sidebarShowingType} from "$lib/stores/sidebar";
+import {onMount} from "svelte";
 
 let isMouseInsideArea = $state(false);
 let animationClass = $state("");
@@ -58,14 +60,24 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
     )
         return;
     if (((type === SidebarType.Right && e.detail.deltaX < -100 ) ||
-        (type === SidebarType.Left && e.detail.deltaX > 100)) && !isMouseInsideArea) {
+        (type === SidebarType.Left && e.detail.deltaX > 100)) && $sidebarShowingType === null
+        && !isMouseInsideArea) {
         isMouseInsideArea = true;
-        animationClass = type === SidebarType.Right ? "animate__fadeInLeft" : "animate__fadeInLeft";
+        animationClass = type === SidebarType.Right ? "animate__fadeInRight" : "animate__fadeInLeft";
+        $sidebarShowingType = type;
     } else if (((type === SidebarType.Right && e.detail.deltaX > 100) ||
-        (type === SidebarType.Left && e.detail.deltaX < -100)) && isMouseInsideArea) {
-        animationClass = type === SidebarType.Right ? "animate__fadeOutRight" : "animate__fadeOutLeft";
+        (type === SidebarType.Left && e.detail.deltaX < -100) && $sidebarShowingType !== null)
+        && isMouseInsideArea) {
+        setTimeout(() => {
+            animationClass = type === SidebarType.Right ? "animate__fadeOutRight" : "animate__fadeOutLeft";
+            $sidebarShowingType = null;
+        }, 0);
     }
 }
+
+onMount(() => {
+    $sidebarShowingType = null;
+})
 </script>
 
 <svelte:body use:swipeable on:swiped={onSwipe} />
@@ -73,7 +85,9 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
         class={`fixed ${type === SidebarType.Right ? 'right-0' : 'left-0'} top-0 z-10 h-[calc(100%-8rem)]
-        w-full sm:w-[70%] md:w-[50%] lg:w-[50%] xl:w-[35%] px-3
+        w-full px-3 sm:w-[70%]
+        md-mdpi:w-[50%] lg-mdpi:w-[35%] xl-mdpi:w-[25%]
+        md-hdpi:w-[50%] lg-hdpi:w-[35%] xl-hdpi:w-[25%]
 	${isMouseInsideArea ? "" : "hidden"}`}
         style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 32}px`}
         onmouseleave={onMouseLeave}

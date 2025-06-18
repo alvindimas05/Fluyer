@@ -13,7 +13,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"tauri": "tauri",
-		"android": "RANLIB=$HOME/Library/Android/sdk/ndk/*/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ranlib tauri android dev",
+		"android": "tauri android dev",
 		"android:build": "tauri android build --apk --target aarch64",
 		"ios": "tauri ios dev",
 		"ios:build": "tauri ios build"
