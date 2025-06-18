@@ -1,6 +1,11 @@
 import {Store} from "@tauri-apps/plugin-store";
+import {settingAnimatedBackgroundType} from "$lib/stores/setting";
+import type {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
 
 const PersistentStoreController = {
+    initialize: async () => {
+        await PersistentStoreController.animatedBackgroundType.setStore();
+    },
     get: () => Store.load("store.json", { autoSave: false }),
     musicPath: {
         key: 'music-path',
@@ -27,6 +32,23 @@ const PersistentStoreController = {
             const paths = await PersistentStoreController.musicPath.get()
             paths.splice(index, 1);
             await PersistentStoreController.musicPath.set(paths);
+        },
+    },
+    animatedBackgroundType: {
+        key: 'animated-background-type',
+        setStore: async () => {
+            settingAnimatedBackgroundType.set(
+                await PersistentStoreController.animatedBackgroundType.get()
+            );
+        },
+        get: async () => {
+            return <SettingAnimatedBackgroundType> await (await PersistentStoreController.get()).get<string>(
+                PersistentStoreController.animatedBackgroundType.key
+            );
+        },
+        set: async (value: SettingAnimatedBackgroundType) => {
+            await (await PersistentStoreController.get())
+                .set(PersistentStoreController.animatedBackgroundType.key, value.toString());
         },
     },
 };

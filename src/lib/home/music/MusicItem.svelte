@@ -63,12 +63,13 @@ async function addMusicAndPlay() {
 onMount(checkAlbumImage);
 </script>
 
-<div class="relative text-sm md:text-base animate__animated animate__fadeInDown animate__slow">
+<div class="relative text-sm md:text-base
+	animate__animated animate__fadeInDown animate__slow">
 	<div
 		class="grid grid-cols-[max-content_auto] py-2"
 	>
 		<img
-			class="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 relative rounded"
+			class="w-12 md:w-14   relative rounded"
 			src={albumImage}
 			alt="Album"
 		/>
@@ -87,11 +88,11 @@ onMount(checkAlbumImage);
 	</div>
 	<div class="absolute top-0 left-0 py-2 w-full music-item-play animate__animated animate__faster animate__fadeOut">
 		<button
-			class="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16"
+			class="w-12 md:w-14  "
 			onclick={addMusicAndPlay}
 		>
 			<div
-				class="bg-black bg-opacity-40 grid w-full h-full p-2 justify-items-center items-center rounded"
+				class="bg-black bg-opacity-40 grid w-full h-full p-1 justify-items-center items-center rounded"
 			><Icon type={IconType.Play}/></div>
 		</button>
 	</div>

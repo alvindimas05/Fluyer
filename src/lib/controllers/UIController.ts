@@ -2,7 +2,7 @@
 import { fluidScroll } from "fluidscroll";
 
 const UIController = {
-	initialize: () => {
+	initialize: async () => {
 		UIController.listenAnimateScrollOverflowText();
 		UIController.listenDisableTabSelection();
 	},

@@ -13,6 +13,7 @@ import MobileController from "$lib/controllers/MobileController";
 import logHandler from "$lib/handlers/log";
 import { goto } from "$app/navigation";
 import { PageRoutes } from "$lib/pages";
+import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 
 interface Props {
 	children?: import("svelte").Snippet;
@@ -26,21 +27,18 @@ async function initialize() {
 	if (isWindows()) await getCurrentWindow().toggleMaximize();
 
 	logHandler();
-	MusicController.initialize();
-	UIController.initialize();
-	MobileController.initialize();
+    await Promise.all([
+        PersistentStoreController.initialize(),
+        MusicController.initialize(),
+        UIController.initialize(),
+        MobileController.initialize(),
+    ]);
 	isAppReady = true;
 }
 
-if (isWindows()) {
-	onMount(async () => {
-		setTimeout(() => {
-			initialize();
-		}, 1000);
-	});
-} else {
-	initialize();
-}
+onMount(async () => {
+    setTimeout(initialize, isWindows() ? 1000 : 500);
+});
 </script>
 
 <Font />

@@ -34,7 +34,7 @@ export const MusicConfig = {
 	defaultAlbumImage: "/icons/default/default-album-cover.jpg",
 };
 const MusicController = {
-	initialize: () => {
+	initialize: async () => {
 		MusicController.listenSyncMusic();
 		MusicController.handleVolumeChange();
 	},

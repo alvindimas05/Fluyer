@@ -4,6 +4,7 @@ import Icon from "$lib/icon/Icon.svelte";
 import {IconType} from "$lib/icon/types";
 import SettingMusicPaths from "$lib/settings/music-paths/SettingMusicPaths.svelte";
 import {isDesktop} from "$lib/platform";
+import SettingAnimatedBackground from "$lib/settings/animated-background/SettingAnimatedBackground.svelte";
 let isLoading = $state(false);
 </script>
 
@@ -15,6 +16,7 @@ let isLoading = $state(false);
                 {#if isDesktop()}
                     <SettingMusicPaths />
                 {/if}
+                <SettingAnimatedBackground />
             </div>
             <div>
                 <button

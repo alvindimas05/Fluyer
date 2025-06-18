@@ -142,7 +142,8 @@ function scrollToSelectedLyric() {
 <div
     id="root-play"
     class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0
-    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center root-nolyrics"} md:pt-0`}
+    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]  " :
+    "md:grid-cols-[45%] justify-center root-nolyrics"} md:pt-0`}
     style={`--mobile-status-bar-height: ${$mobileStatusBarHeight}px; --mobile-navigation-bar-height: ${$mobileNavigationBarHeight}px;`}
 >
     <div
@@ -164,12 +165,12 @@ function scrollToSelectedLyric() {
     >
         <div class="w-full md:w-[80%] xl:w-[65%]">
             <div class="w-full grid grid-cols-[auto,1fr,auto] md:mt-4">
-                <div class="text-xs lg:text-sm md-xhdpi:text-xs flex w-12">
+                <div class="text-xs lg:text-sm  flex w-12">
                     <span class="self-end opacity-75"
                         >{progressDurationText}</span
                     >
                 </div>
-                <div class="text-sm md:text-base lg:text-lg md-xhdpi:text-base font-medium text-center mt-2 opacity-90 overflow-hidden">
+                <div class="text-sm md:text-base lg:text-lg  font-medium text-center mt-2 opacity-90 overflow-hidden">
                     <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                     <p class="animate-scroll-overflow-text"></p>
                     <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">
@@ -179,7 +180,7 @@ function scrollToSelectedLyric() {
                         {music?.title ?? MusicConfig.defaultTitle}
                     </p>
                 </div>
-                <div class="text-xs lg:text-sm md-xhdpi:text-xs flex justify-end w-12">
+                <div class="text-xs lg:text-sm  flex justify-end w-12">
                     <span class="self-end opacity-75"
                         >{progressDurationNegativeText}</span
                     >
@@ -218,14 +219,14 @@ function scrollToSelectedLyric() {
                 </div>
                 <div class="flex justify-end">
                     <button
-                        class="w-12 sm:w-14 md:w-12 md-hdpi:w-12 lg:w-13 mx-2"
+                        class="w-12 sm:w-14 md:w-12  lg:w-13 mx-2"
                         onclick={handleButtonPrevious}
                         ><Icon type={IconType.Previous} /></button
                     >
                 </div>
                 <div class="flex justify-center">
                     <button
-                        class="w-12 sm:w-14 md:w-12 md-hdpi:w-12 lg:w-13 mx-2"
+                        class="w-12 sm:w-14 md:w-12  lg:w-13 mx-2"
                         onclick={handleButtonPlayPause}
                         >
                         {#if $musicIsPlaying}
@@ -237,7 +238,7 @@ function scrollToSelectedLyric() {
                 </div>
                 <div class="flex justify-start">
                     <button
-                        class="w-12 sm:w-14 md:w-12 md-hdpi:w-12 lg:w-13 mx-2"
+                        class="w-12 sm:w-14 md:w-12  lg:w-13 mx-2"
                         onclick={handleButtonNext}
                         ><Icon type={IconType.Next} /></button
                     >
@@ -311,6 +312,7 @@ function scrollToSelectedLyric() {
 <style lang="scss">
     @media (min-width: 40rem) {
         #btn-back, #volume-bar {
+            animation-duration: .5s;
             animation-delay: 2s;
             animation-name: fadeOut;
             animation-fill-mode: forwards;

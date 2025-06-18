@@ -7,7 +7,7 @@ interface Props {
 	isPlaying?: boolean;
 	isPrevious?: boolean;
 }
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import {IconType} from "$lib/icon/types";
 
@@ -32,9 +32,9 @@ function gotoPlaylist() {
         class={`grid grid-cols-[max-content_auto_max-content] py-2 px-3 animate__animated animate__fadeIn
             ${isPlaying && "bg-gray-700 bg-opacity-40"}`}
     >
-        <div class="w-12 h-12 lg:w-16 lg:h-16">
+        <div class="w-10 md:w-12  ">
             <img
-                class="w-12 lg:w-16 rounded"
+                class="w-full rounded"
                 src={MusicController.getAlbumImageFromMusic(music)}
                 alt="Album"
             />
@@ -45,15 +45,15 @@ function gotoPlaylist() {
                 {MusicController.getFullArtistFromMusic(music)}
             </p>
         </div>
-        <div class="w-12 lg:w-16"></div>
+        <div class="w-12 md:w-14   lg-xhdpi:w-16 lg:w-16"></div>
     </div>
     {#if isPlaying}
         <div
             class="absolute top-0 left-0 w-full grid grid-cols-[max-content_auto_max-content] py-2 px-3 z-10"
         >
-            <div class="w-12 h-12 lg:w-16 lg:h-16"></div>
+            <div class="w-10 md:w-12   aspect-square"></div>
             <div></div>
-            <div class="w-12 lg:w-16 p-2 flex justify-center items-center">
+            <div class="w-10 md:w-12   aspect-square p-1">
                 <div class="w-full animate__animated animate__infinite animate__pulse">
                     <Icon type={IconType.Playing} />
                 </div>
@@ -65,20 +65,19 @@ function gotoPlaylist() {
             animate__animated animate__faster animate__fadeOut playlist-item-controls"
         >
             <button
-                class="w-12 h-12 lg:w-16 lg:h-16"
+                class="w-10 md:w-12   aspect-square"
                 onclick={gotoPlaylist}
             >
                 {#if !isPlaying}
                     <div
-                        class="playlist-item-goto bg-black bg-opacity-40 grid w-full h-full
-                    justify-items-center items-center rounded"
+                        class="w-full bg-black bg-opacity-40 rounded"
                     >
                         <Icon type={isPrevious ? IconType.Previous : IconType.Next} />
                     </div>
                 {/if}
             </button>
             <div></div>
-            <button class="w-12 lg:w-16 flex justify-center items-center"
+            <button class="w-10 md:w-12   aspect-square"
                 onclick={removePlaylist}>
                 <Icon
                     class="w-10 h-10"

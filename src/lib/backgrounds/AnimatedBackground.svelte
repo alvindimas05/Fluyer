@@ -6,6 +6,9 @@ import { musicCurrentIndex } from "$lib/stores/music";
 import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
 import ColorThief from "colorthief/dist/color-thief.mjs";
+import {settingAnimatedBackgroundType, settingTriggerAnimatedBackground} from "$lib/stores/setting";
+import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
+import {prominent} from "color.js";
 
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_SPEED = 0.03;
@@ -61,9 +64,9 @@ function getLuminance(r: number, g: number, b: number): number {
 	return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
 }
 
-async function getColors(): Promise<string[] | null> {
+async function getColors(force = false): Promise<string[] | null> {
 	const currentAlbumImage = MusicController.currentMusicAlbumImage();
-	if (previousBackground !== null && previousBackground === currentAlbumImage)
+	if (previousBackground === currentAlbumImage && !force)
 		return null;
 
 	let image = new Image();
@@ -75,25 +78,30 @@ async function getColors(): Promise<string[] | null> {
         })
     }
 
-    // @ts-ignore
-    // let colors: string[] = await prominent(image, {
-    // 	amount: 10,
-    // 	format: "hex",
-    // });
-    const colorThief = new ColorThief();
-    let colors = (await colorThief.getPalette(image, 10)).map(rgb => rgbToHex(rgb[0], rgb[1], rgb[2]));
+    let colors: string[] = [];
+    if($settingAnimatedBackgroundType === SettingAnimatedBackgroundType.Prominent) {
+        // @ts-ignore
+        colors = await prominent(image, {
+            amount: 10,
+            format: "hex",
+        });
+    } else {
+        const colorThief = new ColorThief();
+        colors = (await colorThief.getPalette(image, 10)).map(rgb => rgbToHex(rgb[0], rgb[1], rgb[2]));
+    }
 
     colors = colors.map((hex) => darkenTooBright(hex));
     return colors;
 }
 
 async function createCanvas(options = {
-    usePreviousColors: false
+    usePreviousColors: false,
+    force: false,
 }): Promise<HTMLCanvasElement | null> {
     const canvasBlockSize = CANVAS_BLOCK_SIZE;
 
     if (!options.usePreviousColors) {
-        const colors = await getColors();
+        const colors = await getColors(options.force);
         if (colors === null) return null;
 
         previousColors = colors;
@@ -174,8 +182,8 @@ async function afterInitializeCanvas() {
 	LoadingController.setLoadingBackground(true);
 }
 
-async function transitionToNewCanvas() {
-	const _newCanvas = await createCanvas();
+async function transitionToNewCanvas(force = false) {
+	const _newCanvas = await createCanvas({ force });
 
 	if(!_newCanvas) return;
 	
@@ -222,7 +230,8 @@ function onWindowResize() {
 
 onMount(() => {
 	initializeCanvas();
-    musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0))
+    musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
+    settingTriggerAnimatedBackground.subscribe(() => setTimeout(() => transitionToNewCanvas(true), 0));
 });
 </script>
 

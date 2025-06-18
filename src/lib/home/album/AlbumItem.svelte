@@ -85,7 +85,8 @@ setTimeout(
 			animate__animated animate__faster animate__fadeOut"
         >
             <button
-                class="w-12 md:w-14 absolute bottom-0 left-0 ms-3 mb-3"
+                class="w-12 md:w-14
+                 absolute bottom-0 left-0 ms-3 mb-3"
                 onclick={addMusicListAndPlay}
             ><Icon type={IconType.Play}/></button>
         </div>
