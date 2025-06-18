@@ -16,8 +16,9 @@ async function onMethodChange(e: InputEvent & {
 }
 </script>
 
-<SettingLabel title="Animated Background"
-    description="Choose one of Animated Background generation methods."/>
+<SettingLabel
+    title="Animated Background"
+    description="The methods for generating animated backgrounds."/>
 <SettingInput>
     <label class="grid grid-cols-[min-content_auto] items-center gap-3 px-3 py-2 cursor-pointer">
         <input
