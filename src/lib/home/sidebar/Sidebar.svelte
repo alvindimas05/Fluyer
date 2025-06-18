@@ -73,8 +73,7 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
         class={`fixed ${type === SidebarType.Right ? 'right-0' : 'left-0'} top-0 z-10 h-[calc(100%-8rem)]
-        w-full sm:w-[70%] md:w-[50%]
-          lg:w-[50%] xl:w-[25%] px-3
+        w-full sm:w-[70%] md:w-[50%] lg:w-[50%] xl:w-[35%] px-3
 	${isMouseInsideArea ? "" : "hidden"}`}
         style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 32}px`}
         onmouseleave={onMouseLeave}
