@@ -43,10 +43,15 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
     let mut dirs: Vec<Result<DirEntry, walkdir::Error>> = vec![];
 
     if is_desktop() {
-        let mut dir = GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string();
-        dir.remove(0);
-        dir.pop();
-        search_dirs.push(dir);
+        let dir = GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string();
+        let dirs = dir.split("||");
+
+        for d in dirs {
+            let trimmed = d.trim().trim_matches('"'); // optionally remove whitespace and quotes
+            if !trimmed.is_empty() {
+                search_dirs.push(trimmed.to_string());
+            }
+        }
     }
 
     if is_android() {

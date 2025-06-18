@@ -28,6 +28,7 @@ export const MusicConfig = {
 	vmin: 0,
 	vmax: 1,
 	separator: "•",
+	artistSeparator: "||",
 	defaultTitle: "The Meaning of Life",
 	defaultArtist: "Musician",
 	defaultAlbumImage: "/icons/default/default-album-cover.jpg",

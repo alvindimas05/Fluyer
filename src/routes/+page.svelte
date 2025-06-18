@@ -1,15 +1,14 @@
 <script lang="ts">
-import AlbumList from "$lib/home/album/AlbumList.svelte";
-import MusicList from "$lib/home/music/MusicList.svelte";
-import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
 import Playlist from "$lib/home/playlist/Playlist.svelte";
 import LoadingController from "$lib/controllers/LoadingController";
 import { loadingBackground, loadingShow } from "$lib/stores/loading";
 import MusicController from "$lib/controllers/MusicController";
 import { musicList } from "$lib/stores/music";
-import { isMobile } from "$lib/platform";
 import Intro from "$lib/home/intro/Intro.svelte";
-import SearchBar from "$lib/searchbar/SearchBar.svelte";
+import Menu from "$lib/home/menu/Menu.svelte";
+import AlbumList from "$lib/home/album/AlbumList.svelte";
+import MusicList from "$lib/home/music/MusicList.svelte";
+import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
 
 let isLoadingDone = LoadingController.loadingShow();
 
@@ -27,8 +26,9 @@ LoadingController.listen();
     {#if $musicList === null}
         <Intro />
     {:else if Array.isArray($musicList)}
-        <PlayerBar />
         <Playlist />
+        <Menu />
+        <PlayerBar />
         <div class="h-full grid grid-rows-[min-content_auto]">
             <AlbumList />
             <MusicList />
