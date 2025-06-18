@@ -164,12 +164,12 @@ function scrollToSelectedLyric() {
     >
         <div class="w-full md:w-[80%] xl:w-[65%]">
             <div class="w-full grid grid-cols-[auto,1fr,auto] md:mt-4">
-                <div class="text-xs lg:text-sm flex w-12">
+                <div class="text-xs lg:text-sm md-xhdpi:text-xs flex w-12">
                     <span class="self-end opacity-75"
                         >{progressDurationText}</span
                     >
                 </div>
-                <div class="text-sm md:text-base lg:text-lg font-medium text-center mt-2 opacity-90 overflow-hidden">
+                <div class="text-sm md:text-base lg:text-lg md-xhdpi:text-base font-medium text-center mt-2 opacity-90 overflow-hidden">
                     <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                     <p class="animate-scroll-overflow-text"></p>
                     <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">
@@ -179,7 +179,7 @@ function scrollToSelectedLyric() {
                         {music?.title ?? MusicConfig.defaultTitle}
                     </p>
                 </div>
-                <div class="text-xs lg:text-sm flex justify-end w-12">
+                <div class="text-xs lg:text-sm md-xhdpi:text-xs flex justify-end w-12">
                     <span class="self-end opacity-75"
                         >{progressDurationNegativeText}</span
                     >
@@ -210,21 +210,22 @@ function scrollToSelectedLyric() {
             <div class="w-full grid grid-cols-5 mt-4">
                 <div class="flex items-center">
                     <button
-                        class="w-7 md:w-8 xl:w-9 mx-2"
+                        id="btn-back"
+                        class="w-7 md:w-8 xl:w-9 mx-2 animate__animated"
                         onclick={handleButtonBack}
                         ><Icon type={IconType.Back} /></button
                     >
                 </div>
                 <div class="flex justify-end">
                     <button
-                        class="w-12 sm:w-14 md:w-12 hdpi:w-12 lg:w-13 mx-2"
+                        class="w-12 sm:w-14 md:w-12 md-hdpi:w-12 lg:w-13 mx-2"
                         onclick={handleButtonPrevious}
                         ><Icon type={IconType.Previous} /></button
                     >
                 </div>
                 <div class="flex justify-center">
                     <button
-                        class="w-12 sm:w-14 md:w-12 hdpi:w-12 lg:w-13 mx-2"
+                        class="w-12 sm:w-14 md:w-12 md-hdpi:w-12 lg:w-13 mx-2"
                         onclick={handleButtonPlayPause}
                         >
                         {#if $musicIsPlaying}
@@ -236,13 +237,13 @@ function scrollToSelectedLyric() {
                 </div>
                 <div class="flex justify-start">
                     <button
-                        class="w-12 sm:w-14 md:w-12 hdpi:w-12 lg:w-13 mx-2"
+                        class="w-12 sm:w-14 md:w-12 md-hdpi:w-12 lg:w-13 mx-2"
                         onclick={handleButtonNext}
                         ><Icon type={IconType.Next} /></button
                     >
                 </div>
             </div>
-            <div class="mt-5 volume-action animate__animated animate__faster">
+            <div id="volume-bar" class="mt-5 animate__animated">
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <button class="w-5" onclick={() => MusicController.setVolume(0)}>
                         <Icon type={IconType.Mute} />
@@ -275,20 +276,20 @@ function scrollToSelectedLyric() {
     </div>
     {#if lyrics.length > 0}
         <div
-            class="w-full md:h-screen md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden scrollbar-hidden
-            [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
+            class="w-full md:h-screen md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden
+            scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
             md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]
             animate__animated animate__faster animate__fadeInUp"
         >
             <div class="flex">
                 <div
                     id="lyrics"
-                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.1rem] md:text-[1.7rem] lg:text-[2rem]"
+                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1rem] md:text-[1.6rem] lg:text-[1.9rem]"
                 >
                     {#each lyrics as lyric, i}
                         <p
                             id={selectedLyricIndex === i ? "selected-lyric" : ""}
-                            class={selectedLyricIndex === i ? "text-[1.25rem] md:text-[1.65rem] lg:text-[2.15rem] py-5 md:py-7 lg:py-10"
+                            class={selectedLyricIndex === i ? "text-[1.05rem] md:text-[1.45rem] lg:text-[1.95rem] py-5 md:py-7 lg:py-10"
                                 : "opacity-50 py-5 md:py-7 lg:py-10"}
                         >
                             {#if lyric.value.length > 0}
@@ -296,7 +297,7 @@ function scrollToSelectedLyric() {
                             {:else}
                                 <div class={`${selectedLyricIndex === i ? 'w-[1.2rem] md:w-[1.8rem] lg:w-[2.1rem]'
                                     : 'w-[1.35rem] md:w-[1.75rem] lg:w-[2.25rem]'}`}>
-                                    <Icon type={IconType.Note} />
+                                    <Icon type={IconType.Note} weight="bold" />
                                 </div>
                             {/if}
                         </p>
@@ -309,9 +310,12 @@ function scrollToSelectedLyric() {
 
 <style lang="scss">
     @media (min-width: 40rem) {
-        .volume-action {
+        #btn-back, #volume-bar {
+            animation-delay: 2s;
             animation-name: fadeOut;
+            animation-fill-mode: forwards;
             &:hover {
+                animation-delay: 0s;
                 animation-name: fadeIn;
             }
         }

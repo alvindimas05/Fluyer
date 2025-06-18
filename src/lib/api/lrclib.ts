@@ -4,12 +4,10 @@ import axios from "axios";
 import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
 
 const LYRIC_THRESHOLD_DURATION = 5;
-const ARTIST_SEPARATOR = "||";
 const LrcLib = {
 	getLyrics: async (music: MusicData) => {
 		try {
 			if (music.title === null) return null;
-			console.log(music);
 			let url = new URL("https://lrclib.net/api/search");
 			url.searchParams.append(
 				"q",
@@ -18,17 +16,15 @@ const LrcLib = {
 			const res = await axios.get<any[]>(url.toString());
 			if (
 				res.data.length < 1 ||
-				res.data[0]["syncedLyrics"] == null ||
-				// Make sure the track name is not detected as album name
+				!res.data[0]["syncedLyrics"] ||
 				!(res.data[0]["name"] as string)
 					.toLowerCase()
 					.includes(music.title.toLowerCase())
 			)
 				return null;
 
-			const lrcData = music.duration ? res.data.find((dat) => Math.floor(dat.duration) ===
-				Math.floor(music.duration / 1000)) : res.data[0];
-			console.log(lrcData);
+			const lrcData = music.duration ? (res.data.find((dat) => Math.floor(dat.duration) ===
+				Math.floor(music.duration / 1000)) ?? res.data[0]) : res.data[0];
 			const rawLyrics = (lrcData["syncedLyrics"] as string).split("\n");
 			let lyrics: MusicLyric[] = [];
 

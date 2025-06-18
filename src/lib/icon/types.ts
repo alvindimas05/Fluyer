@@ -15,4 +15,6 @@ export enum IconType {
     Speaker,
     Mute,
     Remove,
+    Trash,
+    Settings,
 }

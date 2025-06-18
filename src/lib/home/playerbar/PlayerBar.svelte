@@ -123,15 +123,15 @@ function handleVolumeButton() {
         />
     </div>
     <div class="p-3 mt-1">
-        <div class="grid grid-cols-[auto_min-content] xhdpi:grid-cols-3 lg:grid-cols-3">
+        <div class="grid grid-cols-[auto_min-content] md-xhdpi:grid-cols-3 lg:grid-cols-3">
             <div class="flex items-center">
                 <button
-                    class="w-10 md:w-12 hdpi:w-12 lg:w-12 mx-2"
+                    class="w-10 md:w-12 md-hdpi:w-12 lg:w-12 mx-2"
                     onclick={handleButtonPrevious}
                     ><Icon type={IconType.Previous} /></button
                 >
                 <button
-                    class="w-10 md:w-12 hdpi:w-12 lg:w-12 mx-2"
+                    class="w-10 md:w-12 md-hdpi:w-12 lg:w-12 mx-2"
                     onclick={handleButtonPlayPause}
                     >
                     {#if isPlaying}
@@ -142,13 +142,13 @@ function handleVolumeButton() {
                     </button
                 >
                 <button
-                    class="w-10 md:w-12 hdpi:w-12 lg:w-12 mx-2"
+                    class="w-10 md:w-12 md-hdpi:w-12 lg:w-12 mx-2"
                     onclick={handleButtonNext}
                     ><Icon type={IconType.Next} /></button
                 >
             </div>
             <div
-                class="ms-2 lg:ms-0 xhdpi:flex lg:flex items-center justify-center order-first xhdpi:order-none lg:order-none text-sm md:text-base"
+                class="ms-2 lg:ms-0 md-xhdpi:flex lg:flex items-center justify-center order-first md-xhdpi:order-none lg:order-none text-sm md:text-base"
             >
                 <div
                     class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
@@ -176,7 +176,7 @@ function handleVolumeButton() {
                     </div>
                 </div>
             </div>
-            <div class="hidden xhdpi:grid lg:grid justify-end">
+            <div class="hidden md-xhdpi:grid lg:grid justify-end">
                 <div class="grid grid-cols-[auto_auto] items-center gap-3">
                     <button class="w-5" onclick={handleVolumeButton}>
                         {#if volumePercentage > 0}
