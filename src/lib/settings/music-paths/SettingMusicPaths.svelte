@@ -58,7 +58,7 @@ onMount(refreshPath);
             {#if musicPath.length > 1}
                 <button class="w-6 h-6 flex items-center justify-center cursor-pointer rounded"
                         onclick={() => removePath(index)}>
-                    <Icon type={IconType.Trash} weight="fill" color="rgb(255, 150, 150)" />
+                    <Icon type={IconType.Trash} />
                 </button>
             {/if}
         </div>

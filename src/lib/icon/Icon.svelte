@@ -5,13 +5,28 @@ import type {IconWeight} from "phosphor-svelte";
 
 interface Props {
     type: IconType,
-    color?: string,
-    weight?: IconWeight,
 }
 
-let { type, color = "white", weight = "regular" } = $props<Props>();
+let { type } = $props<Props>();
 const themeType = IconThemeType.Phosphor;
 const Component = iconRegistry[themeType]?.[type] ?? iconRegistry[themeType]?.['QuestionMark'];
+
+let color = "#ff0000";
+let weight: IconWeight = "regular";
+
+switch(themeType){
+    case IconThemeType.Phosphor:
+        switch(type){
+            case IconType.Trash:
+                weight = "fill";
+                color = "rgb(255, 150, 150)";
+                break;
+            case IconType.Note:
+                weight = "bold";
+                break;
+        }
+        break;
+}
 </script>
 
 {#if Component}

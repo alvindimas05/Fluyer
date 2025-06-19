@@ -299,7 +299,7 @@ function scrollToSelectedLyric() {
                             {:else}
                                 <div class={`${selectedLyricIndex === i ? 'w-[1.35rem] md:w-[1.85rem] lg:w-[2.25rem]'
                                 : 'w-[1.2rem] md:w-[1.7rem] lg:w-[2.1rem]'}`}>
-                                    <Icon type={IconType.Note} weight="bold" />
+                                    <Icon type={IconType.Note} />
                                 </div>
                             {/if}
                         </p>
