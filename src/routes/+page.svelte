@@ -9,6 +9,7 @@ import Menu from "$lib/home/menu/Menu.svelte";
 import AlbumList from "$lib/home/album/AlbumList.svelte";
 import MusicList from "$lib/home/music/MusicList.svelte";
 import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
+import FilterBar from "$lib/filterbar/FilterBar.svelte";
 
 let isLoadingDone = LoadingController.loadingShow();
 
@@ -29,7 +30,8 @@ LoadingController.listen();
         <Playlist />
         <Menu />
         <PlayerBar />
-        <div class="h-full grid grid-rows-[min-content_auto]">
+        <div class="h-full grid grid-rows-[min-content_min-content_auto]">
+            <FilterBar />
             <AlbumList />
             <MusicList />
         </div>

@@ -36,9 +36,7 @@ async function initialize() {
 	isAppReady = true;
 }
 
-onMount(async () => {
-    setTimeout(initialize, isWindows() ? 1000 : 500);
-});
+onMount(() => setTimeout(initialize, isWindows() ? 1000 : 0));
 </script>
 
 <Font />

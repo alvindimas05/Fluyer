@@ -88,6 +88,7 @@ onMount(() => {
         w-full px-3 sm:w-[70%]
         md-mdpi:w-[50%] lg-mdpi:w-[35%] xl-mdpi:w-[25%]
         md-hdpi:w-[50%] lg-hdpi:w-[35%] xl-hdpi:w-[25%]
+        md-xhdpi:w-[50%] lg-xhdpi:w-[35%] xl-xhdpi:w-[35%]
 	${isMouseInsideArea ? "" : "hidden"}`}
         style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 32}px`}
         onmouseleave={onMouseLeave}

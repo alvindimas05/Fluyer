@@ -5,12 +5,12 @@ import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
-import { mobileStatusBarHeight } from "$lib/stores/mobile";
-import { isMobile } from "$lib/platform";
+import type {Unsubscriber} from "svelte/store";
+import {beforeNavigate} from "$app/navigation";
 
 let element: HTMLDivElement;
+let unsubscribeMusicList: Unsubscriber;
 
-MusicController.setMusicAlbumList(groupByAlbum());
 function groupByAlbum(): MusicData[][] {
 	const albumsMap = MusicController.musicList()!.reduce(
 		(acc, item) => {
@@ -44,21 +44,23 @@ function onMouseWheel(
 }
 
 onMount(() => {
-	musicList.subscribe(() => {
-		MusicController.setMusicAlbumList(groupByAlbum());
-		setTimeout(() => {
-			$swipeMinimumTop = element.clientHeight;
-		}, 1);
+    MusicController.setMusicAlbumList(groupByAlbum());
+    unsubscribeMusicList = musicList.subscribe(() => {
+        MusicController.setMusicAlbumList(groupByAlbum());
+        setTimeout(() => ($swipeMinimumTop = element.clientHeight), 0);
 	});
+});
+
+beforeNavigate(() => {
+    unsubscribeMusicList();
 });
 </script>
 
 <div
     class={`grid auto-cols-[50%] sm:auto-cols-[33.3334%]
-    md-mdpi:auto-cols-[25%] lg-mdpi:auto-cols-[20%] xl-mdpi:auto-cols-[16.6667%]
-    md-hdpi:auto-cols-[20%]
-    grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden`}
-    style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 32}px`}
+        md-mdpi:auto-cols-[25%] lg-mdpi:auto-cols-[20%] xl-mdpi:auto-cols-[16.6667%]
+        md-hdpi:auto-cols-[20%]
+        grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden`}
     bind:this={element}
     onwheel={onMouseWheel}
 >

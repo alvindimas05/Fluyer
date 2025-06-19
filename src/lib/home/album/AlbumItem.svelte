@@ -6,6 +6,7 @@ import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import {IconType} from "$lib/icon/types";
+import {filterSearch} from "$lib/stores/filter";
 
 interface Props {
 	musicList: MusicData[];
@@ -14,6 +15,12 @@ interface Props {
 
 let { musicList, index }: Props = $props();
 let music = MusicController.sortMusicList(musicList)[0];
+
+let isValidSearch = $derived.by(() => {
+    const search = $filterSearch.toLowerCase();
+    return music.album?.toLowerCase().includes(search) ||
+        music.albumArtist?.toLowerCase().includes(search);
+})
 
 const animationDelay = 200;
 let animationClasses = $state("hidden");
@@ -77,7 +84,7 @@ setTimeout(
 </script>
 
 <div
-    class={`px-3 pb-6 text-white row-[1] col-auto ${animationClasses}`}
+    class={`px-3 pb-6 text-white row-[1] col-auto ${animationClasses} ${!isValidSearch && "hidden"}`}
 >
     <div class="relative w-full">
         <div
@@ -92,9 +99,11 @@ setTimeout(
         </div>
         <img class="rounded-lg w-full" src={albumImage} alt="Album" />
     </div>
-    <p class="font-medium sm:text-lg md:text-xl mt-2 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">{music.album}</p>
+    <p class="font-medium sm:text-lg md:text-xl mt-2 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
+        {music.album}
+    </p>
     <p class="text-[15px] sm:text-base md:text-lg text-opacity-background-80 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
-        {MusicController.getFullArtistFromMusic(music)}
+        {music.albumArtist ?? MusicController.getFullArtistFromMusic(music)}
     </p>
 </div>
 

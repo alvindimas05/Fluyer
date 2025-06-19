@@ -1,7 +1,7 @@
 import { IconType, IconThemeType } from "$lib/icon/types";
 import type {Component} from "svelte";
 import {
-    ArrowUUpLeft, Gear, MusicNote,
+    ArrowUUpLeft, Gear, MagnifyingGlass, MusicNote,
     MusicNotes,
     PauseCircle,
     PlayCircle,
@@ -23,6 +23,7 @@ export const iconRegistry: Record<IconThemeType, Partial<Record<IconType, Compon
         [IconType.Remove]: XCircle,
         [IconType.Trash]: Trash,
         [IconType.Settings]: Gear,
+        [IconType.Search]: MagnifyingGlass,
     },
     [IconThemeType.Lucide]: {},
     [IconThemeType.Material]: {}

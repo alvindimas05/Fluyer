@@ -1,5 +1,5 @@
 <script lang="ts">
-import {IconThemeType, type IconType} from "$lib/icon/types";
+import {IconThemeType, IconType} from "$lib/icon/types";
 import {iconRegistry} from "$lib/icon/registry";
 import type {IconWeight} from "phosphor-svelte";
 
@@ -7,11 +7,11 @@ interface Props {
     type: IconType,
 }
 
-let { type } = $props<Props>();
+let {type}: Props = $props();
 const themeType = IconThemeType.Phosphor;
 const Component = iconRegistry[themeType]?.[type] ?? iconRegistry[themeType]?.['QuestionMark'];
 
-let color = "#ff0000";
+let color = "white";
 let weight: IconWeight = "regular";
 
 switch(themeType){

@@ -17,4 +17,5 @@ export enum IconType {
     Remove,
     Trash,
     Settings,
+    Search,
 }
