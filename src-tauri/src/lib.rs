@@ -15,6 +15,11 @@ mod store;
 mod logger;
 mod api;
 
+#[cfg(target_os = "macos")]
+const MACOS_TRAFFIC_LIGHTS_INSET_X: f32 = 12.0;
+#[cfg(target_os = "macos")]
+const MACOS_TRAFFIC_LIGHTS_INSET_Y: f32 = 20.0;
+
 struct AppState {
     music_player: MusicPlayer,
 }
@@ -45,7 +50,7 @@ pub fn run() {
             }
             #[cfg(target_os = "macos")]{
           		main_window.make_transparent().unwrap();
-                main_window.set_traffic_lights_inset(16.0, 8.0).unwrap();
+                main_window.set_traffic_lights_inset(MACOS_TRAFFIC_LIGHTS_INSET_X, MACOS_TRAFFIC_LIGHTS_INSET_Y).unwrap();
             }
             #[cfg(all(desktop, not(windows)))]
             main_window.maximize().unwrap();
@@ -82,10 +87,8 @@ pub fn run() {
             match event {
                 WindowEvent::Resized(_) => {
                     #[cfg(target_os = "macos")]
-                    {
-                        GLOBAL_MAIN_WINDOW.get().unwrap()
-                            .set_traffic_lights_inset(16.0, 8.0).unwrap();
-                    }
+                    GLOBAL_MAIN_WINDOW.get().unwrap()
+                        .set_traffic_lights_inset(MACOS_TRAFFIC_LIGHTS_INSET_X, MACOS_TRAFFIC_LIGHTS_INSET_Y).unwrap();
                 }
                 _ => {}
             }

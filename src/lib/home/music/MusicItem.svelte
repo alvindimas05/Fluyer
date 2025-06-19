@@ -6,6 +6,7 @@ import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import {IconType} from "$lib/icon/types";
+import {filterSearch} from "$lib/stores/filter";
 
 interface Props {
 	music: MusicData;
@@ -13,6 +14,13 @@ interface Props {
 
 let { music }: Props = $props();
 
+let isValidSearch = $derived.by(() => {
+	const search = $filterSearch.toLowerCase();
+	return music.album?.toLowerCase().includes(search) ||
+		music.title?.toLowerCase().includes(search) ||
+		music.artist?.toLowerCase().includes(search) ||
+		music.albumArtist?.toLowerCase().includes(search);
+});
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
 async function checkAlbumImage() {
@@ -63,13 +71,13 @@ async function addMusicAndPlay() {
 onMount(checkAlbumImage);
 </script>
 
-<div class="relative text-sm md:text-base
-	animate__animated animate__fadeInDown animate__slow">
+<div class={`relative text-sm md:text-base animate__animated animate__fadeIn animate__slow
+	${!isValidSearch && "hidden"}`}>
 	<div
 		class="grid grid-cols-[max-content_auto] py-2"
 	>
 		<img
-			class="w-12 md:w-14   relative rounded"
+			class="w-12 md:w-14 relative rounded"
 			src={albumImage}
 			alt="Album"
 		/>
@@ -86,15 +94,17 @@ onMount(checkAlbumImage);
 			</p>
 		</div>
 	</div>
-	<div class="absolute top-0 left-0 py-2 w-full music-item-play animate__animated animate__faster animate__fadeOut">
-		<button
-			class="w-12 md:w-14  "
-			onclick={addMusicAndPlay}
-		>
-			<div
-				class="bg-black bg-opacity-40 grid w-full h-full p-1 justify-items-center items-center rounded"
-			><Icon type={IconType.Play}/></div>
-		</button>
+	<div class="absolute top-0 left-0 py-2 w-full">
+		<div class="w-full music-item-play animate__animated animate__faster animate__fadeOut">
+			<button
+					class="w-12 md:w-14"
+					onclick={addMusicAndPlay}
+			>
+				<div
+						class="bg-black bg-opacity-40 grid w-full h-full p-1 justify-items-center items-center rounded"
+				><Icon type={IconType.Play}/></div>
+			</button>
+			</div>
 	</div>
 </div>
 

@@ -4,6 +4,8 @@
     import { invoke } from "@tauri-apps/api/core";
     import { PageRoutes } from "$lib/pages";
     import { afterNavigate } from "$app/navigation";
+    import FilterBar from "$lib/filterbar/FilterBar.svelte";
+    import {page} from "$app/state";
 
     const LINUX_ICONS = {
         close: "/icons/linux/window-close-symbolic.svg",
@@ -50,8 +52,11 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="fixed top-0 left-0 w-full h-8 z-[99999] grid grid-cols-[1fr_auto]">
-    <div class="h-full w-full" onmousedown={onMouseDown}></div>
+<div class="fixed top-0 left-0 w-full h-12 z-[99999] grid grid-cols-[1fr_auto]">
+    <div class="absolute top-0 left-0 h-full w-full" onmousedown={onMouseDown}></div>
+    {#if page.url.pathname === PageRoutes.HOME}
+        <FilterBar />
+    {/if}
     {#if (isWindows() || isLinux()) && !isPlayPage}
         <div class="pe-3">
             <button

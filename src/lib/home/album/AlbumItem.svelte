@@ -20,7 +20,7 @@ let isValidSearch = $derived.by(() => {
     const search = $filterSearch.toLowerCase();
     return music.album?.toLowerCase().includes(search) ||
         music.albumArtist?.toLowerCase().includes(search);
-})
+});
 
 const animationDelay = 200;
 let animationClasses = $state("hidden");
@@ -78,13 +78,13 @@ onMount(() => {
 });
 
 setTimeout(
-	() => (animationClasses = "animate__animated animate__fadeInDown"),
+	() => (animationClasses = "animate__animated animate__fadeIn"),
 	animationDelay * index,
 );
 </script>
 
 <div
-    class={`px-3 pb-6 text-white row-[1] col-auto ${animationClasses} ${!isValidSearch && "hidden"}`}
+    class={`px-3 pb-3 text-white row-[1] col-auto ${animationClasses} ${!isValidSearch && "hidden"}`}
 >
     <div class="relative w-full">
         <div

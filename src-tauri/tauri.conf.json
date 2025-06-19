@@ -27,6 +27,9 @@
 		}
 	},
 	"bundle": {
+		"macOS": {
+			"signingIdentity": "-"
+		},
 		"active": true,
 		"targets": ["nsis", "dmg", "deb", "appimage"],
 		"icon": [

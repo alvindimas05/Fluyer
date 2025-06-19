@@ -7,6 +7,8 @@ import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
 import type {Unsubscriber} from "svelte/store";
 import {beforeNavigate} from "$app/navigation";
+import {isMobile} from "$lib/platform";
+import {mobileStatusBarHeight} from "$lib/stores/mobile";
 
 let element: HTMLDivElement;
 let unsubscribeMusicList: Unsubscriber;
@@ -57,13 +59,13 @@ beforeNavigate(() => {
 </script>
 
 <div
-    class={`grid auto-cols-[50%] sm:auto-cols-[33.3334%]
+    class="grid auto-cols-[50%] sm:auto-cols-[33.3334%]
         md-mdpi:auto-cols-[25%] lg-mdpi:auto-cols-[20%] xl-mdpi:auto-cols-[16.6667%]
         md-hdpi:auto-cols-[20%]
-        grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden`}
+        grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden"
+    style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 44}px`}
     bind:this={element}
-    onwheel={onMouseWheel}
->
+    onwheel={onMouseWheel}>
     {#each Object.entries($musicAlbumList) as [_, musicList], index}
         <AlbumItem {musicList} {index} />
     {/each}

@@ -1,6 +1,4 @@
 use std::path::Path;
-use std::time::Duration;
-
 use base64::Engine;
 use regex::Regex;
 use symphonia::core::formats::FormatOptions;
@@ -21,6 +19,8 @@ pub struct MusicMetadata {
     pub album: Option<String>,
     pub album_artist: Option<String>,
     pub track_number: Option<String>,
+    pub genre: Option<String>,
+    pub bitrate: Option<u32>,
     pub image: Option<String>,
 }
 
@@ -35,6 +35,8 @@ impl MusicMetadata {
             album: None,
             album_artist: None,
             track_number: None,
+            genre: None,
+            bitrate: None,
             image: None,
         }
     }
@@ -71,7 +73,6 @@ impl MusicMetadata {
                 return metadata;
             }
         };
-
         let mut format = probed.format;
 
         while !format.metadata().is_latest() {
@@ -99,6 +100,7 @@ impl MusicMetadata {
                         StandardTagKey::Album => metadata.album = self.get_value(tag),
                         StandardTagKey::AlbumArtist => metadata.album_artist = self.get_value(tag),
                         StandardTagKey::TrackNumber => metadata.track_number = self.get_value(tag),
+                        StandardTagKey::Genre => metadata.genre = self.get_value(tag),
                         _ => {}
                     }
                 }
@@ -133,24 +135,27 @@ impl MusicMetadata {
             }
         };
 
-        let sample_rate = match track.codec_params.sample_rate {
-            Some(sample_rate) => sample_rate,
-            None => {
-                logger::error!("Unknown sample rate of music: {}", &path);
-                return metadata;
-            }
-        };
-
-        let total_frames = match track.codec_params.n_frames {
-            Some(total_frames) => total_frames,
+        let time_base = match track.codec_params.time_base {
+            Some(time_base) => Some(time_base),
             None => {
                 logger::error!("Unknown sample of frames of music: {}", &path);
-                return metadata;
+                None
             }
         };
 
-        metadata.duration =
-            Some(Duration::from_secs_f64(total_frames as f64 / sample_rate as f64).as_millis());
+        let n_frames = match track.codec_params.n_frames {
+            Some(n_frames) => Some(n_frames),
+            None => {
+                logger::error!("Unknown sample of frames of music: {}", &path);
+                None
+            }
+        };
+
+        if let Some(timebase) = time_base {
+            if let Some(nframes) = n_frames {
+                metadata.duration = Some((timebase.calc_time(nframes).seconds * 1000) as u128);
+            }
+        }
 
         metadata
     }

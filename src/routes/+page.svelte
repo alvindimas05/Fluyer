@@ -30,8 +30,7 @@ LoadingController.listen();
         <Playlist />
         <Menu />
         <PlayerBar />
-        <div class="h-full grid grid-rows-[min-content_min-content_auto]">
-            <FilterBar />
+        <div class="h-full grid grid-rows-[min-content_auto]">
             <AlbumList />
             <MusicList />
         </div>

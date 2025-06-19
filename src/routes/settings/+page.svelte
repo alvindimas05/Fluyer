@@ -10,7 +10,7 @@ import {settingIsLoading} from "$lib/stores/setting";
 let isLoading = $derived($settingIsLoading);
 </script>
 
-<div class="w-full h-full md:px-4 md:pb-4 md:pt-8">
+<div class="w-full h-full md:px-3 md:pb-4 md:pt-10">
     <div class="w-full h-full md:p-6 bg-gray-700 bg-opacity-30 rounded-xl shadow-xl">
         <div class="w-full h-full grid grid-rows-[min-content_auto_min-content] rounded-lg border border-white/20 p-4 bg-white/5"
              style={isMobile() && `padding-top: ${$mobileStatusBarHeight}px;
