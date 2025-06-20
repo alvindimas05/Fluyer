@@ -13,8 +13,6 @@ You can grab the latest version of the app below or check the [release page](htt
 - [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x64-setup.exe)
 - [MacOS Intel](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x64.dmg) ([Click here](#macos) before installing)
 - [MacOS Silicon](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_aarch64.dmg) ([Click here](#macos) before installing)
-- [Debian/Ubuntu](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_amd64.deb)
-- [Linux AppImage](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_amd64.AppImage)
 - [Android aarch64](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_aarch64.apk) (For most android mobile devices)
 - [Android armv7](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_armv7.apk) (For older android mobile devices)
 - [Android x86_64](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x86_64.apk) (Usually for chromebooks)
