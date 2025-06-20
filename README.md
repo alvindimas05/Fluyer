@@ -24,10 +24,18 @@ You can grab the latest version of the app below or check the [release page](htt
 
 > [!IMPORTANT]
 > This step is necessary. I didn't notorize the app because Apple Developer is simply too expensive for me. It will show "Apple could not verify 'Fluyer.app' is free of malware". It refers to the [lack of notarizaion](https://support.apple.com/en-us/102445), not to any anomalies detected.
-- After moving `Fluyer` to the `Applications` directory, run this command at the terminal.
-```
-/usr/bin/xattr -cr /Applications/Fluyer.app
-```
+
+On macOS 14 Sonoma or below:
+1. Right click `Fluyer.app`
+2. Click "Open"
+3. Click "Open" in the dialog box
+
+On macOS 15 Sequoia or above:
+1. Try to open the app, it will tell you it's blocked
+2. Go to `System Settings > Privacy & Security` and scroll to the bottom
+3. Click "Open Anyway" to allow Fluyer to open
+4. Click "Open Anyway" on the next dialog box and authenticate
+5. Open Fluyer again from Applications folder
 
 ### Universal
 - High resource usage due to Animated Background. For now, the animation is disabled but the background is still enabled.
