@@ -114,7 +114,7 @@ onMount(() => {
     md-mdpi:w-[50%] lg-mdpi:w-[40%] xl-mdpi:w-[30%]
     md-hdpi:w-[50%] lg-hdpi:w-[35%]
 	${isMouseInsideArea ? "" : "hidden"}`}
-    style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 44}px`}
+    style={`padding-top: ${(isMobile() ? $mobileStatusBarHeight : 0) + 44}px`}
     onmouseleave={onMouseLeave}
 >
     <div

@@ -49,7 +49,7 @@ onMount(() => {
 	MusicController.setMusicAlbumList(groupByAlbum());
 	unsubscribeMusicList = musicList.subscribe(() => {
 		MusicController.setMusicAlbumList(groupByAlbum());
-		setTimeout(() => ($swipeMinimumTop = element.clientHeight), 0);
+		setTimeout(() => ($swipeMinimumTop = element.clientHeight + 44), 0);
 	});
 });
 
