@@ -53,7 +53,7 @@ function gotoPlaylist() {
         >
             <div class="w-11 md:w-12 lg:w-16 aspect-square"></div>
             <div></div>
-            <div class="w-10 md:w-11 lg:w-12 aspect-square p-1">
+            <div class="w-11 md:w-12 lg:w-16 aspect-square p-1 lg:p-3">
                 <div class="w-full animate__animated animate__infinite animate__pulse">
                     <Icon type={IconType.Playing} />
                 </div>
@@ -70,14 +70,14 @@ function gotoPlaylist() {
             >
                 {#if !isPlaying}
                     <div
-                        class="w-full bg-black bg-opacity-40 rounded"
+                        class="w-full bg-black bg-opacity-40 rounded lg:p-1"
                     >
                         <Icon type={isPrevious ? IconType.Previous : IconType.Next} />
                     </div>
                 {/if}
             </button>
             <div></div>
-            <button class="w-11 md:w-12 lg:w-16 aspect-square"
+            <button class="w-11 md:w-12 lg:w-16 aspect-square lg:p-1"
                 onclick={removePlaylist}>
                 <Icon type={IconType.Remove}/>
             </button>
