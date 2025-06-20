@@ -99,7 +99,7 @@ setTimeout(
                 onclick={addMusicListAndPlay}
             ><Icon type={IconType.Play}/></button>
         </div>
-        <img class="rounded-lg w-full" src={albumImage} alt="Album" />
+        <img class="rounded-lg w-full shadow-lg" src={albumImage} alt="Album" />
     </div>
     <p class="font-medium sm:text-lg md:text-xl mt-2 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
         {music.album}

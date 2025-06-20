@@ -63,7 +63,7 @@ afterNavigate(() => {
         md-mdpi:auto-cols-[25%] lg-mdpi:auto-cols-[20%] xl-mdpi:auto-cols-[16.6667%]
         md-hdpi:auto-cols-[25%] lg-hdpi:auto-cols-[20%]
         grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden"
-    style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 44}px`}
+    style={`padding-top: ${(isMobile() ? $mobileStatusBarHeight : 0) + 44}px`}
     bind:this={element}
     onwheel={onMouseWheel}>
     {#each Object.entries($musicAlbumList) as [_, musicList], index}

@@ -79,7 +79,7 @@ onMount(checkAlbumImage);
 		class="grid grid-cols-[max-content_auto] py-2"
 	>
 		<img
-			class="w-12 md:w-14 relative rounded"
+			class="w-12 md:w-14 relative rounded shadow-lg"
 			src={albumImage}
 			alt="Album"
 		/>

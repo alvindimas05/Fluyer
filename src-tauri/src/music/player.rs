@@ -5,6 +5,7 @@ use tauri::Emitter;
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
+#[cfg(desktop)]
 use std::env::temp_dir;
 #[cfg(desktop)]
 use std::sync::OnceLock;
@@ -12,7 +13,9 @@ use std::thread;
 #[cfg(desktop)]
 use libmpv2::Mpv;
 
-use crate::{logger, GLOBAL_APP_HANDLE};
+#[cfg(desktop)]
+use crate::logger;
+use crate::GLOBAL_APP_HANDLE;
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]

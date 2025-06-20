@@ -147,7 +147,7 @@ function scrollToSelectedLyric() {
     style={`--mobile-status-bar-height: ${$mobileStatusBarHeight}px; --mobile-navigation-bar-height: ${$mobileNavigationBarHeight}px;`}
 >
     <div
-        class={`md:row-[1] md:col-[1] ${isMobile() ? "p-6" : "p-4"} md:p-0 flex items-end
+        class={`md:row-[1] md:col-[1] ${isMobile() ? "p-5" : "p-4"} md:p-0 flex items-end
         ${lyrics.length > 1 ? "justify-end" : "justify-center"}`}
     >
         <div
@@ -281,8 +281,7 @@ function scrollToSelectedLyric() {
             class={`w-full md:h-screen md:row-[1/span_2] md:col-[2] md:px-20 overflow-y-auto overflow-x-hidden
             scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
             md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]
-            animate__animated animate__faster animate__fadeInUp
-            ${!isMobile() && "px-4"}`}
+            animate__animated animate__faster animate__fadeInUp ${isMobile() ? "px-5" : "px-4"}`}
         >
             <div class="flex">
                 <div
