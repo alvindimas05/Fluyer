@@ -10,20 +10,23 @@ Music Player with Beautiful UI and Cross-Platform.
 > Keep in mind that this app is still in beta and has some issues. Scroll below to check.
 
 You can grab the latest version of the app below or check the [release page](https://github.com/alvindimas05/Fluyer/releases).
-- [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64-setup.exe)
-- [MacOS Intel](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x64.dmg)
-- [MacOS Silicon](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_aarch64.dmg) ([CLICK HERE](#macos) before installing)
-- [Debian/Ubuntu](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_amd64.deb)
-- [Linux AppImage](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_amd64.AppImage)
-- [Android aarch64](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_aarch64.apk) (For most android mobile devices)
-- [Android armv7](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_armv7.apk) (For older android mobile devices)
-- [Android x86_64](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_x86_64.apk) (Usually for chromebooks)
-- [Android i686](https://github.com/alvindimas05/Fluyer/releases/download/v0.0.1/Fluyer_0.0.1_i686.apk) (Usually for older chromebooks)
+- [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x64-setup.exe)
+- [MacOS Intel](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x64.dmg) ([Click here](#macos) before installing)
+- [MacOS Silicon](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_aarch64.dmg) ([Click here](#macos) before installing)
+- [Debian/Ubuntu](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_amd64.deb)
+- [Linux AppImage](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_amd64.AppImage)
+- [Android aarch64](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_aarch64.apk) (For most android mobile devices)
+- [Android armv7](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_armv7.apk) (For older android mobile devices)
+- [Android x86_64](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x86_64.apk) (Usually for chromebooks)
+- [Android i686](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_i686.apk) (Usually for older chromebooks)
 
 ## Issues
 
 ### MacOS
-- Due to MacOS Silicon security restriction, after moving `Fluyer` to the `Applications` directory, run this command at the terminal.
+
+> [!IMPORTANT]
+> This step is necessary, because the app has not been notarized by Apple because it's just simply too expensive for me. It will show "Apple could not verify 'Fluyer.app' is free of malware". It refers to the [lack of notarizaion](https://support.apple.com/en-us/102445), not to any anomalies detected.
+- After moving `Fluyer` to the `Applications` directory, run this command at the terminal.
 ```
 /usr/bin/xattr -cr /Applications/Fluyer
 ```

@@ -1171,7 +1171,7 @@ dependencies = [
 
 [[package]]
 name = "fluyer"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
  "dotenvy",
@@ -4796,7 +4796,7 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-fluyer"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
