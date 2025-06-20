@@ -16,6 +16,8 @@ import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import { sidebarShowingType } from "$lib/stores/sidebar";
 import { onMount } from "svelte";
 
+const SWIPE_RANGE = 125;
+
 let isMouseInsideArea = $state(false);
 let animationClass = $state("");
 
@@ -72,8 +74,8 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 	)
 		return;
 	if (
-		((type === SidebarType.Right && e.detail.deltaX < -100) ||
-			(type === SidebarType.Left && e.detail.deltaX > 100)) &&
+		((type === SidebarType.Right && e.detail.deltaX < -SWIPE_RANGE) ||
+			(type === SidebarType.Left && e.detail.deltaX > SWIPE_RANGE)) &&
 		$sidebarShowingType === null &&
 		!isMouseInsideArea
 	) {
@@ -84,9 +86,9 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 				: "animate__fadeInLeft";
 		$sidebarShowingType = type;
 	} else if (
-		((type === SidebarType.Right && e.detail.deltaX > 100) ||
+		((type === SidebarType.Right && e.detail.deltaX > SWIPE_RANGE) ||
 			(type === SidebarType.Left &&
-				e.detail.deltaX < -100 &&
+				e.detail.deltaX < -SWIPE_RANGE &&
 				$sidebarShowingType !== null)) &&
 		isMouseInsideArea
 	) {

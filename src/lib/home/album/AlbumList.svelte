@@ -3,15 +3,17 @@ import type { MusicData } from "../music/types";
 import { musicAlbumList, musicList } from "$lib/stores/music";
 import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
-import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
 import { afterNavigate } from "$app/navigation";
 import { isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
+import {swipeMinimumTop} from "$lib/stores";
 
 let element: HTMLDivElement;
 let unsubscribeMusicList: Unsubscriber;
+
+let elementHeight = $state(0);
 
 function groupByAlbum(): MusicData[][] {
 	const albumsMap = MusicController.musicList()!.reduce(
@@ -47,15 +49,14 @@ function onMouseWheel(
 
 onMount(() => {
 	MusicController.setMusicAlbumList(groupByAlbum());
-	unsubscribeMusicList = musicList.subscribe(() => {
-		MusicController.setMusicAlbumList(groupByAlbum());
-		setTimeout(() => ($swipeMinimumTop = element.clientHeight + 44), 0);
-	});
+	unsubscribeMusicList = musicList.subscribe(() => MusicController.setMusicAlbumList(groupByAlbum()));
 });
 
 afterNavigate(() => {
 	unsubscribeMusicList();
 });
+
+$effect(() => void($swipeMinimumTop = elementHeight));
 </script>
 
 <div
@@ -64,7 +65,7 @@ afterNavigate(() => {
         md-hdpi:auto-cols-[25%] lg-hdpi:auto-cols-[20%]
         grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden"
     style={`padding-top: ${(isMobile() ? $mobileStatusBarHeight : 0) + 44}px`}
-    bind:this={element}
+    bind:offsetHeight={elementHeight}
     onwheel={onMouseWheel}>
     {#each Object.entries($musicAlbumList) as [_, musicList], index}
         <AlbumItem {musicList} {index} />
