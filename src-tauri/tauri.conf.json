@@ -28,7 +28,8 @@
 	},
 	"bundle": {
 		"macOS": {
-			"signingIdentity": "-"
+			"signingIdentity": "-",
+			"hardenedRuntime": false
 		},
 		"active": true,
 		"targets": ["nsis", "dmg", "deb", "appimage"],

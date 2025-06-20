@@ -50,7 +50,7 @@ async function main() {
 		path.resolve(destPath, "libmpv.dylib"),
 	);
 
-	await forceRemoveSignatureLibs();
+	// await forceRemoveSignatureLibs();
 	// await forceSignLibs();
 	await updateConfWithFileList();
 }
