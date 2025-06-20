@@ -12,7 +12,7 @@ import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
-import { isMobile } from "$lib/platform";
+import {isMacos, isMobile} from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
 import {IconType} from "$lib/icon/types";
@@ -141,13 +141,13 @@ function scrollToSelectedLyric() {
 
 <div
     id="root-play"
-    class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0
-    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]  " :
-    "md:grid-cols-[45%] justify-center root-nolyrics"} md:pt-0`}
+    class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:pt-0
+    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center root-nolyrics"}
+    ${isMacos() && "pt-6"}`}
     style={`--mobile-status-bar-height: ${$mobileStatusBarHeight}px; --mobile-navigation-bar-height: ${$mobileNavigationBarHeight}px;`}
 >
     <div
-        class={`md:row-[1] md:col-[1] p-6 md:p-0 flex items-end
+        class={`md:row-[1] md:col-[1] ${isMobile() ? "p-6" : "p-4"} md:p-0 flex items-end
         ${lyrics.length > 1 ? "justify-end" : "justify-center"}`}
     >
         <div
@@ -161,7 +161,7 @@ function scrollToSelectedLyric() {
         </div>
     </div>
     <div
-        class={`md:row-[2] md:col-[1] order-last md:order-2 px-5 pb-5 pt-2 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
+        class={`md:row-[2] md:col-[1] order-last md:order-2 ${isMobile() ? "px-5" : "px-4"} pb-5 pt-2 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
     >
         <div class="w-full md:w-[80%] xl:w-[65%]">
             <div class="w-full grid grid-cols-[auto,1fr,auto] md:mt-4">
@@ -278,10 +278,11 @@ function scrollToSelectedLyric() {
     </div>
     {#if lyrics.length > 0}
         <div
-            class="w-full md:h-screen md:row-[1/span_2] md:col-[2] px-6 md:px-20 overflow-y-auto overflow-x-hidden
+            class={`w-full md:h-screen md:row-[1/span_2] md:col-[2] md:px-20 overflow-y-auto overflow-x-hidden
             scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
             md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]
-            animate__animated animate__faster animate__fadeInUp"
+            animate__animated animate__faster animate__fadeInUp
+            ${!isMobile() && "px-4"}`}
         >
             <div class="flex">
                 <div

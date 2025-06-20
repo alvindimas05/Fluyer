@@ -11,7 +11,8 @@ import { filterSearch } from "$lib/stores/filter";
     md-mdpi:w-[calc(25%-24px)] 
     lg-mdpi:w-[calc(20%-24px)] 
     xl-mdpi:w-[calc(16.6667%-24px)] 
-    md-hdpi:w-[calc(20%-24px)]`}>
+    md-hdpi:w-[calc(25%-24px)]
+    lg-hdpi:w-[calc(20%-24px)]`}>
     <div class="bg-white/20 backdrop-blur-md text-white rounded-md shadow-md animate__animated animate__fadeIn animate__slow">
         <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-3 py-1">
             <input

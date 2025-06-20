@@ -115,7 +115,7 @@
     class={`fixed ${type === SidebarType.Right ? "right-0" : "left-0"} top-0 z-10 h-[calc(100%-8rem)]
     w-full px-3 sm:w-[70%]
     md-mdpi:w-[50%] lg-mdpi:w-[40%] xl-mdpi:w-[30%]
-    md-hdpi:w-[50%] lg-hdpi:w-[35%] xl-hdpi:w-[25%]
+    md-hdpi:w-[50%] lg-hdpi:w-[35%]
 	${isMouseInsideArea ? "" : "hidden"}`}
     style={`padding-top: ${isMobile() ? $mobileStatusBarHeight : 44}px`}
     onmouseleave={onMouseLeave}
