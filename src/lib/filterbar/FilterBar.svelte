@@ -1,15 +1,20 @@
 <script lang="ts">
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
-import {filterSearch} from "$lib/stores/filter";
+import { IconType } from "$lib/icon/types";
+import { filterSearch } from "$lib/stores/filter";
 </script>
 
-<div class="w-full pt-2 pb-3 pe-3 text-sm grid justify-end md:auto-cols-[50%] lg:auto-cols-[20%]
-    animate__animated animate__slow animate__fadeInDown">
-    <div class="bg-white/10 text-white rounded-md ms-5">
-        <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-2 py-1">
+<div class="h-6 ms-3 absolute top-0 left-0 mt-2
+    w-[calc(50%-24px)] 
+    sm:w-[calc(33.3334%-24px)] 
+    md-mdpi:w-[calc(25%-24px)] 
+    lg-mdpi:w-[calc(20%-24px)] 
+    xl-mdpi:w-[calc(16.6667%-24px)] 
+    md-hdpi:w-[calc(20%-24px)]">
+    <div class="bg-white/20 backdrop-blur-md text-white rounded-md shadow-md animate__animated animate__fadeIn animate__slow">
+        <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-3 py-1">
             <input
-                class="w-full bg-transparent placeholder:text-white/80 outline-none"
+                class="w-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"
                 placeholder="Search..."
                 bind:value={$filterSearch}
             />

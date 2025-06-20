@@ -11,7 +11,7 @@ import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/t
 import {prominent} from "color.js";
 
 const CANVAS_BLOCK_SIZE = 150;
-const CANVAS_TRANSITION_SPEED = 0.03;
+const CANVAS_TRANSITION_SPEED = 0.01;
 const CANVAS_BLUR_RADIUS = 200;
 
 let previousBackground: string | null = null;

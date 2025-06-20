@@ -4,6 +4,7 @@ import {
 	loadingMusicList,
 	loadingShow,
 } from "$lib/stores/loading";
+import MusicController from "./MusicController";
 
 const LoadingController = {
 	loadingMusicList: () => get(loadingMusicList),
@@ -15,14 +16,20 @@ const LoadingController = {
 	setLoadingShow: (value: boolean) => loadingShow.set(value),
 
 	listen: () => {
-		loadingMusicList.subscribe(LoadingController.onAllLoadingChange);
-	},
-	onAllLoadingChange: () => {
-		if (
-			LoadingController.loadingMusicList() &&
-			LoadingController.loadingBackground()
-		)
-			LoadingController.setLoadingShow(true);
+		const unlistenLoadingBackground = loadingBackground.subscribe((value) => {
+			if (!value) return;
+			MusicController.getMusics();
+			unlistenLoadingBackground();
+		});
+		const unlistenLoadingMusicList = loadingMusicList.subscribe(() => {
+			if (
+				LoadingController.loadingMusicList() &&
+				LoadingController.loadingBackground()
+			) {
+				LoadingController.setLoadingShow(true);
+				unlistenLoadingMusicList();
+			}
+		});
 	},
 };
 

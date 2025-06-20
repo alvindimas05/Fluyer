@@ -1,11 +1,9 @@
 <script lang="ts">
-    import { isDesktop, isLinux, isWindows } from "$lib/platform";
+    import { isLinux, isWindows } from "$lib/platform";
     import { getCurrentWindow } from "@tauri-apps/api/window";
     import { invoke } from "@tauri-apps/api/core";
     import { PageRoutes } from "$lib/pages";
     import { afterNavigate } from "$app/navigation";
-    import FilterBar from "$lib/filterbar/FilterBar.svelte";
-    import {page} from "$app/state";
 
     const LINUX_ICONS = {
         close: "/icons/linux/window-close-symbolic.svg",
@@ -52,63 +50,58 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="fixed top-0 left-0 w-full h-12 z-[99999] grid grid-cols-[1fr_auto]">
-    <div class="absolute top-0 left-0 h-full w-full" onmousedown={onMouseDown}></div>
-    {#if page.url.pathname === PageRoutes.HOME}
-        <FilterBar />
-    {/if}
-    {#if (isWindows() || isLinux()) && !isPlayPage}
-        <div class="pe-3">
-            <button
-                class={`tb-button ${isWindows() && "win-button"} ${isLinux() && "linux-button"}`}
-                onclick={() => window.minimize()}
-            >
-                {#if isWindows()}
-                    &#59681;
+<div class="absolute top-0 left-0 h-full w-full z-[-10]" onmousedown={onMouseDown}></div>
+{#if (isWindows() || isLinux()) && !isPlayPage}
+    <div class="absolute top-0 right-0 pe-3 mt-2">
+        <button
+            class={`tb-button ${isWindows() && "win-button"} ${isLinux() && "linux-button"}`}
+            onclick={() => window.minimize()}
+        >
+            {#if isWindows()}
+                &#59681;
+            {/if}
+            {#if isLinux()}
+                <!-- svelte-ignore a11y_missing_attribute -->
+                <img src={LINUX_ICONS.minimize} />
+            {/if}
+        </button>
+        <button
+            class={`tb-button ${isWindows() && "win-button"} ${isLinux() && "linux-button"}`}
+            onmouseenter={handleMaximizeMouseEnter}
+            onmouseleave={handleMaximizeMouseLeave}
+            onclick={() => window.toggleMaximize()}
+        >
+            {#if isWindows()}
+                {#if isMaximized}
+                    &#59683;
+                {:else}
+                    &#59682;
                 {/if}
-                {#if isLinux()}
+            {/if}
+            {#if isLinux()}
+                {#if isMaximized}
                     <!-- svelte-ignore a11y_missing_attribute -->
-                    <img src={LINUX_ICONS.minimize} />
-                {/if}
-            </button>
-            <button
-                class={`tb-button ${isWindows() && "win-button"} ${isLinux() && "linux-button"}`}
-                onmouseenter={handleMaximizeMouseEnter}
-                onmouseleave={handleMaximizeMouseLeave}
-                onclick={() => window.toggleMaximize()}
-            >
-                {#if isWindows()}
-                    {#if isMaximized}
-                        &#59683;
-                    {:else}
-                        &#59682;
-                    {/if}
-                {/if}
-                {#if isLinux()}
-                    {#if isMaximized}
-                        <!-- svelte-ignore a11y_missing_attribute -->
-                        <img src={LINUX_ICONS.restore} />
-                    {:else}
-                        <!-- svelte-ignore a11y_missing_attribute -->
-                        <img src={LINUX_ICONS.maximize} />
-                    {/if}
-                {/if}
-            </button>
-            <button
-                class={`tb-button ${isWindows() && "win-button"} ${isLinux() && "linux-button"}`}
-                onclick={() => window.close()}
-            >
-                {#if isWindows()}
-                    &#59579;
-                {/if}
-                {#if isLinux()}
+                    <img src={LINUX_ICONS.restore} />
+                {:else}
                     <!-- svelte-ignore a11y_missing_attribute -->
-                    <img src={LINUX_ICONS.close} />
+                    <img src={LINUX_ICONS.maximize} />
                 {/if}
-            </button>
-        </div>
-    {/if}
-</div>
+            {/if}
+        </button>
+        <button
+            class={`tb-button ${isWindows() && "win-button"} ${isLinux() && "linux-button"}`}
+            onclick={() => window.close()}
+        >
+            {#if isWindows()}
+                &#59579;
+            {/if}
+            {#if isLinux()}
+                <!-- svelte-ignore a11y_missing_attribute -->
+                <img src={LINUX_ICONS.close} />
+            {/if}
+        </button>
+    </div>
+{/if}
 
 <style lang="scss">
     .tb-button {

@@ -313,8 +313,8 @@ function scrollToSelectedLyric() {
 <style lang="scss">
     @media (min-width: 40rem) {
         #btn-back, #volume-bar {
-            animation-duration: .5s;
-            animation-delay: 2s;
+            animation-duration: 1s;
+            animation-delay: 3s;
             animation-name: fadeOut;
             animation-fill-mode: forwards;
             &:hover {
