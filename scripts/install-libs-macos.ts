@@ -29,6 +29,12 @@ async function forceSignLibs(){
 	console.log(`Successfully force signing dylibs.`);
 }
 
+async function forceRemoveSignatureLibs(){
+	await spawn("bash", ["-c", `find ${destPath} -name "*.dylib" -exec codesign --remove-signature - {} \\;`],
+		{ stdio: "inherit" });
+	console.log(`Successfully force remove signature dylibs.`);
+}
+
 async function main() {
 	// Assume it only contains .gitignore
 	if ((await fs.readdir(destPath)).length > 1) return;
@@ -44,6 +50,7 @@ async function main() {
 		path.resolve(destPath, "libmpv.dylib"),
 	);
 
+	await forceRemoveSignatureLibs();
 	// await forceSignLibs();
 	await updateConfWithFileList();
 }
