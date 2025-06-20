@@ -44,7 +44,7 @@ async function main() {
 		path.resolve(destPath, "libmpv.dylib"),
 	);
 
-	await forceSignLibs();
+	// await forceSignLibs();
 	await updateConfWithFileList();
 }
 
