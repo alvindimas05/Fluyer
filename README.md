@@ -25,7 +25,7 @@ You can grab the latest version of the app below or check the [release page](htt
 ### MacOS
 
 > [!IMPORTANT]
-> This step is necessary, because the app has not been notarized by Apple because it's just simply too expensive for me. It will show "Apple could not verify 'Fluyer.app' is free of malware". It refers to the [lack of notarizaion](https://support.apple.com/en-us/102445), not to any anomalies detected.
+> This step is necessary. I didn't notorize the app because Apple Developer is simply too expensive for me. It will show "Apple could not verify 'Fluyer.app' is free of malware". It refers to the [lack of notarizaion](https://support.apple.com/en-us/102445), not to any anomalies detected.
 - After moving `Fluyer` to the `Applications` directory, run this command at the terminal.
 ```
 /usr/bin/xattr -cr /Applications/Fluyer
