@@ -49,7 +49,7 @@ You can grab the latest version of the app below or check the [release page](htt
 - [x] Playlist
 
 ### Advanced Functionality
-- [ ] Search
+- [x] Search
 - [x] Lyrics
 - [x] Animated Background
 - [x] Cover Art Caching
