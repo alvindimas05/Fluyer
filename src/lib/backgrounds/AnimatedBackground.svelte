@@ -11,7 +11,7 @@ import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/t
 import {prominent} from "color.js";
 
 const CANVAS_BLOCK_SIZE = 150;
-const CANVAS_TRANSITION_SPEED = 0.01;
+const CANVAS_TRANSITION_DURATION = 750;
 const CANVAS_BLUR_RADIUS = 200;
 
 let previousBackground: string | null = null;
@@ -148,34 +148,37 @@ async function createCanvas(options = {
 }
 
 async function initializeCanvas(reinitialize = false) {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-	currentCanvas = await createCanvas({ usePreviousColors: reinitialize });
-	
-	if(reinitialize){
+    currentCanvas = await createCanvas({ usePreviousColors: reinitialize });
+
+    if (reinitialize) {
         canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-  		canvasContext.drawImage(currentCanvas!, 0, 0);
-	} else {
-	    canvasContext = canvas.getContext("2d")!;
-     
-    	let alpha = 0;
-    	function fadeIn() {
-    		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-    		canvasContext.globalAlpha = alpha;
-    		canvasContext.drawImage(currentCanvas!, 0, 0);
-    		canvasContext.globalAlpha = 1.0;
-      
-    		if (alpha < 1) {
-    			alpha += CANVAS_TRANSITION_SPEED;
-    			requestAnimationFrame(fadeIn);
-    		} else {
-    			afterInitializeCanvas();
-    		}
-    	}
-    
-    	fadeIn();
-	}
+        canvasContext.drawImage(currentCanvas!, 0, 0);
+    } else {
+        canvasContext = canvas.getContext("2d")!;
+
+        const startTime = performance.now();
+
+        function fadeIn(currentTime: number) {
+            const elapsed = currentTime - startTime;
+            const alpha = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
+
+            canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+            canvasContext.globalAlpha = alpha;
+            canvasContext.drawImage(currentCanvas!, 0, 0);
+            canvasContext.globalAlpha = 1.0;
+
+            if (alpha < 1) {
+                requestAnimationFrame(fadeIn);
+            } else {
+                afterInitializeCanvas();
+            }
+        }
+
+        requestAnimationFrame(fadeIn);
+    }
 }
 
 async function afterInitializeCanvas() {
@@ -183,55 +186,61 @@ async function afterInitializeCanvas() {
 }
 
 async function transitionToNewCanvas(force = false) {
-	const _newCanvas = await createCanvas({ force });
+    const _newCanvas = await createCanvas({ force });
 
-	if(!_newCanvas) return;
-	
-	newCanvas = _newCanvas;
+    if (!_newCanvas) return;
 
-	const width = canvas.width;
-	const height = canvas.height;
+    newCanvas = _newCanvas;
 
-	const buffer = document.createElement("canvas");
-	buffer.width = width;
-	buffer.height = height;
-	const bufferContext = buffer.getContext("2d")!;
+    const width = canvas.width;
+    const height = canvas.height;
 
-	let progress = 0;
+    const buffer = document.createElement("canvas");
+    buffer.width = width;
+    buffer.height = height;
+    const bufferContext = buffer.getContext("2d")!;
 
-	function animate() {
-		bufferContext.clearRect(0, 0, width, height);
+    const startTime = performance.now();
 
-		bufferContext.globalAlpha = 1;
-		bufferContext.drawImage(currentCanvas!, 0, 0, width, height);
+    function animate(currentTime: number) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
 
-		bufferContext.globalAlpha = progress;
-		bufferContext.drawImage(newCanvas!, 0, 0, width, height);
+        bufferContext.clearRect(0, 0, width, height);
 
-		bufferContext.globalAlpha = 1;
-		canvasContext.clearRect(0, 0, width, height);
-		canvasContext.drawImage(buffer, 0, 0);
+        bufferContext.globalAlpha = 1;
+        bufferContext.drawImage(currentCanvas!, 0, 0, width, height);
 
-		if (progress < 1) {
-			progress += CANVAS_TRANSITION_SPEED;
-			requestAnimationFrame(animate);
-		} else {
-			currentCanvas = newCanvas;
-			newCanvas = null;
-		}
-	}
+        bufferContext.globalAlpha = progress;
+        bufferContext.drawImage(newCanvas!, 0, 0, width, height);
 
-	animate();
+        bufferContext.globalAlpha = 1;
+        canvasContext.clearRect(0, 0, width, height);
+        canvasContext.drawImage(buffer, 0, 0);
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            currentCanvas = newCanvas;
+            newCanvas = null;
+        }
+    }
+
+    requestAnimationFrame(animate);
 }
 
 function onWindowResize() {
 	initializeCanvas(true);
 }
 
+let isMounted = false;
 onMount(() => {
 	initializeCanvas();
     musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
-    settingTriggerAnimatedBackground.subscribe(() => setTimeout(() => transitionToNewCanvas(true), 0));
+    settingTriggerAnimatedBackground.subscribe(() => {
+        if(isMounted) setTimeout(() => transitionToNewCanvas(true), 0);
+        else isMounted = true;
+    });
 });
 </script>
 

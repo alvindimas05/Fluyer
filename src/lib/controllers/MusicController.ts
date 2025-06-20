@@ -42,7 +42,6 @@ const MusicController = {
 	setMusicList: (value: MusicData[] | null) => musicList.set(value),
 	getMusics: async (force = false) => {
 		if (MusicController.musicList()?.length && !force) return;
-		console.log("Retreiving musics");
 		const musics = await invoke<MusicData[] | null>(
 			CommandRoutes.MUSIC_GET_ALL,
 		);
