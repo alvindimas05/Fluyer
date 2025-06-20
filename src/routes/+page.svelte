@@ -6,7 +6,7 @@ import Menu from "$lib/home/menu/Menu.svelte";
 import AlbumList from "$lib/home/album/AlbumList.svelte";
 import MusicList from "$lib/home/music/MusicList.svelte";
 import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
-    import { loadingShow } from "$lib/stores/loading";
+import { loadingShow } from "$lib/stores/loading";
 </script>
 {#if $loadingShow}
     {#if $musicList === null}

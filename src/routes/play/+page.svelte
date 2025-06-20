@@ -12,10 +12,10 @@ import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
-import {isMacos, isMobile} from "$lib/platform";
+import { isMacos, isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
+import { IconType } from "$lib/icon/types";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());

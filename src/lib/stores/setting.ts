@@ -1,6 +1,8 @@
-import {writable} from "svelte/store";
-import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
+import { writable } from "svelte/store";
+import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 
 export const settingIsLoading = writable(false);
 export const settingTriggerAnimatedBackground = writable("");
-export const settingAnimatedBackgroundType = writable(SettingAnimatedBackgroundType.Pallete);
+export const settingAnimatedBackgroundType = writable(
+	SettingAnimatedBackgroundType.Pallete,
+);

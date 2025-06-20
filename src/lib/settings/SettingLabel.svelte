@@ -1,7 +1,7 @@
 <script lang="ts">
 interface Props {
-    title: string,
-    description: string,
+	title: string;
+	description: string;
 }
 
 const { title, description } = $props<Props>();

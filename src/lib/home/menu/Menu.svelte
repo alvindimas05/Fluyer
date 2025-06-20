@@ -1,10 +1,10 @@
 <script lang="ts">
 import Sidebar from "$lib/home/sidebar/Sidebar.svelte";
-import {SidebarType} from "$lib/home/sidebar/types.js";
+import { SidebarType } from "$lib/home/sidebar/types.js";
 import PageController from "$lib/controllers/PageController";
-import {PageRoutes} from "$lib/pages";
+import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
+import { IconType } from "$lib/icon/types";
 </script>
 
 <Sidebar type={SidebarType.Left}>

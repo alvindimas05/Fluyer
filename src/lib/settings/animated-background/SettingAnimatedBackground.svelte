@@ -1,18 +1,23 @@
 <script lang="ts">
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
-import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types.js";
-import {settingAnimatedBackgroundType, settingTriggerAnimatedBackground} from "$lib/stores/setting";
+import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types.js";
+import {
+	settingAnimatedBackgroundType,
+	settingTriggerAnimatedBackground,
+} from "$lib/stores/setting";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 
-async function onMethodChange(e: InputEvent & {
-    currentTarget: EventTarget & HTMLInputElement;
-}){
-    const value = <SettingAnimatedBackgroundType> e.currentTarget.value;
-    if(value === $settingAnimatedBackgroundType) return;
-    await PersistentStoreController.animatedBackgroundType.set(value);
-    await PersistentStoreController.animatedBackgroundType.setStore();
-    $settingTriggerAnimatedBackground = (new Date()).toString();
+async function onMethodChange(
+	e: InputEvent & {
+		currentTarget: EventTarget & HTMLInputElement;
+	},
+) {
+	const value = <SettingAnimatedBackgroundType>e.currentTarget.value;
+	if (value === $settingAnimatedBackgroundType) return;
+	await PersistentStoreController.animatedBackgroundType.set(value);
+	await PersistentStoreController.animatedBackgroundType.setStore();
+	$settingTriggerAnimatedBackground = new Date().toString();
 }
 </script>
 

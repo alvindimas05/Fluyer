@@ -2,7 +2,7 @@
 import Sidebar from "$lib/home/sidebar/Sidebar.svelte";
 import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
-import {SidebarType} from "$lib/home/sidebar/types";
+import { SidebarType } from "$lib/home/sidebar/types";
 </script>
 
 <Sidebar type={SidebarType.Right}>

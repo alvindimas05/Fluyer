@@ -1,7 +1,7 @@
 export interface AlbumData {
-	name: string,
-	artist: string,
-	musicList: MusicData[],
+	name: string;
+	artist: string;
+	musicList: MusicData[];
 }
 
 export interface MusicData {

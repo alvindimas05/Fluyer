@@ -1,4 +1,4 @@
 export enum SidebarType {
-    Left,
-    Right
+	Left,
+	Right,
 }

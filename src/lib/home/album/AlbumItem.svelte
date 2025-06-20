@@ -5,8 +5,8 @@ import MusicController from "$lib/controllers/MusicController";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
-import {filterSearch} from "$lib/stores/filter";
+import { IconType } from "$lib/icon/types";
+import { filterSearch } from "$lib/stores/filter";
 
 interface Props {
 	musicList: MusicData[];
@@ -17,9 +17,11 @@ let { musicList, index }: Props = $props();
 let music = MusicController.sortMusicList(musicList)[0];
 
 let isValidSearch = $derived.by(() => {
-    const search = $filterSearch.toLowerCase();
-    return music.album?.toLowerCase().includes(search) ||
-        music.albumArtist?.toLowerCase().includes(search);
+	const search = $filterSearch.toLowerCase();
+	return (
+		music.album?.toLowerCase().includes(search) ||
+		music.albumArtist?.toLowerCase().includes(search)
+	);
 });
 
 const animationDelay = 200;

@@ -1,52 +1,52 @@
 <script lang="ts">
-    import { isLinux, isWindows } from "$lib/platform";
-    import { getCurrentWindow } from "@tauri-apps/api/window";
-    import { invoke } from "@tauri-apps/api/core";
-    import { PageRoutes } from "$lib/pages";
-    import { afterNavigate } from "$app/navigation";
+import { isLinux, isWindows } from "$lib/platform";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
+import { PageRoutes } from "$lib/pages";
+import { afterNavigate } from "$app/navigation";
 
-    const LINUX_ICONS = {
-        close: "/icons/linux/window-close-symbolic.svg",
-        maximize: "/icons/linux/window-maximize-symbolic.svg",
-        minimize: "/icons/linux/window-minimize-symbolic.svg",
-        restore: "/icons/linux/window-restore-symbolic.svg",
-    };
+const LINUX_ICONS = {
+	close: "/icons/linux/window-close-symbolic.svg",
+	maximize: "/icons/linux/window-maximize-symbolic.svg",
+	minimize: "/icons/linux/window-minimize-symbolic.svg",
+	restore: "/icons/linux/window-restore-symbolic.svg",
+};
 
-    let isMaximized = $state(true);
-    let isPlayPage = $state(false);
-    const window = getCurrentWindow();
-    function onMouseDown(
-        e: MouseEvent & {
-            currentTarget: EventTarget & HTMLDivElement;
-        },
-    ) {
-        if (e.buttons === 1) {
-            e.detail === 2 ? window.toggleMaximize() : window.startDragging();
-        }
-    }
+let isMaximized = $state(true);
+let isPlayPage = $state(false);
+const window = getCurrentWindow();
+function onMouseDown(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	if (e.buttons === 1) {
+		e.detail === 2 ? window.toggleMaximize() : window.startDragging();
+	}
+}
 
-    let snapOverlayTimer: ReturnType<typeof setTimeout> | null = null;
-    function showSnapOverlay() {
-        window.setFocus().then(() => invoke("decorum_show_snap_overlay"));
-    }
+let snapOverlayTimer: ReturnType<typeof setTimeout> | null = null;
+function showSnapOverlay() {
+	window.setFocus().then(() => invoke("decorum_show_snap_overlay"));
+}
 
-    function handleMaximizeMouseEnter() {
-        if (!isWindows()) return;
-        snapOverlayTimer = setTimeout(showSnapOverlay, 620);
-    }
+function handleMaximizeMouseEnter() {
+	if (!isWindows()) return;
+	snapOverlayTimer = setTimeout(showSnapOverlay, 620);
+}
 
-    function handleMaximizeMouseLeave() {
-        if (!isWindows()) return;
-        if (snapOverlayTimer != null) clearTimeout(snapOverlayTimer);
-    }
+function handleMaximizeMouseLeave() {
+	if (!isWindows()) return;
+	if (snapOverlayTimer != null) clearTimeout(snapOverlayTimer);
+}
 
-    window.onResized(async (_) => {
-        isMaximized = await window.isMaximized();
-    });
+window.onResized(async (_) => {
+	isMaximized = await window.isMaximized();
+});
 
-    afterNavigate((navigation) => {
-        isPlayPage = navigation.to?.route.id === PageRoutes.PLAY;
-    });
+afterNavigate((navigation) => {
+	isPlayPage = navigation.to?.route.id === PageRoutes.PLAY;
+});
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

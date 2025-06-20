@@ -1,12 +1,15 @@
 <script lang="ts">
 import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
+import { IconType } from "$lib/icon/types";
 import SettingMusicPaths from "$lib/settings/music-paths/SettingMusicPaths.svelte";
-import {isDesktop, isMobile} from "$lib/platform";
+import { isDesktop, isMobile } from "$lib/platform";
 import SettingAnimatedBackground from "$lib/settings/animated-background/SettingAnimatedBackground.svelte";
-import {mobileNavigationBarHeight, mobileStatusBarHeight} from "$lib/stores/mobile";
-import {settingIsLoading} from "$lib/stores/setting";
+import {
+	mobileNavigationBarHeight,
+	mobileStatusBarHeight,
+} from "$lib/stores/mobile";
+import { settingIsLoading } from "$lib/stores/setting";
 let isLoading = $derived($settingIsLoading);
 </script>
 

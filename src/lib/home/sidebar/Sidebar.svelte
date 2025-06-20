@@ -1,111 +1,108 @@
 <script lang="ts">
-    import { SidebarType } from "$lib/home/sidebar/types";
+import { SidebarType } from "$lib/home/sidebar/types";
 
-    interface Props {
-        children?: import("svelte").Snippet;
-        type: SidebarType;
-    }
+interface Props {
+	children?: import("svelte").Snippet;
+	type: SidebarType;
+}
 
-    let { children, type }: Props = $props();
+let { children, type }: Props = $props();
 
-    import { isMobile } from "$lib/platform";
-    import { swipeable } from "@react2svelte/swipeable";
-    import type { SwipeEventData } from "@react2svelte/swipeable";
-    import { swipeMinimumTop } from "$lib/stores";
-    import { mobileStatusBarHeight } from "$lib/stores/mobile";
-    import { sidebarShowingType } from "$lib/stores/sidebar";
-    import { onMount } from "svelte";
+import { isMobile } from "$lib/platform";
+import { swipeable } from "@react2svelte/swipeable";
+import type { SwipeEventData } from "@react2svelte/swipeable";
+import { swipeMinimumTop } from "$lib/stores";
+import { mobileStatusBarHeight } from "$lib/stores/mobile";
+import { sidebarShowingType } from "$lib/stores/sidebar";
+import { onMount } from "svelte";
 
-    let isMouseInsideArea = $state(false);
-    let animationClass = $state("");
+let isMouseInsideArea = $state(false);
+let animationClass = $state("");
 
-    function onMouseMove(
-        e: MouseEvent & {
-            currentTarget: EventTarget & Document;
-        },
-    ) {
-        if (isMobile()) return;
-        if (
-            ((type === SidebarType.Right &&
-                e.clientX > window.innerWidth - 20) ||
-                (type === SidebarType.Left && e.clientX < 20)) &&
-            e.clientY <= window.innerHeight - 8 * 16 &&
-            !isMouseInsideArea
-        ) {
-            isMouseInsideArea = true;
-            animationClass =
-                type === SidebarType.Right
-                    ? "animate__fadeInRight"
-                    : "animate__fadeInLeft";
-        }
-    }
+function onMouseMove(
+	e: MouseEvent & {
+		currentTarget: EventTarget & Document;
+	},
+) {
+	if (isMobile()) return;
+	if (
+		((type === SidebarType.Right && e.clientX > window.innerWidth - 20) ||
+			(type === SidebarType.Left && e.clientX < 20)) &&
+		e.clientY <= window.innerHeight - 8 * 16 &&
+		!isMouseInsideArea
+	) {
+		isMouseInsideArea = true;
+		animationClass =
+			type === SidebarType.Right
+				? "animate__fadeInRight"
+				: "animate__fadeInLeft";
+	}
+}
 
-    function onMouseLeave(
-        e: MouseEvent & {
-            currentTarget: EventTarget & HTMLDivElement;
-        },
-    ) {
-        if (
-            !isMouseInsideArea ||
-            (type === SidebarType.Right && e.clientX >= window.innerWidth) ||
-            (type === SidebarType.Left && e.clientX <= 0)
-        )
-            return;
-        animationClass =
-            type === SidebarType.Right
-                ? "animate__fadeOutRight"
-                : "animate__fadeOutLeft";
-    }
+function onMouseLeave(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	if (
+		!isMouseInsideArea ||
+		(type === SidebarType.Right && e.clientX >= window.innerWidth) ||
+		(type === SidebarType.Left && e.clientX <= 0)
+	)
+		return;
+	animationClass =
+		type === SidebarType.Right
+			? "animate__fadeOutRight"
+			: "animate__fadeOutLeft";
+}
 
-    function onAnimationEnd() {
-        if (
-            (type === SidebarType.Right &&
-                animationClass != "animate__fadeOutRight") ||
-            (type === SidebarType.Left &&
-                animationClass != "animate__fadeOutLeft")
-        )
-            return;
-        isMouseInsideArea = false;
-    }
+function onAnimationEnd() {
+	if (
+		(type === SidebarType.Right && animationClass != "animate__fadeOutRight") ||
+		(type === SidebarType.Left && animationClass != "animate__fadeOutLeft")
+	)
+		return;
+	isMouseInsideArea = false;
+}
 
-    function onSwipe(e: CustomEvent<SwipeEventData>) {
-        if (
-            !isMobile() ||
-            (e.detail.initial[1] < $swipeMinimumTop && !isMouseInsideArea)
-        )
-            return;
-        if (
-            ((type === SidebarType.Right && e.detail.deltaX < -100) ||
-                (type === SidebarType.Left && e.detail.deltaX > 100)) &&
-            $sidebarShowingType === null &&
-            !isMouseInsideArea
-        ) {
-            isMouseInsideArea = true;
-            animationClass =
-                type === SidebarType.Right
-                    ? "animate__fadeInRight"
-                    : "animate__fadeInLeft";
-            $sidebarShowingType = type;
-        } else if (
-            ((type === SidebarType.Right && e.detail.deltaX > 100) ||
-                (type === SidebarType.Left &&
-                    e.detail.deltaX < -100 &&
-                    $sidebarShowingType !== null)) &&
-            isMouseInsideArea
-        ) {
-            setTimeout(() => {
-                animationClass =
-                    type === SidebarType.Right
-                        ? "animate__fadeOutRight"
-                        : "animate__fadeOutLeft";
-                $sidebarShowingType = null;
-            }, 0);
-        }
-    }
+function onSwipe(e: CustomEvent<SwipeEventData>) {
+	if (
+		!isMobile() ||
+		(e.detail.initial[1] < $swipeMinimumTop && !isMouseInsideArea)
+	)
+		return;
+	if (
+		((type === SidebarType.Right && e.detail.deltaX < -100) ||
+			(type === SidebarType.Left && e.detail.deltaX > 100)) &&
+		$sidebarShowingType === null &&
+		!isMouseInsideArea
+	) {
+		isMouseInsideArea = true;
+		animationClass =
+			type === SidebarType.Right
+				? "animate__fadeInRight"
+				: "animate__fadeInLeft";
+		$sidebarShowingType = type;
+	} else if (
+		((type === SidebarType.Right && e.detail.deltaX > 100) ||
+			(type === SidebarType.Left &&
+				e.detail.deltaX < -100 &&
+				$sidebarShowingType !== null)) &&
+		isMouseInsideArea
+	) {
+		setTimeout(() => {
+			animationClass =
+				type === SidebarType.Right
+					? "animate__fadeOutRight"
+					: "animate__fadeOutLeft";
+			$sidebarShowingType = null;
+		}, 0);
+	}
+}
 
-    onMount(() => {
-        $sidebarShowingType = null;
-    });
+onMount(() => {
+	$sidebarShowingType = null;
+});
 </script>
 
 <svelte:body use:swipeable on:swiped={onSwipe} />

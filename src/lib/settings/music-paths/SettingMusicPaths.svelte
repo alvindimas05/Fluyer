@@ -1,42 +1,41 @@
 <script lang="ts">
-
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import {open} from "@tauri-apps/plugin-dialog";
+import { open } from "@tauri-apps/plugin-dialog";
 import MusicController from "$lib/controllers/MusicController";
-import {IconType} from "$lib/icon/types";
+import { IconType } from "$lib/icon/types";
 import Icon from "$lib/icon/Icon.svelte";
-import {settingIsLoading} from "$lib/stores/setting";
-import {onMount} from "svelte";
+import { settingIsLoading } from "$lib/stores/setting";
+import { onMount } from "svelte";
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
 
 let musicPath = $state<string[]>([]);
 let isLoading = $derived($settingIsLoading);
 
-async function refreshPath(){
-    musicPath = await PersistentStoreController.musicPath.get();
+async function refreshPath() {
+	musicPath = await PersistentStoreController.musicPath.get();
 }
 
-async function addPath(){
-    const newPath = await open({
-        directory: true,
-        multiple: false,
-    });
-    if(!newPath || musicPath.includes(newPath)) return;
+async function addPath() {
+	const newPath = await open({
+		directory: true,
+		multiple: false,
+	});
+	if (!newPath || musicPath.includes(newPath)) return;
 
-    isLoading = true;
-    await PersistentStoreController.musicPath.add(newPath);
-    await refreshPath();
-    await MusicController.getMusics(true);
-    isLoading = false
+	isLoading = true;
+	await PersistentStoreController.musicPath.add(newPath);
+	await refreshPath();
+	await MusicController.getMusics(true);
+	isLoading = false;
 }
 
-async function removePath(index: number){
-    isLoading = true;
-    await PersistentStoreController.musicPath.remove(index);
-    await refreshPath();
-    await MusicController.getMusics(true);
-    isLoading = false;
+async function removePath(index: number) {
+	isLoading = true;
+	await PersistentStoreController.musicPath.remove(index);
+	await refreshPath();
+	await MusicController.getMusics(true);
+	isLoading = false;
 }
 
 onMount(refreshPath);

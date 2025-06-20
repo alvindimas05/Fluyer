@@ -5,10 +5,10 @@ import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import { swipeMinimumTop } from "$lib/stores";
 import { onMount } from "svelte";
-import type {Unsubscriber} from "svelte/store";
-import {afterNavigate} from "$app/navigation";
-import {isMobile} from "$lib/platform";
-import {mobileStatusBarHeight} from "$lib/stores/mobile";
+import type { Unsubscriber } from "svelte/store";
+import { afterNavigate } from "$app/navigation";
+import { isMobile } from "$lib/platform";
+import { mobileStatusBarHeight } from "$lib/stores/mobile";
 
 let element: HTMLDivElement;
 let unsubscribeMusicList: Unsubscriber;
@@ -46,15 +46,15 @@ function onMouseWheel(
 }
 
 onMount(() => {
-    MusicController.setMusicAlbumList(groupByAlbum());
-    unsubscribeMusicList = musicList.subscribe(() => {
-        MusicController.setMusicAlbumList(groupByAlbum());
-        setTimeout(() => ($swipeMinimumTop = element.clientHeight), 0);
+	MusicController.setMusicAlbumList(groupByAlbum());
+	unsubscribeMusicList = musicList.subscribe(() => {
+		MusicController.setMusicAlbumList(groupByAlbum());
+		setTimeout(() => ($swipeMinimumTop = element.clientHeight), 0);
 	});
 });
 
 afterNavigate(() => {
-    unsubscribeMusicList();
+	unsubscribeMusicList();
 });
 </script>
 

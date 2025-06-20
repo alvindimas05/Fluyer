@@ -9,7 +9,7 @@ interface Props {
 }
 import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
+import { IconType } from "$lib/icon/types";
 
 let {
 	music,

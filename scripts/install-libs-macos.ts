@@ -2,11 +2,11 @@ import path from "path";
 import { downloadFile, extractZip } from "./install-helpers";
 import fs from "fs/promises";
 import axios from "axios";
-import {spawn} from "promisify-child-process";
+import { spawn } from "promisify-child-process";
 
 const confPath = path.resolve("src-tauri", "tauri.macos.conf.json");
 const destPath = path.resolve("src-tauri", "libs");
-const arch = process.arch === 'arm64' ? 'arm64' : 'x86_64';
+const arch = process.arch === "arm64" ? "arm64" : "x86_64";
 const zipName = `macos-libs-${arch}.zip`;
 const zipPath = path.resolve(destPath, zipName);
 
@@ -14,7 +14,9 @@ const filelistURL = `https://raw.githubusercontent.com/alvindimas05/Fluyer-API/r
 
 async function updateConfWithFileList() {
 	const res = await axios.get(filelistURL);
-	const lines = res.data.split("\n").filter((line: string) => line.trim() !== "");
+	const lines = res.data
+		.split("\n")
+		.filter((line: string) => line.trim() !== "");
 	const libPaths = lines.map((file: string) => `./libs/${file}`);
 
 	const json = { bundle: { macOS: { frameworks: libPaths } } };
@@ -23,15 +25,27 @@ async function updateConfWithFileList() {
 	console.log(`Updated conf with dylib paths at ${confPath}.`);
 }
 
-async function forceSignLibs(){
-	await spawn("bash", ["-c", `find ${destPath} -name "*.dylib" -exec codesign --force --sign - {} \\;`],
-		{ stdio: "inherit" });
+async function forceSignLibs() {
+	await spawn(
+		"bash",
+		[
+			"-c",
+			`find ${destPath} -name "*.dylib" -exec codesign --force --sign - {} \\;`,
+		],
+		{ stdio: "inherit" },
+	);
 	console.log(`Successfully force signing dylibs.`);
 }
 
-async function forceRemoveSignatureLibs(){
-	await spawn("bash", ["-c", `find ${destPath} -name "*.dylib" -exec codesign --remove-signature - {} \\;`],
-		{ stdio: "inherit" });
+async function forceRemoveSignatureLibs() {
+	await spawn(
+		"bash",
+		[
+			"-c",
+			`find ${destPath} -name "*.dylib" -exec codesign --remove-signature - {} \\;`,
+		],
+		{ stdio: "inherit" },
+	);
 	console.log(`Successfully force remove signature dylibs.`);
 }
 

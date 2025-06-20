@@ -22,11 +22,11 @@ const UIController = {
 		}, scrollDuration + 2000);
 	},
 	listenDisableTabSelection: () => {
-        window.addEventListener('keydown', (e) => {
-            if (e.key !== 'Tab') return;
-            e.preventDefault();
-        });
-	}
+		window.addEventListener("keydown", (e) => {
+			if (e.key !== "Tab") return;
+			e.preventDefault();
+		});
+	},
 };
 
 export default UIController;

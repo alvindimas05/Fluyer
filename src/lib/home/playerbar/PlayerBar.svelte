@@ -10,7 +10,7 @@ import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
+import { IconType } from "$lib/icon/types";
 
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
