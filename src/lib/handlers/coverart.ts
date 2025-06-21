@@ -31,6 +31,8 @@ const CoverArt = {
 				image: null,
 			});
 
+			if(query.album) query.title = undefined;
+
 			let cover = await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
 				query,
 			});

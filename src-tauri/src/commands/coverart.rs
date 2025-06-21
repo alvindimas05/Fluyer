@@ -62,7 +62,8 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
     if query.album.is_some(){
         name = format!("{} {}", query.artist, query.album.clone().unwrap());
         folder_name = "album".to_string();
-    } else if query.title.is_some(){
+    } 
+    if query.title.is_some(){
         name = format!("{} {}", query.artist, query.title.clone().unwrap());
         folder_name = "music".to_string();
     }
