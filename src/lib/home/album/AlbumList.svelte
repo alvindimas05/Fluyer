@@ -61,8 +61,8 @@ $effect(() => void($swipeMinimumTop = elementHeight));
 
 <div
     class="grid auto-cols-[50%] sm:auto-cols-[33.3334%]
-        md-mdpi:auto-cols-[25%] lg-mdpi:auto-cols-[20%] xl-mdpi:auto-cols-[16.6667%]
-        md-hdpi:auto-cols-[25%] lg-hdpi:auto-cols-[20%]
+        md-mdpi:auto-cols-[20%] lg-mdpi:auto-cols-[16.6667%] xl-mdpi:auto-cols-[12.5%]
+        md-hdpi:auto-cols-[20%] lg-hdpi:auto-cols-[16.6667%]
         grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden"
     style={`padding-top: ${(isMobile() ? $mobileStatusBarHeight : 0) + 44}px`}
     bind:offsetHeight={elementHeight}

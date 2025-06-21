@@ -1,12 +1,13 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import type { MusicData } from "../music/types";
+import type {AlbumData, MusicData} from "../music/types";
 import MusicController from "$lib/controllers/MusicController";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import { filterSearch } from "$lib/stores/filter";
+import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import FilterController from "$lib/controllers/FilterController";
 
 interface Props {
 	musicList: MusicData[];
@@ -17,12 +18,21 @@ let { musicList, index }: Props = $props();
 let music = MusicController.sortMusicList(musicList)[0];
 
 let isValidSearch = $derived.by(() => {
-	const search = $filterSearch.toLowerCase();
-	return (
-		music.album?.toLowerCase().includes(search) ||
-		music.albumArtist?.toLowerCase().includes(search)
-	);
+    const search = $filterSearch.toLowerCase();
+    const hasSearch = !!search;
+    const hasFilterAlbum = !!$filterAlbum;
+
+    if (hasFilterAlbum) return true;
+
+    if (!hasSearch) return true;
+
+    return (
+        music.album?.toLowerCase().includes(search) ||
+        music.albumArtist?.toLowerCase().includes(search)
+    );
 });
+
+let isValidFilterAlbum = $derived($filterAlbum && music.album && $filterAlbum.name === music.album);
 
 const animationDelay = 200;
 let animationClasses = $state("hidden");
@@ -68,6 +78,14 @@ function setAlbumImageFromCache() {
 	return true;
 }
 
+async function setFilterAlbum(){
+    FilterController.setFilterAlbum({
+        name: music.album,
+        artist: music.albumArtist ?? MusicController.getFullArtistFromMusic(music),
+        musicList
+    } as AlbumData);
+}
+
 async function addMusicListAndPlay() {
 	music.image = albumImage;
 	await MusicController.reset();
@@ -90,16 +108,14 @@ setTimeout(
 >
     <div class="relative w-full">
         <div
-            class="album-item-actions w-full h-full absolute rounded-lg bg-gradient-to-b from-transparent to-black/50
+            class="album-item-actions w-full h-full absolute rounded-lg
+            bg-white/20 ring-2 ring-white cursor-pointer
 			animate__animated animate__faster animate__fadeOut"
-        >
-            <button
-                class="w-12 md:w-14
-                 absolute bottom-0 left-0 ms-3 mb-3"
-                onclick={addMusicListAndPlay}
-            ><Icon type={IconType.Play}/></button>
-        </div>
-        <img class="rounded-lg w-full shadow-lg" src={albumImage} alt="Album" />
+            onclick={setFilterAlbum}
+        ></div>
+        <img class={`rounded-lg w-full ${isValidFilterAlbum && "ring-2 ring-white"}`}
+             src={albumImage}
+             alt="Album" />
     </div>
     <p class="font-medium sm:text-lg md:text-xl mt-2 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
         {music.album}

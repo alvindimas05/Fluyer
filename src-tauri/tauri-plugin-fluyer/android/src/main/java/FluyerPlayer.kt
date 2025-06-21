@@ -8,6 +8,7 @@ import app.tauri.annotation.InvokeArg
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import java.util.Locale
+import androidx.media3.session.MediaSession
 
 enum class PlayerCommand(val value: String) {
     Play("play"),
@@ -41,6 +42,13 @@ data class PlayerGetInfo (
 
 class FluyerPlayer(activity: Activity) {
     private val player = ExoPlayer.Builder(activity).build()
+    private val mediaSession: MediaSession
+
+    init {
+        mediaSession = MediaSession.Builder(activity, player)
+            .setId("FluyerSession")
+            .build()
+    }
 
     fun sendCommand(args: PlayerCommandArgs) {
         val command = PlayerCommand.valueOf(args.command.replaceFirstChar { if (it.isLowerCase()) it.titlecase(

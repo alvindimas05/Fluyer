@@ -215,7 +215,7 @@ function scrollToSelectedLyric() {
                         id="btn-back"
                         class="w-7 md:w-8 md-mdpi:w-9 md-hdpi:w-9 mx-2 animate__animated"
                         onclick={handleButtonBack}
-                        ><Icon type={IconType.Back} /></button
+                        ><Icon type={IconType.PlayBack} /></button
                     >
                 </div>
                 <div class="flex justify-end">

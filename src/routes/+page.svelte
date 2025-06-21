@@ -7,6 +7,7 @@ import AlbumList from "$lib/home/album/AlbumList.svelte";
 import MusicList from "$lib/home/music/MusicList.svelte";
 import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
 import { loadingShow } from "$lib/stores/loading";
+import AlbumInfo from "$lib/home/albuminfo/AlbumInfo.svelte";
 </script>
 {#if $loadingShow}
     {#if $musicList === null}
@@ -15,8 +16,9 @@ import { loadingShow } from "$lib/stores/loading";
         <Playlist />
         <Menu />
         <PlayerBar />
-        <div class="h-full grid grid-rows-[min-content_auto]">
+        <div class="h-full grid grid-rows-[min-content_min-content_auto]">
             <AlbumList />
+            <AlbumInfo />
             <MusicList />
         </div>
     {/if}

@@ -123,15 +123,15 @@ function handleVolumeButton() {
         />
     </div>
     <div class="p-3 mt-1">
-        <div class="grid grid-cols-[auto_min-content]  lg:grid-cols-3">
-            <div class="flex items-center">
+        <div class="grid grid-cols-[auto_min-content] lg:grid-cols-3">
+            <div class="flex items-center md:gap-2">
                 <button
-                    class="w-10 md:w-12  lg:w-12 mx-2"
+                    class="w-10 md:w-12 lg:w-12"
                     onclick={handleButtonPrevious}
                     ><Icon type={IconType.Previous} /></button
                 >
                 <button
-                    class="w-10 md:w-12  lg:w-12 mx-2"
+                    class="w-10 md:w-12 lg:w-12"
                     onclick={handleButtonPlayPause}
                     >
                     {#if isPlaying}
@@ -142,7 +142,7 @@ function handleVolumeButton() {
                     </button
                 >
                 <button
-                    class="w-10 md:w-12  lg:w-12 mx-2"
+                    class="w-10 md:w-12 lg:w-12"
                     onclick={handleButtonNext}
                     ><Icon type={IconType.Next} /></button
                 >

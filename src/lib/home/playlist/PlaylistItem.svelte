@@ -32,7 +32,7 @@ function gotoPlaylist() {
         class={`grid grid-cols-[max-content_auto_max-content] py-2 px-3 animate__animated animate__fadeIn
             ${isPlaying && "bg-gray-700 bg-opacity-40"}`}
     >
-        <div class="w-11 md:w-12 lg:w-16">
+        <div class="w-11 md:w-12 lg:w-14">
             <img
                 class="w-full rounded"
                 src={MusicController.getAlbumImageFromMusic(music)}
@@ -45,15 +45,15 @@ function gotoPlaylist() {
                 {MusicController.getFullArtistFromMusic(music)}
             </p>
         </div>
-        <div class="w-11 md:w-12 lg:w-16"></div>
+        <div class="w-11 md:w-12 lg:w-14"></div>
     </div>
     {#if isPlaying}
         <div
             class="absolute top-0 left-0 w-full grid grid-cols-[max-content_auto_max-content] py-2 px-3 z-10"
         >
-            <div class="w-11 md:w-12 lg:w-16 aspect-square"></div>
+            <div class="w-11 md:w-12 lg:w-14 aspect-square"></div>
             <div></div>
-            <div class="w-11 md:w-12 lg:w-16 aspect-square p-1 lg:p-3">
+            <div class="w-11 md:w-12 lg:w-14 aspect-square p-1 lg:p-3">
                 <div class="w-full animate__animated animate__infinite animate__pulse">
                     <Icon type={IconType.Playing} />
                 </div>
@@ -65,7 +65,7 @@ function gotoPlaylist() {
             animate__animated animate__faster animate__fadeOut playlist-item-controls"
         >
             <button
-                class="w-11 md:w-12 lg:w-16 aspect-square"
+                class="w-11 md:w-12 lg:w-14 aspect-square"
                 onclick={gotoPlaylist}
             >
                 {#if !isPlaying}
@@ -77,7 +77,7 @@ function gotoPlaylist() {
                 {/if}
             </button>
             <div></div>
-            <button class="w-11 md:w-12 lg:w-16 aspect-square lg:p-1"
+            <button class="w-11 md:w-12 lg:w-14 aspect-square lg:p-1"
                 onclick={removePlaylist}>
                 <Icon type={IconType.Remove}/>
             </button>
