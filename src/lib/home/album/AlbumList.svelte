@@ -4,15 +4,11 @@ import { musicAlbumList, musicList } from "$lib/stores/music";
 import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import { onMount } from "svelte";
-import type { Unsubscriber } from "svelte/store";
-import { afterNavigate } from "$app/navigation";
 import { isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import {swipeMinimumTop} from "$lib/stores";
 
 let element: HTMLDivElement;
-let unsubscribeMusicList: Unsubscriber;
-
 let elementHeight = $state(0);
 
 function groupByAlbum(): MusicData[][] {
@@ -49,11 +45,7 @@ function onMouseWheel(
 
 onMount(() => {
 	MusicController.setMusicAlbumList(groupByAlbum());
-	unsubscribeMusicList = musicList.subscribe(() => MusicController.setMusicAlbumList(groupByAlbum()));
-});
-
-afterNavigate(() => {
-	unsubscribeMusicList();
+	musicList.subscribe(() => MusicController.setMusicAlbumList(groupByAlbum()));
 });
 
 $effect(() => void($swipeMinimumTop = elementHeight));

@@ -149,12 +149,10 @@ impl MusicPlayer {
     pub fn add_playlist(&mut self, playlist: Vec<String>) {
         #[cfg(desktop)]{
             let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
-            let playlist_count = mpv.get_property::<i64>("playlist-count").unwrap();
             
             for (i, music) in playlist.iter().enumerate() {
                 let path = format!("\"{}\"", music).replace("\\", "/").replace("//", "/");
-                mpv.command("loadfile", &[path.as_str(),
-                    if i < 1 && playlist_count < 1 { "replace" } else { "append" }]).unwrap();
+                mpv.command("loadfile", &[path.as_str(), "append"]).unwrap();
             }
         }
         
@@ -212,7 +210,16 @@ impl MusicPlayer {
 
     #[cfg(desktop)]
     fn mpv_play_pause(&self, play: bool) {
-        GLOBAL_MUSIC_MPV.get().unwrap().set_property("pause", !play).unwrap();
+        let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
+        let playlist_count = mpv.get_property::<i64>("playlist-count").unwrap();
+        
+        if playlist_count < 1 {
+            return
+        }
+        if mpv.get_property::<i64>("playlist-pos").unwrap() < 0 {
+            mpv.set_property("playlist-pos", 0).unwrap();
+        }
+        mpv.set_property("pause", !play).unwrap();
         
         // let sink = GLOBAL_MUSIC_SINK.get().unwrap();
         // let max_volume = MUSIC_VOLUME.load(Ordering::SeqCst);

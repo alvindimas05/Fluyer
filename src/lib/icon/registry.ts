@@ -1,7 +1,7 @@
 import { IconType, IconThemeType } from "$lib/icon/types";
 import type { Component } from "svelte";
 import {
-	ArrowCircleLeft, ArrowCounterClockwise, ArrowUUpLeft,
+	ArrowCircleLeft, ArrowCounterClockwise, ArrowUUpLeft, Broom,
 	Gear,
 	MagnifyingGlass,
 	MusicNote,
@@ -28,6 +28,7 @@ export const iconRegistry: Record<
 		[IconType.Playing]: MusicNotes,
 		[IconType.Note]: MusicNote,
 		[IconType.PlayBack]: ArrowUUpLeft,
+		[IconType.Back]: ArrowUUpLeft,
 		[IconType.AlbumBack]: ArrowCounterClockwise,
 		[IconType.Speaker]: SpeakerHigh,
 		[IconType.Mute]: SpeakerX,
@@ -36,6 +37,7 @@ export const iconRegistry: Record<
 		[IconType.Settings]: Gear,
 		[IconType.Search]: MagnifyingGlass,
 		[IconType.QueuePlaylist]: Queue,
+		[IconType.CleanPlaylist]: Broom,
 	},
 	[IconThemeType.Lucide]: {},
 	[IconThemeType.Material]: {},

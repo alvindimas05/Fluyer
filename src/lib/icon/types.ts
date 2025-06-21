@@ -20,4 +20,6 @@ export enum IconType {
 	Search,
 	PlayBack,
 	QueuePlaylist,
+	Back,
+	CleanPlaylist,
 }

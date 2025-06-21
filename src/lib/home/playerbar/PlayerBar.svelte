@@ -11,35 +11,21 @@ import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
+import {onMount} from "svelte";
 
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
 let albumImage = $state(MusicConfig.defaultAlbumImage);
 
-let isPlaying = $state(MusicController.isPlaying());
+let isPlaying = $derived($musicIsPlaying);
 let progressPercentage = $state(MusicController.progressPercentage());
 let volumePercentage = $state(MusicController.volumePercentage());
 
-musicProgressValue.subscribe(updateStates);
-musicCurrentIndex.subscribe(updateStates);
-musicIsPlaying.subscribe(updateStates);
-musicVolume.subscribe(() => {
-	volumePercentage = MusicController.volumePercentage();
-});
-
 function handleButtonPlayPause() {
-	if (
-		MusicController.currentMusic() === null ||
-		MusicController.isProgressValueEnd()
-	)
-		return;
-
 	if (MusicController.isPlaying()) {
 		MusicController.setIsPlaying(false);
 		MusicController.pause();
 	} else MusicController.play();
-
-	updateStates();
 }
 
 function handleButtonPrevious() {
@@ -65,18 +51,6 @@ function onPlayerBarChange() {
 	);
 }
 
-function updateStates() {
-	isPlaying = MusicController.isPlaying();
-	progressPercentage = MusicController.progressPercentage();
-
-	let music = MusicController.currentMusic();
-	if (music == null) return;
-
-	title = music.title!;
-	artist = MusicController.getFullArtistFromMusic(music);
-	albumImage = MusicController.currentMusicAlbumImage();
-}
-
 async function onKeyDown(
 	e: KeyboardEvent & {
 		currentTarget: EventTarget & Document;
@@ -92,6 +66,24 @@ function redirectToPlay() {
 function handleVolumeButton() {
 	MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
 }
+
+onMount(() => {
+    musicProgressValue.subscribe(() => (progressPercentage = MusicController.progressPercentage()));
+    musicVolume.subscribe(() => (volumePercentage = MusicController.volumePercentage()));
+    musicCurrentIndex.subscribe(() => setTimeout(() => {
+        let music = MusicController.currentMusic();
+        if (music === null){
+            title = MusicConfig.defaultTitle;
+            artist = MusicConfig.defaultArtist;
+            albumImage = MusicConfig.defaultAlbumImage;
+            return;
+        }
+
+        title = music.title!;
+        artist = MusicController.getFullArtistFromMusic(music);
+        albumImage = MusicController.currentMusicAlbumImage();
+    }, 0));
+});
 </script>
 
 <svelte:document onkeydown={onKeyDown} />
