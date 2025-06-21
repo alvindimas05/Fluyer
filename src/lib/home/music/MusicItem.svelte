@@ -30,8 +30,13 @@ let isValidSearch = $derived.by(() => {
 
 	const matchesAlbum = hasAlbum && album.name === music.album;
 
-	return !hasSearch && !hasAlbum || matchesSearch || matchesAlbum;
+	if (!hasAlbum) {
+		return !hasSearch || matchesSearch;
+	} else {
+		return matchesAlbum && (!hasSearch || matchesSearch);
+	}
 });
+
 
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
