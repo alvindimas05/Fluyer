@@ -80,13 +80,17 @@ async function addMusicAndPlay() {
 	MusicController.play();
 }
 
+async function addMusic(){
+	await MusicController.addMusic(music);
+}
+
 onMount(checkAlbumImage);
 </script>
 
 <div class={`relative text-sm md:text-base animate__animated animate__fadeIn animate__slow
 	${!isValidSearch && "hidden"}`}>
 	<div
-		class="grid grid-cols-[max-content_auto] py-2"
+		class="grid grid-cols-[max-content_auto_max-content] py-2"
 	>
 		<img
 			class="w-12 md:w-14 relative rounded shadow-lg"
@@ -105,9 +109,10 @@ onMount(checkAlbumImage);
 				{MusicController.getFullArtistFromMusic(music)}
 			</p>
 		</div>
+		<div class="w-12 md:w-14"></div>
 	</div>
 	<div class="absolute top-0 left-0 py-2 w-full">
-		<div class="w-full music-item-play animate__animated animate__faster animate__fadeOut">
+		<div class="w-full grid grid-cols-[max-content_auto_max-content] music-item-play animate__animated animate__faster animate__fadeOut">
 			<button
 					class="w-12 md:w-14"
 					onclick={addMusicAndPlay}
@@ -116,7 +121,11 @@ onMount(checkAlbumImage);
 						class="bg-black bg-opacity-40 grid w-full h-full p-1 justify-items-center items-center rounded"
 				><Icon type={IconType.Play}/></div>
 			</button>
+			<div></div>
+			<div class="w-12 h-12 md:w-14 md:h-14 p-2">
+				<button class="w-full h-full" onclick={addMusic}><Icon type={IconType.QueuePlaylist} /></button>
 			</div>
+		</div>
 	</div>
 </div>
 
