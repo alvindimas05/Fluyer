@@ -217,9 +217,10 @@ const MusicController = {
 		return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 	},
 	play: (sendCommand: boolean = true) => {
-		const previousMusic = MusicController.currentMusic();
-		if(previousMusic !== null && !MusicController.isCurrentMusicFinished()
-			&& MusicController.currentMusicIndex() >= MusicController.musicPlaylist().length) return;
+		if(MusicController.isCurrentMusicFinished() && MusicController.isProgressValueEnd()
+			&& MusicController.currentMusicIndex() < MusicController.musicPlaylist().length){
+			MusicController.gotoPlaylist(MusicController.currentMusicIndex());
+		}
 
 		musicIsPlaying.set(true);
 		MusicController.startProgress({ resetProgress: false });
@@ -261,11 +262,15 @@ const MusicController = {
 	},
 
 	addMusicList: async (musicDataList: MusicData[]) => {
+		let isPlaylistEmpty = !MusicController.musicPlaylist().length;
 		let musicPaths: string[] = [];
 		musicDataList.forEach((music) => musicPaths.push(music.path));
 		MusicController.addSinkMusics(musicPaths);
 
 		MusicController.addMusicPlaylist(musicDataList);
+
+		if(MusicController.currentMusicIndex() === -1 && isPlaylistEmpty)
+			MusicController.setCurrentMusicIndex(0);
 	},
 
 	isCurrentMusicFinished: () => {
