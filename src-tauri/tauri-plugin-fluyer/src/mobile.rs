@@ -110,6 +110,12 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("playerGetInfo", ())
             .map_err(Into::into)
     }
+    
+    pub fn get_sdk_version(&self) -> crate::Result<SdkVersion> {
+        self.0
+            .run_mobile_plugin("getSdkVersion", ())
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]

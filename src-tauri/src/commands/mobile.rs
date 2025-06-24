@@ -28,7 +28,13 @@ pub fn request_read_audio_permission() -> bool {
     if !check_read_audio_permission() {
         let permissions = app
             .fluyer()
-            .request_permissions(Some(vec![PermissionType::Audio, PermissionType::Storage]))
+            .request_permissions(Some(vec![
+                if app.fluyer().get_sdk_version().unwrap().value >= 33 {
+                    PermissionType::Audio
+                } else {
+                    PermissionType::Storage
+                },
+            ]))
             .unwrap();
         return permissions.audio == PermissionState::Granted ||
                permissions.storage == PermissionState::Granted;

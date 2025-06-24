@@ -63,6 +63,10 @@ impl<R: Runtime> Fluyer<R> {
     pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
         Ok(PlayerGetInfo::default())
     }
+
+    pub fn get_sdk_version(&self) -> crate::Result<SdkVersion> {
+        Ok(SdkVersion::default())
+    }
 }
 
 impl<R: Runtime> Fluyer<R> {}

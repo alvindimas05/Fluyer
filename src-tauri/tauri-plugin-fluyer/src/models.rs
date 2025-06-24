@@ -101,3 +101,9 @@ pub struct PlayerGetInfo {
     pub is_playing: bool,
     pub index: usize,
 }
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SdkVersion {
+    pub value: u8,
+}

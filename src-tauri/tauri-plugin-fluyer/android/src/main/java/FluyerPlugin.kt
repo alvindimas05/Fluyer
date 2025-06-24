@@ -74,10 +74,14 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
         implementation.restartApp()
         invoke.resolve()
     }
+
+    @Command
+    fun getSdkVersion(invoke: Invoke) {
+        invoke.resolve(JSObject().put("value", Build.VERSION.SDK_INT))
+    }
     
     @Command
     fun playerRunCommand(invoke: Invoke) {
-        Log.d("Fluyer", invoke.getArgs().toString())
         try {
             val args = invoke.parseArgs(PlayerCommandArgs::class.java)
             player.sendCommand(args)
