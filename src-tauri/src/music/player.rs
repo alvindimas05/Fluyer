@@ -1,17 +1,17 @@
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 
-#[cfg(target_os = "android")]
-use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
-#[cfg(target_os = "android")]
-use tauri_plugin_fluyer::FluyerExt;
+#[cfg(desktop)]
+use libmpv2::Mpv;
 #[cfg(desktop)]
 use std::env::temp_dir;
 #[cfg(desktop)]
 use std::sync::OnceLock;
 use std::thread;
-#[cfg(desktop)]
-use libmpv2::Mpv;
+#[cfg(target_os = "android")]
+use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
+#[cfg(target_os = "android")]
+use tauri_plugin_fluyer::FluyerExt;
 
 #[cfg(desktop)]
 use crate::logger;
@@ -26,6 +26,9 @@ pub enum MusicCommand {
     Play,
     Next,
     Clear,
+    Repeat,
+    RepeatOne,
+    RepeatNone,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -78,6 +81,9 @@ impl MusicPlayer {
             "pause" | "stop" => MusicCommand::Pause,
             "next" => MusicCommand::Next,
             "clear" => MusicCommand::Clear,
+            "repeat" => MusicCommand::Repeat,
+            "repeatOne" => MusicCommand::RepeatOne,
+            "repeatNone" => MusicCommand::RepeatNone,
             _ => MusicCommand::None,
         };
         if _command == MusicCommand::Play || _command == MusicCommand::Pause {
@@ -105,6 +111,34 @@ impl MusicPlayer {
                 .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next)).ok();
             #[cfg(desktop)]
             GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-next", &[]).unwrap();
+            return;
+        }
+        
+        if _command == MusicCommand::Repeat || _command == MusicCommand::RepeatOne
+            || _command == MusicCommand::RepeatNone {
+            #[cfg(target_os = "android")] {
+                let mut args = PlayerCommandArguments::new(match _command {
+                    MusicCommand::Repeat => PlayerCommand::Repeat,
+                    MusicCommand::RepeatOne => PlayerCommand::RepeatOne,
+                    MusicCommand::RepeatNone => PlayerCommand::RepeatNone,
+                    _ => return,
+                });
+                GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                    .player_run_command(args).ok();
+            }
+            #[cfg(desktop)]{
+                let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
+                mpv.set_property("loop-file", if _command == MusicCommand::RepeatOne {
+                    "inf"
+                } else {
+                    "no"
+                }).unwrap();
+                mpv.set_property("loop-playlist", if _command == MusicCommand::Repeat {
+                    "inf"
+                } else {
+                    "no"
+                }).unwrap();
+            }
             return;
         }
     }
@@ -150,7 +184,7 @@ impl MusicPlayer {
         #[cfg(desktop)]{
             let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
             
-            for (i, music) in playlist.iter().enumerate() {
+            for (_, music) in playlist.iter().enumerate() {
                 let path = format!("\"{}\"", music).replace("\\", "/").replace("//", "/");
                 mpv.command("loadfile", &[path.as_str(), "append"]).unwrap();
             }
@@ -258,7 +292,7 @@ impl MusicPlayer {
     
     pub fn start_listener(){
         #[cfg(desktop)]{
-            use libmpv2::events::{EventContext, Event};
+            use libmpv2::events::{Event, EventContext, PropertyData};
     
             let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
             thread::spawn(move || loop {
@@ -266,6 +300,9 @@ impl MusicPlayer {
                 match event {
                     Ok(Event::FileLoaded) => {
                         MusicPlayer::emit_sync(true);
+                    },
+                    Ok(Event::PlaybackRestart) => {
+                        MusicPlayer::emit_sync(false);
                     },
                     Ok(_) => {},
                     Err(_) => {},

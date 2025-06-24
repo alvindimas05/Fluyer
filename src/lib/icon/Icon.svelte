@@ -25,6 +25,9 @@ switch (themeType) {
 			case IconType.Note:
 				weight = "bold";
 				break;
+            case IconType.RepeatNone:
+                color = "rgb(180, 180, 180)";
+                break;
 		}
 		break;
 }

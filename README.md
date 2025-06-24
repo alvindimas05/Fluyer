@@ -51,7 +51,7 @@ On macOS 15 Sequoia or above:
 - [x] Previous
 - [x] Volume Control
 - [x] Mute
-- [ ] Shuffle & Repeat
+- [x] Shuffle & Repeat
 - [x] Playlist
 
 ### Advanced Functionality

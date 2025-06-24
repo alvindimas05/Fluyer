@@ -1,4 +1,4 @@
-import type { MusicData } from "$lib/home/music/types";
+import {type MusicData, RepeatMode} from "$lib/home/music/types";
 import { writable } from "svelte/store";
 
 export let musicList = writable<MusicData[] | null | undefined>(undefined);
@@ -11,3 +11,4 @@ export let musicProgressIntervalId = writable<null | ReturnType<
 >>(null);
 export let musicAlbumList = writable<MusicData[][]>([]);
 export let musicPlaylist = writable<MusicData[]>([]);
+export let musicRepeatMode = writable<RepeatMode>(RepeatMode.None);

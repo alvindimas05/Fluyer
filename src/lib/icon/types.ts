@@ -22,4 +22,8 @@ export enum IconType {
 	QueuePlaylist,
 	Back,
 	CleanPlaylist,
+	RepeatNone,
+	Repeat,
+	RepeatOne,
+	Shuffle,
 }

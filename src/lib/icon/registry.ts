@@ -1,13 +1,13 @@
 import { IconType, IconThemeType } from "$lib/icon/types";
 import type { Component } from "svelte";
 import {
-	ArrowCircleLeft, ArrowCounterClockwise, ArrowUUpLeft, Broom,
+	ArrowCounterClockwise, ArrowUUpLeft, Broom,
 	Gear,
 	MagnifyingGlass,
 	MusicNote,
 	MusicNotes,
 	PauseCircle,
-	PlayCircle, Queue,
+	PlayCircle, Queue, Repeat, RepeatOnce, Shuffle,
 	SkipBackCircle,
 	SkipForwardCircle,
 	SpeakerHigh,
@@ -38,6 +38,10 @@ export const iconRegistry: Record<
 		[IconType.Search]: MagnifyingGlass,
 		[IconType.QueuePlaylist]: Queue,
 		[IconType.CleanPlaylist]: Broom,
+		[IconType.RepeatNone]: Repeat,
+		[IconType.Repeat]: Repeat,
+		[IconType.RepeatOne]: RepeatOnce,
+		[IconType.Shuffle]: Shuffle,
 	},
 	[IconThemeType.Lucide]: {},
 	[IconThemeType.Material]: {},

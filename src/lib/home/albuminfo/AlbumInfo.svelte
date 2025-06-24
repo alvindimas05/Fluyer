@@ -20,11 +20,15 @@ async function addMusicListAndPlay() {
 async function addMusicList(){
     MusicController.addMusicList(MusicController.sortMusicList(album!.musicList));
 }
+
+async function playShuffle(){
+    MusicController.playShuffle(album!.musicList);
+}
 </script>
 {#if album}
     <div class="px-3 pb-2 animate__animated animate__fadeIn">
         <div class="w-full px-4 py-2 bg-white/10 rounded-lg shadow-sm">
-            <div class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-x-4">
+            <div class="grid grid-cols-[1fr_repeat(4,auto)] items-center gap-x-4">
                 <div class="text-base md:text-lg font-medium text-white overflow-hidden">
                     <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">{album.artist} {MusicConfig.separator} {album.name}</p>
                 </div>
@@ -39,6 +43,10 @@ async function addMusicList(){
                 <button class="w-7 h-7 flex items-center justify-center text-white"
                     onclick={addMusicList}>
                     <Icon type={IconType.QueuePlaylist} />
+                </button>
+                <button class="w-7 h-7 flex items-center justify-center text-white"
+                        onclick={playShuffle}>
+                    <Icon type={IconType.Shuffle} />
                 </button>
             </div>
         </div>

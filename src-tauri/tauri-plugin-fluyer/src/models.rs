@@ -63,6 +63,9 @@ pub enum PlayerCommand {
     AddPlaylist,
     RemovePlaylist,
     GotoPlaylist,
+    Repeat,
+    RepeatOne,
+    RepeatNone,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]

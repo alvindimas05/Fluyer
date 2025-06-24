@@ -23,3 +23,9 @@ export interface MusicPlayerSync {
 	isPlaying: boolean;
 	duration: number;
 }
+
+export enum RepeatMode {
+	None = "repeatNone",
+	One = "repeatOne",
+	All = "repeat",
+}
