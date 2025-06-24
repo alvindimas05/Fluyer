@@ -12,6 +12,7 @@ import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import {onMount} from "svelte";
+import musicController from "$lib/controllers/MusicController";
 
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
@@ -34,21 +35,6 @@ function handleButtonPrevious() {
 
 function handleButtonNext() {
 	MusicController.nextMusic();
-}
-
-function onPlayerBarChange() {
-	if (MusicController.isProgressValueEnd()) {
-		MusicController.setProgressValue(0);
-		return;
-	}
-
-	if (MusicController.isProgressValueEnd()) {
-		MusicController.addMusic(MusicController.currentMusic()!);
-	}
-
-	MusicController.sendCommandSetPosition(
-		MusicController.realProgressDuration(),
-	);
 }
 
 async function onKeyDown(
@@ -101,7 +87,7 @@ onMount(() => {
             min={MusicConfig.min}
             max={MusicConfig.max}
             step={MusicConfig.step}
-            onchange={onPlayerBarChange}
+            oninput={MusicController.onPlayerBarChange}
         />
         <input
             class={`w-full absolute music-progress-bar-end`}
@@ -111,7 +97,7 @@ onMount(() => {
             min={MusicConfig.min}
             max={MusicConfig.max}
             step={MusicConfig.step}
-            onchange={onPlayerBarChange}
+            oninput={MusicController.onPlayerBarChange}
         />
     </div>
     <div class="p-3 mt-1">

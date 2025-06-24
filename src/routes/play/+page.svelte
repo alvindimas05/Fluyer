@@ -16,6 +16,7 @@ import { isMacos, isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
+import musicController from "$lib/controllers/MusicController";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -66,21 +67,6 @@ function handleButtonPrevious() {
 
 function handleButtonNext() {
 	MusicController.nextMusic();
-}
-
-function onPlayerBarChange() {
-	if (MusicController.isProgressValueEnd()) {
-		MusicController.setProgressValue(0);
-		return;
-	}
-
-	if (MusicController.isProgressValueEnd()) {
-		MusicController.addMusic(MusicController.currentMusic()!);
-	}
-
-	MusicController.sendCommandSetPosition(
-		MusicController.realProgressDuration(),
-	);
 }
 
 function handleButtonBack() {
@@ -196,7 +182,7 @@ function scrollToSelectedLyric() {
                     min={MusicConfig.min}
                     max={MusicConfig.max}
                     step={MusicConfig.step}
-                    onchange={onPlayerBarChange}
+                    oninput={MusicController.onPlayerBarChange}
                 />
                 <input
                     class={`w-full absolute music-progress-bar-play-end`}
@@ -206,7 +192,7 @@ function scrollToSelectedLyric() {
                     min={MusicConfig.min}
                     max={MusicConfig.max}
                     step={MusicConfig.step}
-                    onchange={onPlayerBarChange}
+                    oninput={MusicController.onPlayerBarChange}
                 />
             </div>
             <div class="w-full grid grid-cols-5 mt-4">

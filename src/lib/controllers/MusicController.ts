@@ -354,6 +354,18 @@ const MusicController = {
 		MusicController.stopProgress();
 		MusicController.resetProgress();
 	},
+
+	onPlayerBarChange: () => {
+		if(MusicController.isProgressValueEnd() || MusicController.currentMusicIndex() < 0){
+			MusicController.setProgressValue(0);
+			return;
+		}
+		console.log('TEST');
+
+		setTimeout(() => MusicController.sendCommandSetPosition(
+			MusicController.realProgressDuration(),
+		));
+	},
 };
 
 export default MusicController;
