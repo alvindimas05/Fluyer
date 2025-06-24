@@ -31,12 +31,13 @@ pub struct StatusBarHeight {
 #[serde(rename_all = "camelCase")]
 pub struct PermissionStatus {
     pub audio: PermissionState,
+    pub storage: PermissionState,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum PermissionType {
-    Audio,
+    Audio, Storage
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]

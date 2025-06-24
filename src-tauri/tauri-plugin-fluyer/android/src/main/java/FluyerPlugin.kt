@@ -25,12 +25,14 @@ class PlaylistChangeWatcherArgs {
 }
 
 private const val ALIAS_READ_AUDIO: String = "audio"
+private const val ALIAS_EXTERNAL_STORAGE: String = "storage"
 @TauriPlugin(
     permissions = [
-        Permission(strings = [
-            Manifest.permission.READ_MEDIA_AUDIO
-        ],
+        Permission(strings = [Manifest.permission.READ_MEDIA_AUDIO],
             alias = ALIAS_READ_AUDIO
+        ),
+        Permission(strings = [Manifest.permission.READ_EXTERNAL_STORAGE],
+            alias = ALIAS_EXTERNAL_STORAGE
         )
     ]
 )

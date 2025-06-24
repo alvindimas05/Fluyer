@@ -11,11 +11,9 @@ pub fn check_read_audio_permission() -> bool {
     let app = GLOBAL_APP_HANDLE
         .get()
         .expect("Failed to get GLOBAL_APP_HANDLE");
-    app.fluyer()
-        .check_permissions()
-        .expect("Failed to request read audio permission")
-        .audio
-        == PermissionState::Granted
+    let permissions = app.fluyer().check_permissions().unwrap();
+    permissions.audio == PermissionState::Granted ||
+        permissions.storage == PermissionState::Granted
 }
 
 #[cfg(target_os = "android")]
@@ -28,12 +26,12 @@ pub fn request_read_audio_permission() -> bool {
         .get()
         .expect("Failed to get GLOBAL_APP_HANDLE");
     if !check_read_audio_permission() {
-        return app
+        let permissions = app
             .fluyer()
-            .request_permissions(Some(vec![PermissionType::Audio]))
-            .unwrap()
-            .audio
-            == PermissionState::Granted;
+            .request_permissions(Some(vec![PermissionType::Audio, PermissionType::Storage]))
+            .unwrap();
+        return permissions.audio == PermissionState::Granted ||
+               permissions.storage == PermissionState::Granted;
     }
     true
 }
