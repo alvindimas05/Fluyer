@@ -20,6 +20,9 @@ enum class PlayerCommand(val value: String) {
     AddPlaylist("addPlaylist"),
     RemovePlaylist("removePlaylist"),
     GotoPlaylist("gotoPlaylist"),
+    Repeat("repeat"),
+    RepeatOne("repeatOne"),
+    RepeatNone("repeatNone"),
 }
 
 @InvokeArg
@@ -65,9 +68,17 @@ class FluyerPlayer(activity: Activity) {
             PlayerCommand.Clear -> {
                 player.clearMediaItems()
             }
-
             PlayerCommand.GotoPlaylist -> {
                 player.seekTo(args.playlistGotoIndex!!, 0)
+            }
+            PlayerCommand.Repeat -> {
+                player.repeatMode = Player.REPEAT_MODE_ALL
+            }
+            PlayerCommand.RepeatOne -> {
+                player.repeatMode = Player.REPEAT_MODE_ONE
+            }
+            PlayerCommand.RepeatNone -> {
+                player.repeatMode = Player.REPEAT_MODE_OFF
             }
         }
     }

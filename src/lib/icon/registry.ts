@@ -39,6 +39,7 @@ export const iconRegistry: Record<
 		[IconType.QueuePlaylist]: Queue,
 		[IconType.CleanPlaylist]: Broom,
 		[IconType.RepeatNone]: Repeat,
+		[IconType.RepeatPlayNone]: Repeat,
 		[IconType.Repeat]: Repeat,
 		[IconType.RepeatOne]: RepeatOnce,
 		[IconType.Shuffle]: Shuffle,

@@ -1,10 +1,10 @@
 <script lang="ts">
-import {
-	musicCurrentIndex,
-	musicIsPlaying,
-	musicProgressValue,
-	musicVolume,
-} from "$lib/stores/music";
+    import {
+        musicCurrentIndex,
+        musicIsPlaying,
+        musicProgressValue, musicRepeatMode,
+        musicVolume,
+    } from "$lib/stores/music";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
 import LrcLib from "$lib/api/lrclib";
@@ -12,11 +12,12 @@ import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
-import { isMacos, isMobile } from "$lib/platform";
+    import {isAndroid, isMacos, isMobile} from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import musicController from "$lib/controllers/MusicController";
+import {RepeatMode} from "$lib/home/music/types";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -195,25 +196,38 @@ function scrollToSelectedLyric() {
                     oninput={MusicController.onPlayerBarChange}
                 />
             </div>
-            <div class="w-full grid grid-cols-5 mt-4">
-                <div class="flex items-center">
-                    <button
-                        id="btn-back"
-                        class="w-7 md:w-8 md-mdpi:w-9 md-hdpi:w-9 mx-2 animate__animated"
-                        onclick={handleButtonBack}
-                        ><Icon type={IconType.PlayBack} /></button
-                    >
+            <div class={`w-full grid ${isAndroid() ? "grid-cols-5" : "grid-cols-7"} items-center gap-2 mt-4`}>
+                {#if !isAndroid()}
+                    <div class="flex items-center">
+                        <button
+                            id="btn-back"
+                            class="w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2 animate__animated"
+                            onclick={handleButtonBack}
+                        ><Icon type={IconType.PlayBack} /></button>
+                    </div>
+                {/if}
+                <div class="flex justify-center">
+                    <button class="w-7"
+                        onclick={MusicController.toggleRepeatMode}>
+                        {#if $musicRepeatMode === RepeatMode.All}
+                            <Icon type={IconType.Repeat} />
+                        {:else if $musicRepeatMode === RepeatMode.None}
+                            <Icon type={IconType.RepeatPlayNone} />
+                        {:else if $musicRepeatMode === RepeatMode.One}
+                            <Icon type={IconType.RepeatOne} />
+                        {/if}
+                    </button>
                 </div>
                 <div class="flex justify-end">
                     <button
-                        class="w-12 sm:w-14 md-mdpi:w-12 md-hdpi:w-12 lg-mdpi:w-14 mx-2"
+                        class="w-12 sm:w-14 md-mdpi:w-12 md-hdpi:w-12 lg-mdpi:w-14"
                         onclick={handleButtonPrevious}
                         ><Icon type={IconType.Previous} /></button
                     >
                 </div>
                 <div class="flex justify-center">
                     <button
-                        class="w-12 sm:w-14 md-mdpi:w-12 md-hdpi:w-12 lg-mdpi:w-14 mx-2"
+                        class="w-12 sm:w-14 md-mdpi:w-12 md-hdpi:w-12 lg-mdpi:w-14"
                         onclick={handleButtonPlayPause}
                         >
                         {#if $musicIsPlaying}
@@ -225,10 +239,15 @@ function scrollToSelectedLyric() {
                 </div>
                 <div class="flex justify-start">
                     <button
-                        class="w-12 sm:w-14 md-mdpi:w-12 md-hdpi:w-12 lg-mdpi:w-14 mx-2"
+                        class="w-12 sm:w-14 md-mdpi:w-12 md-hdpi:w-12 lg-mdpi:w-14"
                         onclick={handleButtonNext}
                         ><Icon type={IconType.Next} /></button
                     >
+                </div>
+                <div class="flex justify-center">
+                    <button class="w-7" onclick={() => MusicController.playShuffle()}>
+                        <Icon type={IconType.Shuffle} />
+                    </button>
                 </div>
             </div>
             <div id="volume-bar" class="mt-5 animate__animated">

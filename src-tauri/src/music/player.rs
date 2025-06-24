@@ -117,7 +117,7 @@ impl MusicPlayer {
         if _command == MusicCommand::Repeat || _command == MusicCommand::RepeatOne
             || _command == MusicCommand::RepeatNone {
             #[cfg(target_os = "android")] {
-                let mut args = PlayerCommandArguments::new(match _command {
+                let args = PlayerCommandArguments::new(match _command {
                     MusicCommand::Repeat => PlayerCommand::Repeat,
                     MusicCommand::RepeatOne => PlayerCommand::RepeatOne,
                     MusicCommand::RepeatNone => PlayerCommand::RepeatNone,

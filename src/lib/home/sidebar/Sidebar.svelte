@@ -26,7 +26,6 @@ function onMouseMove(
 		currentTarget: EventTarget & Document;
 	},
 ) {
-	if (isMobile()) return;
 	if (
 		((type === SidebarType.Right && e.clientX > window.innerWidth - 20) ||
 			(type === SidebarType.Left && e.clientX < 20)) &&
@@ -68,10 +67,7 @@ function onAnimationEnd() {
 }
 
 function onSwipe(e: CustomEvent<SwipeEventData>) {
-	if (
-		!isMobile() ||
-		(e.detail.initial[1] < $swipeMinimumTop && !isMouseInsideArea)
-	)
+	if ((e.detail.initial[1] < $swipeMinimumTop && !isMouseInsideArea))
 		return;
 	if (
 		((type === SidebarType.Right && e.detail.deltaX < -SWIPE_RANGE) ||

@@ -23,6 +23,7 @@ export enum IconType {
 	Back,
 	CleanPlaylist,
 	RepeatNone,
+	RepeatPlayNone,
 	Repeat,
 	RepeatOne,
 	Shuffle,
