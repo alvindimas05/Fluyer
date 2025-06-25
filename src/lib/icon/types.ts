@@ -27,4 +27,5 @@ export enum IconType {
 	Repeat,
 	RepeatOne,
 	Shuffle,
+	Fullscreen,
 }

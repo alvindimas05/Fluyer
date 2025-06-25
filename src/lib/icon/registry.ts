@@ -1,7 +1,7 @@
 import { IconType, IconThemeType } from "$lib/icon/types";
 import type { Component } from "svelte";
 import {
-	ArrowCounterClockwise, ArrowUUpLeft, Broom,
+	ArrowCounterClockwise, ArrowUUpLeft, Broom, FrameCorners,
 	Gear,
 	MagnifyingGlass,
 	MusicNote,
@@ -43,6 +43,7 @@ export const iconRegistry: Record<
 		[IconType.Repeat]: Repeat,
 		[IconType.RepeatOne]: RepeatOnce,
 		[IconType.Shuffle]: Shuffle,
+		[IconType.Fullscreen]: FrameCorners,
 	},
 	[IconThemeType.Lucide]: {},
 	[IconThemeType.Material]: {},
