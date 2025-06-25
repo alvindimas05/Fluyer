@@ -292,7 +292,7 @@ impl MusicPlayer {
     
     pub fn start_listener(){
         #[cfg(desktop)]{
-            use libmpv2::events::{Event, EventContext, PropertyData};
+            use libmpv2::events::{Event, EventContext};
     
             let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
             thread::spawn(move || loop {
