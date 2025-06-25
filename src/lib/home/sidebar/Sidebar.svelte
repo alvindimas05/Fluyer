@@ -116,8 +116,8 @@ onMount(() => {
     onmouseleave={onMouseLeave}
 >
     <div
-        class={`bg-gray-700 bg-opacity-30 backdrop-blur-md rounded shadow-xl
-    text-white h-full w-full p-5 animate__animated animate__faster
+        class={`bg-gray-700 bg-opacity-30 backdrop-blur-sm md:backdrop-blur-md rounded shadow-xl
+    text-white h-full w-full p-2 md:p-5 animate__animated animate__faster
     ${animationClass}`}
         onanimationend={onAnimationEnd}
     >
