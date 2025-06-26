@@ -53,8 +53,8 @@ onMount(() => setTimeout(initialize, isWindows() ? 1000 : 0));
     {@render children?.()}
 </div>
 <div class="fixed top-0 left-0 w-full h-12 z-[99999] grid grid-cols-[1fr_auto]">
-    {#if $loadingShow}
-        {#if Array.isArray($musicList) && [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
+    {#if $loadingShow && Array.isArray($musicList)}
+        {#if [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
             <FilterBar />
         {/if}
         {#if isMobile() && $mobileShowSwipeGuide}
