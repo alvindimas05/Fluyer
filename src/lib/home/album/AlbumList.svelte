@@ -58,6 +58,7 @@ $effect(() => void($swipeMinimumTop = elementHeight));
         grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden"
     style={`padding-top: ${(isMobile() ? $mobileStatusBarHeight : 0) + 44}px`}
     bind:offsetHeight={elementHeight}
+	bind:this={element}
     onwheel={onMouseWheel}>
     {#each Object.entries($musicAlbumList) as [_, musicList], index}
         <AlbumItem {musicList} {index} />
