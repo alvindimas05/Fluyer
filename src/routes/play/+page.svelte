@@ -317,14 +317,13 @@ function scrollToSelectedLyric() {
 
 <style lang="scss">
     @media (min-width: 40rem) {
-        #btn-back, #volume-bar {
-            animation-duration: 1s;
-            animation-delay: 3s;
-            animation-name: fadeOut;
-            animation-fill-mode: forwards;
+        #btn-back,
+        #volume-bar {
+            opacity: 0;
+            transition: opacity 1s ease 3s;
             &:hover {
-                animation-delay: 0s;
-                animation-name: fadeIn;
+                opacity: 1;
+                transition-delay: 0s;
             }
         }
     }

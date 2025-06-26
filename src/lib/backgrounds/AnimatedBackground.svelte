@@ -251,10 +251,7 @@ function onWindowResize() {
 let isMounted = false;
 onMount(() => {
 	initializeCanvas();
-	musicCurrentIndex.subscribe(() => {
-		console.log('Transitioning');
-		setTimeout(transitionToNewCanvas, 0);
-	});
+	musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
 	settingTriggerAnimatedBackground.subscribe(() => {
 		if (isMounted) setTimeout(() => transitionToNewCanvas(true), 0);
 		else isMounted = true;
