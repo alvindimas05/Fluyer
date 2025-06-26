@@ -197,7 +197,8 @@ impl MusicPlayer {
                     file_path: music.path,
                     title: music.title.unwrap_or(MusicMetadata::default_title()),
                     artist: music.artist.unwrap_or(MusicMetadata::default_artist()),
-                    image: music.image,
+                    // image: music.image,
+                    image: None,
                 })
                 .collect::<Vec<_>>();
             GLOBAL_APP_HANDLE.get().unwrap().fluyer()

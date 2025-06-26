@@ -12,6 +12,7 @@ import app.tauri.plugin.Channel
 import android.Manifest
 import android.os.Build
 import android.util.Log
+import android.webkit.WebView
 import androidx.annotation.RequiresApi
 
 @InvokeArg
@@ -26,6 +27,7 @@ class PlaylistChangeWatcherArgs {
 
 private const val ALIAS_READ_AUDIO: String = "audio"
 private const val ALIAS_EXTERNAL_STORAGE: String = "storage"
+const val LOG_TAG = "Fluyer"
 @TauriPlugin(
     permissions = [
         Permission(strings = [Manifest.permission.READ_MEDIA_AUDIO],
@@ -36,11 +38,13 @@ private const val ALIAS_EXTERNAL_STORAGE: String = "storage"
         )
     ]
 )
-
-val LOG_TAG = "Fluyer"
 class FluyerPlugin(activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
     private val player = FluyerPlayer(activity)
+
+    override fun load(webView: WebView) {
+        player.initialize()
+    }
 
     @Command
     fun toast(invoke: Invoke) {
@@ -108,7 +112,8 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
         }
     }
 
-    fun playerAddPlaylist(invoke: Invoke) {
+    @Command
+    fun playerPlaylistAdd(invoke: Invoke) {
         try {
             val args = invoke.parseArgs(PlayerPlaylistAddArgs::class.java)
             player.addPlaylist(args.playlist)
