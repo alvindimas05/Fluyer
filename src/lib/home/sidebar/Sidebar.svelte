@@ -23,49 +23,46 @@
 
 	function onMouseMove(e: MouseEvent) {
 		if (
-			((type === SidebarType.Right &&
-				e.clientX > window.innerWidth - 20) ||
-				(type === SidebarType.Left && e.clientX < 20)) &&
-			e.clientY <= window.innerHeight - 8 * 16 &&
-			!isMouseInsideArea
-		) {
-			isMouseInsideArea = true;
-			isShowing = true;
-		}
-	}
-
-	function onMouseLeave(e: MouseEvent) {
-		if (!isMouseInsideArea ||
-			(type === SidebarType.Right && e.clientX > window.innerWidth - 20) ||
-			(type === SidebarType.Left && e.clientX < 20)) return;
-
-		isShowing = false;
-		isMouseInsideArea = false;
-	}
-
-	function onSwipe(e: CustomEvent<SwipeEventData>) {
-		if (e.detail.initial[1] < $swipeMinimumTop && !isMouseInsideArea)
-			return;
-		if (
-			((type === SidebarType.Right && e.detail.deltaX < -SWIPE_RANGE) ||
-				(type === SidebarType.Left && e.detail.deltaX > SWIPE_RANGE)) &&
-			$sidebarShowingType === null &&
-			!isMouseInsideArea
+				((type === SidebarType.Right && e.clientX > window.innerWidth - 20) ||
+						(type === SidebarType.Left && e.clientX < 20)) &&
+				e.clientY <= window.innerHeight - 8 * 16 &&
+				!isMouseInsideArea
 		) {
 			isMouseInsideArea = true;
 			isShowing = true;
 			$sidebarShowingType = type;
-		} else if (
-			((type === SidebarType.Right && e.detail.deltaX > SWIPE_RANGE) ||
-				(type === SidebarType.Left &&
-					e.detail.deltaX < -SWIPE_RANGE &&
-					$sidebarShowingType !== null)) &&
-			isMouseInsideArea
+		}
+	}
+
+	function onMouseLeave(e: MouseEvent) {
+		if (!isMouseInsideArea) return;
+		isShowing = false;
+		isMouseInsideArea = false;
+		$sidebarShowingType = null;
+	}
+
+	function onSwipe(e: CustomEvent<SwipeEventData>) {
+		if (e.detail.initial[1] < $swipeMinimumTop) return;
+
+		if (
+				((type === SidebarType.Right && e.detail.deltaX < -SWIPE_RANGE) ||
+						(type === SidebarType.Left && e.detail.deltaX > SWIPE_RANGE)) &&
+				$sidebarShowingType === null
+		) {
+			isMouseInsideArea = true;
+			isShowing = true;
+			$sidebarShowingType = type;
+		}
+		else if (
+				((type === SidebarType.Right && e.detail.deltaX > SWIPE_RANGE) ||
+						(type === SidebarType.Left && e.detail.deltaX < -SWIPE_RANGE)) &&
+				$sidebarShowingType === type
 		) {
 			setTimeout(() => {
+				isMouseInsideArea = false;
 				isShowing = false;
 				$sidebarShowingType = null;
-			}, 0);
+			});
 		}
 	}
 
