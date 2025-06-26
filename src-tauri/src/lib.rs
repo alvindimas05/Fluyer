@@ -82,6 +82,8 @@ pub fn run() {
             commands::coverart::cover_art_get,
             #[cfg(windows)]
             commands::decorum::decorum_show_snap_overlay,
+            #[cfg(mobile)]
+            commands::mobile::set_navigation_bar_visibility,
         ])
         .on_window_event(|_, event| {
             match event {

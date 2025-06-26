@@ -9,7 +9,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
 import Font from "$lib/font/Font.svelte";
 import UIController from "$lib/controllers/UIController";
-import MobileController from "$lib/controllers/MobileController";
+import MobileController from "$lib/controllers/MobileController.js";
 import logHandler from "$lib/handlers/log";
 import { PageRoutes } from "$lib/pages";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";

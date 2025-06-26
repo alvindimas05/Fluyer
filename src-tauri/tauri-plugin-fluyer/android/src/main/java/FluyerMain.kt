@@ -8,7 +8,6 @@ import android.content.res.Configuration
 import android.app.Activity
 import android.widget.Toast
 import android.content.Intent
-import androidx.annotation.RequiresApi
 import java.lang.Runtime
 
 class FluyerMain(private val activity: Activity) {
@@ -20,8 +19,15 @@ class FluyerMain(private val activity: Activity) {
     private fun dpToPx(value: Int): Int {
         return (value / activity.resources.displayMetrics.density).roundToInt()
     }
-    @RequiresApi(Build.VERSION_CODES.R)
     fun getStatusBarHeight(): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            val resourceId = activity.resources.getIdentifier("status_bar_height", "dimen", "android")
+            return if (resourceId > 0) {
+                dpToPx(activity.resources.getDimensionPixelSize(resourceId))
+            } else {
+                0
+            }
+        }
         return dpToPx(activity.window.decorView.rootWindowInsets
             .getInsets(WindowInsets.Type.statusBars()).top)
     }

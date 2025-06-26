@@ -121,3 +121,9 @@ pub struct PlaylistAddMusic {
 pub struct SdkVersion {
     pub value: u8,
 }
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NavigationBarVisibility {
+    pub value: bool,
+}

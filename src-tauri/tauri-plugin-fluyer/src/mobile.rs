@@ -124,6 +124,15 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("getSdkVersion", ())
             .map_err(Into::into)
     }
+
+    pub fn set_navigation_bar_visibility(
+        &self,
+        visible: bool,
+    ) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("setNavigationBarVisibility", NavigationBarVisibility { value: visible })
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]

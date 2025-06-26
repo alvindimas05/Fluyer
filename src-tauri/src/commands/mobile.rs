@@ -64,3 +64,12 @@ pub fn get_status_bar_height() -> u8 {
         .expect("Failed to get GLOBAL_APP_HANDLE");
     app.fluyer().get_status_bar_height().unwrap().value
 }
+
+#[cfg(mobile)]
+#[tauri::command]
+pub fn set_navigation_bar_visibility(visible: bool) {
+    let app = GLOBAL_APP_HANDLE
+        .get()
+        .expect("Failed to get GLOBAL_APP_HANDLE");
+    app.fluyer().set_navigation_bar_visibility(visible).unwrap();
+}

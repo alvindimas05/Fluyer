@@ -12,8 +12,9 @@ import app.tauri.plugin.Channel
 import android.Manifest
 import android.os.Build
 import android.util.Log
+import android.view.View
 import android.webkit.WebView
-import androidx.annotation.RequiresApi
+import kotlin.properties.Delegates
 
 @InvokeArg
 class ToastArgs {
@@ -23,6 +24,11 @@ class ToastArgs {
 @InvokeArg
 class PlaylistChangeWatcherArgs {
     lateinit var channel: Channel
+}
+
+@InvokeArg
+class NavigationBarVisibilityArgs {
+    var value by Delegates.notNull<Boolean>()
 }
 
 private const val ALIAS_READ_AUDIO: String = "audio"
@@ -38,7 +44,7 @@ const val LOG_TAG = "Fluyer"
         )
     ]
 )
-class FluyerPlugin(activity: Activity): Plugin(activity) {
+class FluyerPlugin(val activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
     private val player = FluyerPlayer(activity)
 
@@ -59,7 +65,6 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
         invoke.resolve(obj)
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     @Command
     fun getStatusBarHeight(invoke: Invoke){
         val obj = JSObject().put("value", implementation.getStatusBarHeight())
@@ -84,6 +89,24 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
     @Command
     fun getSdkVersion(invoke: Invoke) {
         invoke.resolve(JSObject().put("value", Build.VERSION.SDK_INT))
+    }
+
+    @Command
+    fun setNavigationBarVisibility(invoke: Invoke){
+        val visible = invoke.parseArgs(NavigationBarVisibilityArgs::class.java).value
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val id = android.view.WindowInsets.Type.statusBars()
+            if(visible) activity.window.insetsController?.show(id)
+            else activity.window.insetsController?.hide(id)
+        } else {
+            if (visible) {
+                activity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            } else {
+                activity.window.decorView.systemUiVisibility =
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
+            }
+        }
+        invoke.resolve()
     }
     
     @Command

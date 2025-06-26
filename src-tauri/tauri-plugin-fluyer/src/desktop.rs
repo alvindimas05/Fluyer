@@ -74,6 +74,13 @@ impl<R: Runtime> Fluyer<R> {
     pub fn get_sdk_version(&self) -> crate::Result<SdkVersion> {
         Ok(SdkVersion::default())
     }
+
+    pub fn set_navigation_bar_visibility(
+        &self,
+        _: bool,
+    ) -> crate::Result<()> {
+        Ok(())
+    }
 }
 
 impl<R: Runtime> Fluyer<R> {}
