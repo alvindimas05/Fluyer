@@ -12,6 +12,7 @@ use std::thread;
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
+#[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistAddMusic;
 #[cfg(desktop)]
 use crate::logger;

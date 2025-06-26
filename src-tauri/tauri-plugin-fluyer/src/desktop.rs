@@ -1,5 +1,5 @@
 use serde::de::DeserializeOwned;
-use tauri::{ipc::Channel, plugin::PluginApi, AppHandle, Runtime};
+use tauri::{plugin::PluginApi, AppHandle, Runtime};
 
 use crate::models::*;
 
@@ -45,10 +45,6 @@ impl<R: Runtime> Fluyer<R> {
         &self,
         _callback: F,
     ) -> crate::Result<WatchPlaylistChangeResponse> {
-        Ok(WatchPlaylistChangeResponse { value: false })
-    }
-
-    pub(crate) fn watch_playlist_change_inner(&self, _channel: Channel) -> crate::Result<WatchPlaylistChangeResponse> {
         Ok(WatchPlaylistChangeResponse { value: false })
     }
 

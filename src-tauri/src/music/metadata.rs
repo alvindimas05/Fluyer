@@ -1,5 +1,6 @@
 use std::path::Path;
 use base64::Engine;
+#[cfg(mobile)]
 use dotenvy_macro::dotenv;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -27,9 +28,11 @@ pub struct MusicMetadata {
 }
 
 impl MusicMetadata {
+    #[cfg(mobile)]
     pub fn default_title() -> String {
         dotenv!("VITE_DEFAULT_MUSIC_TITLE").to_string()
     }
+    #[cfg(mobile)]
     pub fn default_artist() -> String {
         dotenv!("VITE_DEFAULT_MUSIC_ARTIST").to_string()
     }
