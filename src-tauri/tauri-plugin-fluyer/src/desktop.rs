@@ -30,8 +30,8 @@ impl<R: Runtime> Fluyer<R> {
         Ok(StatusBarHeight::default())
     }
 
-    pub fn check_permissions(&self) -> crate::Result<PermissionStatus> {
-        Ok(PermissionStatus::default())
+    pub fn check_permissions(&self) -> crate::Result<Option<PermissionStatus>> {
+        Ok(None)
     }
 
     pub fn request_permissions(
@@ -62,6 +62,13 @@ impl<R: Runtime> Fluyer<R> {
     
     pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
         Ok(PlayerGetInfo::default())
+    }
+
+    pub fn player_playlist_add(
+        &self,
+        _: Vec<PlaylistAddMusic>
+    ) -> crate::Result<()> {
+        Ok(())
     }
 
     pub fn get_sdk_version(&self) -> crate::Result<SdkVersion> {

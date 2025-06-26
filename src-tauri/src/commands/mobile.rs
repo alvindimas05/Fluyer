@@ -11,7 +11,12 @@ pub fn check_read_audio_permission() -> bool {
     let app = GLOBAL_APP_HANDLE
         .get()
         .expect("Failed to get GLOBAL_APP_HANDLE");
-    let permissions = app.fluyer().check_permissions().unwrap();
+    let permissions_result = app.fluyer().check_permissions().unwrap();
+    if permissions_result.is_none() {
+        return false;
+    }
+
+    let permissions = permissions_result.unwrap();
     permissions.audio == PermissionState::Granted ||
         permissions.storage == PermissionState::Granted
 }

@@ -50,7 +50,7 @@ impl<R: Runtime> Fluyer<R> {
             .map_err(Into::into)
     }
 
-    pub fn check_permissions(&self) -> crate::Result<PermissionStatus> {
+    pub fn check_permissions(&self) -> crate::Result<Option<PermissionStatus>> {
         self.0
             .run_mobile_plugin("checkPermissions", ())
             .map_err(Into::into)
@@ -108,6 +108,14 @@ impl<R: Runtime> Fluyer<R> {
     pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
         self.0
             .run_mobile_plugin("playerGetInfo", ())
+            .map_err(Into::into)
+    }
+    
+    pub fn player_playlist_add(
+        &self,
+        playlist: Vec<PlaylistAddMusic>
+    ) -> crate::Result<()> {
+        self.0.run_mobile_plugin("playerPlaylistAdd", PlayerPlaylistAdd { playlist })
             .map_err(Into::into)
     }
     

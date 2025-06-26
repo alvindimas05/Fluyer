@@ -61,7 +61,6 @@ pub enum PlayerCommand {
     Seek,
     Volume,
     Clear,
-    AddPlaylist,
     RemovePlaylist,
     GotoPlaylist,
     Repeat,
@@ -100,6 +99,21 @@ pub struct PlayerGetInfo {
     pub is_empty: bool,
     pub is_playing: bool,
     pub index: usize,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerPlaylistAdd {
+    pub playlist: Vec<PlaylistAddMusic>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaylistAddMusic {
+    pub file_path: String,
+    pub title: String,
+    pub artist: String,
+    pub image: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

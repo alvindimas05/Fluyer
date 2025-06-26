@@ -40,7 +40,7 @@ pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
 }
 
 #[tauri::command]
-pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<String>) {
+pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<MusicMetadata>) {
     let mut state = state.lock().unwrap();
     state.music_player.add_playlist(playlist);
 }

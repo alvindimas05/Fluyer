@@ -36,6 +36,8 @@ private const val ALIAS_EXTERNAL_STORAGE: String = "storage"
         )
     ]
 )
+
+val LOG_TAG = "Fluyer"
 class FluyerPlugin(activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
     private val player = FluyerPlayer(activity)
@@ -86,7 +88,7 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
             val args = invoke.parseArgs(PlayerCommandArgs::class.java)
             player.sendCommand(args)
         } catch (err: Exception){
-            Log.e("Fluyer", err.toString())
+            Log.e(LOG_TAG, err.toString())
         }
         invoke.resolve()
     }
@@ -102,7 +104,17 @@ class FluyerPlugin(activity: Activity): Plugin(activity) {
                 .put("index", info.index)
             )
         } catch (err: Exception){
-            Log.e("Fluyer", err.toString())
+            Log.e(LOG_TAG, err.toString())
         }
+    }
+
+    fun playerAddPlaylist(invoke: Invoke) {
+        try {
+            val args = invoke.parseArgs(PlayerPlaylistAddArgs::class.java)
+            player.addPlaylist(args.playlist)
+        } catch (err: Exception){
+            Log.e(LOG_TAG, err.toString())
+        }
+        invoke.resolve()
     }
 }

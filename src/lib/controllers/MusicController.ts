@@ -19,6 +19,7 @@ import type {
 	CoverArtCacheQuery,
 	CoverArtResponse,
 } from "$lib/handlers/coverart";
+import {isDesktop} from "$lib/platform";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -29,8 +30,8 @@ export const MusicConfig = {
 	vmax: 1,
 	separator: "•",
 	artistSeparator: "||",
-	defaultTitle: "The Meaning of Life",
-	defaultArtist: "Musician",
+	defaultTitle: import.meta.env.VITE_DEFAULT_MUSIC_TITLE,
+	defaultArtist: import.meta.env.VITE_DEFAULT_MUSIC_ARTIST,
 	defaultAlbumImage: "/icons/default/default-album-cover.jpg",
 };
 const MusicController = {
@@ -250,19 +251,20 @@ const MusicController = {
 		invoke(CommandRoutes.MUSIC_PLAYLIST_REMOVE, { index });
 	},
 
-	addSinkMusic: async (path: string) =>
-		await MusicController.addSinkMusics([path]),
-	addSinkMusics: async (musicPaths: string[]) => {
+	addSinkMusic: async (musicData: MusicData) =>
+		await MusicController.addSinkMusics([musicData]),
+	addSinkMusics: async (musicDataList: MusicData[]) => {
 		await invoke(CommandRoutes.MUSIC_PLAYLIST_ADD, {
-			playlist: musicPaths,
+			playlist: musicDataList,
 		});
 	},
 
 	addMusicList: async (musicDataList: MusicData[]) => {
 		let isPlaylistEmpty = !MusicController.musicPlaylist().length;
-		let musicPaths: string[] = [];
-		musicDataList.forEach((music) => musicPaths.push(music.path));
-		MusicController.addSinkMusics(musicPaths);
+		MusicController.addSinkMusics(musicDataList.map(({ path, title, artist, image }) => {
+			if(isDesktop()) return { path } as MusicData;
+			return { path, title, artist, image } as MusicData;
+		}));
 
 		MusicController.addMusicPlaylist(musicDataList);
 

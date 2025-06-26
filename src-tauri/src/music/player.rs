@@ -12,10 +12,11 @@ use std::thread;
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
-
+use tauri_plugin_fluyer::models::PlaylistAddMusic;
 #[cfg(desktop)]
 use crate::logger;
 use crate::GLOBAL_APP_HANDLE;
+use crate::music::metadata::MusicMetadata;
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -180,22 +181,27 @@ impl MusicPlayer {
             }
         }
     }
-    pub fn add_playlist(&mut self, playlist: Vec<String>) {
+    pub fn add_playlist(&mut self, playlist: Vec<MusicMetadata>) {
         #[cfg(desktop)]{
             let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
             
             for (_, music) in playlist.iter().enumerate() {
-                let path = format!("\"{}\"", music).replace("\\", "/").replace("//", "/");
+                let path = format!("\"{}\"", music.path).replace("\\", "/").replace("//", "/");
                 mpv.command("loadfile", &[path.as_str(), "append"]).unwrap();
             }
         }
         
         #[cfg(target_os = "android")]{
-            for music in playlist.iter() {
-                let mut args = PlayerCommandArguments::new(PlayerCommand::AddPlaylist);
-                args.playlist_file_path = Some(music.clone());
-                GLOBAL_APP_HANDLE.get().unwrap().fluyer().player_run_command(args).unwrap();
-            }
+            let music_playlist = playlist.into_iter()
+                .map(|music| PlaylistAddMusic {
+                    file_path: music.path,
+                    title: music.title.unwrap_or(MusicMetadata::default_title()),
+                    artist: music.artist.unwrap_or(MusicMetadata::default_artist()),
+                    image: music.image,
+                })
+                .collect::<Vec<_>>();
+            GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+                .player_playlist_add(music_playlist).unwrap();
         }
     }
 

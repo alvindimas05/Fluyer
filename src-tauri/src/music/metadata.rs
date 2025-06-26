@@ -1,13 +1,15 @@
 use std::path::Path;
 use base64::Engine;
+use dotenvy_macro::dotenv;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use symphonia::core::formats::FormatOptions;
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
 
 use crate::logger;
 
-#[derive(Debug, serde::Serialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MusicMetadata {
     pub path: String,
@@ -25,6 +27,12 @@ pub struct MusicMetadata {
 }
 
 impl MusicMetadata {
+    pub fn default_title() -> String {
+        dotenv!("VITE_DEFAULT_MUSIC_TITLE").to_string()
+    }
+    pub fn default_artist() -> String {
+        dotenv!("VITE_DEFAULT_MUSIC_ARTIST").to_string()
+    }
     pub fn new(path: String) -> Self {
         MusicMetadata {
             path,

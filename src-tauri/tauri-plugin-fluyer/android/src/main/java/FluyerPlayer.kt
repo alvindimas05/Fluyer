@@ -6,8 +6,11 @@ import java.io.File
 import android.net.Uri
 import app.tauri.annotation.InvokeArg
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.session.MediaSession
 import java.util.Locale
+import androidx.core.net.toUri
 
 enum class PlayerCommand(val value: String) {
     Play("play"),
@@ -17,7 +20,6 @@ enum class PlayerCommand(val value: String) {
     Seek("seek"),
     Volume("volume"),
     Clear("clear"),
-    AddPlaylist("addPlaylist"),
     RemovePlaylist("removePlaylist"),
     GotoPlaylist("gotoPlaylist"),
     Repeat("repeat"),
@@ -30,10 +32,21 @@ class PlayerCommandArgs {
     lateinit var command: String
     var seekPosition: Long? = null
     var volume: Float? = null
-    var playlistFilePath: String? = null
     var playlistRemoveIndex: Int? = null
     var playlistGotoIndex: Int? = null
 }
+
+@InvokeArg
+class PlayerPlaylistAddArgs {
+    lateinit var playlist: List<PlaylistAddMusic>
+}
+
+data class PlaylistAddMusic (
+    val filePath: String,
+    val title: String,
+    val artist: String,
+    val image: String?,
+)
 
 data class PlayerGetInfo (
     val currentPosition: Long,
@@ -44,6 +57,7 @@ data class PlayerGetInfo (
 
 class FluyerPlayer(activity: Activity) {
     private val player = ExoPlayer.Builder(activity).build()
+    private val mediaSession = MediaSession.Builder(activity, player).build()
 
     fun sendCommand(args: PlayerCommandArgs) {
         val command = PlayerCommand.valueOf(args.command.replaceFirstChar { if (it.isLowerCase()) it.titlecase(
@@ -54,11 +68,6 @@ class FluyerPlayer(activity: Activity) {
             PlayerCommand.Pause, PlayerCommand.Stop -> player.pause()
             PlayerCommand.Seek -> player.seekTo(args.seekPosition!!)
             PlayerCommand.Volume -> player.volume = args.volume!!
-            PlayerCommand.AddPlaylist -> {
-                val file = File(args.playlistFilePath!!)
-                player.addMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
-                player.prepare()
-            }
             PlayerCommand.Next -> {
                 player.seekToNext()
             }
@@ -81,6 +90,21 @@ class FluyerPlayer(activity: Activity) {
                 player.repeatMode = Player.REPEAT_MODE_OFF
             }
         }
+    }
+
+    fun addPlaylist(playlist: List<PlaylistAddMusic>) {
+        playlist.forEach { item ->
+            val mediaItem = MediaItem.Builder()
+                .setUri(Uri.fromFile(File(item.filePath)))
+                .setMediaMetadata(MediaMetadata.Builder()
+                    .setTitle(item.title)
+                    .setArtist(item.artist)
+                    .setArtworkUri(item.image?.toUri())
+                    .build())
+                .build()
+            player.addMediaItem(mediaItem)
+        }
+        player.prepare()
     }
 
     fun getInfo(): PlayerGetInfo {
