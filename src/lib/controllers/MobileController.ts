@@ -1,22 +1,21 @@
 import { CommandRoutes } from "$lib/commands";
 import { isDesktop } from "$lib/platform";
 import {
-	mobileNavigationBarHeight,
+	mobileNavigationBarHeight, mobileShowSwipeGuide,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
 import { invoke } from "@tauri-apps/api/core";
 import {PageRoutes} from "$lib/pages";
 import {page} from "$app/stores";
+import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 
 const MobileController = {
 	initialize: async () => {
 		if (isDesktop()) return;
 		await MobileController.setNavigationBarHeight();
 		await MobileController.setStatusBarHeight();
-		page.subscribe(async ($page) => {
-			const visible = $page.url.pathname !== PageRoutes.PLAY;
-			await MobileController.setNavigationBarVisibility(visible);
-		});
+		MobileController.listenPageChange();
+		await MobileController.setSwipeGuide();
 	},
 	setStatusBarHeight: async () => {
 		const barHeight = await invoke<number>(CommandRoutes.GET_STATUS_BAR_HEIGHT);
@@ -30,6 +29,19 @@ const MobileController = {
 	},
 	setNavigationBarVisibility: async (visible: boolean) => {
 		await invoke(CommandRoutes.SET_NAVIGATION_BAR_VISIBILITY, { visible });
+	},
+	listenPageChange: () => {
+		page.subscribe(async ($page) => {
+			const visible = $page.url.pathname !== PageRoutes.PLAY;
+			await MobileController.setNavigationBarVisibility(visible);
+		});
+	},
+	setSwipeGuide: async () => {
+		mobileShowSwipeGuide.set(await PersistentStoreController.swipeGuide.get());
+	},
+	hideSwipeGuide: async () => {
+		await PersistentStoreController.swipeGuide.set(false);
+		mobileShowSwipeGuide.set(false);
 	}
 };
 

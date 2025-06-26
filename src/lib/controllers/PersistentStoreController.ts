@@ -6,7 +6,7 @@ const PersistentStoreController = {
 	initialize: async () => {
 		await PersistentStoreController.animatedBackgroundType.setStore();
 	},
-	get: () => Store.load("store.json", { autoSave: false }),
+	get: () => Store.load("store.json", { autoSave: true }),
 	musicPath: {
 		key: "music-path",
 		separator: "||",
@@ -59,6 +59,22 @@ const PersistentStoreController = {
 			);
 		},
 	},
+	swipeGuide: {
+		key: "swipe-guide",
+		get: async () => {
+			return (
+				(await (await PersistentStoreController.get()).get<boolean>(
+					PersistentStoreController.swipeGuide.key,
+				)) ?? true
+			);
+		},
+		set: async (value: boolean) => {
+			await (await PersistentStoreController.get()).set(
+				PersistentStoreController.swipeGuide.key,
+				value,
+			);
+		},
+	}
 };
 
 export default PersistentStoreController;

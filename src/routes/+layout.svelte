@@ -3,7 +3,7 @@ import "animate.css";
 import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 import "../app.scss";
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
-import { isDesktop, isWindows } from "$lib/platform";
+import {isDesktop, isMobile, isWindows} from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
@@ -18,6 +18,8 @@ import { page } from "$app/state";
 import LoadingController from "$lib/controllers/LoadingController";
 import { loadingShow } from "$lib/stores/loading";
 import {musicList} from "$lib/stores/music";
+import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
+import {mobileShowSwipeGuide} from "$lib/stores/mobile";
 interface Props {
 	children?: import("svelte").Snippet;
 }
@@ -51,8 +53,13 @@ onMount(() => setTimeout(initialize, isWindows() ? 1000 : 0));
     {@render children?.()}
 </div>
 <div class="fixed top-0 left-0 w-full h-12 z-[99999] grid grid-cols-[1fr_auto]">
-    {#if $loadingShow && Array.isArray($musicList) && [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
-        <FilterBar />
+    {#if $loadingShow}
+        {#if Array.isArray($musicList) && [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
+            <FilterBar />
+        {/if}
+        {#if isMobile() && $mobileShowSwipeGuide}
+            <SwipeGuide />
+        {/if}
     {/if}
     {#if isDesktop()}
         <TitleBar />
