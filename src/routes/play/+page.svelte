@@ -1,10 +1,11 @@
 <script lang="ts">
-    import {
-        musicCurrentIndex,
-        musicIsPlaying,
-        musicProgressValue, musicRepeatMode,
-        musicVolume,
-    } from "$lib/stores/music";
+import {
+	musicCurrentIndex,
+	musicIsPlaying,
+	musicProgressValue,
+	musicRepeatMode,
+	musicVolume,
+} from "$lib/stores/music";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
 import LrcLib from "$lib/api/lrclib";
@@ -12,12 +13,11 @@ import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
-    import {isAndroid, isMacos, isMobile} from "$lib/platform";
+import { isAndroid, isMacos, isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import musicController from "$lib/controllers/MusicController";
-import {RepeatMode} from "$lib/home/music/types";
+import { RepeatMode } from "$lib/home/music/types";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -335,13 +335,7 @@ function scrollToSelectedLyric() {
         );
         margin-top: var(--margin-vertical);
         margin-bottom: var(--margin-vertical);
-        grid-template-rows:
-            auto calc(
-                (auto - var(--mobile-status-bar-height)) - var(
-                        --mobile-navigation-bar-height
-                    )
-            )
-            auto;
+        grid-template-rows: auto calc((auto - var(--mobile-status-bar-height)) - var(--mobile-navigation-bar-height)) auto;
 
         @media (min-width: 40rem) {
             margin-top: 0;

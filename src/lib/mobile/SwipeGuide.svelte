@@ -1,6 +1,6 @@
 <script lang="ts">
 import { DotLottieSvelte } from "@lottiefiles/dotlottie-svelte";
-import {swipeMinimumTop} from "$lib/stores";
+import { swipeMinimumTop } from "$lib/stores";
 import MobileController from "$lib/controllers/MobileController";
 </script>
 

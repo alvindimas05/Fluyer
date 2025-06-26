@@ -63,9 +63,9 @@ const PersistentStoreController = {
 		key: "swipe-guide",
 		get: async () => {
 			return (
-				(await (await PersistentStoreController.get()).get<boolean>(
-					PersistentStoreController.swipeGuide.key,
-				)) ?? true
+				(await (
+					await PersistentStoreController.get()
+				).get<boolean>(PersistentStoreController.swipeGuide.key)) ?? true
 			);
 		},
 		set: async (value: boolean) => {
@@ -74,7 +74,7 @@ const PersistentStoreController = {
 				value,
 			);
 		},
-	}
+	},
 };
 
 export default PersistentStoreController;

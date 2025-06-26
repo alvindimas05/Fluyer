@@ -3,7 +3,7 @@ import "animate.css";
 import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 import "../app.scss";
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
-import {isDesktop, isMobile, isWindows} from "$lib/platform";
+import { isDesktop, isMobile, isWindows } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
@@ -17,9 +17,9 @@ import FilterBar from "$lib/filterbar/FilterBar.svelte";
 import { page } from "$app/state";
 import LoadingController from "$lib/controllers/LoadingController";
 import { loadingShow } from "$lib/stores/loading";
-import {musicList} from "$lib/stores/music";
+import { musicList } from "$lib/stores/music";
 import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
-import {mobileShowSwipeGuide} from "$lib/stores/mobile";
+import { mobileShowSwipeGuide } from "$lib/stores/mobile";
 interface Props {
 	children?: import("svelte").Snippet;
 }

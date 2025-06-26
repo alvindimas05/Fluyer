@@ -1,12 +1,13 @@
 import { CommandRoutes } from "$lib/commands";
 import { isDesktop } from "$lib/platform";
 import {
-	mobileNavigationBarHeight, mobileShowSwipeGuide,
+	mobileNavigationBarHeight,
+	mobileShowSwipeGuide,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
 import { invoke } from "@tauri-apps/api/core";
-import {PageRoutes} from "$lib/pages";
-import {page} from "$app/stores";
+import { PageRoutes } from "$lib/pages";
+import { page } from "$app/stores";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 
 const MobileController = {
@@ -42,7 +43,7 @@ const MobileController = {
 	hideSwipeGuide: async () => {
 		await PersistentStoreController.swipeGuide.set(false);
 		mobileShowSwipeGuide.set(false);
-	}
+	},
 };
 
 export default MobileController;

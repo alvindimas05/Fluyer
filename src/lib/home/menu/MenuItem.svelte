@@ -1,14 +1,14 @@
 <script lang="ts">
-import type {IconType} from "$lib/icon/types";
+import type { IconType } from "$lib/icon/types";
 import Icon from "$lib/icon/Icon.svelte";
 
 interface Props {
-    onclick: () => void;
-    icon: IconType;
-    label: string;
+	onclick: () => void;
+	icon: IconType;
+	label: string;
 }
 
-const {onclick, icon, label}: Props = $props();
+const { onclick, icon, label }: Props = $props();
 </script>
 <button
         class="text-white text-start font-medium tracking-wide px-4 py-3 my-1 mx-3 rounded

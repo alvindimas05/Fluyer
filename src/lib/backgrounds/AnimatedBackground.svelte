@@ -218,7 +218,7 @@ async function transitionToNewCanvas(force = false) {
 
 	function animate(currentTime: number) {
 		let elapsed = currentTime - startTime;
-		if(elapsed < 0) elapsed = 0;
+		if (elapsed < 0) elapsed = 0;
 		const progress = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
 
 		bufferContext.clearRect(0, 0, width, height);

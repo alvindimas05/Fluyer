@@ -1,13 +1,20 @@
 import { IconType, IconThemeType } from "$lib/icon/types";
 import type { Component } from "svelte";
 import {
-	ArrowCounterClockwise, ArrowUUpLeft, Broom, FrameCorners,
+	ArrowCounterClockwise,
+	ArrowUUpLeft,
+	Broom,
+	FrameCorners,
 	Gear,
 	MagnifyingGlass,
 	MusicNote,
 	MusicNotes,
 	PauseCircle,
-	PlayCircle, Queue, Repeat, RepeatOnce, Shuffle,
+	PlayCircle,
+	Queue,
+	Repeat,
+	RepeatOnce,
+	Shuffle,
 	SkipBackCircle,
 	SkipForwardCircle,
 	SpeakerHigh,

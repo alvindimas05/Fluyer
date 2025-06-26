@@ -25,12 +25,12 @@ switch (themeType) {
 			case IconType.Note:
 				weight = "bold";
 				break;
-            case IconType.RepeatNone:
-                color = "rgb(180, 180, 180)";
-                break;
-            case IconType.RepeatPlayNone:
-                color = "rgb(220, 220, 220)";
-                break;
+			case IconType.RepeatNone:
+				color = "rgb(180, 180, 180)";
+				break;
+			case IconType.RepeatPlayNone:
+				color = "rgb(220, 220, 220)";
+				break;
 		}
 		break;
 }

@@ -7,10 +7,15 @@ import {
 	musicVolume,
 	musicAlbumList,
 	musicPlaylist,
-	musicCurrentIndex, musicRepeatMode,
+	musicCurrentIndex,
+	musicRepeatMode,
 } from "$lib/stores/music";
 import { get } from "svelte/store";
-import {type MusicPlayerSync, type MusicData, RepeatMode} from "$lib/home/music/types";
+import {
+	type MusicPlayerSync,
+	type MusicData,
+	RepeatMode,
+} from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
 import { CommandRoutes } from "$lib/commands";
@@ -19,7 +24,7 @@ import type {
 	CoverArtCacheQuery,
 	CoverArtResponse,
 } from "$lib/handlers/coverart";
-import {isDesktop} from "$lib/platform";
+import { isDesktop } from "$lib/platform";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -119,7 +124,7 @@ const MusicController = {
 
 	progressDurationText: (negative = false): string => {
 		let minutes = 0;
-		let seconds = 0;
+		let seconds: number;
 		for (
 			seconds = negative
 				? MusicController.currentMusicDuration() -
@@ -174,7 +179,8 @@ const MusicController = {
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
 			MusicController.setCurrentMusicIndex(e.payload.index);
-			if (e.payload.isPlaying) MusicController.startProgress({ resetProgress: true });
+			if (e.payload.isPlaying)
+				MusicController.startProgress({ resetProgress: true });
 			else MusicController.stopProgress();
 
 			MusicController.setProgressValue(
@@ -215,8 +221,12 @@ const MusicController = {
 		return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 	},
 	play: (sendCommand: boolean = true) => {
-		if(MusicController.isCurrentMusicFinished() && MusicController.isProgressValueEnd()
-			&& MusicController.currentMusicIndex() < MusicController.musicPlaylist().length){
+		if (
+			MusicController.isCurrentMusicFinished() &&
+			MusicController.isProgressValueEnd() &&
+			MusicController.currentMusicIndex() <
+				MusicController.musicPlaylist().length
+		) {
 			MusicController.gotoPlaylist(MusicController.currentMusicIndex());
 		}
 
@@ -261,14 +271,16 @@ const MusicController = {
 
 	addMusicList: async (musicDataList: MusicData[]) => {
 		let isPlaylistEmpty = !MusicController.musicPlaylist().length;
-		MusicController.addSinkMusics(musicDataList.map(({ path, title, artist, image }) => {
-			if(isDesktop()) return { path } as MusicData;
-			return { path, title, artist, image } as MusicData;
-		}));
+		MusicController.addSinkMusics(
+			musicDataList.map(({ path, title, artist, image }) => {
+				if (isDesktop()) return { path } as MusicData;
+				return { path, title, artist, image } as MusicData;
+			}),
+		);
 
 		MusicController.addMusicPlaylist(musicDataList);
 
-		if(MusicController.currentMusicIndex() === -1 && isPlaylistEmpty)
+		if (MusicController.currentMusicIndex() === -1 && isPlaylistEmpty)
 			MusicController.setCurrentMusicIndex(0);
 	},
 
@@ -355,14 +367,19 @@ const MusicController = {
 	},
 
 	onPlayerBarChange: () => {
-		if(MusicController.isProgressValueEnd() || MusicController.currentMusicIndex() < 0){
+		if (
+			MusicController.isProgressValueEnd() ||
+			MusicController.currentMusicIndex() < 0
+		) {
 			MusicController.setProgressValue(0);
 			return;
 		}
 
-		setTimeout(() => MusicController.sendCommandSetPosition(
-			MusicController.realProgressDuration(),
-		));
+		setTimeout(() =>
+			MusicController.sendCommandSetPosition(
+				MusicController.realProgressDuration(),
+			),
+		);
 	},
 
 	toggleRepeatMode: () => {
@@ -378,11 +395,13 @@ const MusicController = {
 			}
 		})();
 		musicRepeatMode.set(nextRepeatMode);
-		invoke(CommandRoutes.MUSIC_CONTROLLER, { command: nextRepeatMode.toString() });
+		invoke(CommandRoutes.MUSIC_CONTROLLER, {
+			command: nextRepeatMode.toString(),
+		});
 	},
 	playShuffle: async (playlist: MusicData[] | null = null) => {
-		if(!playlist) playlist = MusicController.musicPlaylist();
-		if(playlist.length < 2) return;
+		if (!playlist) playlist = MusicController.musicPlaylist();
+		if (playlist.length < 2) return;
 
 		await MusicController.reset();
 		for (let i = playlist.length - 1; i > 0; i--) {
@@ -391,7 +410,7 @@ const MusicController = {
 		}
 		await MusicController.addMusicList(playlist);
 		MusicController.play();
-	}
+	},
 };
 
 export default MusicController;

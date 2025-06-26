@@ -1,6 +1,5 @@
 import { CommandRoutes } from "$lib/commands";
 import MusicController from "$lib/controllers/MusicController";
-import type { MusicData } from "$lib/home/music/types";
 import { invoke } from "@tauri-apps/api/core";
 
 export enum CoverArtStatus {
@@ -31,7 +30,7 @@ const CoverArt = {
 				image: null,
 			});
 
-			if(query.album) query.title = undefined;
+			if (query.album) query.title = undefined;
 
 			let cover = await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
 				query,

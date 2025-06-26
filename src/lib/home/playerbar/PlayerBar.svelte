@@ -1,19 +1,19 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import {
-    musicCurrentIndex,
-    musicIsPlaying,
-    musicProgressValue, musicRepeatMode,
-    musicVolume,
+	musicCurrentIndex,
+	musicIsPlaying,
+	musicProgressValue,
+	musicRepeatMode,
+	musicVolume,
 } from "$lib/stores/music";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import {onMount} from "svelte";
-import musicController from "$lib/controllers/MusicController";
-import {RepeatMode} from "$lib/home/music/types";
+import { onMount } from "svelte";
+import { RepeatMode } from "$lib/home/music/types";
 
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
@@ -55,21 +55,27 @@ function handleVolumeButton() {
 }
 
 onMount(() => {
-    musicProgressValue.subscribe(() => (progressPercentage = MusicController.progressPercentage()));
-    musicVolume.subscribe(() => (volumePercentage = MusicController.volumePercentage()));
-    musicCurrentIndex.subscribe(() => setTimeout(() => {
-        let music = MusicController.currentMusic();
-        if (music === null){
-            title = MusicConfig.defaultTitle;
-            artist = MusicConfig.defaultArtist;
-            albumImage = MusicConfig.defaultAlbumImage;
-            return;
-        }
+	musicProgressValue.subscribe(
+		() => (progressPercentage = MusicController.progressPercentage()),
+	);
+	musicVolume.subscribe(
+		() => (volumePercentage = MusicController.volumePercentage()),
+	);
+	musicCurrentIndex.subscribe(() =>
+		setTimeout(() => {
+			let music = MusicController.currentMusic();
+			if (music === null) {
+				title = MusicConfig.defaultTitle;
+				artist = MusicConfig.defaultArtist;
+				albumImage = MusicConfig.defaultAlbumImage;
+				return;
+			}
 
-        title = music.title!;
-        artist = MusicController.getFullArtistFromMusic(music);
-        albumImage = MusicController.currentMusicAlbumImage();
-    }, 0));
+			title = music.title!;
+			artist = MusicController.getFullArtistFromMusic(music);
+			albumImage = MusicController.currentMusicAlbumImage();
+		}, 0),
+	);
 });
 </script>
 

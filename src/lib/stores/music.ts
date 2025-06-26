@@ -1,4 +1,4 @@
-import {type MusicData, RepeatMode} from "$lib/home/music/types";
+import { type MusicData, RepeatMode } from "$lib/home/music/types";
 import { writable } from "svelte/store";
 
 export let musicList = writable<MusicData[] | null | undefined>(undefined);

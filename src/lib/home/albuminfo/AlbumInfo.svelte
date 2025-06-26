@@ -1,28 +1,30 @@
 <script lang="ts">
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
-import {filterAlbum} from "$lib/stores/filter";
-import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
+import { IconType } from "$lib/icon/types";
+import { filterAlbum } from "$lib/stores/filter";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import FilterController from "$lib/controllers/FilterController";
 
-let album = $derived($filterAlbum)
+let album = $derived($filterAlbum);
 
-function handleBack(){
-    FilterController.setFilterAlbum(null);
+function handleBack() {
+	FilterController.setFilterAlbum(null);
 }
 
 async function addMusicListAndPlay() {
-    await MusicController.reset();
-    await MusicController.addMusicList(MusicController.sortMusicList(album!.musicList));
-    MusicController.play();
+	await MusicController.reset();
+	await MusicController.addMusicList(
+		MusicController.sortMusicList(album!.musicList),
+	);
+	MusicController.play();
 }
 
-async function addMusicList(){
-    MusicController.addMusicList(MusicController.sortMusicList(album!.musicList));
+async function addMusicList() {
+	MusicController.addMusicList(MusicController.sortMusicList(album!.musicList));
 }
 
-async function playShuffle(){
-    MusicController.playShuffle(album!.musicList);
+async function playShuffle() {
+	MusicController.playShuffle(album!.musicList);
 }
 </script>
 {#if album}

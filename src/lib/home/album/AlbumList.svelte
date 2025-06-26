@@ -6,7 +6,7 @@ import MusicController from "$lib/controllers/MusicController";
 import { onMount } from "svelte";
 import { isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
-import {swipeMinimumTop} from "$lib/stores";
+import { swipeMinimumTop } from "$lib/stores";
 
 let element: HTMLDivElement;
 let elementHeight = $state(0);
@@ -48,7 +48,7 @@ onMount(() => {
 	musicList.subscribe(() => MusicController.setMusicAlbumList(groupByAlbum()));
 });
 
-$effect(() => void($swipeMinimumTop = elementHeight));
+$effect(() => void ($swipeMinimumTop = elementHeight));
 </script>
 
 <div

@@ -6,7 +6,7 @@ import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import { filterAlbum, filterSearch } from "$lib/stores/filter";
 
 interface Props {
 	music: MusicData;
@@ -21,12 +21,12 @@ let isValidSearch = $derived.by(() => {
 	const hasSearch = !!search;
 	const hasAlbum = !!album;
 
-	const matchesSearch = hasSearch && (
-			music.album?.toLowerCase().includes(search) ||
+	const matchesSearch =
+		hasSearch &&
+		(music.album?.toLowerCase().includes(search) ||
 			music.title?.toLowerCase().includes(search) ||
 			music.artist?.toLowerCase().includes(search) ||
-			music.albumArtist?.toLowerCase().includes(search)
-	);
+			music.albumArtist?.toLowerCase().includes(search));
 
 	const matchesAlbum = hasAlbum && album.name === music.album;
 
@@ -36,7 +36,6 @@ let isValidSearch = $derived.by(() => {
 		return matchesAlbum && (!hasSearch || matchesSearch);
 	}
 });
-
 
 let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
 
@@ -85,7 +84,7 @@ async function addMusicAndPlay() {
 	MusicController.play();
 }
 
-async function addMusic(){
+async function addMusic() {
 	await MusicController.addMusic(music);
 }
 

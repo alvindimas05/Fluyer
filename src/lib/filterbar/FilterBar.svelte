@@ -1,9 +1,9 @@
 <script lang="ts">
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import {isMacos, isMobile} from "$lib/platform";
+import { isMacos, isMobile } from "$lib/platform";
 import { filterSearch } from "$lib/stores/filter";
-import {mobileStatusBarHeight} from "$lib/stores/mobile";
+import { mobileStatusBarHeight } from "$lib/stores/mobile";
 </script>
 
 <div class={`h-6 absolute top-0

@@ -1,12 +1,10 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import type {AlbumData, MusicData} from "../music/types";
+import type { AlbumData, MusicData } from "../music/types";
 import MusicController from "$lib/controllers/MusicController";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
-import Icon from "$lib/icon/Icon.svelte";
-import { IconType } from "$lib/icon/types";
-import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import { filterAlbum, filterSearch } from "$lib/stores/filter";
 import FilterController from "$lib/controllers/FilterController";
 
 interface Props {
@@ -18,21 +16,23 @@ let { musicList, index }: Props = $props();
 let music = MusicController.sortMusicList(musicList)[0];
 
 let isValidSearch = $derived.by(() => {
-    const search = $filterSearch.toLowerCase();
-    const hasSearch = !!search;
-    const hasFilterAlbum = !!$filterAlbum;
+	const search = $filterSearch.toLowerCase();
+	const hasSearch = !!search;
+	const hasFilterAlbum = !!$filterAlbum;
 
-    if (hasFilterAlbum) return true;
+	if (hasFilterAlbum) return true;
 
-    if (!hasSearch) return true;
+	if (!hasSearch) return true;
 
-    return (
-        music.album?.toLowerCase().includes(search) ||
-        music.albumArtist?.toLowerCase().includes(search)
-    );
+	return (
+		music.album?.toLowerCase().includes(search) ||
+		music.albumArtist?.toLowerCase().includes(search)
+	);
 });
 
-let isValidFilterAlbum = $derived($filterAlbum && music.album && $filterAlbum.name === music.album);
+let isValidFilterAlbum = $derived(
+	$filterAlbum && music.album && $filterAlbum.name === music.album,
+);
 
 const animationDelay = 200;
 let animationClasses = $state("hidden");
@@ -78,12 +78,12 @@ function setAlbumImageFromCache() {
 	return true;
 }
 
-async function setFilterAlbum(){
-    FilterController.setFilterAlbum({
-        name: music.album,
-        artist: music.albumArtist ?? MusicController.getFullArtistFromMusic(music),
-        musicList
-    } as AlbumData);
+async function setFilterAlbum() {
+	FilterController.setFilterAlbum({
+		name: music.album,
+		artist: music.albumArtist ?? MusicController.getFullArtistFromMusic(music),
+		musicList,
+	} as AlbumData);
 }
 
 async function addMusicListAndPlay() {

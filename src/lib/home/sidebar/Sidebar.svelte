@@ -1,74 +1,73 @@
 <script lang="ts">
-	import { SidebarType } from "$lib/home/sidebar/types";
+import { SidebarType } from "$lib/home/sidebar/types";
 
-	interface Props {
-		children?: import("svelte").Snippet;
-		type: SidebarType;
+interface Props {
+	children?: import("svelte").Snippet;
+	type: SidebarType;
+}
+
+let { children, type }: Props = $props();
+
+import { isMobile } from "$lib/platform";
+import { swipeable } from "@react2svelte/swipeable";
+import type { SwipeEventData } from "@react2svelte/swipeable";
+import { swipeMinimumTop } from "$lib/stores";
+import { mobileStatusBarHeight } from "$lib/stores/mobile";
+import { sidebarShowingType } from "$lib/stores/sidebar";
+import { onMount } from "svelte";
+
+const SWIPE_RANGE = 125;
+
+let isMouseInsideArea = $state(false);
+let isShowing = $state(false);
+
+function onMouseMove(e: MouseEvent) {
+	if (
+		((type === SidebarType.Right && e.clientX > window.innerWidth - 20) ||
+			(type === SidebarType.Left && e.clientX < 20)) &&
+		e.clientY <= window.innerHeight - 8 * 16 &&
+		!isMouseInsideArea
+	) {
+		isMouseInsideArea = true;
+		isShowing = true;
+		$sidebarShowingType = type;
 	}
+}
 
-	let { children, type }: Props = $props();
+function onMouseLeave() {
+	if (!isMouseInsideArea) return;
+	isShowing = false;
+	isMouseInsideArea = false;
+	$sidebarShowingType = null;
+}
 
-	import { isMobile } from "$lib/platform";
-	import { swipeable } from "@react2svelte/swipeable";
-	import type { SwipeEventData } from "@react2svelte/swipeable";
-	import { swipeMinimumTop } from "$lib/stores";
-	import { mobileStatusBarHeight } from "$lib/stores/mobile";
-	import { sidebarShowingType } from "$lib/stores/sidebar";
-	import { onMount } from "svelte";
+function onSwipe(e: CustomEvent<SwipeEventData>) {
+	if (e.detail.initial[1] < $swipeMinimumTop) return;
 
-	const SWIPE_RANGE = 125;
-
-	let isMouseInsideArea = $state(false);
-	let isShowing = $state(false);
-
-	function onMouseMove(e: MouseEvent) {
-		if (
-				((type === SidebarType.Right && e.clientX > window.innerWidth - 20) ||
-						(type === SidebarType.Left && e.clientX < 20)) &&
-				e.clientY <= window.innerHeight - 8 * 16 &&
-				!isMouseInsideArea
-		) {
-			isMouseInsideArea = true;
-			isShowing = true;
-			$sidebarShowingType = type;
-		}
+	if (
+		((type === SidebarType.Right && e.detail.deltaX < -SWIPE_RANGE) ||
+			(type === SidebarType.Left && e.detail.deltaX > SWIPE_RANGE)) &&
+		$sidebarShowingType === null
+	) {
+		isMouseInsideArea = true;
+		isShowing = true;
+		$sidebarShowingType = type;
+	} else if (
+		((type === SidebarType.Right && e.detail.deltaX > SWIPE_RANGE) ||
+			(type === SidebarType.Left && e.detail.deltaX < -SWIPE_RANGE)) &&
+		$sidebarShowingType === type
+	) {
+		setTimeout(() => {
+			isMouseInsideArea = false;
+			isShowing = false;
+			$sidebarShowingType = null;
+		});
 	}
+}
 
-	function onMouseLeave(e: MouseEvent) {
-		if (!isMouseInsideArea) return;
-		isShowing = false;
-		isMouseInsideArea = false;
-		$sidebarShowingType = null;
-	}
-
-	function onSwipe(e: CustomEvent<SwipeEventData>) {
-		if (e.detail.initial[1] < $swipeMinimumTop) return;
-
-		if (
-				((type === SidebarType.Right && e.detail.deltaX < -SWIPE_RANGE) ||
-						(type === SidebarType.Left && e.detail.deltaX > SWIPE_RANGE)) &&
-				$sidebarShowingType === null
-		) {
-			isMouseInsideArea = true;
-			isShowing = true;
-			$sidebarShowingType = type;
-		}
-		else if (
-				((type === SidebarType.Right && e.detail.deltaX > SWIPE_RANGE) ||
-						(type === SidebarType.Left && e.detail.deltaX < -SWIPE_RANGE)) &&
-				$sidebarShowingType === type
-		) {
-			setTimeout(() => {
-				isMouseInsideArea = false;
-				isShowing = false;
-				$sidebarShowingType = null;
-			});
-		}
-	}
-
-	onMount(() => {
-		$sidebarShowingType = null;
-	});
+onMount(() => {
+	$sidebarShowingType = null;
+});
 </script>
 
 <svelte:body use:swipeable on:swiped={onSwipe} />

@@ -4,11 +4,11 @@ import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
 import { SidebarType } from "$lib/home/sidebar/types";
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
+import { IconType } from "$lib/icon/types";
 import MusicController from "$lib/controllers/MusicController";
 
-function cleanPlaylist(){
-    MusicController.reset();
+function cleanPlaylist() {
+	MusicController.reset();
 }
 </script>
 
