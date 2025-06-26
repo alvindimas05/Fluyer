@@ -217,7 +217,8 @@ async function transitionToNewCanvas(force = false) {
 	const startTime = performance.now();
 
 	function animate(currentTime: number) {
-		const elapsed = currentTime - startTime;
+		let elapsed = currentTime - startTime;
+		if(elapsed < 0) elapsed = 0;
 		const progress = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
 
 		bufferContext.clearRect(0, 0, width, height);
@@ -250,7 +251,10 @@ function onWindowResize() {
 let isMounted = false;
 onMount(() => {
 	initializeCanvas();
-	musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
+	musicCurrentIndex.subscribe(() => {
+		console.log('Transitioning');
+		setTimeout(transitionToNewCanvas, 0);
+	});
 	settingTriggerAnimatedBackground.subscribe(() => {
 		if (isMounted) setTimeout(() => transitionToNewCanvas(true), 0);
 		else isMounted = true;
