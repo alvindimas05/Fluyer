@@ -38,7 +38,7 @@ switch (themeType) {
 
 {#if Component}
     <i class="w-full h-full aspect-square">
-        <svelte:component class="w-full h-full text-[100%]" {color} {weight} this={Component} />
+        <Component class="w-full h-full text-[100%]" {color} {weight} />
     </i>
 {:else}
     <span class="text-red-500">Icon not found</span>

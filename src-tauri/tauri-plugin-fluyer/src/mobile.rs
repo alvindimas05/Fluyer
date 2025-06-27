@@ -118,6 +118,16 @@ impl<R: Runtime> Fluyer<R> {
         self.0.run_mobile_plugin("playerPlaylistAdd", PlayerPlaylistAdd { playlist })
             .map_err(Into::into)
     }
+
+    pub fn player_playlist_move_to(
+        &self,
+        from: usize,
+        to: usize,
+    ) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("playerPlaylistMoveTo", PlaylistMoveTo { from, to })
+            .map_err(Into::into)
+    }
     
     pub fn get_sdk_version(&self) -> crate::Result<SdkVersion> {
         self.0

@@ -118,6 +118,13 @@ pub struct PlaylistAddMusic {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct PlaylistMoveTo {
+    pub from: usize,
+    pub to: usize,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SdkVersion {
     pub value: u8,
 }

@@ -27,9 +27,9 @@ function gotoPlaylist() {
 }
 </script>
 
-<div class="relative">
+<div class="absolute w-full h-fit" data-index={index}>
     <div
-        class={`grid grid-cols-[max-content_auto_max-content] py-2 px-3 animate__animated animate__fadeIn
+        class={`relative grid grid-cols-[max-content_auto_max-content] py-2 px-3 animate__animated animate__fadeIn
             ${isPlaying && "bg-gray-700 bg-opacity-40"}`}
     >
         <div class="w-11 md:w-12 lg:w-14">

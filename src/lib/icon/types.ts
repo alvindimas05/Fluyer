@@ -28,4 +28,6 @@ export enum IconType {
 	RepeatOne,
 	Shuffle,
 	Fullscreen,
+	DragOn,
+	DragOff,
 }

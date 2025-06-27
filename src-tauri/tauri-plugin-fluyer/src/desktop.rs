@@ -67,6 +67,13 @@ impl<R: Runtime> Fluyer<R> {
         Ok(())
     }
 
+    pub fn player_playlist_move_to(
+        &self,
+        _: PlaylistMoveTo,
+    ) -> crate::Result<()> {
+        Ok(())
+    }
+
     pub fn get_sdk_version(&self) -> crate::Result<SdkVersion> {
         Ok(SdkVersion::default())
     }

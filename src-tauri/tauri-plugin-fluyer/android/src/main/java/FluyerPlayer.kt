@@ -19,6 +19,7 @@ import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import kotlin.properties.Delegates
 
 enum class PlayerCommand(val value: String) {
     Play("play"),
@@ -55,6 +56,12 @@ class PlaylistAddMusic {
     lateinit var title: String
     lateinit var artist: String
     var image: String? = null
+}
+
+@InvokeArg
+class PlayerPlaylistMoveToArgs {
+    var from by Delegates.notNull<Int>()
+    var to by Delegates.notNull<Int>()
 }
 
 data class PlayerGetInfo (
@@ -137,6 +144,10 @@ class FluyerPlayer(val activity: Activity) {
             player?.addMediaItem(mediaItem)
         }
         player?.prepare()
+    }
+
+    fun playlistMoveTo(from: Int, to: Int) {
+        player?.moveMediaItem(from, to)
     }
 
     fun getInfo(): PlayerGetInfo {

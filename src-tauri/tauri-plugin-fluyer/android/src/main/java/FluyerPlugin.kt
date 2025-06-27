@@ -145,4 +145,15 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
         }
         invoke.resolve()
     }
+
+    @Command
+    fun playerPlaylistMoveTo(invoke: Invoke) {
+        try {
+            val args = invoke.parseArgs(PlayerPlaylistMoveToArgs::class.java)
+            player.playlistMoveTo(args.from, args.to)
+        } catch (err: Exception){
+            Log.e(LOG_TAG, err.toString())
+        }
+        invoke.resolve()
+    }
 }

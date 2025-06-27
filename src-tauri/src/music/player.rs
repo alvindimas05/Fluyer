@@ -14,6 +14,7 @@ use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 use tauri_plugin_fluyer::FluyerExt;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistAddMusic;
+use tauri_plugin_fluyer::models::PlaylistMoveTo;
 #[cfg(desktop)]
 use crate::logger;
 use crate::GLOBAL_APP_HANDLE;
@@ -227,6 +228,14 @@ impl MusicPlayer {
         #[cfg(desktop)]
         GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-play-index", &[index.to_string().as_str()]).unwrap();
     }
+    
+    pub fn moveto_playlist(&mut self, from: usize, to: usize) {
+        #[cfg(target_os = "android")]
+        GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+            .player_playlist_move_to(from, to).ok();
+        #[cfg(desktop)]
+        GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-move", &[from.to_string().as_str(), to.to_string().as_str()]).unwrap();
+    }
 
     pub fn set_volume(&mut self, volume: f32) {
         #[cfg(target_os = "android")] {
@@ -291,7 +300,7 @@ impl MusicPlayer {
         if GLOBAL_MUSIC_MPV.get().unwrap().get_property::<i64>("playlist-pos").unwrap() < 0 {
             return
         }
-        
+
         GLOBAL_APP_HANDLE.get().unwrap().emit(
             crate::commands::route::MUSIC_PLAYER_SYNC,
             MusicPlayer::get_sync_info(is_from_next),

@@ -92,3 +92,9 @@ pub fn music_playlist_goto(state: State<'_, Mutex<AppState>>, index: usize) {
     let mut state = state.lock().unwrap();
     state.music_player.goto_playlist(index);
 }
+
+#[tauri::command]
+pub fn music_playlist_moveto(state: State<'_, Mutex<AppState>>, from: usize, to: usize) {
+    let mut state = state.lock().unwrap();
+    state.music_player.moveto_playlist(from, to);
+}

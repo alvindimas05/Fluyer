@@ -178,6 +178,7 @@ const MusicController = {
 
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
+			console.log(e.payload);
 			MusicController.setCurrentMusicIndex(e.payload.index);
 			if (e.payload.isPlaying)
 				MusicController.startProgress({ resetProgress: true });
@@ -411,6 +412,22 @@ const MusicController = {
 		await MusicController.addMusicList(playlist);
 		MusicController.play();
 	},
+	playlistMoveto: async (fromIndex: number, toIndex: number) => {
+		if (fromIndex === toIndex) return;
+
+		const currentMusic = MusicController.currentMusic();
+		const playlist = MusicController.musicPlaylist();
+		const music = playlist[fromIndex];
+		playlist.splice(fromIndex, 1);
+		playlist.splice(toIndex, 0, music);
+
+		await invoke(CommandRoutes.MUSIC_PLAYLIST_MOVETO, {
+			from: fromIndex,
+			to: toIndex,
+		});
+		musicPlaylist.set(playlist);
+		musicCurrentIndex.set(playlist.findIndex((m => m.path === currentMusic.path)));
+	}
 };
 
 export default MusicController;
