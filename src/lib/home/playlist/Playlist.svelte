@@ -31,7 +31,6 @@ function initMuuri() {
 		dragSortPredicate: {
 			action: "move",
 		},
-		dragStartPredicate: () => dragging,
 	});
 
 	muuri.on("dragStart", (item, _) => {
@@ -53,9 +52,18 @@ function initMuuri() {
 
 function createPlaylistItem(music: MusicData) {
 	const element = document.createElement("div");
-	element.className = "absolute w-full h-fit";
+	element.className = "playlist-item absolute w-full h-fit";
 	mount(PlaylistItem, { target: element, props: { music } });
 	return element;
+}
+
+function elementToggleDraggable(){
+    let elements = document.querySelectorAll(".playlist-item");
+    if(dragging) elements.forEach((el) => {
+        (el as HTMLDivElement).style.touchAction = "none";
+    }); else elements.forEach((el) => {
+        (el as HTMLDivElement).style.touchAction = "auto";
+    });
 }
 
 onMount(() => {
@@ -89,14 +97,12 @@ onMount(() => {
 			muuri.add(newItems.map(({ music }) => createPlaylistItem(music)));
 		}
 
+        elementToggleDraggable();
 		oldPlaylist = [...playlist];
 	});
 });
 
-$effect(() => {
-	dragging;
-	initMuuri();
-});
+$effect(elementToggleDraggable);
 </script>
 
 <Sidebar type={SidebarType.Right}>
