@@ -178,7 +178,6 @@ const MusicController = {
 
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-			console.log(e.payload);
 			MusicController.setCurrentMusicIndex(e.payload.index);
 			if (e.payload.isPlaying)
 				MusicController.startProgress({ resetProgress: true });

@@ -14,6 +14,7 @@ use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 use tauri_plugin_fluyer::FluyerExt;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistAddMusic;
+#[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistMoveTo;
 #[cfg(desktop)]
 use crate::logger;
@@ -167,7 +168,7 @@ impl MusicPlayer {
                 } else {
                     info.current_position
                 },
-                is_playing: if is_from_next { true } else { info.is_playing },
+                is_playing: info.is_playing,
             }
         }
         #[cfg(desktop)] {
@@ -331,7 +332,7 @@ impl MusicPlayer {
             GLOBAL_APP_HANDLE.get().unwrap().fluyer().watch_playlist_change(|_|{
                 // Note: Thread spawn is required for unknown reasons.
                 thread::spawn(||{
-                    MusicPlayer::emit_sync(true);
+                    MusicPlayer::emit_sync(false);
                 });
             }).unwrap();
         }
