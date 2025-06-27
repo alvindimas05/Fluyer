@@ -43,29 +43,5 @@ On macOS 15 Sequoia or above:
 ### iOS
 - Even though it's already tested, iOS release is not planned for now due to Apple Developer pricing.
 
-## Features Progress
-
-### Basic Functionality
-- [x] Play & Pause 
-- [x] Next
-- [x] Previous
-- [x] Volume Control
-- [x] Mute
-- [x] Shuffle & Repeat
-- [x] Playlist
-
-### Advanced Functionality
-- [x] Search
-- [x] Lyrics
-- [x] Animated Background
-- [x] Cover Art Caching
-
-### API Functionality
-- [x] MusicBrainz Integration (For Cover Art)
-
-[//]: # (- [ ] Spotify Integration &#40;For Spotify Canvas&#41;)
-
-[//]: # (- [ ] Soulseek Integration &#40;We love FLACs <3&#41;)
-
 ## Credits
 - [Default Album Cover](https://www.freepik.com/free-vector/music-notes-rainbow-colourful-with-vinyl-record-white-backgro_24459713.htm)
