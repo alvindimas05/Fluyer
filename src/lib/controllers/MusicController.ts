@@ -425,8 +425,10 @@ const MusicController = {
 			to: toIndex,
 		});
 		musicPlaylist.set(playlist);
-		musicCurrentIndex.set(playlist.findIndex((m => m.path === currentMusic.path)));
-	}
+		musicCurrentIndex.set(
+			playlist.findIndex((m) => m.path === currentMusic.path),
+		);
+	},
 };
 
 export default MusicController;

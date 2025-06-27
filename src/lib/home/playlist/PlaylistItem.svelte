@@ -7,7 +7,7 @@ interface Props {
 import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music";
+import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
 
 let { music }: Props = $props();
 
