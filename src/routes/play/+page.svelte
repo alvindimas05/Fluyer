@@ -207,7 +207,7 @@ function scrollToSelectedLyric() {
                     </div>
                 {/if}
                 <div class="flex justify-center">
-                    <button class="w-7"
+                    <button class={`w-7 ${$musicRepeatMode === RepeatMode.None ? "opacity-80" : ""}`}
                         onclick={MusicController.toggleRepeatMode}>
                         {#if $musicRepeatMode === RepeatMode.All}
                             <Icon type={IconType.Repeat} />

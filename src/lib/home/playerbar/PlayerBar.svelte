@@ -166,7 +166,7 @@ onMount(() => {
                 </div>
                 <div class="hidden md:grid justify-end">
                     <div class="grid grid-cols-[repeat(5,auto)] items-center gap-3">
-                        <button class="w-6"
+                        <button class={`w-6 ${$musicRepeatMode === RepeatMode.None ? 'opacity-60' : ''}`}
                             onclick={MusicController.toggleRepeatMode}>
                             {#if $musicRepeatMode === RepeatMode.All}
                                 <Icon type={IconType.Repeat} />
