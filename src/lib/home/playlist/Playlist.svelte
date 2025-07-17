@@ -1,6 +1,6 @@
 <script lang="ts">
 import Sidebar from "$lib/home/sidebar/Sidebar.svelte";
-import { musicPlaylist } from "$lib/stores/music";
+import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
 import { SidebarType } from "$lib/home/sidebar/types";
 import Icon from "$lib/icon/Icon.svelte";
@@ -31,6 +31,10 @@ function initMuuri() {
 		dragSortPredicate: {
 			action: "move",
 		},
+        dragStartPredicate: (item, event) => {
+            if(muuri.getItems().indexOf(item) === $musicCurrentIndex) return false;
+            return true;
+        }
 	});
 
 	muuri.on("dragStart", (item, _) => {
