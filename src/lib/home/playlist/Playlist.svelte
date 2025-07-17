@@ -32,7 +32,7 @@ function initMuuri() {
 			action: "move",
 		},
         dragStartPredicate: (item, event) => {
-            if(muuri.getItems().indexOf(item) === $musicCurrentIndex) return false;
+            if(muuri.getItems().indexOf(item) === $musicCurrentIndex || !dragging) return false;
             return true;
         }
 	});
