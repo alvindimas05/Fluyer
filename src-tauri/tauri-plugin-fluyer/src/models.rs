@@ -42,7 +42,9 @@ pub enum PermissionType {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
-pub struct WatcherPlaylistChange {}
+pub struct WatcherPlaylistChange {
+    pub is_next: bool,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]

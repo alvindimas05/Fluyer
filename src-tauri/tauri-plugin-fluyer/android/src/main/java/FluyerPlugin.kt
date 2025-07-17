@@ -75,7 +75,7 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
     fun watchPlaylistChange(invoke: Invoke) {
         val args = invoke.parseArgs(PlaylistChangeWatcherArgs::class.java)
         player.listenPlaylistChange {
-            args.channel.send(JSObject())
+            args.channel.send(JSObject().put("isNext", it))
         }
         invoke.resolve(JSObject().put("value", true))
     }

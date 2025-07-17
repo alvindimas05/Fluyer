@@ -75,7 +75,7 @@ class FluyerPlayer(val activity: Activity) {
     private lateinit var factory: ListenableFuture<MediaController>
     private var player: MediaController? = null
 
-    private var callbackPlaylistChange: (() -> Unit)? = null
+    private var callbackPlaylistChange: ((isNext: Boolean) -> Unit)? = null
 
     fun initialize() {
         factory = MediaController.Builder(
@@ -88,7 +88,11 @@ class FluyerPlayer(val activity: Activity) {
                     player!!.addListener(object: Player.Listener {
                         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                             super.onMediaItemTransition(mediaItem, reason)
-                            callbackPlaylistChange?.invoke()
+                            Log.d("FluyerPlayer", "onMediaItemTransition: $reason")
+                            callbackPlaylistChange?.invoke(arrayListOf(
+                                Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED,
+                                Player.MEDIA_ITEM_TRANSITION_REASON_SEEK,
+                            ).contains(reason))
                         }
                     })
                 }
@@ -159,7 +163,7 @@ class FluyerPlayer(val activity: Activity) {
         )
     }
 
-    fun listenPlaylistChange(callback: () -> Unit){
+    fun listenPlaylistChange(callback: (isNext: Boolean) -> Unit){
         callbackPlaylistChange = callback
     }
 }
