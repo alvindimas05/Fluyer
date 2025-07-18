@@ -16,7 +16,7 @@ bun i
 
 if [[ "$os" == "windows" ]]; then
   if [[ "$arch" == "arm64" ]]; then
-    bun i @tauri-apps/cli-win32-arm64-msvc
+    bun i @tauri-apps/cli-win32-x64-msvc
   fi
 fi
 
