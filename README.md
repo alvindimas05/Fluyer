@@ -17,6 +17,8 @@ You can grab the latest version of the app below or check the [release page](htt
 - [Android armv7](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_armv7.apk) (For older android mobile devices)
 - [Android x86_64](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x86_64.apk) (Usually for chromebooks)
 - [Android i686](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_i686.apk) (Usually for older chromebooks)
+- [Ubuntu/Debian](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_amd64.deb) ([Click here](#linux) before installing)
+- [Linux AppImage](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_amd64.AppImage)
 
 ## Issues
 
@@ -36,6 +38,19 @@ On macOS 15 Sequoia or above:
 3. Click "Open Anyway" to allow Fluyer to open
 4. Click "Open Anyway" on the next dialog box and authenticate
 5. Open Fluyer again from Applications folder
+
+### Linux
+> [!IMPORTANT]
+> If you were installing the deb, you need to install libmpv first.
+> You can check the install guide at [mpv.io](https://mpv.io/installation/).
+> Below is the example for Ubuntu Latest.
+
+```
+sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
+deb http://apt.fruit.je/debian trixie mpv
+sudo apt-get update -y
+sudo apt-get install -y libmpv2
+```
 
 ### Universal
 - High resource usage due to Animated Background. For now, the animation is disabled but the background is still enabled.
