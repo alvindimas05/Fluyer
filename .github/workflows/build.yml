@@ -100,7 +100,7 @@ jobs:
       # https://github.com/sfackler/rust-openssl/issues/2149
       - name: Setup Workflow
         shell: bash
-        run: os=windows bash scripts/setup-workflow.sh
+        run: os=windows arch=arm64 bash scripts/setup-workflow.sh
       - name: Build Workflow
         run: bun tauri:build
 

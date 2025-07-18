@@ -14,6 +14,12 @@ fi
 # Install NPM Packages
 bun i
 
+if [[ "$os" == "windows" ]]; then
+  if [[ "$arch" == "arm64" ]]; then
+    bun i @tauri-apps/cli-win32-arm64-msvc
+  fi
+fi
+
 # Setup Android
 if [[ "$os" == "android" ]]; then
     export ANDROID_NDK_HOME=$NDK_HOME
