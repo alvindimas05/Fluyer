@@ -7,17 +7,20 @@ echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
 # Install Linux Dependencies
 if [[ "$os" == "linux" ]]; then
+    sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
+    deb http://apt.fruit.je/debian bookworm mpv
     sudo apt-get update
     sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
+    sudo apt-get install -y libmpv-dev
 fi
 
 # Install NPM Packages
 bun i
 
 if [[ "$os" == "windows" ]]; then
-  if [[ "$arch" == "arm64" ]]; then
-    bun i @tauri-apps/cli-win32-arm64-msvc
-  fi
+    if [[ "$arch" == "arm64" ]]; then
+        bun i @tauri-apps/cli-win32-arm64-msvc
+    fi
 fi
 
 # Setup Android
