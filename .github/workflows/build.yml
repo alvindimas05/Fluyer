@@ -79,6 +79,10 @@ jobs:
           artifactErrorsFailBuild: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  # FIXME: Keeps giving error like required tauri-cli arm64
+  # even though it's already installed on setup-workflow.sh
+  # Probably because bun doesn't support arm64
+  # Will fix later since Windows ARM is not required for now
   build-windows-arm64:
     name: Build Windows (arm64)
     runs-on: windows-11-arm
