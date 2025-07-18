@@ -209,7 +209,7 @@ jobs:
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ./src-tauri/target/release/bundle/deb/Fluyer_${{ env.APP_VERSION }}_x64.deb,./src-tauri/target/release/bundle/appimage/Fluyer_${{ env.APP_VERSION }}_x64.AppImage
+          artifacts: ./src-tauri/target/release/bundle/deb/Fluyer_${{ env.APP_VERSION }}_amd64.deb,./src-tauri/target/release/bundle/appimage/Fluyer_${{ env.APP_VERSION }}_amd64.AppImage
           tag: v${{ env.APP_VERSION }}
           name: Fluyer v${{ env.APP_VERSION }}
           allowUpdates: true
