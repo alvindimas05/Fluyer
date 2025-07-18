@@ -87,6 +87,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+        with:
+          bun-download-url: 'https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip'
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
