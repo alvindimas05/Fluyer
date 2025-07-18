@@ -81,7 +81,7 @@ jobs:
 
   build-windows-arm64:
     name: Build Windows (arm64)
-    runs-on: windows-latest
+    runs-on: windows-11-arm
     permissions: write-all
     if: ${{ github.event.inputs.build-windows-arm64 == 'true' }}
     steps:
