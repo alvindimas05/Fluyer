@@ -3,8 +3,12 @@ name: Build & Publish
 on:
   workflow_dispatch:
     inputs:
-      build-windows:
-        description: "Build for Windows"
+      build-windows-x86_64:
+        description: "Build for Windows (x86_64)"
+        required: false
+        type: boolean
+      build-windows-arm64:
+        description: "Build for Windows (arm64)"
         required: false
         type: boolean
       build-macos-intel:
@@ -41,11 +45,11 @@ on:
         type: boolean
 
 jobs:
-  build-windows:
-    name: Build Windows
+  build-windows-x86_64:
+    name: Build Windows (x86_64)
     runs-on: windows-latest
     permissions: write-all
-    if: ${{ github.event.inputs.build-windows == 'true' }}
+    if: ${{ github.event.inputs.build-windows-x86_64 == 'true' }}
     steps: 
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -74,7 +78,41 @@ jobs:
           prerelease: true
           artifactErrorsFailBuild: true
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
+  build-windows-arm64:
+    name: Build Windows (arm64)
+    runs-on: windows-latest
+    permissions: write-all
+    if: ${{ github.event.inputs.build-windows-arm64 == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+      # Note: Setup and Build are seperated due to rust-openssl bug
+      # https://github.com/sfackler/rust-openssl/issues/2149
+      - name: Setup Workflow
+        shell: bash
+        run: os=windows bash scripts/setup-workflow.sh
+      - name: Build Workflow
+        run: bun tauri:build
+
+      - name: Publish release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ./src-tauri/target/release/bundle/nsis/Fluyer_${{ env.APP_VERSION }}_arm64-setup.exe
+          tag: v${{ env.APP_VERSION }}
+          name: Fluyer v${{ env.APP_VERSION }}
+          allowUpdates: true
+          prerelease: true
+          artifactErrorsFailBuild: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   build-macos-intel:
     name: Build MacOS (Intel)
     runs-on: macos-13

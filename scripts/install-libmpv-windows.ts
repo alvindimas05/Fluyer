@@ -21,8 +21,9 @@ async function getLatestAssetUrl(): Promise<string> {
 	}
 
 	const latestRelease = releases[0];
+	const arch = process.arch === "arm64" ? "aarch64" : "x86_64";
 	const asset = latestRelease.assets.find(
-		(a: any) => a.name.endsWith(".7z") && a.name.includes("mpv-dev-x86_64"),
+		(a: any) => a.name.endsWith(".7z") && a.name.includes(`mpv-dev-${arch}`),
 	);
 
 	if (!asset) {
