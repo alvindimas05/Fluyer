@@ -42,7 +42,7 @@ const PersistentStoreController = {
 			const value =
 				await PersistentStoreController.animatedBackgroundType.get();
 			settingAnimatedBackgroundType.set(
-				value ?? SettingAnimatedBackgroundType.Pallete,
+				value ?? SettingAnimatedBackgroundType.Prominent,
 			);
 		},
 		get: async () => {
