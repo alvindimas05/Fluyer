@@ -2,6 +2,7 @@
 import "animate.css";
 import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 import "../app.scss";
+import "toastify-js/src/toastify.css";
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
 import { isDesktop, isMobile, isWindows } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";

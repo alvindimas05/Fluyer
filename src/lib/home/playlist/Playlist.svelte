@@ -8,8 +8,9 @@ import { IconType } from "$lib/icon/types";
 import MusicController from "$lib/controllers/MusicController";
 import Muuri from "muuri";
 import { mount, onMount, unmount } from "svelte";
-import { isMobile } from "$lib/platform";
+import {isDesktop, isMobile} from "$lib/platform";
 import type { MusicData } from "$lib/home/music/types";
+import ToastController from "$lib/controllers/ToastController";
 
 let gridElement: HTMLDivElement;
 let muuri: Muuri;
@@ -48,6 +49,11 @@ function initMuuri() {
 
 		if (fromIndex === toIndex) return;
 
+        if (isDesktop() && fromIndex < $musicCurrentIndex && toIndex === $musicCurrentIndex) {
+            muuri.move(toIndex, fromIndex);
+            ToastController.info("Sorry, you can't move previous song next to the current song");
+            return;
+        }
 		MusicController.playlistMoveto(fromIndex, toIndex);
 	});
 

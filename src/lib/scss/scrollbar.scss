@@ -1,0 +1,19 @@
+.scrollbar-hidden {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+.scrollbar {
+  &::-webkit-scrollbar {
+    @apply bg-transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    @apply bg-black rounded;
+    border: 3px solid transparent;
+    border-radius: 9px;
+    background-clip: content-box;
+  }
+}

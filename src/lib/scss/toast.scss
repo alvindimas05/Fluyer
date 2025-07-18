@@ -1,0 +1,14 @@
+.toast {
+  @apply px-5 py-2 border rounded-lg p-4 shadow-xl backdrop-blur-md #{!important};
+  backdrop-filter: blur(4px);
+
+  &-info {
+    background: rgba(255, 255, 255, 0.1) !important;
+    @apply border-white/20 text-white #{!important};
+  }
+
+  &-error {
+    background: rgba(255, 0, 0, 0.1) !important;
+    @apply border-red-500/20 text-red-100 #{!important};
+  }
+}
