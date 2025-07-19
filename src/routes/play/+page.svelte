@@ -160,7 +160,7 @@ function scrollToSelectedLyric() {
                     >
                 </div>
                 <div class="font-medium text-center mt-2 opacity-90 overflow-hidden
-                    text-sm md-mdpi:text-base md-hdpi:text-sm lg-mdpi:text-base">
+                    text-sm md-mdpi:text-base md-hdpi:text-sm lg-mdpi:text-base md-hdpi:text-base md-xhdpi:text-sm lg-xhdpi:text-base">
                     <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                     <p class="animate-scroll-overflow-text"></p>
                     <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">
