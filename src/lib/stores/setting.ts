@@ -6,3 +6,6 @@ export const settingTriggerAnimatedBackground = writable("");
 export const settingAnimatedBackgroundType = writable(
 	SettingAnimatedBackgroundType.Pallete,
 );
+export const settingUiShowRepeatButton = writable(true);
+export const settingUiShowShuffleButton = writable(true);
+export const settingUiPlayShowBackButton = writable(true);

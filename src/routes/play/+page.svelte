@@ -18,6 +18,7 @@ import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { RepeatMode } from "$lib/home/music/types";
+import {settingUiPlayShowBackButton, settingUiShowRepeatButton, settingUiShowShuffleButton} from "$lib/stores/setting";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -82,6 +83,7 @@ async function onKeyDown(
 		currentTarget: EventTarget & Document;
 	},
 ) {
+    if (e.key === "Escape") handleButtonBack();
 	if (e.key === " ") handleButtonPlayPause();
 }
 
@@ -196,8 +198,8 @@ function scrollToSelectedLyric() {
                     oninput={MusicController.onPlayerBarChange}
                 />
             </div>
-            <div class={`w-full grid ${isAndroid() ? "grid-cols-5" : "grid-cols-7"} items-center gap-2 mt-4`}>
-                {#if !isAndroid()}
+            <div class={`w-full grid ${isAndroid() || !$settingUiPlayShowBackButton ? "grid-cols-[1fr_auto_auto_auto_1fr]" : "grid-cols-7"} items-center gap-2 mt-4`}>
+                {#if !isAndroid() && $settingUiPlayShowBackButton}
                     <div class="flex items-center">
                         <button
                             id="btn-back"
@@ -206,17 +208,19 @@ function scrollToSelectedLyric() {
                         ><Icon type={IconType.PlayBack} /></button>
                     </div>
                 {/if}
-                <div class="flex justify-center">
-                    <button class={`w-7 ${$musicRepeatMode === RepeatMode.None ? "opacity-80" : ""}`}
-                        onclick={MusicController.toggleRepeatMode}>
-                        {#if $musicRepeatMode === RepeatMode.All}
-                            <Icon type={IconType.Repeat} />
-                        {:else if $musicRepeatMode === RepeatMode.None}
-                            <Icon type={IconType.RepeatPlayNone} />
-                        {:else if $musicRepeatMode === RepeatMode.One}
-                            <Icon type={IconType.RepeatOne} />
-                        {/if}
-                    </button>
+                <div class="flex justify-end">
+                    {#if $settingUiShowRepeatButton}
+                        <button class={`w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2 ${$musicRepeatMode === RepeatMode.None ? "opacity-80" : ""}`}
+                                onclick={MusicController.toggleRepeatMode}>
+                            {#if $musicRepeatMode === RepeatMode.All}
+                                <Icon type={IconType.Repeat} />
+                            {:else if $musicRepeatMode === RepeatMode.None}
+                                <Icon type={IconType.RepeatPlayNone} />
+                            {:else if $musicRepeatMode === RepeatMode.One}
+                                <Icon type={IconType.RepeatOne} />
+                            {/if}
+                        </button>
+                    {/if}
                 </div>
                 <div class="flex justify-end">
                     <button
@@ -244,10 +248,12 @@ function scrollToSelectedLyric() {
                         ><Icon type={IconType.Next} /></button
                     >
                 </div>
-                <div class="flex justify-center">
-                    <button class="w-7" onclick={() => MusicController.playShuffle()}>
-                        <Icon type={IconType.Shuffle} />
-                    </button>
+                <div class="flex justify-start">
+                    {#if $settingUiShowShuffleButton}
+                        <button class="w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2" onclick={() => MusicController.playShuffle()}>
+                            <Icon type={IconType.Shuffle} />
+                        </button>
+                    {/if}
                 </div>
             </div>
             <div id="volume-bar" class="mt-5 animate__animated">

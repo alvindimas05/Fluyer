@@ -10,6 +10,7 @@ import {
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile";
 import { settingIsLoading } from "$lib/stores/setting";
+import SettingUserInteface from "$lib/settings/user-interface/SettingUserInteface.svelte";
 let isLoading = $derived($settingIsLoading);
 </script>
 
@@ -24,6 +25,7 @@ let isLoading = $derived($settingIsLoading);
                     <SettingMusicPaths />
                 {/if}
                 <SettingAnimatedBackground />
+                <SettingUserInteface />
             </div>
             <div>
                 <button

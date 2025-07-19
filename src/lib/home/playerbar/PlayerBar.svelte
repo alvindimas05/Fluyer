@@ -14,6 +14,7 @@ import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { onMount } from "svelte";
 import { RepeatMode } from "$lib/home/music/types";
+import {settingUiShowRepeatButton, settingUiShowShuffleButton} from "$lib/stores/setting";
 
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
@@ -22,6 +23,12 @@ let albumImage = $state(MusicConfig.defaultAlbumImage);
 let isPlaying = $derived($musicIsPlaying);
 let progressPercentage = $state(MusicController.progressPercentage());
 let volumePercentage = $state(MusicController.volumePercentage());
+
+const gridRight = (() => {
+    if($settingUiShowRepeatButton && $settingUiShowShuffleButton) return "grid-cols-[repeat(5,auto)]";
+    if($settingUiShowRepeatButton || $settingUiShowShuffleButton) return "grid-cols-[repeat(4,auto)]";
+    return "grid-cols-[repeat(3,auto)]";
+})();
 
 function handleButtonPlayPause() {
 	if (MusicController.isPlaying()) {
@@ -165,20 +172,24 @@ onMount(() => {
                     </div>
                 </div>
                 <div class="hidden md:grid justify-end">
-                    <div class="grid grid-cols-[repeat(5,auto)] items-center gap-3">
-                        <button class={`w-6 ${$musicRepeatMode === RepeatMode.None ? 'opacity-60' : ''}`}
-                            onclick={MusicController.toggleRepeatMode}>
-                            {#if $musicRepeatMode === RepeatMode.All}
-                                <Icon type={IconType.Repeat} />
-                            {:else if $musicRepeatMode === RepeatMode.None}
-                                <Icon type={IconType.RepeatNone} />
-                            {:else if $musicRepeatMode === RepeatMode.One}
-                                <Icon type={IconType.RepeatOne} />
-                            {/if}
-                        </button>
-                        <button class="w-6" onclick={() => MusicController.playShuffle()}>
-                            <Icon type={IconType.Shuffle} />
-                        </button>
+                    <div class={`grid items-center gap-3 ${gridRight}`}>
+                        {#if $settingUiShowRepeatButton}
+                            <button class={`w-6 ${$musicRepeatMode === RepeatMode.None ? 'opacity-60' : ''}`}
+                                    onclick={MusicController.toggleRepeatMode}>
+                                {#if $musicRepeatMode === RepeatMode.All}
+                                    <Icon type={IconType.Repeat} />
+                                {:else if $musicRepeatMode === RepeatMode.None}
+                                    <Icon type={IconType.RepeatNone} />
+                                {:else if $musicRepeatMode === RepeatMode.One}
+                                    <Icon type={IconType.RepeatOne} />
+                                {/if}
+                            </button>
+                        {/if}
+                        {#if $settingUiShowShuffleButton}
+                            <button class="w-6" onclick={() => MusicController.playShuffle()}>
+                                <Icon type={IconType.Shuffle} />
+                            </button>
+                        {/if}
                         <button class="w-6" onclick={handleVolumeButton}>
                             {#if volumePercentage > 0}
                                 <Icon type={IconType.Speaker} />
