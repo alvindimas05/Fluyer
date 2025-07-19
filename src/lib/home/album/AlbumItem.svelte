@@ -117,10 +117,10 @@ setTimeout(
              src={albumImage}
              alt="Album" />
     </div>
-    <p class="font-medium sm:text-lg md:text-xl mt-2 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
+    <p class="font-medium mt-2 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
         {music.album}
     </p>
-    <p class="text-[15px] sm:text-base md:text-lg text-opacity-background-80 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
+    <p class="text-[15px] sm:text-base text-opacity-background-80 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
         {music.albumArtist ?? MusicController.getFullArtistFromMusic(music)}
     </p>
 </div>
