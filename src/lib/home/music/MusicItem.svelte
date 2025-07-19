@@ -91,7 +91,7 @@ async function addMusic() {
 onMount(checkAlbumImage);
 </script>
 
-<div class={`relative text-sm md:text-base animate__animated animate__fadeIn animate__slow
+<div class={`relative text-sm animate__animated animate__fadeIn animate__slow
 	${!isValidSearch && "hidden"}`}>
 	<div
 		class="grid grid-cols-[max-content_auto_max-content] py-2"
@@ -118,7 +118,7 @@ onMount(checkAlbumImage);
 	<div class="absolute top-0 left-0 py-2 w-full">
 		<div class="w-full grid grid-cols-[max-content_auto_max-content] music-item-play animate__animated animate__faster animate__fadeOut">
 			<button
-					class="w-12 md:w-14"
+					class="w-12 h-12 md:w-14 md:h-14"
 					onclick={addMusicAndPlay}
 			>
 				<div

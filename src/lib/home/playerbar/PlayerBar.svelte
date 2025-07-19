@@ -143,7 +143,7 @@ onMount(() => {
                 <div
                     class="ms-2 md:ms-0 md:flex items-center justify-center
                         order-first md:order-none
-                        text-sm md:text-base"
+                        text-sm md:text-[15px]"
                 >
                     <div
                         class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
@@ -155,7 +155,7 @@ onMount(() => {
                                     alt="Album"
                             />
                         </button>
-                        <div class="ms-3 overflow-hidden">
+                        <div class="ms-3 overflow-hidden grid grid-rows-[auto_1fr_1fr]">
                             <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                             <p class="animate-scroll-overflow-text"></p>
                             <p

@@ -108,19 +108,23 @@ setTimeout(
 >
     <div class="relative w-full">
         <div
-            class="album-item-actions w-full h-full absolute rounded-lg
-            bg-white/20 ring-2 ring-white cursor-pointer
+            class="album-item-actions w-full h-full absolute rounded-lg z-20
+            bg-white/20 shadow-[inset_0_0_0_2px_white] cursor-pointer
 			animate__animated animate__faster animate__fadeOut"
             onclick={setFilterAlbum}
         ></div>
-        <img class={`rounded-lg w-full shadow-lg ${isValidFilterAlbum && "ring-2 ring-white"}`}
+        {#if isValidFilterAlbum}
+            <div class="w-full h-full absolute top-0 left-0 z-10
+            rounded-lg shadow-[inset_0_0_0_2px_white]"></div>
+        {/if}
+        <img class={`rounded-lg w-full shadow-lg`}
              src={albumImage}
              alt="Album" />
     </div>
     <p class="font-medium mt-2 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
         {music.album}
     </p>
-    <p class="text-[15px] sm:text-base text-opacity-background-80 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
+    <p class="text-[15px] sm:text-base md:text-lg text-opacity-background-80 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
         {music.albumArtist ?? MusicController.getFullArtistFromMusic(music)}
     </p>
 </div>
