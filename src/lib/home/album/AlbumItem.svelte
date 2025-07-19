@@ -113,7 +113,7 @@ setTimeout(
 			animate__animated animate__faster animate__fadeOut"
             onclick={setFilterAlbum}
         ></div>
-        <img class={`rounded-lg w-full ${isValidFilterAlbum && "ring-2 ring-white"}`}
+        <img class={`rounded-lg w-full shadow-lg ${isValidFilterAlbum && "ring-2 ring-white"}`}
              src={albumImage}
              alt="Album" />
     </div>
