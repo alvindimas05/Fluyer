@@ -88,7 +88,6 @@ class FluyerPlayer(val activity: Activity) {
                     player!!.addListener(object: Player.Listener {
                         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                             super.onMediaItemTransition(mediaItem, reason)
-                            Log.d("FluyerPlayer", "onMediaItemTransition: $reason")
                             callbackPlaylistChange?.invoke(arrayListOf(
                                 Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED,
                                 Player.MEDIA_ITEM_TRANSITION_REASON_SEEK,
