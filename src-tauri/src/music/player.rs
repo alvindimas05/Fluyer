@@ -66,7 +66,7 @@ impl MusicPlayer {
 
         #[cfg(desktop)]{
             GLOBAL_MUSIC_MPV.set(Mpv::with_initializer(|mpv|{
-                let log_path = format!("{}/fluyer-mpv.log", temp_dir().display());
+                let log_path = logger::get_mpv_log_path();
                 mpv.set_option("log-file", log_path.clone())?;
                 mpv.set_property("vo", "null")?;
                 logger::debug!("The mpv log file is saved at {}", log_path);

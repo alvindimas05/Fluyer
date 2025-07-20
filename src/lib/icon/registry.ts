@@ -22,6 +22,7 @@ import {
 	SpeakerX,
 	Trash,
 	XCircle,
+	FileText,
 } from "phosphor-svelte";
 
 export const iconRegistry: Record<
@@ -54,6 +55,7 @@ export const iconRegistry: Record<
 		[IconType.Fullscreen]: FrameCorners,
 		[IconType.DragOn]: DotsSixVertical,
 		[IconType.DragOff]: LockSimple,
+		[IconType.SaveLog]: FileText,
 	},
 	[IconThemeType.Lucide]: {},
 	[IconThemeType.Material]: {},

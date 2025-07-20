@@ -85,6 +85,9 @@ pub fn run() {
             commands::decorum::decorum_show_snap_overlay,
             #[cfg(mobile)]
             commands::mobile::set_navigation_bar_visibility,
+
+            commands::developer::developer_save_log,
+            commands::developer::developer_save_mpv_log,
         ])
         .on_window_event(|_, event| {
             match event {

@@ -1,10 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod logger;
+
+use std::env::temp_dir;
 use simplelog::{
     ColorChoice, CombinedLogger, LevelFilter, TermLogger, TerminalMode, WriteLogger,
 };
-use std::{env::temp_dir, fs::File};
+use std::fs::File;
 
 fn main() {
     #[cfg(desktop)]
@@ -16,8 +19,8 @@ fn main() {
 #[cfg(desktop)]
 fn init_logging() {
     use simplelog::ConfigBuilder;
-    let log_path = format!("{}/fluyer.log", temp_dir().display());
-    
+    let log_path = logger::get_log_path();
+
     let mut config = ConfigBuilder::new();
     config.add_filter_ignore_str("symphonia_core");
     let config = config.build();

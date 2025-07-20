@@ -30,4 +30,5 @@ export enum IconType {
 	Fullscreen,
 	DragOn,
 	DragOff,
+	SaveLog,
 }

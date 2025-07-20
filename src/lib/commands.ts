@@ -23,4 +23,7 @@ export const CommandRoutes = {
 	LOG_ERROR: "log_error",
 
 	COVER_ART_GET: "cover_art_get",
+
+	DEVELOPER_SAVE_LOG: "developer_save_log",
+	DEVELOPER_SAVE_MPV_LOG: "developer_save_mpv_log",
 };
