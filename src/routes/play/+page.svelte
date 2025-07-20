@@ -1,129 +1,138 @@
 <script lang="ts">
-import {
-	musicCurrentIndex,
-	musicIsPlaying,
-	musicProgressValue,
-	musicRepeatMode,
-	musicVolume,
-} from "$lib/stores/music";
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import type MusicLyric from "$lib/home/music/lyric";
-import LrcLib from "$lib/api/lrclib";
-import {
-	mobileNavigationBarHeight,
-	mobileStatusBarHeight,
-} from "$lib/stores/mobile";
-import { isAndroid, isMacos, isMobile } from "$lib/platform";
-import PageController from "$lib/controllers/PageController";
-import Icon from "$lib/icon/Icon.svelte";
-import { IconType } from "$lib/icon/types";
-import { RepeatMode } from "$lib/home/music/types";
-import {settingUiPlayShowBackButton, settingUiShowRepeatButton, settingUiShowShuffleButton} from "$lib/stores/setting";
+    import {
+        musicCurrentIndex,
+        musicIsPlaying,
+        musicProgressValue,
+        musicRepeatMode,
+        musicVolume,
+    } from "$lib/stores/music";
+    import MusicController, {
+        MusicConfig,
+    } from "$lib/controllers/MusicController";
+    import type MusicLyric from "$lib/home/music/lyric";
+    import LrcLib from "$lib/api/lrclib";
+    import {
+        mobileNavigationBarHeight,
+        mobileStatusBarHeight,
+    } from "$lib/stores/mobile";
+    import { isAndroid, isMacos, isMobile } from "$lib/platform";
+    import PageController from "$lib/controllers/PageController";
+    import Icon from "$lib/icon/Icon.svelte";
+    import { IconType } from "$lib/icon/types";
+    import { RepeatMode } from "$lib/home/music/types";
+    import {
+        settingUiPlayShowBackButton,
+        settingUiShowRepeatButton,
+        settingUiShowShuffleButton,
+    } from "$lib/stores/setting";
 
-let music = $state(MusicController.currentMusic());
-let progressPercentage = $state(MusicController.progressPercentage());
-let progressDurationText = $state(MusicController.progressDurationText());
-let progressDurationNegativeText = $state(
-	MusicController.progressDurationText(true),
-);
-let albumImage = $state(MusicConfig.defaultAlbumImage);
+    let music = $state(MusicController.currentMusic());
+    let progressPercentage = $state(MusicController.progressPercentage());
+    let progressDurationText = $state(MusicController.progressDurationText());
+    let progressDurationNegativeText = $state(
+        MusicController.progressDurationText(true),
+    );
+    let albumImage = $state(MusicConfig.defaultAlbumImage);
 
-let lyrics: MusicLyric[] = $state([]);
-let selectedLyricIndex = $state(0);
-let volumePercentage = $state(MusicController.volumePercentage());
+    let lyrics: MusicLyric[] = $state([]);
+    let selectedLyricIndex = $state(0);
+    let volumePercentage = $state(MusicController.volumePercentage());
 
-const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
-	progressPercentage = MusicController.progressPercentage();
-	progressDurationText = MusicController.progressDurationText();
-	progressDurationNegativeText = MusicController.progressDurationText(true);
+    const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
+        progressPercentage = MusicController.progressPercentage();
+        progressDurationText = MusicController.progressDurationText();
+        progressDurationNegativeText =
+            MusicController.progressDurationText(true);
 
-	resetSelectedLyricIndex();
-});
-const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => {
-	music = MusicController.currentMusic();
-	albumImage = MusicController.currentMusicAlbumImage();
-	resetLyrics();
-});
+        resetSelectedLyricIndex();
+    });
+    const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => {
+        music = MusicController.currentMusic();
+        albumImage = MusicController.currentMusicAlbumImage();
+        resetLyrics();
+    });
 
-const unlistenMusicVolume = musicVolume.subscribe(() => {
-	volumePercentage = MusicController.volumePercentage();
-});
+    const unlistenMusicVolume = musicVolume.subscribe(() => {
+        volumePercentage = MusicController.volumePercentage();
+    });
 
-function handleButtonPlayPause() {
-	if (
-		MusicController.currentMusic() === null ||
-		MusicController.isProgressValueEnd()
-	) {
-		return;
-	}
+    function handleButtonPlayPause() {
+        if (
+            MusicController.currentMusic() === null ||
+            MusicController.isProgressValueEnd()
+        ) {
+            return;
+        }
 
-	if (MusicController.isPlaying()) {
-		MusicController.setIsPlaying(false);
-		MusicController.pause();
-	} else MusicController.play();
-}
+        if (MusicController.isPlaying()) {
+            MusicController.setIsPlaying(false);
+            MusicController.pause();
+        } else MusicController.play();
+    }
 
-function handleButtonPrevious() {
-	MusicController.previousMusic();
-}
+    function handleButtonPrevious() {
+        MusicController.previousMusic();
+    }
 
-function handleButtonNext() {
-	MusicController.nextMusic();
-}
+    function handleButtonNext() {
+        MusicController.nextMusic();
+    }
 
-function handleButtonBack() {
-	unlistenMusicProgressValue();
-	unlistenMusicCurrentIndex();
-	unlistenMusicVolume();
-	PageController.back();
-}
+    function handleButtonBack() {
+        unlistenMusicProgressValue();
+        unlistenMusicCurrentIndex();
+        unlistenMusicVolume();
+        PageController.back();
+    }
 
-async function onKeyDown(
-	e: KeyboardEvent & {
-		currentTarget: EventTarget & Document;
-	},
-) {
-    if (e.key === "Escape") handleButtonBack();
-	if (e.key === " ") handleButtonPlayPause();
-}
+    async function onKeyDown(
+        e: KeyboardEvent & {
+            currentTarget: EventTarget & Document;
+        },
+    ) {
+        if (e.key === "Escape") handleButtonBack();
+        if (e.key === " ") handleButtonPlayPause();
+    }
 
-async function resetLyrics() {
-	selectedLyricIndex = 0;
+    async function resetLyrics() {
+        selectedLyricIndex = 0;
 
-	if (MusicController.currentMusic() == null) return;
-	const resLyrics = await LrcLib.getLyrics(MusicController.currentMusic()!);
-	if (resLyrics == null) {
-		lyrics = [];
-		return;
-	}
-	lyrics = resLyrics;
-}
+        if (MusicController.currentMusic() == null) return;
+        const resLyrics = await LrcLib.getLyrics(
+            MusicController.currentMusic()!,
+        );
+        if (resLyrics == null) {
+            lyrics = [];
+            return;
+        }
+        lyrics = resLyrics;
+    }
 
-function resetSelectedLyricIndex() {
-	if (lyrics.length < 1) return;
+    function resetSelectedLyricIndex() {
+        if (lyrics.length < 1) return;
 
-	if (MusicController.progressDuration() < lyrics[0].duration) {
-		scrollToSelectedLyric();
-		return;
-	}
-	// Note: Using for loop since it's the fastest. Just in case though :)
-	for (var i = 0; i < lyrics.length; i++) {
-		if (MusicController.progressDuration() < lyrics[i].duration) {
-			selectedLyricIndex = i - 1;
-			scrollToSelectedLyric();
-			return;
-		}
-	}
-	selectedLyricIndex = lyrics.length - 1;
-	scrollToSelectedLyric();
-}
+        if (MusicController.progressDuration() < lyrics[0].duration) {
+            scrollToSelectedLyric();
+            return;
+        }
+        // Note: Using for loop since it's the fastest. Just in case though :)
+        for (var i = 0; i < lyrics.length; i++) {
+            if (MusicController.progressDuration() < lyrics[i].duration) {
+                selectedLyricIndex = i - 1;
+                scrollToSelectedLyric();
+                return;
+            }
+        }
+        selectedLyricIndex = lyrics.length - 1;
+        scrollToSelectedLyric();
+    }
 
-function scrollToSelectedLyric() {
-	document.getElementById("selected-lyric")?.scrollIntoView({
-		block: window.innerWidth > 768 ? "center" : "start",
-		behavior: "smooth",
-	});
-}
+    function scrollToSelectedLyric() {
+        document.getElementById("selected-lyric")?.scrollIntoView({
+            block: window.innerWidth > 768 ? "center" : "start",
+            behavior: "smooth",
+        });
+    }
 </script>
 
 <svelte:document onkeydown={onKeyDown} />
@@ -159,14 +168,19 @@ function scrollToSelectedLyric() {
                         >{progressDurationText}</span
                     >
                 </div>
-                <div class="font-medium text-center mt-2 opacity-90 overflow-hidden
-                    text-sm md-mdpi:text-base md-hdpi:text-sm lg-mdpi:text-base md-hdpi:text-base md-xhdpi:text-sm lg-xhdpi:text-base">
+                <div
+                    class="font-medium text-center mt-2 opacity-90 overflow-hidden
+                    text-sm md-mdpi:text-base md-hdpi:text-sm lg-mdpi:text-base md-xhdpi:text-sm lg-xhdpi:text-base"
+                >
                     <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                     <p class="animate-scroll-overflow-text"></p>
-                    <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">
+                    <p
+                        class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
+                    >
                         {music?.albumArtist ??
                             music?.artist ??
-                            MusicConfig.defaultArtist} {MusicConfig.separator}
+                            MusicConfig.defaultArtist}
+                        {MusicConfig.separator}
                         {music?.title ?? MusicConfig.defaultTitle}
                     </p>
                 </div>
@@ -198,20 +212,25 @@ function scrollToSelectedLyric() {
                     oninput={MusicController.onPlayerBarChange}
                 />
             </div>
-            <div class={`w-full grid ${isAndroid() || !$settingUiPlayShowBackButton ? "grid-cols-[1fr_auto_auto_auto_1fr]" : "grid-cols-7"} items-center gap-2 mt-4`}>
+            <div
+                class={`w-full grid ${isAndroid() || !$settingUiPlayShowBackButton ? "grid-cols-[1fr_auto_auto_auto_1fr]" : "grid-cols-7"} items-center gap-2 mt-4`}
+            >
                 {#if !isAndroid() && $settingUiPlayShowBackButton}
                     <div class="flex items-center">
                         <button
                             id="btn-back"
                             class="w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2 animate__animated"
                             onclick={handleButtonBack}
-                        ><Icon type={IconType.PlayBack} /></button>
+                            ><Icon type={IconType.PlayBack} /></button
+                        >
                     </div>
                 {/if}
                 <div class="flex justify-end">
                     {#if $settingUiShowRepeatButton}
-                        <button class={`w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2 ${$musicRepeatMode === RepeatMode.None ? "opacity-80" : ""}`}
-                                onclick={MusicController.toggleRepeatMode}>
+                        <button
+                            class={`w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2 ${$musicRepeatMode === RepeatMode.None ? "opacity-80" : ""}`}
+                            onclick={MusicController.toggleRepeatMode}
+                        >
                             {#if $musicRepeatMode === RepeatMode.All}
                                 <Icon type={IconType.Repeat} />
                             {:else if $musicRepeatMode === RepeatMode.None}
@@ -233,7 +252,7 @@ function scrollToSelectedLyric() {
                     <button
                         class="w-12 sm:w-14 md-mdpi:w-12 md-hdpi:w-12 lg-mdpi:w-14"
                         onclick={handleButtonPlayPause}
-                        >
+                    >
                         {#if $musicIsPlaying}
                             <Icon type={IconType.Pause} />
                         {:else}
@@ -250,7 +269,10 @@ function scrollToSelectedLyric() {
                 </div>
                 <div class="flex justify-start">
                     {#if $settingUiShowShuffleButton}
-                        <button class="w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2" onclick={() => MusicController.playShuffle()}>
+                        <button
+                            class="w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2"
+                            onclick={() => MusicController.playShuffle()}
+                        >
                             <Icon type={IconType.Shuffle} />
                         </button>
                     {/if}
@@ -258,7 +280,10 @@ function scrollToSelectedLyric() {
             </div>
             <div id="volume-bar" class="mt-5 animate__animated">
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-                    <button class="w-5" onclick={() => MusicController.setVolume(0)}>
+                    <button
+                        class="w-5"
+                        onclick={() => MusicController.setVolume(0)}
+                    >
                         <Icon type={IconType.Mute} />
                     </button>
                     <div class="relative">
@@ -280,7 +305,10 @@ function scrollToSelectedLyric() {
                             step={MusicConfig.vstep}
                         />
                     </div>
-                    <button class="w-5" onclick={() => MusicController.setVolume(1)}>
+                    <button
+                        class="w-5"
+                        onclick={() => MusicController.setVolume(1)}
+                    >
                         <Icon type={IconType.Speaker} />
                     </button>
                 </div>
@@ -302,22 +330,30 @@ function scrollToSelectedLyric() {
                     md-hdpi:text-[1.15rem] lg-hdpi:text-[1.4rem]"
                 >
                     {#each lyrics as lyric, i}
-                        <p
-                            id={selectedLyricIndex === i ? "selected-lyric" : ""}
-                            class={selectedLyricIndex === i ? "text-[1.25rem] md:text-[1.55rem] lg:text-[1.85rem]" +
-                             "md-hdpi:text-[1.25rem] lg-hdpi:text-[1.55rem]" +
-                             "py-5 md:py-7 lg:py-10"
+                        <div
+                            id={selectedLyricIndex === i
+                                ? "selected-lyric"
+                                : ""}
+                            class={selectedLyricIndex === i
+                                ? `text-[1.25rem] md:text-[1.55rem] lg:text-[1.85rem]
+                                  md-hdpi:text-[1.25rem] lg-hdpi:text-[1.55rem]
+                                  py-5 md:py-7 lg:py-10`
                                 : "opacity-50 py-5 md:py-7 lg:py-10"}
                         >
                             {#if lyric.value.length > 0}
                                 {lyric.value}
                             {:else}
-                                <div class={`${selectedLyricIndex === i ? 'w-[1.35rem] md:w-[1.85rem] lg:w-[2.25rem]'
-                                : 'w-[1.2rem] md:w-[1.7rem] lg:w-[2.1rem]'}`}>
+                                <div
+                                    class={`${
+                                        selectedLyricIndex === i
+                                            ? "w-[1.35rem] md:w-[1.85rem] lg:w-[2.25rem]"
+                                            : "w-[1.2rem] md:w-[1.7rem] lg:w-[2.1rem]"
+                                    }`}
+                                >
                                     <Icon type={IconType.Note} />
                                 </div>
                             {/if}
-                        </p>
+                        </div>
                     {/each}
                 </div>
             </div>
@@ -345,7 +381,11 @@ function scrollToSelectedLyric() {
         );
         margin-top: var(--margin-vertical);
         margin-bottom: var(--margin-vertical);
-        grid-template-rows: auto calc((auto - var(--mobile-status-bar-height)) - var(--mobile-navigation-bar-height)) auto;
+        grid-template-rows: auto calc(
+                (auto - var(--mobile-status-bar-height)) - var(
+                        --mobile-navigation-bar-height
+                    )
+            ) auto;
 
         @media (min-width: 40rem) {
             margin-top: 0;
