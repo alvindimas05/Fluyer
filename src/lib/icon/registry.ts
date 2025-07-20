@@ -22,7 +22,7 @@ import {
 	SpeakerX,
 	Trash,
 	XCircle,
-	FileText,
+	FileText, QuestionMark,
 } from "phosphor-svelte";
 
 export const iconRegistry: Record<
@@ -30,6 +30,7 @@ export const iconRegistry: Record<
 	Partial<Record<IconType, Component>>
 > = {
 	[IconThemeType.Phosphor]: {
+		[IconType.Unknown]: QuestionMark,
 		[IconType.Play]: PlayCircle,
 		[IconType.Pause]: PauseCircle,
 		[IconType.Previous]: SkipBackCircle,

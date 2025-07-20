@@ -10,7 +10,7 @@ interface Props {
 let { type }: Props = $props();
 const themeType = IconThemeType.Phosphor;
 const Component =
-	iconRegistry[themeType]?.[type] ?? iconRegistry[themeType]?.["QuestionMark"];
+	iconRegistry[themeType]?.[type] ?? iconRegistry[themeType]?.[IconType.Unknown];
 
 let color = "white";
 let weight: IconWeight = "regular";

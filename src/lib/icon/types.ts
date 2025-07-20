@@ -5,6 +5,7 @@ export enum IconThemeType {
 }
 
 export enum IconType {
+	Unknown,
 	Play,
 	Pause,
 	Previous,
