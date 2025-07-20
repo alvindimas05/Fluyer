@@ -22,6 +22,7 @@
 	"dependencies": {
 		"@fontsource/inter": "^5.2.5",
 		"@lottiefiles/dotlottie-svelte": "^0.6.2",
+		"@lucide/svelte": "^0.525.0",
 		"@react2svelte/swipeable": "^0.1.4",
 		"@tauri-apps/api": "^2.5.0",
 		"@tauri-apps/plugin-dialog": "~2.2.1",
@@ -31,7 +32,6 @@
 		"animate.css": "^4.1.1",
 		"axios": "^1.9.0",
 		"caniuse-lite": "^1.0.30001717",
-		"capitalize": "^2.0.4",
 		"color.js": "^1.2.0",
 		"colorthief": "^2.6.0",
 		"fluidscroll": "^2.0.0",
@@ -39,6 +39,7 @@
 		"sass": "^1.88.0",
 		"sleep-promise": "^9.1.0",
 		"stackblur-canvas": "^2.7.0",
+		"svelte-material-icons": "^3.0.5",
 		"toastify-js": "^1.12.0",
 		"virtua": "^0.41.5",
 		"web-animations-js": "^2.3.2"
@@ -64,5 +65,10 @@
 		"tslib": "^2.8.1",
 		"typescript": "^5.8.3",
 		"vite": "6.3.5"
+	},
+	"overrides": {
+		"svelte-material-icons": {
+			"svelte": "^5.0.0"
+		}
 	}
 }

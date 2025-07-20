@@ -8,8 +8,6 @@ import {
 } from "$lib/stores/setting";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import ToastController from "$lib/controllers/ToastController";
-// @ts-ignore
-import capitalize from "capitalize";
 
 async function onMethodChange(
 	e: Event & {
@@ -22,7 +20,7 @@ async function onMethodChange(
     await PersistentStoreController.animatedBackgroundType.setStore();
 	$settingTriggerAnimatedBackground = new Date().toString();
 
-    ToastController.info("Animated Background method changed to " + capitalize(value));
+    ToastController.info("Animated Background method changed to " + value);
 }
 </script>
 
