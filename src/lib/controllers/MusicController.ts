@@ -173,7 +173,8 @@ const MusicController = {
 	},
 
 	nextMusic: async () => {
-		if (MusicController.musicPlaylist().length === 0) return;
+		if (MusicController.musicPlaylist().length === 0 ||
+			MusicController.currentMusicIndex() >= MusicController.musicPlaylist().length - 1) return;
 		MusicController.sendCommandController("next");
 	},
 
