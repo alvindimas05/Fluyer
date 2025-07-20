@@ -6,6 +6,7 @@ import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
+import {musicList} from "$lib/stores/music";
 
 interface Props {
 	music: MusicData;
@@ -15,43 +16,59 @@ let { music }: Props = $props();
 
 let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
 
-// async function checkAlbumImage() {
-// 	if (music.image !== null || music.artist == null) return;
-// 	const status = await CoverArt.fromQuery({
-// 		artist: music.artist!,
-// 		title: music.title!,
-// 		album: music.album ?? undefined,
-// 	});
-// 	if (status == CoverArtStatus.Failed) return;
-// 	if (status == CoverArtStatus.Loading) {
-// 		const unlisten = coverArtCaches.subscribe(() => {
-// 			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
-// 		});
-// 		return;
-// 	}
-//
-// 	setAlbumImageFromCache();
-// }
+async function checkAlbumImage() {
+	if (music.image !== null || music.artist == null) return;
+	const status = await CoverArt.fromQuery({
+		artist: music.artist!,
+		title: music.title!,
+		album: music.album ?? undefined,
+	});
+	if (status == CoverArtStatus.Failed) return;
+	if (status == CoverArtStatus.Loading) {
+		const unlisten = coverArtCaches.subscribe(() => {
+			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
+		});
+		return;
+	}
 
-// function setAlbumImageFromCache() {
-// 	if (albumImage != MusicConfig.defaultAlbumImage) return true;
-//
-// 	const cache = MusicController.getCoverArtCache({
-// 		artist: music.artist!,
-// 		title: music.title!,
-// 		album: music.album ?? undefined,
-// 	});
-//
-// 	if (
-// 		cache == null ||
-// 		(cache.status == CoverArtStatus.Loading && cache.image == null)
-// 	)
-// 		return false;
-// 	if (cache.status == CoverArtStatus.Failed) return true;
-//
-// 	albumImage = MusicController.withBase64(cache.image!);
-// 	return true;
-// }
+	setAlbumImageFromCache();
+}
+
+function setAlbumImageFromCache() {
+	if (albumImage != MusicConfig.defaultAlbumImage) return true;
+
+	const cache = MusicController.getCoverArtCache({
+		artist: music.artist!,
+		title: music.title!,
+		album: music.album ?? undefined,
+	});
+
+	if (
+		cache == null ||
+		(cache.status == CoverArtStatus.Loading && cache.image == null)
+	)
+		return false;
+	if (cache.status == CoverArtStatus.Failed) return true;
+
+	musicList.update((list) => {
+		if(!Array.isArray(list)) return list;
+		for(let i = 0; i < list.length; i++) {
+			if(music.album){
+				if(list[i].album == music.album){
+					list[i].image = cache.image;
+					return list;
+				}
+			} else {
+				if(list[i].title == music.title && list[i].artist == music.artist){
+					list[i].image = cache.image;
+					return list;
+				}
+			}
+		}
+		return list;
+	})
+	return true;
+}
 
 async function addMusicAndPlay() {
 	music.image = albumImage;
@@ -64,7 +81,7 @@ async function addMusic() {
 	await MusicController.addMusic(music);
 }
 
-// onMount(checkAlbumImage);
+onMount(checkAlbumImage);
 </script>
 
 <div class="relative text-sm md:text-base animate__animated animate__fadeIn animate__faster">

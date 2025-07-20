@@ -6,6 +6,7 @@ import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import { filterAlbum, filterSearch } from "$lib/stores/filter";
 import FilterController from "$lib/controllers/FilterController";
+import {musicList as storeMusicList} from "$lib/stores/music";
 
 interface Props {
 	musicList: MusicData[];
@@ -71,10 +72,15 @@ function setAlbumImageFromCache() {
 	if (cache.status == CoverArtStatus.Failed) return true;
 
 	albumImage = MusicController.withBase64(cache.image!);
-	musicList = musicList.map((m) => {
-		m.image = MusicController.withBase64(cache.image!);
-		return m;
-	});
+	storeMusicList.update((list) => {
+        if(!Array.isArray(list)) return list;
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].album == music.album && list[i].artist == music.artist) {
+                list[i].image = MusicController.withBase64(cache.image!);
+            }
+        }
+        return list;
+    });
 	return true;
 }
 
