@@ -16,7 +16,6 @@ async function onMethodChange(
 	const value = <SettingAnimatedBackgroundType>e.currentTarget.value;
 	if (value === $settingAnimatedBackgroundType) return;
 	await PersistentStoreController.animatedBackgroundType.set(value);
-	await PersistentStoreController.animatedBackgroundType.setStore();
 	$settingTriggerAnimatedBackground = new Date().toString();
 }
 </script>

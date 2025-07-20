@@ -170,7 +170,7 @@
                 </div>
                 <div
                     class="font-medium text-center mt-2 opacity-90 overflow-hidden
-                    text-sm md-mdpi:text-base md-hdpi:text-sm lg-mdpi:text-base md-xhdpi:text-sm lg-xhdpi:text-base"
+                    text-sm md-mdpi:text-base md-hdpi:text-base md-xhdpi:text-sm lg-xhdpi:text-base"
                 >
                     <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
                     <p class="animate-scroll-overflow-text"></p>
@@ -346,8 +346,8 @@
                                 <div
                                     class={`${
                                         selectedLyricIndex === i
-                                            ? "w-[1.35rem] md:w-[1.85rem] lg:w-[2.25rem]"
-                                            : "w-[1.2rem] md:w-[1.7rem] lg:w-[2.1rem]"
+                                            ? "w-[1.25rem] md:w-[175rem] lg:w-[2.15rem]"
+                                            : "w-[1.1rem] md:w-[1.6rem] lg:w-[2rem]"
                                     }`}
                                 >
                                     <Icon type={IconType.Note} />
