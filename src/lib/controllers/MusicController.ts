@@ -173,6 +173,7 @@ const MusicController = {
 	},
 
 	nextMusic: async () => {
+		if (MusicController.currentMusicIndex() <= 0) return;
 		MusicController.sendCommandController("next");
 	},
 
@@ -221,6 +222,7 @@ const MusicController = {
 		return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 	},
 	play: (sendCommand: boolean = true) => {
+		if (MusicController.musicPlaylist().length === 0) return;
 		if (
 			MusicController.isCurrentMusicFinished() &&
 			MusicController.isProgressValueEnd() &&

@@ -6,7 +6,6 @@ import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import { filterAlbum, filterSearch } from "$lib/stores/filter";
 
 interface Props {
 	music: MusicData;
@@ -14,68 +13,45 @@ interface Props {
 
 let { music }: Props = $props();
 
-let isValidSearch = $derived.by(() => {
-	const search = $filterSearch.toLowerCase();
-	const album = $filterAlbum;
+let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
 
-	const hasSearch = !!search;
-	const hasAlbum = !!album;
+// async function checkAlbumImage() {
+// 	if (music.image !== null || music.artist == null) return;
+// 	const status = await CoverArt.fromQuery({
+// 		artist: music.artist!,
+// 		title: music.title!,
+// 		album: music.album ?? undefined,
+// 	});
+// 	if (status == CoverArtStatus.Failed) return;
+// 	if (status == CoverArtStatus.Loading) {
+// 		const unlisten = coverArtCaches.subscribe(() => {
+// 			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
+// 		});
+// 		return;
+// 	}
+//
+// 	setAlbumImageFromCache();
+// }
 
-	const matchesSearch =
-		hasSearch &&
-		(music.album?.toLowerCase().includes(search) ||
-			music.title?.toLowerCase().includes(search) ||
-			music.artist?.toLowerCase().includes(search) ||
-			music.albumArtist?.toLowerCase().includes(search));
-
-	const matchesAlbum = hasAlbum && album.name === music.album;
-
-	if (!hasAlbum) {
-		return !hasSearch || matchesSearch;
-	} else {
-		return matchesAlbum && (!hasSearch || matchesSearch);
-	}
-});
-
-let albumImage = $state(MusicController.getAlbumImageFromMusic(music));
-
-async function checkAlbumImage() {
-	if (music.image !== null || music.artist == null) return;
-	const status = await CoverArt.fromQuery({
-		artist: music.artist!,
-		title: music.title!,
-		album: music.album ?? undefined,
-	});
-	if (status == CoverArtStatus.Failed) return;
-	if (status == CoverArtStatus.Loading) {
-		const unlisten = coverArtCaches.subscribe(() => {
-			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
-		});
-		return;
-	}
-
-	setAlbumImageFromCache();
-}
-
-function setAlbumImageFromCache() {
-	if (albumImage != MusicConfig.defaultAlbumImage) return true;
-
-	const cache = MusicController.getCoverArtCache({
-		artist: music.artist!,
-		title: music.title!,
-		album: music.album ?? undefined,
-	});
-
-	if (
-		cache == null ||
-		(cache.status == CoverArtStatus.Loading && cache.image == null)
-	)
-		return false;
-	if (cache.status == CoverArtStatus.Failed) return true;
-
-	albumImage = MusicController.withBase64(cache.image!);
-	return true;
-}
+// function setAlbumImageFromCache() {
+// 	if (albumImage != MusicConfig.defaultAlbumImage) return true;
+//
+// 	const cache = MusicController.getCoverArtCache({
+// 		artist: music.artist!,
+// 		title: music.title!,
+// 		album: music.album ?? undefined,
+// 	});
+//
+// 	if (
+// 		cache == null ||
+// 		(cache.status == CoverArtStatus.Loading && cache.image == null)
+// 	)
+// 		return false;
+// 	if (cache.status == CoverArtStatus.Failed) return true;
+//
+// 	albumImage = MusicController.withBase64(cache.image!);
+// 	return true;
+// }
 
 async function addMusicAndPlay() {
 	music.image = albumImage;
@@ -88,11 +64,10 @@ async function addMusic() {
 	await MusicController.addMusic(music);
 }
 
-onMount(checkAlbumImage);
+// onMount(checkAlbumImage);
 </script>
 
-<div class={`relative text-sm md:text-base animate__animated animate__fadeIn animate__faster
-	${!isValidSearch && "hidden"}`}>
+<div class="relative text-sm md:text-base animate__animated animate__fadeIn animate__faster">
 	<div
 		class="grid grid-cols-[max-content_auto_max-content] py-2"
 	>
