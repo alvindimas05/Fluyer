@@ -77,6 +77,11 @@ const PersistentStoreController = {
 			},
 		},
 	},
+	developerMode: {
+		key: "developer-mode",
+		get: makeGetter<boolean>("developer-mode", false),
+		set: makeSetter<boolean>("developer-mode"),
+	},
 };
 
 export default PersistentStoreController;

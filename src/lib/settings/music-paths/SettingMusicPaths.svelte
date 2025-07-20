@@ -8,6 +8,7 @@ import { settingIsLoading } from "$lib/stores/setting";
 import { onMount } from "svelte";
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
+import ToastController from "$lib/controllers/ToastController";
 
 let musicPath = $state<string[]>([]);
 let isLoading = $derived($settingIsLoading);
@@ -28,6 +29,8 @@ async function addPath() {
 	await refreshPath();
 	await MusicController.getMusics(true);
 	isLoading = false;
+
+    ToastController.info("Music path added");
 }
 
 async function removePath(index: number) {
@@ -36,6 +39,8 @@ async function removePath(index: number) {
 	await refreshPath();
 	await MusicController.getMusics(true);
 	isLoading = false;
+
+    ToastController.info("Music path removed");
 }
 
 onMount(refreshPath);
