@@ -17,10 +17,7 @@ const rules = [
 	[768,  1.0, 2]
 ];
 
-// Reactive derived store for column count
 let columnCount = $state(1);
-let list;
-
 function updateColumnCount() {
 	const w = window.innerWidth;
 	const dpi = window.devicePixelRatio;
