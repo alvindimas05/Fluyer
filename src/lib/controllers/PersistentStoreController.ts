@@ -1,6 +1,7 @@
 import {Store} from "@tauri-apps/plugin-store";
 import {settingAnimatedBackgroundType} from "$lib/stores/setting";
 import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
+import {IconThemeType} from "$lib/icon/types";
 
 const storePath = "store.json";
 const storeOptions = { autoSave: true };
@@ -81,6 +82,11 @@ const PersistentStoreController = {
 		key: "developer-mode",
 		get: makeGetter<boolean>("developer-mode", false),
 		set: makeSetter<boolean>("developer-mode"),
+	},
+	iconTheme: {
+		key: "icon-theme",
+		get: makeGetter<string>("icon-theme", IconThemeType.Phosphor),
+		set: makeSetter<string>("icon-theme"),
 	},
 };
 

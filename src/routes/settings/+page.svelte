@@ -12,6 +12,7 @@ import {
 import { settingIsLoading } from "$lib/stores/setting";
 import SettingUserInteface from "$lib/settings/user-interface/SettingUserInteface.svelte";
 import SettingDeveloper from "$lib/settings/developer/SettingDeveloper.svelte";
+import SettingIconTheme from "$lib/settings/icon-theme/SettingIconTheme.svelte";
 let isLoading = $derived($settingIsLoading);
 </script>
 
@@ -26,6 +27,7 @@ let isLoading = $derived($settingIsLoading);
                     <SettingMusicPaths />
                 {/if}
                 <SettingAnimatedBackground />
+                <SettingIconTheme />
                 <SettingUserInteface />
                 <SettingDeveloper />
             </div>

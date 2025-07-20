@@ -1,7 +1,7 @@
 export enum IconThemeType {
-	Phosphor,
-	Lucide,
-	Material,
+	Phosphor = "Phosphor",
+	Lucide = "Lucide",
+	Material = "Material",
 }
 
 export enum IconType {
