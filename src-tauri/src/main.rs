@@ -3,7 +3,6 @@
 
 mod logger;
 
-use std::env::temp_dir;
 use simplelog::{
     ColorChoice, CombinedLogger, LevelFilter, TermLogger, TerminalMode, WriteLogger,
 };

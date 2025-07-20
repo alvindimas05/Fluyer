@@ -4,8 +4,6 @@ use tauri::Emitter;
 #[cfg(desktop)]
 use libmpv2::Mpv;
 #[cfg(desktop)]
-use std::env::temp_dir;
-#[cfg(desktop)]
 use std::sync::OnceLock;
 use std::thread;
 #[cfg(target_os = "android")]

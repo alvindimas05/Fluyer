@@ -1,17 +1,21 @@
 use std::env::temp_dir;
 
+#[allow(dead_code)]
 pub fn get_log_name() -> String {
     "fluyer.log".to_string()
 }
 
+#[allow(dead_code)]
 pub fn get_mpv_log_name() -> String {
     "fluyer-mpv.log".to_string()
 }
 
+#[allow(dead_code)]
 pub fn get_log_path() -> String {
     format!("{}{}", temp_dir().display(), get_log_name())
 }
 
+#[allow(dead_code)]
 pub fn get_mpv_log_path() -> String {
     format!("{}{}", temp_dir().display(), get_mpv_log_name())
 }
@@ -58,4 +62,5 @@ macro_rules! error {
 
 #[allow(unused_imports)]
 pub(crate) use debug;
+#[allow(unused_imports)]
 pub(crate) use error;
