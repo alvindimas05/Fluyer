@@ -1,6 +1,6 @@
-import { Store } from "@tauri-apps/plugin-store";
-import { settingAnimatedBackgroundType } from "$lib/stores/setting";
-import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
+import {Store} from "@tauri-apps/plugin-store";
+import {settingAnimatedBackgroundType} from "$lib/stores/setting";
+import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
 
 const storePath = "store.json";
 const storeOptions = { autoSave: true };
@@ -44,6 +44,10 @@ const PersistentStoreController = {
 
 	animatedBackgroundType: {
 		key: "animated-background-type",
+		setStore: async () => {
+			const value = await PersistentStoreController.animatedBackgroundType.get();
+			settingAnimatedBackgroundType.set(value ?? SettingAnimatedBackgroundType.Prominent);
+		},
 		get: makeGetter<SettingAnimatedBackgroundType>("animated-background-type"),
 		set: makeSetter<SettingAnimatedBackgroundType>("animated-background-type"),
 	},
