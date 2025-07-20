@@ -91,7 +91,7 @@ async function addMusic() {
 onMount(checkAlbumImage);
 </script>
 
-<div class={`relative text-sm md:text-base animate__animated animate__fadeIn animate__slow
+<div class={`relative text-sm md:text-base animate__animated animate__fadeIn animate__faster
 	${!isValidSearch && "hidden"}`}>
 	<div
 		class="grid grid-cols-[max-content_auto_max-content] py-2"

@@ -39,6 +39,7 @@
 		"sleep-promise": "^9.1.0",
 		"stackblur-canvas": "^2.7.0",
 		"toastify-js": "^1.12.0",
+		"virtua": "^0.41.5",
 		"web-animations-js": "^2.3.2"
 	},
 	"devDependencies": {
