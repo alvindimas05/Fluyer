@@ -202,7 +202,7 @@ async function afterInitializeCanvas() {
 async function transitionToNewCanvas(force = false) {
 	const _newCanvas = await createCanvas({ force });
 
-	if (!_newCanvas) return;
+	if (!_newCanvas || newCanvas !== null) return;
 
 	newCanvas = _newCanvas;
 
