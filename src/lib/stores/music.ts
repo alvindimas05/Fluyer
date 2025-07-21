@@ -12,3 +12,4 @@ export let musicProgressIntervalId = writable<null | ReturnType<
 export let musicAlbumList = writable<MusicData[][]>([]);
 export let musicPlaylist = writable<MusicData[]>([]);
 export let musicRepeatMode = writable<RepeatMode>(RepeatMode.None);
+export let musicReset = writable(false);

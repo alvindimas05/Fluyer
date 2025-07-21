@@ -8,7 +8,7 @@ import {
 	musicAlbumList,
 	musicPlaylist,
 	musicCurrentIndex,
-	musicRepeatMode,
+	musicRepeatMode, musicReset,
 } from "$lib/stores/music";
 import { get } from "svelte/store";
 import {
@@ -386,9 +386,11 @@ const MusicController = {
 		MusicController.resetProgress();
 
 		if(MusicController.currentMusicIndex() >= 0) MusicController.setCurrentMusicIndex(0);
+		musicReset.set(true);
 		await MusicController.addMusicList(musicList, {
 			resetPlaylist: true,
 		});
+		musicReset.set(false);
 	},
 
 	onPlayerBarChange: () => {
@@ -428,12 +430,11 @@ const MusicController = {
 		if (!playlist) playlist = MusicController.musicPlaylist();
 		if (playlist.length < 2) return;
 
-		await MusicController.reset();
 		for (let i = playlist.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
 			[playlist[i], playlist[j]] = [playlist[j], playlist[i]];
 		}
-		await MusicController.addMusicList(playlist);
+		await MusicController.resetAndAddMusicList(playlist);
 		MusicController.play();
 	},
 	playlistMoveto: async (fromIndex: number, toIndex: number) => {

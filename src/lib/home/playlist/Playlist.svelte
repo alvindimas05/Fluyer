@@ -1,6 +1,6 @@
 <script lang="ts">
 import Sidebar from "$lib/home/sidebar/Sidebar.svelte";
-import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music";
+import {musicCurrentIndex, musicPlaylist, musicReset} from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
 import { SidebarType } from "$lib/home/sidebar/types";
 import Icon from "$lib/icon/Icon.svelte";
@@ -82,9 +82,9 @@ onMount(() => {
 	musicPlaylist.subscribe((playlist) => {
 		if (playlist.length < 1) return;
 
-		const removedIndices = oldPlaylist
-			.map((music, index) => (!playlist.includes(music) ? index : -1))
-			.filter((index) => index !== -1);
+		const removedIndices = $musicReset ? oldPlaylist.map((_, index) => index) : oldPlaylist
+            .map((music, index) => (!playlist.includes(music) ? index : -1))
+            .filter((index) => index !== -1);
 
 		if (removedIndices.length > 0) {
 			const items = muuri.getItems();
@@ -95,7 +95,7 @@ onMount(() => {
 			muuri.remove(removedItems, { removeElements: true });
 		}
 
-		const newItems = playlist
+		const newItems = $musicReset ? playlist.map((music, index) => ({ music, index })) : playlist
 			.map((music, index) =>
 				!oldPlaylist.includes(music) ? { music, index } : null,
 			)
