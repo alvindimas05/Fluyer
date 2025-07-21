@@ -1,34 +1,48 @@
-import {Store} from "@tauri-apps/plugin-store";
-import {settingAnimatedBackgroundType} from "$lib/stores/setting";
-import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
-import {IconThemeType} from "$lib/icon/types";
+import { Store } from "@tauri-apps/plugin-store";
+import {
+	settingAnimatedBackgroundType,
+	settingDeveloperMode,
+	settingUiPlayShowBackButton,
+	settingUiShowRepeatButton,
+	settingUiShowShuffleButton
+} from "$lib/stores/setting";
+import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
+import { IconThemeType } from "$lib/icon/types";
+import { iconTheme } from "$lib/stores/icon";
 
 const storePath = "store.json";
 const storeOptions = { autoSave: true };
 
 const getStore = async () => Store.load(storePath, storeOptions);
-
 const makeGetter = <T>(key: string, fallback?: T) => async () =>
 	(await (await getStore()).get<T>(key)) ?? fallback;
-
 const makeSetter = <T>(key: string) => async (value: T) =>
-	await (await getStore()).set(key, value);
+	(await getStore()).set(key, value);
+const makeBinding = <T>(key: string, fallback: T, setStoreFn: (v: T) => void) => ({
+	initialize: async () => setStoreFn(await makeGetter<T>(key, fallback)()),
+	get: makeGetter<T>(key, fallback),
+	set: makeSetter<T>(key),
+});
 
 const PersistentStoreController = {
-	initialize: async () => {
-		const value = await PersistentStoreController.animatedBackgroundType.get();
-		settingAnimatedBackgroundType.set(
-			value ?? SettingAnimatedBackgroundType.Prominent,
-		);
-	},
-
 	get: getStore,
+
+	initialize: async () => {
+		await Promise.all([
+			PersistentStoreController.animatedBackgroundType.initialize(),
+			PersistentStoreController.iconTheme.initialize(),
+			PersistentStoreController.developerMode.initialize(),
+			PersistentStoreController.userInterface.play.showBackButton.initialize(),
+			PersistentStoreController.userInterface.showRepeatButton.initialize(),
+			PersistentStoreController.userInterface.showShuffleButton.initialize(),
+		]);
+	},
 
 	musicPath: {
 		key: "music-path",
 		separator: "||",
 		get: async () =>
-			(await (await getStore()).get<string>("music-path"))?.split("||") ?? [],
+			(await makeGetter<string>("music-path")())?.split("||") ?? [],
 		set: async (value: string[]) =>
 			(await getStore()).set("music-path", value.join("||")),
 		add: async (value: string) => {
@@ -43,50 +57,39 @@ const PersistentStoreController = {
 		},
 	},
 
-	animatedBackgroundType: {
-		key: "animated-background-type",
-		setStore: async () => {
-			const value = await PersistentStoreController.animatedBackgroundType.get();
-			settingAnimatedBackgroundType.set(value ?? SettingAnimatedBackgroundType.Prominent);
-		},
-		get: makeGetter<SettingAnimatedBackgroundType>("animated-background-type"),
-		set: makeSetter<SettingAnimatedBackgroundType>("animated-background-type"),
-	},
+	animatedBackgroundType: makeBinding(
+		"animated-background-type",
+		SettingAnimatedBackgroundType.Prominent,
+		settingAnimatedBackgroundType.set
+	),
+
+	developerMode: makeBinding("developer-mode", false, settingDeveloperMode.set),
+
+	iconTheme: makeBinding("icon-theme", IconThemeType.Phosphor, iconTheme.set),
 
 	swipeGuide: {
-		key: "swipe-guide",
 		get: makeGetter<boolean>("swipe-guide", true),
 		set: makeSetter<boolean>("swipe-guide"),
 	},
 
 	userInterface: {
-		showRepeatButton: {
-			key: "ui-show-repeat-button",
-			get: makeGetter<boolean>("ui-show-repeat-button", true),
-			set: makeSetter<boolean>("ui-show-repeat-button"),
-		},
-		showShuffleButton: {
-			key: "ui-show-shuffle-button",
-			get: makeGetter<boolean>("ui-show-shuffle-button", true),
-			set: makeSetter<boolean>("ui-show-shuffle-button"),
-		},
+		showRepeatButton: makeBinding(
+			"ui-show-repeat-button",
+			true,
+			settingUiShowRepeatButton.set
+		),
+		showShuffleButton: makeBinding(
+			"ui-show-shuffle-button",
+			true,
+			settingUiShowShuffleButton.set
+		),
 		play: {
-			showBackButton: {
-				key: "ui-play-show-back-button",
-				get: makeGetter<boolean>("ui-play-show-back-button", true),
-				set: makeSetter<boolean>("ui-play-show-back-button"),
-			},
+			showBackButton: makeBinding(
+				"ui-play-show-back-button",
+				true,
+				settingUiPlayShowBackButton.set
+			),
 		},
-	},
-	developerMode: {
-		key: "developer-mode",
-		get: makeGetter<boolean>("developer-mode", false),
-		set: makeSetter<boolean>("developer-mode"),
-	},
-	iconTheme: {
-		key: "icon-theme",
-		get: makeGetter<string>("icon-theme", IconThemeType.Phosphor),
-		set: makeSetter<string>("icon-theme"),
 	},
 };
 
