@@ -385,6 +385,7 @@ const MusicController = {
 		MusicController.stopProgress();
 		MusicController.resetProgress();
 
+		if(MusicController.currentMusicIndex() >= 0) MusicController.setCurrentMusicIndex(0);
 		await MusicController.addMusicList(musicList, {
 			resetPlaylist: true,
 		});
