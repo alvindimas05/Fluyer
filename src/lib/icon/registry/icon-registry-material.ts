@@ -9,7 +9,7 @@ import MusicNote from "svelte-material-icons/MusicNote.svelte";
 import ArrowULeftTop from "svelte-material-icons/ArrowULeftTop.svelte";
 import VolumeHigh from "svelte-material-icons/VolumeHigh.svelte";
 import VolumeOff from "svelte-material-icons/VolumeOff.svelte";
-import Cancel from "svelte-material-icons/Cancel.svelte";
+import Close from "svelte-material-icons/Close.svelte";
 import Delete from "svelte-material-icons/Delete.svelte";
 import Cog from "svelte-material-icons/Cog.svelte";
 import Magnify from "svelte-material-icons/Magnify.svelte";
@@ -36,7 +36,7 @@ const iconRegistryMaterial = {
     [IconType.AlbumBack]: ArrowULeftTop,
     [IconType.Speaker]: VolumeHigh,
     [IconType.Mute]: VolumeOff,
-    [IconType.Remove]: Cancel,
+    [IconType.Remove]: Close,
     [IconType.Trash]: Delete,
     [IconType.Settings]: Cog,
     [IconType.Search]: Magnify,

@@ -89,6 +89,7 @@ onMount(() => {
 	musicVolume.subscribe(
 		() => (volumePercentage = MusicController.volumePercentage()),
 	);
+    musicCurrentIndex.subscribe(refresh);
     musicPlaylist.subscribe(refresh);
 });
 </script>
