@@ -92,12 +92,6 @@ async function setFilterAlbum() {
 	} as AlbumData);
 }
 
-async function addMusicListAndPlay() {
-	music.image = albumImage;
-    await MusicController.resetAndAddMusicList(MusicController.sortMusicList(musicList));
-	MusicController.play();
-}
-
 onMount(() => {
 	checkAlbumImage();
 });
