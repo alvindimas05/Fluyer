@@ -25,6 +25,7 @@ import type {
 	CoverArtResponse,
 } from "$lib/handlers/coverart";
 import { isDesktop } from "$lib/platform";
+import {settingTriggerAnimatedBackground} from "$lib/stores/setting";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -272,7 +273,10 @@ const MusicController = {
 		});
 	},
 
-	addMusicList: async (musicDataList: MusicData[]) => {
+	addMusicList: async (musicDataList: MusicData[], options?: {
+		forceSetCurrentMusicIndex?: boolean,
+		resetPlaylist?: boolean
+	}) => {
 		let isPlaylistEmpty = !MusicController.musicPlaylist().length;
 		await MusicController.addSinkMusics(
 			musicDataList.map((music) => {
@@ -282,9 +286,10 @@ const MusicController = {
 			}),
 		);
 
-		MusicController.addMusicPlaylist(musicDataList);
+		if(options?.resetPlaylist) musicPlaylist.set(musicDataList);
+		else MusicController.addMusicPlaylist(musicDataList);
 
-		if (MusicController.currentMusicIndex() === -1 && isPlaylistEmpty)
+		if (options?.forceSetCurrentMusicIndex || (MusicController.currentMusicIndex() === -1 && isPlaylistEmpty))
 			MusicController.setCurrentMusicIndex(0);
 	},
 
@@ -368,6 +373,21 @@ const MusicController = {
 		musicPlaylist.set([]);
 		MusicController.stopProgress();
 		MusicController.resetProgress();
+	},
+
+	resetAndAddMusic: async (musicData: MusicData) => {
+		await MusicController.resetAndAddMusicList([musicData]);
+	},
+
+	resetAndAddMusicList: async (musicList: MusicData[]) => {
+		MusicController.pause();
+		await MusicController.sendCommandController("clear");
+		MusicController.stopProgress();
+		MusicController.resetProgress();
+
+		await MusicController.addMusicList(musicList, {
+			resetPlaylist: true,
+		});
 	},
 
 	onPlayerBarChange: () => {

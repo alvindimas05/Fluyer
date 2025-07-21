@@ -4,6 +4,7 @@ import MusicItem from "./MusicItem.svelte";
 import { VList } from "virtua/svelte";
 import {onMount} from "svelte";
 import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import MusicController from "$lib/controllers/MusicController";
 
 // Responsive rules: [minWidth, maxDppxExclusive, columns]
 const rules = [
@@ -34,7 +35,7 @@ function updateColumnCount() {
 
 let data = $derived.by(() => {
 	if(!Array.isArray($musicList)) return [];
-	const list = $musicList.filter(music => {
+	let list = $musicList.filter(music => {
 		const search = $filterSearch.toLowerCase();
 		const album = $filterAlbum;
 
@@ -55,7 +56,10 @@ let data = $derived.by(() => {
 		} else {
 			return matchesAlbum && (!hasSearch || matchesSearch);
 		}
-	})
+	});
+	if($filterAlbum){
+		list = MusicController.sortMusicList(list);
+	}
 
 	const result = [];
 	for (let i = 0; i < list.length; i += columnCount) {

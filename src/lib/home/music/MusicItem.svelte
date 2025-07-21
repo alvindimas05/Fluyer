@@ -72,8 +72,7 @@ function setAlbumImageFromCache() {
 
 async function addMusicAndPlay() {
 	music.image = albumImage;
-	await MusicController.reset();
-	await MusicController.addMusic(music);
+	await MusicController.resetAndAddMusic(music);
 	MusicController.play();
 }
 

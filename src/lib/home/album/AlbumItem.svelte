@@ -94,8 +94,7 @@ async function setFilterAlbum() {
 
 async function addMusicListAndPlay() {
 	music.image = albumImage;
-	await MusicController.reset();
-	await MusicController.addMusicList(MusicController.sortMusicList(musicList));
+    await MusicController.resetAndAddMusicList(MusicController.sortMusicList(musicList));
 	MusicController.play();
 }
 

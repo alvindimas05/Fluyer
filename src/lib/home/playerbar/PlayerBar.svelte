@@ -1,11 +1,11 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import {
-	musicCurrentIndex,
-	musicIsPlaying,
-	musicProgressValue,
-	musicRepeatMode,
-	musicVolume,
+    musicCurrentIndex,
+    musicIsPlaying, musicPlaylist,
+    musicProgressValue,
+    musicRepeatMode,
+    musicVolume,
 } from "$lib/stores/music";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 import PageController from "$lib/controllers/PageController";
@@ -13,9 +13,10 @@ import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { onMount } from "svelte";
-import { RepeatMode } from "$lib/home/music/types";
+import {type MusicData, RepeatMode} from "$lib/home/music/types";
 import {settingUiShowRepeatButton, settingUiShowShuffleButton} from "$lib/stores/setting";
 
+let oldMusic: MusicData = $state(null);
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
 let albumImage = $state(MusicConfig.defaultAlbumImage);
@@ -61,6 +62,26 @@ function handleVolumeButton() {
 	MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
 }
 
+function refresh(){
+    setTimeout(() => {
+        let music = MusicController.currentMusic();
+
+        if (music === null) {
+            title = MusicConfig.defaultTitle;
+            artist = MusicConfig.defaultArtist;
+            albumImage = MusicConfig.defaultAlbumImage;
+            return;
+        }
+
+        if(oldMusic !== null && oldMusic.path === music.path) return;
+
+        oldMusic = music;
+        title = music.title!;
+        artist = MusicController.getFullArtistFromMusic(music);
+        albumImage = MusicController.currentMusicAlbumImage();
+    }, 0);
+}
+
 onMount(() => {
 	musicProgressValue.subscribe(
 		() => (progressPercentage = MusicController.progressPercentage()),
@@ -68,21 +89,7 @@ onMount(() => {
 	musicVolume.subscribe(
 		() => (volumePercentage = MusicController.volumePercentage()),
 	);
-	musicCurrentIndex.subscribe(() =>
-		setTimeout(() => {
-			let music = MusicController.currentMusic();
-			if (music === null) {
-				title = MusicConfig.defaultTitle;
-				artist = MusicConfig.defaultArtist;
-				albumImage = MusicConfig.defaultAlbumImage;
-				return;
-			}
-
-			title = music.title!;
-			artist = MusicController.getFullArtistFromMusic(music);
-			albumImage = MusicController.currentMusicAlbumImage();
-		}, 0),
-	);
+    musicPlaylist.subscribe(refresh);
 });
 </script>
 
