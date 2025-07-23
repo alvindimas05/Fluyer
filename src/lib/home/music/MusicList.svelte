@@ -88,7 +88,7 @@ onMount(() => {
 <!--    	{/if}-->
 <!--    </div>-->
 	{#if data && columnCount}
-		<VList class="scrollbar-hidden" {data} getKey={(_, i) => i}>
+		<VList class="scrollbar-hidden pb-20" {data} getKey={(_, i) => i}>
 			{#snippet children(musicList)}
 				<div class="grid" style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr))">
 					{#each musicList as music}

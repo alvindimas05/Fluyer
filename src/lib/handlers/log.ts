@@ -6,7 +6,7 @@ import PersistentStoreController from "$lib/controllers/PersistentStoreControlle
 export default function logHandler() {
 	window.addEventListener("error", async (e) => {
 		invoke(CommandRoutes.LOG_ERROR, { message: e.message.toString() });
-		if(await PersistentStoreController.developerMode.get()) ToastController.error(e.error.toString());
+		if(await PersistentStoreController.developerMode.get()) ToastController.error(e.message.toString());
 	});
 	window.addEventListener("unhandledrejection", async (e) => {
 		const message = e.reason.toString();
