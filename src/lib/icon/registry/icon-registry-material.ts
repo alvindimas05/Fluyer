@@ -9,11 +9,11 @@ import MusicNote from "svelte-material-icons/MusicNote.svelte";
 import ArrowULeftTop from "svelte-material-icons/ArrowULeftTop.svelte";
 import VolumeHigh from "svelte-material-icons/VolumeHigh.svelte";
 import VolumeOff from "svelte-material-icons/VolumeOff.svelte";
-import Close from "svelte-material-icons/Close.svelte";
+import CloseCircleOutline from "svelte-material-icons/CloseCircleOutline.svelte";
 import Delete from "svelte-material-icons/Delete.svelte";
 import Cog from "svelte-material-icons/Cog.svelte";
 import Magnify from "svelte-material-icons/Magnify.svelte";
-import PlaylistMusic from "svelte-material-icons/PlaylistMusic.svelte";
+import PlaylistPlus from "svelte-material-icons/PlaylistPlus.svelte";
 import Broom from "svelte-material-icons/Broom.svelte";
 import Repeat from "svelte-material-icons/Repeat.svelte";
 import RepeatOnce from "svelte-material-icons/RepeatOnce.svelte";
@@ -36,11 +36,11 @@ const iconRegistryMaterial = {
     [IconType.AlbumBack]: ArrowULeftTop,
     [IconType.Speaker]: VolumeHigh,
     [IconType.Mute]: VolumeOff,
-    [IconType.Remove]: Close,
+    [IconType.Remove]: CloseCircleOutline,
     [IconType.Trash]: Delete,
     [IconType.Settings]: Cog,
     [IconType.Search]: Magnify,
-    [IconType.QueuePlaylist]: PlaylistMusic,
+    [IconType.QueuePlaylist]: PlaylistPlus,
     [IconType.CleanPlaylist]: Broom,
     [IconType.RepeatNone]: Repeat,
     [IconType.RepeatPlayNone]: Repeat,
