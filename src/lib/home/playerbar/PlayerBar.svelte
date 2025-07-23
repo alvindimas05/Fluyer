@@ -30,6 +30,8 @@ let tooltipPosition = $state(0);
 let tooltipVisible = $state(false);
 let tooltipText = $state("0:00");
 
+let touchLastX = $state(0);
+
 const gridRight = (() => {
     if($settingUiShowRepeatButton && $settingUiShowShuffleButton) return "grid-cols-[repeat(5,auto)]";
     if($settingUiShowRepeatButton || $settingUiShowShuffleButton) return "grid-cols-[repeat(4,auto)]";
@@ -101,6 +103,22 @@ function updateTooltip(e: MouseEvent & {
     tooltipVisible = true;
 }
 
+function updateTooltipTouch(e: TouchEvent & {
+    currentTarget: EventTarget & HTMLDivElement;
+}) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    tooltipPosition = x - (tooltip.offsetWidth / 2);
+    if(tooltipPosition < 0) tooltipPosition = 0;
+    else if(tooltipPosition + tooltip.offsetWidth > window.innerWidth) tooltipPosition = window.innerWidth - tooltip.offsetWidth;
+
+    const percentage = (x / window.innerWidth) * 100;
+    tooltipText = MusicController.parsePercentageProgressDurationIntoText(percentage);
+    tooltipVisible = true;
+
+    touchLastX = x;
+}
+
 function hideTooltip() {
     tooltipVisible = false;
 }
@@ -112,6 +130,15 @@ function updateProgress(e: MouseEvent & {
     const x = e.clientX - rect.left;
     const percentage = (x / window.innerWidth) * 100;
     MusicController.updateProgressByPercentage(percentage);
+}
+
+function updateProgressTouch(e: TouchEvent & {
+    currentTarget: EventTarget & HTMLDivElement;
+}) {
+    const percentage = (touchLastX / window.innerWidth) * 100;
+    MusicController.updateProgressByPercentage(percentage);
+
+    hideTooltip();
 }
 
 onMount(() => {
@@ -161,6 +188,9 @@ onMount(() => {
              onmouseenter={updateTooltip}
              onmousemove={updateTooltip}
              onmouseleave={hideTooltip}
+             ontouchstart={updateTooltipTouch}
+             ontouchmove={updateTooltipTouch}
+             ontouchend={updateProgressTouch}
              onclick={updateProgress}></div>
         <div class="p-3 mt-1">
             <div class="grid grid-cols-[auto_min-content] md:grid-cols-3">

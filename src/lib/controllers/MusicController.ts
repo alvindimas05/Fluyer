@@ -24,7 +24,7 @@ import type {
 	CoverArtCacheQuery,
 	CoverArtResponse,
 } from "$lib/handlers/coverart";
-import { isDesktop } from "$lib/platform";
+import {isDesktop, isMobile} from "$lib/platform";
 import {settingTriggerAnimatedBackground} from "$lib/stores/setting";
 
 export const MusicConfig = {
@@ -126,6 +126,9 @@ const MusicController = {
 		(value / max) * MusicConfig.max,
 	parseProgressValueIntoDuration: (value: number, max: number) =>
 		(value / MusicConfig.max) * max,
+
+	parseProgressPercentageIntoValue: (value: number) =>
+		(value / 100) * MusicConfig.max,
 
 	parseProgressDurationIntoText: (value: number, negative = false) => {
 		let minutes = 0;
@@ -432,6 +435,9 @@ const MusicController = {
 		}
 
 		setTimeout(() => {
+			if(isMobile()) MusicController.setProgressValue(
+				MusicController.parseProgressPercentageIntoValue(percentage)
+			)
 			MusicController.sendCommandSetPosition(MusicController.currentMusicRealDuration() * (percentage / 100));
 		});
 	},

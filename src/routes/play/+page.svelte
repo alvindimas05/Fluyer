@@ -40,6 +40,7 @@ let volumePercentage = $state(MusicController.volumePercentage());
 
 let progressBar: HTMLDivElement;
 let updateProgressText = $state(true);
+let touchLastX = $state(0);
 
 const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
     progressPercentage = MusicController.progressPercentage();
@@ -142,6 +143,19 @@ function setProgressText(e: MouseEvent & {
     progressDurationNegativeText = MusicController.parsePercentageProgressDurationIntoText(percentage, true);
 }
 
+function setProgressTextTouch(e: TouchEvent & {
+    currentTarget: EventTarget & HTMLDivElement;
+}){
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    const percentage = (x / progressBar.offsetWidth) * 100;
+    updateProgressText = false;
+    progressDurationText = MusicController.parsePercentageProgressDurationIntoText(percentage);
+    progressDurationNegativeText = MusicController.parsePercentageProgressDurationIntoText(percentage, true);
+
+    touchLastX = x;
+}
+
 function updateProgress(e: MouseEvent & {
     currentTarget: EventTarget & HTMLDivElement;
 }){
@@ -149,6 +163,15 @@ function updateProgress(e: MouseEvent & {
     const x = e.clientX - rect.left;
     const percentage = (x / progressBar.offsetWidth) * 100;
     MusicController.updateProgressByPercentage(percentage);
+}
+
+function updateProgressTouch(e: TouchEvent & {
+    currentTarget: EventTarget & HTMLDivElement;
+}){
+    const percentage = (touchLastX / progressBar.offsetWidth) * 100;
+    MusicController.updateProgressByPercentage(percentage);
+
+    resetProgressText();
 }
 
 function resetProgressText(){
@@ -242,6 +265,9 @@ function scrollToSelectedLyric() {
                     onmouseenter={setProgressText}
                     onmousemove={setProgressText}
                     onmouseleave={resetProgressText}
+                    ontouchstart={setProgressTextTouch}
+                    ontouchmove={setProgressTextTouch}
+                    ontouchend={updateProgressTouch}
                     onclick={updateProgress}></div>
             </div>
             <div
