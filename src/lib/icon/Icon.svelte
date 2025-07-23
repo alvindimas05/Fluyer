@@ -31,14 +31,7 @@ function configureIcon(){
     }
     switch ($iconTheme) {
         case IconThemeType.Lucide:
-            switch(type){
-                case IconType.Play:
-                case IconType.Pause:
-                case IconType.Next:
-                case IconType.Previous:
-                case IconType.Playing:
-                    classes = "w-[85%]"
-            }
+            classes = "!w-[90%]"
     }
 }
 
