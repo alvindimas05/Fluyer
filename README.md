@@ -56,7 +56,4 @@ sudo apt-get install -y libmpv2
 - High resource usage due to Animated Background. For now, the animation is disabled but the background is still enabled.
 
 ### iOS
-- Even though it's already tested, iOS release is not planned for now due to Apple Developer pricing.
-
-## Credits
-- [Default Album Cover](https://www.freepik.com/free-vector/music-notes-rainbow-colourful-with-vinyl-record-white-backgro_24459713.htm)
+- Even though it's already tested in the old version, iOS release is not planned for now due to Apple Developer pricing.

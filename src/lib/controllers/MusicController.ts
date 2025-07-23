@@ -38,7 +38,7 @@ export const MusicConfig = {
 	artistSeparator: "||",
 	defaultTitle: import.meta.env.VITE_DEFAULT_MUSIC_TITLE,
 	defaultArtist: import.meta.env.VITE_DEFAULT_MUSIC_ARTIST,
-	defaultAlbumImage: "/icons/default/default-album-cover.jpg",
+	defaultAlbumImage: "/icons/default/default-album-cover.png",
 };
 const MusicController = {
 	initialize: async () => {
