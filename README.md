@@ -17,8 +17,8 @@
   </a>
 </p>
 
-> ![NOTE]
-> This project is a slow-paced hobby. I’m building it just for fun :)
+> [!NOTE]
+> ⚠️ This project is a slow-paced hobby. I’m building it just for fun :)
 
 ---
 
