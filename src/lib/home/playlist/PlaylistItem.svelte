@@ -72,7 +72,7 @@ function gotoPlaylist() {
                 </div>
             {/if}
         </button>
-        <div></div>
+        <div class="muuri-draggable"></div>
         <button class="w-11 md:w-12 lg:w-14 aspect-square lg:p-1"
             onclick={removePlaylist}>
             <Icon type={IconType.Remove}/>

@@ -32,9 +32,9 @@ function initMuuri() {
 		dragSortPredicate: {
 			action: "move",
 		},
-        dragStartPredicate: (item, event) => {
-            if(muuri.getItems().indexOf(item) === $musicCurrentIndex || !dragging) return false;
-            return true;
+        dragStartPredicate: (item, e) => {
+            return !(muuri.getItems().indexOf(item) === $musicCurrentIndex ||
+                !e.target.classList.contains("muuri-draggable") || !dragging);
         }
 	});
 
