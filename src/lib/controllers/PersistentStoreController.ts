@@ -57,7 +57,7 @@ const PersistentStoreController = {
 		},
 	},
 
-	animatedBackgroundType: makeBinding(
+	animatedBackgroundType: makeBinding<SettingAnimatedBackgroundType>(
 		"animated-background-type",
 		SettingAnimatedBackgroundType.Prominent,
 		settingAnimatedBackgroundType.set

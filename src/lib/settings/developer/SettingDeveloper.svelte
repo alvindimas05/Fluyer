@@ -8,6 +8,7 @@ import SettingButton from "$lib/settings/SettingButton.svelte";
 import {IconType} from "$lib/icon/types";
 import {invoke} from "@tauri-apps/api/core";
 import {CommandRoutes} from "$lib/commands";
+import {isDesktop} from "$lib/platform";
 
 function onDeveloperModeChange(e: Event & {
     currentTarget: EventTarget & HTMLInputElement;
@@ -43,7 +44,7 @@ async function saveMpvLog(){
         <div>Developer Mode</div>
     </label>
 </SettingInput>
-{#if $settingDeveloperMode}
+{#if $settingDeveloperMode && isDesktop()}
     <SettingButton
             label="Save Log"
             icon={IconType.SaveLog}
