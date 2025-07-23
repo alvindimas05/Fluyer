@@ -31,7 +31,7 @@
 
 ## 📦 Downloads
 
-> ![WARNING]
+> [!WARNING]
 > 🚧 This app is a beta version and still under development. It may contain bugs or missing features. Check the issues below before installing.
 
 Get the latest release from the list or visit the [Releases Page](https://github.com/alvindimas05/Fluyer/releases).
