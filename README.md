@@ -2,7 +2,7 @@
   <img src="assets/icon.png" width="128" alt="Fluyer Icon" />
 </p>
 
-<h1 align="center">🎵 Fluyer</h1>
+<h1 align="center">🦋🎵 Fluyer</h1>
 <p align="center">A Beautiful Cross-Platform Music Player.</p>
 
 <p align="center">
