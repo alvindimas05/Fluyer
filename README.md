@@ -37,17 +37,17 @@
 Get the latest release from the list or visit the [Releases Page](https://github.com/alvindimas05/Fluyer/releases).
 
 ### 💻 Desktop
-- 🪟 [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x64-setup.exe)
-- 🍎 [macOS (Intel)](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x64.dmg) ([Read this first](#macos))
-- 🍎 [macOS (Silicon)](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_aarch64.dmg) ([Read this first](#macos))
-- 🐧 [Ubuntu/Debian (.deb)](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_amd64.deb) ([Read this first](#linux))
-- 🐧 [Linux AppImage](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_amd64.AppImage)
+- 🪟 [Windows](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_x64-setup.exe)
+- 🍎 [macOS (Intel)](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_x64.dmg) ([Read this first](#macos))
+- 🍎 [macOS (Silicon)](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_aarch64.dmg) ([Read this first](#macos))
+- 🐧 [Ubuntu/Debian (.deb)](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_amd64.deb) ([Read this first](#linux))
+- 🐧 [Linux AppImage](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_amd64.AppImage)
 
 ### 📱 Android
-- 📱 [aarch64 (Most Devices)](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_aarch64.apk)
-- 📱 [armv7 (Older Devices)](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_armv7.apk)
-- 📱 [x86_64 (Chromebooks)](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_x86_64.apk)
-- 📱 [i686 (Older Chromebooks)](https://github.com/alvindimas05/Fluyer/releases/download/v0.1.0/Fluyer_0.1.0_i686.apk)
+- 📱 [aarch64 (Most Devices)](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_aarch64.apk)
+- 📱 [armv7 (Older Devices)](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_armv7.apk)
+- 📱 [x86_64 (Chromebooks)](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_x86_64.apk)
+- 📱 [i686 (Older Chromebooks)](https://github.com/alvindimas05/Fluyer/releases/download/v1.0.0/Fluyer_1.0.0_i686.apk)
 
 ---
 
