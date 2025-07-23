@@ -16,7 +16,7 @@ import { onMount } from "svelte";
 import {type MusicData, RepeatMode} from "$lib/home/music/types";
 import {settingUiShowRepeatButton, settingUiShowShuffleButton} from "$lib/stores/setting";
 
-let oldMusic: MusicData = $state(null);
+let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
 let albumImage = $state(MusicConfig.defaultAlbumImage);
@@ -24,6 +24,11 @@ let albumImage = $state(MusicConfig.defaultAlbumImage);
 let isPlaying = $derived($musicIsPlaying);
 let progressPercentage = $state(MusicController.progressPercentage());
 let volumePercentage = $state(MusicController.volumePercentage());
+
+let tooltip: HTMLDivElement;
+let tooltipPosition = $state(0);
+let tooltipVisible = $state(false);
+let tooltipText = $state("0:00");
 
 const gridRight = (() => {
     if($settingUiShowRepeatButton && $settingUiShowShuffleButton) return "grid-cols-[repeat(5,auto)]";
@@ -82,6 +87,33 @@ function refresh(){
     }, 0);
 }
 
+function updateTooltip(e: MouseEvent & {
+    currentTarget: EventTarget & HTMLDivElement;
+}) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    tooltipPosition = x - (tooltip.offsetWidth / 2);
+    if(tooltipPosition < 0) tooltipPosition = 0;
+    else if(tooltipPosition + tooltip.offsetWidth > window.innerWidth) tooltipPosition = window.innerWidth - tooltip.offsetWidth;
+
+    const percentage = (x / window.innerWidth) * 100;
+    tooltipText = MusicController.parsePercentageProgressDurationIntoText(percentage);
+    tooltipVisible = true;
+}
+
+function hideTooltip() {
+    tooltipVisible = false;
+}
+
+function updateProgress(e: MouseEvent & {
+    currentTarget: EventTarget & HTMLDivElement;
+}) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = (x / window.innerWidth) * 100;
+    MusicController.updateProgressByPercentage(percentage);
+}
+
 onMount(() => {
 	musicProgressValue.subscribe(
 		() => (progressPercentage = MusicController.progressPercentage()),
@@ -97,6 +129,10 @@ onMount(() => {
 <svelte:document onkeydown={onKeyDown} />
 
 <div class="fixed left-0 bottom-0 z-10 w-full pt-2">
+    <div class="w-fit absolute bottom-[4.5rem] md:bottom-[5rem]
+        border rounded-lg px-2 py-1 shadow-xl backdrop-blur-md text-sm"
+        style="left: {tooltipPosition}px; visibility: {tooltipVisible ? 'visible' : 'hidden'};"
+        bind:this={tooltip}>{tooltipText}</div>
     <div
         class={`w-full bg-gray-700 bg-opacity-30 text-white backdrop-blur-md`}
         style={`padding-bottom: ${$mobileNavigationBarHeight}px`}
@@ -110,7 +146,6 @@ onMount(() => {
                     min={MusicConfig.min}
                     max={MusicConfig.max}
                     step={MusicConfig.step}
-                    oninput={MusicController.onPlayerBarChange}
             />
             <input
                     class={`w-full absolute music-progress-bar-end`}
@@ -120,9 +155,13 @@ onMount(() => {
                     min={MusicConfig.min}
                     max={MusicConfig.max}
                     step={MusicConfig.step}
-                    oninput={MusicController.onPlayerBarChange}
             />
         </div>
+        <div class="w-full h-5 absolute left-0 top-[-10px] cursor-pointer"
+             onmouseenter={updateTooltip}
+             onmousemove={updateTooltip}
+             onmouseleave={hideTooltip}
+             onclick={updateProgress}></div>
         <div class="p-3 mt-1">
             <div class="grid grid-cols-[auto_min-content] md:grid-cols-3">
                 <div class="flex items-center md:gap-2">

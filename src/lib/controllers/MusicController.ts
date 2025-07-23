@@ -104,6 +104,10 @@ const MusicController = {
 					MusicController.currentMusic()!.duration,
 				)
 			: 0,
+	currentMusicRealDuration: () =>
+		MusicController.currentMusic() != null
+			? MusicController.currentMusicDuration() * 1000
+			: 0,
 	progressValue: () => get(musicProgressValue),
 	setProgressValue: (value: number) => musicProgressValue.set(value),
 
@@ -123,22 +127,31 @@ const MusicController = {
 	parseProgressValueIntoDuration: (value: number, max: number) =>
 		(value / MusicConfig.max) * max,
 
-	progressDurationText: (negative = false): string => {
+	parseProgressDurationIntoText: (value: number, negative = false) => {
 		let minutes = 0;
 		let seconds: number;
-		for (
-			seconds = negative
-				? MusicController.currentMusicDuration() -
-					MusicController.progressDuration()
-				: MusicController.progressDuration();
-			seconds >= 60;
-			seconds -= 60
-		) {
+		for (seconds = value; seconds >= 60; seconds -= 60) {
 			minutes++;
 		}
 		if (seconds < 0) seconds = seconds + 60;
 		seconds = Math.round(seconds);
-		return `${negative ? "-" : ""}${minutes}.${seconds > 9 ? seconds : "0" + seconds.toString()}`;
+		return `${negative ? "-" : ""}${minutes}:${seconds > 9 ? seconds : "0" + seconds.toString()}`;
+	},
+	progressDurationText: (negative = false): string => {
+		return MusicController.parseProgressDurationIntoText(
+			negative
+				? MusicController.currentMusicDuration() -
+					MusicController.progressDuration()
+				: MusicController.progressDuration(),
+			negative,
+		);
+	},
+	parsePercentageProgressDurationIntoText: (value: number, negative = false) => {
+		return MusicController.parseProgressDurationIntoText(
+			negative ? MusicController.currentMusicDuration() * ((100 - value) / 100) :
+			MusicController.currentMusicDuration() * (value / 100),
+			negative,
+		);
 	},
 
 	startProgress: ({ resetProgress } = { resetProgress: true }) => {
@@ -407,6 +420,20 @@ const MusicController = {
 				MusicController.realProgressDuration(),
 			),
 		);
+	},
+
+	updateProgressByPercentage: (percentage: number) => {
+		if (
+			MusicController.isProgressValueEnd() ||
+			MusicController.currentMusicIndex() < 0
+		) {
+			MusicController.setProgressValue(0);
+			return;
+		}
+
+		setTimeout(() => {
+			MusicController.sendCommandSetPosition(MusicController.currentMusicRealDuration() * (percentage / 100));
+		});
 	},
 
 	toggleRepeatMode: () => {
