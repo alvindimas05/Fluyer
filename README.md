@@ -17,7 +17,8 @@
   </a>
 </p>
 
-> ⚠️ **Note:** This project is a slow-paced hobby. I’m building it just for fun :)
+> ![NOTE]
+> This project is a slow-paced hobby. I’m building it just for fun :)
 
 ---
 
@@ -30,7 +31,8 @@
 
 ## 📦 Downloads
 
-> 🚧 **Beta Warning:** This app is still under development and may contain bugs or missing features. Check the issues below before installing.
+> ![WARNING]
+> 🚧 This app is a beta version and still under development. It may contain bugs or missing features. Check the issues below before installing.
 
 Get the latest release from the list or visit the [Releases Page](https://github.com/alvindimas05/Fluyer/releases).
 
@@ -53,7 +55,8 @@ Get the latest release from the list or visit the [Releases Page](https://github
 
 ### macOS
 
-> 🔐 **IMPORTANT:** The app is **not notarized** due to Apple Developer fees. macOS will warn that Fluyer “cannot be verified.” This is expected and harmless.
+> [!IMPORTANT]
+> 🔐 The app is **not notarized** due to Apple Developer fees. macOS will warn that Fluyer “cannot be verified.” This is expected and harmless.
 
 #### macOS 14 (Sonoma) and below:
 1. Right-click `Fluyer.app`
@@ -71,7 +74,8 @@ Get the latest release from the list or visit the [Releases Page](https://github
 
 ### Linux
 
-> 🧩 **IMPORTANT:** If you're using the `.deb`, you **must install libmpv** manually.
+> [!IMPORTANT]
+> 🧩 If you're using the `.deb`, you **must install libmpv** manually.
 
 Example for Ubuntu:
 ```bash
@@ -91,6 +95,7 @@ sudo apt-get install -y libmpv2
 
 ### iOS
 
+> [!IMPORTANT]
 > 🍏 **iOS version is not available.** Although previously tested, I don’t plan to release it due to Apple Developer fees.
 
 ---
