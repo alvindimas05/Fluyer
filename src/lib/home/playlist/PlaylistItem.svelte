@@ -30,7 +30,7 @@ function gotoPlaylist() {
 >
     <div class="w-11 md:w-12 lg:w-14">
         <img
-            class="w-full rounded"
+            class="w-full h-full rounded"
             src={MusicController.getAlbumImageFromMusic(music)}
             alt="Album"
         />
@@ -47,7 +47,7 @@ function gotoPlaylist() {
     <div
         class="absolute top-0 left-0 w-full grid grid-cols-[max-content_auto_max-content] py-2 px-3 z-10"
     >
-        <div class="w-11 md:w-12 lg:w-14 aspect-square"></div>
+        <div class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 aspect-square"></div>
         <div></div>
         <div class="w-11 md:w-12 lg:w-14 aspect-square p-1 lg:p-3">
             <div class="w-full animate__animated animate__infinite animate__pulse">
@@ -61,12 +61,12 @@ function gotoPlaylist() {
         animate__animated animate__faster animate__fadeOut playlist-item-controls"
     >
         <button
-            class="w-11 md:w-12 lg:w-14 aspect-square"
+            class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 aspect-square"
             onclick={gotoPlaylist}
         >
             {#if !isPlaying}
                 <div
-                    class="w-full bg-black bg-opacity-40 rounded lg:p-1"
+                    class="w-full h-full bg-black bg-opacity-40 rounded lg:p-1"
                 >
                     <Icon type={isPrevious ? IconType.Previous : IconType.Next} />
                 </div>
