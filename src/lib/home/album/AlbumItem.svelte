@@ -96,12 +96,10 @@ onMount(() => {
 	checkAlbumImage();
 });
 
-if (index < 10) {
-	setTimeout(
-		() => (animationClasses = "animate__animated animate__fadeIn"),
-		animationDelay * index,
-	);
-}
+setTimeout(
+    () => (animationClasses = "animate__animated animate__fadeIn"),
+    animationDelay * (index > 10 ? 10 : index),
+);
 </script>
 
 <div

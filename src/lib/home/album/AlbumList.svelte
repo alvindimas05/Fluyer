@@ -60,7 +60,7 @@ $effect(() => void ($swipeMinimumTop = elementHeight));
     bind:offsetHeight={elementHeight}
 	bind:this={element}
     onwheel={onMouseWheel}>
-    {#each Object.entries($musicAlbumList) as [_, musicList], index}
+    {#each $musicAlbumList as musicList, index}
         <AlbumItem {musicList} {index} />
     {/each}
 </div>
