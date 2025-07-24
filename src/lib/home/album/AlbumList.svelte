@@ -29,7 +29,12 @@ function groupByAlbum(): MusicData[][] {
 		{} as Record<string, MusicData[]>,
 	);
 
-	return Object.values(albumsMap);
+    const data: MusicData[][] = [];
+    for (const key of Object.keys(albumsMap).sort()) {
+        data.push(albumsMap[key]);
+    }
+
+    return data;
 }
 
 function onMouseWheel(
