@@ -1,36 +1,34 @@
 <script lang="ts">
-    import {
-        musicCurrentIndex,
-        musicIsPlaying,
-        musicProgressValue,
-        musicRepeatMode,
-        musicVolume,
-    } from "$lib/stores/music";
-    import MusicController, {
-        MusicConfig,
-    } from "$lib/controllers/MusicController";
-    import type MusicLyric from "$lib/home/music/lyric";
-    import LrcLib from "$lib/api/lrclib";
-    import {
-        mobileNavigationBarHeight,
-        mobileStatusBarHeight,
-    } from "$lib/stores/mobile";
-    import { isAndroid, isMacos, isMobile } from "$lib/platform";
-    import PageController from "$lib/controllers/PageController";
-    import Icon from "$lib/icon/Icon.svelte";
-    import { IconType } from "$lib/icon/types";
-    import { RepeatMode } from "$lib/home/music/types";
-    import {
-        settingUiPlayShowBackButton,
-        settingUiShowRepeatButton,
-        settingUiShowShuffleButton,
+import {
+	musicCurrentIndex,
+	musicIsPlaying,
+	musicProgressValue,
+	musicRepeatMode,
+	musicVolume,
+} from "$lib/stores/music";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import type MusicLyric from "$lib/home/music/lyric";
+import LrcLib from "$lib/api/lrclib";
+import {
+	mobileNavigationBarHeight,
+	mobileStatusBarHeight,
+} from "$lib/stores/mobile";
+import { isAndroid, isMacos, isMobile } from "$lib/platform";
+import PageController from "$lib/controllers/PageController";
+import Icon from "$lib/icon/Icon.svelte";
+import { IconType } from "$lib/icon/types";
+import { RepeatMode } from "$lib/home/music/types";
+import {
+	settingUiPlayShowBackButton,
+	settingUiShowRepeatButton,
+	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
 let progressDurationText = $state(MusicController.progressDurationText());
 let progressDurationNegativeText = $state(
-    MusicController.progressDurationText(true),
+	MusicController.progressDurationText(true),
 );
 let albumImage = $state(MusicConfig.defaultAlbumImage);
 
@@ -43,146 +41,156 @@ let updateProgressText = $state(true);
 let touchLastX = $state(0);
 
 const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
-    progressPercentage = MusicController.progressPercentage();
-    if(updateProgressText) {
-        progressDurationText = MusicController.progressDurationText();
-        progressDurationNegativeText = MusicController.progressDurationText(true);
-    }
+	progressPercentage = MusicController.progressPercentage();
+	if (updateProgressText) {
+		progressDurationText = MusicController.progressDurationText();
+		progressDurationNegativeText = MusicController.progressDurationText(true);
+	}
 
-    resetSelectedLyricIndex();
+	resetSelectedLyricIndex();
 });
 const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => {
-    music = MusicController.currentMusic();
-    albumImage = MusicController.currentMusicAlbumImage();
-    resetLyrics();
+	music = MusicController.currentMusic();
+	albumImage = MusicController.currentMusicAlbumImage();
+	resetLyrics();
 });
 
 const unlistenMusicVolume = musicVolume.subscribe(() => {
-    volumePercentage = MusicController.volumePercentage();
+	volumePercentage = MusicController.volumePercentage();
 });
 
 function handleButtonPlayPause() {
-    if (
-        MusicController.currentMusic() === null ||
-        MusicController.isProgressValueEnd()
-    ) {
-        return;
-    }
+	if (
+		MusicController.currentMusic() === null ||
+		MusicController.isProgressValueEnd()
+	) {
+		return;
+	}
 
-    if (MusicController.isPlaying()) {
-        MusicController.setIsPlaying(false);
-        MusicController.pause();
-    } else MusicController.play();
+	if (MusicController.isPlaying()) {
+		MusicController.setIsPlaying(false);
+		MusicController.pause();
+	} else MusicController.play();
 }
 
 function handleButtonPrevious() {
-    MusicController.previousMusic();
+	MusicController.previousMusic();
 }
 
 function handleButtonNext() {
-    MusicController.nextMusic();
+	MusicController.nextMusic();
 }
 
 function handleButtonBack() {
-    unlistenMusicProgressValue();
-    unlistenMusicCurrentIndex();
-    unlistenMusicVolume();
-    PageController.back();
+	unlistenMusicProgressValue();
+	unlistenMusicCurrentIndex();
+	unlistenMusicVolume();
+	PageController.back();
 }
 
 async function onKeyDown(
-    e: KeyboardEvent & {
-        currentTarget: EventTarget & Document;
-    },
+	e: KeyboardEvent & {
+		currentTarget: EventTarget & Document;
+	},
 ) {
-    if (e.key === "Escape") handleButtonBack();
-    if (e.key === " ") handleButtonPlayPause();
+	if (e.key === "Escape") handleButtonBack();
+	if (e.key === " ") handleButtonPlayPause();
 }
 
 async function resetLyrics() {
-    selectedLyricIndex = 0;
+	selectedLyricIndex = 0;
 
-    if (MusicController.currentMusic() == null) return;
-    const resLyrics = await LrcLib.getLyrics(
-        MusicController.currentMusic()!,
-    );
-    if (resLyrics == null) {
-        lyrics = [];
-        return;
-    }
-    lyrics = resLyrics;
+	if (MusicController.currentMusic() == null) return;
+	const resLyrics = await LrcLib.getLyrics(MusicController.currentMusic()!);
+	if (resLyrics == null) {
+		lyrics = [];
+		return;
+	}
+	lyrics = resLyrics;
 }
 
 function resetSelectedLyricIndex() {
-    if (lyrics.length < 1) return;
+	if (lyrics.length < 1) return;
 
-    if (MusicController.progressDuration() < lyrics[0].duration) {
-        scrollToSelectedLyric();
-        return;
-    }
-    // Note: Using for loop since it's the fastest. Just in case though :)
-    for (var i = 0; i < lyrics.length; i++) {
-        if (MusicController.progressDuration() < lyrics[i].duration) {
-            selectedLyricIndex = i - 1;
-            scrollToSelectedLyric();
-            return;
-        }
-    }
-    selectedLyricIndex = lyrics.length - 1;
-    scrollToSelectedLyric();
+	if (MusicController.progressDuration() < lyrics[0].duration) {
+		scrollToSelectedLyric();
+		return;
+	}
+	// Note: Using for loop since it's the fastest. Just in case though :)
+	for (var i = 0; i < lyrics.length; i++) {
+		if (MusicController.progressDuration() < lyrics[i].duration) {
+			selectedLyricIndex = i - 1;
+			scrollToSelectedLyric();
+			return;
+		}
+	}
+	selectedLyricIndex = lyrics.length - 1;
+	scrollToSelectedLyric();
 }
 
-function setProgressText(e: MouseEvent & {
-    currentTarget: EventTarget & HTMLDivElement;
-}){
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = (x / progressBar.offsetWidth) * 100;
-    updateProgressText = false;
-    progressDurationText = MusicController.parsePercentageProgressDurationIntoText(percentage);
-    progressDurationNegativeText = MusicController.parsePercentageProgressDurationIntoText(percentage, true);
+function setProgressText(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	const rect = e.currentTarget.getBoundingClientRect();
+	const x = e.clientX - rect.left;
+	const percentage = (x / progressBar.offsetWidth) * 100;
+	updateProgressText = false;
+	progressDurationText =
+		MusicController.parsePercentageProgressDurationIntoText(percentage);
+	progressDurationNegativeText =
+		MusicController.parsePercentageProgressDurationIntoText(percentage, true);
 }
 
-function setProgressTextTouch(e: TouchEvent & {
-    currentTarget: EventTarget & HTMLDivElement;
-}){
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    const percentage = (x / progressBar.offsetWidth) * 100;
-    updateProgressText = false;
-    progressDurationText = MusicController.parsePercentageProgressDurationIntoText(percentage);
-    progressDurationNegativeText = MusicController.parsePercentageProgressDurationIntoText(percentage, true);
+function setProgressTextTouch(
+	e: TouchEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	const rect = e.currentTarget.getBoundingClientRect();
+	const x = e.touches[0].clientX - rect.left;
+	const percentage = (x / progressBar.offsetWidth) * 100;
+	updateProgressText = false;
+	progressDurationText =
+		MusicController.parsePercentageProgressDurationIntoText(percentage);
+	progressDurationNegativeText =
+		MusicController.parsePercentageProgressDurationIntoText(percentage, true);
 
-    touchLastX = x;
+	touchLastX = x;
 }
 
-function updateProgress(e: MouseEvent & {
-    currentTarget: EventTarget & HTMLDivElement;
-}){
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = (x / progressBar.offsetWidth) * 100;
-    MusicController.updateProgressByPercentage(percentage);
+function updateProgress(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	const rect = e.currentTarget.getBoundingClientRect();
+	const x = e.clientX - rect.left;
+	const percentage = (x / progressBar.offsetWidth) * 100;
+	MusicController.updateProgressByPercentage(percentage);
 }
 
-function updateProgressTouch(e: TouchEvent & {
-    currentTarget: EventTarget & HTMLDivElement;
-}){
-    const percentage = (touchLastX / progressBar.offsetWidth) * 100;
-    MusicController.updateProgressByPercentage(percentage);
+function updateProgressTouch(
+	e: TouchEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	const percentage = (touchLastX / progressBar.offsetWidth) * 100;
+	MusicController.updateProgressByPercentage(percentage);
 
-    resetProgressText();
+	resetProgressText();
 }
 
-function resetProgressText(){
-    updateProgressText = true;
+function resetProgressText() {
+	updateProgressText = true;
 }
 
 function scrollToSelectedLyric() {
-    document.getElementById("selected-lyric")?.scrollIntoView({
-        block: window.innerWidth > 768 ? "center" : "start",
-        behavior: "smooth",
-    });
+	document.getElementById("selected-lyric")?.scrollIntoView({
+		block: window.innerWidth > 768 ? "center" : "start",
+		behavior: "smooth",
+	});
 }
 </script>
 

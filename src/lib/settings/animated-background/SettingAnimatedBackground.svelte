@@ -17,10 +17,10 @@ async function onMethodChange(
 	const value = <SettingAnimatedBackgroundType>e.currentTarget.value;
 	if (value === $settingAnimatedBackgroundType) return;
 	await PersistentStoreController.animatedBackgroundType.set(value);
-    $settingAnimatedBackgroundType = value;
+	$settingAnimatedBackgroundType = value;
 	$settingTriggerAnimatedBackground = new Date().toString();
 
-    ToastController.info("Animated Background method changed to " + value);
+	ToastController.info("Animated Background method changed to " + value);
 }
 </script>
 

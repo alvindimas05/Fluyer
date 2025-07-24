@@ -3,8 +3,8 @@ import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import ToastController from "$lib/controllers/ToastController";
-import {IconThemeType} from "$lib/icon/types";
-import {iconTheme} from "$lib/stores/icon";
+import { IconThemeType } from "$lib/icon/types";
+import { iconTheme } from "$lib/stores/icon";
 
 async function onMethodChange(
 	e: Event & {
@@ -13,9 +13,9 @@ async function onMethodChange(
 ) {
 	const value = <IconThemeType>e.currentTarget.value;
 	if (value === $iconTheme) return;
-    iconTheme.set(value);
+	iconTheme.set(value);
 	await PersistentStoreController.iconTheme.set(value);
-    ToastController.info("Icon theme changed to " + value);
+	ToastController.info("Icon theme changed to " + value);
 }
 </script>
 

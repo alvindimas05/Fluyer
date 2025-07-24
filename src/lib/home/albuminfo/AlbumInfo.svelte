@@ -12,7 +12,9 @@ function handleBack() {
 }
 
 async function addMusicListAndPlay() {
-	await MusicController.resetAndAddMusicList(MusicController.sortMusicList(album!.musicList));
+	await MusicController.resetAndAddMusicList(
+		MusicController.sortMusicList(album!.musicList),
+	);
 	MusicController.play();
 }
 

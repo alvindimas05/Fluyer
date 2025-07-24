@@ -2,21 +2,21 @@
 import { musicList } from "$lib/stores/music";
 import MusicItem from "./MusicItem.svelte";
 import { VList } from "virtua/svelte";
-import {onMount} from "svelte";
-import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import { onMount } from "svelte";
+import { filterAlbum, filterSearch } from "$lib/stores/filter";
 import MusicController from "$lib/controllers/MusicController";
 
 // Responsive rules: [minWidth, maxDppxExclusive, columns]
 const rules = [
-	[1280, 2.01, 3],  // xhdpi & ≥1280px → 3 cols
+	[1280, 2.01, 3], // xhdpi & ≥1280px → 3 cols
 	[1024, 2.01, 3],
-	[768,  2.01, 2],
-	[1280, 1.01, 3],  // hdpi
+	[768, 2.01, 2],
+	[1280, 1.01, 3], // hdpi
 	[1024, 1.01, 2],
-	[768,  1.01, 2],
-	[1280, 1.0, 4],   // mdpi
+	[768, 1.01, 2],
+	[1280, 1.0, 4], // mdpi
 	[1024, 1.0, 3],
-	[768,  1.0, 2]
+	[768, 1.0, 2],
 ];
 
 let columnCount = $state(1);
@@ -25,7 +25,7 @@ function updateColumnCount() {
 	const dpi = window.devicePixelRatio;
 
 	for (const [minW, minDppx, cols] of rules) {
-		if (w >= minW && dpi >= minDppx){
+		if (w >= minW && dpi >= minDppx) {
 			columnCount = cols;
 			return;
 		}
@@ -34,8 +34,8 @@ function updateColumnCount() {
 }
 
 let data = $derived.by(() => {
-	if(!Array.isArray($musicList)) return [];
-	let list = $musicList.filter(music => {
+	if (!Array.isArray($musicList)) return [];
+	let list = $musicList.filter((music) => {
 		const search = $filterSearch.toLowerCase();
 		const album = $filterAlbum;
 
@@ -43,11 +43,11 @@ let data = $derived.by(() => {
 		const hasAlbum = !!album;
 
 		const matchesSearch =
-				hasSearch &&
-				(music.album?.toLowerCase().includes(search) ||
-						music.title?.toLowerCase().includes(search) ||
-						music.artist?.toLowerCase().includes(search) ||
-						music.albumArtist?.toLowerCase().includes(search));
+			hasSearch &&
+			(music.album?.toLowerCase().includes(search) ||
+				music.title?.toLowerCase().includes(search) ||
+				music.artist?.toLowerCase().includes(search) ||
+				music.albumArtist?.toLowerCase().includes(search));
 
 		const matchesAlbum = hasAlbum && album.name === music.album;
 
@@ -57,7 +57,7 @@ let data = $derived.by(() => {
 			return matchesAlbum && (!hasSearch || matchesSearch);
 		}
 	});
-	if($filterAlbum){
+	if ($filterAlbum) {
 		list = MusicController.sortMusicList(list);
 	}
 

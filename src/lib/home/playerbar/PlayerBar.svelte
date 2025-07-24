@@ -1,11 +1,12 @@
 <script lang="ts">
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import {
-    musicCurrentIndex,
-    musicIsPlaying, musicPlaylist,
-    musicProgressValue,
-    musicRepeatMode,
-    musicVolume,
+	musicCurrentIndex,
+	musicIsPlaying,
+	musicPlaylist,
+	musicProgressValue,
+	musicRepeatMode,
+	musicVolume,
 } from "$lib/stores/music";
 import { mobileNavigationBarHeight } from "$lib/stores/mobile";
 import PageController from "$lib/controllers/PageController";
@@ -13,8 +14,11 @@ import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { onMount } from "svelte";
-import {type MusicData, RepeatMode} from "$lib/home/music/types";
-import {settingUiShowRepeatButton, settingUiShowShuffleButton} from "$lib/stores/setting";
+import { type MusicData, RepeatMode } from "$lib/home/music/types";
+import {
+	settingUiShowRepeatButton,
+	settingUiShowShuffleButton,
+} from "$lib/stores/setting";
 
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
@@ -33,9 +37,11 @@ let tooltipText = $state("0:00");
 let touchLastX = $state(0);
 
 const gridRight = (() => {
-    if($settingUiShowRepeatButton && $settingUiShowShuffleButton) return "grid-cols-[repeat(5,auto)]";
-    if($settingUiShowRepeatButton || $settingUiShowShuffleButton) return "grid-cols-[repeat(4,auto)]";
-    return "grid-cols-[repeat(3,auto)]";
+	if ($settingUiShowRepeatButton && $settingUiShowShuffleButton)
+		return "grid-cols-[repeat(5,auto)]";
+	if ($settingUiShowRepeatButton || $settingUiShowShuffleButton)
+		return "grid-cols-[repeat(4,auto)]";
+	return "grid-cols-[repeat(3,auto)]";
 })();
 
 function handleButtonPlayPause() {
@@ -69,76 +75,88 @@ function handleVolumeButton() {
 	MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
 }
 
-function refresh(){
-    setTimeout(() => {
-        let music = MusicController.currentMusic();
+function refresh() {
+	setTimeout(() => {
+		let music = MusicController.currentMusic();
 
-        if (music === null) {
-            title = MusicConfig.defaultTitle;
-            artist = MusicConfig.defaultArtist;
-            albumImage = MusicConfig.defaultAlbumImage;
-            return;
-        }
+		if (music === null) {
+			title = MusicConfig.defaultTitle;
+			artist = MusicConfig.defaultArtist;
+			albumImage = MusicConfig.defaultAlbumImage;
+			return;
+		}
 
-        if(oldMusic !== null && oldMusic.path === music.path) return;
+		if (oldMusic !== null && oldMusic.path === music.path) return;
 
-        oldMusic = music;
-        title = music.title!;
-        artist = MusicController.getFullArtistFromMusic(music);
-        albumImage = MusicController.currentMusicAlbumImage();
-    }, 0);
+		oldMusic = music;
+		title = music.title!;
+		artist = MusicController.getFullArtistFromMusic(music);
+		albumImage = MusicController.currentMusicAlbumImage();
+	}, 0);
 }
 
-function updateTooltip(e: MouseEvent & {
-    currentTarget: EventTarget & HTMLDivElement;
-}) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    tooltipPosition = x - (tooltip.offsetWidth / 2);
-    if(tooltipPosition < 0) tooltipPosition = 0;
-    else if(tooltipPosition + tooltip.offsetWidth > window.innerWidth) tooltipPosition = window.innerWidth - tooltip.offsetWidth;
+function updateTooltip(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	const rect = e.currentTarget.getBoundingClientRect();
+	const x = e.clientX - rect.left;
+	tooltipPosition = x - tooltip.offsetWidth / 2;
+	if (tooltipPosition < 0) tooltipPosition = 0;
+	else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth)
+		tooltipPosition = window.innerWidth - tooltip.offsetWidth;
 
-    const percentage = (x / window.innerWidth) * 100;
-    tooltipText = MusicController.parsePercentageProgressDurationIntoText(percentage);
-    tooltipVisible = true;
+	const percentage = (x / window.innerWidth) * 100;
+	tooltipText =
+		MusicController.parsePercentageProgressDurationIntoText(percentage);
+	tooltipVisible = true;
 }
 
-function updateTooltipTouch(e: TouchEvent & {
-    currentTarget: EventTarget & HTMLDivElement;
-}) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    tooltipPosition = x - (tooltip.offsetWidth / 2);
-    if(tooltipPosition < 0) tooltipPosition = 0;
-    else if(tooltipPosition + tooltip.offsetWidth > window.innerWidth) tooltipPosition = window.innerWidth - tooltip.offsetWidth;
+function updateTooltipTouch(
+	e: TouchEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	const rect = e.currentTarget.getBoundingClientRect();
+	const x = e.touches[0].clientX - rect.left;
+	tooltipPosition = x - tooltip.offsetWidth / 2;
+	if (tooltipPosition < 0) tooltipPosition = 0;
+	else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth)
+		tooltipPosition = window.innerWidth - tooltip.offsetWidth;
 
-    const percentage = (x / window.innerWidth) * 100;
-    tooltipText = MusicController.parsePercentageProgressDurationIntoText(percentage);
-    tooltipVisible = true;
+	const percentage = (x / window.innerWidth) * 100;
+	tooltipText =
+		MusicController.parsePercentageProgressDurationIntoText(percentage);
+	tooltipVisible = true;
 
-    touchLastX = x;
+	touchLastX = x;
 }
 
 function hideTooltip() {
-    tooltipVisible = false;
+	tooltipVisible = false;
 }
 
-function updateProgress(e: MouseEvent & {
-    currentTarget: EventTarget & HTMLDivElement;
-}) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = (x / window.innerWidth) * 100;
-    MusicController.updateProgressByPercentage(percentage);
+function updateProgress(
+	e: MouseEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	const rect = e.currentTarget.getBoundingClientRect();
+	const x = e.clientX - rect.left;
+	const percentage = (x / window.innerWidth) * 100;
+	MusicController.updateProgressByPercentage(percentage);
 }
 
-function updateProgressTouch(e: TouchEvent & {
-    currentTarget: EventTarget & HTMLDivElement;
-}) {
-    const percentage = (touchLastX / window.innerWidth) * 100;
-    MusicController.updateProgressByPercentage(percentage);
+function updateProgressTouch(
+	e: TouchEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	const percentage = (touchLastX / window.innerWidth) * 100;
+	MusicController.updateProgressByPercentage(percentage);
 
-    hideTooltip();
+	hideTooltip();
 }
 
 onMount(() => {
@@ -148,8 +166,8 @@ onMount(() => {
 	musicVolume.subscribe(
 		() => (volumePercentage = MusicController.volumePercentage()),
 	);
-    musicCurrentIndex.subscribe(refresh);
-    musicPlaylist.subscribe(refresh);
+	musicCurrentIndex.subscribe(refresh);
+	musicPlaylist.subscribe(refresh);
 });
 </script>
 

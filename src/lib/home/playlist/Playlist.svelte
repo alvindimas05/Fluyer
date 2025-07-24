@@ -1,6 +1,10 @@
 <script lang="ts">
 import Sidebar from "$lib/home/sidebar/Sidebar.svelte";
-import {musicCurrentIndex, musicPlaylist, musicReset} from "$lib/stores/music";
+import {
+	musicCurrentIndex,
+	musicPlaylist,
+	musicReset,
+} from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
 import { SidebarType } from "$lib/home/sidebar/types";
 import Icon from "$lib/icon/Icon.svelte";
@@ -8,7 +12,7 @@ import { IconType } from "$lib/icon/types";
 import MusicController from "$lib/controllers/MusicController";
 import Muuri from "muuri";
 import { mount, onMount, unmount } from "svelte";
-import {isDesktop, isMobile} from "$lib/platform";
+import { isDesktop, isMobile } from "$lib/platform";
 import type { MusicData } from "$lib/home/music/types";
 import ToastController from "$lib/controllers/ToastController";
 
@@ -32,10 +36,13 @@ function initMuuri() {
 		dragSortPredicate: {
 			action: "move",
 		},
-        dragStartPredicate: (item, e) => {
-            return !(muuri.getItems().indexOf(item) === $musicCurrentIndex ||
-                !e.target.classList.contains("muuri-draggable") || !dragging);
-        }
+		dragStartPredicate: (item, e) => {
+			return !(
+				muuri.getItems().indexOf(item) === $musicCurrentIndex ||
+				!e.target.classList.contains("muuri-draggable") ||
+				!dragging
+			);
+		},
 	});
 
 	muuri.on("dragStart", (item, _) => {
@@ -49,11 +56,17 @@ function initMuuri() {
 
 		if (fromIndex === toIndex) return;
 
-        if (isDesktop() && fromIndex < $musicCurrentIndex && toIndex === $musicCurrentIndex) {
-            muuri.move(toIndex, fromIndex);
-            ToastController.info("Sorry, you can't move previous song next to the current song");
-            return;
-        }
+		if (
+			isDesktop() &&
+			fromIndex < $musicCurrentIndex &&
+			toIndex === $musicCurrentIndex
+		) {
+			muuri.move(toIndex, fromIndex);
+			ToastController.info(
+				"Sorry, you can't move previous song next to the current song",
+			);
+			return;
+		}
 		MusicController.playlistMoveto(fromIndex, toIndex);
 	});
 
@@ -67,13 +80,16 @@ function createPlaylistItem(music: MusicData) {
 	return element;
 }
 
-function elementToggleDraggable(){
-    let elements = document.querySelectorAll(".playlist-item");
-    if(dragging) elements.forEach((el) => {
-        (el as HTMLDivElement).style.touchAction = "none";
-    }); else elements.forEach((el) => {
-        (el as HTMLDivElement).style.touchAction = "auto";
-    });
+function elementToggleDraggable() {
+	let elements = document.querySelectorAll(".playlist-item");
+	if (dragging)
+		elements.forEach((el) => {
+			(el as HTMLDivElement).style.touchAction = "none";
+		});
+	else
+		elements.forEach((el) => {
+			(el as HTMLDivElement).style.touchAction = "auto";
+		});
 }
 
 onMount(() => {
@@ -82,9 +98,11 @@ onMount(() => {
 	musicPlaylist.subscribe((playlist) => {
 		if (playlist.length < 1) return;
 
-		const removedIndices = $musicReset ? oldPlaylist.map((_, index) => index) : oldPlaylist
-            .map((music, index) => (!playlist.includes(music) ? index : -1))
-            .filter((index) => index !== -1);
+		const removedIndices = $musicReset
+			? oldPlaylist.map((_, index) => index)
+			: oldPlaylist
+					.map((music, index) => (!playlist.includes(music) ? index : -1))
+					.filter((index) => index !== -1);
 
 		if (removedIndices.length > 0) {
 			const items = muuri.getItems();
@@ -95,19 +113,22 @@ onMount(() => {
 			muuri.remove(removedItems, { removeElements: true });
 		}
 
-		const newItems = $musicReset ? playlist.map((music, index) => ({ music, index })) : playlist
-			.map((music, index) =>
-				!oldPlaylist.includes(music) ? { music, index } : null,
-			)
-			.filter(
-				(item): item is { music: MusicData; index: number } => item !== null,
-			);
+		const newItems = $musicReset
+			? playlist.map((music, index) => ({ music, index }))
+			: playlist
+					.map((music, index) =>
+						!oldPlaylist.includes(music) ? { music, index } : null,
+					)
+					.filter(
+						(item): item is { music: MusicData; index: number } =>
+							item !== null,
+					);
 
 		if (newItems.length > 0) {
 			muuri.add(newItems.map(({ music }) => createPlaylistItem(music)));
 		}
 
-        elementToggleDraggable();
+		elementToggleDraggable();
 		oldPlaylist = [...playlist];
 	});
 });

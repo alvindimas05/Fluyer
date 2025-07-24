@@ -4,7 +4,7 @@ import {
 	settingDeveloperMode,
 	settingUiPlayShowBackButton,
 	settingUiShowRepeatButton,
-	settingUiShowShuffleButton
+	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { IconThemeType } from "$lib/icon/types";
@@ -14,11 +14,19 @@ const storePath = "store.json";
 const storeOptions = { autoSave: true };
 
 const getStore = async () => Store.load(storePath, storeOptions);
-const makeGetter = <T>(key: string, fallback?: T) => async () =>
-	(await (await getStore()).get<T>(key)) ?? fallback;
-const makeSetter = <T>(key: string) => async (value: T) =>
-	(await getStore()).set(key, value);
-const makeBinding = <T>(key: string, fallback: T, setStoreFn: (v: T) => void) => ({
+const makeGetter =
+	<T>(key: string, fallback?: T) =>
+	async () =>
+		(await (await getStore()).get<T>(key)) ?? fallback;
+const makeSetter =
+	<T>(key: string) =>
+	async (value: T) =>
+		(await getStore()).set(key, value);
+const makeBinding = <T>(
+	key: string,
+	fallback: T,
+	setStoreFn: (v: T) => void,
+) => ({
 	initialize: async () => setStoreFn(await makeGetter<T>(key, fallback)()),
 	get: makeGetter<T>(key, fallback),
 	set: makeSetter<T>(key),
@@ -60,7 +68,7 @@ const PersistentStoreController = {
 	animatedBackgroundType: makeBinding<SettingAnimatedBackgroundType>(
 		"animated-background-type",
 		SettingAnimatedBackgroundType.Prominent,
-		settingAnimatedBackgroundType.set
+		settingAnimatedBackgroundType.set,
 	),
 
 	developerMode: makeBinding("developer-mode", false, settingDeveloperMode.set),
@@ -76,18 +84,18 @@ const PersistentStoreController = {
 		showRepeatButton: makeBinding(
 			"ui-show-repeat-button",
 			true,
-			settingUiShowRepeatButton.set
+			settingUiShowRepeatButton.set,
 		),
 		showShuffleButton: makeBinding(
 			"ui-show-shuffle-button",
 			true,
-			settingUiShowShuffleButton.set
+			settingUiShowShuffleButton.set,
 		),
 		play: {
 			showBackButton: makeBinding(
 				"ui-play-show-back-button",
 				true,
-				settingUiPlayShowBackButton.set
+				settingUiPlayShowBackButton.set,
 			),
 		},
 	},

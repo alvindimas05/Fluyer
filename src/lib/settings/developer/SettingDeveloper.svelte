@@ -1,31 +1,38 @@
 <script lang="ts">
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
-import {settingDeveloperMode, settingUiShowShuffleButton} from "$lib/stores/setting";
+import {
+	settingDeveloperMode,
+	settingUiShowShuffleButton,
+} from "$lib/stores/setting";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import ToastController from "$lib/controllers/ToastController";
 import SettingButton from "$lib/settings/SettingButton.svelte";
-import {IconType} from "$lib/icon/types";
-import {invoke} from "@tauri-apps/api/core";
-import {CommandRoutes} from "$lib/commands";
-import {isDesktop} from "$lib/platform";
+import { IconType } from "$lib/icon/types";
+import { invoke } from "@tauri-apps/api/core";
+import { CommandRoutes } from "$lib/commands";
+import { isDesktop } from "$lib/platform";
 
-function onDeveloperModeChange(e: Event & {
-    currentTarget: EventTarget & HTMLInputElement;
-}) {
-    settingDeveloperMode.set(e.currentTarget.checked);
-    PersistentStoreController.developerMode.set(e.currentTarget.checked);
-    ToastController.info(`Developer mode is ${e.currentTarget.checked ? "enabled" : "disabled"}`);
+function onDeveloperModeChange(
+	e: Event & {
+		currentTarget: EventTarget & HTMLInputElement;
+	},
+) {
+	settingDeveloperMode.set(e.currentTarget.checked);
+	PersistentStoreController.developerMode.set(e.currentTarget.checked);
+	ToastController.info(
+		`Developer mode is ${e.currentTarget.checked ? "enabled" : "disabled"}`,
+	);
 }
 
-async function saveLog(){
-    await invoke(CommandRoutes.DEVELOPER_SAVE_LOG);
-    ToastController.info("Log saved at Downloads");
+async function saveLog() {
+	await invoke(CommandRoutes.DEVELOPER_SAVE_LOG);
+	ToastController.info("Log saved at Downloads");
 }
 
-async function saveMpvLog(){
-    await invoke(CommandRoutes.DEVELOPER_SAVE_MPV_LOG);
-    ToastController.info("MPV log saved at Downloads");
+async function saveMpvLog() {
+	await invoke(CommandRoutes.DEVELOPER_SAVE_MPV_LOG);
+	ToastController.info("MPV log saved at Downloads");
 }
 </script>
 

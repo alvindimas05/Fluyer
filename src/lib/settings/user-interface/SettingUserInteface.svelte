@@ -1,33 +1,55 @@
 <script lang="ts">
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
-import {settingUiPlayShowBackButton, settingUiShowRepeatButton, settingUiShowShuffleButton} from "$lib/stores/setting";
+import {
+	settingUiPlayShowBackButton,
+	settingUiShowRepeatButton,
+	settingUiShowShuffleButton,
+} from "$lib/stores/setting";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import {isDesktop} from "$lib/platform";
+import { isDesktop } from "$lib/platform";
 import ToastController from "$lib/controllers/ToastController";
 
-function onUiPlayShowBackButtonChange(e: Event & {
-    currentTarget: EventTarget & HTMLInputElement;
-}) {
-    settingUiPlayShowBackButton.set(e.currentTarget.checked);
-    PersistentStoreController.userInterface.play.showBackButton.set(e.currentTarget.checked);
-    ToastController.info(`Back button ${e.currentTarget.checked ? "enabled" : "disabled"}`);
+function onUiPlayShowBackButtonChange(
+	e: Event & {
+		currentTarget: EventTarget & HTMLInputElement;
+	},
+) {
+	settingUiPlayShowBackButton.set(e.currentTarget.checked);
+	PersistentStoreController.userInterface.play.showBackButton.set(
+		e.currentTarget.checked,
+	);
+	ToastController.info(
+		`Back button ${e.currentTarget.checked ? "enabled" : "disabled"}`,
+	);
 }
 
-function onUiShowRepeatButtonChange(e: Event & {
-    currentTarget: EventTarget & HTMLInputElement;
-}) {
-    settingUiShowRepeatButton.set(e.currentTarget.checked);
-    PersistentStoreController.userInterface.showRepeatButton.set(e.currentTarget.checked);
-    ToastController.info(`Repeat button ${e.currentTarget.checked ? "enabled" : "disabled"}`);
+function onUiShowRepeatButtonChange(
+	e: Event & {
+		currentTarget: EventTarget & HTMLInputElement;
+	},
+) {
+	settingUiShowRepeatButton.set(e.currentTarget.checked);
+	PersistentStoreController.userInterface.showRepeatButton.set(
+		e.currentTarget.checked,
+	);
+	ToastController.info(
+		`Repeat button ${e.currentTarget.checked ? "enabled" : "disabled"}`,
+	);
 }
 
-function onUiShowShuffleButtonChange(e: Event & {
-    currentTarget: EventTarget & HTMLInputElement;
-}) {
-    settingUiShowShuffleButton.set(e.currentTarget.checked);
-    PersistentStoreController.userInterface.showShuffleButton.set(e.currentTarget.checked);
-    ToastController.info(`Shuffle button ${e.currentTarget.checked ? "enabled" : "disabled"}`);
+function onUiShowShuffleButtonChange(
+	e: Event & {
+		currentTarget: EventTarget & HTMLInputElement;
+	},
+) {
+	settingUiShowShuffleButton.set(e.currentTarget.checked);
+	PersistentStoreController.userInterface.showShuffleButton.set(
+		e.currentTarget.checked,
+	);
+	ToastController.info(
+		`Shuffle button ${e.currentTarget.checked ? "enabled" : "disabled"}`,
+	);
 }
 </script>
 

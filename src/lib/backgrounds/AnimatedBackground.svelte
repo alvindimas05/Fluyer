@@ -2,7 +2,7 @@
 import MusicController from "$lib/controllers/MusicController";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
-import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music";
+import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
 import { onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
 import ColorThief from "colorthief/dist/color-thief.mjs";
@@ -251,7 +251,7 @@ function onWindowResize() {
 let isMounted = false;
 onMount(() => {
 	initializeCanvas();
-    musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
+	musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
 	musicPlaylist.subscribe(() => setTimeout(transitionToNewCanvas, 0));
 	settingTriggerAnimatedBackground.subscribe(() => {
 		if (isMounted) setTimeout(() => transitionToNewCanvas(true), 0);

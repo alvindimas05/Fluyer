@@ -30,7 +30,7 @@ async function addPath() {
 	await MusicController.getMusics(true);
 	isLoading = false;
 
-    ToastController.info("Music path added");
+	ToastController.info("Music path added");
 }
 
 async function removePath(index: number) {
@@ -40,7 +40,7 @@ async function removePath(index: number) {
 	await MusicController.getMusics(true);
 	isLoading = false;
 
-    ToastController.info("Music path removed");
+	ToastController.info("Music path removed");
 }
 
 onMount(refreshPath);

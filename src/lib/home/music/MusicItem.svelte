@@ -6,7 +6,7 @@ import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import {musicList} from "$lib/stores/music";
+import { musicList } from "$lib/stores/music";
 
 interface Props {
 	music: MusicData;
@@ -51,22 +51,22 @@ function setAlbumImageFromCache() {
 	if (cache.status == CoverArtStatus.Failed) return true;
 
 	musicList.update((list) => {
-		if(!Array.isArray(list)) return list;
-		for(let i = 0; i < list.length; i++) {
-			if(music.album){
-				if(list[i].album == music.album){
+		if (!Array.isArray(list)) return list;
+		for (let i = 0; i < list.length; i++) {
+			if (music.album) {
+				if (list[i].album == music.album) {
 					list[i].image = cache.image;
 					return list;
 				}
 			} else {
-				if(list[i].title == music.title && list[i].artist == music.artist){
+				if (list[i].title == music.title && list[i].artist == music.artist) {
 					list[i].image = cache.image;
 					return list;
 				}
 			}
 		}
 		return list;
-	})
+	});
 	return true;
 }
 

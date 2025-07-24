@@ -8,7 +8,8 @@ import {
 	musicAlbumList,
 	musicPlaylist,
 	musicCurrentIndex,
-	musicRepeatMode, musicReset,
+	musicRepeatMode,
+	musicReset,
 } from "$lib/stores/music";
 import { get } from "svelte/store";
 import {
@@ -24,8 +25,8 @@ import type {
 	CoverArtCacheQuery,
 	CoverArtResponse,
 } from "$lib/handlers/coverart";
-import {isDesktop, isMobile} from "$lib/platform";
-import {settingTriggerAnimatedBackground} from "$lib/stores/setting";
+import { isDesktop, isMobile } from "$lib/platform";
+import { settingTriggerAnimatedBackground } from "$lib/stores/setting";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -144,15 +145,19 @@ const MusicController = {
 		return MusicController.parseProgressDurationIntoText(
 			negative
 				? MusicController.currentMusicDuration() -
-					MusicController.progressDuration()
+						MusicController.progressDuration()
 				: MusicController.progressDuration(),
 			negative,
 		);
 	},
-	parsePercentageProgressDurationIntoText: (value: number, negative = false) => {
+	parsePercentageProgressDurationIntoText: (
+		value: number,
+		negative = false,
+	) => {
 		return MusicController.parseProgressDurationIntoText(
-			negative ? MusicController.currentMusicDuration() * ((100 - value) / 100) :
-			MusicController.currentMusicDuration() * (value / 100),
+			negative
+				? MusicController.currentMusicDuration() * ((100 - value) / 100)
+				: MusicController.currentMusicDuration() * (value / 100),
 			negative,
 		);
 	},
@@ -190,8 +195,12 @@ const MusicController = {
 	},
 
 	nextMusic: async () => {
-		if (MusicController.musicPlaylist().length === 0 ||
-			MusicController.currentMusicIndex() >= MusicController.musicPlaylist().length - 1) return;
+		if (
+			MusicController.musicPlaylist().length === 0 ||
+			MusicController.currentMusicIndex() >=
+				MusicController.musicPlaylist().length - 1
+		)
+			return;
 		MusicController.sendCommandController("next");
 	},
 
@@ -289,23 +298,33 @@ const MusicController = {
 		});
 	},
 
-	addMusicList: async (musicDataList: MusicData[], options?: {
-		forceSetCurrentMusicIndex?: boolean,
-		resetPlaylist?: boolean
-	}) => {
+	addMusicList: async (
+		musicDataList: MusicData[],
+		options?: {
+			forceSetCurrentMusicIndex?: boolean;
+			resetPlaylist?: boolean;
+		},
+	) => {
 		let isPlaylistEmpty = !MusicController.musicPlaylist().length;
 		await MusicController.addSinkMusics(
 			musicDataList.map((music) => {
 				const { path, title, artist } = music;
 				if (isDesktop()) return { path } as MusicData;
-				return { path, title, artist: MusicController.getFullArtistFromMusic(music) } as MusicData;
+				return {
+					path,
+					title,
+					artist: MusicController.getFullArtistFromMusic(music),
+				} as MusicData;
 			}),
 		);
 
-		if(options?.resetPlaylist) musicPlaylist.set(musicDataList);
+		if (options?.resetPlaylist) musicPlaylist.set(musicDataList);
 		else MusicController.addMusicPlaylist(musicDataList);
 
-		if (options?.forceSetCurrentMusicIndex || (MusicController.currentMusicIndex() === -1 && isPlaylistEmpty))
+		if (
+			options?.forceSetCurrentMusicIndex ||
+			(MusicController.currentMusicIndex() === -1 && isPlaylistEmpty)
+		)
 			MusicController.setCurrentMusicIndex(0);
 	},
 
@@ -401,7 +420,8 @@ const MusicController = {
 		MusicController.stopProgress();
 		MusicController.resetProgress();
 
-		if(MusicController.currentMusicIndex() >= 0) MusicController.setCurrentMusicIndex(0);
+		if (MusicController.currentMusicIndex() >= 0)
+			MusicController.setCurrentMusicIndex(0);
 		musicReset.set(true);
 		await MusicController.addMusicList(musicList, {
 			resetPlaylist: true,
@@ -435,10 +455,13 @@ const MusicController = {
 		}
 
 		setTimeout(() => {
-			if(isMobile()) MusicController.setProgressValue(
-				MusicController.parseProgressPercentageIntoValue(percentage)
-			)
-			MusicController.sendCommandSetPosition(MusicController.currentMusicRealDuration() * (percentage / 100));
+			if (isMobile())
+				MusicController.setProgressValue(
+					MusicController.parseProgressPercentageIntoValue(percentage),
+				);
+			MusicController.sendCommandSetPosition(
+				MusicController.currentMusicRealDuration() * (percentage / 100),
+			);
 		});
 	},
 
