@@ -504,7 +504,7 @@ const MusicController = {
 
 		await invoke(CommandRoutes.MUSIC_PLAYLIST_MOVETO, {
 			from: fromIndex,
-			to: toIndex,
+			to: isDesktop() && fromIndex < MusicController.currentMusicIndex() ? toIndex + 1 : toIndex,
 		});
 		musicPlaylist.set(playlist);
 		musicCurrentIndex.set(

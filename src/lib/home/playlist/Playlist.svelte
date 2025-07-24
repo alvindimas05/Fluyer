@@ -50,24 +50,15 @@ function initMuuri() {
 		fromIndex = muuri.getItems().indexOf(item);
 	});
 
-	muuri.on("dragEnd", (item, _) => {
+	muuri.on("dragEnd", async (item, _) => {
 		if (!muuri || !$musicPlaylist) return;
 		const toIndex = muuri.getItems().indexOf(item);
 
 		if (fromIndex === toIndex) return;
 
-		if (
-			isDesktop() &&
-			fromIndex < $musicCurrentIndex &&
-			toIndex === $musicCurrentIndex
-		) {
-			muuri.move(toIndex, fromIndex);
-			ToastController.info(
-				"Sorry, you can't move previous song next to the current song",
-			);
-			return;
-		}
-		MusicController.playlistMoveto(fromIndex, toIndex);
+        dragging = false;
+		await MusicController.playlistMoveto(fromIndex, toIndex);
+        dragging = true
 	});
 
 	return muuri;
