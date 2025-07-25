@@ -18,7 +18,7 @@
 </p>
 
 > [!NOTE]
-> ⚠️ This project is a slow-paced hobby. I’m building it just for fun :)
+> This project is a slow-paced hobby. I’m building it just for fun :)
 
 ---
 
@@ -34,7 +34,7 @@
 > [!WARNING]
 > 🚧 This app is a beta version and still under development. It may contain bugs or missing features. Check the issues below before installing.
 
-Get the latest release from the [Releases Page](https://github.com/alvindimas05/Fluyer/releases).
+You can download from the latest release from the [Releases Page](https://github.com/alvindimas05/Fluyer/releases/latest).
 
 ---
 
