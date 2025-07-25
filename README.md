@@ -95,4 +95,4 @@ PRs and feedback are welcome, but again—this project is made for fun!
 
 ## 📄 License
 
-MIT License.
+GNU General Public License v3.0
