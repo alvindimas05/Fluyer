@@ -169,6 +169,8 @@ function updateProgress(
 	const x = e.clientX - rect.left;
 	const percentage = (x / progressBar.offsetWidth) * 100;
 	MusicController.updateProgressByPercentage(percentage);
+
+    resetProgressText();
 }
 
 function updateProgressTouch(
