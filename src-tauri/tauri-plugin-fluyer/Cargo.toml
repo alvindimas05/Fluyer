@@ -1,6 +1,6 @@
 [package]
 name = "tauri-plugin-fluyer"
-version = "1.0.0"
+version = "1.0.1"
 authors = [ "alvindimas05" ]
 description = ""
 edition = "2021"
