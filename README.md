@@ -37,8 +37,9 @@
 You can download and install from the latest release from the [Releases Page](https://github.com/alvindimas05/Fluyer/releases/latest).
 
 > [!NOTE]
-> Make sure to download the correct version for your platform.
-> Supported Platforms: Windows, macOS, Android, Ubuntu/Debian, Arch Linux.
+> Make sure to download the correct version for your platform. Supported Platforms:
+>
+> <b>Windows, macOS, Android, Ubuntu/Debian, Arch Linux.</b>
 
 ### Arch Linux
 
