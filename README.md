@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">🦋🎵 Fluyer</h1>
-<p align="center">A Beautiful Cross-Platform Music Player.</p>
+<p align="center">A Beautiful Cross-Platform Music Player</p>
 
 <p align="center">
   <a href="https://github.com/alvindimas05/Fluyer/stargazers">
@@ -29,12 +29,29 @@
 
 ---
 
-## 📦 Downloads
+## 📦 Installation
 
 > [!WARNING]
 > 🚧 This app is a beta version and still under development. It may contain bugs or missing features. Check the issues below before installing.
 
-You can download from the latest release from the [Releases Page](https://github.com/alvindimas05/Fluyer/releases/latest).
+You can download and install from the latest release from the [Releases Page](https://github.com/alvindimas05/Fluyer/releases/latest).
+
+> [!NOTE]
+> Make sure to download the correct version for your platform.
+> Supported Platforms: Windows, macOS, Android, Ubuntu/Debian, Arch Linux.
+
+### Arch Linux
+
+If you have `yay` installed, You can install from the AUR with the following command:
+```bash
+yay -S fluyer
+```
+If you don't have `yay` installed, you can install from the [Fluyer AUR Page](https://aur.archlinux.org/packages/fluyer/) and run the following command:
+```bash
+git clone https://aur.archlinux.org/fluyer.git
+cd fluyer
+makepkg -si
+```
 
 ---
 
