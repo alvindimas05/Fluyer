@@ -30,7 +30,7 @@ function gotoPlaylist() {
 >
     <div class="w-11 md:w-12 lg:w-14">
         <img
-            class="w-full h-full rounded"
+            class="w-full aspect-square rounded"
             src={MusicController.getAlbumImageFromMusic(music)}
             alt="Album"
         />
