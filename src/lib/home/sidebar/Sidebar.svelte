@@ -8,7 +8,7 @@ interface Props {
 
 let { children, type }: Props = $props();
 
-import { isMobile } from "$lib/platform";
+import {isAndroid, isMobile} from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
@@ -74,28 +74,30 @@ onMount(() => {
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class={`fixed ${type === SidebarType.Right ? "right-0" : "left-0"} top-0 z-10 h-[calc(100%-8rem)]
+		class={`fixed ${type === SidebarType.Right ? "right-0" : "left-0"} top-0 z-10 h-[calc(100%-8rem)]
 	w-full px-3 sm:w-[70%]
 	md-mdpi:w-[50%] lg-mdpi:w-[40%] xl-mdpi:w-[30%]
 	md-hdpi:w-[50%] lg-hdpi:w-[35%]
 	transition-opacity duration-400 ease-in-out
 	${isMouseInsideArea ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-	style={`padding-top: ${(isMobile() ? $mobileStatusBarHeight : 0) + 44}px`}
-	onmouseleave={onMouseLeave}
+		style={`padding-top: ${(isMobile() ? $mobileStatusBarHeight : 0) + 44}px`}
+		onmouseleave={onMouseLeave}
 >
 	<div
-		class={`bg-gray-700 bg-opacity-30 backdrop-blur-sm md:backdrop-blur-md rounded shadow-xl
+			class="bg-gray-700 bg-opacity-30  rounded-lg shadow-2xl border border-white/20
 		text-white h-full w-full p-2 md:p-5
-		${type === SidebarType.Right ? "fadeRight" : "fadeLeft"}
-		${isShowing ? "show" : ""}`}
+		{isAndroid() ? 'backdrop-blur-md' : 'backdrop-blur-lg'}
+		{type === SidebarType.Right ? 'fadeRight' : 'fadeLeft'}
+		{isShowing ? 'show' : ''}"
 	>
 		<div
-			class="border border-gray-400 bg-white/5 h-full w-full rounded flex flex-col"
+				class="border border-white/15 bg-white/5 h-full w-full rounded-md flex flex-col shadow-inner"
 		>
 			{@render children?.()}
 		</div>
 	</div>
 </div>
+
 
 <style lang="scss">
 	.fadeRight,
