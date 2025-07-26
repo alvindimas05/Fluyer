@@ -28,7 +28,7 @@ async function playShuffle() {
 </script>
 {#if album}
     <div class="px-3 pb-2 animate__animated animate__fadeIn">
-        <div class="w-full px-4 py-2 bg-white/10 rounded-lg shadow-sm">
+        <div class="w-full px-4 py-2 bg-white/15 rounded-lg shadow-md">
             <div class="grid grid-cols-[1fr_repeat(4,auto)] items-center gap-x-2 md:gap-x-4">
                 <div class="text-sm md:text-base font-medium text-white overflow-hidden">
                     <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">{album.artist} {MusicConfig.separator} {album.name}</p>

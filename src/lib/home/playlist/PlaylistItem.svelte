@@ -8,6 +8,7 @@ import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
+import {isAndroid, isWindows} from "$lib/platform";
 
 let { music }: Props = $props();
 
@@ -24,61 +25,66 @@ function gotoPlaylist() {
 }
 </script>
 
-<div
-    class={`relative grid grid-cols-[max-content_auto_max-content] py-2 px-3 animate__animated animate__fadeIn
-        ${isPlaying && "bg-gray-700 bg-opacity-40"}`}
->
-    <div class="w-11 md:w-12 lg:w-14">
-        <img
-            class="w-full aspect-square rounded"
-            src={MusicController.getAlbumImageFromMusic(music)}
-            alt="Album"
-        />
-    </div>
-    <div class="ms-3 text-sm md:text-base">
-        <p class="font-medium">{music.title}</p>
-        <p class="text-opacity-background-70">
-            {MusicController.getFullArtistFromMusic(music)}
-        </p>
-    </div>
-    <div class="w-11 md:w-12 lg:w-14"></div>
-</div>
-{#if isPlaying}
-    <div
-        class="absolute top-0 left-0 w-full grid grid-cols-[max-content_auto_max-content] py-2 px-3 z-10"
-    >
-        <div class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 aspect-square"></div>
-        <div></div>
-        <div class="w-11 md:w-12 lg:w-14 aspect-square p-1 lg:p-3">
-            <div class="w-full animate__animated animate__infinite animate__pulse">
-                <Icon type={IconType.Playing} />
-            </div>
-        </div>
-    </div>
-{:else}
-    <div
-        class="absolute top-0 left-0 w-full grid grid-cols-[max-content_auto_max-content] py-2 px-3 z-10
-        animate__animated animate__faster animate__fadeOut playlist-item-controls"
-    >
-        <button
-            class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 aspect-square"
-            onclick={gotoPlaylist}
+<div class="w-full px-3">
+    <div class="relative w-full">
+        <div
+                class="relative grid grid-cols-[max-content_auto_max-content] py-2 px-3 animate__animated animate__fadeIn
+        {isPlaying && 'bg-white/15 rounded-lg shadow-md'}"
         >
-            {#if !isPlaying}
-                <div
-                    class="w-full h-full bg-black bg-opacity-40 rounded lg:p-1"
-                >
-                    <Icon type={isPrevious ? IconType.Previous : IconType.Next} />
+            <div class="w-11 md:w-12 lg:w-14">
+                <img
+                        class="w-full aspect-square rounded"
+                        src={MusicController.getAlbumImageFromMusic(music)}
+                        alt="Album"
+                />
+            </div>
+            <div class="ms-3 text-sm md:text-base">
+                <p class="font-medium">{music.title}</p>
+                <p class="text-opacity-background-70">
+                    {MusicController.getFullArtistFromMusic(music)}
+                </p>
+            </div>
+            <div class="w-11 md:w-12 lg:w-14"></div>
+        </div>
+        {#if isPlaying}
+            <div
+                    class="absolute top-0 left-0 w-full grid grid-cols-[max-content_auto_max-content] py-2 px-3 z-10"
+            >
+                <div class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 aspect-square"></div>
+                <div></div>
+                <div class="w-11 md:w-12 lg:w-14 aspect-square p-1 lg:p-3">
+                    <!--         <-- Note: Has rendering issues on WebKit -->
+                    <div class="w-full {isWindows() || isAndroid() && 'animate__animated animate__infinite animate__pulse'}">
+                        <Icon type={IconType.Playing} />
+                    </div>
                 </div>
-            {/if}
-        </button>
-        <div class="muuri-draggable"></div>
-        <button class="w-11 md:w-12 lg:w-14 aspect-square lg:p-1"
-            onclick={removePlaylist}>
-            <Icon type={IconType.Remove}/>
-        </button>
+            </div>
+        {:else}
+            <div
+                    class="absolute top-0 left-0 w-full grid grid-cols-[max-content_auto_max-content] py-2 px-3 z-10
+        animate__animated animate__faster animate__fadeOut playlist-item-controls"
+            >
+                <button
+                        class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 aspect-square"
+                        onclick={gotoPlaylist}
+                >
+                    {#if !isPlaying}
+                        <div
+                                class="w-full h-full bg-black bg-opacity-40 rounded lg:p-1"
+                        >
+                            <Icon type={isPrevious ? IconType.Previous : IconType.Next} />
+                        </div>
+                    {/if}
+                </button>
+                <div class="muuri-draggable"></div>
+                <button class="w-11 md:w-12 lg:w-14 aspect-square lg:p-1"
+                        onclick={removePlaylist}>
+                    <Icon type={IconType.Remove}/>
+                </button>
+            </div>
+        {/if}
     </div>
-{/if}
+</div>
 
 <style lang="scss">
     .playlist-item-controls:hover {

@@ -5,6 +5,6 @@ interface Props {
 
 let { children }: Props = $props();
 </script>
-<div class="w-full bg-white/10 text-white my-3 rounded-md">
+<div class="bg-gradient-to-r from-white/15 to-white/10 rounded shadow-md my-3">
     {@render children?.()}
 </div>
