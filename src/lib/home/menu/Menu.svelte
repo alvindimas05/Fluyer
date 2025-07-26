@@ -9,7 +9,7 @@ import MenuItem from "$lib/home/menu/MenuItem.svelte";
 </script>
 
 <Sidebar type={SidebarType.Left}>
-    <p class="text-[1.5rem] font-semibold p-3">Menu</p>
+    <p class="text-[1.2rem] md:text-[1.5rem] font-semibold p-3">Menu</p>
     <MenuItem label="Settings" icon={IconType.Settings}
               onclick={() => PageController.goto(PageRoutes.SETTINGS)}/>
     <MenuItem label="Full Play Screen" icon={IconType.Fullscreen}
