@@ -32,4 +32,6 @@ export enum IconType {
 	DragOn,
 	DragOff,
 	SaveLog,
+	Equalizer,
+	Close,
 }

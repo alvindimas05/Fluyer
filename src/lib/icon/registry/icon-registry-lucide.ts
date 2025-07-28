@@ -22,6 +22,8 @@ import {
 	VolumeX,
 	Trash2,
 	XCircle,
+	KeyboardMusic,
+	CircleX,
 } from "@lucide/svelte";
 
 const iconRegistryLucide = {
@@ -52,6 +54,8 @@ const iconRegistryLucide = {
 	[IconType.DragOn]: GripVertical,
 	[IconType.DragOff]: Lock,
 	[IconType.SaveLog]: FileText,
+	[IconType.Equalizer]: KeyboardMusic,
+	[IconType.Close]: CircleX,
 };
 
 export default iconRegistryLucide;

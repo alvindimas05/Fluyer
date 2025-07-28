@@ -22,6 +22,7 @@ import Fullscreen from "svelte-material-icons/Fullscreen.svelte";
 import DotsGrid from "svelte-material-icons/DotsGrid.svelte";
 import Lock from "svelte-material-icons/Lock.svelte";
 import FileDocumentOutline from "svelte-material-icons/FileDocumentOutline.svelte";
+import TuneVerticalVariant from "svelte-material-icons/TuneVerticalVariant.svelte";
 
 const iconRegistryMaterial = {
 	[IconType.Unknown]: HelpCircleOutline,
@@ -51,6 +52,8 @@ const iconRegistryMaterial = {
 	[IconType.DragOn]: DotsGrid,
 	[IconType.DragOff]: Lock,
 	[IconType.SaveLog]: FileDocumentOutline,
+	[IconType.Equalizer]: TuneVerticalVariant,
+	[IconType.Close]: CloseCircleOutline,
 };
 
 export default iconRegistryMaterial;

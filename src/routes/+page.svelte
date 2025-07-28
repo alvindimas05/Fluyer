@@ -8,11 +8,16 @@ import MusicList from "$lib/home/music/MusicList.svelte";
 import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
 import { loadingShow } from "$lib/stores/loading";
 import AlbumInfo from "$lib/home/albuminfo/AlbumInfo.svelte";
+import Equalizer from "$lib/home/equalizer/Equalizer.svelte";
+import {isDesktop} from "$lib/platform";
 </script>
 {#if $loadingShow}
     {#if $musicList === null}
         <Intro />
     {:else if Array.isArray($musicList)}
+        {#if isDesktop()}
+            <Equalizer />
+        {/if}
         <Playlist />
         <Menu />
         <PlayerBar />

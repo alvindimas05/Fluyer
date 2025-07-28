@@ -98,3 +98,9 @@ pub fn music_playlist_moveto(state: State<'_, Mutex<AppState>>, from: usize, to:
     let mut state = state.lock().unwrap();
     state.music_player.moveto_playlist(from, to);
 }
+
+#[tauri::command]
+pub fn music_equalizer(state: State<'_, Mutex<AppState>>, values: Vec<f32>) {
+    let state = state.lock().unwrap();
+    state.music_player.equalizer(values);
+}

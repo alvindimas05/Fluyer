@@ -23,6 +23,7 @@ import {
 	SpeakerX,
 	Trash,
 	XCircle,
+	Faders,
 } from "phosphor-svelte";
 
 const iconRegistryPhospor = {
@@ -53,6 +54,8 @@ const iconRegistryPhospor = {
 	[IconType.DragOn]: DotsSixVertical,
 	[IconType.DragOff]: LockSimple,
 	[IconType.SaveLog]: FileText,
+	[IconType.Equalizer]: Faders,
+	[IconType.Close]: XCircle,
 };
 
 export default iconRegistryPhospor;

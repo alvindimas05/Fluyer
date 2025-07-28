@@ -511,6 +511,12 @@ const MusicController = {
 			playlist.findIndex((m) => m.path === currentMusic.path),
 		);
 	},
+
+	setEqualizer: async (values: number[]) => {
+		await invoke(CommandRoutes.MUSIC_EQUALIZER, {
+			values
+		});
+	}
 };
 
 export default MusicController;

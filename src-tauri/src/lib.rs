@@ -71,6 +71,8 @@ pub fn run() {
             commands::music::music_playlist_moveto,
             #[cfg(desktop)]
             commands::music::music_request_directory,
+            #[cfg(desktop)]
+            commands::music::music_equalizer,
             commands::log::log_error,
             #[cfg(target_os = "android")]
             commands::log::toast,

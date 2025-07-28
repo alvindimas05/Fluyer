@@ -6,6 +6,8 @@ import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import MenuItem from "$lib/home/menu/MenuItem.svelte";
+import UIController from "$lib/controllers/UIController";
+import {isDesktop} from "$lib/platform";
 </script>
 
 <Sidebar type={SidebarType.Left}>
@@ -14,4 +16,8 @@ import MenuItem from "$lib/home/menu/MenuItem.svelte";
               onclick={() => PageController.goto(PageRoutes.SETTINGS)}/>
     <MenuItem label="Full Play Screen" icon={IconType.Fullscreen}
               onclick={() => PageController.goto(PageRoutes.PLAY)}/>
+    {#if isDesktop()}
+        <MenuItem label="Equalizer" icon={IconType.Equalizer}
+                  onclick={() => UIController.toggleEqualizer(true)}/>
+    {/if}
 </Sidebar>

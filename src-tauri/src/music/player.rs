@@ -260,6 +260,22 @@ impl MusicPlayer {
         self.mpv_play_pause(play);
     }
 
+    pub fn equalizer(&self, values: Vec<f32>) {
+        let mut arg = String::from("superequalizer=");
+        for (i, &gain) in values.iter().enumerate() {
+            if &gain == &0.0 {
+                continue;
+            }
+            let band = i + 1; // bands are 1‑based: 1b ... 18b
+            arg.push_str(&format!("{}b={:.1}:", band, gain));
+        }
+        if arg.ends_with(':') {
+            arg.pop();
+        }
+        logger::debug!(arg);
+        GLOBAL_MUSIC_MPV.get().unwrap().command("af", &["set", arg.as_str()]).unwrap();
+    }
+
     #[cfg(desktop)]
     fn mpv_play_pause(&self, play: bool) {
         let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
