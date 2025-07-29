@@ -8,6 +8,16 @@ import { listen } from "@tauri-apps/api/event";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 
 let animatedClasses = $state("animate__fadeIn");
+
+async function requestAction(){
+    if(isAndroid()){
+        const res = await invoke<boolean>(
+            CommandRoutes.REQUEST_READ_AUDIO_PERMISSION,
+        );
+        if (!res) return;
+    }
+    await chooseDirPath();
+}
 async function chooseDirPath() {
     const command = isAndroid() ? CommandRoutes.ANDROID_REQUEST_DIRECTORY : CommandRoutes.MUSIC_REQUEST_DIRECTORY
     await invoke(command);
@@ -18,14 +28,6 @@ async function chooseDirPath() {
         unlisten();
     });
 }
-
-// async function requestReadAudioPermission() {
-// 	const res = await invoke<boolean>(
-// 		CommandRoutes.REQUEST_READ_AUDIO_PERMISSION,
-// 	);
-// 	if (!res) return;
-// 	animatedClasses = "animate__fadeOut";
-// }
 
 function onAnimationEnd() {
 	if (animatedClasses === "animate__fadeIn") return;
@@ -39,11 +41,22 @@ function onAnimationEnd() {
     onanimationend={onAnimationEnd}
 >
     <div class="grid justify-items-center text-center px-5 lg:px-0">
-        <p class="font-medium text-3xl">
-            Please pick the folder with your music.
-            </p>
+        <p class="font-bold text-2xl md:text-3xl lg:text-4xl">Let's Set Up Your Music</p>
+        <p class="mt-3 text-lg md:text-xl lg:text-2xl">
+            {#if isAndroid()}
+                To get started, allow access and select your music folder.
+            {:else if isDesktop()}
+                Select your music folder to get started.
+            {/if}
+        </p>
         <button
-            class="border border-gray-300 bg-gray-500 bg-opacity-10 hover: hover:bg-opacity-20 rounded w-fit mt-5 p-2"
-            onclick={chooseDirPath}>Choose Your Folder</button>
+            class="border border-gray-300 bg-gray-500 bg-opacity-10 hover:bg-opacity-20 rounded w-fit mt-5 p-2"
+            onclick={requestAction}>
+            {#if isAndroid()}
+                Allow Access & Choose Folder
+            {:else if isDesktop()}
+                Choose Folder
+            {/if}
+        </button>
     </div>
 </div>

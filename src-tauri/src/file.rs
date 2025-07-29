@@ -34,10 +34,10 @@ fn is_not_hidden(entry: &DirEntry) -> bool {
 }
 
 pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
-    // #[cfg(target_os = "android")]
-    // if !check_read_audio_permission() {
-    //     return None;
-    // }
+    #[cfg(target_os = "android")]
+    if !check_read_audio_permission() {
+        return None;
+    }
 
     let mut search_dirs: Vec<String> = vec![];
     let mut dirs: Vec<Result<DirEntry, walkdir::Error>> = vec![];

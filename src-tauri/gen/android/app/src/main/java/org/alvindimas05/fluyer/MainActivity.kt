@@ -19,7 +19,7 @@ class MainActivity : TauriActivity() {
     }
 
     // Make navigation bar transparent (API 21+)
-    window.navigationBarColor = Color.TRANSPARENT
+    window.navigationBarColor = Color.WHITE
 
     // Remove nav-bar contrast scrim (API 29+)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -33,6 +33,8 @@ class MainActivity : TauriActivity() {
 
     // Transparent status bar & adaptive icon colors
     window.statusBarColor = Color.TRANSPARENT
-    insetsController.isAppearanceLightStatusBars = true  // or false depending on background
+    
+    // Make status bar white
+    insetsController.isAppearanceLightStatusBars = false
   }
 }
