@@ -1,10 +1,11 @@
+use std::collections::HashMap;
 use std::path::Path;
 use base64::Engine;
 #[cfg(mobile)]
 use dotenvy_macro::dotenv;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use symphonia::core::formats::FormatOptions;
+use symphonia::core::formats::{FormatOptions, FormatReader};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
 
@@ -25,6 +26,8 @@ pub struct MusicMetadata {
     pub genre: Option<String>,
     pub bitrate: Option<u32>,
     pub image: Option<String>,
+
+    pub extra_tags: HashMap<String, Option<String>>,
 }
 
 impl MusicMetadata {
@@ -49,21 +52,16 @@ impl MusicMetadata {
             genre: None,
             bitrate: None,
             image: None,
+            extra_tags: HashMap::new(),
         }
     }
 
-    pub fn get(&self) -> Self {
-        let path = self.path.clone();
-        let mut metadata = MusicMetadata::new(path.clone());
-
-        if let Some(filename) = Path::new(&path).file_stem() {
-            metadata.filename = Some(filename.to_string_lossy().to_string());
-        }
+    pub fn get_format(path: String) -> Option<Box<dyn FormatReader>>{
         let src = match std::fs::File::open(&path) {
             Ok(file) => file,
             Err(_) => {
                 logger::error!("Failed to open music at path: {}", &path);
-                return metadata;
+                return None;
             }
         };
 
@@ -81,14 +79,29 @@ impl MusicMetadata {
             Ok(probed) => probed,
             Err(e) => {
                 logger::error!("Unsupported format music at {}: {:?}", &path, e);
-                return metadata;
+                return None;
             }
         };
         let mut format = probed.format;
-
         while !format.metadata().is_latest() {
             format.metadata().pop();
         }
+        Some(format)
+    }
+
+    pub fn get(&self) -> Self {
+        let path = self.path.clone();
+        let mut metadata = MusicMetadata::new(path.clone());
+
+        if let Some(filename) = Path::new(&path).file_stem() {
+            metadata.filename = Some(filename.to_string_lossy().to_string());
+        }
+        let _format = MusicMetadata::get_format(path.clone());
+        if _format.is_none() {
+            return metadata;
+        }
+
+        let mut format = _format.unwrap();
 
         if let Some(rev) = format.metadata().current() {
             for tag in rev.tags() {
@@ -112,14 +125,11 @@ impl MusicMetadata {
                         StandardTagKey::AlbumArtist => metadata.album_artist = self.get_value(tag),
                         StandardTagKey::TrackNumber => metadata.track_number = self.get_value(tag),
                         StandardTagKey::Genre => metadata.genre = self.get_value(tag),
-                        _ => {}
+                        key => {
+                            metadata.extra_tags.insert(format!("{:?}", key), self.get_value(tag));
+                        }
                     }
                 }
-            }
-
-            for visual in rev.visuals() {
-                metadata.image =
-                    Some(base64::engine::general_purpose::STANDARD.encode(visual.data.clone()));
             }
         }
 
@@ -169,6 +179,21 @@ impl MusicMetadata {
         }
 
         metadata
+    }
+
+    fn get_image_from_path(path: String) -> Option<String> {
+        let _format = MusicMetadata::get_format(path);
+        if _format.is_none() {
+            return None;
+        }
+        let mut format = _format.unwrap();
+
+        if let Some(rev) = format.metadata().current() {
+            for visual in rev.visuals() {
+                return Some(base64::engine::general_purpose::STANDARD.encode(visual.data.clone()));
+            }
+        }
+        None
     }
 
     fn get_value(&self, tag: &Tag) -> Option<String> {
