@@ -3,7 +3,7 @@ import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import SettingMusicPaths from "$lib/settings/music-paths/SettingMusicPaths.svelte";
-import { isDesktop, isMobile } from "$lib/platform";
+import { isMobile } from "$lib/platform";
 import SettingAnimatedBackground from "$lib/settings/animated-background/SettingAnimatedBackground.svelte";
 import {
 	mobileNavigationBarHeight,
@@ -23,9 +23,7 @@ let isLoading = $derived($settingIsLoading);
              padding-bottom: {$mobileNavigationBarHeight > 0 ? $mobileNavigationBarHeight : 24}px;">
             <p class="text-2xl font-semibold text-white mb-4">Settings</p>
             <div class="overflow-auto mb-3 scrollbar-hidden">
-                {#if isDesktop()}
-                    <SettingMusicPaths />
-                {/if}
+                <SettingMusicPaths />
                 <SettingAnimatedBackground />
                 <SettingIconTheme />
                 <SettingUserInteface />

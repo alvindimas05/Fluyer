@@ -87,6 +87,8 @@ pub fn run() {
             commands::decorum::decorum_show_snap_overlay,
             #[cfg(mobile)]
             commands::mobile::set_navigation_bar_visibility,
+            #[cfg(target_os = "android")]
+            commands::mobile::android_request_directory,
 
             commands::developer::developer_save_log,
             commands::developer::developer_save_mpv_log,

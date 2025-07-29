@@ -84,6 +84,13 @@ impl<R: Runtime> Fluyer<R> {
     ) -> crate::Result<()> {
         Ok(())
     }
+    
+    pub fn android_pick_folder<F: Fn(WatcherPickFolder) + Send + Sync + 'static>(
+        &self,
+        _callback: F,
+    ) -> crate::Result<WatchPickFolderResponse> {
+        Ok(WatchPickFolderResponse { value: false })
+    }
 }
 
 impl<R: Runtime> Fluyer<R> {}

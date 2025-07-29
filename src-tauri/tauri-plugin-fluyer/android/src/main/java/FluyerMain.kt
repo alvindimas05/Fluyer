@@ -1,14 +1,15 @@
 package org.alvindimas05.fluyerplugin
 
+import android.app.Activity
 import android.os.Build
 import kotlin.math.roundToInt
 import android.view.WindowInsets
 import android.content.res.Resources
 import android.content.res.Configuration
-import android.app.Activity
 import android.widget.Toast
 import android.content.Intent
 import java.lang.Runtime
+
 
 class FluyerMain(private val activity: Activity) {
     fun toast(value: String) {

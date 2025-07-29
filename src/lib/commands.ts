@@ -20,6 +20,7 @@ export const CommandRoutes = {
 	GET_NAVIGATION_BAR_HEIGHT: "get_navigation_bar_height",
 	GET_STATUS_BAR_HEIGHT: "get_status_bar_height",
 	SET_NAVIGATION_BAR_VISIBILITY: "set_navigation_bar_visibility",
+	ANDROID_REQUEST_DIRECTORY: "android_request_directory",
 
 	LOG_ERROR: "log_error",
 

@@ -3,7 +3,7 @@ use std::path::Path;
 #[cfg(target_os = "android")]
 use crate::commands::mobile::check_read_audio_permission;
 use crate::{
-    commands::music::STORE_PATH_NAME,
+    commands::music::MUSIC_STORE_PATH_NAME,
     logger,
     music::metadata::MusicMetadata,
     platform::{is_android, is_desktop, is_ios},
@@ -34,28 +34,22 @@ fn is_not_hidden(entry: &DirEntry) -> bool {
 }
 
 pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
-    #[cfg(target_os = "android")]
-    if !check_read_audio_permission() {
-        return None;
-    }
+    // #[cfg(target_os = "android")]
+    // if !check_read_audio_permission() {
+    //     return None;
+    // }
 
     let mut search_dirs: Vec<String> = vec![];
     let mut dirs: Vec<Result<DirEntry, walkdir::Error>> = vec![];
 
-    if is_desktop() {
-        let dir = GLOBAL_APP_STORE.get()?.get(STORE_PATH_NAME)?.to_string();
-        let dirs = dir.split("||");
+    let dir = GLOBAL_APP_STORE.get()?.get(MUSIC_STORE_PATH_NAME)?.to_string();
+    let dir_paths = dir.split("||");
 
-        for d in dirs {
-            let trimmed = d.trim().trim_matches('"'); // optionally remove whitespace and quotes
-            if !trimmed.is_empty() {
-                search_dirs.push(trimmed.to_string());
-            }
+    for d in dir_paths {
+        let trimmed = d.trim().trim_matches('"'); // optionally remove whitespace and quotes
+        if !trimmed.is_empty() {
+            search_dirs.push(trimmed.to_string());
         }
-    }
-
-    if is_android() {
-        search_dirs.extend(get_android_audio_dirs())
     }
 
     if is_ios() {

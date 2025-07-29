@@ -143,9 +143,39 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("setNavigationBarVisibility", NavigationBarVisibility { value: visible })
             .map_err(Into::into)
     }
+
+    pub fn android_pick_folder<F: Fn(WatcherPickFolder) + Send + Sync + 'static>(
+        &self,
+        callback: F,
+    ) -> crate::Result<WatchPickFolderResponse> {
+        let channel = Channel::new(move |event| {
+            let payload = match event {
+                InvokeResponseBody::Json(payload) => {
+                    serde_json::from_str::<WatcherPickFolder>(&payload).unwrap()
+                }
+                _ => panic!("Failed to parse WatcherPickFolder payload"),
+            };
+
+            callback(payload);
+
+            Ok(())
+        });
+        self.android_pick_folder_inner(channel)
+    }
+
+    pub(crate) fn android_pick_folder_inner(&self, channel: Channel) -> crate::Result<WatchPickFolderResponse> {
+        self.0
+            .run_mobile_plugin("requestPickFolder", WatchPickFolderPayload { channel })
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]
 struct WatchPlaylistChangePayload {
+    pub channel: Channel,
+}
+
+#[derive(Serialize)]
+struct WatchPickFolderPayload {
     pub channel: Channel,
 }

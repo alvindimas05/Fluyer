@@ -1,7 +1,13 @@
 #[cfg(mobile)]
+use tauri::Emitter;
+#[cfg(mobile)]
 use crate::GLOBAL_APP_HANDLE;
 #[cfg(mobile)]
 use tauri_plugin_fluyer::FluyerExt;
+#[cfg(mobile)]
+use crate::commands::music::MUSIC_STORE_PATH_NAME;
+#[cfg(mobile)]
+use crate::store::GLOBAL_APP_STORE;
 
 #[cfg(target_os = "android")]
 #[tauri::command]
@@ -72,4 +78,19 @@ pub fn set_navigation_bar_visibility(visible: bool) {
         .get()
         .expect("Failed to get GLOBAL_APP_HANDLE");
     app.fluyer().set_navigation_bar_visibility(visible).unwrap();
+}
+
+#[cfg(target_os = "android")]
+#[tauri::command]
+pub fn android_request_directory() {
+    let app_handle = GLOBAL_APP_HANDLE
+        .get()
+        .expect("Failed to get GLOBAL_APP_HANDLE");
+
+    app_handle.fluyer()
+        .android_pick_folder(|payload| {
+            if let Some(dir) = payload.value {
+                app_handle.emit(crate::commands::route::ANDROID_REQUEST_DIRECTORY, dir).unwrap();
+            }
+        }).ok();
 }

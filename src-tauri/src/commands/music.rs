@@ -15,7 +15,7 @@ use crate::{
     AppState,
 };
 
-pub static STORE_PATH_NAME: &str = "music-path";
+pub static MUSIC_STORE_PATH_NAME: &str = "music-path";
 
 #[tauri::command]
 pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String) {
@@ -60,7 +60,7 @@ pub fn music_request_directory(app: AppHandle) {
         GLOBAL_APP_STORE
             .get()
             .expect("Failed to get GLOBAL_APP_STORE")
-            .set(STORE_PATH_NAME, dir);
+            .set(MUSIC_STORE_PATH_NAME, dir);
 
         GLOBAL_APP_HANDLE
             .get()

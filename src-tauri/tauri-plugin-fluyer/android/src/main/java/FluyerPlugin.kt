@@ -10,10 +10,15 @@ import app.tauri.plugin.JSObject
 import app.tauri.annotation.Permission
 import app.tauri.plugin.Channel
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import android.view.View
 import android.webkit.WebView
+import androidx.activity.result.ActivityResult
+import androidx.appcompat.app.AppCompatActivity
+import app.tauri.annotation.ActivityCallback
+import org.alvindimas05.fluyerplugin.utils.FileUtil
 import kotlin.properties.Delegates
 
 @InvokeArg
@@ -23,6 +28,11 @@ class ToastArgs {
 
 @InvokeArg
 class PlaylistChangeWatcherArgs {
+    lateinit var channel: Channel
+}
+
+@InvokeArg
+class PickFolderWatcherArgs {
     lateinit var channel: Channel
 }
 
@@ -47,9 +57,11 @@ const val LOG_TAG = "Fluyer"
 class FluyerPlugin(val activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
     private val player = FluyerPlayer(activity)
+    private var pickFolderChannel: Channel? = null
 
     override fun load(webView: WebView) {
         player.initialize()
+        super.load(webView)
     }
 
     @Command
@@ -91,6 +103,7 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
         invoke.resolve(JSObject().put("value", Build.VERSION.SDK_INT))
     }
 
+    @Suppress("DEPRECATION")
     @Command
     fun setNavigationBarVisibility(invoke: Invoke){
         val visible = invoke.parseArgs(NavigationBarVisibilityArgs::class.java).value
@@ -155,5 +168,39 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
             Log.e(LOG_TAG, err.toString())
         }
         invoke.resolve()
+    }
+
+    @Command
+    fun requestPickFolder(invoke: Invoke) {
+        try {
+            val args = invoke.parseArgs(PickFolderWatcherArgs::class.java)
+            pickFolderChannel = args.channel
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                )
+            }
+            startActivityForResult(invoke, intent, "onFolderPicked")
+            invoke.resolve(JSObject().put("value", true))
+        } catch (err: Exception) {
+            Log.e(LOG_TAG, err.toString())
+        }
+    }
+
+    @ActivityCallback
+    fun onFolderPicked(invoke: Invoke, result: ActivityResult) {
+        if (result.resultCode == Activity.RESULT_OK) {
+            val folderUri = result.data?.data
+            if (folderUri != null) {
+                activity.contentResolver.takePersistableUriPermission(
+                    folderUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+                pickFolderChannel!!.send(JSObject().put("value", FileUtil.getFullPathFromTreeUri(folderUri, activity)))
+            }
+        }
+        pickFolderChannel!!.send(JSObject().put("value", null))
     }
 }

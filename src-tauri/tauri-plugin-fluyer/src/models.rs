@@ -52,6 +52,12 @@ pub struct WatchPlaylistChangeResponse {
     pub value: bool,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct WatchPickFolderResponse {
+    pub value: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum PlayerCommand {
@@ -135,4 +141,10 @@ pub struct SdkVersion {
 #[serde(rename_all = "camelCase")]
 pub struct NavigationBarVisibility {
     pub value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct WatcherPickFolder {
+    pub value: Option<String>,
 }
