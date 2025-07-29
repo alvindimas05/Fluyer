@@ -5,6 +5,7 @@ import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import {IconType} from "$lib/icon/types";
 import UIController from "$lib/controllers/UIController";
+import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 const LABELS = [
     65,    // 1b  - Sub-bass
     92,    // 2b
@@ -30,6 +31,7 @@ function updateValues(index: number, value: number) {
     equalizerValues.update((values) => {
         values[index] = value;
         MusicController.setEqualizer(values);
+        PersistentStoreController.equalizer.set(values);
         return values;
     });
 }

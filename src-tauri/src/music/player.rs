@@ -272,7 +272,6 @@ impl MusicPlayer {
         if arg.ends_with(':') {
             arg.pop();
         }
-        logger::debug!(arg);
         GLOBAL_MUSIC_MPV.get().unwrap().command("af", &["set", arg.as_str()]).unwrap();
     }
 

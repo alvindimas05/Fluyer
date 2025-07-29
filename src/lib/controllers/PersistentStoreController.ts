@@ -9,6 +9,7 @@ import {
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { IconThemeType } from "$lib/icon/types";
 import { iconTheme } from "$lib/stores/icon";
+import {equalizerValues} from "$lib/stores/equalizer";
 
 const storePath = "store.json";
 const storeOptions = { autoSave: true };
@@ -43,6 +44,7 @@ const PersistentStoreController = {
 			PersistentStoreController.userInterface.play.showBackButton.initialize(),
 			PersistentStoreController.userInterface.showRepeatButton.initialize(),
 			PersistentStoreController.userInterface.showShuffleButton.initialize(),
+			PersistentStoreController.equalizer.initialize(),
 		]);
 	},
 
@@ -99,6 +101,12 @@ const PersistentStoreController = {
 			),
 		},
 	},
+
+	equalizer: makeBinding<number[]>(
+		"equalizer",
+		Array(18).fill(0),
+		equalizerValues.set,
+	),
 };
 
 export default PersistentStoreController;
