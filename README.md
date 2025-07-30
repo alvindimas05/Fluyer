@@ -80,23 +80,11 @@ makepkg -si
 ### Linux
 
 > [!IMPORTANT]
-> 🧩 If you're using the `.deb`, there is a chance that you might need to **install libmpv** manually.
+> 🧩 If you're using the `.deb`, there is a chance that you might need to **install mpv** manually.
 
-Example for Ubuntu Latest:
 ```bash
-sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
-echo "deb http://apt.fruit.je/ubuntu noble mpv" | sudo tee /etc/apt/sources.list.d/fruit.list
-sudo apt-get update -y
-sudo apt-get install -y libmpv2
+sudo apt install mpv
 ```
-Example for Debian Latest:
-```bash
-sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
-echo "deb http://apt.fruit.je/debian trixie mpv" | sudo tee /etc/apt/sources.list.d/fruit.list
-sudo apt-get update -y
-sudo apt-get install -y libmpv2
-```
-
 
 ---
 
