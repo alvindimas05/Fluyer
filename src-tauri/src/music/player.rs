@@ -189,7 +189,7 @@ impl MusicPlayer {
             let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
             
             for (_, music) in playlist.iter().enumerate() {
-                let path = format!("\"{}\"", music.path).replace("\\", "/").replace("//", "/");
+                let path = format!("{}", music.path).replace("\\", "/").replace("//", "/");
                 mpv.command("loadfile", &[path.as_str(), "append"]).unwrap();
             }
         }
