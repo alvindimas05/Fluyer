@@ -35,7 +35,6 @@ let itemHeight = $state(0);
 let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 44);
 
 function updateItemWidth() {
-    console.log("updateItemWidth");
     const w = window.innerWidth;
     const dpi = window.devicePixelRatio;
 
