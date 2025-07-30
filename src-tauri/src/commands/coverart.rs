@@ -71,35 +71,14 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
     let file_path = format!("{}/{}/{}", cover_art_cache_directory(), folder_name, name);
     let queue = cover_art_get_queue(name.clone());
     if queue.is_none() {
-        COVER_ART_QUEUE.lock().unwrap().push(CoverArtRequest {
-            name: name.clone(),
-            status: CoverArtRequestStatus::Loading,
-        });
-        if Path::new(file_path.as_str()).exists() {
-            // Check if image is corrupted
-            let data = std::fs::read(file_path.clone());
-            if data.is_ok() {
-                let reader =
-                    ImageReader::new(std::io::Cursor::new(data.unwrap())).with_guessed_format();
-                if reader.is_ok() {
-                    let mut buf = Cursor::new(vec![]);
-                    if reader
-                        .unwrap()
-                        .decode()
-                        .unwrap()
-                        .write_to(&mut buf, image::ImageFormat::Png)
-                        .is_ok()
-                    {
-                        return CoverArtResponse {
-                            name,
-                            status: CoverArtRequestStatus::Loaded,
-                            image: Some(
-                                base64::engine::general_purpose::STANDARD.encode(buf.get_ref()),
-                            ),
-                        };
-                    }
-                }
-            }
+        if let Some(image) = cover_art_get_from_path(file_path.clone()).await {
+            cover_art_set_status(name.clone(), CoverArtRequestStatus::Loaded);
+
+            return CoverArtResponse {
+                name,
+                status: CoverArtRequestStatus::Loaded,
+                image: Some(image),
+            };
         }
         
         let cover_art = cover_art_request(query).await;
@@ -120,21 +99,41 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
         };
     }
 
-    // if queue.unwrap().status == CoverArtRequestStatus::Loading {
-    //     let status = wait_until_file_created(album.clone(), file_path.clone());
-
-    //     return CoverArtResponse {
-    //         name: album,
-    //         status,
-    //         image: None,
-    //     };
-    // }
+    if queue.unwrap().status == CoverArtRequestStatus::Loaded {
+        if let Some(image) = cover_art_get_from_path(file_path.clone()).await {
+            return CoverArtResponse {
+                name,
+                status: CoverArtRequestStatus::Loaded,
+                image: Some(image),
+            };
+        }
+    }
 
     CoverArtResponse {
         name,
         status: CoverArtRequestStatus::Failed,
         image: None,
     }
+}
+
+async fn cover_art_get_from_path(file_path: String) -> Option<String> {
+    let data = std::fs::read(file_path);
+    if data.is_ok() {
+        let reader = ImageReader::new(std::io::Cursor::new(data.unwrap())).with_guessed_format();
+        if reader.is_ok() {
+            let mut buf = Cursor::new(vec![]);
+            if reader
+                .unwrap()
+                .decode()
+                .unwrap()
+                .write_to(&mut buf, image::ImageFormat::Png)
+                .is_ok()
+            {
+                return Some(base64::engine::general_purpose::STANDARD.encode(buf.get_ref()));
+            }
+        }
+    }
+    None
 }
 
 async fn cover_art_request(query: CoverArtQuery) -> Option<String> {    

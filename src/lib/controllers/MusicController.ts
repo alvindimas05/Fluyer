@@ -21,9 +21,9 @@ import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
 import { CommandRoutes } from "$lib/commands";
 import { coverArtCaches } from "$lib/stores/coverart";
-import type {
-	CoverArtCacheQuery,
-	CoverArtResponse,
+import CoverArt, {
+	type CoverArtCacheQuery,
+	type CoverArtResponse, CoverArtStatus,
 } from "$lib/handlers/coverart";
 import { isDesktop, isMobile } from "$lib/platform";
 import { settingTriggerAnimatedBackground } from "$lib/stores/setting";
@@ -78,19 +78,19 @@ const MusicController = {
 			MusicController.currentMusic(),
 		);
 	},
-	getAlbumImageFromMusic: (music: MusicData | null) => {
-		if (music === null || music.image === null || music.image.length < 1)
-			return MusicConfig.defaultAlbumImage;
-		if (music.image === MusicConfig.defaultAlbumImage) return music.image;
+	getAlbumImageFromMusic: async (music: MusicData | null) => {
+		if (music === null) return MusicConfig.defaultAlbumImage;
 		try {
-			new URL(music.image);
-			return music.image;
-		} catch (e) {
-			if (music.image.startsWith("data:image/png;base64,")) return music.image;
-			return music.image
-				? `data:image/png;base64, ${music.image}`
-				: MusicConfig.defaultAlbumImage;
-		}
+			const image = await invoke<string>(CommandRoutes.MUSIC_GET_IMAGE, {path: music?.path});
+			if(image !== null) return `data:image/png;base64,${image}`;
+		} catch (e) {}
+		if (music.title == null || music.artist == null) return MusicConfig.defaultAlbumImage;
+		const coverArt = await CoverArt.getImageFromQuery({
+			artist: music.artist!,
+			title: music.album ? undefined : music.title!,
+			album: music.album ?? undefined,
+		});
+		return coverArt ? MusicController.withBase64(coverArt) : MusicConfig.defaultAlbumImage;
 	},
 
 	getFullArtistFromMusic: (music: MusicData | null) => {
@@ -383,6 +383,7 @@ const MusicController = {
 	},
 
 	sortMusicList: (list: MusicData[]) => {
+		if(!list || list[0].trackNumber === null) return list;
 		const hasTrackNumber = list[0].trackNumber != null;
 		return list.sort((a, b) => {
 			if (hasTrackNumber) {

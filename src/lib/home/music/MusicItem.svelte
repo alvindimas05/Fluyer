@@ -14,64 +14,9 @@ interface Props {
 
 let { music }: Props = $props();
 
-let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
-
-async function checkAlbumImage() {
-	if (music.image !== null || music.artist == null) return;
-	const status = await CoverArt.fromQuery({
-		artist: music.artist!,
-		title: music.title!,
-		album: music.album ?? undefined,
-	});
-	if (status == CoverArtStatus.Failed) return;
-	if (status == CoverArtStatus.Loading) {
-		const unlisten = coverArtCaches.subscribe(() => {
-			if (setAlbumImageFromCache()) setTimeout(() => unlisten(), 0);
-		});
-		return;
-	}
-
-	setAlbumImageFromCache();
-}
-
-function setAlbumImageFromCache() {
-	if (albumImage != MusicConfig.defaultAlbumImage) return true;
-
-	const cache = MusicController.getCoverArtCache({
-		artist: music.artist!,
-		title: music.title!,
-		album: music.album ?? undefined,
-	});
-
-	if (
-		cache == null ||
-		(cache.status == CoverArtStatus.Loading && cache.image == null)
-	)
-		return false;
-	if (cache.status == CoverArtStatus.Failed) return true;
-
-	musicList.update((list) => {
-		if (!Array.isArray(list)) return list;
-		for (let i = 0; i < list.length; i++) {
-			if (music.album) {
-				if (list[i].album == music.album) {
-					list[i].image = cache.image;
-					return list;
-				}
-			} else {
-				if (list[i].title == music.title && list[i].artist == music.artist) {
-					list[i].image = cache.image;
-					return list;
-				}
-			}
-		}
-		return list;
-	});
-	return true;
-}
+let albumImage = $derived(MusicConfig.defaultAlbumImage);
 
 async function addMusicAndPlay() {
-	music.image = albumImage;
 	await MusicController.resetAndAddMusic(music);
 	MusicController.play();
 }
@@ -80,10 +25,14 @@ async function addMusic() {
 	await MusicController.addMusic(music);
 }
 
-onMount(checkAlbumImage);
+$effect(() => {
+	(async () => {
+		albumImage = await MusicController.getAlbumImageFromMusic(music);
+	})();
+});
 </script>
 
-<div class="relative text-sm md:text-base animate__animated animate__fadeIn animate__faster">
+<div class="relative text-sm md:text-base animate__animated animate__fadeIn">
 	<div
 		class="grid grid-cols-[max-content_auto_max-content] py-2"
 	>

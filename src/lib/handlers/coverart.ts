@@ -20,28 +20,16 @@ export interface CoverArtCacheQuery {
 }
 
 const CoverArt = {
-	fromQuery: async (query: CoverArtCacheQuery) => {
+	getImageFromQuery: async (query: CoverArtCacheQuery) => {
 		try {
-			let cache = MusicController.getCoverArtCache(query);
-			if (cache != null) return cache.status;
-			MusicController.addCoverArtCache({
-				name: `${query.artist} ${query.album ?? query.title ?? ""}`,
-				status: CoverArtStatus.Loading,
-				image: null,
-			});
-
-			if (query.album) query.title = undefined;
-
-			let cover = await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
+			return (await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
 				query,
-			});
-			MusicController.setCoverArtCache(query, cover);
-			return cover.status;
+			})).image;
 		} catch (err) {
 			console.error(err);
-			return CoverArtStatus.Failed;
+			return null;
 		}
-	},
+	}
 };
 
 export default CoverArt;

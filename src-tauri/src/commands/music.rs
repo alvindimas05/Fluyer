@@ -104,3 +104,8 @@ pub fn music_equalizer(state: State<'_, Mutex<AppState>>, values: Vec<f32>) {
     let state = state.lock().unwrap();
     state.music_player.equalizer(values);
 }
+
+#[tauri::command]
+pub fn music_get_image(path: String) -> Option<String> {
+    MusicMetadata::get_image_from_path(path)
+}

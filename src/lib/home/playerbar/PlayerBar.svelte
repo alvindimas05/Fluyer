@@ -76,7 +76,7 @@ function handleVolumeButton() {
 }
 
 function refresh() {
-	setTimeout(() => {
+	setTimeout(async () => {
 		let music = MusicController.currentMusic();
 
 		if (music === null) {
@@ -91,7 +91,7 @@ function refresh() {
 		oldMusic = music;
 		title = music.title!;
 		artist = MusicController.getFullArtistFromMusic(music);
-		albumImage = MusicController.currentMusicAlbumImage();
+		albumImage = await MusicController.currentMusicAlbumImage();
 	}, 0);
 }
 

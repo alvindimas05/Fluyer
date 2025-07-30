@@ -68,7 +68,7 @@ function getLuminance(r: number, g: number, b: number): number {
 }
 
 async function getColors(force = false): Promise<string[] | null> {
-	const currentAlbumImage = MusicController.currentMusicAlbumImage();
+	const currentAlbumImage = await MusicController.currentMusicAlbumImage();
 	if (previousBackground === currentAlbumImage && !force) return null;
 
 	let image = new Image();

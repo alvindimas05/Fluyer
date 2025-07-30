@@ -24,10 +24,9 @@ pub struct MusicMetadata {
     pub album_artist: Option<String>,
     pub track_number: Option<String>,
     pub genre: Option<String>,
-    pub bitrate: Option<u32>,
     pub image: Option<String>,
 
-    pub extra_tags: HashMap<String, Option<String>>,
+    pub extra_tags: Option<HashMap<String, Option<String>>>,
 }
 
 impl MusicMetadata {
@@ -50,13 +49,12 @@ impl MusicMetadata {
             album_artist: None,
             track_number: None,
             genre: None,
-            bitrate: None,
             image: None,
-            extra_tags: HashMap::new(),
+            extra_tags: Some(HashMap::new()),
         }
     }
 
-    pub fn get_format(path: String) -> Option<Box<dyn FormatReader>>{
+    fn get_format(path: String) -> Option<Box<dyn FormatReader>>{
         let src = match std::fs::File::open(&path) {
             Ok(file) => file,
             Err(_) => {
@@ -125,9 +123,12 @@ impl MusicMetadata {
                         StandardTagKey::AlbumArtist => metadata.album_artist = self.get_value(tag),
                         StandardTagKey::TrackNumber => metadata.track_number = self.get_value(tag),
                         StandardTagKey::Genre => metadata.genre = self.get_value(tag),
-                        key => {
-                            metadata.extra_tags.insert(format!("{:?}", key), self.get_value(tag));
-                        }
+                        // key => {
+                        //     let mut extra_tags = metadata.extra_tags.clone().unwrap();
+                        //     extra_tags.insert(format!("{:?}", key), self.get_value(tag));
+                        //     metadata.extra_tags = Some(extra_tags);
+                        // }
+                        _ => {}
                     }
                 }
             }
@@ -181,7 +182,7 @@ impl MusicMetadata {
         metadata
     }
 
-    fn get_image_from_path(path: String) -> Option<String> {
+    pub fn get_image_from_path(path: String) -> Option<String> {
         let _format = MusicMetadata::get_format(path);
         if _format.is_none() {
             return None;

@@ -13,6 +13,7 @@ export const CommandRoutes = {
 	MUSIC_PLAYLIST_MOVETO: "music_playlist_moveto",
 	MUSIC_SET_VOLUME: "music_set_volume",
 	MUSIC_EQUALIZER: "music_equalizer",
+	MUSIC_GET_IMAGE: "music_get_image",
 
 	CHECK_READ_AUDIO_PERMISSION: "check_read_audio_permission",
 	REQUEST_READ_AUDIO_PERMISSION: "request_read_audio_permission",

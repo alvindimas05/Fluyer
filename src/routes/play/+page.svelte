@@ -30,7 +30,7 @@ let progressDurationText = $state(MusicController.progressDurationText());
 let progressDurationNegativeText = $state(
 	MusicController.progressDurationText(true),
 );
-let albumImage = $state(MusicConfig.defaultAlbumImage);
+let albumImage = $state(MusicController.currentMusicAlbumImage());
 
 let lyrics: MusicLyric[] = $state([]);
 let selectedLyricIndex = $state(0);
@@ -49,7 +49,7 @@ const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
 
 	resetSelectedLyricIndex();
 });
-const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => {
+const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async() => {
 	music = MusicController.currentMusic();
 	albumImage = MusicController.currentMusicAlbumImage();
 	resetLyrics();
@@ -212,11 +212,19 @@ function scrollToSelectedLyric() {
         <div
             class={`w-full md:w-[80%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}
         >
-            <img
-                class="w-full rounded-lg aspect-square"
-                src={albumImage}
-                alt="Music Album"
-            />
+            {#await albumImage}
+                <img
+                    class="w-full rounded-lg aspect-square"
+                    src={MusicConfig.defaultAlbumImage}
+                    alt="Music Album"
+                />
+            {:then image}
+                <img
+                    class="w-full rounded-lg aspect-square"
+                    src={image}
+                    alt="Music Album"
+                />
+            {/await}
         </div>
     </div>
     <div
