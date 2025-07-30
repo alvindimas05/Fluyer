@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { MusicData } from "../music/types";
+import type { MusicData } from "$lib/home/music/types";
 import { musicAlbumList, musicList } from "$lib/stores/music";
 import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
@@ -31,9 +31,11 @@ const rules = [
     [768, 1.0, 0.5],         // sm-mdpi → 50%
 ];
 let itemWidth = $state(0.5 * window.innerWidth);
-let itemHeight = $derived(itemWidth + 90);
+let itemHeight = $state(0);
+let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 44);
 
 function updateItemWidth() {
+    console.log("updateItemWidth");
     const w = window.innerWidth;
     const dpi = window.devicePixelRatio;
 
@@ -127,14 +129,24 @@ $effect(() => void ($swipeMinimumTop = itemHeight));
 <!--    {/each}-->
 <!--</div>-->
 
-<div style="padding-top: {(isMobile() ? $mobileStatusBarHeight : 0) + 44}px; width: 100%; height: {itemHeight}px;">
-    <VList class="scrollbar-hidden"
-           {data}
-           horizontal>
-        {#snippet children(musicList)}
-            <div style="width: {itemWidth}px;">
-                <AlbumItem {musicList} />
-            </div>
+<div style="padding-top: {paddingTop}px;
+    width: 100%;
+    height: {itemHeight + paddingTop}px;">
+    <VList
+       class="scrollbar-hidden"
+       {data}
+       horizontal>
+        {#snippet children(musicList, index)}
+            {#if index === 0}
+                <div class="h-fit" style="width: {itemWidth}px;"
+                    bind:clientHeight={itemHeight}>
+                    <AlbumItem {musicList} />
+                </div>
+            {:else}
+                <div class="h-fit" style="width: {itemWidth}px;">
+                    <AlbumItem {musicList} />
+                </div>
+            {/if}
         {/snippet}
     </VList>
 </div>

@@ -31,7 +31,7 @@ async function setFilterAlbum() {
 </script>
 
 <div
-    class="px-3 pb-3 text-white row-[1] col-auto animate__animated animate__fadeIn"
+    class="h-fit px-3 pb-3 text-white row-[1] col-auto animate__animated animate__fadeIn"
 >
     <div class="relative w-full">
         <div
