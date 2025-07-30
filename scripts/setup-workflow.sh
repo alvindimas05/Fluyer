@@ -12,6 +12,7 @@ if [[ "$os" == "linux" ]]; then
     sudo apt-get update
     sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
     sudo apt-get install -y libmpv-dev
+    sudo apt-get install -y lld
 fi
 
 # Install NPM Packages
@@ -21,6 +22,11 @@ if [[ "$os" == "windows" ]]; then
     if [[ "$arch" == "arm64" ]]; then
         bun i @tauri-apps/cli-win32-arm64-msvc
     fi
+fi
+
+if [[ "$os" == "macos" ]]; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  brew install lld
 fi
 
 # Setup Android
