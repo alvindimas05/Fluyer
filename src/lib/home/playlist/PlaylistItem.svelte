@@ -27,7 +27,7 @@ function gotoPlaylist() {
 }
 </script>
 
-<div class="w-full px-3">
+<div class="w-full">
     <div class="relative w-full">
         <div
                 class="relative grid grid-cols-[max-content_auto_max-content] py-2 px-3 animate__animated animate__fadeIn
