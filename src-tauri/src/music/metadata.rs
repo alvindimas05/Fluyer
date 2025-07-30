@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::path::Path;
-use base64::Engine;
 #[cfg(mobile)]
 use dotenvy_macro::dotenv;
 use regex::Regex;
@@ -191,7 +190,7 @@ impl MusicMetadata {
 
         if let Some(rev) = format.metadata().current() {
             for visual in rev.visuals() {
-                return Some(base64::engine::general_purpose::STANDARD.encode(visual.data.clone()));
+                return Some(base64_simd::STANDARD.encode_to_string(visual.data.clone()));
             }
         }
         None

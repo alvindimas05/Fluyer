@@ -327,11 +327,10 @@ impl MusicPlayer {
     
     pub fn start_listener(){
         #[cfg(desktop)]{
-            use libmpv2::events::{Event, EventContext};
-    
-            let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
+            use libmpv2::events::Event;
+            let mut client = GLOBAL_MUSIC_MPV.get().unwrap().create_client(None).unwrap();
             thread::spawn(move || loop {
-                let event = event_context.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
+                let event = client.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
                 match event {
                     Ok(Event::FileLoaded) => {
                         MusicPlayer::emit_sync(true);

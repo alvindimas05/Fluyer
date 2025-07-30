@@ -38,12 +38,23 @@ dotenvy = "0.15.7"
 dotenvy_macro = "0.15.7"
 simplelog = "0.12.2"
 rayon = "1.10.0"
+base64-simd = "0.8.0"
 
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
-libmpv2 = "4.1.0"
+libmpv2 = "5.0.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 enigo = "0.5.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2.172"
+
+[profile.dev]
+debug = 0
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = "symbols"
+panic = "abort"

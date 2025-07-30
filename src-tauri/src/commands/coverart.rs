@@ -3,7 +3,6 @@ use std::{
     sync::Mutex,
 };
 
-use base64::Engine;
 use image::ImageReader;
 use lazy_static::lazy_static;
 // use notify::{EventKind, RecommendedWatcher, RecursiveMode, Watcher};
@@ -117,22 +116,27 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
 }
 
 async fn cover_art_get_from_path(file_path: String) -> Option<String> {
-    let data = std::fs::read(file_path);
-    if data.is_ok() {
-        let reader = ImageReader::new(std::io::Cursor::new(data.unwrap())).with_guessed_format();
-        if reader.is_ok() {
-            let mut buf = Cursor::new(vec![]);
-            if reader
-                .unwrap()
-                .decode()
-                .unwrap()
-                .write_to(&mut buf, image::ImageFormat::Png)
-                .is_ok()
-            {
-                return Some(base64::engine::general_purpose::STANDARD.encode(buf.get_ref()));
+    if let Ok(data) = std::fs::read(&file_path) {
+        let ext = Path::new(&file_path)
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+
+        // If it's already PNG or JPEG, don't re-encode
+        if ext == "png" || ext == "jpg" || ext == "jpeg" {
+            return Some(base64_simd::STANDARD.encode_to_string(data));
+        }
+
+        let reader = ImageReader::new(Cursor::new(data)).with_guessed_format();
+        if let Ok(reader) = reader {
+            let mut buf = Cursor::new(Vec::new());
+            if reader.decode().unwrap().write_to(&mut buf, image::ImageFormat::Png).is_ok() {
+                return Some(base64_simd::STANDARD.encode_to_string(buf.get_ref()));
             }
         }
     }
+
     None
 }
 
@@ -178,7 +182,7 @@ async fn cover_art_request(query: CoverArtQuery) -> Option<String> {
         return None;
     }
 
-    Some(base64::engine::general_purpose::STANDARD.encode(content.into_inner()))
+    Some(base64_simd::STANDARD.encode_to_string(content.into_inner()))
 }
 
 fn cover_art_get_queue(album: String) -> Option<CoverArtRequest> {

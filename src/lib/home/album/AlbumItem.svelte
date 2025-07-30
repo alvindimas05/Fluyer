@@ -28,8 +28,6 @@ async function setFilterAlbum() {
 		musicList,
 	} as AlbumData);
 }
-
-// onMount(checkAlbumImage);
 </script>
 
 <div
@@ -47,11 +45,9 @@ async function setFilterAlbum() {
             rounded-lg shadow-[inset_0_0_0_2px_white]"></div>
         {/if}
         {#await albumImage}
-            <img class="rounded-lg w-full shadow-lg"
-                 src={MusicConfig.defaultAlbumImage}
-                 alt="Album" />
+            <div class="w-full aspect-square"></div>
         {:then image}
-            <img class="rounded-lg w-full shadow-lg"
+            <img class="rounded-lg w-full shadow-lg animate__animated animate__fadeIn"
                  src={image}
                  alt="Album" />
         {/await}

@@ -85,11 +85,14 @@ const MusicController = {
 			if(image !== null) return `data:image/png;base64,${image}`;
 		} catch (e) {}
 		if (music.title == null || music.artist == null) return MusicConfig.defaultAlbumImage;
+		const start = performance.now();
 		const coverArt = await CoverArt.getImageFromQuery({
 			artist: music.artist!,
 			title: music.album ? undefined : music.title!,
 			album: music.album ?? undefined,
 		});
+		const end = performance.now();
+		console.log(`CoverArt: ${end - start}ms`);
 		return coverArt ? MusicController.withBase64(coverArt) : MusicConfig.defaultAlbumImage;
 	},
 

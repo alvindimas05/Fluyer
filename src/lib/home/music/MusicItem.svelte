@@ -14,7 +14,7 @@ interface Props {
 
 let { music }: Props = $props();
 
-let albumImage = $derived(MusicConfig.defaultAlbumImage);
+let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
 
 async function addMusicAndPlay() {
 	await MusicController.resetAndAddMusic(music);
@@ -24,23 +24,21 @@ async function addMusicAndPlay() {
 async function addMusic() {
 	await MusicController.addMusic(music);
 }
-
-$effect(() => {
-	(async () => {
-		albumImage = await MusicController.getAlbumImageFromMusic(music);
-	})();
-});
 </script>
 
 <div class="relative text-sm md:text-base animate__animated animate__fadeIn">
 	<div
 		class="grid grid-cols-[max-content_auto_max-content] py-2"
 	>
-		<img
-			class="w-12 md:w-14 relative rounded shadow-lg"
-			src={albumImage}
-			alt="Album"
-		/>
+		{#await albumImage}
+			<div class="w-12 md:w-14 relative aspect-square"></div>
+		{:then image}
+			<img
+				class="w-12 md:w-14 relative rounded shadow-lg animate__animated animate__fadeIn"
+				src={image}
+				alt="Album"
+			/>
+		{/await}
 		<div class="ms-3 overflow-hidden">
 			<p
 				class="font-medium whitespace-nowrap overflow-hidden animate-scroll-overflow-text"
