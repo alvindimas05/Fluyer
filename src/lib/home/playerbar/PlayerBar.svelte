@@ -23,7 +23,7 @@ import {
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
-let albumImage = $state(MusicConfig.defaultAlbumImage);
+let albumImage = $derived(MusicController.getAlbumImageFromMusic(oldMusic));
 
 let isPlaying = $derived($musicIsPlaying);
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -82,7 +82,6 @@ function refresh() {
 		if (music === null) {
 			title = MusicConfig.defaultTitle;
 			artist = MusicConfig.defaultArtist;
-			albumImage = MusicConfig.defaultAlbumImage;
 			return;
 		}
 
@@ -91,7 +90,6 @@ function refresh() {
 		oldMusic = music;
 		title = music.title!;
 		artist = MusicController.getFullArtistFromMusic(music);
-		albumImage = await MusicController.currentMusicAlbumImage();
 	}, 0);
 }
 
@@ -244,11 +242,15 @@ onMount(() => {
                         class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
                     >
                         <button onclick={redirectToPlay}>
-                            <img
-                                    class="rounded"
-                                    src={albumImage}
+                            {#await albumImage}
+                                <div class="w-full aspect-square"></div>
+                            {:then image}
+                                <img
+                                    class="w-full rounded animate__animated animate__fadeIn"
+                                    src={image}
                                     alt="Album"
-                            />
+                                />
+                            {/await}
                         </button>
                         <div class="ms-3 overflow-hidden grid grid-rows-[auto_1fr_1fr]">
                             <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->

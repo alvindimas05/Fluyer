@@ -213,14 +213,10 @@ function scrollToSelectedLyric() {
             class={`w-full md:w-[80%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}
         >
             {#await albumImage}
-                <img
-                    class="w-full rounded-lg aspect-square"
-                    src={MusicConfig.defaultAlbumImage}
-                    alt="Music Album"
-                />
+                <div class="w-full aspect-square"></div>
             {:then image}
                 <img
-                    class="w-full rounded-lg aspect-square"
+                    class="w-full rounded-lg aspect-square animate__animated animate__fadeIn"
                     src={image}
                     alt="Music Album"
                 />
