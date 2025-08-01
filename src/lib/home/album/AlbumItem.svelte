@@ -32,17 +32,17 @@ async function setFilterAlbum() {
 </script>
 
 <div
-    class="h-fit px-3 pb-3 text-white row-[1] col-auto {isDesktop() && 'animate__animated animate__fadeIn'}"
+    class="h-fit px-3 pb-3 text-white row-[1] col-auto"
 >
     <div class="relative w-full">
-        <button
-            class="album-item-actions w-full h-full absolute rounded-lg z-20
-            bg-white/20 shadow-[inset_0_0_0_2px_white] cursor-pointer"
-            onclick={setFilterAlbum}
-        ></button>
         {#if isValidFilterAlbum}
             <div class="w-full h-full absolute top-0 left-0 z-10
             rounded-lg shadow-[inset_0_0_0_2px_white]"></div>
+        {:else}
+            <div class="album-item-actions w-full h-full absolute rounded-lg z-20
+                bg-white/20 shadow-[inset_0_0_0_2px_white] cursor-pointer"
+                    onclick={setFilterAlbum}
+            ></div>
         {/if}
         {#await albumImage}
             <div class="w-full aspect-square"></div>
@@ -66,6 +66,8 @@ async function setFilterAlbum() {
 
         &:hover {
             animation-name: fadeIn;
+            animation-duration: 0.5s;
+            animation-fill-mode: forwards;
         }
     }
 </style>

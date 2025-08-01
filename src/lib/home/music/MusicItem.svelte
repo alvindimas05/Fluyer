@@ -27,7 +27,7 @@ async function addMusic() {
 }
 </script>
 
-<div class="relative text-sm md:text-base {isDesktop() && 'animate__animated animate__fadeIn'}">
+<div class="relative text-sm md:text-base">
 	<div
 		class="grid grid-cols-[max-content_auto_max-content] py-2"
 	>
@@ -78,6 +78,8 @@ async function addMusic() {
 
 		&:hover {
 			animation-name: fadeIn;
+			animation-duration: 0.5s;
+			animation-fill-mode: forwards;
 		}
 	}
 </style>
