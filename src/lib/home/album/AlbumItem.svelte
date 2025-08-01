@@ -7,6 +7,7 @@ import { coverArtCaches } from "$lib/stores/coverart";
 import { filterAlbum, filterSearch } from "$lib/stores/filter";
 import FilterController from "$lib/controllers/FilterController";
 import { musicList as storeMusicList } from "$lib/stores/music";
+import {isDesktop} from "$lib/platform";
 
 interface Props {
 	musicList: MusicData[];
@@ -31,15 +32,14 @@ async function setFilterAlbum() {
 </script>
 
 <div
-    class="h-fit px-3 pb-3 text-white row-[1] col-auto animate__animated animate__fadeIn"
+    class="h-fit px-3 pb-3 text-white row-[1] col-auto {isDesktop() && 'animate__animated animate__fadeIn'}"
 >
     <div class="relative w-full">
-        <div
+        <button
             class="album-item-actions w-full h-full absolute rounded-lg z-20
-            bg-white/20 shadow-[inset_0_0_0_2px_white] cursor-pointer
-			animate__animated animate__faster animate__fadeOut"
+            bg-white/20 shadow-[inset_0_0_0_2px_white] cursor-pointer"
             onclick={setFilterAlbum}
-        ></div>
+        ></button>
         {#if isValidFilterAlbum}
             <div class="w-full h-full absolute top-0 left-0 z-10
             rounded-lg shadow-[inset_0_0_0_2px_white]"></div>
@@ -47,7 +47,7 @@ async function setFilterAlbum() {
         {#await albumImage}
             <div class="w-full aspect-square"></div>
         {:then image}
-            <img class="rounded-lg w-full shadow-lg animate__animated animate__fadeIn"
+            <img class="rounded-lg w-full shadow-lg {isDesktop() && 'animate__animated animate__fadeIn'}"
                  src={image}
                  alt="Album" />
         {/await}
@@ -61,7 +61,11 @@ async function setFilterAlbum() {
 </div>
 
 <style lang="scss">
-    .album-item-actions:hover {
-        animation-name: fadeIn;
+    .album-item-actions {
+        opacity: 0;
+
+        &:hover {
+            animation-name: fadeIn;
+        }
     }
 </style>

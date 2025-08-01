@@ -7,6 +7,7 @@ import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { musicList } from "$lib/stores/music";
+import {isDesktop} from "$lib/platform";
 
 interface Props {
 	music: MusicData;
@@ -26,7 +27,7 @@ async function addMusic() {
 }
 </script>
 
-<div class="relative text-sm md:text-base animate__animated animate__fadeIn">
+<div class="relative text-sm md:text-base {isDesktop() && 'animate__animated animate__fadeIn'}">
 	<div
 		class="grid grid-cols-[max-content_auto_max-content] py-2"
 	>
@@ -34,7 +35,7 @@ async function addMusic() {
 			<div class="w-12 md:w-14 relative aspect-square"></div>
 		{:then image}
 			<img
-				class="w-12 md:w-14 relative rounded shadow-lg animate__animated animate__fadeIn"
+				class="w-12 md:w-14 relative rounded shadow-lg {isDesktop() && 'animate__animated animate__fadeIn'}"
 				src={image}
 				alt="Album"
 			/>
@@ -54,7 +55,7 @@ async function addMusic() {
 		<div class="w-12 md:w-14"></div>
 	</div>
 	<div class="absolute top-0 left-0 py-2 w-full">
-		<div class="w-full grid grid-cols-[max-content_auto_max-content] music-item-play animate__animated animate__faster animate__fadeOut">
+		<div class="w-full grid grid-cols-[max-content_auto_max-content] music-item-play">
 			<button
 					class="w-12 h-12 md:w-14 md:h-14"
 					onclick={addMusicAndPlay}
@@ -72,7 +73,11 @@ async function addMusic() {
 </div>
 
 <style lang="scss">
-	.music-item-play:hover {
-		animation-name: fadeIn;
+	.music-item-play {
+		opacity: 0;
+
+		&:hover {
+			animation-name: fadeIn;
+		}
 	}
 </style>

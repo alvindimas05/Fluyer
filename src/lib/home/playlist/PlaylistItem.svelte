@@ -35,11 +35,7 @@ function gotoPlaylist() {
         >
             <div class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 md-hdpi:w-11 md-hdpi:h-11 lg-hdpi:w-12 lg-hdpi:h-12">
                 {#await albumImage}
-                    <img
-                        class="w-full aspect-square rounded"
-                        src={MusicConfig.defaultAlbumImage}
-                        alt="Album"
-                    />
+                    <div class="w-full aspect-square"></div>
                 {:then image}
                     <img
                         class="w-full aspect-square rounded"

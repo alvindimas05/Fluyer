@@ -116,8 +116,10 @@ onDestroy(() => {
     unlistenMusicList();
 });
 
-$effect(() => void ($swipeMinimumTop = itemHeight));
-$effect(() => void (itemHeight = itemElementHeight > itemHeight ? itemElementHeight : itemHeight));
+$effect(() => {
+    itemHeight = itemElementHeight > itemHeight ? itemElementHeight : itemHeight;
+    $swipeMinimumTop = itemHeight + paddingTop;
+});
 </script>
 
 <svelte:window onresize={updateSize} />
