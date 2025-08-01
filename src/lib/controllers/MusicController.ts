@@ -37,6 +37,8 @@ export const MusicConfig = {
 	vmin: 0,
 	vmax: 1,
 	separator: "•",
+	separatorAlbum: "-",
+	separatorAudio: "/",
 	artistSeparator: "||",
 	defaultTitle: import.meta.env.VITE_DEFAULT_MUSIC_TITLE,
 	defaultArtist: import.meta.env.VITE_DEFAULT_MUSIC_ARTIST,
@@ -162,6 +164,19 @@ const MusicController = {
 			negative,
 		);
 	},
+	getYearFromDate: (date: string | null) => {
+		if(!date) return null;
+
+		if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+			// Matches full date like "2025-01-01"
+			return date.slice(0, 4);
+		} else if (/^\d{4}$/.test(date)) {
+			// Matches just a year like "2025"
+			return date;
+		}
+		// Fallback if format is unexpected
+		return date;
+	},
 
 	startProgress: ({ resetProgress } = { resetProgress: true }) => {
 		const updateInterval =
@@ -242,13 +257,34 @@ const MusicController = {
 				MusicController.progressDuration()
 			: MusicController.progressDuration();
 
-		while (seconds > 60) {
-			minutes++;
-			seconds -= 60;
-		}
-		seconds = Math.floor(seconds);
+		return MusicController.parseSecondsIntoText(seconds);
+	},
+	parseSecondsIntoText: (seconds: number) => {
+		return MusicController.parseMilisecondsIntoText(seconds * 1000);
+	},
+	parseMilisecondsIntoText: (milliseconds: number) => {
+		const totalSeconds = Math.floor(milliseconds / 1000);
+		const minutes = Math.floor(totalSeconds / 60);
+		const seconds = totalSeconds % 60;
 		return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 	},
+
+	parseSampleRateIntoText: (sampleRate: number | null) => {
+		if (!sampleRate || sampleRate <= 0) return "Unknown";
+
+		const khz = sampleRate / 1000;
+		const commonRates = [44.1, 48.0, 88.2, 96.0, 176.4, 192.0];
+
+		// Allow slight floating point tolerance
+		const isCommon = commonRates.some(r => Math.abs(r - khz) < 0.05);
+
+		if (isCommon) {
+			return `${khz.toFixed(1)} kHz`;
+		}
+
+		return `${sampleRate} Hz`;
+	},
+
 	play: async (sendCommand: boolean = true) => {
 		if (MusicController.musicPlaylist().length === 0) return;
 		if (

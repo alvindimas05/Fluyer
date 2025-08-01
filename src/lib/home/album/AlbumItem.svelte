@@ -26,6 +26,8 @@ async function setFilterAlbum() {
 	FilterController.setFilterAlbum({
 		name: music.album,
 		artist: music.albumArtist ?? MusicController.getFullArtistFromMusic(music),
+        year: MusicController.getYearFromDate(music.date),
+        duration: MusicController.parseMilisecondsIntoText(musicList.map(m => m.duration).reduce((a, b) => a + b, 0)),
 		musicList,
 	} as AlbumData);
 }

@@ -16,6 +16,16 @@ interface Props {
 let { music }: Props = $props();
 
 let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
+let infoLabel = $derived.by(() => {
+	const duration = MusicController.parseMilisecondsIntoText(music.duration);
+	let audioResolution: any = [music.bitsPerSample ?? 0,
+		MusicController.parseSampleRateIntoText(music.sampleRate)]
+		.filter((v) => !!v);
+	if(audioResolution.length) audioResolution = audioResolution.join(MusicConfig.separatorAudio);
+	else return duration;
+
+	return [audioResolution, duration].join(` ${MusicConfig.separator} `);
+});
 
 async function addMusicAndPlay() {
 	await MusicController.resetAndAddMusic(music);
@@ -47,10 +57,13 @@ async function addMusic() {
 				{music.title}
 			</p>
 			<p
-				class="text-opacity-background-80 whitespace-nowrap overflow-hidden animate-scroll-overflow-text"
+				class="text-opacity-background-90 whitespace-nowrap overflow-hidden
+				text-xs animate-scroll-overflow-text"
 			>
+				{music.album ? `${music.album} ${MusicConfig.separatorAlbum} ` : ''}
 				{MusicController.getFullArtistFromMusic(music)}
 			</p>
+			<p class="text-xs text-opacity-background-90">{infoLabel}</p>
 		</div>
 		<div class="w-12 md:w-14"></div>
 	</div>

@@ -11,8 +11,9 @@ pub const MIGRATIONS_SLICE: &[M<'_>] = &[
         artist TEXT,
         album TEXT,
         album_artist TEXT,
-        track_number TEXT,
+        track_number VARCHAR(10),
         genre TEXT,
+        date TEXT,
         bits_per_sample INTEGER,
         sample_rate INTEGER,
         modified_at TEXT NOT NULL

@@ -1,6 +1,8 @@
 export interface AlbumData {
 	name: string;
 	artist: string;
+	year: string;
+	duration: string;
 	musicList: MusicData[];
 }
 
@@ -15,6 +17,10 @@ export interface MusicData {
 	albumArtist: string | null;
 	trackNumber: string | null;
 	image: string | null;
+	bitsPerSample: number | null;
+	sampleRate: number | null;
+	genre: string | null;
+	date: string | null;
 }
 
 export interface MusicPlayerSync {

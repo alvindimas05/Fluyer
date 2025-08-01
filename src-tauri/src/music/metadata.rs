@@ -23,6 +23,7 @@ pub struct MusicMetadata {
     pub album_artist: Option<String>,
     pub track_number: Option<String>,
     pub genre: Option<String>,
+    pub date: Option<String>,
     pub bits_per_sample: Option<u32>,
     pub sample_rate: Option<u32>,
     pub image: Option<String>,
@@ -50,6 +51,7 @@ impl MusicMetadata {
             album_artist: None,
             track_number: None,
             genre: None,
+            date: None,
             bits_per_sample: None,
             sample_rate: None,
             image: None,
@@ -126,6 +128,7 @@ impl MusicMetadata {
                         StandardTagKey::AlbumArtist => metadata.album_artist = self.get_value(tag),
                         StandardTagKey::TrackNumber => metadata.track_number = self.get_value(tag),
                         StandardTagKey::Genre => metadata.genre = self.get_value(tag),
+                        StandardTagKey::Date => metadata.date = self.get_value(tag),
                         // key => {
                         //     let mut extra_tags = metadata.extra_tags.clone().unwrap();
                         //     extra_tags.insert(format!("{:?}", key), self.get_value(tag));
