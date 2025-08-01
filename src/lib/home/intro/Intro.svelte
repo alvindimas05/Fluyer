@@ -41,8 +41,8 @@ function onAnimationEnd() {
     onanimationend={onAnimationEnd}
 >
     <div class="grid justify-items-center text-center px-5 lg:px-0">
-        <p class="font-bold text-2xl md:text-3xl lg:text-4xl">Let's Set Up Your Music</p>
-        <p class="mt-3 text-lg md:text-xl lg:text-2xl">
+        <p class="font-bold text-2xl md:text-3xl">Let's Set Up Your Music</p>
+        <p class="mt-3 text-lg md:text-xl">
             {#if isAndroid()}
                 To get started, allow access and select your music folder.
             {:else if isDesktop()}
