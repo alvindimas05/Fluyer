@@ -41,16 +41,30 @@ function updateValues(index: number, value: number) {
 <div class="absolute top-0 left-0 w-full h-full z-10
     grid items-center justify-items-center"
     class:hidden={!$equalizerShow}>
-    <div class="w-fit h-fit bg-gray-700 bg-opacity-30 rounded-lg shadow-2xl
-        border border-white/20 text-white p-4
+    <div class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] bg-gray-700 bg-opacity-30 rounded-lg shadow-2xl
+        border border-white/20 text-white p-4 grid grid-rows-[min-content_auto]
         {isAndroid() ? 'backdrop-blur-md' : 'backdrop-blur-lg'}">
-        <div class="w-full flex justify-end">
-            <button class="w-8 my-2 ms-2"
-                onclick={() => UIController.toggleEqualizer(false)}><Icon type={IconType.Close} /></button>
+        <div class="w-full grid grid-cols-2">
+            <div class="flex justify-start">
+                <button class="w-8 my-2 ms-2"
+                    onclick={() => UIController.toggleEqualizer(false)}><Icon type={IconType.Close} /></button>
+            </div>
+            <div class="flex justify-end">
+                <button
+                        class="w-fit text-white text-start px-3 my-2
+                    bg-gradient-to-r from-white/15 to-white/10 rounded shadow-md
+                    hover:from-white/25 hover:to-white/30
+                    focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200"
+                        onclick={MusicController.resetEqualizer}
+                >
+                    <div>Reset</div>
+                </button>
+            </div>
         </div>
-        <div class="h-[50vh] grid grid-cols-[repeat(18,1fr)]">
+        <div class="w-full grid grid-cols-[repeat(18,1fr)] overflow-auto scrollbar-hidden">
             {#each LABELS as label, i}
-                <div class="w-full grid grid-rows-[min-content_min-content_auto_min-content_min-content] text-center font-semibold">
+                <div class="grid grid-rows-[min-content_min-content_auto_min-content_min-content]
+                    text-center font-semibold">
                     <div>{label > 1000 ? (label / 1000).toFixed(1) : label}</div>
                     <div>{label > 1000 ? 'kHz' : 'Hz'}</div>
                     <input type="range" class="range-slider"
@@ -69,7 +83,7 @@ function updateValues(index: number, value: number) {
 
 <style lang="scss">
   .range-slider {
-    @apply h-full bg-transparent appearance-none pt-2;
+    @apply bg-transparent appearance-none pt-2;
     writing-mode: vertical-rl;
 
     &::-webkit-slider-thumb {

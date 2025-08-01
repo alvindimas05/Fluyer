@@ -30,13 +30,15 @@ let isLoading = $derived($settingIsLoading);
                 <SettingDeveloper />
             </div>
             <div>
+
                 <button
-                    class="rounded text-white text-start font-medium tracking-wide px-4 py-2
-                        bg-gradient-to-r from-white/10 to-white/5 hover:from-white/20 hover:to-white/10
-                        focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200 shadow-md
-                        hover:shadow-lg grid grid-cols-[min-content_auto] items-center gap-2"
-                    onclick={() => PageController.back()}
-                    disabled={isLoading}
+                        class="w-fit text-white text-start px-3 py-2
+                    bg-gradient-to-r from-white/15 to-white/10 rounded shadow-md
+                    hover:from-white/25 hover:to-white/30
+                    focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200
+                    grid grid-cols-[min-content_auto] items-center gap-2"
+                        onclick={() => PageController.back()}
+                >
                 >
                     <div class="w-4"><Icon type={IconType.Back}/></div>
                     <div>Back</div>

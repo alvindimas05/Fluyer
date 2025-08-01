@@ -34,4 +34,5 @@ export enum IconType {
 	SaveLog,
 	Equalizer,
 	Close,
+	// Reset,
 }

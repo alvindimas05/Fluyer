@@ -27,6 +27,7 @@ import CoverArt, {
 } from "$lib/handlers/coverart";
 import { isDesktop, isMobile } from "$lib/platform";
 import { settingTriggerAnimatedBackground } from "$lib/stores/setting";
+import {equalizerValues} from "$lib/stores/equalizer";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -248,7 +249,7 @@ const MusicController = {
 		seconds = Math.floor(seconds);
 		return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 	},
-	play: (sendCommand: boolean = true) => {
+	play: async (sendCommand: boolean = true) => {
 		if (MusicController.musicPlaylist().length === 0) return;
 		if (
 			MusicController.isCurrentMusicFinished() &&
@@ -261,7 +262,10 @@ const MusicController = {
 
 		musicIsPlaying.set(true);
 		MusicController.startProgress({ resetProgress: false });
-		if (sendCommand) MusicController.sendCommandController("play");
+		if (sendCommand){
+			await MusicController.applyEqualizer();
+			MusicController.sendCommandController("play");
+		}
 	},
 	pause: (sendCommand: boolean = true) => {
 		musicIsPlaying.set(false);
@@ -517,7 +521,18 @@ const MusicController = {
 		await invoke(CommandRoutes.MUSIC_EQUALIZER, {
 			values
 		});
-	}
+	},
+	applyEqualizer: async () => {
+		await MusicController.setEqualizer(get(equalizerValues));
+	},
+	getDefaultEqualizerValues: () => {
+		return Array(18).fill(0);
+	},
+	resetEqualizer: async () => {
+		console.log("reset equalizer");
+		equalizerValues.set(MusicController.getDefaultEqualizerValues());
+		await MusicController.setEqualizer(MusicController.getDefaultEqualizerValues());
+	},
 };
 
 export default MusicController;
