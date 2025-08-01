@@ -47,7 +47,7 @@ async function setFilterAlbum() {
         {#await albumImage}
             <div class="w-full aspect-square"></div>
         {:then image}
-            <img class="rounded-lg w-full shadow-lg {isDesktop() && 'animate__animated animate__fadeIn'}"
+            <img class="rounded-lg w-full {isDesktop() && 'animate__animated animate__fadeIn'}"
                  src={image}
                  alt="Album" />
         {/await}

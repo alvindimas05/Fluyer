@@ -35,7 +35,7 @@ async function addMusic() {
 			<div class="w-12 md:w-14 relative aspect-square"></div>
 		{:then image}
 			<img
-				class="w-12 md:w-14 relative rounded shadow-lg {isDesktop() && 'animate__animated animate__fadeIn'}"
+				class="w-12 md:w-14 relative rounded {isDesktop() && 'animate__animated animate__fadeIn'}"
 				src={image}
 				alt="Album"
 			/>
