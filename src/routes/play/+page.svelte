@@ -216,7 +216,7 @@ function scrollToSelectedLyric() {
                 <div class="w-full aspect-square"></div>
             {:then image}
                 <img
-                    class="w-full rounded-lg aspect-square animate__animated animate__fadeIn"
+                    class="w-full rounded-lg aspect-square animate__animated animate__fadeIn animate__faster"
                     src={image}
                     alt="Music Album"
                 />

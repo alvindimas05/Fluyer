@@ -30,9 +30,15 @@ const rules = [
     [1024, 1.0, 0.333334],   // md-mdpi → 33.3334%
     [768, 1.0, 0.5],         // sm-mdpi → 50%
 ];
+let itemElementHeight = $state(0);
 let itemWidth = $state(0.5 * window.innerWidth);
 let itemHeight = $state(0);
 let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 44);
+
+function updateSize(){
+    updateItemWidth();
+    itemHeight = itemElementHeight;
+}
 
 function updateItemWidth() {
     const w = window.innerWidth;
@@ -111,9 +117,10 @@ onDestroy(() => {
 });
 
 $effect(() => void ($swipeMinimumTop = itemHeight));
+$effect(() => void (itemHeight = itemElementHeight > itemHeight ? itemElementHeight : itemHeight));
 </script>
 
-<svelte:window onresize={updateItemWidth} />
+<svelte:window onresize={updateSize} />
 <!--<div-->
 <!--    class="grid auto-cols-[50%] sm:auto-cols-[33.3334%]-->
 <!--        md-mdpi:auto-cols-[20%] lg-mdpi:auto-cols-[16.6667%] xl-mdpi:auto-cols-[12.5%]-->
@@ -138,7 +145,7 @@ $effect(() => void ($swipeMinimumTop = itemHeight));
         {#snippet children(musicList, index)}
             {#if index === 0}
                 <div class="h-fit" style="width: {itemWidth}px;"
-                    bind:clientHeight={itemHeight}>
+                    bind:clientHeight={itemElementHeight}>
                     <AlbumItem {musicList} />
                 </div>
             {:else}
