@@ -39,7 +39,7 @@ pub struct CoverArtResponse {
 pub struct CoverArtQuery {
     pub artist: String,
     pub album: Option<String>,
-    pub title: Option<String>
+    pub title: Option<String>,
 }
 
 lazy_static! {
@@ -52,21 +52,21 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
         return CoverArtResponse {
             name: String::from(""),
             status: CoverArtRequestStatus::Failed,
-            image: None
-        }
+            image: None,
+        };
     }
-    
+
     let mut name = String::from("");
     let mut folder_name = String::from("");
-    if query.album.is_some(){
+    if query.album.is_some() {
         name = format!("{} {}", query.artist, query.album.clone().unwrap());
         folder_name = "album".to_string();
-    } 
-    if query.title.is_some(){
+    }
+    if query.title.is_some() {
         name = format!("{} {}", query.artist, query.title.clone().unwrap());
         folder_name = "music".to_string();
     }
-    
+
     let file_path = format!("{}/{}/{}", cover_art_cache_directory(), folder_name, name);
     let queue = cover_art_get_queue(name.clone());
     if queue.is_none() {
@@ -79,9 +79,9 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
                 image: Some(image),
             };
         }
-        
+
         let cover_art = cover_art_request(query).await;
-        
+
         if cover_art.is_none() {
             cover_art_set_status(name.clone(), CoverArtRequestStatus::Failed);
             return CoverArtResponse {
@@ -131,7 +131,12 @@ async fn cover_art_get_from_path(file_path: String) -> Option<String> {
         let reader = ImageReader::new(Cursor::new(data)).with_guessed_format();
         if let Ok(reader) = reader {
             let mut buf = Cursor::new(Vec::new());
-            if reader.decode().unwrap().write_to(&mut buf, image::ImageFormat::Png).is_ok() {
+            if reader
+                .decode()
+                .unwrap()
+                .write_to(&mut buf, image::ImageFormat::Png)
+                .is_ok()
+            {
                 return Some(base64_simd::STANDARD.encode_to_string(buf.get_ref()));
             }
         }
@@ -140,7 +145,7 @@ async fn cover_art_get_from_path(file_path: String) -> Option<String> {
     None
 }
 
-async fn cover_art_request(query: CoverArtQuery) -> Option<String> {    
+async fn cover_art_request(query: CoverArtQuery) -> Option<String> {
     let url = MusicBrainz::get_cover_art(query.clone()).await;
 
     if url.is_none() {
@@ -157,22 +162,34 @@ async fn cover_art_request(query: CoverArtQuery) -> Option<String> {
         return None;
     }
     let cache = cover_art_cache_directory();
-    
+
     let mut folder_name = String::from("");
     let mut file_path = String::from("");
-    if query.album.is_some(){
+    if query.album.is_some() {
         folder_name = "album".to_string();
-        file_path = format!("{}/{}/{} {}", cache, folder_name, query.artist, query.album.unwrap());
+        file_path = format!(
+            "{}/{}/{} {}",
+            cache,
+            folder_name,
+            query.artist,
+            query.album.unwrap()
+        );
     }
-    if query.title.is_some(){
+    if query.title.is_some() {
         folder_name = "music".to_string();
-        file_path = format!("{}/{}/{} {}", cache, folder_name, query.artist, query.title.unwrap());
+        file_path = format!(
+            "{}/{}/{} {}",
+            cache,
+            folder_name,
+            query.artist,
+            query.title.unwrap()
+        );
     }
-    
+
     if std::fs::create_dir_all(format!("{}/{}", cache.clone(), folder_name)).is_err() {
         return None;
     }
-    
+
     let mut file = std::fs::File::create(file_path).unwrap();
     let mut content = Cursor::new(bytes.unwrap());
     if copy(&mut content, &mut file).is_err() {
@@ -206,13 +223,13 @@ fn cover_art_get_queue(album: String) -> Option<CoverArtRequest> {
 
 fn cover_art_set_status(name: String, status: CoverArtRequestStatus) {
     cover_art_remove(name.clone());
-    COVER_ART_QUEUE.lock().unwrap().push(CoverArtRequest {
-        name,
-        status,
-    });
+    COVER_ART_QUEUE
+        .lock()
+        .unwrap()
+        .push(CoverArtRequest { name, status });
 }
 
-fn cover_art_remove(name: String){
+fn cover_art_remove(name: String) {
     COVER_ART_QUEUE.lock().unwrap().retain(|c| c.name == name);
 }
 
@@ -252,7 +269,7 @@ fn cover_art_cache_directory() -> String {
 
 //     #[allow(for_loops_over_fallibles)]
 //     for res in rx {
-        
+
 //         let queue = cover_art_get_queue(album.clone());
 //         if queue.is_some() && queue.unwrap().status == CoverArtRequestStatus::Failed {
 //             return CoverArtRequestStatus::Failed

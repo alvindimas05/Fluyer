@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-use std::path::Path;
 #[cfg(mobile)]
 use dotenvy_macro::dotenv;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::path::Path;
 use symphonia::core::formats::{FormatOptions, FormatReader};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
@@ -23,6 +23,8 @@ pub struct MusicMetadata {
     pub album_artist: Option<String>,
     pub track_number: Option<String>,
     pub genre: Option<String>,
+    pub bits_per_sample: Option<u32>,
+    pub sample_rate: Option<u32>,
     pub image: Option<String>,
 
     pub extra_tags: Option<HashMap<String, Option<String>>>,
@@ -48,12 +50,14 @@ impl MusicMetadata {
             album_artist: None,
             track_number: None,
             genre: None,
+            bits_per_sample: None,
+            sample_rate: None,
             image: None,
             extra_tags: Some(HashMap::new()),
         }
     }
 
-    fn get_format(path: String) -> Option<Box<dyn FormatReader>>{
+    fn get_format(path: String) -> Option<Box<dyn FormatReader>> {
         let src = match std::fs::File::open(&path) {
             Ok(file) => file,
             Err(_) => {
@@ -178,6 +182,24 @@ impl MusicMetadata {
             }
         }
 
+        let bits_per_sample = match track.codec_params.bits_per_sample {
+            Some(bits_per_sample) => bits_per_sample,
+            None => {
+                logger::error!("Unknown sample of frames of music: {}", &path);
+                0
+            }
+        };
+        metadata.bits_per_sample = Some(bits_per_sample);
+
+        let sample_rate = match track.codec_params.sample_rate {
+            Some(sample_rate) => sample_rate,
+            None => {
+                logger::error!("Unknown sample of frames of music: {}", &path);
+                0
+            }
+        };
+        metadata.sample_rate = Some(sample_rate);
+
         metadata
     }
 
@@ -205,7 +227,7 @@ impl MusicMetadata {
             .rsplit_once('.')
             .map(|(name, _)| name)
             .unwrap_or(file_name);
-    
+
         let patterns = vec![
             Regex::new(r"^(.*)\s-\s(.*)$").unwrap(),  // "Artist - Title"
             Regex::new(r"^(.*)\sby\s(.*)$").unwrap(), // "Title by Artist"
@@ -213,26 +235,34 @@ impl MusicMetadata {
             Regex::new(r"^(.*)\s-\s(.*)\s\(.*\)$").unwrap(), // "Artist - Title (Remix)"
             Regex::new(r"^(.*)\s-\s(.*)\[.*\]$").unwrap(), // "Artist - Title [Remastered]"
         ];
-    
+
         let cleanup_re = Regex::new(r"(?:\s+\([^)]*\)|\s+\[[^]]*\])$").unwrap();
-    
+
         for pattern in patterns {
             if let Some(captures) = pattern.captures(without_extension) {
-                let mut artist = captures.get(1).map_or("", |m| m.as_str()).trim().to_string();
-                let mut title = captures.get(2).map_or("", |m| m.as_str()).trim().to_string();
-    
+                let mut artist = captures
+                    .get(1)
+                    .map_or("", |m| m.as_str())
+                    .trim()
+                    .to_string();
+                let mut title = captures
+                    .get(2)
+                    .map_or("", |m| m.as_str())
+                    .trim()
+                    .to_string();
+
                 // Clean up both artist and title
                 artist = cleanup_re.replace_all(&artist, "").trim().to_string();
                 title = cleanup_re.replace_all(&title, "").trim().to_string();
-    
+
                 if pattern.as_str().contains("by") {
                     return Some((title, artist));
                 }
-    
+
                 return Some((artist, title));
             }
         }
-    
+
         None
     }
 }

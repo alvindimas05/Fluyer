@@ -38,7 +38,7 @@ async function configureMacos() {
 
 let _env = {
 	...process.env,
-	PATH: `${process.env.PATH};${mpvSource}`,
+	PATH: `${process.env.PATH}:${mpvSource}`,
 	FLUYER_MPV_SOURCE: mpvSource,
 };
 if(os.platform() === 'linux') _env['WEBKIT_DISABLE_DMABUF_RENDERER'] = '1';

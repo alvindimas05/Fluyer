@@ -10,10 +10,7 @@ use tauri_plugin_dialog::DialogExt;
 #[cfg(desktop)]
 use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
 
-use crate::{
-    music::metadata::MusicMetadata,
-    AppState,
-};
+use crate::{music::metadata::MusicMetadata, AppState};
 
 pub static MUSIC_STORE_PATH_NAME: &str = "music-path";
 

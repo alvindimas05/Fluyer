@@ -4,9 +4,7 @@
 mod logger;
 mod platform;
 
-use simplelog::{
-    ColorChoice, CombinedLogger, LevelFilter, TermLogger, TerminalMode, WriteLogger,
-};
+use simplelog::{ColorChoice, CombinedLogger, LevelFilter, TermLogger, TerminalMode, WriteLogger};
 use std::fs::File;
 
 fn main() {
@@ -25,28 +23,24 @@ fn init_logging() {
     config.add_filter_ignore_str("symphonia_core");
     let config = config.build();
 
-    let mut logs: Vec<Box<dyn SharedLogger>> = vec![
-        TermLogger::new(
-            if cfg!(debug_assertions) {
-                LevelFilter::Debug
-            } else {
-                LevelFilter::Warn
-            },
-            config.clone(),
-            TerminalMode::Mixed,
-            ColorChoice::Auto,
-        )
-    ];
+    let mut logs: Vec<Box<dyn SharedLogger>> = vec![TermLogger::new(
+        if cfg!(debug_assertions) {
+            LevelFilter::Debug
+        } else {
+            LevelFilter::Warn
+        },
+        config.clone(),
+        TerminalMode::Mixed,
+        ColorChoice::Auto,
+    )];
 
     let log_file = File::create(log_path.clone());
     if log_file.is_ok() {
-        logs.push(
-            WriteLogger::new(
-                LevelFilter::Warn,
-                config,
-                log_file.unwrap(),
-            )
-        );
+        logs.push(WriteLogger::new(
+            LevelFilter::Warn,
+            config,
+            log_file.unwrap(),
+        ));
     }
 
     CombinedLogger::init(logs).unwrap();

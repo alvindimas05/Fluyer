@@ -2,20 +2,20 @@ use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 
 #[cfg(desktop)]
+use crate::logger;
+use crate::music::metadata::MusicMetadata;
+use crate::GLOBAL_APP_HANDLE;
+#[cfg(desktop)]
 use libmpv2::Mpv;
 #[cfg(desktop)]
 use std::sync::OnceLock;
 use std::thread;
 #[cfg(target_os = "android")]
+use tauri_plugin_fluyer::models::PlaylistAddMusic;
+#[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
-#[cfg(target_os = "android")]
-use tauri_plugin_fluyer::models::PlaylistAddMusic;
-#[cfg(desktop)]
-use crate::logger;
-use crate::GLOBAL_APP_HANDLE;
-use crate::music::metadata::MusicMetadata;
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -57,19 +57,25 @@ impl MusicPlayer {
         #[cfg(target_os = "linux")]
         unsafe {
             extern crate libc;
-            use std::ffi::CString;
             use libc::{setlocale, LC_NUMERIC};
+            use std::ffi::CString;
             setlocale(LC_NUMERIC, CString::new("C").unwrap().as_ptr());
         }
 
-        #[cfg(desktop)]{
-            GLOBAL_MUSIC_MPV.set(Mpv::with_initializer(|mpv|{
-                let log_path = logger::get_mpv_log_path();
-                mpv.set_option("log-file", log_path.clone())?;
-                mpv.set_property("vo", "null")?;
-                logger::debug!("The mpv log file is saved at {}", log_path);
-                Ok(())
-            }).unwrap()).ok();
+        #[cfg(desktop)]
+        {
+            GLOBAL_MUSIC_MPV
+                .set(
+                    Mpv::with_initializer(|mpv| {
+                        let log_path = logger::get_mpv_log_path();
+                        mpv.set_option("log-file", log_path.clone())?;
+                        mpv.set_property("vo", "null")?;
+                        logger::debug!("The mpv log file is saved at {}", log_path);
+                        Ok(())
+                    })
+                    .unwrap(),
+                )
+                .ok();
         }
         MusicPlayer::start_listener();
 
@@ -93,9 +99,14 @@ impl MusicPlayer {
 
         if _command == MusicCommand::Clear {
             #[cfg(target_os = "android")]
-            GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                .player_run_command(PlayerCommandArguments::new(PlayerCommand::Clear)).ok();
-            #[cfg(desktop)]{
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_run_command(PlayerCommandArguments::new(PlayerCommand::Clear))
+                .ok();
+            #[cfg(desktop)]
+            {
                 let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
                 mpv.command("playlist-clear", &[]).unwrap();
                 if mpv.get_property::<i64>("playlist-pos").unwrap() >= 0 {
@@ -107,56 +118,99 @@ impl MusicPlayer {
 
         if _command == MusicCommand::Next {
             #[cfg(target_os = "android")]
-            GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next)).ok();
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next))
+                .ok();
             #[cfg(desktop)]
-            GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-next", &[]).unwrap();
+            GLOBAL_MUSIC_MPV
+                .get()
+                .unwrap()
+                .command("playlist-next", &[])
+                .unwrap();
             return;
         }
-        
-        if _command == MusicCommand::Repeat || _command == MusicCommand::RepeatOne
-            || _command == MusicCommand::RepeatNone {
-            #[cfg(target_os = "android")] {
+
+        if _command == MusicCommand::Repeat
+            || _command == MusicCommand::RepeatOne
+            || _command == MusicCommand::RepeatNone
+        {
+            #[cfg(target_os = "android")]
+            {
                 let args = PlayerCommandArguments::new(match _command {
                     MusicCommand::Repeat => PlayerCommand::Repeat,
                     MusicCommand::RepeatOne => PlayerCommand::RepeatOne,
                     MusicCommand::RepeatNone => PlayerCommand::RepeatNone,
                     _ => return,
                 });
-                GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                    .player_run_command(args).ok();
+                GLOBAL_APP_HANDLE
+                    .get()
+                    .unwrap()
+                    .fluyer()
+                    .player_run_command(args)
+                    .ok();
             }
-            #[cfg(desktop)]{
+            #[cfg(desktop)]
+            {
                 let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
-                mpv.set_property("loop-file", if _command == MusicCommand::RepeatOne {
-                    "inf"
-                } else {
-                    "no"
-                }).unwrap();
-                mpv.set_property("loop-playlist", if _command == MusicCommand::Repeat {
-                    "inf"
-                } else {
-                    "no"
-                }).unwrap();
+                mpv.set_property(
+                    "loop-file",
+                    if _command == MusicCommand::RepeatOne {
+                        "inf"
+                    } else {
+                        "no"
+                    },
+                )
+                .unwrap();
+                mpv.set_property(
+                    "loop-playlist",
+                    if _command == MusicCommand::Repeat {
+                        "inf"
+                    } else {
+                        "no"
+                    },
+                )
+                .unwrap();
             }
             return;
         }
     }
     pub fn set_pos(&mut self, position: u64) {
-        #[cfg(target_os = "android")] {
+        #[cfg(target_os = "android")]
+        {
             let mut args = PlayerCommandArguments::new(PlayerCommand::Seek);
             args.seek_position = Some(position);
-            GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                .player_run_command(args).ok();
-        } 
-        #[cfg(desktop)] 
-        GLOBAL_MUSIC_MPV.get().unwrap().command("seek", &[
-            format!("{:.3}", position as f64 / 1000.0).as_str(), "absolute"]).unwrap();
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_run_command(args)
+                .ok();
+        }
+        #[cfg(desktop)]
+        GLOBAL_MUSIC_MPV
+            .get()
+            .unwrap()
+            .command(
+                "seek",
+                &[
+                    format!("{:.3}", position as f64 / 1000.0).as_str(),
+                    "absolute",
+                ],
+            )
+            .unwrap();
     }
     pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
-        #[cfg(target_os = "android")] {
-            let info = GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                .player_get_info().unwrap();
+        #[cfg(target_os = "android")]
+        {
+            let info = GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_get_info()
+                .unwrap();
             MusicPlayerSync {
                 index: info.index,
                 current_position: if is_from_next {
@@ -164,14 +218,11 @@ impl MusicPlayer {
                 } else {
                     info.current_position
                 },
-                is_playing: if is_from_next {
-                    true
-                } else {
-                    info.is_playing
-                },
+                is_playing: if is_from_next { true } else { info.is_playing },
             }
         }
-        #[cfg(desktop)] {
+        #[cfg(desktop)]
+        {
             let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
             MusicPlayerSync {
                 index: mpv.get_property::<i64>("playlist-pos").unwrap() as usize,
@@ -180,22 +231,31 @@ impl MusicPlayer {
                 } else {
                     (mpv.get_property::<f64>("time-pos").unwrap() * 1000.0) as u128
                 },
-                is_playing: if is_from_next { true } else { !mpv.get_property::<bool>("pause").unwrap() },
+                is_playing: if is_from_next {
+                    true
+                } else {
+                    !mpv.get_property::<bool>("pause").unwrap()
+                },
             }
         }
     }
     pub fn add_playlist(&mut self, playlist: Vec<MusicMetadata>) {
-        #[cfg(desktop)]{
+        #[cfg(desktop)]
+        {
             let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
-            
+
             for (_, music) in playlist.iter().enumerate() {
-                let path = format!("{}", music.path).replace("\\", "/").replace("//", "/");
+                let path = format!("{}", music.path)
+                    .replace("\\", "/")
+                    .replace("//", "/");
                 mpv.command("loadfile", &[path.as_str(), "append"]).unwrap();
             }
         }
-        
-        #[cfg(target_os = "android")]{
-            let music_playlist = playlist.into_iter()
+
+        #[cfg(target_os = "android")]
+        {
+            let music_playlist = playlist
+                .into_iter()
                 .map(|music| PlaylistAddMusic {
                     file_path: music.path,
                     title: music.title.unwrap_or(MusicMetadata::default_title()),
@@ -204,64 +264,114 @@ impl MusicPlayer {
                     image: None,
                 })
                 .collect::<Vec<_>>();
-            GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-                .player_playlist_add(music_playlist).unwrap();
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_playlist_add(music_playlist)
+                .unwrap();
         }
     }
 
     pub fn remove_playlist(&mut self, index: usize) {
-        #[cfg(target_os = "android")]{
+        #[cfg(target_os = "android")]
+        {
             let mut args = PlayerCommandArguments::new(PlayerCommand::RemovePlaylist);
             args.playlist_remove_index = Some(index);
-            GLOBAL_APP_HANDLE.get().unwrap().fluyer().player_run_command(args).unwrap();
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_run_command(args)
+                .unwrap();
         }
-        
+
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-remove", &[index.to_string().as_str()]).unwrap();
+        GLOBAL_MUSIC_MPV
+            .get()
+            .unwrap()
+            .command("playlist-remove", &[index.to_string().as_str()])
+            .unwrap();
     }
 
     pub fn goto_playlist(&mut self, index: usize) {
-        #[cfg(target_os = "android")]{
+        #[cfg(target_os = "android")]
+        {
             let mut args = PlayerCommandArguments::new(PlayerCommand::GotoPlaylist);
             args.playlist_goto_index = Some(index);
-            GLOBAL_APP_HANDLE.get().unwrap().fluyer().player_run_command(args).ok();
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_run_command(args)
+                .ok();
         }
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-play-index", &[index.to_string().as_str()]).unwrap();
+        GLOBAL_MUSIC_MPV
+            .get()
+            .unwrap()
+            .command("playlist-play-index", &[index.to_string().as_str()])
+            .unwrap();
     }
-    
+
     pub fn moveto_playlist(&mut self, from: usize, to: usize) {
         #[cfg(target_os = "android")]
-        GLOBAL_APP_HANDLE.get().unwrap().fluyer()
-            .player_playlist_move_to(from, to).ok();
+        GLOBAL_APP_HANDLE
+            .get()
+            .unwrap()
+            .fluyer()
+            .player_playlist_move_to(from, to)
+            .ok();
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV.get().unwrap().command("playlist-move", &[from.to_string().as_str(), to.to_string().as_str()]).unwrap();
+        GLOBAL_MUSIC_MPV
+            .get()
+            .unwrap()
+            .command(
+                "playlist-move",
+                &[from.to_string().as_str(), to.to_string().as_str()],
+            )
+            .unwrap();
     }
 
     pub fn set_volume(&mut self, volume: f32) {
-        #[cfg(target_os = "android")] {
+        #[cfg(target_os = "android")]
+        {
             let mut args = PlayerCommandArguments::new(PlayerCommand::Volume);
             args.volume = Some(volume);
-            GLOBAL_APP_HANDLE.get().unwrap().fluyer().player_run_command(args).ok();
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_run_command(args)
+                .ok();
         }
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV.get().unwrap().set_property("volume", (volume * 100.0).round() as i64).unwrap();
+        GLOBAL_MUSIC_MPV
+            .get()
+            .unwrap()
+            .set_property("volume", (volume * 100.0).round() as i64)
+            .unwrap();
     }
-    
-    fn play_pause(&self, play: bool){
+
+    fn play_pause(&self, play: bool) {
         #[cfg(target_os = "android")]
-        GLOBAL_APP_HANDLE.get().unwrap().fluyer()
+        GLOBAL_APP_HANDLE
+            .get()
+            .unwrap()
+            .fluyer()
             .player_run_command(PlayerCommandArguments::new(if play {
                 PlayerCommand::Play
             } else {
                 PlayerCommand::Pause
-            })).ok();
+            }))
+            .ok();
         #[cfg(desktop)]
         self.mpv_play_pause(play);
     }
 
     pub fn equalizer(&self, values: Vec<f32>) {
-        #[cfg(desktop)]{
+        #[cfg(desktop)]
+        {
             let mut arg = String::from("superequalizer=");
             for (i, &gain) in values.iter().enumerate() {
                 if &gain == &0.0 {
@@ -273,7 +383,11 @@ impl MusicPlayer {
             if arg.ends_with(':') {
                 arg.pop();
             }
-            GLOBAL_MUSIC_MPV.get().unwrap().command("af", &["set", arg.as_str()]).unwrap();
+            GLOBAL_MUSIC_MPV
+                .get()
+                .unwrap()
+                .command("af", &["set", arg.as_str()])
+                .unwrap();
         }
     }
 
@@ -281,15 +395,15 @@ impl MusicPlayer {
     fn mpv_play_pause(&self, play: bool) {
         let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
         let playlist_count = mpv.get_property::<i64>("playlist-count").unwrap();
-        
+
         if playlist_count < 1 {
-            return
+            return;
         }
         if mpv.get_property::<i64>("playlist-pos").unwrap() < 0 {
             mpv.set_property("playlist-pos", 0).unwrap();
         }
         mpv.set_property("pause", !play).unwrap();
-        
+
         // let sink = GLOBAL_MUSIC_SINK.get().unwrap();
         // let max_volume = MUSIC_VOLUME.load(Ordering::SeqCst);
         // let mut range: Vec<f32> = (if play { 1..21 } else { 0..20 })
@@ -313,20 +427,31 @@ impl MusicPlayer {
         // }
     }
 
-    pub fn emit_sync(is_from_next: bool){
+    pub fn emit_sync(is_from_next: bool) {
         #[cfg(desktop)]
-        if GLOBAL_MUSIC_MPV.get().unwrap().get_property::<i64>("playlist-pos").unwrap() < 0 {
-            return
+        if GLOBAL_MUSIC_MPV
+            .get()
+            .unwrap()
+            .get_property::<i64>("playlist-pos")
+            .unwrap()
+            < 0
+        {
+            return;
         }
 
-        GLOBAL_APP_HANDLE.get().unwrap().emit(
-            crate::commands::route::MUSIC_PLAYER_SYNC,
-            MusicPlayer::get_sync_info(is_from_next),
-        ).unwrap();
+        GLOBAL_APP_HANDLE
+            .get()
+            .unwrap()
+            .emit(
+                crate::commands::route::MUSIC_PLAYER_SYNC,
+                MusicPlayer::get_sync_info(is_from_next),
+            )
+            .unwrap();
     }
-    
-    pub fn start_listener(){
-        #[cfg(desktop)]{
+
+    pub fn start_listener() {
+        #[cfg(desktop)]
+        {
             use libmpv2::events::Event;
             let mut client = GLOBAL_MUSIC_MPV.get().unwrap().create_client(None).unwrap();
             thread::spawn(move || loop {
@@ -334,24 +459,30 @@ impl MusicPlayer {
                 match event {
                     Ok(Event::FileLoaded) => {
                         MusicPlayer::emit_sync(true);
-                    },
+                    }
                     Ok(Event::PlaybackRestart) => {
                         MusicPlayer::emit_sync(false);
-                    },
-                    Ok(_) => {},
-                    Err(_) => {},
+                    }
+                    Ok(_) => {}
+                    Err(_) => {}
                 }
             });
         }
-        
-        #[cfg(target_os = "android")]{
-            GLOBAL_APP_HANDLE.get().unwrap().fluyer().watch_playlist_change(|payload|{
-                // Note: Thread spawn is required for unknown reasons.
-                thread::spawn(move ||{
-                    println!("Music player background event: {:?}", payload);
-                    MusicPlayer::emit_sync(payload.is_next);
-                });
-            }).unwrap();
+
+        #[cfg(target_os = "android")]
+        {
+            GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .watch_playlist_change(|payload| {
+                    // Note: Thread spawn is required for unknown reasons.
+                    thread::spawn(move || {
+                        println!("Music player background event: {:?}", payload);
+                        MusicPlayer::emit_sync(payload.is_next);
+                    });
+                })
+                .unwrap();
         }
     }
 }

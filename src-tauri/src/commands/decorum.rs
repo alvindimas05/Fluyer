@@ -1,7 +1,10 @@
 #[cfg(windows)]
 #[tauri::command]
-pub fn decorum_show_snap_overlay(){
-    use enigo::{Enigo, Key, Keyboard, Settings, Direction::{Click, Press, Release},};
+pub fn decorum_show_snap_overlay() {
+    use enigo::{
+        Direction::{Click, Press, Release},
+        Enigo, Key, Keyboard, Settings,
+    };
     let mut enigo = Enigo::new(&Settings::default()).unwrap();
     enigo.key(Key::Meta, Press).unwrap();
     enigo.key(Key::Unicode('z'), Click).unwrap();

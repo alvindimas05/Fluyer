@@ -1,13 +1,13 @@
 #[cfg(mobile)]
-use tauri::Emitter;
-#[cfg(mobile)]
-use crate::GLOBAL_APP_HANDLE;
-#[cfg(mobile)]
-use tauri_plugin_fluyer::FluyerExt;
-#[cfg(mobile)]
 use crate::commands::music::MUSIC_STORE_PATH_NAME;
 #[cfg(mobile)]
 use crate::store::GLOBAL_APP_STORE;
+#[cfg(mobile)]
+use crate::GLOBAL_APP_HANDLE;
+#[cfg(mobile)]
+use tauri::Emitter;
+#[cfg(mobile)]
+use tauri_plugin_fluyer::FluyerExt;
 
 #[cfg(target_os = "android")]
 #[tauri::command]
@@ -23,8 +23,7 @@ pub fn check_read_audio_permission() -> bool {
     }
 
     let permissions = permissions_result.unwrap();
-    permissions.audio == PermissionState::Granted ||
-        permissions.storage == PermissionState::Granted
+    permissions.audio == PermissionState::Granted || permissions.storage == PermissionState::Granted
 }
 
 #[cfg(target_os = "android")]
@@ -47,8 +46,8 @@ pub fn request_read_audio_permission() -> bool {
                 },
             ]))
             .unwrap();
-        return permissions.audio == PermissionState::Granted ||
-               permissions.storage == PermissionState::Granted;
+        return permissions.audio == PermissionState::Granted
+            || permissions.storage == PermissionState::Granted;
     }
     true
 }
@@ -87,10 +86,14 @@ pub fn android_request_directory() {
         .get()
         .expect("Failed to get GLOBAL_APP_HANDLE");
 
-    app_handle.fluyer()
+    app_handle
+        .fluyer()
         .android_pick_folder(|payload| {
             if let Some(dir) = payload.value {
-                app_handle.emit(crate::commands::route::ANDROID_REQUEST_DIRECTORY, dir).unwrap();
+                app_handle
+                    .emit(crate::commands::route::ANDROID_REQUEST_DIRECTORY, dir)
+                    .unwrap();
             }
-        }).ok();
+        })
+        .ok();
 }
