@@ -39,7 +39,6 @@ let isLoading = $derived($settingIsLoading);
                     grid grid-cols-[min-content_auto] items-center gap-2"
                         onclick={() => PageController.back()}
                 >
-                >
                     <div class="w-4"><Icon type={IconType.Back}/></div>
                     <div>Back</div>
                 </button>
