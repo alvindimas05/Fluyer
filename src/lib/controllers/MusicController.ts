@@ -518,7 +518,7 @@ const MusicController = {
 	},
 
 	setEqualizer: async (values: number[]) => {
-		await invoke(CommandRoutes.MUSIC_EQUALIZER, {
+		if(isDesktop()) await invoke(CommandRoutes.MUSIC_EQUALIZER, {
 			values
 		});
 	},
@@ -529,7 +529,6 @@ const MusicController = {
 		return Array(18).fill(0);
 	},
 	resetEqualizer: async () => {
-		console.log("reset equalizer");
 		equalizerValues.set(MusicController.getDefaultEqualizerValues());
 		await MusicController.setEqualizer(MusicController.getDefaultEqualizerValues());
 	},
