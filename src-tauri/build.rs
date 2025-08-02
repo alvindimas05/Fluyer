@@ -1,9 +1,13 @@
 use std::env;
 
 fn main() {
-    // if let Ok(source) = env::var("FLUYER_MPV_SOURCE") {
-    //     println!("cargo:rustc-link-search=native={}", source);
-    // }
-    println!("cargo:rustc-link-search=native={}", env::var("FLUYER_MPV_SOURCE").unwrap());
+    let target = std::env::var("TARGET").unwrap();
+
+    if target.contains("windows")
+        || target.contains("linux")
+        || target.contains("darwin")
+    {
+        println!("cargo:rustc-link-search=native={}", std::env::var("FLUYER_MPV_SOURCE").unwrap());
+    }
     tauri_build::build()
 }
