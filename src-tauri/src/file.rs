@@ -15,11 +15,11 @@ use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
 use crate::database::database::GLOBAL_DATABASE;
 
-fn is_audio_file(entry: &DirEntry) -> bool {
+fn is_supported_audio_file(entry: &DirEntry) -> bool {
     if let Some(ext) = entry.path().extension() {
         matches!(
             ext.to_str().unwrap_or("").to_lowercase().as_str(),
-            "mp3" | "flac" | "aac" | "m4a" | "wav" | "ogg"
+            "mp3" | "flac" | "aac" | "m4a" | "wav" | "ogg" | "alac" | "opus" | "amr" | "dts" | "ac3" | "eac3"
         )
     } else {
         false
@@ -90,7 +90,7 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
                     .into_string()
                     .unwrap()
                     .contains("au_uu_SzH34yR2")
-                && is_audio_file(e)
+                && is_supported_audio_file(e)
         })
         .filter_map(|entry| {
             let path_str = entry.path().to_str()?;
