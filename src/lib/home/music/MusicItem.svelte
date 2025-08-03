@@ -18,7 +18,7 @@ let { music }: Props = $props();
 let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
 let infoLabel = $derived.by(() => {
 	const duration = MusicController.parseMilisecondsIntoText(music.duration);
-	let audioResolution: any = [music.bitsPerSample ?? 0,
+	let audioResolution: any = [music.bitsPerSample ? `${music.bitsPerSample}-bit` : 0,
 		MusicController.parseSampleRateIntoText(music.sampleRate)]
 		.filter((v) => !!v);
 	if(audioResolution.length) audioResolution = audioResolution.join(MusicConfig.separatorAudio);
@@ -58,12 +58,12 @@ async function addMusic() {
 			</p>
 			<p
 				class="text-opacity-background-90 whitespace-nowrap overflow-hidden
-				text-xs animate-scroll-overflow-text"
+				text-xs md:text-[14px] animate-scroll-overflow-text"
 			>
 				{music.album ? `${music.album} ${MusicConfig.separatorAlbum} ` : ''}
 				{MusicController.getFullArtistFromMusic(music)}
 			</p>
-			<p class="text-xs text-opacity-background-90">{infoLabel}</p>
+			<p class="text-xs mt-[2px] text-opacity-background-90">{infoLabel}</p>
 		</div>
 		<div class="w-12 md:w-14"></div>
 	</div>
