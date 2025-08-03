@@ -12,6 +12,6 @@ pub fn is_mobile() -> bool {
     is_android() || is_ios()
 }
 
-pub fn is_desktop() -> bool {
-    !is_mobile()
-}
+// pub fn is_desktop() -> bool {
+//     !is_mobile()
+// }

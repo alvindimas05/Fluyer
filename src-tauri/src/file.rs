@@ -5,12 +5,12 @@ use crate::{
     commands::music::MUSIC_STORE_PATH_NAME,
     logger,
     music::metadata::MusicMetadata,
-    platform::{is_desktop, is_ios},
+    platform::is_ios,
     store::GLOBAL_APP_STORE,
     GLOBAL_APP_HANDLE,
 };
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use rusqlite::{params, params_from_iter, Connection};
+use rusqlite::{params, Connection};
 use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
 use crate::database::database::GLOBAL_DATABASE;

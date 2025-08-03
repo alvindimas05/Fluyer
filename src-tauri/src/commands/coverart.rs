@@ -23,7 +23,7 @@ struct CoverArtRequest {
 #[serde(rename_all = "camelCase")]
 enum CoverArtRequestStatus {
     Loaded,
-    Loading,
+    // Loading,
     Failed,
 }
 
