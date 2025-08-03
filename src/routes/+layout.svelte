@@ -21,6 +21,11 @@ import { loadingShow } from "$lib/stores/loading";
 import { musicList } from "$lib/stores/music";
 import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
 import { mobileShowSwipeGuide } from "$lib/stores/mobile";
+
+if(isWindows()){
+    import('$lib/scss/rounded-windows.scss');
+}
+
 interface Props {
 	children?: import("svelte").Snippet;
 }
@@ -50,7 +55,7 @@ onMount(() => setTimeout(initialize, isWindows() ? 1000 : 0));
 {#if isAppReady}
     <AnimatedBackground />
 {/if}
-<div class="w-screen h-screen fixed scrollbar-hidden">
+<div class="w-screen h-screen fixed scrollbar-hidden rounded-windows">
     {@render children?.()}
 </div>
 <div class="fixed top-0 left-0 w-full h-12 z-[99999] grid grid-cols-[1fr_auto]">

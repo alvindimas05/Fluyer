@@ -18,8 +18,10 @@
 				"resizable": true,
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
+				"visible": false,
+				"decorations": false,
 				"transparent": true,
-				"visible": false
+				"shadow": true
 			}
 		],
 		"security": {

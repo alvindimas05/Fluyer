@@ -177,8 +177,8 @@ onMount(() => {
         style="left: {tooltipPosition}px; visibility: {tooltipVisible ? 'visible' : 'hidden'};"
         bind:this={tooltip}>{tooltipText}</div>
     <div
-        class={`w-full bg-gray-700 bg-opacity-30 text-white backdrop-blur-md`}
-        style={`padding-bottom: ${$mobileNavigationBarHeight}px`}
+        class="w-full bg-gray-700 bg-opacity-30 text-white backdrop-blur-md rounded-windows-bottom"
+        style="padding-bottom: ${$mobileNavigationBarHeight}px"
     >
         <div class="relative">
             <input

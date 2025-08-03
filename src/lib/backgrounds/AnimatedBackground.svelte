@@ -261,4 +261,4 @@ onMount(() => {
 </script>
 
 <svelte:window onresize={onWindowResize} />
-<canvas class="fixed" bind:this={canvas}></canvas>
+<canvas class="fixed rounded-windows" bind:this={canvas}></canvas>
