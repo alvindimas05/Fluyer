@@ -19,9 +19,7 @@
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
 				"visible": false,
-				"decorations": false,
-				"transparent": true,
-				"shadow": true
+				"transparent": true
 			}
 		],
 		"security": {
