@@ -18,7 +18,7 @@
 </p>
 
 > [!NOTE]
-> This project is a slow-paced hobby. I’m building it just for fun :)
+> This project is a slow-paced hobby. It is still in a beta version and under development. It may contain bugs or missing features. I’m building it just for fun :)
 
 ---
 
@@ -31,15 +31,11 @@
 
 ## 📦 Installation
 
-> [!WARNING]
-> 🚧 This app is a beta version and still under development. It may contain bugs or missing features. Check the issues below before installing.
-
-You can download and install from the latest release from the [Releases Page](https://github.com/alvindimas05/Fluyer/releases/latest).
-
 > [!NOTE]
-> Make sure to download the correct version for your platform. Supported Platforms:
->
-> <b>Windows, macOS, Android, Ubuntu/Debian, Arch Linux.</b>
+> Supported Platforms: <b>Windows, macOS, Android, Ubuntu/Debian, Arch Linux.</b>
+
+Download and install the latest version by clicking the button below.
+### [Go to Fluyer Releases](https://github.com/alvindimas05/Fluyer/releases/latest)
 
 ### Arch Linux
 
