@@ -95,16 +95,16 @@ function groupByAlbum(): MusicData[][] {
     return data;
 }
 
-// function onMouseWheel(
-// 	e: WheelEvent & {
-// 		currentTarget: EventTarget & HTMLDivElement;
-// 	},
-// ) {
-// 	if (e.deltaX == -0) {
-// 		e.preventDefault();
-// 		element.scrollLeft += e.deltaY;
-// 	}
-// }
+function onMouseWheel(
+	e: WheelEvent & {
+		currentTarget: EventTarget & HTMLDivElement;
+	},
+) {
+	if (e.deltaX == -0) {
+		e.preventDefault();
+		e.currentTarget.scrollLeft += e.deltaY;
+	}
+}
 
 let unlistenMusicList: Unsubscriber
 onMount(() => {
@@ -141,7 +141,8 @@ $effect(() => {
 <div style="padding-top: {paddingTop}px;
     width: 100%;
     height: {itemHeight + paddingTop}px;">
-    <VList
+    <!-- Note: Ignore this  -->
+    <VList onwheel={onMouseWheel}
        class="scrollbar-hidden"
        {data}
        horizontal>
