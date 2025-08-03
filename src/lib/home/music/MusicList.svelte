@@ -8,13 +8,15 @@ import MusicController from "$lib/controllers/MusicController";
 
 // Responsive rules: [minWidth, maxDppxExclusive, columns]
 const rules = [
-	[1280, 2.01, 3], // xhdpi & ≥1280px → 3 cols
+	[1280, 2.01, 4], // xhdpi
 	[1024, 2.01, 3],
 	[768, 2.01, 2],
-	[1280, 1.01, 3], // hdpi
-	[1024, 1.01, 2],
+
+	[1536, 1.01, 4], // hdpi
+	[1280, 1.01, 3],
 	[768, 1.01, 2],
-	[1280, 1.0, 4], // mdpi
+
+	[1536, 1.0, 4], // default
 	[1024, 1.0, 3],
 	[768, 1.0, 2],
 ];
