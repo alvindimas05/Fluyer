@@ -1,8 +1,4 @@
 #[cfg(mobile)]
-use crate::commands::music::MUSIC_STORE_PATH_NAME;
-#[cfg(mobile)]
-use crate::store::GLOBAL_APP_STORE;
-#[cfg(mobile)]
 use crate::GLOBAL_APP_HANDLE;
 #[cfg(mobile)]
 use tauri::Emitter;
