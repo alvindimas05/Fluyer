@@ -49,7 +49,7 @@ const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
 
 	resetSelectedLyricIndex();
 });
-const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async() => {
+const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async () => {
 	music = MusicController.currentMusic();
 	albumImage = MusicController.currentMusicAlbumImage();
 	resetLyrics();
@@ -170,7 +170,7 @@ function updateProgress(
 	const percentage = (x / progressBar.offsetWidth) * 100;
 	MusicController.updateProgressByPercentage(percentage);
 
-    resetProgressText();
+	resetProgressText();
 }
 
 function updateProgressTouch(

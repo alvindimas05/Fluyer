@@ -7,7 +7,7 @@ import { coverArtCaches } from "$lib/stores/coverart";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { musicList } from "$lib/stores/music";
-import {isDesktop} from "$lib/platform";
+import { isDesktop } from "$lib/platform";
 
 interface Props {
 	music: MusicData;
@@ -18,10 +18,12 @@ let { music }: Props = $props();
 let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
 let infoLabel = $derived.by(() => {
 	const duration = MusicController.parseMilisecondsIntoText(music.duration);
-	let audioResolution: any = [music.bitsPerSample ? `${music.bitsPerSample}-bit` : 0,
-		MusicController.parseSampleRateIntoText(music.sampleRate)]
-		.filter((v) => !!v);
-	if(audioResolution.length) audioResolution = audioResolution.join(MusicConfig.separatorAudio);
+	let audioResolution: any = [
+		music.bitsPerSample ? `${music.bitsPerSample}-bit` : 0,
+		MusicController.parseSampleRateIntoText(music.sampleRate),
+	].filter((v) => !!v);
+	if (audioResolution.length)
+		audioResolution = audioResolution.join(MusicConfig.separatorAudio);
 	else return duration;
 
 	return [audioResolution, duration].join(` ${MusicConfig.separator} `);

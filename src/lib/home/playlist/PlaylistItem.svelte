@@ -5,11 +5,11 @@ interface Props {
 	music: MusicData;
 }
 
-import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
-import {isAndroid, isWindows} from "$lib/platform";
+import { isAndroid, isWindows } from "$lib/platform";
 
 let { music }: Props = $props();
 

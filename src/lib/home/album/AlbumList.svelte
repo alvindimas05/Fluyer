@@ -3,73 +3,73 @@ import type { MusicData } from "$lib/home/music/types";
 import { musicAlbumList, musicList } from "$lib/stores/music";
 import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
-import {onDestroy, onMount} from "svelte";
+import { onDestroy, onMount } from "svelte";
 import { isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import { swipeMinimumTop } from "$lib/stores";
-import type {Unsubscriber} from "svelte/store";
+import type { Unsubscriber } from "svelte/store";
 import { VList } from "virtua/svelte";
-import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import { filterAlbum, filterSearch } from "$lib/stores/filter";
 
 // Responsive rules: [minWidth, minDppx, widthPercent]]
 // md-hdpi:auto-cols-[20%] lg-hdpi:auto-cols-[16.6667%]
 // md-mdpi:auto-cols-[20%] lg-mdpi:auto-cols-[16.6667%] xl-mdpi:auto-cols-[12.5%]
 // auto-cols-[50%] sm:auto-cols-[33.3334%]
 const rules = [
-    // xhdpi (DPR > 2.0)
-    [1280, 2.01, 0.125], // xl-xhdpi → 12.5%
-    [1024, 2.01, 0.166667], // lg-xhdpi → 16.6667%
-    [768, 2.01, 0.25], // md-xhdpi → 25%
+	// xhdpi (DPR > 2.0)
+	[1280, 2.01, 0.125], // xl-xhdpi → 12.5%
+	[1024, 2.01, 0.166667], // lg-xhdpi → 16.6667%
+	[768, 2.01, 0.25], // md-xhdpi → 25%
 
-    // hdpi (1.01 ≤ DPR ≤ 2.0)
-    [1536, 1.01, 0.125], // 2xl → 12.5%
-    [1280, 1.01, 0.166667], // xl-hdpi → 12.5%
-    [1024, 1.01, 0.2], // lg-hdpi → 16.6667%
-    [768, 1.01, 0.25], // md-hdpi → 20%
+	// hdpi (1.01 ≤ DPR ≤ 2.0)
+	[1536, 1.01, 0.125], // 2xl → 12.5%
+	[1280, 1.01, 0.166667], // xl-hdpi → 12.5%
+	[1024, 1.01, 0.2], // lg-hdpi → 16.6667%
+	[768, 1.01, 0.25], // md-hdpi → 20%
 
-    // default (DPR <= 1.0)
-    [1536, 0, 0.125], // 2xl → 12.5%
-    [1280, 0, 0.166667], // xl → 16.6667%
-    [1024, 0, 0.2], // lg → 20%
-    [768, 0, 0.25], // md → 25%
-    [640, 0, 0.33334], // sm → 33.3334%
+	// default (DPR <= 1.0)
+	[1536, 0, 0.125], // 2xl → 12.5%
+	[1280, 0, 0.166667], // xl → 16.6667%
+	[1024, 0, 0.2], // lg → 20%
+	[768, 0, 0.25], // md → 25%
+	[640, 0, 0.33334], // sm → 33.3334%
 ];
 let itemElementHeight = $state(0);
 let itemWidth = $state(0.5 * window.innerWidth);
 let itemHeight = $state(0);
 let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 44);
 
-function updateSize(){
-    updateItemWidth();
-    itemHeight = itemElementHeight;
+function updateSize() {
+	updateItemWidth();
+	itemHeight = itemElementHeight;
 }
 
 function updateItemWidth() {
-    const w = window.innerWidth;
-    const dpi = window.devicePixelRatio;
+	const w = window.innerWidth;
+	const dpi = window.devicePixelRatio;
 
-    for (const [minW, minDppx, width] of rules) {
-        if (w >= minW && dpi >= minDppx){
-            itemWidth = width * window.innerWidth;
-            return;
-        }
-    }
-    itemWidth = 0.5 * window.innerWidth;
+	for (const [minW, minDppx, width] of rules) {
+		if (w >= minW && dpi >= minDppx) {
+			itemWidth = width * window.innerWidth;
+			return;
+		}
+	}
+	itemWidth = 0.5 * window.innerWidth;
 }
 
 let data = $derived.by(() => {
-    if (!Array.isArray($musicAlbumList)) return [];
+	if (!Array.isArray($musicAlbumList)) return [];
 
-    const search = $filterSearch.toLowerCase();
-    if (!search) return $musicAlbumList;
+	const search = $filterSearch.toLowerCase();
+	if (!search) return $musicAlbumList;
 
-    return $musicAlbumList.filter((musicList) => {
-        return (
-            ($filterAlbum && musicList[0].album === $filterAlbum.name) ||
-            musicList[0].album?.toLowerCase().includes(search) ||
-            musicList[0].albumArtist?.toLowerCase().includes(search)
-        );
-    });
+	return $musicAlbumList.filter((musicList) => {
+		return (
+			($filterAlbum && musicList[0].album === $filterAlbum.name) ||
+			musicList[0].album?.toLowerCase().includes(search) ||
+			musicList[0].albumArtist?.toLowerCase().includes(search)
+		);
+	});
 });
 
 function groupByAlbum(): MusicData[][] {
@@ -90,12 +90,12 @@ function groupByAlbum(): MusicData[][] {
 		{} as Record<string, MusicData[]>,
 	);
 
-    const data: MusicData[][] = [];
-    for (const key of Object.keys(albumsMap).sort()) {
-        data.push(MusicController.sortMusicList(albumsMap[key]));
-    }
+	const data: MusicData[][] = [];
+	for (const key of Object.keys(albumsMap).sort()) {
+		data.push(MusicController.sortMusicList(albumsMap[key]));
+	}
 
-    return data;
+	return data;
 }
 
 function onMouseWheel(
@@ -109,20 +109,22 @@ function onMouseWheel(
 	}
 }
 
-let unlistenMusicList: Unsubscriber
+let unlistenMusicList: Unsubscriber;
 onMount(() => {
-    updateItemWidth();
+	updateItemWidth();
 	MusicController.setMusicAlbumList(groupByAlbum());
-	unlistenMusicList = musicList.subscribe(() => MusicController.setMusicAlbumList(groupByAlbum()));
+	unlistenMusicList = musicList.subscribe(() =>
+		MusicController.setMusicAlbumList(groupByAlbum()),
+	);
 });
 
 onDestroy(() => {
-    unlistenMusicList();
+	unlistenMusicList();
 });
 
 $effect(() => {
-    itemHeight = itemElementHeight > itemHeight ? itemElementHeight : itemHeight;
-    $swipeMinimumTop = itemHeight + paddingTop;
+	itemHeight = itemElementHeight > itemHeight ? itemElementHeight : itemHeight;
+	$swipeMinimumTop = itemHeight + paddingTop;
 });
 </script>
 

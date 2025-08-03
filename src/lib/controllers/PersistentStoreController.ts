@@ -9,7 +9,7 @@ import {
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { IconThemeType } from "$lib/icon/types";
 import { iconTheme } from "$lib/stores/icon";
-import {equalizerValues} from "$lib/stores/equalizer";
+import { equalizerValues } from "$lib/stores/equalizer";
 import MusicController from "$lib/controllers/MusicController";
 
 const storePath = "store.json";

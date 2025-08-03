@@ -9,9 +9,9 @@ import { onMount } from "svelte";
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
 import ToastController from "$lib/controllers/ToastController";
-import {isAndroid, isDesktop} from "$lib/platform";
-import {invoke} from "@tauri-apps/api/core";
-import {CommandRoutes} from "$lib/commands.js";
+import { isAndroid, isDesktop } from "$lib/platform";
+import { invoke } from "@tauri-apps/api/core";
+import { CommandRoutes } from "$lib/commands.js";
 import { listen } from "@tauri-apps/api/event";
 
 let musicPath = $state<string[]>([]);
@@ -23,22 +23,25 @@ async function refreshPath() {
 
 async function addPath() {
 	let newPath = null;
-    if(isDesktop()){
-        newPath = await open({
-            directory: true,
-            multiple: false,
-        });
-    }
-    if(isAndroid()){
-        await invoke(CommandRoutes.ANDROID_REQUEST_DIRECTORY);
-        await new Promise(async (resolve) => {
-            const unlisten = await listen<string>(CommandRoutes.ANDROID_REQUEST_DIRECTORY, (e) => {
-                newPath = e.payload;
-                unlisten();
-                resolve(true);
-            });
-        });
-    }
+	if (isDesktop()) {
+		newPath = await open({
+			directory: true,
+			multiple: false,
+		});
+	}
+	if (isAndroid()) {
+		await invoke(CommandRoutes.ANDROID_REQUEST_DIRECTORY);
+		await new Promise(async (resolve) => {
+			const unlisten = await listen<string>(
+				CommandRoutes.ANDROID_REQUEST_DIRECTORY,
+				(e) => {
+					newPath = e.payload;
+					unlisten();
+					resolve(true);
+				},
+			);
+		});
+	}
 	if (!newPath || musicPath.includes(newPath)) return;
 
 	isLoading = true;

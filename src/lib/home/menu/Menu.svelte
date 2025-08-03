@@ -7,7 +7,7 @@ import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import MenuItem from "$lib/home/menu/MenuItem.svelte";
 import UIController from "$lib/controllers/UIController";
-import {isDesktop} from "$lib/platform";
+import { isDesktop } from "$lib/platform";
 </script>
 
 <Sidebar type={SidebarType.Left}>

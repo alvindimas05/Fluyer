@@ -22,8 +22,8 @@ import { musicList } from "$lib/stores/music";
 import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
 import { mobileShowSwipeGuide } from "$lib/stores/mobile";
 
-if(isWindows()){
-    import('$lib/scss/rounded-windows.scss');
+if (isWindows()) {
+	import("$lib/scss/rounded-windows.scss");
 }
 
 interface Props {

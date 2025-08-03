@@ -56,9 +56,9 @@ function initMuuri() {
 
 		if (fromIndex === toIndex) return;
 
-        dragging = false;
+		dragging = false;
 		await MusicController.playlistMoveto(fromIndex, toIndex);
-        dragging = true
+		dragging = true;
 	});
 
 	return muuri;

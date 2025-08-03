@@ -23,11 +23,12 @@ import { CommandRoutes } from "$lib/commands";
 import { coverArtCaches } from "$lib/stores/coverart";
 import CoverArt, {
 	type CoverArtCacheQuery,
-	type CoverArtResponse, CoverArtStatus,
+	type CoverArtResponse,
+	CoverArtStatus,
 } from "$lib/handlers/coverart";
 import { isDesktop, isMobile } from "$lib/platform";
 import { settingTriggerAnimatedBackground } from "$lib/stores/setting";
-import {equalizerValues} from "$lib/stores/equalizer";
+import { equalizerValues } from "$lib/stores/equalizer";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -84,16 +85,21 @@ const MusicController = {
 	getAlbumImageFromMusic: async (music: MusicData | null) => {
 		if (music === null) return MusicConfig.defaultAlbumImage;
 		try {
-			const image = await invoke<string>(CommandRoutes.MUSIC_GET_IMAGE, {path: music?.path});
-			if(image !== null) return `data:image/png;base64,${image}`;
+			const image = await invoke<string>(CommandRoutes.MUSIC_GET_IMAGE, {
+				path: music?.path,
+			});
+			if (image !== null) return `data:image/png;base64,${image}`;
 		} catch (e) {}
-		if (music.title == null || music.artist == null) return MusicConfig.defaultAlbumImage;
+		if (music.title == null || music.artist == null)
+			return MusicConfig.defaultAlbumImage;
 		const coverArt = await CoverArt.getImageFromQuery({
 			artist: music.artist!,
 			title: music.album ? undefined : music.title!,
 			album: music.album ?? undefined,
 		});
-		return coverArt ? MusicController.withBase64(coverArt) : MusicConfig.defaultAlbumImage;
+		return coverArt
+			? MusicController.withBase64(coverArt)
+			: MusicConfig.defaultAlbumImage;
 	},
 
 	getFullArtistFromMusic: (music: MusicData | null) => {
@@ -165,7 +171,7 @@ const MusicController = {
 		);
 	},
 	getYearFromDate: (date: string | null) => {
-		if(!date) return null;
+		if (!date) return null;
 
 		if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
 			// Matches full date like "2025-01-01"
@@ -276,7 +282,7 @@ const MusicController = {
 		const commonRates = [44.1, 48.0, 88.2, 96.0, 176.4, 192.0];
 
 		// Allow slight floating point tolerance
-		const isCommon = commonRates.some(r => Math.abs(r - khz) < 0.05);
+		const isCommon = commonRates.some((r) => Math.abs(r - khz) < 0.05);
 
 		if (isCommon) {
 			return `${khz.toFixed(1)} kHz`;
@@ -298,7 +304,7 @@ const MusicController = {
 
 		musicIsPlaying.set(true);
 		MusicController.startProgress({ resetProgress: false });
-		if (sendCommand){
+		if (sendCommand) {
 			await MusicController.applyEqualizer();
 			MusicController.sendCommandController("play");
 		}
@@ -423,7 +429,7 @@ const MusicController = {
 	},
 
 	sortMusicList: (list: MusicData[]) => {
-		if(!list || list[0].trackNumber === null) return list;
+		if (!list || list[0].trackNumber === null) return list;
 		const hasTrackNumber = list[0].trackNumber != null;
 		return list.sort((a, b) => {
 			if (hasTrackNumber) {
@@ -545,7 +551,10 @@ const MusicController = {
 
 		await invoke(CommandRoutes.MUSIC_PLAYLIST_MOVETO, {
 			from: fromIndex,
-			to: isDesktop() && fromIndex < MusicController.currentMusicIndex() ? toIndex + 1 : toIndex,
+			to:
+				isDesktop() && fromIndex < MusicController.currentMusicIndex()
+					? toIndex + 1
+					: toIndex,
 		});
 		musicPlaylist.set(playlist);
 		musicCurrentIndex.set(
@@ -554,9 +563,10 @@ const MusicController = {
 	},
 
 	setEqualizer: async (values: number[]) => {
-		if(isDesktop()) await invoke(CommandRoutes.MUSIC_EQUALIZER, {
-			values
-		});
+		if (isDesktop())
+			await invoke(CommandRoutes.MUSIC_EQUALIZER, {
+				values,
+			});
 	},
 	applyEqualizer: async () => {
 		await MusicController.setEqualizer(get(equalizerValues));
@@ -566,7 +576,9 @@ const MusicController = {
 	},
 	resetEqualizer: async () => {
 		equalizerValues.set(MusicController.getDefaultEqualizerValues());
-		await MusicController.setEqualizer(MusicController.getDefaultEqualizerValues());
+		await MusicController.setEqualizer(
+			MusicController.getDefaultEqualizerValues(),
+		);
 	},
 };
 

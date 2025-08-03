@@ -1,6 +1,6 @@
 // @ts-ignore
 import { fluidScroll } from "fluidscroll";
-import {equalizerShow} from "$lib/stores/equalizer";
+import { equalizerShow } from "$lib/stores/equalizer";
 
 const UIController = {
 	initialize: async () => {
@@ -30,7 +30,7 @@ const UIController = {
 	},
 	toggleEqualizer: (value: boolean) => {
 		equalizerShow.set(value);
-	}
+	},
 };
 
 export default UIController;

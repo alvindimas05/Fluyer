@@ -22,14 +22,16 @@ export interface CoverArtCacheQuery {
 const CoverArt = {
 	getImageFromQuery: async (query: CoverArtCacheQuery) => {
 		try {
-			return (await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
-				query,
-			})).image;
+			return (
+				await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
+					query,
+				})
+			).image;
 		} catch (err) {
 			console.error(err);
 			return null;
 		}
-	}
+	},
 };
 
 export default CoverArt;

@@ -1,41 +1,40 @@
 <script lang="ts">
-import {isAndroid} from "$lib/platform";
-import {equalizerShow, equalizerValues} from "$lib/stores/equalizer";
+import { isAndroid } from "$lib/platform";
+import { equalizerShow, equalizerValues } from "$lib/stores/equalizer";
 import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
-import {IconType} from "$lib/icon/types";
+import { IconType } from "$lib/icon/types";
 import UIController from "$lib/controllers/UIController";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 const LABELS = [
-    65,    // 1b  - Sub-bass
-    92,    // 2b
-    131,   // 3b
-    185,   // 4b
-    262,   // 5b  - Bass
-    370,   // 6b
-    523,   // 7b
-    740,   // 8b
-    1047,  // 9b  - Midrange
-    1480,  // 10b
-    2093,  // 11b
-    2960,  // 12b
-    4186,  // 13b  - Upper mids
-    5920,  // 14b
-    8372,  // 15b
-    11840, // 16b
-    16744, // 17b
-    20000  // 18b - Highs / air
+	65, // 1b  - Sub-bass
+	92, // 2b
+	131, // 3b
+	185, // 4b
+	262, // 5b  - Bass
+	370, // 6b
+	523, // 7b
+	740, // 8b
+	1047, // 9b  - Midrange
+	1480, // 10b
+	2093, // 11b
+	2960, // 12b
+	4186, // 13b  - Upper mids
+	5920, // 14b
+	8372, // 15b
+	11840, // 16b
+	16744, // 17b
+	20000, // 18b - Highs / air
 ];
 
 function updateValues(index: number, value: number) {
-    equalizerValues.update((values) => {
-        values[index] = value;
-        MusicController.setEqualizer(values);
-        PersistentStoreController.equalizer.set(values);
-        return values;
-    });
+	equalizerValues.update((values) => {
+		values[index] = value;
+		MusicController.setEqualizer(values);
+		PersistentStoreController.equalizer.set(values);
+		return values;
+	});
 }
-
 </script>
 
 <div class="absolute top-0 left-0 w-full h-full z-10

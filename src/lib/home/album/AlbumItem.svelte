@@ -1,13 +1,13 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import type { AlbumData, MusicData } from "../music/types";
-import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
 import { filterAlbum, filterSearch } from "$lib/stores/filter";
 import FilterController from "$lib/controllers/FilterController";
 import { musicList as storeMusicList } from "$lib/stores/music";
-import {isDesktop} from "$lib/platform";
+import { isDesktop } from "$lib/platform";
 
 interface Props {
 	musicList: MusicData[];
@@ -26,8 +26,10 @@ async function setFilterAlbum() {
 	FilterController.setFilterAlbum({
 		name: music.album,
 		artist: music.albumArtist ?? MusicController.getFullArtistFromMusic(music),
-        year: MusicController.getYearFromDate(music.date),
-        duration: MusicController.parseMilisecondsIntoText(musicList.map(m => m.duration).reduce((a, b) => a + b, 0)),
+		year: MusicController.getYearFromDate(music.date),
+		duration: MusicController.parseMilisecondsIntoText(
+			musicList.map((m) => m.duration).reduce((a, b) => a + b, 0),
+		),
 		musicList,
 	} as AlbumData);
 }

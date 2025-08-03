@@ -8,14 +8,14 @@ interface Props {
 
 let { children, type }: Props = $props();
 
-import {isAndroid, isMobile, isWindows} from "$lib/platform";
+import { isAndroid, isMobile, isWindows } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import { sidebarShowingType } from "$lib/stores/sidebar";
 import { onMount } from "svelte";
-    import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const SWIPE_RANGE = 125;
 
@@ -36,7 +36,13 @@ function onMouseMove(e: MouseEvent) {
 }
 
 async function onMouseLeave(e: MouseEvent) {
-	if (!isMouseInsideArea || (isWindows() && await getCurrentWindow().isMaximized() && e.clientX > window.innerWidth - 20)) return;
+	if (
+		!isMouseInsideArea ||
+		(isWindows() &&
+			(await getCurrentWindow().isMaximized()) &&
+			e.clientX > window.innerWidth - 20)
+	)
+		return;
 	isShowing = false;
 	isMouseInsideArea = false;
 	$sidebarShowingType = null;

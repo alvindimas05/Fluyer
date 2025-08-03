@@ -2,31 +2,33 @@
 import { CommandRoutes } from "$lib/commands";
 import LoadingController from "$lib/controllers/LoadingController";
 import MusicController from "$lib/controllers/MusicController";
-import {isAndroid, isDesktop, isMobile} from "$lib/platform";
+import { isAndroid, isDesktop, isMobile } from "$lib/platform";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 
 let animatedClasses = $state("animate__fadeIn");
 
-async function requestAction(){
-    if(isAndroid()){
-        const res = await invoke<boolean>(
-            CommandRoutes.REQUEST_READ_AUDIO_PERMISSION,
-        );
-        if (!res) return;
-    }
-    await chooseDirPath();
+async function requestAction() {
+	if (isAndroid()) {
+		const res = await invoke<boolean>(
+			CommandRoutes.REQUEST_READ_AUDIO_PERMISSION,
+		);
+		if (!res) return;
+	}
+	await chooseDirPath();
 }
 async function chooseDirPath() {
-    const command = isAndroid() ? CommandRoutes.ANDROID_REQUEST_DIRECTORY : CommandRoutes.MUSIC_REQUEST_DIRECTORY
-    await invoke(command);
-    const unlisten = await listen<string>(command, async (e) => {
-        if(isAndroid()) await PersistentStoreController.musicPath.set([e.payload]);
+	const command = isAndroid()
+		? CommandRoutes.ANDROID_REQUEST_DIRECTORY
+		: CommandRoutes.MUSIC_REQUEST_DIRECTORY;
+	await invoke(command);
+	const unlisten = await listen<string>(command, async (e) => {
+		if (isAndroid()) await PersistentStoreController.musicPath.set([e.payload]);
 
-        animatedClasses = "animate__fadeOut";
-        unlisten();
-    });
+		animatedClasses = "animate__fadeOut";
+		unlisten();
+	});
 }
 
 function onAnimationEnd() {

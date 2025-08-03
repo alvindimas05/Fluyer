@@ -5,7 +5,7 @@ import PersistentStoreController from "$lib/controllers/PersistentStoreControlle
 
 export default function logHandler() {
 	window.addEventListener("error", async (e) => {
-		if(e.message.toString().includes("ResizeObserver")) return;
+		if (e.message.toString().includes("ResizeObserver")) return;
 		invoke(CommandRoutes.LOG_ERROR, { message: e.message.toString() });
 		if (await PersistentStoreController.developerMode.get())
 			ToastController.error(e.message.toString());
