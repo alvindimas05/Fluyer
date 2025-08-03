@@ -18,17 +18,18 @@ import {filterAlbum, filterSearch} from "$lib/stores/filter";
 const rules = [
     // xhdpi (DPR > 2.0)
     [1024, 2.01, 0.166667], // lg-xhdpi → 16.6667%
-    [768, 2.01, 0.25],      // md-xhdpi → 25%
+    [768, 2.01, 0.25], // md-xhdpi → 25%
 
     // hdpi (1.01 ≤ DPR ≤ 2.0)
-    [1280, 1.01, 0.166667],     // xl-hdpi → 12.5%
-    [1024, 1.01, 0.2],  // lg-hdpi → 16.6667%
-    [768, 1.01, 0.25],        // md-hdpi → 20%
+    [1280, 1.01, 0.166667], // xl-hdpi → 12.5%
+    [1024, 1.01, 0.2], // lg-hdpi → 16.6667%
+    [768, 1.01, 0.25], // md-hdpi → 20%
 
-    // mdpi (DPR = 1.0)
-    [1280, 1.0, 0.2],        // lg-mdpi → 20%
-    [1024, 1.0, 0.333334],   // md-mdpi → 33.3334%
-    [768, 1.0, 0.5],         // sm-mdpi → 50%
+    // default (DPR <= 1.0)
+    [1536, 0, 0.125], // 2xl → 12.5%
+    [1280, 0, 0.166667], // xl → 16.6667%
+    [1024, 0, 0.2], // lg → 20%
+    [768, 0, 0.333334], // md → 33.3334%
 ];
 let itemElementHeight = $state(0);
 let itemWidth = $state(0.5 * window.innerWidth);
