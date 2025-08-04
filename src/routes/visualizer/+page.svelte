@@ -25,15 +25,16 @@ async function start(){
     View.initialize(container);
 
     await Iris.make();
-    View.data.renderVisualization = Iris.render;
 
     if(!MusicController.isPlaying()) return;
 
     try {
         const buffer = await MusicController.getBuffer(MusicController.currentMusic().path);
         if(buffer === null) return;
-        AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
+        await AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
     } catch (e) {}
+
+    View.data.renderVisualization = Iris.render;
 }
 
 function onKeyDown(e: KeyboardEvent){

@@ -15,23 +15,23 @@ const AudioAnalyser = {
         AudioAnalyser.data.audioContext = audioContext;
         AudioAnalyser.data.analyser = audioContext.createAnalyser();
         AudioAnalyser.data.gainNode = audioContext.createGain();
-        AudioAnalyser.data.gainNode.gain.value = 0.2;
+        AudioAnalyser.data.gainNode.gain.value = 0;
     },
-    makeAudio: function (data: ArrayBuffer){
+    makeAudio: async function (data: ArrayBuffer){
         if(AudioAnalyser.data.source){
             AudioAnalyser.data.source.stop(0);
         }
 
         AudioAnalyser.data.source = AudioAnalyser.data.audioContext.createBufferSource();
         if(AudioAnalyser.data.audioContext.decodeAudioData){
-            AudioAnalyser.data.audioContext.decodeAudioData(data, function (buffer) {
+            await AudioAnalyser.data.audioContext.decodeAudioData(data, function (buffer) {
                 AudioAnalyser.data.source.buffer = buffer;
             });
-            AudioAnalyser.playAudio();
+            await AudioAnalyser.playAudio();
         } else {
             // @ts-ignore
             AudioAnalyser.data.source.buffer = AudioAnalyser.data.audioContext.createBuffer(data, false);
-            AudioAnalyser.playAudio();
+            await AudioAnalyser.playAudio();
         }
     },
     playAudio: async () => {
