@@ -13,6 +13,7 @@ import {isMobile} from "$lib/platform";
 import {mobileStatusBarHeight} from "$lib/stores/mobile";
 import Fracture from "$lib/visualizers/vissonance/visualizers/Fracture";
 import Barred from "$lib/visualizers/vissonance/visualizers/Barred";
+import HillFog from "$lib/visualizers/vissonance/visualizers/HillFog";
 
 let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 40);
 
@@ -33,7 +34,7 @@ async function start(){
     AudioAnalyser.initialize();
     View.initialize(container);
 
-    const visualizer = new Barred();
+    const visualizer = new HillFog();
     await visualizer.make();
 
     await setAudio();
