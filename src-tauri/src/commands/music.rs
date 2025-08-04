@@ -1,5 +1,5 @@
 use std::sync::Mutex;
-use tauri::{Manager, State};
+use tauri::State;
 
 #[cfg(desktop)]
 use tauri::{AppHandle, Emitter};
