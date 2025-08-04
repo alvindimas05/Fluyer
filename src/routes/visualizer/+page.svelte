@@ -12,6 +12,7 @@ import type {MusicData} from "$lib/home/music/types";
 import {isMobile} from "$lib/platform";
 import {mobileStatusBarHeight} from "$lib/stores/mobile";
 import Fracture from "$lib/visualizers/vissonance/visualizers/Fracture";
+import Barred from "$lib/visualizers/vissonance/visualizers/Barred";
 
 let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 40);
 
@@ -32,7 +33,7 @@ async function start(){
     AudioAnalyser.initialize();
     View.initialize(container);
 
-    const visualizer = new Fracture();
+    const visualizer = new Barred();
     await visualizer.make();
 
     await setAudio();
@@ -68,7 +69,7 @@ onMount(() => {
 });
 
 onDestroy(() => {
-    unlistenMusicCurrentIndex();
+    if(unlistenMusicCurrentIndex) unlistenMusicCurrentIndex();
     View.destroy();
     AudioAnalyser.destroy();
 });

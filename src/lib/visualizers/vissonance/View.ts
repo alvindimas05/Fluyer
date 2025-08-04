@@ -6,6 +6,7 @@ interface ViewDataInterface {
     scene: THREE.Scene;
     container: HTMLElement;
     renderVisualization: () => void;
+    loopAnimateIntervalId: ReturnType<typeof setInterval>;
 }
 
 const View = {
@@ -25,7 +26,7 @@ const View = {
         View.data.renderer.setSize(window.innerWidth, window.innerHeight);
         View.data.container.appendChild(View.data.renderer.domElement);
 
-        View.animate();
+        View.loopAnimate();
     },
     usePerspectiveCamera: function() {
         View.data.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 2000 );
@@ -43,12 +44,16 @@ const View = {
         View.data.camera.updateProjectionMatrix();
         View.data.renderer.setSize( window.innerWidth, window.innerHeight );
     },
+    loopAnimate: () => {
+        View.animate();
+        View.data.loopAnimateIntervalId = setInterval(View.animate, 1000 / 60);
+    },
     animate: () => {
-        setTimeout(() => requestAnimationFrame(View.animate), 1000 / 60);
         if(View.data.renderVisualization) View.data.renderVisualization();
         View.data.renderer.render(View.data.scene, View.data.camera);
     },
     destroy: () => {
+        clearInterval(View.data.loopAnimateIntervalId);
         View.data.renderer.dispose();
         View.data.renderer.forceContextLoss();
     }
