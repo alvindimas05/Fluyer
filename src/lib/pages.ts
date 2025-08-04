@@ -3,4 +3,5 @@ export const PageRoutes = {
 	HOME_PRODUCTION: "",
 	PLAY: "/play",
 	SETTINGS: "/settings",
+	VISUALIZER: "/visualizer",
 };
