@@ -67,6 +67,7 @@ const MusicController = {
 	currentMusic: () => get(musicPlaylist)[get(musicCurrentIndex)] ?? null,
 	currentMusicIndex: () => get(musicCurrentIndex),
 	setCurrentMusicIndex: (value: number) => musicCurrentIndex.set(value),
+	getMusicByIndex: (index: number) => MusicController.musicPlaylist()[index],
 
 	musicPlaylist: () => get(musicPlaylist),
 	addMusicPlaylist: (value: MusicData[]) =>

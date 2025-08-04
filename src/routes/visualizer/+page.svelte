@@ -1,11 +1,14 @@
 <script lang="ts">
-import {onMount} from "svelte";
+    import {onDestroy, onMount} from "svelte";
 import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
 import View from "$lib/visualizers/vissonance/View";
 import Iris from "$lib/visualizers/vissonance/visualizers/Iris";
 import ToastController from "$lib/controllers/ToastController";
 import MusicController from "$lib/controllers/MusicController";
 import PageController from "$lib/controllers/PageController";
+import {musicCurrentIndex} from "$lib/stores/music";
+import type {Unsubscriber} from "svelte/store";
+    import type {MusicData} from "$lib/home/music/types";
 
 let container: HTMLDivElement;
 
@@ -26,15 +29,19 @@ async function start(){
 
     await Iris.make();
 
+    await setAudio();
+
+    View.data.renderVisualization = Iris.render;
+}
+
+async function setAudio(music: MusicData | null = null){
     if(!MusicController.isPlaying()) return;
 
     try {
-        const buffer = await MusicController.getBuffer(MusicController.currentMusic().path);
+        const buffer = await MusicController.getBuffer(music ? music.path : MusicController.currentMusic().path);
         if(buffer === null) return;
         await AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
     } catch (e) {}
-
-    View.data.renderVisualization = Iris.render;
 }
 
 function onKeyDown(e: KeyboardEvent){
@@ -44,7 +51,19 @@ function onKeyDown(e: KeyboardEvent){
 function toastError(){
     ToastController.error("Your OS WebView does not support WebGL.");
 }
-onMount(start);
+
+let unlistenMusicCurrentIndex: Unsubscriber;
+onMount(() => {
+    (async () => {
+        await start();
+        unlistenMusicCurrentIndex = musicCurrentIndex
+            .subscribe(async (index) => setAudio(MusicController.getMusicByIndex(index)));
+    })();
+});
+
+onDestroy(() => {
+    unlistenMusicCurrentIndex();
+});
 </script>
 
 <svelte:window
