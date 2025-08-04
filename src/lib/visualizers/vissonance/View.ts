@@ -47,6 +47,10 @@ const View = {
         setTimeout(() => requestAnimationFrame(View.animate), 1000 / 60);
         if(View.data.renderVisualization) View.data.renderVisualization();
         View.data.renderer.render(View.data.scene, View.data.camera);
+    },
+    destroy: () => {
+        View.data.renderer.dispose();
+        View.data.renderer.forceContextLoss();
     }
 };
 

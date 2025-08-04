@@ -4,7 +4,8 @@ interface AnalyserInterface {
     audioContext: AudioContext,
     analyser: AnalyserNode,
     gainNode: GainNode,
-    source: AudioBufferSourceNode
+    source: AudioBufferSourceNode,
+    dataArray: Uint8Array,
 }
 
 const AudioAnalyser = {
@@ -43,7 +44,12 @@ const AudioAnalyser = {
         AudioAnalyser.data.source.connect(AudioAnalyser.data.gainNode);
         AudioAnalyser.data.gainNode.connect(AudioAnalyser.data.audioContext.destination);
         AudioAnalyser.data.source.start(0, duration);
-    }
+    },
+    destroy: () => {
+        AudioAnalyser.data.source.disconnect(AudioAnalyser.data.analyser);
+        AudioAnalyser.data.source.disconnect(AudioAnalyser.data.gainNode);
+        AudioAnalyser.data.gainNode.disconnect(AudioAnalyser.data.audioContext.destination);
+    },
 };
 
 export default AudioAnalyser;
