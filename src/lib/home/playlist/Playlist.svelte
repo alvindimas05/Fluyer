@@ -11,10 +11,11 @@ import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import MusicController from "$lib/controllers/MusicController";
 import Muuri from "muuri";
-import { mount, onMount, unmount } from "svelte";
+import {mount, onDestroy, onMount, unmount} from "svelte";
 import { isDesktop, isMobile } from "$lib/platform";
 import type { MusicData } from "$lib/home/music/types";
 import ToastController from "$lib/controllers/ToastController";
+import type {Unsubscriber} from "svelte/store";
 
 let gridElement: HTMLDivElement;
 let muuri: Muuri;
@@ -83,10 +84,12 @@ function elementToggleDraggable() {
 		});
 }
 
+let unlistenMusicPlaylist: Unsubscriber;
+
 onMount(() => {
 	initMuuri();
 
-	musicPlaylist.subscribe((playlist) => {
+	unlistenMusicPlaylist = musicPlaylist.subscribe((playlist) => {
 		if (playlist.length < 1) return;
 
 		const removedIndices = $musicReset
@@ -122,6 +125,10 @@ onMount(() => {
 		elementToggleDraggable();
 		oldPlaylist = [...playlist];
 	});
+});
+
+onDestroy(() => {
+    unlistenMusicPlaylist();
 });
 
 $effect(elementToggleDraggable);
