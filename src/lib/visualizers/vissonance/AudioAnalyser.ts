@@ -1,3 +1,5 @@
+import MusicController from "$lib/controllers/MusicController";
+
 interface AnalyserInterface {
     audioContext: AudioContext,
     analyser: AnalyserNode,
@@ -13,7 +15,7 @@ const AudioAnalyser = {
         AudioAnalyser.data.audioContext = audioContext;
         AudioAnalyser.data.analyser = audioContext.createAnalyser();
         AudioAnalyser.data.gainNode = audioContext.createGain();
-        AudioAnalyser.data.gainNode.gain.value = 0;
+        AudioAnalyser.data.gainNode.gain.value = 0.2;
     },
     makeAudio: function (data: ArrayBuffer){
         if(AudioAnalyser.data.source){
@@ -32,11 +34,15 @@ const AudioAnalyser = {
             AudioAnalyser.playAudio();
         }
     },
-    playAudio: () => {
+    playAudio: async () => {
+        let duration = await MusicController.mpvMusicCurrentDuration();
+        if(duration === null) return;
+        duration = duration / 1000;
+
         AudioAnalyser.data.source.connect(AudioAnalyser.data.analyser);
         AudioAnalyser.data.source.connect(AudioAnalyser.data.gainNode);
         AudioAnalyser.data.gainNode.connect(AudioAnalyser.data.audioContext.destination);
-        AudioAnalyser.data.source.start(0);
+        AudioAnalyser.data.source.start(0, duration);
     }
 };
 

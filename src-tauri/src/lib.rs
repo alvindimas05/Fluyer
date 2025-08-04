@@ -79,11 +79,14 @@ pub fn run() {
             commands::music::music_set_volume,
             commands::music::music_playlist_goto,
             commands::music::music_playlist_moveto,
+            commands::music::music_get_buffer,
             #[cfg(desktop)]
             commands::music::music_request_directory,
             #[cfg(desktop)]
             commands::music::music_equalizer,
             commands::music::music_get_image,
+            commands::music::music_get_current_duration,
+            commands::music::music_request_sync,
             commands::log::log_error,
             #[cfg(target_os = "android")]
             commands::log::toast,

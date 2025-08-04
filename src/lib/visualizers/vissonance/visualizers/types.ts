@@ -1,6 +1,6 @@
 export interface Visualizer {
     initialize: () => void,
-    make: () => void,
+    make: () => Promise<void>,
     destroy: () => void,
     render: () => void
 }

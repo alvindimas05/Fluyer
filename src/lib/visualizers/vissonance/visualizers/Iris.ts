@@ -25,7 +25,20 @@ let group: THREE.Object3D;
 
 const Iris: Visualizer = {
     initialize: () => {},
-    make: () => {
+    make: async () => {
+        const manager = new THREE.LoadingManager();
+
+        const onLoad = new Promise<void>((resolve) => {
+            manager.onLoad = () => {
+                resolve();
+            };
+        });
+
+        const textureLoader = new THREE.TextureLoader(manager);
+        try {
+            textureLoader.load("/textures/placeholder.jpg");
+        } catch (e) {}
+
         group = new THREE.Object3D();
         const bufferLength = AudioAnalyser.data.analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
@@ -63,6 +76,8 @@ const Iris: Visualizer = {
             group.add(plane);
         }
         View.data.scene.add(group);
+
+        await onLoad;
     },
     destroy: () => View.data.scene.remove(group),
     render: () => {

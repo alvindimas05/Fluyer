@@ -1,5 +1,5 @@
 use std::sync::Mutex;
-use tauri::State;
+use tauri::{Manager, State};
 
 #[cfg(desktop)]
 use tauri::{AppHandle, Emitter};
@@ -11,6 +11,7 @@ use tauri_plugin_dialog::DialogExt;
 use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
 
 use crate::{music::metadata::MusicMetadata, AppState};
+use crate::music::player::MusicPlayer;
 
 pub static MUSIC_STORE_PATH_NAME: &str = "music-path";
 
@@ -105,4 +106,19 @@ pub fn music_equalizer(state: State<'_, Mutex<AppState>>, values: Vec<f32>) {
 #[tauri::command]
 pub fn music_get_image(path: String) -> Option<String> {
     MusicMetadata::get_image_from_path(path)
+}
+
+#[tauri::command]
+pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
+    std::fs::read(path).ok()
+}
+
+#[tauri::command]
+pub fn music_get_current_duration(state: State<'_, Mutex<AppState>>) -> Option<u128> {
+    Some(state.lock().unwrap().music_player.get_current_duration())
+}
+
+#[tauri::command]
+pub fn music_request_sync() {
+    MusicPlayer::emit_sync(false);
 }

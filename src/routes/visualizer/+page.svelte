@@ -4,38 +4,50 @@ import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
 import View from "$lib/visualizers/vissonance/View";
 import Iris from "$lib/visualizers/vissonance/visualizers/Iris";
 import ToastController from "$lib/controllers/ToastController";
+import MusicController from "$lib/controllers/MusicController";
+import PageController from "$lib/controllers/PageController";
 
 let container: HTMLDivElement;
 
-async function test(){
+async function start(){
     try {
         const canvas = document.createElement('canvas');
         if(!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')))){
-            ToastController.error("Your OS WebView does not support WebGL.");
+            toastError();
             return;
         }
     } catch (e) {
-        ToastController.error("Your OS WebView does not support WebGL.");
+        toastError();
         return;
     }
 
     AudioAnalyser.initialize();
     View.initialize(container);
 
-    Iris.make();
+    await Iris.make();
     View.data.renderVisualization = Iris.render;
 
-    const request = new XMLHttpRequest();
-    request.open("GET", "https://tariqksoliman.github.io/Vissonance/songs/Sex Whales & Roee Yeger - Where Was I (ft. Ashley Apollodor).mp3");
-    request.responseType = "arraybuffer";
-    request.onload = () => {
-        AudioAnalyser.makeAudio(request.response);
-    };
-    request.send();
+    if(!MusicController.isPlaying()) return;
+
+    try {
+        const buffer = await MusicController.getBuffer(MusicController.currentMusic().path);
+        if(buffer === null) return;
+        AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
+    } catch (e) {}
 }
-onMount(test);
+
+function onKeyDown(e: KeyboardEvent){
+    if(e.key === "Escape") PageController.back();
+}
+
+function toastError(){
+    ToastController.error("Your OS WebView does not support WebGL.");
+}
+onMount(start);
 </script>
 
-<svelte:window onresize={View.onWindowResize} />
+<svelte:window
+    onresize={View.onWindowResize}
+    onkeydown={onKeyDown}/>
 <div class="fixed w-full h-full z-[-1] bg-black"></div>
 <div bind:this={container}></div>
