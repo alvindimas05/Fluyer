@@ -20,6 +20,6 @@ import { isDesktop } from "$lib/platform";
         <MenuItem label="Equalizer" icon={IconType.Equalizer}
                   onclick={() => UIController.toggleEqualizer(true)}/>
     {/if}
-    <MenuItem label="Visualizer" icon={IconType.Equalizer}
+    <MenuItem label="Visualizer" icon={IconType.Visualizer}
               onclick={() => PageController.goto(PageRoutes.VISUALIZER)}/>
 </Sidebar>

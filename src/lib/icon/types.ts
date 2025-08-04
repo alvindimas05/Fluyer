@@ -35,4 +35,5 @@ export enum IconType {
 	Equalizer,
 	Close,
 	// Reset,
+	Visualizer,
 }
