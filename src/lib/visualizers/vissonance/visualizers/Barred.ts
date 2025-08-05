@@ -16,6 +16,10 @@ class Barred extends Visualizer {
 		"}",
 	].join("\n");
 
+	constructor() {
+		super();
+	}
+
 	async make() {
 		View.useOrthographicCamera();
 

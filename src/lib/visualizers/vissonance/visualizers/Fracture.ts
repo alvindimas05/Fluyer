@@ -22,11 +22,6 @@ class Fracture extends Visualizer {
 		"}",
 	].join("\n");
 
-	constructor() {
-		super();
-		AudioAnalyser.data.analyser.fftSize = 4096;
-	}
-
 	async make() {
 		View.data.renderer.autoClearColor = true;
 		View.data.renderer.setClearColor(new THREE.Color("hsl( 0, 0%, 100%)"), 1);

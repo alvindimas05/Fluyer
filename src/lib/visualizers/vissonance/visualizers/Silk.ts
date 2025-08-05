@@ -40,7 +40,6 @@ class Silk extends Visualizer {
 	constructor() {
 		super();
 		this.numBars = 512;
-		AudioAnalyser.data.analyser.fftSize = 4096;
 	}
 
 	async make() {

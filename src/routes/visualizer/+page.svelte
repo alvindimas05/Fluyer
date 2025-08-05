@@ -16,6 +16,7 @@ import Barred from "$lib/visualizers/vissonance/visualizers/Barred";
 import HillFog from "$lib/visualizers/vissonance/visualizers/HillFog";
 import Silk from "$lib/visualizers/vissonance/visualizers/Silk";
 import Siphon from "$lib/visualizers/vissonance/visualizers/Siphon";
+import Tricentric from "$lib/visualizers/vissonance/visualizers/Tricentric";
 
 let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 40);
 
@@ -41,7 +42,7 @@ async function start() {
 	AudioAnalyser.initialize();
 	View.initialize(container);
 
-	const visualizer = new Siphon();
+	const visualizer = new Tricentric();
 	await visualizer.make();
 
 	await setAudio();
