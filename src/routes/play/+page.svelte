@@ -438,10 +438,11 @@ function scrollToSelectedLyric() {
         #btn-back,
         #volume-bar {
             opacity: 0;
-            transition: opacity 1s ease 3s;
+            transition: opacity 4s ease 3s;
+
             &:hover {
                 opacity: 1;
-                transition-delay: 0s;
+                transition: opacity 0.5s ease;
             }
         }
     }

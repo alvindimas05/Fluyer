@@ -23,6 +23,7 @@ import DotsGrid from "svelte-material-icons/DotsGrid.svelte";
 import Lock from "svelte-material-icons/Lock.svelte";
 import FileDocumentOutline from "svelte-material-icons/FileDocumentOutline.svelte";
 import TuneVerticalVariant from "svelte-material-icons/TuneVerticalVariant.svelte";
+import Poll from "svelte-material-icons/Poll.svelte";
 
 const iconRegistryMaterial = {
 	[IconType.Unknown]: HelpCircleOutline,
@@ -54,6 +55,7 @@ const iconRegistryMaterial = {
 	[IconType.SaveLog]: FileDocumentOutline,
 	[IconType.Equalizer]: TuneVerticalVariant,
 	[IconType.Close]: CloseCircleOutline,
+	[IconType.Visualizer]: Poll,
 };
 
 export default iconRegistryMaterial;

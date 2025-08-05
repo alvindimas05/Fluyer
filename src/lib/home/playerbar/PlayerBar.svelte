@@ -13,12 +13,13 @@ import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 import { type MusicData, RepeatMode } from "$lib/home/music/types";
 import {
 	settingUiShowRepeatButton,
 	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
+import type { Unsubscriber } from "svelte/store";
 
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
@@ -157,15 +158,27 @@ function updateProgressTouch(
 	hideTooltip();
 }
 
+let unlistenMusicProgressValue: Unsubscriber;
+let unlistenMusicVolume: Unsubscriber;
+let unlistenMusicCurrentIndex: Unsubscriber;
+let unlistenMusicPlaylist: Unsubscriber;
+
 onMount(() => {
-	musicProgressValue.subscribe(
+	unlistenMusicProgressValue = musicProgressValue.subscribe(
 		() => (progressPercentage = MusicController.progressPercentage()),
 	);
-	musicVolume.subscribe(
+	unlistenMusicVolume = musicVolume.subscribe(
 		() => (volumePercentage = MusicController.volumePercentage()),
 	);
-	musicCurrentIndex.subscribe(refresh);
-	musicPlaylist.subscribe(refresh);
+	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(refresh);
+	unlistenMusicPlaylist = musicPlaylist.subscribe(refresh);
+});
+
+onDestroy(() => {
+	unlistenMusicProgressValue();
+	unlistenMusicVolume();
+	unlistenMusicCurrentIndex();
+	unlistenMusicPlaylist();
 });
 </script>
 

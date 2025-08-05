@@ -24,6 +24,7 @@ import {
 	Trash,
 	XCircle,
 	Faders,
+	ChartBar,
 } from "phosphor-svelte";
 
 const iconRegistryPhospor = {
@@ -56,6 +57,7 @@ const iconRegistryPhospor = {
 	[IconType.SaveLog]: FileText,
 	[IconType.Equalizer]: Faders,
 	[IconType.Close]: XCircle,
+	[IconType.Visualizer]: ChartBar,
 };
 
 export default iconRegistryPhospor;

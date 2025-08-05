@@ -14,6 +14,8 @@ export const CommandRoutes = {
 	MUSIC_SET_VOLUME: "music_set_volume",
 	MUSIC_EQUALIZER: "music_equalizer",
 	MUSIC_GET_IMAGE: "music_get_image",
+	MUSIC_GET_BUFFER: "music_get_buffer",
+	MUSIC_GET_CURRENT_DURATION: "music_get_current_duration",
 
 	CHECK_READ_AUDIO_PERMISSION: "check_read_audio_permission",
 	REQUEST_READ_AUDIO_PERMISSION: "request_read_audio_permission",
