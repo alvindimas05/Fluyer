@@ -103,6 +103,16 @@ PRs and feedback are welcome, but again—this project is made for fun!
 
 ---
 
+## 📝 Credits
+
+- [Vissonance](https://github.com/tariqksoliman/Vissonance) by [tariqksoliman](https://github.com/tariqksoliman)
+
+---
+
 ## 📄 License
 
-GNU General Public License v3.0
+This project includes code from the Vissonance project, which is licensed under the MIT License.  
+See [licenses/Vissonance-LICENSE](licenses/Vissonance-LICENSE) for the full license text.
+
+This project is licensed under the GNU General Public License v3.0.  
+See [LICENSE](./LICENSE) for details.
