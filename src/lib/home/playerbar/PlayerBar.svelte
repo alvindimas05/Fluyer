@@ -13,13 +13,13 @@ import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import {onDestroy, onMount} from "svelte";
+import { onDestroy, onMount } from "svelte";
 import { type MusicData, RepeatMode } from "$lib/home/music/types";
 import {
 	settingUiShowRepeatButton,
 	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
-import type {Unsubscriber} from "svelte/store";
+import type { Unsubscriber } from "svelte/store";
 
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
@@ -175,10 +175,10 @@ onMount(() => {
 });
 
 onDestroy(() => {
-    unlistenMusicProgressValue();
-    unlistenMusicVolume();
-    unlistenMusicCurrentIndex();
-    unlistenMusicPlaylist();
+	unlistenMusicProgressValue();
+	unlistenMusicVolume();
+	unlistenMusicCurrentIndex();
+	unlistenMusicPlaylist();
 });
 </script>
 

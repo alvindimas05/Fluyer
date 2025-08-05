@@ -11,11 +11,11 @@ import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import MusicController from "$lib/controllers/MusicController";
 import Muuri from "muuri";
-import {mount, onDestroy, onMount, unmount} from "svelte";
+import { mount, onDestroy, onMount, unmount } from "svelte";
 import { isDesktop, isMobile } from "$lib/platform";
 import type { MusicData } from "$lib/home/music/types";
 import ToastController from "$lib/controllers/ToastController";
-import type {Unsubscriber} from "svelte/store";
+import type { Unsubscriber } from "svelte/store";
 
 let gridElement: HTMLDivElement;
 let muuri: Muuri;
@@ -128,7 +128,7 @@ onMount(() => {
 });
 
 onDestroy(() => {
-    unlistenMusicPlaylist();
+	unlistenMusicPlaylist();
 });
 
 $effect(elementToggleDraggable);

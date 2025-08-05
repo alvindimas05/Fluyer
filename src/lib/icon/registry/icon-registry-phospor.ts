@@ -23,7 +23,8 @@ import {
 	SpeakerX,
 	Trash,
 	XCircle,
-	Faders, ChartBar,
+	Faders,
+	ChartBar,
 } from "phosphor-svelte";
 
 const iconRegistryPhospor = {

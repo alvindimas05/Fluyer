@@ -23,7 +23,8 @@ import {
 	Trash2,
 	XCircle,
 	KeyboardMusic,
-	CircleX, ChartNoAxesColumn,
+	CircleX,
+	ChartNoAxesColumn,
 } from "@lucide/svelte";
 
 const iconRegistryLucide = {

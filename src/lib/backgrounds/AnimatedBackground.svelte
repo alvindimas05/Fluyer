@@ -3,7 +3,7 @@ import MusicController from "$lib/controllers/MusicController";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
 import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
-import {onDestroy, onMount} from "svelte";
+import { onDestroy, onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
 import ColorThief from "colorthief/dist/color-thief.mjs";
 import {
@@ -12,7 +12,7 @@ import {
 } from "$lib/stores/setting";
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { prominent } from "color.js";
-import type {Unsubscriber} from "svelte/store";
+import type { Unsubscriber } from "svelte/store";
 
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_DURATION = 750;
@@ -257,18 +257,23 @@ let unlistenSettingTriggerAnimatedBackground: Unsubscriber;
 
 onMount(() => {
 	initializeCanvas();
-	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() => setTimeout(transitionToNewCanvas, 0));
-	unlistenMusicPlaylist = musicPlaylist.subscribe(() => setTimeout(transitionToNewCanvas, 0));
-	unlistenSettingTriggerAnimatedBackground = settingTriggerAnimatedBackground.subscribe(() => {
-		if (isMounted) setTimeout(() => transitionToNewCanvas(true), 0);
-		else isMounted = true;
-	});
+	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() =>
+		setTimeout(transitionToNewCanvas, 0),
+	);
+	unlistenMusicPlaylist = musicPlaylist.subscribe(() =>
+		setTimeout(transitionToNewCanvas, 0),
+	);
+	unlistenSettingTriggerAnimatedBackground =
+		settingTriggerAnimatedBackground.subscribe(() => {
+			if (isMounted) setTimeout(() => transitionToNewCanvas(true), 0);
+			else isMounted = true;
+		});
 });
 
 onDestroy(() => {
-    unlistenMusicCurrentIndex();
-    unlistenMusicPlaylist();
-    unlistenSettingTriggerAnimatedBackground();
+	unlistenMusicCurrentIndex();
+	unlistenMusicPlaylist();
+	unlistenSettingTriggerAnimatedBackground();
 });
 </script>
 

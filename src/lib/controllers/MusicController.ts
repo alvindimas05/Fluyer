@@ -151,7 +151,8 @@ const MusicController = {
 		seconds = Math.round(seconds);
 		return `${negative ? "-" : ""}${minutes}:${seconds > 9 ? seconds : "0" + seconds.toString()}`;
 	},
-	mpvMusicCurrentDuration: () => invoke<number | null>(CommandRoutes.MUSIC_GET_CURRENT_DURATION),
+	mpvMusicCurrentDuration: () =>
+		invoke<number | null>(CommandRoutes.MUSIC_GET_CURRENT_DURATION),
 	progressDurationText: (negative = false): string => {
 		return MusicController.parseProgressDurationIntoText(
 			negative
