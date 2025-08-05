@@ -14,6 +14,7 @@ import {mobileStatusBarHeight} from "$lib/stores/mobile";
 import Fracture from "$lib/visualizers/vissonance/visualizers/Fracture";
 import Barred from "$lib/visualizers/vissonance/visualizers/Barred";
 import HillFog from "$lib/visualizers/vissonance/visualizers/HillFog";
+import Silk from "$lib/visualizers/vissonance/visualizers/Silk";
 
 let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 40);
 
@@ -71,8 +72,8 @@ onMount(() => {
 
 onDestroy(() => {
     if(unlistenMusicCurrentIndex) unlistenMusicCurrentIndex();
-    View.destroy();
-    AudioAnalyser.destroy();
+    try { View.destroy(); } catch (e) {}
+    try { AudioAnalyser.destroy(); } catch (e) {}
 });
 </script>
 

@@ -12,6 +12,7 @@ class Visualizer {
     barGap = 10;
     vertexShader = '';
     fragmentShader = '';
+    lastLoudness = 0;
 
     constructor() {
         this.group = new THREE.Object3D();
@@ -22,6 +23,7 @@ class Visualizer {
     async make(){}
     destroy(){}
     render(){}
+    executeOnNewSong(){}
 
     waitForLoad(){
         const manager = new THREE.LoadingManager();

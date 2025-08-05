@@ -5,7 +5,6 @@ import View from "$lib/visualizers/vissonance/View";
 import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 
 class Fracture extends Visualizer {
-    lastLoudness = 0;
     // @ts-ignore
     group2: THREE.Object3D;
     vertexShader = [
@@ -22,6 +21,11 @@ class Fracture extends Visualizer {
         "gl_FragColor = vec4( -pos.z/500.0 * col.r, -pos.z/500.0 * col.g, -pos.z/500.0 * col.b, 1 );",
         "}",
     ].join("\n");
+
+    constructor() {
+        super();
+        AudioAnalyser.data.analyser.fftSize = 4096;
+    }
 
     async make() {
         View.data.renderer.autoClearColor = true;

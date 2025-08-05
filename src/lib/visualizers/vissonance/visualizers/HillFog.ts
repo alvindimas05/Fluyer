@@ -24,9 +24,7 @@ class Barred extends Visualizer {
         View.useOrthographicCamera();
 
         this.geometry = new THREE.PlaneGeometry( 900, 40, 127 )
-        const uniforms = {};
         const material = new THREE.ShaderMaterial( {
-            uniforms: uniforms,
             vertexShader: this.vertexShader,
             fragmentShader: this.fragmentShader
         });
@@ -44,7 +42,7 @@ class Barred extends Visualizer {
         const dataArray = new Uint8Array(bufferLength);
         AudioAnalyser.data.analyser.getByteTimeDomainData(dataArray);
 
-        if(this.geometry) return;
+        if(!this.geometry) return;
         for(let i = 0; i < bufferLength; i++) {
             this.geometry.attributes.position.array[i*3 + 1] = dataArray[i] / 3;
         }
