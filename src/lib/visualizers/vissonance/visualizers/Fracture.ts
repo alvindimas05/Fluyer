@@ -23,6 +23,8 @@ class Fracture extends Visualizer {
 	].join("\n");
 
 	async make() {
+		await super.make();
+
 		View.data.renderer.autoClearColor = true;
 		View.data.renderer.setClearColor(new THREE.Color("hsl( 0, 0%, 100%)"), 1);
 

@@ -21,6 +21,8 @@ class Iris extends Visualizer {
 	].join("\n");
 
 	async make() {
+		await super.make();
+
 		View.usePerspectiveCamera();
 		View.data.camera.position.y = 0;
 		View.data.camera.position.z = 250;

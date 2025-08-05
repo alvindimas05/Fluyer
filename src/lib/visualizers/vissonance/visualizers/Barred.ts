@@ -16,11 +16,9 @@ class Barred extends Visualizer {
 		"}",
 	].join("\n");
 
-	constructor() {
-		super();
-	}
-
 	async make() {
+		super.make();
+
 		View.useOrthographicCamera();
 
 		let positionX = -20 * (this.numBars / 2);

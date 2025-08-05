@@ -27,6 +27,11 @@ const View = {
 		View.data.camera.position.z = 500;
 		View.data.scene = new THREE.Scene();
 
+		View.resetRenderer()
+
+		View.loopAnimate();
+	},
+	resetRenderer: () => {
 		// Plane
 		View.data.renderer = new THREE.WebGLRenderer({
 			alpha: true,
@@ -35,8 +40,6 @@ const View = {
 		View.data.renderer.setPixelRatio(window.devicePixelRatio);
 		View.data.renderer.setSize(window.innerWidth, window.innerHeight);
 		View.data.container.appendChild(View.data.renderer.domElement);
-
-		View.loopAnimate();
 	},
 	usePerspectiveCamera: function () {
 		View.data.camera = new THREE.PerspectiveCamera(
@@ -79,6 +82,10 @@ const View = {
 		View.data.renderer.dispose();
 		View.data.renderer.forceContextLoss();
 	},
+	clear: () => {
+		View.data.scene = new THREE.Scene();
+		View.data.renderer.clear();
+	}
 };
 
 export default View;

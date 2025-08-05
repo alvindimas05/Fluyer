@@ -18,12 +18,11 @@ class Tricentric extends Visualizer {
 		"}",
 	].join("\n");
 
-	constructor() {
-		super();
-		this.numBars = 32;
-	}
-
 	async make() {
+		await super.make();
+
+		this.numBars = 32;
+
 		View.usePerspectiveCamera();
 		View.data.camera.position.y = 0;
 

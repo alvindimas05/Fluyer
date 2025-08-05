@@ -21,12 +21,11 @@ class Siphon extends Visualizer {
 		"}",
 	].join("\n");
 
-	constructor() {
-		super();
-		this.barGap = 8;
-	}
-
 	async make() {
+		await super.make();
+
+		this.barGap = 8;
+
 		View.usePerspectiveCamera();
 		View.data.camera.position.y = 0;
 		View.data.camera.position.z = 0;

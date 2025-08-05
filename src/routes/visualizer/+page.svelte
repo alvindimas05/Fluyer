@@ -2,7 +2,6 @@
 import { onDestroy, onMount } from "svelte";
 import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
 import View from "$lib/visualizers/vissonance/View";
-import Iris from "$lib/visualizers/vissonance/visualizers/Iris";
 import ToastController from "$lib/controllers/ToastController";
 import MusicController from "$lib/controllers/MusicController";
 import PageController from "$lib/controllers/PageController";
@@ -11,16 +10,30 @@ import type { Unsubscriber } from "svelte/store";
 import type { MusicData } from "$lib/home/music/types";
 import { isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
-import Fracture from "$lib/visualizers/vissonance/visualizers/Fracture";
 import Barred from "$lib/visualizers/vissonance/visualizers/Barred";
+import Fracture from "$lib/visualizers/vissonance/visualizers/Fracture";
 import HillFog from "$lib/visualizers/vissonance/visualizers/HillFog";
+import Iris from "$lib/visualizers/vissonance/visualizers/Iris";
 import Silk from "$lib/visualizers/vissonance/visualizers/Silk";
 import Siphon from "$lib/visualizers/vissonance/visualizers/Siphon";
 import Tricentric from "$lib/visualizers/vissonance/visualizers/Tricentric";
+import type Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 40);
 
 let container: HTMLDivElement;
+
+const DEFAULT_VISUALIZER_INDEX = 0;
+let visualizers: Visualizer[] = [
+    new Barred(),
+    new Fracture(),
+    new HillFog(),
+    new Iris(),
+    new Silk(),
+    new Siphon(),
+    new Tricentric(),
+];
+let currentVisualizerIndex = $state(-1);
 
 async function start() {
 	try {
@@ -42,12 +55,19 @@ async function start() {
 	AudioAnalyser.initialize();
 	View.initialize(container);
 
-	const visualizer = new Tricentric();
-	await visualizer.make();
+    await setCurrentVisualizer(DEFAULT_VISUALIZER_INDEX);
 
 	await setAudio();
+}
 
-	View.data.renderVisualization = visualizer.render.bind(visualizer);
+async function setCurrentVisualizer(index: number){
+    if(index === currentVisualizerIndex) return;
+
+    if(visualizers[currentVisualizerIndex]) visualizers[currentVisualizerIndex].destroy();
+    currentVisualizerIndex = index;
+    View.clear();
+    await visualizers[currentVisualizerIndex].make();
+    View.data.renderVisualization = visualizers[currentVisualizerIndex].render.bind(visualizers[currentVisualizerIndex]);
 }
 
 async function setAudio(music: MusicData | null = null) {
@@ -96,19 +116,32 @@ onDestroy(() => {
     onkeydown={onKeyDown}/>
 <div class="fixed w-full h-full z-[-2] bg-black"></div>
 <div class="fixed w-full h-full z-[-1]" bind:this={container}></div>
-<div id="actions" class="ms-3 font-light" style="margin-top: {marginTop}px;">
-    <p class="text-opacity-background-80 text-3xl">Vissonance</p>
-    <p class="text-opacity-background-60">by tariqksoliman</p>
+<div id="actions" class="ms-3 font-light md:max-w-[50vw]" style="margin-top: {marginTop}px;">
+    <p class="text-gray-300 text-3xl">Vissonance</p>
+    <p class="text-gray-400">by tariqksoliman</p>
+    <ul class="w-fit">
+        {#each visualizers as visualizer, i}
+            <li class="cursor-pointer hover:text-gray-300"
+                class:text-gray-500={i !== currentVisualizerIndex}
+                class:text-gray-300={i === currentVisualizerIndex}
+                onclick={() => setCurrentVisualizer(i)}>
+                {visualizer.constructor.name}
+                {#if visualizer.constructor.name === "Siphon"}
+                    (EPILEPSY WARNING)
+                {/if}
+            </li>
+        {/each}
+    </ul>
 </div>
 
 <style lang="scss">
-  //#actions {
-  //  opacity: 0;
-  //  transition: opacity 1s ease 3s;
-  //
-  //  &:hover {
-  //    opacity: 1;
-  //    transition-delay: 0s;
-  //  }
-  //}
+  #actions {
+    opacity: 0;
+    transition: opacity 4s ease 3s;
+
+    &:hover {
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+  }
 </style>

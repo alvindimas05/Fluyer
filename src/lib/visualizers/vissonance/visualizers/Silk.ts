@@ -37,12 +37,11 @@ class Silk extends Visualizer {
 		"}",
 	].join("\n");
 
-	constructor() {
-		super();
-		this.numBars = 512;
-	}
-
 	async make() {
+		await super.make();
+
+		this.numBars = 512;
+
 		View.usePerspectiveCamera();
 		View.data.camera.position.x = 0;
 		View.data.camera.position.y = 0;

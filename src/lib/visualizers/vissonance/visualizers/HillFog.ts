@@ -21,6 +21,8 @@ class HillFog extends Visualizer {
 	].join("\n");
 
 	async make() {
+		await super.make();
+
 		View.useOrthographicCamera();
 
 		this.geometry = new THREE.PlaneGeometry(900, 40, 127);

@@ -14,14 +14,12 @@ class Visualizer {
 	fragmentShader = "";
 	lastLoudness = 0;
 
-	constructor() {
+	async make() {
 		this.group = new THREE.Object3D();
 		const bufferLength = AudioAnalyser.data.analyser.frequencyBinCount;
 		this.dataArray = new Uint8Array(bufferLength);
 		AudioAnalyser.data.analyser.fftSize = 4096;
 	}
-
-	async make() {}
 	destroy() {}
 	render() {}
 	executeOnNewSong() {}
