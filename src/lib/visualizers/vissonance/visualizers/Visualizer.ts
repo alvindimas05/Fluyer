@@ -1,7 +1,9 @@
 import * as THREE from "three";
 import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
+import View from "$lib/visualizers/vissonance/View";
 
 class Visualizer {
+	name = 'Visualizer';
 	// @ts-ignore
 	group: THREE.Object3D;
 	// @ts-ignore
@@ -19,6 +21,9 @@ class Visualizer {
 		const bufferLength = AudioAnalyser.data.analyser.frequencyBinCount;
 		this.dataArray = new Uint8Array(bufferLength);
 		AudioAnalyser.data.analyser.fftSize = 4096;
+
+		View.data.renderer.autoClearColor = true;
+		View.data.renderer.setClearColor(new THREE.Color("hsl( 0, 0%, 0%)"), 1);
 	}
 	destroy() {}
 	render() {}

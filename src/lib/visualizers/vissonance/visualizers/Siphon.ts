@@ -5,6 +5,7 @@ import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 class Siphon extends Visualizer {
+	name = 'Siphon';
 	cylRadius = 100;
 	vertexShader = [
 		"varying vec4 pos;",
@@ -69,7 +70,7 @@ class Siphon extends Visualizer {
 	}
 	destroy() {
 		View.data.scene.remove(this.group);
-		View.data.renderer.autoClearColor = false;
+		// View.data.renderer.autoClearColor = false;
 	}
 	render() {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);

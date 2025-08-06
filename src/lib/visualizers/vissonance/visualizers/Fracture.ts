@@ -5,6 +5,7 @@ import View from "$lib/visualizers/vissonance/View";
 import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 
 class Fracture extends Visualizer {
+	name = 'Fracture';
 	// @ts-ignore
 	group2: THREE.Object3D;
 	vertexShader = [
@@ -71,7 +72,7 @@ class Fracture extends Visualizer {
 	destroy() {
 		View.data.scene.remove(this.group);
 		View.data.scene.remove(this.group2);
-		View.data.renderer.autoClearColor = false;
+		// View.data.renderer.autoClearColor = false;
 	}
 	render() {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);

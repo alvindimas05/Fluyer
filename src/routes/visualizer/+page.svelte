@@ -30,8 +30,8 @@ let visualizers: Visualizer[] = [
     new HillFog(),
     new Iris(),
     new Silk(),
-    new Siphon(),
     new Tricentric(),
+    new Siphon(),
 ];
 let currentVisualizerIndex = $state(-1);
 
@@ -63,6 +63,7 @@ async function start() {
 async function setCurrentVisualizer(index: number){
     if(index === currentVisualizerIndex) return;
 
+    View.data.renderVisualization = null;
     if(visualizers[currentVisualizerIndex]) visualizers[currentVisualizerIndex].destroy();
     currentVisualizerIndex = index;
     View.clear();
@@ -78,6 +79,8 @@ async function setAudio(music: MusicData | null = null) {
 			music ? music.path : MusicController.currentMusic().path,
 		);
 		if (buffer === null) return;
+
+        const now = performance.now();
 		await AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
 	} catch (e) {}
 }
@@ -90,15 +93,12 @@ function toastError() {
 	ToastController.error("Your OS WebView does not support WebGL.");
 }
 
-let unlistenMusicCurrentIndex: Unsubscriber;
-onMount(() => {
-	(async () => {
-		await start();
-		unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async (index) =>
-			setAudio(MusicController.getMusicByIndex(index)),
-		);
-	})();
+let unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async (index) => {
+    if(currentVisualizerIndex === -1) return;
+    visualizers[currentVisualizerIndex].executeOnNewSong();
+    setAudio(MusicController.getMusicByIndex(index));
 });
+onMount(start);
 
 onDestroy(() => {
 	if (unlistenMusicCurrentIndex) unlistenMusicCurrentIndex();
@@ -114,7 +114,7 @@ onDestroy(() => {
 <svelte:window
     onresize={View.onWindowResize}
     onkeydown={onKeyDown}/>
-<div class="fixed w-full h-full z-[-2] bg-black"></div>
+<!--<div class="fixed w-full h-full z-[-2] bg-black"></div>-->
 <div class="fixed w-full h-full z-[-1]" bind:this={container}></div>
 <div id="actions" class="ms-3 font-light md:max-w-[50vw]" style="margin-top: {marginTop}px;">
     <p class="text-gray-300 text-3xl">Vissonance</p>
@@ -125,8 +125,8 @@ onDestroy(() => {
                 class:text-gray-500={i !== currentVisualizerIndex}
                 class:text-gray-300={i === currentVisualizerIndex}
                 onclick={() => setCurrentVisualizer(i)}>
-                {visualizer.constructor.name}
-                {#if visualizer.constructor.name === "Siphon"}
+                {visualizer.name}
+                {#if visualizer.name === "Siphon"}
                     (EPILEPSY WARNING)
                 {/if}
             </li>

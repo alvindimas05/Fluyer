@@ -43,15 +43,16 @@ const AudioAnalyser = {
 		}
 	},
 	playAudio: async () => {
-		let duration = await MusicController.mpvMusicCurrentDuration();
-		if (duration === null) return;
-		duration = duration / 1000;
-
 		AudioAnalyser.data.source.connect(AudioAnalyser.data.analyser);
 		AudioAnalyser.data.source.connect(AudioAnalyser.data.gainNode);
 		AudioAnalyser.data.gainNode.connect(
 			AudioAnalyser.data.audioContext.destination,
 		);
+
+		let duration = await MusicController.mpvMusicCurrentDuration();
+		if (duration === null) return;
+		duration = duration / 1000;
+
 		AudioAnalyser.data.source.start(0, duration);
 	},
 	destroy: () => {

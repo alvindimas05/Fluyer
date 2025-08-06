@@ -5,6 +5,7 @@ import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 class HillFog extends Visualizer {
+	name = 'Hill Fog';
 	// @ts-ignore
 	geometry: THREE.PlaneGeometry;
 	// @ts-ignore

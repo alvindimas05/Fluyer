@@ -5,7 +5,7 @@ interface ViewDataInterface {
 	renderer: THREE.WebGLRenderer;
 	scene: THREE.Scene;
 	container: HTMLElement;
-	renderVisualization: () => void;
+	renderVisualization: (() => void) | null;
 	loopAnimateIntervalId: ReturnType<typeof setInterval>;
 }
 

@@ -5,6 +5,7 @@ import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 class Barred extends Visualizer {
+	name = 'Barred';
 	vertexShader = [
 		"void main() {",
 		"gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",

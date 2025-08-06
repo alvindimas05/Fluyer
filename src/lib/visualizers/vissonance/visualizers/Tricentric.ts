@@ -5,6 +5,7 @@ import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 class Tricentric extends Visualizer {
+	name = 'Tricentric';
 	vertexShader = [
 		"void main() {",
 		"gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
@@ -54,6 +55,7 @@ class Tricentric extends Visualizer {
 	}
 	destroy() {
 		View.data.scene.remove(this.group);
+		View.data.camera.rotation.z = 0;
 	}
 	render() {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);
@@ -87,11 +89,12 @@ class Tricentric extends Visualizer {
 		l: number,
 		factor: number,
 	) {
+		View.data.renderer.setClearColor(new THREE.Color("hsl( 0, 0%, 0%)"), 1);
 		//l = parseInt( (factor / 255) * 60 + 1 );
 		this.group.children[groupI].material.uniforms.col.value = new THREE.Color(
 			"hsl(" + h + ", " + s + "%, " + l + "%)",
 		);
-		this.group.children[groupI].material.uniforms.alpha.value = s / 100;
+		// this.group.children[groupI].material.uniforms.alpha.value = s / 100;
 	}
 
 	arrayAverage(arr: number[]) {
