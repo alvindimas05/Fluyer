@@ -14,7 +14,7 @@ import { isDesktop } from "$lib/platform";
     <p class="text-[1.2rem] md:text-[1.5rem] font-semibold px-3 py-2">Menu</p>
     <MenuItem label="Settings" icon={IconType.Settings}
               onclick={() => PageController.goto(PageRoutes.SETTINGS)}/>
-    <MenuItem label="Full Play Screen" icon={IconType.Fullscreen}
+    <MenuItem label="Play Screen" icon={IconType.Fullscreen}
               onclick={() => PageController.goto(PageRoutes.PLAY)}/>
     {#if isDesktop()}
         <MenuItem label="Equalizer" icon={IconType.Equalizer}
