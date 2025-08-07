@@ -60,17 +60,10 @@ const unlistenMusicVolume = musicVolume.subscribe(() => {
 });
 
 function handleButtonPlayPause() {
-	if (
-		MusicController.currentMusic() === null ||
-		MusicController.isProgressValueEnd()
-	) {
-		return;
-	}
-
-	if (MusicController.isPlaying()) {
-		MusicController.setIsPlaying(false);
-		MusicController.pause();
-	} else MusicController.play();
+    if (MusicController.isPlaying()) {
+        MusicController.setIsPlaying(false);
+        MusicController.pause();
+    } else MusicController.play();
 }
 
 function handleButtonPrevious() {
