@@ -29,6 +29,7 @@ import CoverArt, {
 import { isDesktop, isMobile } from "$lib/platform";
 import { settingTriggerAnimatedBackground } from "$lib/stores/setting";
 import { equalizerValues } from "$lib/stores/equalizer";
+import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -578,10 +579,10 @@ const MusicController = {
 		return Array(18).fill(0);
 	},
 	resetEqualizer: async () => {
-		equalizerValues.set(MusicController.getDefaultEqualizerValues());
-		await MusicController.setEqualizer(
-			MusicController.getDefaultEqualizerValues(),
-		);
+		const values = MusicController.getDefaultEqualizerValues();
+		equalizerValues.set(values);
+		await PersistentStoreController.equalizer.set(values);
+		await MusicController.setEqualizer(values);
 	},
 
 	getBuffer: async (path: string) => {
