@@ -575,9 +575,6 @@ const MusicController = {
 	applyEqualizer: async () => {
 		await MusicController.setEqualizer(get(equalizerValues));
 	},
-	getDefaultEqualizerValues: () => {
-		return Array(18).fill(0);
-	},
 	resetEqualizer: async () => {
 		const values = MusicController.getDefaultEqualizerValues();
 		equalizerValues.set(values);

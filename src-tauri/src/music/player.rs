@@ -203,8 +203,19 @@ impl MusicPlayer {
             .unwrap();
     }
     pub fn get_current_duration(&self) -> u128 {
-        (GLOBAL_MUSIC_MPV.get().unwrap()
-            .get_property::<f64>("time-pos").unwrap() * 1000.0) as u128
+        #[cfg(target_os = "android")]{
+            let info = GLOBAL_APP_HANDLE
+                .get()
+                .unwrap()
+                .fluyer()
+                .player_get_info()
+                .unwrap();
+            info.current_position as u128
+        }
+        #[cfg(desktop)]{
+            (crate::music::player::GLOBAL_MUSIC_MPV.get().unwrap()
+                .get_property::<f64>("time-pos").unwrap() * 1000.0) as u128
+        }
     }
     pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
         #[cfg(target_os = "android")]

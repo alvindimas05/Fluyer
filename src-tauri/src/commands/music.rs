@@ -110,8 +110,50 @@ pub fn music_get_image(path: String) -> Option<String> {
 
 #[tauri::command]
 pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
-    std::fs::read(path).ok()
+    use std::process::Command;
+    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::path::PathBuf;
+
+    let ffmpeg_exists = Command::new("ffmpeg")
+        .arg("-version")
+        .output()
+        .is_ok();
+
+    if !ffmpeg_exists {
+        return std::fs::read(path).ok();
+    }
+
+    let tmp_dir = std::env::temp_dir();
+    let unique_id = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis();
+    let tmp_file: PathBuf = tmp_dir.join(format!("converted_{}.mp3", unique_id));
+
+    // Convert to very small mp3
+    let ffmpeg_status = Command::new("ffmpeg")
+        .args([
+            "-y", // overwrite
+            "-i", &path, // input
+            "-ac", "1",  // mono
+            "-ar", "22050", // lower sample rate
+            "-b:a", "32k", // low bitrate
+            "-codec:a", "libmp3lame", // MP3 encoder
+            tmp_file.to_str().unwrap(),
+        ])
+        .status();
+
+    if ffmpeg_status.is_err() || !tmp_file.exists() {
+        return std::fs::read(path).ok();
+    }
+
+    let data = std::fs::read(&tmp_file).ok();
+
+    let _ = std::fs::remove_file(tmp_file);
+
+    data
 }
+
 
 #[tauri::command]
 pub fn music_get_current_duration(state: State<'_, Mutex<AppState>>) -> Option<u128> {

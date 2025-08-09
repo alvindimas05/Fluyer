@@ -19,7 +19,12 @@ class MainActivity : TauriActivity() {
     }
 
     // Make navigation bar transparent (API 21+)
-    window.navigationBarColor = Color.WHITE
+    window.navigationBarColor = Color.TRANSPARENT
+
+    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+    
+    // Make navigation bar white
+    insetsController.isAppearanceLightNavigationBars = false
 
     // Remove nav-bar contrast scrim (API 29+)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -27,7 +32,6 @@ class MainActivity : TauriActivity() {
     }
 
     // Let nav-bar reappear on swipe (immersive feel)
-    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
     insetsController.systemBarsBehavior =
       WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
@@ -36,5 +40,7 @@ class MainActivity : TauriActivity() {
     
     // Make status bar white
     insetsController.isAppearanceLightStatusBars = false
+
+    window.decorView.setBackgroundColor(Color.BLACK)
   }
 }

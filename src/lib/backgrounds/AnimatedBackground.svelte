@@ -13,6 +13,8 @@ import {
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { prominent } from "color.js";
 import type { Unsubscriber } from "svelte/store";
+import {page} from "$app/state";
+import {PageRoutes} from "$lib/pages";
 
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_DURATION = 750;
@@ -169,9 +171,11 @@ async function initializeCanvas(reinitialize = false) {
 	currentCanvas = await createCanvas({ usePreviousColors: reinitialize });
 
 	if (reinitialize) {
+        console.log("reinitialize");
 		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
 		canvasContext.drawImage(currentCanvas!, 0, 0);
 	} else {
+        console.log("initializeCanvas");
 		canvasContext = canvas.getContext("2d")!;
 
 		const startTime = performance.now();
@@ -203,7 +207,8 @@ async function afterInitializeCanvas() {
 async function transitionToNewCanvas(force = false) {
 	const _newCanvas = await createCanvas({ force });
 
-	if (!_newCanvas || newCanvas !== null) return;
+	if (!_newCanvas || newCanvas !== null || page.url.pathname !== PageRoutes.VISUALIZER) return;
+    console.log("transitionToNewCanvas");
 
 	newCanvas = _newCanvas;
 
@@ -214,6 +219,7 @@ async function transitionToNewCanvas(force = false) {
 	buffer.width = width;
 	buffer.height = height;
 	const bufferContext = buffer.getContext("2d")!;
+
 
 	const startTime = performance.now();
 
@@ -278,4 +284,6 @@ onDestroy(() => {
 </script>
 
 <svelte:window onresize={onWindowResize} />
-<canvas class="fixed rounded-windows" bind:this={canvas}></canvas>
+<canvas class="fixed rounded-windows"
+        class:hidden={page.url.pathname === PageRoutes.VISUALIZER}
+        bind:this={canvas}></canvas>

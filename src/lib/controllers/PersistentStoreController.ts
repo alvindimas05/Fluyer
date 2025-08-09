@@ -10,7 +10,6 @@ import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background
 import { IconThemeType } from "$lib/icon/types";
 import { iconTheme } from "$lib/stores/icon";
 import { equalizerValues } from "$lib/stores/equalizer";
-import MusicController from "$lib/controllers/MusicController";
 
 const storePath = "store.json";
 const storeOptions = { autoSave: true };
@@ -105,7 +104,7 @@ const PersistentStoreController = {
 
 	equalizer: makeBinding<number[]>(
 		"equalizer",
-		MusicController.getDefaultEqualizerValues(),
+		Array(18).fill(0),
 		equalizerValues.set,
 	),
 };

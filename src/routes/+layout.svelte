@@ -3,11 +3,6 @@ import "animate.css";
 import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 import "../app.scss";
 import "toastify-js/src/toastify.css";
-import jQuery from "jquery";
-
-window.$ = jQuery;
-window.jQuery = jQuery;
-
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
 import { isDesktop, isMobile, isWindows } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
@@ -57,7 +52,7 @@ onMount(() => setTimeout(initialize, isWindows() ? 1000 : 0));
 </script>
 
 <Font />
-{#if isAppReady && page.url.pathname !== PageRoutes.VISUALIZER}
+{#if isAppReady}
     <AnimatedBackground />
 {/if}
 <div class="w-screen h-screen fixed scrollbar-hidden rounded-windows">
