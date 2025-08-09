@@ -73,6 +73,7 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
 
     @Command
     fun getNavigationBarHeight(invoke: Invoke){
+        Log.d(LOG_TAG, "getNavigationBarHeight: ${implementation.getNavigationBarHeight()}")
         val obj = JSObject().put("value", implementation.getNavigationBarHeight())
         invoke.resolve(obj)
     }

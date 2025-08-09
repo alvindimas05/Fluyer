@@ -191,8 +191,7 @@ onDestroy(() => {
         bind:this={tooltip}>{tooltipText}</div>
     <div
         class="w-full bg-gray-700 bg-opacity-30 text-white backdrop-blur-md rounded-windows-bottom"
-        style="padding-bottom: ${$mobileNavigationBarHeight}px"
-    >
+        style="padding-bottom: {$mobileNavigationBarHeight}px;">
         <div class="relative">
             <input
                     class={`w-full absolute music-progress-bar`}

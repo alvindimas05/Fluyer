@@ -17,38 +17,41 @@ class FluyerMain(private val activity: Activity) {
             Toast.makeText(activity, value, Toast.LENGTH_SHORT).show()
         }
     }
+
     private fun dpToPx(value: Int): Int {
         return (value / activity.resources.displayMetrics.density).roundToInt()
     }
+
     fun getStatusBarHeight(): Int {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        return dpToPx(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val insets = activity.window.decorView.rootWindowInsets
+            insets?.getInsets(WindowInsets.Type.statusBars())?.top ?: 0
+        } else {
             val resourceId = activity.resources.getIdentifier("status_bar_height", "dimen", "android")
-            return if (resourceId > 0) {
-                dpToPx(activity.resources.getDimensionPixelSize(resourceId))
+            if (resourceId > 0) {
+                activity.resources.getDimensionPixelSize(resourceId) // already px
             } else {
                 0
             }
-        }
-        return dpToPx(activity.window.decorView.rootWindowInsets
-            .getInsets(WindowInsets.Type.statusBars()).top)
+        })
     }
+
     fun getNavigationBarHeight(): Int {
-        val resources: Resources = activity.resources
-
-        val resName = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            "navigation_bar_height"
+        return dpToPx(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val insets = activity.window.decorView.rootWindowInsets
+            insets?.getInsets(WindowInsets.Type.navigationBars())?.bottom ?: 0
         } else {
-            "navigation_bar_height_landscape"
-        }
-
-        val id: Int = resources.getIdentifier(resName, "dimen", "android")
-
-        return if (id > 0) {
-            dpToPx(resources.getDimensionPixelSize(id))
-        } else {
-            0
-        }
+            val resources = activity.resources
+            val resName = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                "navigation_bar_height"
+            } else {
+                "navigation_bar_height_landscape"
+            }
+            val id = resources.getIdentifier(resName, "dimen", "android")
+            if (id > 0) resources.getDimensionPixelSize(id) else 0
+        })
     }
+
     fun restartApp() {
         val context = activity.applicationContext
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
