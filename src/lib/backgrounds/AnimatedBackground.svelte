@@ -181,7 +181,8 @@ async function initializeCanvas(reinitialize = false) {
 		const startTime = performance.now();
 
 		function fadeIn(currentTime: number) {
-			const elapsed = currentTime - startTime;
+			let elapsed = currentTime - startTime;
+            if (elapsed < 0) elapsed = 0;
 			const alpha = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
 
 			canvasContext.clearRect(0, 0, canvas.width, canvas.height);
@@ -207,7 +208,7 @@ async function afterInitializeCanvas() {
 async function transitionToNewCanvas(force = false) {
 	const _newCanvas = await createCanvas({ force });
 
-	if (!_newCanvas || newCanvas !== null || page.url.pathname !== PageRoutes.VISUALIZER) return;
+	if (!_newCanvas || newCanvas !== null) return;
     console.log("transitionToNewCanvas");
 
 	newCanvas = _newCanvas;
