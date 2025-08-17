@@ -114,7 +114,7 @@ onDestroy(() => {
 <svelte:window
     onresize={View.onWindowResize}
     onkeydown={onKeyDown}/>
-<!--<div class="fixed w-full h-full z-[-2] bg-black"></div>-->
+<div class="fixed w-full h-full z-[-2] bg-black"></div>
 <div class="fixed w-full h-full z-[-1]" bind:this={container}></div>
 <div class="ms-3 font-light w-fit show-then-fade" style="margin-top: {marginTop}px;"
     use:showThenFade>
