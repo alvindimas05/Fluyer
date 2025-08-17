@@ -87,6 +87,10 @@ pub fn run() {
             commands::music::music_get_image,
             commands::music::music_get_current_duration,
             commands::music::music_request_sync,
+
+            commands::folder::folder_get_items,
+            commands::folder::folder_get_image,
+
             commands::log::log_error,
             #[cfg(target_os = "android")]
             commands::log::toast,

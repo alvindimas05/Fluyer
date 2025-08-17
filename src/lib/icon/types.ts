@@ -36,4 +36,5 @@ export enum IconType {
 	Close,
 	// Reset,
 	Visualizer,
+	Folder,
 }

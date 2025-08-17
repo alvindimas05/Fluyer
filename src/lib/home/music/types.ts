@@ -23,6 +23,10 @@ export interface MusicData {
 	date: string | null;
 }
 
+export interface FolderData {
+	path: string;
+}
+
 export interface MusicPlayerSync {
 	index: number;
 	currentPosition: number;
@@ -34,4 +38,9 @@ export enum RepeatMode {
 	None = "repeatNone",
 	One = "repeatOne",
 	All = "repeat",
+}
+
+export enum MusicListType {
+	All = "all",
+	Folder = "folder",
 }

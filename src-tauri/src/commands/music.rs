@@ -154,7 +154,6 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
     data
 }
 
-
 #[tauri::command]
 pub fn music_get_current_duration(state: State<'_, Mutex<AppState>>) -> Option<u128> {
     Some(state.lock().unwrap().music_player.get_current_duration())

@@ -16,8 +16,36 @@ import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import { sidebarShowingType } from "$lib/stores/sidebar";
 import { onMount } from "svelte";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import {MusicConfig} from "$lib/controllers/MusicController";
+
+const rules = [
+	// xhdpi (DPR > 2.0)
+	[1536, 2.01, 0.125], // 2xl → 12.5%
+	[1280, 2.01, 0.16667], // xl-xhdpi → 16.6667%
+	[1024, 2.01, 0.2], // lg-xhdpi → 20%
+	[768, 2.01, 0.25], // md-xhdpi → 25%
+	[640, 2.01, 0.33334], // sm-xhdpi → 33.3334%
+
+	// hdpi (1.01 ≤ DPR ≤ 2.0)
+	[1536, 1.01, 0.125], // 2xl → 12.5%
+	[1280, 1.01, 0.16667], // xl-hdpi → 16.6667%
+	[1024, 1.01, 0.2], // lg-hdpi → 20%
+	[768, 1.01, 0.25], // md-hdpi → 25%
+	[640, 1.01, 0.33334], // sm-hdpi → 33.3334%
+
+	// default (DPR <= 1.0)
+	[1536, 0, 0.125], // 2xl → 12.5%
+	[1280, 0, 0.16667], // xl → 16.6667%
+	[1024, 0, 0.2], // lg → 20%
+	[768, 0, 0.25], // md → 25%
+	[640, 0, 0.33334], // sm → 33.3334%
+];
 
 const SWIPE_RANGE = 125;
+
+let filterBarHeight = $state(MusicConfig.filterBarHeight);
+let sidebarWidth = $state(window.innerWidth);
+let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + filterBarHeight);
 
 let isMouseInsideArea = $state(false);
 let isShowing = $state(false);
@@ -72,22 +100,46 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 	}
 }
 
+function updateFilterBarHeight() {
+	filterBarHeight = MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2);
+}
+
+function updateSidebarWidth() {
+	const w = window.innerWidth;
+	const dpi = window.devicePixelRatio;
+
+	for (const [minW, minDppx, width] of rules) {
+		if (w >= minW && dpi >= minDppx) {
+			const columnPercentage = width * window.innerWidth;
+			// 2 columns size
+			sidebarWidth = columnPercentage * 2;
+			return;
+		}
+	}
+	sidebarWidth = window.innerWidth;
+}
+
+function updateSize() {
+	updateFilterBarHeight();
+	updateSidebarWidth();
+}
+
 onMount(() => {
+	updateSize();
 	$sidebarShowingType = null;
 });
 </script>
 
+<svelte:window onresize={updateSize} />
 <svelte:body use:swipeable on:swiped={onSwipe} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-		class="fixed {type === SidebarType.Right ? 'right-0' : 'left-0'} top-0 z-10 h-[calc(100%-8rem)]
-	w-full px-3 sm:w-[70%]
-	md-mdpi:w-[50%] lg-mdpi:w-[40%] xl-mdpi:w-[30%]
-	md-hdpi:w-[50%] lg-hdpi:w-[35%]
+	class="fixed {type === SidebarType.Right ? 'right-0' : 'left-0'} top-0 z-10 h-[calc(100%-8rem)] px-3
 	transition-opacity duration-400 ease-in-out
 	{isMouseInsideArea ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}"
-		style="padding-top: {(isMobile() ? $mobileStatusBarHeight : 0) + 44}px"
+		style="padding-top: {paddingTop}px;
+		width: {sidebarWidth}px;"
 		onmouseleave={onMouseLeave}
 >
 	<div

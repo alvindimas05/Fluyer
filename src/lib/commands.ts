@@ -17,6 +17,9 @@ export const CommandRoutes = {
 	MUSIC_GET_BUFFER: "music_get_buffer",
 	MUSIC_GET_CURRENT_DURATION: "music_get_current_duration",
 
+	FOLDER_GET_ITEMS: "folder_get_items",
+	FOLDER_GET_IMAGE: "folder_get_image",
+
 	CHECK_READ_AUDIO_PERMISSION: "check_read_audio_permission",
 	REQUEST_READ_AUDIO_PERMISSION: "request_read_audio_permission",
 

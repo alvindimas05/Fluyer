@@ -24,12 +24,11 @@ import { coverArtCaches } from "$lib/stores/coverart";
 import CoverArt, {
 	type CoverArtCacheQuery,
 	type CoverArtResponse,
-	CoverArtStatus,
 } from "$lib/handlers/coverart";
 import { isDesktop, isMobile } from "$lib/platform";
-import { settingTriggerAnimatedBackground } from "$lib/stores/setting";
 import { equalizerValues } from "$lib/stores/equalizer";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
+import UtilsController from "$lib/controllers/UtilsController";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -38,6 +37,7 @@ export const MusicConfig = {
 	vstep: 0.01,
 	vmin: 0,
 	vmax: 1,
+	filterBarHeight: 44,
 	separator: "•",
 	separatorAlbum: "-",
 	separatorAudio: "/",
@@ -90,7 +90,7 @@ const MusicController = {
 			const image = await invoke<string>(CommandRoutes.MUSIC_GET_IMAGE, {
 				path: music?.path,
 			});
-			if (image !== null) return `data:image/png;base64,${image}`;
+			if (image !== null) return UtilsController.withBase64(image);
 		} catch (e) {}
 		if (music.title == null || music.artist == null)
 			return MusicConfig.defaultAlbumImage;
@@ -100,7 +100,7 @@ const MusicController = {
 			album: music.album ?? undefined,
 		});
 		return coverArt
-			? MusicController.withBase64(coverArt)
+			? UtilsController.withBase64(coverArt)
 			: MusicConfig.defaultAlbumImage;
 	},
 
@@ -261,7 +261,6 @@ const MusicController = {
 	getParsedDuration: (negative = false) => {
 		if (MusicController.isCurrentMusicFinished()) return null;
 
-		let minutes = 0;
 		let seconds = negative
 			? MusicController.currentMusicDuration() -
 				MusicController.progressDuration()
@@ -274,9 +273,18 @@ const MusicController = {
 	},
 	parseMilisecondsIntoText: (milliseconds: number) => {
 		const totalSeconds = Math.floor(milliseconds / 1000);
-		const minutes = Math.floor(totalSeconds / 60);
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
 		const seconds = totalSeconds % 60;
-		return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+		const paddedSeconds = `${seconds < 10 ? "0" : ""}${seconds}`;
+
+		if (hours > 0) {
+			const paddedMinutes = `${minutes < 10 ? "0" : ""}${minutes}`;
+			return `${hours}:${paddedMinutes}:${paddedSeconds}`;
+		}
+
+		return `${minutes}:${paddedSeconds}`;
 	},
 
 	parseSampleRateIntoText: (sampleRate: number | null) => {
@@ -358,7 +366,7 @@ const MusicController = {
 		let isPlaylistEmpty = !MusicController.musicPlaylist().length;
 		await MusicController.addSinkMusics(
 			musicDataList.map((music) => {
-				const { path, title, artist } = music;
+				const { path, title } = music;
 				if (isDesktop()) return { path } as MusicData;
 				return {
 					path,
@@ -424,27 +432,32 @@ const MusicController = {
 		caches[caches.findIndex((c) => c.name == fquery)] = value;
 		coverArtCaches.set(caches);
 	},
-	withBase64: (value: string) => {
-		return `data:image/png;base64,${value}`;
-	},
 
 	setMusicAlbumList: (value: MusicData[][]) => {
 		musicAlbumList.set(value);
 	},
 
 	sortMusicList: (list: MusicData[]) => {
-		if (!list || list[0].trackNumber === null) return list;
-		const hasTrackNumber = list[0].trackNumber != null;
+		if (!list) return [];
+
 		return list.sort((a, b) => {
-			if (hasTrackNumber) {
-				if (a.trackNumber?.includes("/") || b.trackNumber?.includes("/")) {
-					a.trackNumber = a.trackNumber!.split("/")[0];
-					b.trackNumber = b.trackNumber!.split("/")[0];
-				}
-				return +a.trackNumber! - +b.trackNumber!;
-			} else {
-				return a.filename.localeCompare(b.filename);
+			const albumA = a.album || "";
+			const albumB = b.album || "";
+
+			if (albumA !== albumB) {
+				return albumA.localeCompare(albumB);
 			}
+
+			const trackA = a.trackNumber ? parseInt(a.trackNumber.split('/')[0], 10) : NaN;
+			const trackB = b.trackNumber ? parseInt(b.trackNumber.split('/')[0], 10) : NaN;
+
+			if (!isNaN(trackA) && !isNaN(trackB)) {
+				if (trackA !== trackB) {
+					return trackA - trackB;
+				}
+			}
+
+			return a.filename.localeCompare(b.filename);
 		});
 	},
 
@@ -576,14 +589,14 @@ const MusicController = {
 		await MusicController.setEqualizer(get(equalizerValues));
 	},
 	resetEqualizer: async () => {
-		const values = MusicController.getDefaultEqualizerValues();
+		const values = Array(18).fill(0);
 		equalizerValues.set(values);
 		await PersistentStoreController.equalizer.set(values);
 		await MusicController.setEqualizer(values);
 	},
 
 	getBuffer: async (path: string) => {
-		return await invoke<Array | null>(CommandRoutes.MUSIC_GET_BUFFER, {
+		return await invoke<ArrayBuffer | null>(CommandRoutes.MUSIC_GET_BUFFER, {
 			path,
 		});
 	},

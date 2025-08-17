@@ -1,10 +1,15 @@
 <script lang="ts">
-import { musicList } from "$lib/stores/music";
+import {musicList, musicListType} from "$lib/stores/music";
 import MusicItem from "./MusicItem.svelte";
-import { VList } from "virtua/svelte";
-import { onMount } from "svelte";
-import { filterAlbum, filterSearch } from "$lib/stores/filter";
+import {VList} from "virtua/svelte";
+import {onDestroy, onMount} from "svelte";
+import {filterAlbum, filterSearch} from "$lib/stores/filter";
 import MusicController from "$lib/controllers/MusicController";
+import {folderCurrent, folderList} from "$lib/stores/folder";
+import {MusicListType} from "$lib/home/music/types";
+import FolderController from "$lib/controllers/FolderController";
+
+let type = $derived($musicListType)
 
 // Responsive rules: [minWidth, maxDppxExclusive, columns]
 const rules = [
@@ -23,6 +28,11 @@ const rules = [
 
 let columnCount = $state(1);
 function updateColumnCount() {
+	if(type === "folder") {
+		columnCount = 1;
+		return;
+	}
+
 	const w = window.innerWidth;
 	const dpi = window.devicePixelRatio;
 
@@ -35,9 +45,13 @@ function updateColumnCount() {
 	columnCount = 1;
 }
 
+function updateSize() {
+	updateColumnCount();
+}
+
 let data = $derived.by(() => {
 	if (!Array.isArray($musicList)) return [];
-	let list = $musicList.filter((music) => {
+	let list = MusicController.sortMusicList($musicList.filter((music) => {
 		const search = $filterSearch.toLowerCase();
 		const album = $filterAlbum;
 
@@ -53,48 +67,58 @@ let data = $derived.by(() => {
 
 		const matchesAlbum = hasAlbum && album.name === music.album;
 
-		if (!hasAlbum) {
+		const matchesFolder = FolderController.isMusicInFolder(music, $folderCurrent);
+
+		if($musicListType === MusicListType.Folder) {
+			return matchesFolder && (!hasSearch || matchesSearch);
+		} else if (!hasAlbum) {
 			return !hasSearch || matchesSearch;
 		} else {
 			return matchesAlbum && (!hasSearch || matchesSearch);
 		}
+	}));
+	let _folderList = $folderList.filter((folder) => {
+		const search = $filterSearch.toLowerCase();
+		return folder.path.toLowerCase().includes(search);
 	});
 	if ($filterAlbum) {
 		list = MusicController.sortMusicList(list);
 	}
 
-	const result = [];
+	const result: any[][] = [];
 	for (let i = 0; i < list.length; i += columnCount) {
 		result.push(list.slice(i, i + columnCount));
+	}
+	if ($musicListType === MusicListType.Folder){
+		for (let i = 0; i < _folderList.length; i += columnCount) {
+			result.push(_folderList.slice(i, i + columnCount));
+		}
 	}
 	return result;
 });
 
+let unsubscribeMusicListType = musicListType.subscribe(() => setTimeout(updateSize));
 onMount(() => {
-	updateColumnCount();
+	updateSize();
+});
+
+onDestroy(() => {
+	unsubscribeMusicListType();
 });
 </script>
 
-<svelte:window onresize={updateColumnCount} />
-<div class="px-3 overflow-y-auto text-white">
-<!--    <div-->
-<!--    	class="grid gap-x-3-->
-<!--    	md-mdpi:grid-cols-2 lg-mdpi:grid-cols-3 xl-mdpi:grid-cols-4-->
-<!--		md-hdpi:grid-cols-2 xl-hdpi:grid-cols-3-->
-<!--		md-xhdpi:grid-cols-2 lg-xhdpi:grid-cols-3"-->
-<!--        >-->
-<!--    	{#if Array.isArray($musicList)}-->
-<!--    		{#each $musicList as music}-->
-<!--    			<MusicItem {music} />-->
-<!--    		{/each}-->
-<!--    	{/if}-->
-<!--    </div>-->
+<svelte:window onresize={updateSize} />
+<div class="h-full px-3 overflow-y-auto text-white">
 	{#if data && columnCount}
-		<VList class="scrollbar-hidden pb-20" {data} getKey={(_, i) => i}>
-			{#snippet children(musicList)}
+		<VList class="scrollbar-hidden pb-[7.5rem]" {data} getKey={(_, i) => i}>
+			{#snippet children(list)}
 				<div class="grid" style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr))">
-					{#each musicList as music}
-						<MusicItem {music} />
+					{#each list as data}
+						{#if 'duration' in data}
+							<MusicItem music={data} />
+						{:else}
+							<MusicItem folder={data} />
+						{/if}
 					{/each}
 				</div>
 			{/snippet}

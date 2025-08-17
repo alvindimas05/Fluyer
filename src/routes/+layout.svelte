@@ -21,6 +21,7 @@ import { loadingShow } from "$lib/stores/loading";
 import { musicList } from "$lib/stores/music";
 import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
 import { mobileShowSwipeGuide } from "$lib/stores/mobile";
+import FolderController from "$lib/controllers/FolderController";
 
 if (isWindows()) {
 	import("$lib/scss/rounded-windows.scss");
@@ -43,6 +44,7 @@ async function initialize() {
 		MusicController.initialize(),
 		UIController.initialize(),
 		MobileController.initialize(),
+        FolderController.initialize(),
 	]);
 	LoadingController.listen();
 	isAppReady = true;

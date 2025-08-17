@@ -24,6 +24,7 @@ import Lock from "svelte-material-icons/Lock.svelte";
 import FileDocumentOutline from "svelte-material-icons/FileDocumentOutline.svelte";
 import TuneVerticalVariant from "svelte-material-icons/TuneVerticalVariant.svelte";
 import Poll from "svelte-material-icons/Poll.svelte";
+import Folder from "svelte-material-icons/Folder.svelte";
 
 const iconRegistryMaterial = {
 	[IconType.Unknown]: HelpCircleOutline,
@@ -56,6 +57,7 @@ const iconRegistryMaterial = {
 	[IconType.Equalizer]: TuneVerticalVariant,
 	[IconType.Close]: CloseCircleOutline,
 	[IconType.Visualizer]: Poll,
+	[IconType.Folder]: Folder,
 };
 
 export default iconRegistryMaterial;

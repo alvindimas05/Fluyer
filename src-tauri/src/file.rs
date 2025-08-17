@@ -11,9 +11,23 @@ use crate::{
 };
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rusqlite::{params, Connection};
+use serde::{Deserialize, Serialize};
 use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
 use crate::database::database::GLOBAL_DATABASE;
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct FolderItem {
+    path: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+enum FsItemType {
+    #[serde(rename = "folder")]
+    Folder,
+    #[serde(rename = "file")]
+    File,
+}
 
 fn is_supported_audio_file(entry: &DirEntry) -> bool {
     if let Some(ext) = entry.path().extension() {
@@ -32,6 +46,33 @@ fn is_not_hidden(entry: &DirEntry) -> bool {
         .to_str()
         .map(|s| !s.starts_with('.'))
         .unwrap_or(false)
+}
+
+pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
+    WalkDir::new(path)
+        .max_depth(1)
+        .into_iter()
+        .filter_map(Result::ok)
+        .filter(|e| e.file_type().is_dir() && e.path().to_str().unwrap_or_default() != path)
+        .map(|entry| FolderItem {
+            path: entry.path().to_str().unwrap_or_default().to_string(),
+        })
+        .collect()
+}
+
+pub fn get_folder_image(path: &str) -> Option<String> {
+    let mut conn_guard = GLOBAL_DATABASE.lock().ok().unwrap();
+    let conn = conn_guard.as_mut().unwrap();
+
+    let mut stmt = conn.prepare("SELECT path FROM musics WHERE path LIKE ? ORDER BY path LIMIT 1")
+        .expect("Failed to prepare statement");
+    if let Ok(res) = stmt.query_one(params![format!("{}%", path)],
+        |row| Ok(row.get(0))) {
+        if let Ok(path) = res {
+            return MusicMetadata::get_image_from_path(path);
+        }
+    }
+    None
 }
 
 pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
@@ -185,10 +226,31 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
 
     delete_non_existing_paths(conn, musics);
 
+
+    Some(get_musics_from_db(conn, GetMusicFromDbOptions { path: None }))
+}
+
+struct GetMusicFromDbOptions {
+    path: Option<String>,
+}
+
+fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> Vec<MusicMetadata> {
     // Retrieve and return the final state from DB
-    let mut stmt = conn.prepare("SELECT path, duration, title, artist, album, album_artist, track_number, genre, bits_per_sample, sample_rate, date FROM musics").ok()?;
-    let rows: Vec<MusicMetadata> = stmt
-        .query_map([], |row| {
+    let mut query = "
+        SELECT path, duration, title, artist, album, album_artist, track_number,
+        genre, bits_per_sample, sample_rate, date FROM musics
+    "
+    .to_string();
+    if options.path.is_some() {
+        query.push_str(" WHERE path LIKE ?1");
+    }
+    let mut stmt = conn.prepare(&query).ok().unwrap();
+    let params = if let Some(path) = options.path {
+        params![format!("{}%", path)]
+    } else {
+        params![]
+    };
+    stmt.query_map(params, |row| {
             let path: String = row.get(0)?;
             let filename = path
                 .split('/')
@@ -213,12 +275,10 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
                 extra_tags: None,
             })
         })
-        .ok()?
+        .ok()
+        .unwrap()
         .filter_map(|r| r.ok())
-        .collect();
-
-
-    Some(rows)
+        .collect()
 }
 
 fn delete_non_existing_paths(conn: &mut Connection, musics: Vec<String>) {

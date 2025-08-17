@@ -49,7 +49,7 @@ const AudioAnalyser = {
 			AudioAnalyser.data.audioContext.destination,
 		);
 
-		let duration = await MusicController.mpvMusicCurrentDuration();
+			let duration = await MusicController.mpvMusicCurrentDuration();
 		if (duration === null) return;
 		duration = duration / 1000;
 

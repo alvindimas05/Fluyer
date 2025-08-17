@@ -25,6 +25,7 @@ import {
 	KeyboardMusic,
 	CircleX,
 	ChartNoAxesColumn,
+	Folder,
 } from "@lucide/svelte";
 
 const iconRegistryLucide = {
@@ -58,6 +59,7 @@ const iconRegistryLucide = {
 	[IconType.Equalizer]: KeyboardMusic,
 	[IconType.Close]: CircleX,
 	[IconType.Visualizer]: ChartNoAxesColumn,
+	[IconType.Folder]: Folder,
 };
 
 export default iconRegistryLucide;
