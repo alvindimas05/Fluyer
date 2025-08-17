@@ -13,16 +13,12 @@ import {isDesktop} from "$lib/platform";
 import {MusicListType} from "$lib/home/music/types";
 import {MusicConfig} from "$lib/controllers/MusicController";
 import {onDestroy, onMount} from "svelte";
+import {mobileStatusBarHeight} from "$lib/stores/mobile";
 
-let filterBarHeight = $state(MusicConfig.filterBarHeight);
+let filterBarHeight = $state(0);
 
 function updateFilterBarHeight() {
-    if($musicListType !== MusicListType.Folder){
-        filterBarHeight = 0;
-        return;
-    }
-
-    filterBarHeight = MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2);
+    filterBarHeight = $mobileStatusBarHeight + (MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2));
 }
 
 let unsubscribeMusicListType = musicListType.subscribe(() => setTimeout(updateFilterBarHeight));

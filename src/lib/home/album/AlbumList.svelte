@@ -144,9 +144,8 @@ $effect(() => {
 <!--    {/each}-->
 <!--</div>-->
 
-<div style="padding-top: {paddingTop}px;
-    width: 100%;
-    height: {itemHeight + paddingTop}px;">
+<div style="width: 100%;
+    height: {itemHeight}px;">
     <!-- Note: Ignore this  -->
     <VList onwheel={onMouseWheel}
        class="scrollbar-hidden"

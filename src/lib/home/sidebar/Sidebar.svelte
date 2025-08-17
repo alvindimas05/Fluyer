@@ -49,6 +49,7 @@ let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + filterBarH
 
 let isMouseInsideArea = $state(false);
 let isShowing = $state(false);
+let isPrerendered = $state(false);
 
 function onMouseMove(e: MouseEvent) {
 	if (
@@ -127,6 +128,12 @@ function updateSize() {
 onMount(() => {
 	updateSize();
 	$sidebarShowingType = null;
+
+	// Pre-render
+	isPrerendered = true;
+	setTimeout(() => {
+		isPrerendered = false;
+	}, 50);
 });
 </script>
 
@@ -147,7 +154,7 @@ onMount(() => {
 		text-white w-full h-full p-2 flex flex-col
 		{isAndroid() ? 'backdrop-blur-md' : 'backdrop-blur-lg'}
 		{type === SidebarType.Right ? 'fadeRight' : 'fadeLeft'}
-		{isShowing ? 'show' : ''}"
+		{isShowing || isPrerendered ? 'show' : ''}"
 	>
 		{@render children?.()}
 	</div>
