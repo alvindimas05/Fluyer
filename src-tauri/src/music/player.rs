@@ -70,10 +70,39 @@ impl MusicPlayer {
                         let log_path = logger::get_mpv_log_path();
                         mpv.set_option("log-file", log_path.clone())?;
                         mpv.set_property("vo", "null")?;
+
+                        // Buffer and cache settings for smoother transitions
+                        mpv.set_property("cache", "yes")?;
+                        mpv.set_property("demuxer-max-bytes", "100000000")?; // 100MB for high-res audio
+                        mpv.set_property("demuxer-readahead-secs", "10")?; // More buffer for large files
+
+                        // Playlist optimization
+                        mpv.set_property("prefetch-playlist", "yes")?;
+                        mpv.set_property("gapless-audio", "yes")?;
+
+                        // AUDIOPHILE SETTINGS - Preserve original quality
+                        // Remove the audio-samplerate setting to use original sample rates
+                        mpv.set_property("audio-format", "floatp")?; // Use floating point for best quality
+                        mpv.set_property("audio-normalize-downmix", "no")?; // Preserve dynamics
+                        mpv.set_property("volume-max", "100")?; // Prevent digital amplification
+
+                        // High-quality resampling when needed (format changes)
+                        mpv.set_property("audio-resample-filter-size", "32")?;
+                        mpv.set_property("audio-resample-cutoff", "0.95")?;
+
+                        // Exclusive audio mode (if supported by OS)
+                        // mpv.set_property("audio-exclusive", "yes")?;
+
+                        // Larger audio buffer for high-res files
+                        mpv.set_property("audio-buffer", "2")?;
+
+                        // Disable any audio processing that might degrade quality
+                        mpv.set_property("audio-pitch-correction", "no")?;
+
                         logger::debug!("The mpv log file is saved at {}", log_path);
                         Ok(())
                     })
-                    .unwrap(),
+                        .unwrap(),
                 )
                 .ok();
         }
@@ -260,6 +289,12 @@ impl MusicPlayer {
             let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
 
             for (_, music) in playlist.iter().enumerate() {
+                // Note: libmpv2 v4.1.0
+                // let path = format!("\"{}\"", music.path)
+                //     .replace("\\", "/")
+                //     .replace("//", "/");
+
+                // Note: libmpv2 v5.0.0
                 let path = format!("{}", music.path)
                     .replace("\\", "/")
                     .replace("//", "/");
@@ -467,9 +502,15 @@ impl MusicPlayer {
     pub fn start_listener() {
         #[cfg(desktop)]
         {
+            // Note: libmpv2 v4.1.0
+            // use libmpv2::events::{Event, EventContext};
+            // let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
+
+            // Note: libmpv2 v5.0.0
             use libmpv2::events::Event;
             let mut client = GLOBAL_MUSIC_MPV.get().unwrap().create_client(None).unwrap();
             thread::spawn(move || loop {
+                // let event = event_context.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
                 let event = client.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
                 match event {
                     Ok(Event::FileLoaded) => {
