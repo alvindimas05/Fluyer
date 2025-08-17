@@ -53,7 +53,7 @@ pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
         .max_depth(1)
         .into_iter()
         .filter_map(Result::ok)
-        .filter(|e| e.file_type().is_dir() && e.path().to_str().unwrap_or_default() != path)
+        .filter(|e| e.file_type().is_dir() && e.path().to_str().unwrap_or_default() != path && is_not_hidden(e))
         .map(|entry| FolderItem {
             path: entry.path().to_str().unwrap_or_default().to_string(),
         })

@@ -9,16 +9,17 @@ import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
 import {loadingShow} from "$lib/stores/loading";
 import AlbumInfo from "$lib/home/albuminfo/AlbumInfo.svelte";
 import Equalizer from "$lib/home/equalizer/Equalizer.svelte";
-import {isDesktop} from "$lib/platform";
+import {isDesktop, isMobile} from "$lib/platform";
 import {MusicListType} from "$lib/home/music/types";
 import {MusicConfig} from "$lib/controllers/MusicController";
 import {onDestroy, onMount} from "svelte";
 import {mobileStatusBarHeight} from "$lib/stores/mobile";
 
-let filterBarHeight = $state(0);
+let filterBarHeight = $state(MusicConfig.filterBarHeight);
+let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + filterBarHeight);
 
 function updateFilterBarHeight() {
-    filterBarHeight = $mobileStatusBarHeight + (MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2));
+    filterBarHeight = MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2);
 }
 
 let unsubscribeMusicListType = musicListType.subscribe(() => setTimeout(updateFilterBarHeight));
@@ -45,7 +46,7 @@ onDestroy(() => {
         <PlayerBar />
         <div class="h-full grid {$musicListType === MusicListType.Folder ?
             'grid-rows-[min-content_auto]' : 'grid-rows-[min-content_min-content_auto]'}"
-            style="margin-top: {filterBarHeight}px;">
+            style="margin-top: {marginTop}px;">
             {#if $musicListType === MusicListType.All}
                 <AlbumList />
             {/if}
