@@ -215,7 +215,7 @@ onDestroy(() => {
                     step={MusicConfig.step}
             />
         </div>
-        <div class="w-full h-5 absolute left-0 top-[4px] cursor-pointer"
+        <div class="w-full h-5 absolute left-0 top-[-8px] cursor-pointer"
              onmouseenter={updateTooltip}
              onmousemove={updateTooltip}
              onmouseleave={hideTooltip}
