@@ -6,7 +6,6 @@ import ToastController from "$lib/controllers/ToastController";
 import MusicController from "$lib/controllers/MusicController";
 import PageController from "$lib/controllers/PageController";
 import { musicCurrentIndex } from "$lib/stores/music";
-import type { Unsubscriber } from "svelte/store";
 import type { MusicData } from "$lib/home/music/types";
 import { isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
@@ -18,6 +17,7 @@ import Silk from "$lib/visualizers/vissonance/visualizers/Silk";
 import Siphon from "$lib/visualizers/vissonance/visualizers/Siphon";
 import Tricentric from "$lib/visualizers/vissonance/visualizers/Tricentric";
 import type Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
+import { showThenFade } from "$lib/controllers/UIController";
 
 let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 40);
 
@@ -116,7 +116,8 @@ onDestroy(() => {
     onkeydown={onKeyDown}/>
 <!--<div class="fixed w-full h-full z-[-2] bg-black"></div>-->
 <div class="fixed w-full h-full z-[-1]" bind:this={container}></div>
-<div id="actions" class="ms-3 font-light md:max-w-[50vw]" style="margin-top: {marginTop}px;">
+<div class="ms-3 font-light w-fit show-then-fade" style="margin-top: {marginTop}px;"
+    use:showThenFade>
     <p class="text-gray-300 text-3xl">Vissonance</p>
     <p class="text-gray-400">by tariqksoliman</p>
     <ul class="w-fit">
@@ -133,15 +134,3 @@ onDestroy(() => {
         {/each}
     </ul>
 </div>
-
-<style lang="scss">
-  #actions {
-    opacity: 0;
-    transition: opacity 4s ease 3s;
-
-    &:hover {
-      opacity: 1;
-      transition: opacity 0.5s ease;
-    }
-  }
-</style>
