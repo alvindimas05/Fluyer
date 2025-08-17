@@ -15,7 +15,7 @@ const { onclick, icon, label }: Props = $props();
             class="w-full text-white text-start font-medium tracking-wide px-4 py-3 rounded
     bg-gradient-to-r from-white/20 to-white/30 hover:from-white/30 hover:to-white/35
     focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200 box-border
-    shadow-md md:text-lg backdrop-blur-md grid grid-cols-[min-content_auto] gap-3 items-center"
+    shadow-md md:text-lg grid grid-cols-[min-content_auto] gap-3 items-center"
             onclick={onclick}
     >
         <div class="w-6"><Icon type={icon}/></div>
