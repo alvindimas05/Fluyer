@@ -110,7 +110,7 @@ onDestroy(() => {
 <svelte:window onresize={updateSize} />
 <div class="h-full px-3 overflow-y-auto text-white">
 	{#if data && columnCount}
-		<VList class="scrollbar-hidden pb-[10rem] md:pb-[7.5rem]" {data} getKey={(_, i) => i}>
+		<VList class="scrollbar-hidden pb-[5rem]" {data} getKey={(_, i) => i}>
 			{#snippet children(list)}
 				<div class="grid" style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr))">
 					{#each list as data}
