@@ -12,7 +12,7 @@ import PersistentStoreController from "$lib/controllers/PersistentStoreControlle
 
 let album = $derived($filterAlbum);
 let showBackButton = $derived.by(async () => $musicListType !== MusicListType.Folder ||
-    (await PersistentStoreController.musicPath.get()).length > 1);
+    ($folderCurrent && !(await PersistentStoreController.musicPath.get()).includes($folderCurrent!!.path)));
 
 let musicList = $derived.by(() => {
     if($musicListType === MusicListType.Folder){

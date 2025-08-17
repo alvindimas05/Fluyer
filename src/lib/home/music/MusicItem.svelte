@@ -119,7 +119,7 @@ async function selectFolder(){
 						class="bg-black bg-opacity-40 grid w-full h-full p-1 box-border justify-items-center items-center rounded"
 				><Icon type={IconType.Play}/></div>
 			</button>
-			<div class="cursor-pointer" onclick={selectFolder}></div>
+			<div class="{folder ? 'cursor-pointer' : 'cursor-default'}" onclick={selectFolder}></div>
 			<div class="w-12 h-12 md:w-14 md:h-14 p-2">
 				<button class="w-full h-full" onclick={addMusic}><Icon type={IconType.QueuePlaylist} /></button>
 			</div>
