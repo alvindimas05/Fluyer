@@ -48,12 +48,12 @@ onDestroy(() => {
         <Menu />
         <PlayerBar />
         <div class="h-full grid {$musicListType === MusicListType.Folder ?
-            '' : 'grid-rows-[min-content_min-content_auto]'}"
+            'grid-rows-[min-content_auto]' : 'grid-rows-[min-content_min-content_auto]'}"
             style="margin-top: {filterBarHeight}px;">
             {#if $musicListType === MusicListType.All}
                 <AlbumList />
-                <AlbumInfo />
             {/if}
+            <AlbumInfo />
             <MusicList />
         </div>
     {/if}

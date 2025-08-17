@@ -22,9 +22,14 @@ const FolderController = {
                 .map((path) => ({path} as FolderData)));
         }
     },
-    selectFolder: async (folder: FolderData | null) => {
+    setFolder: async (folder: FolderData | null) => {
         folderCurrent.set(folder);
         await FolderController.setFolderList();
+    },
+    setFolderToParent: (folder: FolderData | null) => {
+        if (!folder) return;
+        const parent = folder.path.split('/').slice(0, -1).join('/');
+        FolderController.setFolder({path: parent} as FolderData);
     },
     isMusicInFolder: (music: MusicData, folder: FolderData | null) => {
         if (!folder || !music.path.startsWith(folder.path)) {
@@ -44,7 +49,8 @@ const FolderController = {
         if (base64) return UtilsController.withBase64(base64);
         return null;
     },
-    getMusicListFromFolder: (folder: FolderData) => {
+    getMusicListFromFolder: (folder: FolderData | null) => {
+        if (!folder) return [];
         return MusicController.sortMusicList(
             get(musicList)!!.filter((music) =>
                 FolderController.isMusicInFolderRecursive(music, folder))

@@ -76,7 +76,7 @@ async function addMusic() {
 
 async function selectFolder(){
 	if (!folder) return;
-	await FolderController.selectFolder(folder);
+	await FolderController.setFolder(folder);
 }
 </script>
 
