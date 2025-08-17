@@ -440,25 +440,32 @@ const MusicController = {
 	sortMusicList: (list: MusicData[]) => {
 		if (!list) return [];
 
-		return list.sort((a, b) => {
-			const albumA = a.album || "";
-			const albumB = b.album || "";
+		// Schwartzian transform to avoid re-computing values in the sort callback
+		const mapped = list.map((original) => {
+			const trackNumberString = original.trackNumber?.split('/')[0];
+			const track = trackNumberString ? parseInt(trackNumberString, 10) : NaN;
 
-			if (albumA !== albumB) {
-				return albumA.localeCompare(albumB);
+			return {
+				original,
+				album: original.album || '',
+				track: isNaN(track) ? Infinity : track, // Sort items without a valid track number last
+				filename: original.filename,
+			};
+		});
+
+		mapped.sort((a, b) => {
+			if (a.album !== b.album) {
+				return a.album.localeCompare(b.album);
 			}
 
-			const trackA = a.trackNumber ? parseInt(a.trackNumber.split('/')[0], 10) : NaN;
-			const trackB = b.trackNumber ? parseInt(b.trackNumber.split('/')[0], 10) : NaN;
-
-			if (!isNaN(trackA) && !isNaN(trackB)) {
-				if (trackA !== trackB) {
-					return trackA - trackB;
-				}
+			if (a.track !== b.track) {
+				return a.track - b.track;
 			}
 
 			return a.filename.localeCompare(b.filename);
 		});
+
+		return mapped.map((item) => item.original);
 	},
 
 	gotoPlaylist: (index: number) => {
