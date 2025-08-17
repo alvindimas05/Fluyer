@@ -101,11 +101,11 @@ async function selectFolder(){
 		{/await}
 		<div class="ms-3 overflow-hidden">
 			<p
-				class="font-medium whitespace-nowrap overflow-hidden animate-scroll-overflow-text"
+				class="font-medium text-sm/[14px] whitespace-nowrap overflow-hidden animate-scroll-overflow-text"
 			>{titleLabel}</p>
 			<p class="text-opacity-background-90 whitespace-nowrap overflow-hidden
-				text-xs md:text-[14px] animate-scroll-overflow-text">{mediumLabel}</p>
-			<p class="text-xs mt-[2px] text-opacity-background-90">{smallLabel}</p>
+				text-xs/[14px] pt-[4px] md:text-[14px] md:pt-0 animate-scroll-overflow-text">{mediumLabel}</p>
+			<p class="text-xs/[14px] mt-[2px] text-opacity-background-90">{smallLabel}</p>
 		</div>
 		<div class="w-12 md:w-14"></div>
 	</div>
