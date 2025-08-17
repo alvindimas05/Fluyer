@@ -101,11 +101,11 @@ async function selectFolder(){
 		{/await}
 		<div class="ms-3 overflow-hidden">
 			<p
-				class="font-medium text-sm/[14px] whitespace-nowrap overflow-hidden animate-scroll-overflow-text"
+				class="font-medium text-sm/[14px] md:text-sm whitespace-nowrap overflow-hidden animate-scroll-overflow-text"
 			>{titleLabel}</p>
 			<p class="text-opacity-background-90 whitespace-nowrap overflow-hidden
-				text-xs/[14px] pt-[4px] md:text-[14px] md:pt-0 animate-scroll-overflow-text">{mediumLabel}</p>
-			<p class="text-xs/[14px] mt-[2px] text-opacity-background-90">{smallLabel}</p>
+				text-xs/[14px] pt-[4px] md:text-xs md:pt-0 animate-scroll-overflow-text">{mediumLabel}</p>
+			<p class="text-xs/[14px] md:text-xs mt-[2px] text-opacity-background-90">{smallLabel}</p>
 		</div>
 		<div class="w-12 h-12 md:w-14 md:h-14"></div>
 	</div>
@@ -116,7 +116,7 @@ async function selectFolder(){
 					onclick={addMusicAndPlay}
 			>
 				<div
-						class="bg-black bg-opacity-40 grid w-full h-full p-1 justify-items-center items-center rounded"
+						class="bg-black bg-opacity-40 grid w-full h-full p-1 box-border justify-items-center items-center rounded"
 				><Icon type={IconType.Play}/></div>
 			</button>
 			<div class="cursor-pointer" onclick={selectFolder}></div>
