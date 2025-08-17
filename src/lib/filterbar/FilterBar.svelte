@@ -7,7 +7,6 @@ import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import {onMount} from "svelte";
 import {musicListType} from "$lib/stores/music";
 import {MusicListType} from "$lib/home/music/types";
-import {folderCurrent} from "$lib/stores/folder";
 import FolderController from "$lib/controllers/FolderController";
 
 const rules = [
@@ -51,13 +50,14 @@ function updateGridSizing() {
     gridSize = "";
 }
 
-function toggleMusicListType() {
-    $musicListType = listType === MusicListType.All ? MusicListType.Folder : MusicListType.All;
-    if($musicListType === MusicListType.Folder){
+async function toggleMusicListType() {
+    if($musicListType === MusicListType.All){
         $filterAlbum = null;
-        $folderCurrent = null;
-        FolderController.setFolderList();
+        await FolderController.setMusicListToFolder();
+    } else {
+        FolderController.setFolder(null);
     }
+    $musicListType = listType === MusicListType.All ? MusicListType.Folder : MusicListType.All;
 }
 
 onMount(() => {
