@@ -43,7 +43,7 @@ function updateGridSizing() {
         if (w >= minW && dpi >= minDppx) {
             const columnPercentage = width * window.innerWidth;
             // 1:2 ratio
-            gridSize = `${columnPercentage}px ${columnPercentage * 2}px`;
+            gridSize = isMacos() ? `${columnPercentage}px ${columnPercentage * 2}px` : `${columnPercentage * 2}px ${columnPercentage}px`;
             return;
         }
     }
@@ -82,7 +82,8 @@ onMount(() => {
             <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>
         </div>
     </button>
-    <div class="w-full sm:w-auto h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 order-first sm:order-last
+    <div class="w-full sm:w-auto h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3
+        {isMacos() ? 'order-last' : 'order-first'}
         pointer-events-auto
         animate__animated animate__fadeIn animate__slow">
         <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-3 py-1">
