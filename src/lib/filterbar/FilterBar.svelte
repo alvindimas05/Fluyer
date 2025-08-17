@@ -66,11 +66,12 @@ onMount(() => {
 </script>
 
 <svelte:window onresize={updateGridSizing} />
-<div class="w-full sm:w-fit h-6 sm:h-6 absolute top-0 grid gap-y-2 px-3 sm:px-0
+<div class="w-full sm:w-fit h-6 sm:h-6 absolute top-0 grid gap-y-2 px-3 sm:px-0 pointer-events-none
     {isMacos() ? 'right-0' : 'left-0'}"
      style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};">
     <button class="w-full sm:w-auto h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 text-start
+        pointer-events-auto
         animate__animated animate__fadeIn animate__slow"
         onclick={toggleMusicListType}>
         <div class="w-full h-full grid grid-cols-[min-content_auto] gap-x-2 px-3 py-1
@@ -82,6 +83,7 @@ onMount(() => {
         </div>
     </button>
     <div class="w-full sm:w-auto h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 order-first sm:order-last
+        pointer-events-auto
         animate__animated animate__fadeIn animate__slow">
         <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-3 py-1">
             <input
