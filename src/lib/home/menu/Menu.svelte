@@ -12,8 +12,6 @@ import { isDesktop } from "$lib/platform";
 
 <Sidebar type={SidebarType.Left}>
     <p class="text-[1.2rem] md:text-[1.5rem] font-semibold px-3 py-2">Menu</p>
-    <MenuItem label="Settings" icon={IconType.Settings}
-              onclick={() => PageController.goto(PageRoutes.SETTINGS)}/>
     <MenuItem label="Play Screen" icon={IconType.Fullscreen}
               onclick={() => PageController.goto(PageRoutes.PLAY)}/>
     {#if isDesktop()}
@@ -22,4 +20,6 @@ import { isDesktop } from "$lib/platform";
     {/if}
     <MenuItem label="Visualizer" icon={IconType.Visualizer}
               onclick={() => PageController.goto(PageRoutes.VISUALIZER)}/>
+    <MenuItem label="Settings" icon={IconType.Settings}
+              onclick={() => PageController.goto(PageRoutes.SETTINGS)}/>
 </Sidebar>
