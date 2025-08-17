@@ -185,9 +185,12 @@ onDestroy(() => {
 <svelte:document onkeydown={onKeyDown} />
 
 <div class="fixed left-0 bottom-0 z-10 w-full pt-2">
-    <div class="w-fit absolute bottom-[4.5rem] md:bottom-[5rem]
-        border rounded-lg px-2 py-1 shadow-xl backdrop-blur-md text-sm"
-        style="left: {tooltipPosition}px; visibility: {tooltipVisible ? 'visible' : 'hidden'};"
+    <div class="w-fit absolute border rounded-lg px-2 py-1 shadow-xl backdrop-blur-md text-sm"
+        style="
+            left: {tooltipPosition}px;
+            visibility: {tooltipVisible ? 'visible' : 'hidden'};
+            bottom: {(window.innerWidth > 640 ? 80 : 72) + $mobileNavigationBarHeight}px;
+        "
         bind:this={tooltip}>{tooltipText}</div>
     <div
         class="w-full bg-gray-700 bg-opacity-30 text-white rounded-windows-bottom"
@@ -212,7 +215,7 @@ onDestroy(() => {
                     step={MusicConfig.step}
             />
         </div>
-        <div class="w-full h-5 absolute left-0 top-[-10px] cursor-pointer"
+        <div class="w-full h-5 absolute left-0 top-[4px] cursor-pointer"
              onmouseenter={updateTooltip}
              onmousemove={updateTooltip}
              onmouseleave={hideTooltip}
