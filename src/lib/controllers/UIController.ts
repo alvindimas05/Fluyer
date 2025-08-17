@@ -5,7 +5,7 @@ import { equalizerShow } from "$lib/stores/equalizer";
 const UIController = {
 	initialize: async () => {
 		UIController.listenAnimateScrollOverflowText();
-		UIController.listenDisableTabSelection();
+		UIController.listenDisableKeyActions();
 	},
 	listenAnimateScrollOverflowText: () => {
 		const scrollDuration = 3000;
@@ -22,10 +22,9 @@ const UIController = {
 			scrollEnd = !scrollEnd;
 		}, scrollDuration + 2000);
 	},
-	listenDisableTabSelection: () => {
+	listenDisableKeyActions: () => {
 		window.addEventListener("keydown", (e) => {
-			if (e.key !== "Tab") return;
-			e.preventDefault();
+			if (['Tab', 'Escape', 'Space', 'Enter'].includes(e.key)) e.preventDefault();
 		});
 	},
 	toggleEqualizer: (value: boolean) => {
