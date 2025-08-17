@@ -42,6 +42,7 @@ let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + filterBarH
 function updateSize() {
 	updateItemWidth();
 	itemHeight = itemElementHeight;
+    filterBarHeight = MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2);
 }
 
 function updateItemWidth() {

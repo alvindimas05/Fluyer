@@ -70,7 +70,7 @@ onMount(() => {
     {isMacos() ? 'right-0' : 'left-0'}"
      style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};">
-    <button class="w-full sm:w-auto h-fit sm:h-full bg-white/20 backdrop-blur-md text-white rounded-md shadow-md sm:mx-3 text-start
+    <button class="w-full sm:w-auto h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 text-start
         animate__animated animate__fadeIn animate__slow"
         onclick={toggleMusicListType}>
         <div class="w-full h-full grid grid-cols-[min-content_auto] gap-x-2 px-3 py-1
@@ -81,7 +81,7 @@ onMount(() => {
             <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>
         </div>
     </button>
-    <div class="w-full sm:w-auto h-fit sm:h-full bg-white/20 backdrop-blur-md text-white rounded-md shadow-md sm:mx-3 order-first sm:order-last
+    <div class="w-full sm:w-auto h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 order-first sm:order-last
         animate__animated animate__fadeIn animate__slow">
         <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-3 py-1">
             <input

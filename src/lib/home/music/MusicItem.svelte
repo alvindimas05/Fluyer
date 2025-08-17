@@ -85,16 +85,16 @@ async function selectFolder(){
 		class="grid grid-cols-[max-content_auto_max-content] py-2"
 	>
 		{#await albumImage}
-			<div class="w-12 md:w-14 relative aspect-square"></div>
+			<div class="w-12 h-12 md:w-14 md:h-14 relative aspect-square"></div>
 		{:then image}
 			{#if image}
 				<img
-					class="w-12 md:w-14 relative rounded {isDesktop() && 'animate__animated animate__fadeIn'}"
+					class="w-12 h-12 md:w-14 md:h-14 relative rounded {isDesktop() && 'animate__animated animate__fadeIn'}"
 					src={image}
 					alt="Album"
 				/>
 			{:else}
-				<div class="w-12 md:w-14 relative aspect-square">
+				<div class="w-12 h-12 md:w-14 md:h-14 relative aspect-square">
 					<Icon type={IconType.Folder} />
 				</div>
 			{/if}
@@ -107,7 +107,7 @@ async function selectFolder(){
 				text-xs/[14px] pt-[4px] md:text-[14px] md:pt-0 animate-scroll-overflow-text">{mediumLabel}</p>
 			<p class="text-xs/[14px] mt-[2px] text-opacity-background-90">{smallLabel}</p>
 		</div>
-		<div class="w-12 md:w-14"></div>
+		<div class="w-12 h-12 md:w-14 md:h-14"></div>
 	</div>
 	<div class="absolute top-0 left-0 py-2 w-full">
 		<div class="w-full grid grid-cols-[max-content_auto_max-content] music-item-play">
