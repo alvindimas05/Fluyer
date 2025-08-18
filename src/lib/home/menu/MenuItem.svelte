@@ -12,9 +12,8 @@ const { onclick, icon, label }: Props = $props();
 </script>
 <div class="w-full py-1 px-3">
     <button
-            class="w-full text-white text-start font-medium tracking-wide px-4 py-3 rounded
-    bg-gradient-to-r from-white/20 to-white/30 hover:from-white/30 hover:to-white/35
-    focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200 box-border
+            class="w-full text-white text-start font-medium tracking-wide p-3 rounded-lg
+    bg-white/15 hover:bg-white/25 transition-all duration-200 box-border
     shadow-md md:text-lg grid grid-cols-[min-content_auto] gap-3 items-center"
             onclick={onclick}
     >
