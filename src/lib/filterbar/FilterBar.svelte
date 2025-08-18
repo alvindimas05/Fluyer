@@ -58,7 +58,8 @@ onMount(() => {
 </script>
 
 <svelte:window onresize={updateGridSizing} />
-<div class="w-full sm:grid justify-end gap-y-2 px-3 sm:px-0 mb-3
+<div class="w-full sm:grid gap-y-2 px-3 sm:px-0 mb-3
+    {isMacos() ? 'justify-end' : ''}
     {isMacos() ? 'right-0' : 'left-0'}"
      style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};">

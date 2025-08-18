@@ -108,7 +108,7 @@ afterNavigate((navigation) => {
         @apply hover:bg-gray-300/25 rounded text-[10px] font-[300];
     }
     .win-button {
-        @apply py-2 px-3;
+        @apply py-[6px] px-3;
         transition: background 0.1s;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
