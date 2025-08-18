@@ -35,9 +35,6 @@ let { children }: Props = $props();
 let isAppReady = $state(false);
 
 async function initialize() {
-	if (isDesktop()) await getCurrentWindow().show();
-	if (isWindows()) await getCurrentWindow().toggleMaximize();
-
 	logHandler();
 	await Promise.all([
 		PersistentStoreController.initialize(),
@@ -46,6 +43,12 @@ async function initialize() {
 		MobileController.initialize(),
         FolderController.initialize(),
 	]);
+
+	if (isDesktop()){
+        await getCurrentWindow().show();
+        await getCurrentWindow().toggleMaximize();
+    }
+
 	LoadingController.listen();
 	isAppReady = true;
 }

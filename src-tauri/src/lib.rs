@@ -60,8 +60,6 @@ pub fn run() {
                     )
                     .unwrap();
             }
-            #[cfg(all(desktop, not(windows)))]
-            main_window.maximize().unwrap();
 
             GLOBAL_MAIN_WINDOW
                 .set(main_window)
@@ -133,6 +131,23 @@ pub fn run() {
                     .expect("Failed to set GLOBAL_APP_HANDLE");
                 app_handle.manage(Mutex::new(AppState::default()));
 
+                #[cfg(desktop)]
+                {
+                    use std::{thread, time::Duration};
+                    use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                
+                    thread::spawn(|| {
+                        thread::sleep(Duration::from_secs(5));
+                        if !GLOBAL_MAIN_WINDOW.get().unwrap().is_visible().unwrap() {
+                            GLOBAL_APP_HANDLE.get().unwrap().dialog() 
+                                .message("It seems like there is an error with the app. Please contact the developer if you get this message :)")
+                                .kind(MessageDialogKind::Error)
+                                .title("Error")
+                                .blocking_show();
+                        }
+                    });
+                }
+                
                 database::database::initialize_database();
 
                 debug!(
