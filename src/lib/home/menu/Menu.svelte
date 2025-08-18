@@ -3,15 +3,21 @@ import Sidebar from "$lib/home/sidebar/Sidebar.svelte";
 import { SidebarType } from "$lib/home/sidebar/types.js";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
-import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import MenuItem from "$lib/home/menu/MenuItem.svelte";
 import UIController from "$lib/controllers/UIController";
 import { isDesktop } from "$lib/platform";
+import {musicListType} from "$lib/stores/music";
+import {MusicListType} from "$lib/home/music/types";
 </script>
 
 <Sidebar type={SidebarType.Left}>
     <p class="text-[1.2rem] md:text-[1.5rem] font-semibold px-3 py-2">Menu</p>
+    <div class="md:hidden">
+        <MenuItem label="Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}"
+            icon={$musicListType === MusicListType.Folder ? IconType.Note : IconType.Folder}
+            onclick={UIController.toggleMusicListType}/>
+    </div>
     <MenuItem label="Play Screen" icon={IconType.Fullscreen}
               onclick={() => PageController.goto(PageRoutes.PLAY)}/>
     {#if isDesktop()}

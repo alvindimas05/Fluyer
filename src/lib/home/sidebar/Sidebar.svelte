@@ -43,9 +43,8 @@ const rules = [
 
 const SWIPE_RANGE = 125;
 
-let filterBarHeight = $state(MusicConfig.filterBarHeight);
 let sidebarWidth = $state(window.innerWidth);
-let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + filterBarHeight);
+let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + MusicConfig.filterBarHeight);
 
 let isMouseInsideArea = $state(false);
 let isShowing = $state(false);
@@ -101,10 +100,6 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 	}
 }
 
-function updateFilterBarHeight() {
-	filterBarHeight = MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2);
-}
-
 function updateSidebarWidth() {
 	const w = window.innerWidth;
 	const dpi = window.devicePixelRatio;
@@ -121,7 +116,6 @@ function updateSidebarWidth() {
 }
 
 function updateSize() {
-	updateFilterBarHeight();
 	updateSidebarWidth();
 }
 

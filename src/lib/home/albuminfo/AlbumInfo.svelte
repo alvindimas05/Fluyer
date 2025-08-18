@@ -63,39 +63,39 @@ async function playShuffle() {
 }
 </script>
 {#if album || $folderCurrent}
-    <div class="px-3 pb-2 animate__animated animate__fadeIn">
-        <div class="w-full md:grid grid-cols-[auto_max-content] px-4 py-2 bg-white/15 rounded-lg shadow-md">
-            <div class="grid items-center">
-                <div class="text-sm md:text-base font-medium text-white overflow-hidden">
-                    <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">{label}</p>
+    <div class="md:grid grid-cols-[auto_max-content]
+        box-border mx-3 mb-2 px-4 py-2 bg-white/15 rounded-lg shadow-xl
+        animate__animated animate__fadeIn">
+        <div class="grid items-center">
+            <div class="text-sm md:text-base font-medium text-white overflow-hidden">
+                <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">{label}</p>
+            </div>
+        </div>
+        <div class="w-fit">
+            {#await showBackButton then showBackButton}
+                <div class="grid gap-x-2 md:gap-x-3 mt-2 md:mt-0"
+                     class:grid-cols-4={showBackButton}
+                     class:grid-cols-3={!showBackButton}>
+                    {#if showBackButton}
+                        <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-white"
+                                onclick={handleBack}>
+                            <Icon type={IconType.AlbumBack} />
+                        </button>
+                    {/if}
+                    <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-white"
+                            onclick={addMusicListAndPlay}>
+                        <Icon type={IconType.Play} />
+                    </button>
+                    <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-white"
+                            onclick={addMusicList}>
+                        <Icon type={IconType.QueuePlaylist} />
+                    </button>
+                    <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-white"
+                            onclick={playShuffle}>
+                        <Icon type={IconType.Shuffle} />
+                    </button>
                 </div>
-            </div>
-            <div class="w-fit">
-                {#await showBackButton then showBackButton}
-                    <div class="grid gap-x-2 md:gap-x-3 mt-2 md:mt-0"
-                         class:grid-cols-4={showBackButton}
-                         class:grid-cols-3={!showBackButton}>
-                        {#if showBackButton}
-                            <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-white"
-                                    onclick={handleBack}>
-                                <Icon type={IconType.AlbumBack} />
-                            </button>
-                        {/if}
-                        <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-white"
-                                onclick={addMusicListAndPlay}>
-                            <Icon type={IconType.Play} />
-                        </button>
-                        <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-white"
-                                onclick={addMusicList}>
-                            <Icon type={IconType.QueuePlaylist} />
-                        </button>
-                        <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-white"
-                                onclick={playShuffle}>
-                            <Icon type={IconType.Shuffle} />
-                        </button>
-                    </div>
-                {/await}
-            </div>
+            {/await}
         </div>
     </div>
 {:else}

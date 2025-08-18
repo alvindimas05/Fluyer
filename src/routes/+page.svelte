@@ -11,29 +11,12 @@ import AlbumInfo from "$lib/home/albuminfo/AlbumInfo.svelte";
 import Equalizer from "$lib/home/equalizer/Equalizer.svelte";
 import {isDesktop, isMobile} from "$lib/platform";
 import {MusicListType} from "$lib/home/music/types";
-import {MusicConfig} from "$lib/controllers/MusicController";
-import {onDestroy, onMount} from "svelte";
 import {mobileStatusBarHeight} from "$lib/stores/mobile";
+import {MusicConfig} from "$lib/controllers/MusicController";
 
-let filterBarHeight = $state(MusicConfig.filterBarHeight);
-let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + filterBarHeight);
-
-function updateFilterBarHeight() {
-    filterBarHeight = MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2);
-}
-
-let unsubscribeMusicListType = musicListType.subscribe(() => setTimeout(updateFilterBarHeight));
-
-onMount(() => {
-    updateFilterBarHeight();
-});
-
-onDestroy(() => {
-    unsubscribeMusicListType();
-});
+let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + MusicConfig.filterBarHeight);
 </script>
 
-<svelte:window onresize={updateFilterBarHeight} />
 {#if $loadingShow}
     {#if $musicList === null}
         <Intro />
@@ -43,15 +26,15 @@ onDestroy(() => {
         {/if}
         <Playlist />
         <Menu />
-        <PlayerBar />
         <div class="h-full grid {$musicListType === MusicListType.Folder ?
-            'grid-rows-[min-content_auto]' : 'grid-rows-[min-content_min-content_auto]'}"
-            style="margin-top: {marginTop}px;">
+            'grid-rows-[min-content_auto_min-content]' : 'grid-rows-[min-content_min-content_auto_min-content]'}"
+            style="padding-top: {paddingTop}px;">
             {#if $musicListType === MusicListType.All}
                 <AlbumList />
             {/if}
             <AlbumInfo />
             <MusicList />
+            <PlayerBar />
         </div>
     {/if}
 {/if}

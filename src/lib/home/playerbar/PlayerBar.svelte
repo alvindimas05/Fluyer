@@ -184,7 +184,7 @@ onDestroy(() => {
 
 <svelte:document onkeydown={onKeyDown} />
 
-<div class="fixed left-0 bottom-0 z-10 w-full pt-2">
+<div class="relative w-full pt-2">
     <div class="w-fit absolute border rounded-lg px-2 py-1 shadow-xl backdrop-blur-md text-sm"
         style="
             left: {tooltipPosition}px;

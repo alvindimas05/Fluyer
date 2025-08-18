@@ -8,6 +8,8 @@ import {onMount} from "svelte";
 import {musicListType} from "$lib/stores/music";
 import {MusicListType} from "$lib/home/music/types";
 import FolderController from "$lib/controllers/FolderController";
+import MusicController from "$lib/controllers/MusicController";
+import UIController from "$lib/controllers/UIController";
 
 const rules = [
     // xhdpi (DPR > 2.0)
@@ -50,30 +52,19 @@ function updateGridSizing() {
     gridSize = "";
 }
 
-async function toggleMusicListType() {
-    if($musicListType === MusicListType.All){
-        $filterAlbum = null;
-        await FolderController.setMusicListToFolder();
-    } else {
-        FolderController.setFolder(null);
-    }
-    $musicListType = listType === MusicListType.All ? MusicListType.Folder : MusicListType.All;
-}
-
 onMount(() => {
     updateGridSizing();
 });
 </script>
 
 <svelte:window onresize={updateGridSizing} />
-<div class="w-full sm:w-fit h-6 sm:h-6 absolute top-0 grid gap-y-2 px-3 sm:px-0 pointer-events-none
+<div class="w-full sm:grid justify-end gap-y-2 px-3 sm:px-0 mb-3
     {isMacos() ? 'right-0' : 'left-0'}"
      style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};">
-    <button class="w-full sm:w-auto h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 text-start
-        pointer-events-auto
+    <button class="hidden sm:block h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 text-start
         animate__animated animate__fadeIn animate__slow"
-        onclick={toggleMusicListType}>
+        onclick={UIController.toggleMusicListType}>
         <div class="w-full h-full grid grid-cols-[min-content_auto] gap-x-2 px-3 py-1
             text-sm text-white/70">
             <div class="w-4">
@@ -82,9 +73,8 @@ onMount(() => {
             <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>
         </div>
     </button>
-    <div class="w-full sm:w-auto h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3
+    <div class="h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3
         {isMacos() ? 'order-last' : 'order-first'}
-        pointer-events-auto
         animate__animated animate__fadeIn animate__slow">
         <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-3 py-1">
             <input

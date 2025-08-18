@@ -145,7 +145,7 @@ $effect(() => {
 <!--</div>-->
 
 <div style="width: 100%;
-    height: {itemHeight}px;">
+    height: {itemHeight + 16}px;">
     <!-- Note: Ignore this  -->
     <VList onwheel={onMouseWheel}
        class="scrollbar-hidden"

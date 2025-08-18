@@ -1,6 +1,11 @@
 // @ts-ignore
 import { fluidScroll } from "fluidscroll";
 import { equalizerShow } from "$lib/stores/equalizer";
+import {get} from "svelte/store";
+import {musicListType} from "$lib/stores/music";
+import {MusicListType} from "$lib/home/music/types";
+import FilterController from "$lib/controllers/FilterController";
+import FolderController from "$lib/controllers/FolderController";
 
 const UIController = {
 	initialize: async () => {
@@ -30,6 +35,16 @@ const UIController = {
 	toggleEqualizer: (value: boolean) => {
 		equalizerShow.set(value);
 	},
+	toggleMusicListType: async () => {
+		const listType = get(musicListType);
+		if(listType === MusicListType.All){
+			FilterController.setFilterAlbum(null);
+			await FolderController.setMusicListToFolder();
+		} else {
+			FolderController.setFolder(null);
+		}
+		musicListType.set(listType === MusicListType.All ? MusicListType.Folder : MusicListType.All);
+	}
 };
 
 export function showThenFade(node: HTMLElement, options?: {

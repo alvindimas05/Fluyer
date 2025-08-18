@@ -82,7 +82,7 @@ async function selectFolder(){
 
 <div class="relative text-sm md:text-base">
 	<div
-		class="grid grid-cols-[max-content_auto_max-content] py-2"
+		class="grid grid-cols-[max-content_auto] py-2"
 	>
 		{#await albumImage}
 			<div class="w-12 h-12 md:w-14 md:h-14 relative aspect-square"></div>
@@ -107,7 +107,6 @@ async function selectFolder(){
 				text-xs/[14px] pt-[4px] md:text-xs md:pt-0 animate-scroll-overflow-text">{mediumLabel}</p>
 			<p class="text-xs/[14px] md:text-xs mt-[2px] text-opacity-background-90">{smallLabel}</p>
 		</div>
-		<div class="w-12 h-12 md:w-14 md:h-14"></div>
 	</div>
 	<div class="absolute top-0 left-0 py-2 w-full">
 		<div class="w-full grid grid-cols-[max-content_auto_max-content] music-item-play">
@@ -120,8 +119,10 @@ async function selectFolder(){
 				><Icon type={IconType.Play}/></div>
 			</button>
 			<div class="{folder ? 'cursor-pointer' : 'cursor-default'}" onclick={selectFolder}></div>
-			<div class="w-12 h-12 md:w-14 md:h-14 p-2">
-				<button class="w-full h-full" onclick={addMusic}><Icon type={IconType.QueuePlaylist} /></button>
+			<div class="w-12 h-12 md:w-14 md:h-14 ps-4">
+				<button class="w-full h-full aspect-square" onclick={addMusic}>
+					<Icon type={IconType.QueuePlaylist} />
+				</button>
 			</div>
 		</div>
 	</div>

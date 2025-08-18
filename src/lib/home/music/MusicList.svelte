@@ -108,11 +108,11 @@ onDestroy(() => {
 </script>
 
 <svelte:window onresize={updateSize} />
-<div class="h-full px-3 overflow-y-auto text-white">
+<div class="h-full px-3 text-white">
 	{#if data && columnCount}
-		<VList class="scrollbar-hidden pb-[12rem] md:pb-[7.5rem]" {data} getKey={(_, i) => i}>
+		<VList class="scrollbar-hidden" {data} getKey={(_, i) => i}>
 			{#snippet children(list)}
-				<div class="grid" style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr))">
+				<div class="grid gap-x-6" style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr))">
 					{#each list as data}
 						{#if 'duration' in data}
 							<MusicItem music={data} />
