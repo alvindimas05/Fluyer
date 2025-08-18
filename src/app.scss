@@ -16,12 +16,20 @@
 }
 
 .show-then-fade {
-	opacity: 0;
-	transition: opacity var(--show-then-fade-transition-out-duration, 1s) ease-in-out var(--show-then-fade-transition-delay-duration, 0s);
+  opacity: 0;
+  transition: opacity var(--show-then-fade-transition-out-duration, 1s) ease-in-out var(--show-then-fade-transition-delay-duration, 0s);
 
-    &.visible-initially, &:hover {
-        opacity: 1;
-		transition-duration: var(--show-then-fade-transition-in-duration, 0.5s);
-		transition-delay: 0s;
-    }
+  &.visible-initially,
+  &:hover {
+    opacity: 1;
+    transition-duration: var(--show-then-fade-transition-in-duration, 0.5s);
+    transition-delay: 0s;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .show-then-fade.show-then-fade-disable-mobile {
+    opacity: 1;
+    transition: none;
+  }
 }

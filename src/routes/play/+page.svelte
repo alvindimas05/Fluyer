@@ -345,7 +345,7 @@ function scrollToSelectedLyric() {
                     {/if}
                 </div>
             </div>
-            <div id="volume-bar" class="mt-5 animate__animated show-then-fade" use:showThenFade>
+            <div id="volume-bar" class="mt-5 animate__animated show-then-fade show-then-fade-disable-mobile" use:showThenFade>
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <button
                         class="w-5"
