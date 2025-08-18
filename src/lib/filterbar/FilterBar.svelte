@@ -58,12 +58,12 @@ onMount(() => {
 </script>
 
 <svelte:window onresize={updateGridSizing} />
-<div class="w-full sm:grid gap-y-2 px-3 sm:px-0 mb-3
+<div class="w-full sm:grid gap-y-2 px-3 sm:px-0 mb-3 pointer-events-none
     {isMacos() ? 'justify-end' : ''}
     {isMacos() ? 'right-0' : 'left-0'}"
      style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};">
-    <button class="hidden sm:block h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 text-start
+    <button class="hidden sm:block h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 text-start pointer-events-auto
         animate__animated animate__fadeIn animate__slow"
         onclick={UIController.toggleMusicListType}>
         <div class="w-full h-full grid grid-cols-[min-content_auto] gap-x-2 px-3 py-1
@@ -74,7 +74,7 @@ onMount(() => {
             <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>
         </div>
     </button>
-    <div class="h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3
+    <div class="h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 pointer-events-auto
         {isMacos() ? 'order-last' : 'order-first'}
         animate__animated animate__fadeIn animate__slow">
         <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-3 py-1">
