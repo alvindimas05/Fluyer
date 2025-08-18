@@ -137,7 +137,7 @@ pub fn run() {
                     use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
                 
                     thread::spawn(|| {
-                        thread::sleep(Duration::from_secs(5));
+                        thread::sleep(Duration::from_secs(10));
                         if !GLOBAL_MAIN_WINDOW.get().unwrap().is_visible().unwrap() {
                             GLOBAL_APP_HANDLE.get().unwrap().dialog() 
                                 .message("It seems like there is an error with the app. Please contact the developer if you get this message :)")
