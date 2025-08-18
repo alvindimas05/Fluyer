@@ -7,6 +7,7 @@ import PersistentStoreController from "$lib/controllers/PersistentStoreControlle
 import type {FolderData, MusicData} from "$lib/home/music/types";
 import {musicList} from "$lib/stores/music";
 import MusicController from "$lib/controllers/MusicController";
+import { isWindows } from "$lib/platform";
 
 const FolderController = {
     initialize: async () => {
@@ -23,7 +24,6 @@ const FolderController = {
         }
     },
     setMusicListToFolder: async () => {
-        const folder = FolderController.currentFolder();
         const musicPaths = await PersistentStoreController.musicPath.get();
         if(musicPaths.length > 0) folderCurrent.set({path: musicPaths[0]} as FolderData);
         else folderCurrent.set(null);
@@ -39,9 +39,7 @@ const FolderController = {
         FolderController.setFolder({path: parent} as FolderData);
     },
     isMusicInFolder: (music: MusicData, folder: FolderData | null) => {
-        if (!folder || !music.path.startsWith(folder.path)) {
-            return false;
-        }
+        if (!folder || !music.path.startsWith(folder.path)) return false;
 
         // Ensure folder path has a trailing slash for correct comparison
         const folderPathWithSlash = folder.path.endsWith('/') ? folder.path : `${folder.path}/`;

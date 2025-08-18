@@ -55,7 +55,7 @@ pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
         .filter_map(Result::ok)
         .filter(|e| e.file_type().is_dir() && e.path().to_str().unwrap_or_default() != path && is_not_hidden(e))
         .map(|entry| FolderItem {
-            path: entry.path().to_str().unwrap_or_default().to_string(),
+            path: normalize_path(entry.path().to_str().unwrap_or_default().to_string()),
         })
         .collect()
 }
@@ -135,12 +135,14 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
         })
         .filter_map(|entry| {
             let path_str = entry.path().to_str()?;
-            Some(path_str.to_string())
+            Some(normalize_path(path_str.to_string()))
         })
         .collect();
 
     let mut conn_guard = GLOBAL_DATABASE.lock().ok()?;
     let conn = conn_guard.as_mut()?;
+
+    windows_fix_music_paths_older_version(conn);
 
     let tx = conn.transaction().unwrap();
 
@@ -279,6 +281,16 @@ fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> 
         .unwrap()
         .filter_map(|r| r.ok())
         .collect()
+}
+
+fn normalize_path(path: String) -> String {
+    path.replace(":\\\\", ":\\")
+}
+
+fn windows_fix_music_paths_older_version(conn: &mut Connection){
+    let tx = conn.transaction().unwrap();
+    tx.execute("UPDATE musics SET path = REPLACE(path, ':\\\\', ':\\')", params![]).unwrap();
+    tx.commit().unwrap();
 }
 
 fn delete_non_existing_paths(conn: &mut Connection, musics: Vec<String>) {
