@@ -2,8 +2,8 @@
 
 cp .env.example .env
 
-APP_VERSION=$(bun -p "require('./package.json').version")
-echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+#APP_VERSION=$(bun -p "require('./package.json').version")
+#echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
 # Install Linux Dependencies
 if [[ "$os" == "linux" ]]; then

@@ -3,475 +3,207 @@ name: Build & Publish
 on:
   workflow_dispatch:
     inputs:
-      build-windows-x86_64:
-        description: "Build for Windows (x86_64)"
-        required: false
-        type: boolean
-      build-windows-arm64:
-        description: "Build for Windows (arm64)"
-        required: false
-        type: boolean
-      build-macos-intel:
-        description: "Build for MacOS (Intel)"
-        required: false
-        type: boolean
-      build-macos-silicon:
-        description: "Build for MacOS (Silicon)"
-        required: false
-        type: boolean
-      build-linux:
-        description: "Build for Linux"
-        required: false
-        type: boolean
-      build-android-armv7:
-        description: "Build for Android (armv7)"
-        required: false
-        type: boolean
-      build-android-aarch64:
-        description: "Build for Android (aarch64)"
-        required: false
-        type: boolean
-      build-android-i686:
-        description: "Build for Android (i686)"
-        required: false
-        type: boolean
-      build-android-x86_64:
-        description: "Build for Android (x86_64)"
-        required: false
-        type: boolean
-      build-ios:
-        description: "Build for iOS"
-        required: false
-        type: boolean
+      platforms:
+        description: "Select platforms to build"
+        required: true
+        type: choice
+        options:
+          - "windows-x86_64"
+          # - "windows-arm64"
+          - "macos-intel"
+          - "macos-silicon"
+          - "linux"
+          - "android-armv7"
+          - "android-aarch64"
+          - "android-i686"
+          - "android-x86_64"
+          # - "ios"
+          - "all"
+        default: "all"
+
+env:
+  RUST_BACKTRACE: 1
 
 jobs:
-  build-windows-x86_64:
-    name: Build Windows (x86_64)
-    runs-on: windows-latest
-    permissions: write-all
-    if: ${{ github.event.inputs.build-windows-x86_64 == 'true' }}
-    steps: 
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-      # Note: Setup and Build are seperated due to rust-openssl bug
-      # https://github.com/sfackler/rust-openssl/issues/2149
-      - name: Setup Workflow
-        shell: bash
-        run: os=windows bash scripts/setup-workflow.sh
-      - name: Build Workflow
-        run: bun tauri:build
-      
-      - name: Publish release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: ./src-tauri/target/release/bundle/nsis/Fluyer_${{ env.APP_VERSION }}_x64-setup.exe
-          tag: v${{ env.APP_VERSION }}
-          name: Fluyer v${{ env.APP_VERSION }}
-          allowUpdates: true
-          prerelease: true
-          artifactErrorsFailBuild: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  # FIXME: Keeps giving error like required tauri-cli arm64
-  # even though it's already installed on setup-workflow.sh
-  # Probably because bun doesn't support arm64
-  # Will fix later since Windows ARM is not required for now
-  build-windows-arm64:
-    name: Build Windows (arm64)
-    runs-on: windows-11-arm
-    permissions: write-all
-    if: ${{ github.event.inputs.build-windows-arm64 == 'true' }}
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set build matrix
+        id: set-matrix
+        run: |
+          if [ "${{ github.event.inputs.platforms }}" == "all" ]; then
+            # echo 'matrix=["windows-x86_64","windows-arm64","macos-intel","macos-silicon","linux","android-armv7","android-aarch64","android-i686","android-x86_64","ios"]' >> $GITHUB_OUTPUT
+            echo 'matrix=["windows-x86_64","macos-intel","macos-silicon","linux","android-armv7","android-aarch64","android-i686","android-x86_64"]' >> $GITHUB_OUTPUT
+          else
+            platforms=$(echo "${{ github.event.inputs.platforms }}" | jq -R 'split(",") | map(select(length > 0))')
+            echo "matrix=$platforms" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJson(needs.prepare.outputs.matrix) }}
+        include:
+          # Desktop platforms
+          - platform: windows-x86_64
+            os: windows-latest
+            rust_target: x86_64-pc-windows-msvc
+            artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*.exe
+            artifact_name: windows-x86_64
+          # - platform: windows-arm64
+          #   os: windows-11-arm
+          #   rust_target: aarch64-pc-windows-msvc
+          #   artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*_arm64-setup.exe
+          #   artifact_name: windows-arm64
+          #   bun_url: https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip
+          - platform: macos-intel
+            os: macos-13
+            rust_target: x86_64-apple-darwin
+            artifact_path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_x64.dmg
+            artifact_name: macos-intel
+          - platform: macos-silicon
+            os: macos-latest
+            rust_target: aarch64-apple-darwin
+            artifact_path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_aarch64.dmg
+            artifact_name: macos-silicon
+          - platform: linux
+            os: ubuntu-latest
+            rust_target: x86_64-unknown-linux-gnu
+            artifact_path: ./src-tauri/target/release/bundle/deb/Fluyer_*_amd64.deb,./src-tauri/target/release/bundle/appimage/Fluyer_*_amd64.AppImage
+            artifact_name: linux
+          # Mobile platforms
+          - platform: android-armv7
+            os: ubuntu-latest
+            rust_target: armv7-linux-androideabi
+            artifact_path: ./Fluyer_*_armv7.apk
+            artifact_name: android-armv7
+            android_arch: armv7
+          - platform: android-aarch64
+            os: ubuntu-latest
+            rust_target: aarch64-linux-android
+            artifact_path: ./Fluyer_*_aarch64.apk
+            artifact_name: android-aarch64
+            android_arch: aarch64
+          - platform: android-i686
+            os: ubuntu-latest
+            rust_target: i686-linux-android
+            artifact_path: ./Fluyer_*_i686.apk
+            artifact_name: android-i686
+            android_arch: i686
+          - platform: android-x86_64
+            os: ubuntu-latest
+            rust_target: x86_64-linux-android
+            artifact_path: ./Fluyer_*_x86_64.apk
+            artifact_name: android-x86_64
+            android_arch: x86_64
+          # - platform: ios
+          #   os: macos-latest
+          #   rust_target: aarch64-apple-ios
+          #   artifact_path: ./ipas/Fluyer_*.ipa
+          #   artifact_name: ios
+
+    runs-on: ${{ matrix.os }}
+    permissions: write-all
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Bun (with custom URL for Windows ARM)
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-download-url: 'https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip'
+          bun-download-url: ${{ matrix.bun_url || '' }}
 
+      # Android-specific setup
+      - name: Setup Java (Android only)
+        if: startsWith(matrix.platform, 'android')
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        if: startsWith(matrix.platform, 'android')
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK
+        if: startsWith(matrix.platform, 'android')
+        run: sdkmanager "ndk;28.0.13004108"
+
+      # Rust setup
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
-      # Note: Setup and Build are seperated due to rust-openssl bug
-      # https://github.com/sfackler/rust-openssl/issues/2149
+
+      # Build setup and execution
       - name: Setup Workflow
         shell: bash
-        run: os=windows arch=arm64 bash scripts/setup-workflow.sh
-      - name: Build Workflow
+        run: |
+          case "${{ matrix.platform }}" in
+            windows-*)
+              os=windows bash scripts/setup-workflow.sh
+              ;;
+            macos-intel)
+              bash scripts/setup-workflow.sh
+              ;;
+            macos-silicon)
+              bash scripts/setup-workflow.sh
+              ;;
+            linux)
+              bash scripts/setup-workflow.sh
+              ;;
+            android-*)
+              bash scripts/setup-workflow.sh
+              ;;
+            ios)
+              bash scripts/setup-workflow.sh
+              ;;
+          esac
+        env:
+          os: ${{ startsWith(matrix.platform, 'windows') && 'windows' || startsWith(matrix.platform, 'macos') && 'macos' || startsWith(matrix.platform, 'android') && 'android' || startsWith(matrix.platform, 'linux') && 'linux' || 'ios' }}
+          arch: ${{ matrix.platform == 'windows-arm64' && 'arm64' || '' }}
+          macos_type: ${{ matrix.platform == 'macos-intel' && 'intel' || matrix.platform == 'macos-silicon' && 'silicon' || '' }}
+          ANDROID_ARCH: ${{ matrix.android_arch || '' }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+          RUNNER_TEMP: ${{ runner.temp }}
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
+
+      - name: Build (Desktop)
+        if: "!startsWith(matrix.platform, 'android') && matrix.platform != 'ios'"
         run: bun tauri:build
 
+      # Android-specific build steps
+      - name: Rename Android APK
+        if: startsWith(matrix.platform, 'android')
+        run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ needs.prepare.outputs.version }}_${{ matrix.android_arch }}.apk
+
+      # Publish release
       - name: Publish release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ./src-tauri/target/release/bundle/nsis/Fluyer_${{ env.APP_VERSION }}_arm64-setup.exe
-          tag: v${{ env.APP_VERSION }}
-          name: Fluyer v${{ env.APP_VERSION }}
+          artifacts: ${{ matrix.artifact_path }}
+          tag: v${{ needs.prepare.outputs.version }}
+          name: Fluyer v${{ needs.prepare.outputs.version }}
           allowUpdates: true
           prerelease: true
           artifactErrorsFailBuild: true
           token: ${{ secrets.GITHUB_TOKEN }}
-
-  build-macos-intel:
-    name: Build MacOS (Intel)
-    runs-on: macos-13
-    permissions: write-all
-    if: ${{ github.event.inputs.build-macos-intel == 'true' }}
-    steps: 
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Setup Workflow
-        run: bash scripts/setup-workflow.sh
-        env:
-            os: macos
-            macos_type: intel
-      
-      - name: Publish release
-        uses: ncipollo/release-action@v1
-        with:
-            artifacts: ./src-tauri/target/release/bundle/dmg/Fluyer_${{ env.APP_VERSION }}_x64.dmg
-            tag: v${{ env.APP_VERSION }}
-            name: Fluyer v${{ env.APP_VERSION }}
-            allowUpdates: true
-            prerelease: true
-            artifactErrorsFailBuild: true
-            token: ${{ secrets.GITHUB_TOKEN }}
-
-  build-macos-silicon:
-    name: Build MacOS (Silicon)
-    runs-on: macos-latest
-    permissions: write-all
-    if: ${{ github.event.inputs.build-macos-silicon == 'true' }}
-    steps: 
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Setup Workflow
-        run: bash scripts/setup-workflow.sh
-        env:
-            os: macos
-            macos_type: silicon
-      
-      - name: Publish release
-        uses: ncipollo/release-action@v1
-        with:
-            artifacts: ./src-tauri/target/release/bundle/dmg/Fluyer_${{ env.APP_VERSION }}_aarch64.dmg
-            tag: v${{ env.APP_VERSION }}
-            name: Fluyer v${{ env.APP_VERSION }}
-            allowUpdates: true
-            prerelease: true
-            artifactErrorsFailBuild: true
-            token: ${{ secrets.GITHUB_TOKEN }}
-      
-  build-linux:
-    name: Build Linux
-    runs-on: ubuntu-latest
-    permissions: write-all
-    if: ${{ github.event.inputs.build-linux == 'true' }}
-    steps: 
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Setup Workflow
-        run: bash scripts/setup-workflow.sh
-        env:
-          os: linux
-
-      - name: Publish release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: ./src-tauri/target/release/bundle/deb/Fluyer_${{ env.APP_VERSION }}_amd64.deb,./src-tauri/target/release/bundle/appimage/Fluyer_${{ env.APP_VERSION }}_amd64.AppImage
-          tag: v${{ env.APP_VERSION }}
-          name: Fluyer v${{ env.APP_VERSION }}
-          allowUpdates: true
-          prerelease: true
-          artifactErrorsFailBuild: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  build-android-armv7:
-      name: Build Android (armv7)
-      runs-on: ubuntu-latest
-      permissions: write-all
-      if: ${{ github.event.inputs.build-android-armv7 == 'true' }}
-      steps:
-          - uses: actions/checkout@v4
-          - name: Setup Java
-            uses: actions/setup-java@v4
-            with:
-                distribution: 'zulu'
-                java-version: '17'
-          - uses: oven-sh/setup-bun@v2
-
-          - name: Setup Android SDK
-            uses: android-actions/setup-android@v3
-
-          - name: Install NDK
-            run: sdkmanager "ndk;28.0.13004108"
-
-          - name: Install Rust stable
-            uses: dtolnay/rust-toolchain@stable
-            with:
-              target: armv7-linux-androideabi
-          - name: Rust cache
-            uses: swatinem/rust-cache@v2
-            with:
-              workspaces: './src-tauri -> target'
-        
-          - name: Get Node Project Version
-            id: package-version
-            uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-          - name: Setup Workflow
-            run: bash scripts/setup-workflow.sh
-            env:
-                os: android
-                ANDROID_ARCH: armv7
-                ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-                ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-                ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
-                RUNNER_TEMP: ${{ runner.temp }}
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
-          - name: Rename APK
-            run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ steps.package-version.outputs.current-version }}_armv7.apk
-          
-          - name: Publish release
-            uses: ncipollo/release-action@v1
-            with:
-                artifacts: ./Fluyer_${{ steps.package-version.outputs.current-version }}_armv7.apk
-                tag: v${{ steps.package-version.outputs.current-version }}
-                name: Fluyer v${{ steps.package-version.outputs.current-version }}
-                allowUpdates: true
-                prerelease: true
-                artifactErrorsFailBuild: true
-                token: ${{ secrets.GITHUB_TOKEN }}
-  build-android-aarch64:
-      name: Build Android (aarch64)
-      runs-on: ubuntu-latest
-      permissions: write-all
-      if: ${{ github.event.inputs.build-android-aarch64 == 'true' }}
-      steps:
-          - uses: actions/checkout@v4
-          - name: Setup Java
-            uses: actions/setup-java@v4
-            with:
-                distribution: 'zulu'
-                java-version: '17'
-          - uses: oven-sh/setup-bun@v2
-
-          - name: Setup Android SDK
-            uses: android-actions/setup-android@v3
-
-          - name: Install NDK
-            run: sdkmanager "ndk;28.0.13004108"
-
-          - name: Install Rust stable
-            uses: dtolnay/rust-toolchain@stable
-            with:
-              target: aarch64-linux-android
-          - name: Rust cache
-            uses: swatinem/rust-cache@v2
-            with:
-              workspaces: './src-tauri -> target'
-        
-          - name: Get Node Project Version
-            id: package-version
-            uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-          - name: Setup Workflow
-            run: bash scripts/setup-workflow.sh
-            env:
-                os: android
-                ANDROID_ARCH: aarch64
-                ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-                ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-                ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
-                RUNNER_TEMP: ${{ runner.temp }}
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
-          - name: Rename APK
-            run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ steps.package-version.outputs.current-version }}_aarch64.apk
-          
-          - name: Publish release
-            uses: ncipollo/release-action@v1
-            with:
-                artifacts: ./Fluyer_${{ steps.package-version.outputs.current-version }}_aarch64.apk
-                tag: v${{ steps.package-version.outputs.current-version }}
-                name: Fluyer v${{ steps.package-version.outputs.current-version }}
-                allowUpdates: true
-                prerelease: true
-                artifactErrorsFailBuild: true
-                token: ${{ secrets.GITHUB_TOKEN }}
-  build-android-i686:
-      name: Build Android (i686)
-      runs-on: ubuntu-latest
-      permissions: write-all
-      if: ${{ github.event.inputs.build-android-i686 == 'true' }}
-      steps:
-          - uses: actions/checkout@v4
-          - name: Setup Java
-            uses: actions/setup-java@v4
-            with:
-                distribution: 'zulu'
-                java-version: '17'
-          - uses: oven-sh/setup-bun@v2
-
-          - name: Setup Android SDK
-            uses: android-actions/setup-android@v3
-
-          - name: Install NDK
-            run: sdkmanager "ndk;28.0.13004108"
-
-          - name: Install Rust stable
-            uses: dtolnay/rust-toolchain@stable
-            with:
-              target: i686-linux-android
-          - name: Rust cache
-            uses: swatinem/rust-cache@v2
-            with:
-              workspaces: './src-tauri -> target'
-        
-          - name: Get Node Project Version
-            id: package-version
-            uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-          - name: Setup Workflow
-            run: bash scripts/setup-workflow.sh
-            env:
-                os: android
-                ANDROID_ARCH: i686
-                APP_VERSION: ${{ steps.package-version.outputs.current-version }}
-                ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-                ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-                ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
-                RUNNER_TEMP: ${{ runner.temp }}
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
-          - name: Rename APK
-            run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ steps.package-version.outputs.current-version }}_i686.apk
-          
-          - name: Publish release
-            uses: ncipollo/release-action@v1
-            with:
-                artifacts: ./Fluyer_${{ steps.package-version.outputs.current-version }}_i686.apk
-                tag: v${{ steps.package-version.outputs.current-version }}
-                name: Fluyer v${{ steps.package-version.outputs.current-version }}
-                allowUpdates: true
-                prerelease: true
-                artifactErrorsFailBuild: true
-                token: ${{ secrets.GITHUB_TOKEN }}
-  build-android-x86_64:
-      name: Build Android (x86_64)
-      runs-on: ubuntu-latest
-      permissions: write-all
-      if: ${{ github.event.inputs.build-android-x86_64 == 'true' }}
-      steps:
-          - uses: actions/checkout@v4
-          - name: Setup Java
-            uses: actions/setup-java@v4
-            with:
-                distribution: 'zulu'
-                java-version: '17'
-          - uses: oven-sh/setup-bun@v2
-
-          - name: Setup Android SDK
-            uses: android-actions/setup-android@v3
-
-          - name: Install NDK
-            run: sdkmanager "ndk;28.0.13004108"
-
-          - name: Install Rust stable
-            uses: dtolnay/rust-toolchain@stable
-            with:
-              target: x86_64-linux-android
-          - name: Rust cache
-            uses: swatinem/rust-cache@v2
-            with:
-              workspaces: './src-tauri -> target'
-        
-          - name: Get Node Project Version
-            id: package-version
-            uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-          - name: Setup Workflow
-            run: bash scripts/setup-workflow.sh
-            env:
-                os: android
-                ANDROID_ARCH: x86_64
-                ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-                ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-                ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
-                RUNNER_TEMP: ${{ runner.temp }}
-                NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
-          - name: Rename APK
-            run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk
-          
-          - name: Publish release
-            uses: ncipollo/release-action@v1
-            with:
-                artifacts: ./Fluyer_${{ steps.package-version.outputs.current-version }}_x86_64.apk
-                tag: v${{ steps.package-version.outputs.current-version }}
-                name: Fluyer v${{ steps.package-version.outputs.current-version }}
-                allowUpdates: true
-                prerelease: true
-                artifactErrorsFailBuild: true
-                token: ${{ secrets.GITHUB_TOKEN }}
-
-  build-ios:
-      name: Build iOS
-      runs-on: macos-latest
-      permissions:
-          contents: write
-      if: ${{ github.event.inputs.build-ios == 'true' }}
-      steps: 
-          - uses: actions/checkout@v4
-          - uses: oven-sh/setup-bun@v2
-    
-          - name: Install Rust stable
-            uses: dtolnay/rust-toolchain@stable
-          - name: Rust cache
-            uses: swatinem/rust-cache@v2
-            with:
-                workspaces: './src-tauri -> target'
-
-          - name: Setup Workflow
-            run: bash scripts/setup-workflow.sh
-            env:
-                os: ios
-          
-          - name: Publish release
-            uses: ncipollo/release-action@v1
-            with:
-                artifacts: ./ipas/Fluyer_${{ steps.package-version.outputs.current-version }}.ipa
-                tag: v${{ steps.package-version.outputs.current-version }}
-                name: Fluyer v${{ steps.package-version.outputs.current-version }}
-                allowUpdates: true
-                prerelease: true
-                artifactErrorsFailBuild: true
-                token: ${{ secrets.GITHUB_TOKEN }}
