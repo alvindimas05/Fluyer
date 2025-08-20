@@ -110,6 +110,11 @@ pub fn music_get_image(path: String) -> Option<String> {
 
 #[tauri::command]
 pub fn music_get_buffer(path: String, app_handle: tauri::AppHandle) -> Option<Vec<u8>> {
+    if cfg!(mobile) {
+        // FIXME: Mobile platforms do not support ffmpeg conversion
+        return std::fs::read(path).ok();
+    }
+
     use std::process::Command;
     use std::time::{SystemTime, UNIX_EPOCH};
     use std::path::PathBuf;
