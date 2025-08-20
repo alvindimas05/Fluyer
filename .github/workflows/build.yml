@@ -59,12 +59,12 @@ jobs:
             rust_target: x86_64-pc-windows-msvc
             artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*.exe
             artifact_name: windows-x86_64
-          - platform: windows-arm64
-            os: windows-11-arm
-            rust_target: aarch64-pc-windows-msvc
-            artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*_arm64-setup.exe
-            artifact_name: windows-arm64
-            bun_url: https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip
+          # - platform: windows-arm64
+          #   os: windows-11-arm
+          #   rust_target: aarch64-pc-windows-msvc
+          #   artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*_arm64-setup.exe
+          #   artifact_name: windows-arm64
+          #   bun_url: https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip
           - platform: macos-intel
             os: macos-13
             rust_target: x86_64-apple-darwin
@@ -105,11 +105,11 @@ jobs:
             artifact_path: ./Fluyer_*_x86_64.apk
             artifact_name: android-x86_64
             android_arch: x86_64
-          - platform: ios
-            os: macos-latest
-            rust_target: aarch64-apple-ios
-            artifact_path: ./ipas/Fluyer_*.ipa
-            artifact_name: ios
+          # - platform: ios
+          #   os: macos-latest
+          #   rust_target: aarch64-apple-ios
+          #   artifact_path: ./ipas/Fluyer_*.ipa
+          #   artifact_name: ios
 
     runs-on: ${{ matrix.os }}
     permissions: write-all
