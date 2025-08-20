@@ -80,7 +80,6 @@ async function setAudio(music: MusicData | null = null) {
 		);
 		if (buffer === null) return;
 
-        const now = performance.now();
 		await AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
 	} catch (e) {}
 }
