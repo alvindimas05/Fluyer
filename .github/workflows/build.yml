@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       platforms:
-        description: "Select platforms to build (comma-separated)"
+        description: "Select platforms to build"
         required: true
         type: choice
         options:
           - "windows-x86_64"
-          - "windows-arm64"
+          # - "windows-arm64"
           - "macos-intel"
           - "macos-silicon"
           - "linux"
@@ -17,7 +17,7 @@ on:
           - "android-aarch64"
           - "android-i686"
           - "android-x86_64"
-          - "ios"
+          # - "ios"
           - "all"
         default: "all"
 
