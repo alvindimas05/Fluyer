@@ -1,16 +1,16 @@
 use std::sync::Mutex;
-use tauri::State;
+use tauri::{Manager, State};
 
 #[cfg(desktop)]
 use tauri::{AppHandle, Emitter};
-
+use tauri::path::BaseDirectory;
 #[cfg(desktop)]
 use tauri_plugin_dialog::DialogExt;
 
 #[cfg(desktop)]
 use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
 
-use crate::{music::metadata::MusicMetadata, AppState};
+use crate::{logger, music::metadata::MusicMetadata, AppState};
 use crate::music::player::MusicPlayer;
 
 pub static MUSIC_STORE_PATH_NAME: &str = "music-path";
@@ -109,19 +109,20 @@ pub fn music_get_image(path: String) -> Option<String> {
 }
 
 #[tauri::command]
-pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
+pub fn music_get_buffer(path: String, app_handle: tauri::AppHandle) -> Option<Vec<u8>> {
     use std::process::Command;
     use std::time::{SystemTime, UNIX_EPOCH};
     use std::path::PathBuf;
 
-    let ffmpeg_exists = Command::new("ffmpeg")
-        .arg("-version")
-        .output()
-        .is_ok();
+    // Get the bundled ffmpeg path
+    let ffmpeg_binary = if cfg!(target_os = "windows") {
+        "libs/ffmpeg/bin/ffmpeg.exe"
+    } else {
+        "libs/ffmpeg/bin/ffmpeg"
+    };
 
-    if !ffmpeg_exists {
-        return std::fs::read(path).ok();
-    }
+    let ffmpeg_path = GLOBAL_APP_HANDLE.get().unwrap().path()
+        .resolve(ffmpeg_binary, BaseDirectory::Resource).unwrap();
 
     let tmp_dir = std::env::temp_dir();
     let unique_id = SystemTime::now()
@@ -131,19 +132,26 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
     let tmp_file: PathBuf = tmp_dir.join(format!("converted_{}.mp3", unique_id));
 
     // Convert to very small mp3
-    let ffmpeg_status = Command::new("ffmpeg")
+    let ffmpeg_status = Command::new(&ffmpeg_path)
         .args([
             "-y", // overwrite
             "-i", &path, // input
             "-ac", "1",  // mono
-            "-ar", "22050", // lower sample rate
-            "-b:a", "32k", // low bitrate
-            "-codec:a", "libmp3lame", // MP3 encoder
+            "-ar", "44100", // lower the sample rate
+            "-b:a", "192k", // lower the bitrate
+            "-c:a", "libmp3lame", // MP3 encoder
+            "-map", "0:a", // only audio
             tmp_file.to_str().unwrap(),
         ])
         .status();
 
-    if ffmpeg_status.is_err() || !tmp_file.exists() {
+    if ffmpeg_status.is_err() {
+        logger::error!("Failed to convert audio to mp3: {}", ffmpeg_status.unwrap_err());
+        return std::fs::read(path).ok();
+    }
+
+    if !tmp_file.exists() {
+        logger::error!("Failed to convert audio to mp3");
         return std::fs::read(path).ok();
     }
 

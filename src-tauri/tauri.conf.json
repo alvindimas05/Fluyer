@@ -27,6 +27,9 @@
 		}
 	},
 	"bundle": {
+		"resources": [
+			"./libs/ffmpeg/**/*"
+		],
 		"macOS": {
 			"signingIdentity": "-",
 			"hardenedRuntime": false
