@@ -4,6 +4,7 @@ import { pipeline } from "node:stream/promises";
 import fs from "fs/promises";
 import Seven from "node-7z";
 import extract from "extract-zip";
+import * as tar from 'tar'
 
 export async function downloadFile(
 	url: string,
@@ -43,4 +44,17 @@ export async function extractZip(
 	await extract(filePath, { dir: destination });
 	await fs.rm(filePath);
 	console.log("Extraction complete to", destination);
+}
+
+export async function extractTarGz(
+    filePath: string,
+    destination: string,
+): Promise<void> {
+    console.log("Extracting", filePath);
+    await tar.extract({
+        file: filePath,
+        cwd: destination
+    });
+    await fs.rm(filePath);
+    console.log("Extraction complete to", destination);
 }

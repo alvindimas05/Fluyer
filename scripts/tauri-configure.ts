@@ -18,21 +18,26 @@ export async function configure() {
 	}
 	switch (os.platform()) {
 		case "win32":
-			await configureWindows();
+			await installLibmpvWindows();
 			break;
 		case "darwin":
-			await configureMacos();
+			await installLibsMacos();
 			break;
 	}
+	await installFfmpeg();
 }
 
-async function configureWindows() {
+async function installFfmpeg() {
+	await spawn("bun", ["scripts/install-ffmpeg.ts"], { stdio: "inherit" });
+}
+
+async function installLibmpvWindows() {
 	await spawn("bun", ["scripts/install-libmpv-windows.ts"], {
 		stdio: "inherit",
 	});
 }
 
-async function configureMacos() {
+async function installLibsMacos() {
 	await spawn("bun", ["scripts/install-libs-macos.ts"], { stdio: "inherit" });
 }
 
