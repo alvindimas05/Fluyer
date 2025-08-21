@@ -12,7 +12,7 @@
   background: transparent;
 
   &::-webkit-slider-runnable-track {
-    @apply h-[.3rem];
+    @apply h-[.3rem] rounded-full;
     @extend .progress-bar-track;
   }
 
@@ -24,7 +24,7 @@
     @extend .music-progress-bar;
     opacity: .3;
     &::-webkit-slider-runnable-track {
-      @apply h-[.3rem];
+      @apply h-[.3rem] rounded-full;
       @extend .progress-bar-track-end;
     }
   }

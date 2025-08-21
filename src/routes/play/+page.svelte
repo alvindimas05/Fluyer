@@ -24,6 +24,7 @@ import {
     settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import { showThenFade } from "$lib/controllers/UIController";
+import Glass from "$lib/glass/Glass.svelte";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -220,8 +221,10 @@ function scrollToSelectedLyric() {
     <div
         class={`md:row-[2] md:col-[1] order-last md:order-2 ${isMobile() ? "px-5" : "px-4"} pb-5 pt-2 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
     >
-        <div class="w-full md:w-[80%] xl:w-[65%]">
-            <div class="w-full grid grid-cols-[auto,1fr,auto] md:mt-4">
+        <Glass class="w-full md:w-[80%] xl:w-[65%] h-fit md:mt-4"
+            padding="1.2rem"
+            paddingHover="1.5rem">
+            <div class="w-full grid grid-cols-[auto,1fr,auto]">
                 <div class="text-xs lg-mdpi:text-sm flex w-12">
                     <span class="self-end opacity-75"
                         >{progressDurationText}</span
@@ -345,7 +348,7 @@ function scrollToSelectedLyric() {
                     {/if}
                 </div>
             </div>
-            <div id="volume-bar" class="mt-5 animate__animated show-then-fade show-then-fade-disable-mobile" use:showThenFade>
+            <div id="volume-bar" class="mt-5">
                 <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                     <button
                         class="w-5"
@@ -380,7 +383,7 @@ function scrollToSelectedLyric() {
                     </button>
                 </div>
             </div>
-        </div>
+        </Glass>
     </div>
     {#if lyrics.length > 0}
         <div
@@ -427,7 +430,3 @@ function scrollToSelectedLyric() {
         </div>
     {/if}
 </div>
-
-<style lang="scss">
-    // ... (no changes)
-</style>
