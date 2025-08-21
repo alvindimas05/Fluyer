@@ -42,6 +42,7 @@ const PersistentStoreController = {
 			PersistentStoreController.iconTheme.initialize(),
 			PersistentStoreController.developerMode.initialize(),
 			PersistentStoreController.userInterface.play.showBackButton.initialize(),
+			PersistentStoreController.userInterface.play.showVolume.initialize(),
 			PersistentStoreController.userInterface.showRepeatButton.initialize(),
 			PersistentStoreController.userInterface.showShuffleButton.initialize(),
 			PersistentStoreController.equalizer.initialize(),
@@ -99,6 +100,7 @@ const PersistentStoreController = {
 				true,
 				settingUiPlayShowBackButton.set,
 			),
+			showVolume: makeBinding("ui-play-show-volume", true, () => {}),
 		},
 	},
 

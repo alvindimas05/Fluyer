@@ -2,9 +2,9 @@
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
 import {
-	settingUiPlayShowBackButton,
-	settingUiShowRepeatButton,
-	settingUiShowShuffleButton,
+    settingUiPlayShowBackButton, settingUiPlayShowVolume,
+    settingUiShowRepeatButton,
+    settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import { isDesktop } from "$lib/platform";
@@ -20,8 +20,20 @@ function onUiPlayShowBackButtonChange(
 		e.currentTarget.checked,
 	);
 	ToastController.info(
-		`Back button ${e.currentTarget.checked ? "enabled" : "disabled"}`,
+		`Play Back button ${e.currentTarget.checked ? "enabled" : "disabled"}`,
 	);
+}
+
+function onUiPlayShowVolumeChange(
+    e: Event & {
+        currentTarget: EventTarget & HTMLInputElement;
+    },
+) {
+    settingUiPlayShowVolume.set(e.currentTarget.checked);
+    PersistentStoreController.userInterface.play.showVolume.set(e.currentTarget.checked);
+    ToastController.info(
+        `Play Volume ${e.currentTarget.checked ? "enabled" : "disabled"}`,
+    );
 }
 
 function onUiShowRepeatButtonChange(
@@ -90,6 +102,17 @@ function onUiShowShuffleButtonChange(
                     onchange={onUiPlayShowBackButtonChange}
             />
             <div>Show Back Button On Full Play Screen (You can still press Esc to go back)</div>
+        </label>
+    </SettingInput>
+    <SettingInput>
+        <label class="grid grid-cols-[min-content_auto] items-center gap-3 px-3 py-2 cursor-pointer">
+            <input
+                    type="checkbox"
+                    class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
+                    checked={$settingUiPlayShowVolume}
+                    onchange={onUiPlayShowVolumeChange}
+            />
+            <div>Show Volume On Full Play Screen</div>
         </label>
     </SettingInput>
 {/if}

@@ -19,7 +19,7 @@ import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { RepeatMode } from "$lib/home/music/types";
 import {
-    settingUiPlayShowBackButton,
+    settingUiPlayShowBackButton, settingUiPlayShowVolume,
     settingUiShowRepeatButton,
     settingUiShowShuffleButton,
 } from "$lib/stores/setting";
@@ -348,41 +348,43 @@ function scrollToSelectedLyric() {
                     {/if}
                 </div>
             </div>
-            <div id="volume-bar" class="mt-5">
-                <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
-                    <button
-                        class="w-5"
-                        onclick={() => MusicController.setVolume(0)}
-                    >
-                        <Icon type={IconType.Mute} />
-                    </button>
-                    <div class="relative">
-                        <input
-                            class={`absolute w-full volume-progress-bar-end`}
-                            type="range"
-                            style={`--progress-width: ${volumePercentage}%`}
-                            min={MusicConfig.vmin}
-                            max={MusicConfig.vmax}
-                            step={MusicConfig.vstep}
-                        />
-                        <input
-                            class={`absolute w-full volume-progress-bar`}
-                            type="range"
-                            style={`--progress-width: ${volumePercentage}%`}
-                            bind:value={$musicVolume}
-                            min={MusicConfig.vmin}
-                            max={MusicConfig.vmax}
-                            step={MusicConfig.vstep}
-                        />
+            {#if $settingUiPlayShowVolume}
+                <div id="volume-bar" class="mt-5">
+                    <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+                        <button
+                                class="w-5"
+                                onclick={() => MusicController.setVolume(0)}
+                        >
+                            <Icon type={IconType.Mute} />
+                        </button>
+                        <div class="relative">
+                            <input
+                                    class={`absolute w-full volume-progress-bar-end`}
+                                    type="range"
+                                    style={`--progress-width: ${volumePercentage}%`}
+                                    min={MusicConfig.vmin}
+                                    max={MusicConfig.vmax}
+                                    step={MusicConfig.vstep}
+                            />
+                            <input
+                                    class={`absolute w-full volume-progress-bar`}
+                                    type="range"
+                                    style={`--progress-width: ${volumePercentage}%`}
+                                    bind:value={$musicVolume}
+                                    min={MusicConfig.vmin}
+                                    max={MusicConfig.vmax}
+                                    step={MusicConfig.vstep}
+                            />
+                        </div>
+                        <button
+                                class="w-5"
+                                onclick={() => MusicController.setVolume(1)}
+                        >
+                            <Icon type={IconType.Speaker} />
+                        </button>
                     </div>
-                    <button
-                        class="w-5"
-                        onclick={() => MusicController.setVolume(1)}
-                    >
-                        <Icon type={IconType.Speaker} />
-                    </button>
                 </div>
-            </div>
+            {/if}
         </Glass>
     </div>
     {#if lyrics.length > 0}

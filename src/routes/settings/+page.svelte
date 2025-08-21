@@ -30,7 +30,6 @@ let isLoading = $derived($settingIsLoading);
                 <SettingDeveloper />
             </div>
             <div>
-
                 <button
                         class="w-fit text-white text-start px-3 py-2
                     bg-gradient-to-r from-white/15 to-white/10 rounded shadow-md

@@ -9,4 +9,5 @@ export const settingAnimatedBackgroundType = writable(
 export const settingUiShowRepeatButton = writable(true);
 export const settingUiShowShuffleButton = writable(true);
 export const settingUiPlayShowBackButton = writable(true);
+export const settingUiPlayShowVolume = writable(true);
 export const settingDeveloperMode = writable(false);
