@@ -40,7 +40,7 @@ function updateValues(index: number, value: number) {
 <div class="absolute top-0 left-0 w-full h-full z-10
     grid items-center justify-items-center"
     class:hidden={!$equalizerShow}>
-    <div class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] bg-gray-700 bg-opacity-30 rounded-lg shadow-2xl
+    <div class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] rounded-lg shadow-2xl
         border border-white/20 text-white p-4 grid grid-rows-[min-content_auto]
         {isAndroid() ? 'backdrop-blur-md' : 'backdrop-blur-lg'}">
         <div class="w-full grid grid-cols-2">

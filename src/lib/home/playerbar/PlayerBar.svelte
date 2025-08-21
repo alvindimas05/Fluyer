@@ -20,6 +20,7 @@ import {
 	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import type { Unsubscriber } from "svelte/store";
+import Glass from "$lib/glass/Glass.svelte";
 
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
@@ -184,38 +185,19 @@ onDestroy(() => {
 
 <svelte:document onkeydown={onKeyDown} />
 
-<div class="relative w-full pt-2">
-    <div class="w-fit absolute border rounded-lg px-2 py-1 shadow-xl backdrop-blur-md text-sm"
-        style="
+<div class="absolute bottom-0 w-full p-3"
+    style="margin-bottom: {$mobileNavigationBarHeight}px;">
+    <div class="absolute bottom-4 w-full pt-2">
+        <div class="w-fit absolute border rounded-lg px-2 py-1 shadow-xl text-sm backdrop-blur-xl"
+             style="
             left: {tooltipPosition}px;
             visibility: {tooltipVisible ? 'visible' : 'hidden'};
             bottom: {(window.innerWidth > 640 ? 80 : 72) + $mobileNavigationBarHeight}px;
         "
-        bind:this={tooltip}>{tooltipText}</div>
-    <div
-        class="w-full bg-gray-700/30 text-white rounded-windows-bottom"
-        style="padding-bottom: {$mobileNavigationBarHeight}px;">
-        <div class="relative">
-            <input
-                    class={`w-full absolute music-progress-bar`}
-                    type="range"
-                    style={`--progress-width: ${progressPercentage}%`}
-                    bind:value={$musicProgressValue}
-                    min={MusicConfig.min}
-                    max={MusicConfig.max}
-                    step={MusicConfig.step}
-            />
-            <input
-                    class={`w-full absolute music-progress-bar-end`}
-                    type="range"
-                    style={`--progress-width: ${progressPercentage}%`}
-                    bind:value={$musicProgressValue}
-                    min={MusicConfig.min}
-                    max={MusicConfig.max}
-                    step={MusicConfig.step}
-            />
-        </div>
-        <div class="w-full h-5 absolute left-0 top-[-8px] cursor-pointer"
+             bind:this={tooltip}>{tooltipText}</div>
+    </div>
+    <div class="relative mb-3">
+        <div class="absolute w-full h-10 bottom-[-20px] left-0 cursor-pointer z-10"
              onmouseenter={updateTooltip}
              onmousemove={updateTooltip}
              onmouseleave={hideTooltip}
@@ -223,134 +205,132 @@ onDestroy(() => {
              ontouchmove={updateTooltipTouch}
              ontouchend={updateProgressTouch}
              onclick={updateProgress}></div>
-        <div class="p-3 mt-1">
-            <div class="grid grid-cols-[auto_min-content] md:grid-cols-3">
-                <div class="flex items-center md:gap-2">
-                    <button
-                            class="w-10 md:w-12 lg:w-12"
-                            onclick={handleButtonPrevious}
-                    ><Icon type={IconType.Previous} /></button
-                    >
-                    <button
-                            class="w-10 md:w-12 lg:w-12"
-                            onclick={handleButtonPlayPause}
-                    >
-                        {#if isPlaying}
-                            <Icon type={IconType.Pause} />
-                        {:else}
-                            <Icon type={IconType.Play} />
-                        {/if}
-                    </button
-                    >
-                    <button
-                            class="w-10 md:w-12 lg:w-12"
-                            onclick={handleButtonNext}
-                    ><Icon type={IconType.Next} /></button
-                    >
-                </div>
-                <div
-                    class="ms-2 md:ms-0 md:flex items-center justify-center
-                        order-first md:order-none
-                        text-sm md:text-[15px]"
+        <input
+                class="w-full absolute backdrop-blur-lg music-progress-bar"
+                type="range"
+                style="--progress-width: {progressPercentage}%"
+                bind:value={$musicProgressValue}
+                min={MusicConfig.min}
+                max={MusicConfig.max}
+                step={MusicConfig.step}
+        />
+        <input
+                class="w-full absolute music-progress-bar-end"
+                type="range"
+                style="--progress-width: {progressPercentage}%"
+                bind:value={$musicProgressValue}
+                min={MusicConfig.min}
+                max={MusicConfig.max}
+                step={MusicConfig.step}
+        />
+    </div>
+    <Glass>
+        <div class="w-full grid grid-cols-[auto_min-content] md:grid-cols-3 py-1">
+            <div class="flex items-center md:gap-2">
+                <button
+                        class="w-10 md:w-12 lg:w-12"
+                        onclick={handleButtonPrevious}
+                ><Icon type={IconType.Previous} /></button
                 >
-                    <div
+                <button
+                        class="w-10 md:w-12 lg:w-12"
+                        onclick={handleButtonPlayPause}
+                >
+                    {#if isPlaying}
+                        <Icon type={IconType.Pause} />
+                    {:else}
+                        <Icon type={IconType.Play} />
+                    {/if}
+                </button
+                >
+                <button
+                        class="w-10 md:w-12 lg:w-12"
+                        onclick={handleButtonNext}
+                ><Icon type={IconType.Next} /></button
+                >
+            </div>
+            <div
+                    class="ms-2 md:ms-0 md:flex items-center justify-center
+                order-first md:order-none
+                text-sm md:text-[15px]"
+            >
+                <div
                         class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]"
-                    >
-                        <button onclick={redirectToPlay}>
-                            {#await albumImage}
-                                <div class="w-full aspect-square"></div>
-                            {:then image}
-                                <img
+                >
+                    <button onclick={redirectToPlay}>
+                        {#await albumImage}
+                            <div class="w-full aspect-square"></div>
+                        {:then image}
+                            <img
                                     class="w-full rounded animate__animated animate__fadeIn"
                                     src={image}
                                     alt="Album"
-                                />
-                            {/await}
-                        </button>
-                        <div class="ms-3 overflow-hidden grid grid-rows-[auto_1fr_1fr]">
-                            <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
-                            <p class="animate-scroll-overflow-text"></p>
-                            <p
-                                    class="font-medium whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
-                            >
-                                {title}
-                            </p>
-                            <p
-                                    class="text-opacity-80 whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
-                            >
-                                {artist}
-                            </p>
-                        </div>
+                            />
+                        {/await}
+                    </button>
+                    <div class="ms-3 overflow-hidden grid grid-rows-[auto_1fr_1fr]">
+                        <!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
+                        <p class="animate-scroll-overflow-text"></p>
+                        <p
+                                class="font-medium whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
+                        >
+                            {title}
+                        </p>
+                        <p
+                                class="text-opacity-80 whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text"
+                        >
+                            {artist}
+                        </p>
                     </div>
                 </div>
-                <div class="hidden md:grid justify-end">
-                    <div class={`grid items-center gap-3 ${gridRight}`}>
-                        {#if $settingUiShowRepeatButton}
-                            <button class={`w-6 ${$musicRepeatMode === RepeatMode.None ? 'opacity-60' : ''}`}
-                                    onclick={MusicController.toggleRepeatMode}>
-                                {#if $musicRepeatMode === RepeatMode.All}
-                                    <Icon type={IconType.Repeat} />
-                                {:else if $musicRepeatMode === RepeatMode.None}
-                                    <Icon type={IconType.RepeatNone} />
-                                {:else if $musicRepeatMode === RepeatMode.One}
-                                    <Icon type={IconType.RepeatOne} />
-                                {/if}
-                            </button>
-                        {/if}
-                        {#if $settingUiShowShuffleButton}
-                            <button class="w-6" onclick={() => MusicController.playShuffle()}>
-                                <Icon type={IconType.Shuffle} />
-                            </button>
-                        {/if}
-                        <button class="w-6" onclick={handleVolumeButton}>
-                            {#if volumePercentage > 0}
-                                <Icon type={IconType.Speaker} />
-                            {:else}
-                                <Icon type={IconType.Mute} />
+            </div>
+            <div class="hidden md:grid justify-end">
+                <div class={`grid items-center gap-3 ${gridRight}`}>
+                    {#if $settingUiShowRepeatButton}
+                        <button class={`w-6 ${$musicRepeatMode === RepeatMode.None ? 'opacity-60' : ''}`}
+                                onclick={MusicController.toggleRepeatMode}>
+                            {#if $musicRepeatMode === RepeatMode.All}
+                                <Icon type={IconType.Repeat} />
+                            {:else if $musicRepeatMode === RepeatMode.None}
+                                <Icon type={IconType.RepeatNone} />
+                            {:else if $musicRepeatMode === RepeatMode.One}
+                                <Icon type={IconType.RepeatOne} />
                             {/if}
                         </button>
-                        <div class="relative w-24">
-                            <input
-                                    class={`absolute w-24 volume-progress-bar-end`}
-                                    type="range"
-                                    style={`--progress-width: ${volumePercentage}%`}
-                                    min={MusicConfig.vmin}
-                                    max={MusicConfig.vmax}
-                                    step={MusicConfig.vstep}
-                            />
-                            <input
-                                    class={`absolute w-24 volume-progress-bar`}
-                                    type="range"
-                                    style={`--progress-width: ${volumePercentage}%`}
-                                    bind:value={$musicVolume}
-                                    min={MusicConfig.vmin}
-                                    max={MusicConfig.vmax}
-                                    step={MusicConfig.vstep}
-                            />
-                        </div>
+                    {/if}
+                    {#if $settingUiShowShuffleButton}
+                        <button class="w-6" onclick={() => MusicController.playShuffle()}>
+                            <Icon type={IconType.Shuffle} />
+                        </button>
+                    {/if}
+                    <button class="w-6" onclick={handleVolumeButton}>
+                        {#if volumePercentage > 0}
+                            <Icon type={IconType.Speaker} />
+                        {:else}
+                            <Icon type={IconType.Mute} />
+                        {/if}
+                    </button>
+                    <div class="relative w-24">
+                        <input
+                                class={`absolute w-24 volume-progress-bar-end`}
+                                type="range"
+                                style={`--progress-width: ${volumePercentage}%`}
+                                min={MusicConfig.vmin}
+                                max={MusicConfig.vmax}
+                                step={MusicConfig.vstep}
+                        />
+                        <input
+                                class={`absolute w-24 volume-progress-bar`}
+                                type="range"
+                                style={`--progress-width: ${volumePercentage}%`}
+                                bind:value={$musicVolume}
+                                min={MusicConfig.vmin}
+                                max={MusicConfig.vmax}
+                                step={MusicConfig.vstep}
+                        />
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </Glass>
 </div>
-
-<style lang="scss">
-    .playerbar-in {
-        animation:
-            blurIn 4s forwards,
-            slideInUp 2s forwards;
-    }
-    .playerbar-out {
-        @apply backdrop-blur-md;
-        animation: slideOutDown 0.5s forwards;
-    }
-    @keyframes blurIn {
-        25% {
-            @apply backdrop-blur-none;
-        }
-        100% {
-            @apply backdrop-blur-md;
-        }
-    }
-</style>

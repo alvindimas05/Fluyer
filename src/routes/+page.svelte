@@ -27,14 +27,14 @@ let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + MusicConfi
         <Playlist />
         <Menu />
         <div class="h-full grid {$musicListType === MusicListType.Folder ?
-            'grid-rows-[min-content_auto_min-content]' : 'grid-rows-[min-content_min-content_auto_min-content]'}"
+            'grid-rows-[min-content_auto]' : 'grid-rows-[min-content_min-content_auto]'}"
             style="padding-top: {paddingTop}px;">
             {#if $musicListType === MusicListType.All}
                 <AlbumList />
             {/if}
             <AlbumInfo />
             <MusicList />
-            <PlayerBar />
         </div>
+        <PlayerBar />
     {/if}
 {/if}
