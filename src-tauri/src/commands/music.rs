@@ -1,3 +1,4 @@
+use std::os::windows::process::CommandExt;
 use std::sync::Mutex;
 use tauri::{Manager, State};
 
@@ -150,6 +151,7 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
             "-map", "0:a", // only audio
             tmp_file.to_str().unwrap(),
         ])
+        .creation_flags(0x08000000) // CREATE_NO_WINDOW on Windows
         .status();
 
     if ffmpeg_status.is_err() {
