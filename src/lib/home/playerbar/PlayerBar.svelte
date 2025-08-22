@@ -185,7 +185,7 @@ onDestroy(() => {
 
 <svelte:document onkeydown={onKeyDown} />
 
-<div class="absolute bottom-0 w-full p-3"
+<div class="absolute bottom-0 w-full p-3 animate__animated animate__slideInUp"
     style="margin-bottom: {$mobileNavigationBarHeight}px;">
     <div class="absolute bottom-8 w-full pt-2">
         <div class="w-fit absolute border rounded-lg px-2 py-1 shadow-xl text-sm backdrop-blur-xl"

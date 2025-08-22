@@ -19,7 +19,7 @@ const { onclick, icon, label }: Props = $props();
     }}>
     <button
         class="w-full text-white text-start font-medium tracking-wide px-1
-        md:text-lg grid grid-cols-[min-content_auto] gap-3 items-center"
+        text-base md:text-lg grid grid-cols-[min-content_auto] gap-3 items-center"
     >
         <div class="w-6"><Icon type={icon}/></div>
         <div class="text-start">{label}</div>

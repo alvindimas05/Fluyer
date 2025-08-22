@@ -196,7 +196,7 @@ function scrollToSelectedLyric() {
 <div
     id="root-play"
     class={`w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:pt-0
-    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[45%] justify-center root-nolyrics"}
+    ${lyrics.length > 1 ? "md:grid-cols-[40%_55%]" : "md:grid-cols-[50%] justify-center root-nolyrics"}
     ${isMacos() && "pt-6"}`}
     style={`--mobile-status-bar-height: ${$mobileStatusBarHeight}px; --mobile-navigation-bar-height: ${$mobileNavigationBarHeight}px;`}
 >
@@ -205,7 +205,7 @@ function scrollToSelectedLyric() {
         ${lyrics.length > 1 ? "justify-end" : "justify-center"}`}
     >
         <div
-            class={`w-full md:w-[80%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}
+            class={`w-full md:w-[80%] lg:w-[75%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}
         >
             {#await albumImage}
                 <div class="w-full aspect-square"></div>
@@ -221,7 +221,7 @@ function scrollToSelectedLyric() {
     <div
         class={`md:row-[2] md:col-[1] order-last md:order-2 ${isMobile() ? "px-5" : "px-4"} pb-5 pt-2 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
     >
-        <Glass class="w-full md:w-[80%] xl:w-[65%] h-fit md:mt-4 !rounded-2xl"
+        <Glass class="w-full md:w-[80%] lg:w-[75%] xl:w-[65%] h-fit md:mt-4 !rounded-2xl"
             wrapperClass="!rounded-2xl"
             padding="1.2rem"
             paddingHover="1.5rem">
@@ -399,7 +399,7 @@ function scrollToSelectedLyric() {
                 <div
                     id="lyrics"
                     class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold
-                    text-[1.15rem] md:text-[1.4rem] lg:text-[1.7rem]
+                    text-[1.15rem] sm:text-[1.25rem] md:text-[1.4rem] lg:text-[1.7rem]
                     md-hdpi:text-[1.15rem] lg-hdpi:text-[1.4rem]"
                 >
                     {#each lyrics as lyric, i}
@@ -408,7 +408,7 @@ function scrollToSelectedLyric() {
                                 ? "selected-lyric"
                                 : ""}
                             class={selectedLyricIndex === i
-                                ? `text-[1.25rem] md:text-[1.55rem] lg:text-[1.85rem]
+                                ? `text-[1.25rem] sm:text-[1.35rem] md:text-[1.55rem] lg:text-[1.85rem]
                                   md-hdpi:text-[1.25rem] lg-hdpi:text-[1.55rem]
                                   py-5 md:py-7 lg:py-10`
                                 : "opacity-50 py-5 md:py-7 lg:py-10"}
@@ -419,8 +419,8 @@ function scrollToSelectedLyric() {
                                 <div
                                     class={`${
                                         selectedLyricIndex === i
-                                            ? "w-[1.25rem] md:w-[175rem] lg:w-[2.15rem]"
-                                            : "w-[1.1rem] md:w-[1.6rem] lg:w-[2rem]"
+                                            ? "w-[1.4rem] md:w-[1.9rem] lg:w-[2.25rem]"
+                                            : "w-[1.25rem] md:w-[1.75rem] lg:w-[2.15rem]"
                                     }`}
                                 >
                                     <Icon type={IconType.Note} />

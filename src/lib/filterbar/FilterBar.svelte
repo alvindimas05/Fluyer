@@ -62,14 +62,14 @@ onMount(() => {
     {isMacos() ? 'right-0' : 'left-0'}"
      style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};">
-    <Glass class="hidden sm:block h-fit sm:h-full sm:mx-3 text-start pointer-events-auto
+    <Glass class="!hidden sm:!block h-fit sm:h-full sm:mx-3 text-start pointer-events-auto
         animate__animated animate__fadeIn animate__slow"
        padding="4px"
        paddingHover="6px"
         events={{
             onclick: UIController.toggleMusicListType
         }}>
-        <div class="w-full h-full grid grid-cols-[min-content_auto] gap-x-2 px-3
+        <div class="w-full h-full grid grid-cols-[min-content_auto] items-center gap-x-2 px-3
             text-sm text-white/70">
             <div class="w-4">
                 <Icon type={listType === MusicListType.Folder ? IconType.Note : IconType.Folder} />
@@ -82,9 +82,9 @@ onMount(() => {
         animate__animated animate__fadeIn animate__slow"
         padding="4px"
         paddingHover="6px">
-        <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-2">
+        <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2">
             <input
-                    class="w-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"
+                    class="w-full h-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"
                     placeholder="Search..."
                     bind:value={$filterSearch}
             />

@@ -10,7 +10,7 @@ interface Props {
 const props = $props();
 let { children, type }: Props = props;
 
-import { isAndroid, isMobile, isWindows } from "$lib/platform";
+import { isMobile, isWindows } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
@@ -51,7 +51,7 @@ let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + MusicConfi
 
 let isMouseInsideArea = $state(false);
 let isShowing = $state(false);
-let isPrerendered = $state(false);
+let isMounted = $state(false);
 
 function onMouseMove(e: MouseEvent) {
 	if (
@@ -125,14 +125,7 @@ function updateSize() {
 onMount(() => {
 	updateSize();
 	$sidebarShowingType = null;
-
-	// Pre-render
-	if(isMobile()){
-		isPrerendered = true;
-		setTimeout(() => {
-			isPrerendered = false;
-		}, 50);
-	}
+	setTimeout(() => isMounted = true, 750);
 });
 </script>
 
@@ -140,25 +133,28 @@ onMount(() => {
 <svelte:body use:swipeable on:swiped={onSwipe} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<Glass enableHoverAnimation={false} enableBlur={true}
-	class="
-	   z-10 h-[calc(100%-10rem)] p-3 mx-3 !rounded-md
-	   !duration-[400ms] !ease-in-out
-	   {type === SidebarType.Right ? 'right-0' : 'left-0'}
-	"
-	wrapperClass="!rounded-md {props.class}"
-	style="
-		position: fixed;
-		top: 0;
-		margin-top: {paddingTop}px;
-		width: {sidebarWidth - 24}px;
-		transform: translateX({isShowing ? '0%' : (type === SidebarType.Right ? '100%' : '-100%')});
-		transition: transform 0.4s ease;
-		opacity: {isShowing ? 1 : 0};
-	"
-   events={{
-		onmouseleave: onMouseLeave
-	}}
->
-	{@render children?.()}
-</Glass>
+<div class="fixed top-0 z-10 px-3 h-[calc(100%-10rem)] pointer-events-none
+	{type === SidebarType.Right ? 'right-0' : 'left-0'}
+	{isMounted ? '' : 'invisible'}"
+	onmouseleave={onMouseLeave}>
+	<Glass enableHoverAnimation={false} enableBlur={true}
+		class="
+			h-full p-3 !rounded-md pointer-events-auto
+			animate__animated animate__faster
+			{isShowing
+				? (type === SidebarType.Right
+					? 'animate__slideInRight'
+					: 'animate__slideInLeft')
+				: (type === SidebarType.Right
+					? 'animate__slideOutRight'
+					: 'animate__slideOutLeft')}
+		"
+		wrapperClass="!rounded-md {props.class}"
+		style="
+			margin-top: {paddingTop}px;
+			width: {sidebarWidth - 24}px;
+		"
+	>
+		{@render children?.()}
+	</Glass>
+</div>
