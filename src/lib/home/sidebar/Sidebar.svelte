@@ -4,9 +4,11 @@ import { SidebarType } from "$lib/home/sidebar/types";
 interface Props {
 	children?: import("svelte").Snippet;
 	type: SidebarType;
+	class?: string;
 }
 
-let { children, type }: Props = $props();
+const props = $props();
+let { children, type }: Props = props;
 
 import { isAndroid, isMobile, isWindows } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
@@ -17,6 +19,7 @@ import { sidebarShowingType } from "$lib/stores/sidebar";
 import { onMount } from "svelte";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {MusicConfig} from "$lib/controllers/MusicController";
+import Glass from "$lib/glass/Glass.svelte";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
@@ -137,42 +140,25 @@ onMount(() => {
 <svelte:body use:swipeable on:swiped={onSwipe} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
+<Glass enableHoverAnimation={false} enableBlur={true}
 	class="
-		fixed top-0 z-10 h-[calc(100%-10rem)] p-3 mx-3
-		transition-opacity duration-400 ease-in-out
-		bg-opacity-30 rounded-lg shadow-2xl border border-white/20
-		text-whiteflex flex-col
-		{isAndroid() ? 'backdrop-blur-md' : 'backdrop-blur-lg'}
-		{type === SidebarType.Right ? 'fadeRight' : 'fadeLeft'}
-		{isShowing || isPrerendered ? 'show' : ''}
-		{type === SidebarType.Right ? 'right-0' : 'left-0'}
+	   z-10 h-[calc(100%-10rem)] p-3 mx-3 !rounded-md
+	   !duration-[400ms] !ease-in-out
+	   {type === SidebarType.Right ? 'right-0' : 'left-0'}
 	"
-	style="margin-top: {paddingTop}px;
-	width: {sidebarWidth - 24}px;"
-	onmouseleave={onMouseLeave}
+	wrapperClass="!rounded-md {props.class}"
+	style="
+		position: fixed;
+		top: 0;
+		margin-top: {paddingTop}px;
+		width: {sidebarWidth - 24}px;
+		transform: translateX({isShowing ? '0%' : (type === SidebarType.Right ? '100%' : '-100%')});
+		transition: transform 0.4s ease;
+		opacity: {isShowing ? 1 : 0};
+	"
+   events={{
+		onmouseleave: onMouseLeave
+	}}
 >
 	{@render children?.()}
-</div>
-
-
-<style lang="scss">
-	.fadeRight,
-	.fadeLeft {
-		transition:
-			transform 0.4s ease,
-			opacity 0.4s ease;
-		opacity: 0;
-	}
-	.fadeRight {
-		transform: translateX(100%);
-	}
-	.fadeLeft {
-		transform: translateX(-100%);
-	}
-	.fadeRight.show,
-	.fadeLeft.show {
-		transform: translateX(0%);
-		opacity: 1;
-	}
-</style>
+</Glass>

@@ -134,7 +134,7 @@ onDestroy(() => {
 $effect(elementToggleDraggable);
 </script>
 
-<Sidebar type={SidebarType.Right}>
+<Sidebar type={SidebarType.Right} class="flex flex-col">
     <div class="grid grid-cols-[auto_max-content_max-content] items-center gap-3 p-3">
         <p class="text-[1.2rem] md:text-[1.5rem] font-semibold">Now Playing</p>
         <button class="w-7" onclick={cleanPlaylist}>

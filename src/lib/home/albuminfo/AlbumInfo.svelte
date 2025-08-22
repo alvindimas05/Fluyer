@@ -9,6 +9,7 @@ import {musicListType} from "$lib/stores/music";
 import {MusicListType} from "$lib/home/music/types";
 import {folderCurrent} from "$lib/stores/folder";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
+import Glass from "$lib/glass/Glass.svelte";
 
 let album = $derived($filterAlbum);
 let showBackButton = $derived.by(async () => $musicListType !== MusicListType.Folder ||
@@ -63,9 +64,10 @@ async function playShuffle() {
 }
 </script>
 {#if album || $folderCurrent}
-    <div class="md:grid grid-cols-[auto_max-content]
-        box-border mx-3 mb-2 px-4 py-2 bg-white/15 rounded-lg shadow-xl
-        animate__animated animate__fadeIn">
+    <Glass
+        class="mx-3 mb-2"
+        wrapperClass="md:grid grid-cols-[auto_max-content] px-2
+        box-border animate__animated animate__fadeIn">
         <div class="grid items-center">
             <div class="text-sm md:text-base font-medium text-white overflow-hidden">
                 <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">{label}</p>
@@ -97,7 +99,7 @@ async function playShuffle() {
                 </div>
             {/await}
         </div>
-    </div>
+    </Glass>
 {:else}
     <div></div>
 {/if}

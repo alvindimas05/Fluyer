@@ -221,7 +221,8 @@ function scrollToSelectedLyric() {
     <div
         class={`md:row-[2] md:col-[1] order-last md:order-2 ${isMobile() ? "px-5" : "px-4"} pb-5 pt-2 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
     >
-        <Glass class="w-full md:w-[80%] xl:w-[65%] h-fit md:mt-4"
+        <Glass class="w-full md:w-[80%] xl:w-[65%] h-fit md:mt-4 !rounded-2xl"
+            wrapperClass="!rounded-2xl"
             padding="1.2rem"
             paddingHover="1.5rem">
             <div class="w-full grid grid-cols-[auto,1fr,auto]">

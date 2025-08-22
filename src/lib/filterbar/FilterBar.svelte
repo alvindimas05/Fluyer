@@ -2,14 +2,13 @@
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { isMacos, isMobile } from "$lib/platform";
-import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import {filterSearch} from "$lib/stores/filter";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import {onMount} from "svelte";
 import {musicListType} from "$lib/stores/music";
 import {MusicListType} from "$lib/home/music/types";
-import FolderController from "$lib/controllers/FolderController";
-import MusicController from "$lib/controllers/MusicController";
 import UIController from "$lib/controllers/UIController";
+import Glass from "$lib/glass/Glass.svelte";
 
 const rules = [
     // xhdpi (DPR > 2.0)
@@ -63,21 +62,27 @@ onMount(() => {
     {isMacos() ? 'right-0' : 'left-0'}"
      style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};">
-    <button class="hidden sm:block h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 text-start pointer-events-auto
+    <Glass class="hidden sm:block h-fit sm:h-full sm:mx-3 text-start pointer-events-auto
         animate__animated animate__fadeIn animate__slow"
-        onclick={UIController.toggleMusicListType}>
-        <div class="w-full h-full grid grid-cols-[min-content_auto] gap-x-2 px-3 py-1
+       padding="4px"
+       paddingHover="6px"
+        events={{
+            onclick: UIController.toggleMusicListType
+        }}>
+        <div class="w-full h-full grid grid-cols-[min-content_auto] gap-x-2 px-3
             text-sm text-white/70">
             <div class="w-4">
                 <Icon type={listType === MusicListType.Folder ? IconType.Note : IconType.Folder} />
             </div>
             <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>
         </div>
-    </button>
-    <div class="h-fit sm:h-full bg-white/20 text-white rounded-md shadow-md sm:mx-3 pointer-events-auto
+    </Glass>
+    <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
         {isMacos() ? 'order-last' : 'order-first'}
-        animate__animated animate__fadeIn animate__slow">
-        <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-3 py-1">
+        animate__animated animate__fadeIn animate__slow"
+        padding="4px"
+        paddingHover="6px">
+        <div class="w-full grid grid-cols-[auto_min-content] cursor-text px-2">
             <input
                     class="w-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"
                     placeholder="Search..."
@@ -87,5 +92,5 @@ onMount(() => {
                 <Icon type={IconType.Search} />
             </div>
         </div>
-    </div>
+    </Glass>
 </div>

@@ -2,7 +2,7 @@ import { Store } from "@tauri-apps/plugin-store";
 import {
 	settingAnimatedBackgroundType,
 	settingDeveloperMode,
-	settingUiPlayShowBackButton,
+	settingUiPlayShowBackButton, settingUiPlayShowVolume,
 	settingUiShowRepeatButton,
 	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
@@ -100,7 +100,11 @@ const PersistentStoreController = {
 				true,
 				settingUiPlayShowBackButton.set,
 			),
-			showVolume: makeBinding("ui-play-show-volume", true, () => {}),
+			showVolume: makeBinding(
+				"ui-play-show-volume",
+				true,
+				settingUiPlayShowVolume.set
+			),
 		},
 	},
 

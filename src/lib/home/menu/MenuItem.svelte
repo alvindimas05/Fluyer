@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { IconType } from "$lib/icon/types";
 import Icon from "$lib/icon/Icon.svelte";
+import Glass from "$lib/glass/Glass.svelte";
 
 interface Props {
 	onclick: () => void;
@@ -10,14 +11,17 @@ interface Props {
 
 const { onclick, icon, label }: Props = $props();
 </script>
-<div class="w-full py-1 px-3">
+<Glass class="mx-2 my-3 cursor-pointer"
+    padding="12px"
+    paddingHover="16px"
+    events={{
+        onclick
+    }}>
     <button
-            class="w-full text-white text-start font-medium tracking-wide p-3 rounded-lg
-    bg-white/15 hover:bg-white/25 transition-all duration-200 box-border
-    shadow-md md:text-lg grid grid-cols-[min-content_auto] gap-3 items-center"
-            onclick={onclick}
+        class="w-full text-white text-start font-medium tracking-wide px-1
+        md:text-lg grid grid-cols-[min-content_auto] gap-3 items-center"
     >
         <div class="w-6"><Icon type={icon}/></div>
         <div class="text-start">{label}</div>
     </button>
-</div>
+</Glass>
