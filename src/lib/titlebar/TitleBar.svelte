@@ -14,6 +14,7 @@ const LINUX_ICONS = {
 
 let isMaximized = $state(true);
 let isPlayPage = $state(false);
+let isVisualizerPage = $state(false);
 const window = getCurrentWindow();
 function onMouseDown(
 	e: MouseEvent & {
@@ -46,12 +47,13 @@ window.onResized(async (_) => {
 
 afterNavigate((navigation) => {
 	isPlayPage = navigation.to?.route.id === PageRoutes.PLAY;
+    isVisualizerPage = navigation.to?.route.id === PageRoutes.VISUALIZER;
 });
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="absolute top-0 left-0 h-full w-full z-[-10]" onmousedown={onMouseDown}></div>
-{#if (isWindows() || isLinux()) && !isPlayPage}
+{#if (isWindows() || isLinux()) && !isPlayPage && !isVisualizerPage}
     <div class="absolute top-0 right-0 pe-3 mt-2">
         <button
             class={`tb-button ${isWindows() && "win-button"} ${isLinux() && "linux-button"}`}

@@ -132,4 +132,7 @@ onDestroy(() => {
             </li>
         {/each}
     </ul>
+    <p class="mt-2 text-gray-400 hover:text-gray-300 cursor-pointer"
+        onclick={() => PageController.back()}>
+        Back</p>
 </div>
