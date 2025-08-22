@@ -68,10 +68,7 @@ function onMouseMove(e: MouseEvent) {
 
 async function onMouseLeave(e: MouseEvent) {
 	if (
-		!isMouseInsideArea ||
-		(isWindows() &&
-			(await getCurrentWindow().isMaximized()) &&
-			e.clientX > window.innerWidth - 20)
+		!isMouseInsideArea || (e.clientX > window.innerWidth - 20 || e.clientX < 20)
 	)
 		return;
 	isShowing = false;
