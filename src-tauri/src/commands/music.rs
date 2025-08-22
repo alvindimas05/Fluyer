@@ -8,7 +8,9 @@ use tauri::path::BaseDirectory;
 use tauri_plugin_dialog::DialogExt;
 
 #[cfg(desktop)]
-use crate::{store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE};
+use crate::{store::GLOBAL_APP_STORE};
+
+use crate::GLOBAL_APP_HANDLE;
 
 use crate::{logger, music::metadata::MusicMetadata, AppState};
 use crate::music::player::MusicPlayer;
@@ -109,7 +111,7 @@ pub fn music_get_image(path: String) -> Option<String> {
 }
 
 #[tauri::command]
-pub fn music_get_buffer(path: String, app_handle: tauri::AppHandle) -> Option<Vec<u8>> {
+pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
     if cfg!(mobile) {
         // FIXME: Mobile platforms do not support ffmpeg conversion
         return std::fs::read(path).ok();
