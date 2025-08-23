@@ -131,7 +131,7 @@ pub fn run() {
                     .expect("Failed to set GLOBAL_APP_HANDLE");
                 app_handle.manage(Mutex::new(AppState::default()));
 
-                #[cfg(desktop)]
+                #[cfg(all(desktop, not(debug_assertions)))]
                 {
                     use std::{thread, time::Duration};
                     use tauri_plugin_dialog::{DialogExt, MessageDialogKind};

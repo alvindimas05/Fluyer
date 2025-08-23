@@ -171,11 +171,9 @@ async function initializeCanvas(reinitialize = false) {
 	currentCanvas = await createCanvas({ usePreviousColors: reinitialize });
 
 	if (reinitialize) {
-        console.log("reinitialize");
 		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
 		canvasContext.drawImage(currentCanvas!, 0, 0);
 	} else {
-        console.log("initializeCanvas");
 		canvasContext = canvas.getContext("2d")!;
 
 		const startTime = performance.now();
@@ -209,7 +207,6 @@ async function transitionToNewCanvas(force = false) {
 	const _newCanvas = await createCanvas({ force });
 
 	if (!_newCanvas || newCanvas !== null) return;
-    console.log("transitionToNewCanvas");
 
 	newCanvas = _newCanvas;
 

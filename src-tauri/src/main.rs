@@ -24,11 +24,7 @@ fn init_logging() {
     let config = config.build();
 
     let mut logs: Vec<Box<dyn SharedLogger>> = vec![TermLogger::new(
-        if cfg!(debug_assertions) {
-            LevelFilter::Debug
-        } else {
-            LevelFilter::Warn
-        },
+        LevelFilter::Debug,
         config.clone(),
         TerminalMode::Mixed,
         ColorChoice::Auto,
