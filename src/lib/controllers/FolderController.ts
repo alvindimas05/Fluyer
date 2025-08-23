@@ -9,7 +9,9 @@ import {musicList} from "$lib/stores/music";
 import MusicController from "$lib/controllers/MusicController";
 import { isWindows } from "$lib/platform";
 
+const pathSeparator = isWindows() ? '\\' : '/';
 const FolderController = {
+    pathSeparator,
     initialize: async () => {
         await FolderController.setFolderList();
     },
@@ -35,18 +37,18 @@ const FolderController = {
     },
     setFolderToParent: (folder: FolderData | null) => {
         if (!folder) return;
-        const parent = folder.path.split('/').slice(0, -1).join('/');
+        const parent = folder.path.split(pathSeparator).slice(0, -1).join(pathSeparator);
         FolderController.setFolder({path: parent} as FolderData);
     },
     isMusicInFolder: (music: MusicData, folder: FolderData | null) => {
         if (!folder || !music.path.startsWith(folder.path)) return false;
 
         // Ensure folder path has a trailing slash for correct comparison
-        const folderPathWithSlash = folder.path.endsWith('/') ? folder.path : `${folder.path}/`;
+        const folderPathWithSlash = folder.path.endsWith(pathSeparator) ? folder.path : `${folder.path}${pathSeparator}`;
         const remainingPath = music.path.startsWith(folderPathWithSlash) ? music.path.substring(folderPathWithSlash.length) : '';
 
         // If the remaining path has no more slashes, it's in the immediate folder
-        return remainingPath !== '' && !remainingPath.includes('/');
+        return remainingPath !== '' && !remainingPath.includes(pathSeparator);
     },
     isMusicInFolderRecursive: (music: MusicData, folder: FolderData | null) => folder && music.path.startsWith(folder.path),
     getImageFromPath: async (path: string) => {

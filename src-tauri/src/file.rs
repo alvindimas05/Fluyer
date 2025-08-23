@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use chrono::{DateTime, Utc};
 #[cfg(target_os = "android")]
 use crate::commands::mobile::check_read_audio_permission;
@@ -254,10 +256,9 @@ fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> 
     };
     stmt.query_map(params, |row| {
             let path: String = row.get(0)?;
-            let filename = path
-                .split('/')
-                .last()
-                .map(|s| s.to_string());
+            let filename = Path::new(&path)
+                .file_name()
+                .map(|s| s.to_string_lossy().to_string());
 
             Ok(MusicMetadata {
                 path: path.clone(),

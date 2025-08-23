@@ -106,7 +106,7 @@ pub fn music_equalizer(state: State<'_, Mutex<AppState>>, values: Vec<f32>) {
     state.music_player.equalizer(values);
 }
 
-#[tauri::command]
+#[tauri::command]   
 pub fn music_get_image(path: String) -> Option<String> {
     MusicMetadata::get_image_from_path(path)
 }
@@ -122,7 +122,7 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
     use std::time::{SystemTime, UNIX_EPOCH};
     use std::path::PathBuf;
 
-    // Get the bundled ffmpeg path
+    // // Get the bundled ffmpeg path
     let ffmpeg_binary = if cfg!(target_os = "windows") {
         "libs/ffmpeg/bin/ffmpeg.exe"
     } else {
@@ -138,15 +138,15 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
         .unwrap()
         .as_millis();
     let tmp_file: PathBuf = tmp_dir.join(format!("converted_{}.mp3", unique_id));
-
-    // Convert to very small mp3
+    
     let ffmpeg_status = Command::new(&ffmpeg_path)
         .args([
             "-y", // overwrite
             "-i", &path, // input
             "-ac", "1",  // mono
-            "-ar", "44100", // lower the sample rate
-            "-b:a", "192k", // lower the bitrate
+            "-ar", "44100", // fixed sample rate
+            "-b:a", "192k", // fixed bitrate
+            "-q:a", "5", // ~45–55 kbps
             "-c:a", "libmp3lame", // MP3 encoder
             "-map", "0:a", // only audio
             tmp_file.to_str().unwrap(),

@@ -6,6 +6,8 @@ import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import UIController from "$lib/controllers/UIController";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
+import Glass from "$lib/glass/Glass.svelte";
+import { onMount } from "svelte";
 const LABELS = [
 	65, // 1b  - Sub-bass
 	92, // 2b
@@ -27,6 +29,8 @@ const LABELS = [
 	20000, // 18b - Highs / air
 ];
 
+let isMounted = $state(false);
+
 function updateValues(index: number, value: number) {
 	equalizerValues.update((values) => {
 		values[index] = value;
@@ -35,29 +39,40 @@ function updateValues(index: number, value: number) {
 		return values;
 	});
 }
+
+onMount(() => {
+    setTimeout(() => isMounted = true, 1000);
+});
 </script>
 
-<div class="absolute top-0 left-0 w-full h-full z-10
+<!-- <div class="absolute top-0 left-0 w-full h-full z-10
     grid items-center justify-items-center"
-    class:hidden={!$equalizerShow}>
-    <div class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] rounded-lg shadow-2xl
-        border border-white/20 text-white p-4 grid grid-rows-[min-content_auto]
-        {isAndroid() ? 'backdrop-blur-md' : 'backdrop-blur-lg'}">
+    class:hidden={!$equalizerShow}> -->
+<div class="absolute top-0 left-0 w-full h-full z-10
+    grid items-center justify-items-center pointer-events-none
+    {isMounted ? '' : 'invisible'}
+    animate__animated {$equalizerShow ? 'animate__slideInUp' : 'animate__slideOutDown'}">
+    <Glass class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] pointer-events-auto"
+        wrapperClass="p-4 grid grid-rows-[min-content_auto]"
+        enableBlur={true}>
         <div class="w-full grid grid-cols-2">
             <div class="flex justify-start">
                 <button class="w-8 my-2 ms-2"
                     onclick={() => UIController.toggleEqualizer(false)}><Icon type={IconType.Close} /></button>
             </div>
             <div class="flex justify-end">
-                <button
-                        class="w-fit text-white text-start px-3 my-2
-                    bg-gradient-to-r from-white/15 to-white/10 rounded shadow-md
-                    hover:from-white/25 hover:to-white/30
-                    focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200"
-                        onclick={MusicController.resetEqualizer}
+                <Glass
+                        class="w-fit text-white text-start px-3 my-2 !rounded-lg
+                        hover:bg-white/10"
+                        wrapperClass="!rounded-lg"
+                        padding="0.5rem"
+                        paddingHover="0.6rem"
+                        events={{
+                            onclick: MusicController.resetEqualizer
+                        }}
                 >
                     <div>Reset</div>
-                </button>
+                </Glass>
             </div>
         </div>
         <div class="w-full grid grid-cols-[repeat(18,1fr)] overflow-auto scrollbar-hidden">
@@ -77,7 +92,7 @@ function updateValues(index: number, value: number) {
                 </div>
             {/each}
         </div>
-    </div>
+    </Glass>
 </div>
 
 <style lang="scss">

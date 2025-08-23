@@ -75,10 +75,13 @@ async function setAudio(music: MusicData | null = null) {
 	if (!MusicController.isPlaying()) return;
 
 	try {
+        const now = performance.now();
 		const buffer = await MusicController.getBuffer(
 			music ? music.path : MusicController.currentMusic().path,
 		);
 		if (buffer === null) return;
+
+        console.log("Audio request time: ", performance.now() - now, "ms");
 
 		await AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
 	} catch (e) {}

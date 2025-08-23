@@ -58,6 +58,7 @@ const MusicController = {
 		const musics = await invoke<MusicData[] | null>(
 			CommandRoutes.MUSIC_GET_ALL,
 		);
+		console.log(musics);
 		MusicController.setMusicList(musics);
 		LoadingController.setLoadingMusicList(true);
 	},

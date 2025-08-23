@@ -3,8 +3,7 @@ import * as path from "path";
 import fs from "fs/promises";
 import os from "os";
 import { downloadFile, extractTarGz } from "./install-helpers";
-const owner = "alvindimas05";
-const repo = "ffmpeg-build";
+const version = "8.0";
 const downloadOutputDir = path.resolve("src-tauri", "libs");
 const outputDir = path.resolve(downloadOutputDir, "ffmpeg");
 
@@ -23,29 +22,10 @@ function getLibName() {
         default:
             throw new Error("Unsupported platform");
     }
-    return `ffmpeg-7.1-audio-${versionName}`;
+    return `ffmpeg-${version}-audio-${versionName}`;
 }
-async function getLatestAssetUrl(): Promise<string> {
-	const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases`;
-	const res = await axios.get(apiUrl, {
-		headers: { Accept: "application/vnd.github+json" },
-	});
-
-	const releases = res.data;
-	if (!Array.isArray(releases) || releases.length === 0) {
-		throw new Error("No releases found.");
-	}
-
-	const latestRelease = releases[0];
-	const asset = latestRelease.assets.find(
-		(a: any) => a.name === getLibName() + ".tar.gz",
-	);
-
-	if (!asset) {
-		throw new Error("No valid asset found in latest release.");
-	}
-
-	return asset.browser_download_url;
+function getDownloadUrl(): string {
+	return `https://github.com/alvindimas05/ffmpeg-build/releases/download/v${version}/${getLibName()}.tar.gz`;
 }
 
 async function main() {
@@ -55,7 +35,7 @@ async function main() {
 	} catch {}
 	try {
 		console.log("Installing ffmpeg...");
-		const url = await getLatestAssetUrl();
+		const url = getDownloadUrl();
 		const fileName = path.basename(url);
 		const destPath = path.join(downloadOutputDir, fileName);
 

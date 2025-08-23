@@ -20,7 +20,7 @@ let albumImage = $derived.by(() => folder ? FolderController.getImageFromPath(fo
 let titleLabel = $derived.by(() => {
 	if(folder){
 		if($folderCurrent){
-			return folder.path.split('/').pop();
+			return folder.path.split(FolderController.pathSeparator).pop();
 		}
 		return folder.path;
 	} else {

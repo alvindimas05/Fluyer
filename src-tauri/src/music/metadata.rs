@@ -96,9 +96,9 @@ impl MusicMetadata {
         let path = self.path.clone();
         let mut metadata = MusicMetadata::new(path.clone());
 
-        if let Some(filename) = Path::new(&path).file_stem() {
-            metadata.filename = Some(filename.to_string_lossy().to_string());
-        }
+        metadata.filename = Path::new(&path)
+            .file_name()
+            .map(|s| s.to_string_lossy().to_string());
         let _format = MusicMetadata::get_format(path.clone());
         if _format.is_none() {
             return metadata;

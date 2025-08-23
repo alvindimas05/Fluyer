@@ -88,7 +88,6 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
 
   .liquidGlass-text {
     z-index: 3;
-    font-size: 2rem;
     color: black;
   }
 
