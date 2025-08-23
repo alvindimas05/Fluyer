@@ -63,6 +63,7 @@ onMount(() => {
      style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};">
     <Glass class="!hidden sm:!block h-fit sm:h-full sm:mx-3 text-start pointer-events-auto
+        cursor-pointer hover:bg-white/10
         animate__animated animate__fadeIn animate__slow"
        padding="4px"
        paddingHover="6px"
