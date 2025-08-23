@@ -33,7 +33,7 @@ fn is_supported_audio_file(entry: &DirEntry) -> bool {
     if let Some(ext) = entry.path().extension() {
         matches!(
             ext.to_str().unwrap_or("").to_lowercase().as_str(),
-            "mp3" | "flac" | "aac" | "m4a" | "wav" | "ogg" | "alac" | "opus" | "amr" | "dts" | "ac3" | "eac3"
+            "mp3" | "flac" | "aac" | "m4a" | "wav" | "ogg" | "alac" | "opus"
         )
     } else {
         false
