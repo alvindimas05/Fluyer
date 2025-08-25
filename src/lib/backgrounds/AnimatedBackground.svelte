@@ -16,6 +16,7 @@ import type { Unsubscriber } from "svelte/store";
 import {page} from "$app/state";
 import {PageRoutes} from "$lib/pages";
 
+const SCALE = 0.2;
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_DURATION = 750;
 const CANVAS_BLUR_RADIUS = 200;
@@ -104,64 +105,52 @@ async function getColors(force = false): Promise<string[] | null> {
 }
 
 async function createCanvas(
-	options = {
-		usePreviousColors: false,
-		force: false,
-	},
+    options = {
+        usePreviousColors: false,
+        force: false,
+    },
 ): Promise<HTMLCanvasElement | null> {
-	const canvasBlockSize = CANVAS_BLOCK_SIZE;
+    if (!options.usePreviousColors) {
+        const colors = await getColors(options.force);
+        if (colors === null) return null;
 
-	if (!options.usePreviousColors) {
-		const colors = await getColors(options.force);
-		if (colors === null) return null;
+        previousColors = colors;
+        previousBackgroundColors = [];
+    }
 
-		previousColors = colors;
-		previousBackgroundColors = [];
-	}
+    const scaledWidth = Math.floor(canvas.width * SCALE);
+    const scaledHeight = Math.floor(canvas.height * SCALE);
+    const blockSize = Math.floor(CANVAS_BLOCK_SIZE * SCALE);
 
-	const rows = Math.ceil(canvas.height / canvasBlockSize);
-	const cols = Math.ceil(canvas.width / canvasBlockSize);
+    const rows = Math.ceil(scaledHeight / blockSize);
+    const cols = Math.ceil(scaledWidth / blockSize);
 
-	for (let y = 0; y < rows; y++) {
-		if (!previousBackgroundColors[y]) {
-			previousBackgroundColors[y] = [];
-		}
+    for (let y = 0; y < rows; y++) {
+        if (!previousBackgroundColors[y]) previousBackgroundColors[y] = [];
+        for (let x = 0; x < cols; x++) {
+            if (!previousBackgroundColors[y][x]) {
+                previousBackgroundColors[y][x] =
+                    previousColors[Math.floor(Math.random() * previousColors.length)];
+            }
+        }
+    }
 
-		for (let x = 0; x < cols; x++) {
-			if (!previousBackgroundColors[y][x]) {
-				previousBackgroundColors[y][x] =
-					previousColors[Math.floor(Math.random() * previousColors.length)];
-			}
-		}
-	}
+    const baseCanvas = document.createElement("canvas");
+    baseCanvas.width = scaledWidth;
+    baseCanvas.height = scaledHeight;
+    const baseContext = baseCanvas.getContext("2d")!;
 
-	const baseCanvas = document.createElement("canvas");
-	baseCanvas.width = canvas.width;
-	baseCanvas.height = canvas.height;
-	const baseContext = baseCanvas.getContext("2d")!;
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            baseContext.fillStyle = previousBackgroundColors[y][x];
+            baseContext.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        }
+    }
 
-	for (let y = 0; y < rows; y++) {
-		for (let x = 0; x < cols; x++) {
-			baseContext.fillStyle = previousBackgroundColors[y][x];
-			baseContext.fillRect(
-				x * canvasBlockSize,
-				y * canvasBlockSize,
-				canvasBlockSize,
-				canvasBlockSize,
-			);
-		}
-	}
+    const blurRadius = Math.floor(CANVAS_BLUR_RADIUS * SCALE);
+    StackBlur.canvasRGBA(baseCanvas, 0, 0, scaledWidth, scaledHeight, blurRadius);
 
-	StackBlur.canvasRGBA(
-		baseCanvas,
-		0,
-		0,
-		canvas.width,
-		canvas.height,
-		CANVAS_BLUR_RADIUS,
-	);
-
-	return baseCanvas;
+    return baseCanvas;
 }
 
 async function initializeCanvas(reinitialize = false) {
@@ -172,7 +161,7 @@ async function initializeCanvas(reinitialize = false) {
 
 	if (reinitialize) {
 		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-		canvasContext.drawImage(currentCanvas!, 0, 0);
+		canvasContext.drawImage(currentCanvas!, 0, 0, canvas.width, canvas.height);
 	} else {
 		canvasContext = canvas.getContext("2d")!;
 
@@ -185,7 +174,7 @@ async function initializeCanvas(reinitialize = false) {
 
 			canvasContext.clearRect(0, 0, canvas.width, canvas.height);
 			canvasContext.globalAlpha = alpha;
-			canvasContext.drawImage(currentCanvas!, 0, 0);
+			canvasContext.drawImage(currentCanvas!, 0, 0, canvas.width, canvas.height);
 			canvasContext.globalAlpha = 1.0;
 
 			if (alpha < 1) {
@@ -218,7 +207,6 @@ async function transitionToNewCanvas(force = false) {
 	buffer.height = height;
 	const bufferContext = buffer.getContext("2d")!;
 
-
 	const startTime = performance.now();
 
 	function animate(currentTime: number) {
@@ -236,7 +224,7 @@ async function transitionToNewCanvas(force = false) {
 
 		bufferContext.globalAlpha = 1;
 		canvasContext.clearRect(0, 0, width, height);
-		canvasContext.drawImage(buffer, 0, 0);
+		canvasContext.drawImage(buffer, 0, 0, width, height);
 
 		if (progress < 1) {
 			requestAnimationFrame(animate);
