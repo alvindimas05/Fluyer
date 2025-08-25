@@ -19,7 +19,7 @@ import {PageRoutes} from "$lib/pages";
 const SCALE = 0.05;
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_DURATION = 750;
-const CANVAS_BLUR_RADIUS = 150;
+const CANVAS_BLUR_RADIUS = 200;
 
 let previousBackground: string | null = null;
 let canvas: HTMLCanvasElement;
