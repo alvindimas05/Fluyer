@@ -19,7 +19,7 @@ import {PageRoutes} from "$lib/pages";
 const SCALE = 0.05;
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_DURATION = 750;
-const CANVAS_BLUR_RADIUS = 200;
+const CANVAS_BLUR_RADIUS = 150;
 
 let previousBackground: string | null = null;
 let canvas: HTMLCanvasElement;
@@ -37,7 +37,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 	return { r, g, b };
 }
 
-function darkenTooBright(hex: string, targetMax = 180): string {
+function darkenTooBright(hex: string, targetMax = 200): string {
 	const { r, g, b } = hexToRgb(hex);
 	const luminance = getLuminance(r, g, b);
 
