@@ -16,7 +16,7 @@ import type { Unsubscriber } from "svelte/store";
 import {page} from "$app/state";
 import {PageRoutes} from "$lib/pages";
 
-const SCALE = 0.2;
+const SCALE = 0.05;
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_DURATION = 750;
 const CANVAS_BLUR_RADIUS = 200;
