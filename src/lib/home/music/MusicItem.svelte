@@ -115,7 +115,7 @@ async function selectFolder(){
 					onclick={addMusicAndPlay}
 			>
 				<div
-						class="bg-black bg-opacity-40 grid w-full h-full p-1 box-border justify-items-center items-center rounded"
+						class="bg-black bg-opacity-40 grid p-1 box-border justify-items-center items-center rounded"
 				><Icon type={IconType.Play}/></div>
 			</button>
 			<div class="{folder ? 'cursor-pointer' : 'cursor-default'}" onclick={selectFolder}></div>
