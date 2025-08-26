@@ -12,8 +12,8 @@ interface Props {
 const { onclick, icon, label }: Props = $props();
 </script>
 <Glass class="mx-2 my-3 cursor-pointer hover:bg-white/10"
-    padding="12px"
-    paddingHover="16px"
+    padding="10px"
+    paddingHover="12px"
     events={{
         onclick
     }}>
