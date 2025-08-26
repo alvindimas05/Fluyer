@@ -21,7 +21,9 @@ import {
 } from "$lib/stores/setting";
 import type { Unsubscriber } from "svelte/store";
 import Glass from "$lib/glass/Glass.svelte";
+import {playerBarHeight} from "$lib/stores/playerbar";
 
+let element: HTMLDivElement;
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
@@ -159,6 +161,10 @@ function updateProgressTouch(
 	hideTooltip();
 }
 
+function updatePlayerBarHeight(){
+    $playerBarHeight = element.offsetHeight;
+}
+
 let unlistenMusicProgressValue: Unsubscriber;
 let unlistenMusicVolume: Unsubscriber;
 let unlistenMusicCurrentIndex: Unsubscriber;
@@ -173,6 +179,7 @@ onMount(() => {
 	);
 	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(refresh);
 	unlistenMusicPlaylist = musicPlaylist.subscribe(refresh);
+    updatePlayerBarHeight();
 });
 
 onDestroy(() => {
@@ -183,10 +190,12 @@ onDestroy(() => {
 });
 </script>
 
+<svelte:window onresize={updatePlayerBarHeight} />
 <svelte:document onkeydown={onKeyDown} />
 
 <div class="absolute bottom-0 w-full p-3 animate__animated animate__slideInUp"
-    style="margin-bottom: {$mobileNavigationBarHeight}px;">
+    style="margin-bottom: {$mobileNavigationBarHeight}px;"
+    bind:this={element}>
     <div class="absolute bottom-8 w-full pt-2">
         <div class="w-fit absolute border rounded-lg px-2 py-1 shadow-xl text-sm backdrop-blur-xl"
              style="

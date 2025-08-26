@@ -8,6 +8,7 @@ import MusicController from "$lib/controllers/MusicController";
 import {folderCurrent, folderList} from "$lib/stores/folder";
 import {MusicListType} from "$lib/home/music/types";
 import FolderController from "$lib/controllers/FolderController";
+import {playerBarHeight} from "$lib/stores/playerbar";
 
 let type = $derived($musicListType)
 
@@ -110,7 +111,9 @@ onDestroy(() => {
 <svelte:window onresize={updateSize} />
 <div class="h-full px-3 text-white">
 	{#if data && columnCount}
-		<VList class="scrollbar-hidden" {data} getKey={(_, i) => i}>
+		<VList class="scrollbar-hidden" {data}
+		   style="padding-bottom: {$playerBarHeight}px;"
+		   getKey={(_, i) => i}>
 			{#snippet children(list)}
 				<div class="grid gap-x-6" style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr))">
 					{#each list as data}
