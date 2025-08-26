@@ -61,7 +61,10 @@ function updateSize(){
     updateGridSizing();
     updateFilterBarHeight()
 }
-onMount(updateSize);
+onMount(() => {
+    updateSize();
+    setTimeout(updateFilterBarHeight, 0);
+});
 </script>
 
 <svelte:window onresize={updateSize} />
