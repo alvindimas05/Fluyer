@@ -81,8 +81,8 @@ onMount(() => {
     <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
         {isMacos() ? 'order-last' : 'order-first'}
         animate__animated animate__fadeIn animate__slow"
-        padding="4px"
-        paddingHover="6px">
+        padding="6px"
+        paddingHover="8px">
         <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2">
             <input
                     class="w-full h-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"
