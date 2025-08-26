@@ -37,7 +37,6 @@ export const MusicConfig = {
 	vstep: 0.01,
 	vmin: 0,
 	vmax: 1,
-	filterBarHeight: 48,
 	separator: "•",
 	separatorAlbum: "-",
 	separatorAudio: "/",

@@ -9,6 +9,7 @@ import {musicListType} from "$lib/stores/music";
 import {MusicListType} from "$lib/home/music/types";
 import UIController from "$lib/controllers/UIController";
 import Glass from "$lib/glass/Glass.svelte";
+import {filterBarHeight} from "$lib/stores/filterbar";
 
 const rules = [
     // xhdpi (DPR > 2.0)
@@ -33,6 +34,7 @@ const rules = [
     [640, 0, 0.33334], // sm → 33.3334%
 ];
 
+let element: HTMLDivElement;
 let gridSize = $state("");
 let listType = $derived($musicListType);
 
@@ -51,17 +53,24 @@ function updateGridSizing() {
     gridSize = "";
 }
 
-onMount(() => {
+function updateFilterBarHeight(){
+    $filterBarHeight = element.offsetHeight + 8;
+}
+
+function updateSize(){
     updateGridSizing();
-});
+    updateFilterBarHeight()
+}
+onMount(updateSize);
 </script>
 
-<svelte:window onresize={updateGridSizing} />
-<div class="w-full sm:grid gap-y-2 px-3 sm:px-0 mb-3 pointer-events-none
+<svelte:window onresize={updateSize} />
+<div class="w-full sm:grid gap-y-2 px-3 sm:px-0 pb-3 pointer-events-none
     {isMacos() ? 'justify-end' : ''}
     {isMacos() ? 'right-0' : 'left-0'}"
-     style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
-        grid-template-columns: {gridSize};">
+    style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
+        grid-template-columns: {gridSize};"
+    bind:this={element}>
     <Glass class="!hidden sm:!block h-fit sm:h-full sm:mx-3 text-start pointer-events-auto
         cursor-pointer hover:bg-white/10
         animate__animated animate__fadeIn animate__slow"

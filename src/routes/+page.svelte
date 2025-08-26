@@ -12,9 +12,9 @@ import Equalizer from "$lib/home/equalizer/Equalizer.svelte";
 import {isDesktop, isMobile} from "$lib/platform";
 import {MusicListType} from "$lib/home/music/types";
 import {mobileStatusBarHeight} from "$lib/stores/mobile";
-import {MusicConfig} from "$lib/controllers/MusicController";
+import {filterBarHeight} from "$lib/stores/filterbar";
 
-let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + MusicConfig.filterBarHeight);
+let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight);
 </script>
 
 {#if $loadingShow}
