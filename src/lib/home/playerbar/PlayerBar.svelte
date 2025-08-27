@@ -232,7 +232,8 @@ onDestroy(() => {
                 step={MusicConfig.step}
         />
     </div>
-    <Glass enableBlur={true}>
+    <Glass enableBlur={true}
+        glassEffectScale={150}>
         <div class="w-full grid grid-cols-[auto_min-content] md:grid-cols-3 py-1">
             <div class="flex items-center md:gap-2">
                 <button

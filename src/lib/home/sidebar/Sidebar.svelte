@@ -139,6 +139,7 @@ onMount(() => {
 	top: {paddingTop}px;"
 	onmouseleave={onMouseLeave}>
 	<Glass enableHoverAnimation={false} enableBlur={true}
+		glassEffectScale={30}
 		class="
 			h-full p-3 !rounded-md pointer-events-auto
 			animate__animated animate__faster

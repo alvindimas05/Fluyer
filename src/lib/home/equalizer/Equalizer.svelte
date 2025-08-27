@@ -54,7 +54,8 @@ onMount(() => {
     animate__animated {$equalizerShow ? 'animate__slideInUp' : 'animate__slideOutDown'}">
     <Glass class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] pointer-events-auto"
         wrapperClass="p-4 grid grid-rows-[min-content_auto]"
-        enableBlur={true} enableHoverAnimation={!isMacos()}>
+        enableBlur={true} enableHoverAnimation={!isMacos()}
+        glassEffectScale={100}>
         <div class="w-full grid grid-cols-2">
             <div class="flex justify-start">
                 <button class="w-8 my-2 ms-2"
@@ -66,6 +67,7 @@ onMount(() => {
                         hover:bg-white/10 cursor-pointer"
                         wrapperClass="!rounded-lg"
                         padding="0.5rem"
+                        paddingHover="0.6rem"
                         enableHoverAnimation={!isMacos()}
                         events={{
                             onclick: MusicController.resetEqualizer

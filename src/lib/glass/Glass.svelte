@@ -13,11 +13,13 @@ interface Props {
     enableHoverAnimation?: boolean;
     // Note: Enable if needed, disabled by default to increase performance :)
     enableBlur?: boolean;
+    glassEffectScale?: number;
     events?: any;
 }
 
+const componentId = crypto.randomUUID();
 let props: Props = $props();
-let { children, showShine = true, enableHoverAnimation = true, enableBlur = false } = props;
+let { children, showShine = true, enableHoverAnimation = true, enableBlur = false, glassEffectScale = 0 } = props;
 </script>
 
 <div class="liquidGlass-wrapper {enableHoverAnimation ? 'hover-animation' : ''} {props.class}"
@@ -27,7 +29,9 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
         {props.style}
     " {...props.events}>
     <div class="liquidGlass-effect {enableBlur ? 'liquidGlass-blur' : ''} {props.wrapperClass}"
-         style="--blur: {isAndroid() ? '8px' : '12px'}  {props.wrapperStyle}"></div>
+        style="--blur: {isAndroid() ? '8px' : '12px'};
+        --glass-effect-id: url(#glass-distortion-{componentId});
+        {props.wrapperStyle}"></div>
     <div class="liquidGlass-tint {props.wrapperClass}" style="{props.wrapperStyle}"></div>
     {#if showShine}
         <div class="liquidGlass-shine {props.wrapperClass}" style="{props.wrapperStyle}"></div>
@@ -36,6 +40,65 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
         {@render children?.()}
     </div>
 </div>
+
+{#if glassEffectScale > 0}
+    <svg style="display: none">
+        <filter
+                id="glass-distortion-{componentId}"
+                x="0%"
+                y="0%"
+                width="100%"
+                height="100%"
+                filterUnits="objectBoundingBox"
+        >
+            <feTurbulence
+                    type="fractalNoise"
+                    baseFrequency="0.01 0.01"
+                    numOctaves="1"
+                    seed="5"
+                    result="turbulence"
+            />
+            <!-- Seeds: 14, 17,  -->
+
+            <feComponentTransfer in="turbulence" result="mapped">
+                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+            </feComponentTransfer>
+
+            <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+
+            <feSpecularLighting
+                    in="softMap"
+                    surfaceScale="5"
+                    specularConstant="1"
+                    specularExponent="100"
+                    lighting-color="white"
+                    result="specLight"
+            >
+                <fePointLight x="-200" y="-200" z="300" />
+            </feSpecularLighting>
+
+            <feComposite
+                    in="specLight"
+                    operator="arithmetic"
+                    k1="0"
+                    k2="1"
+                    k3="1"
+                    k4="0"
+                    result="litImage"
+            />
+
+            <feDisplacementMap
+                    in="SourceGraphic"
+                    in2="softMap"
+                    scale={glassEffectScale}
+                    xChannelSelector="R"
+                    yChannelSelector="G"
+            />
+        </filter>
+    </svg>
+{/if}
 
 <style lang="scss">
   /* LIQUID GLASS STYLES */
@@ -66,7 +129,7 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
     z-index: 0;
     inset: 0;
 
-    filter: url(#glass-distortion);
+    filter: var(--glass-effect-id);
     overflow: hidden;
     isolation: isolate;
   }
