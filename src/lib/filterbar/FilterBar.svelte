@@ -9,6 +9,7 @@ import {musicListType} from "$lib/stores/music";
 import {MusicListType} from "$lib/home/music/types";
 import UIController from "$lib/controllers/UIController";
 import Glass from "$lib/glass/Glass.svelte";
+import {filterBarHeight} from "$lib/stores/filterbar";
 
 const rules = [
     // xhdpi (DPR > 2.0)
@@ -33,8 +34,8 @@ const rules = [
     [640, 0, 0.33334], // sm → 33.3334%
 ];
 
+let element: HTMLDivElement;
 let gridSize = $state("");
-let listType = $derived($musicListType);
 
 function updateGridSizing() {
     const w = window.innerWidth;
@@ -51,17 +52,27 @@ function updateGridSizing() {
     gridSize = "";
 }
 
-onMount(() => {
+function updateFilterBarHeight(){
+    $filterBarHeight = element.offsetHeight + 8;
+}
+
+function updateSize(){
     updateGridSizing();
+    updateFilterBarHeight()
+}
+onMount(() => {
+    updateSize();
+    setTimeout(updateFilterBarHeight, 0);
 });
 </script>
 
-<svelte:window onresize={updateGridSizing} />
-<div class="w-full sm:grid gap-y-2 px-3 sm:px-0 mb-3 pointer-events-none
+<svelte:window onresize={updateSize} />
+<div class="w-full sm:grid gap-y-2 px-3 sm:px-0 pb-3 pointer-events-none
     {isMacos() ? 'justify-end' : ''}
     {isMacos() ? 'right-0' : 'left-0'}"
-     style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
-        grid-template-columns: {gridSize};">
+    style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
+        grid-template-columns: {gridSize};"
+    bind:this={element}>
     <Glass class="!hidden sm:!block h-fit sm:h-full sm:mx-3 text-start pointer-events-auto
         cursor-pointer hover:bg-white/10
         animate__animated animate__fadeIn animate__slow"
@@ -73,7 +84,7 @@ onMount(() => {
         <div class="w-full h-full grid grid-cols-[min-content_auto] items-center gap-x-2 px-3
             text-sm text-white/70">
             <div class="w-4">
-                <Icon type={listType === MusicListType.Folder ? IconType.Note : IconType.Folder} />
+                <Icon type={$musicListType === MusicListType.Folder ? IconType.Note : IconType.Folder} />
             </div>
             <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>
         </div>
@@ -81,8 +92,8 @@ onMount(() => {
     <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
         {isMacos() ? 'order-last' : 'order-first'}
         animate__animated animate__fadeIn animate__slow"
-        padding="4px"
-        paddingHover="6px">
+        padding="6px"
+        paddingHover="8px">
         <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2">
             <input
                     class="w-full h-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"

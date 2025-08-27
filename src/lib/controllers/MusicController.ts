@@ -37,7 +37,6 @@ export const MusicConfig = {
 	vstep: 0.01,
 	vmin: 0,
 	vmax: 1,
-	filterBarHeight: 48,
 	separator: "•",
 	separatorAlbum: "-",
 	separatorAudio: "/",
@@ -58,7 +57,6 @@ const MusicController = {
 		const musics = await invoke<MusicData[] | null>(
 			CommandRoutes.MUSIC_GET_ALL,
 		);
-		console.log(musics);
 		MusicController.setMusicList(musics);
 		LoadingController.setLoadingMusicList(true);
 	},

@@ -1,4 +1,3 @@
-use std::os::windows::process::CommandExt;
 use std::sync::Mutex;
 use tauri::{Manager, State};
 
@@ -138,21 +137,35 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
         .unwrap()
         .as_millis();
     let tmp_file: PathBuf = tmp_dir.join(format!("converted_{}.mp3", unique_id));
+
+    let args = [
+        "-y", // overwrite
+        "-i", &path, // input
+        "-ac", "1",  // mono
+        "-ar", "44100", // fixed sample rate
+        "-b:a", "192k", // fixed bitrate
+        "-q:a", "5", // ~45–55 kbps
+        "-c:a", "libmp3lame", // MP3 encoder
+        "-map", "0:a", // only audio
+        tmp_file.to_str().unwrap(),
+    ];
     
-    let ffmpeg_status = Command::new(&ffmpeg_path)
-        .args([
-            "-y", // overwrite
-            "-i", &path, // input
-            "-ac", "1",  // mono
-            "-ar", "44100", // fixed sample rate
-            "-b:a", "192k", // fixed bitrate
-            "-q:a", "5", // ~45–55 kbps
-            "-c:a", "libmp3lame", // MP3 encoder
-            "-map", "0:a", // only audio
-            tmp_file.to_str().unwrap(),
-        ])
-        .creation_flags(0x08000000) // CREATE_NO_WINDOW on Windows
-        .status();
+    let ffmpeg_status = {
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            Command::new(&ffmpeg_path)
+                .args(&args)
+                .creation_flags(0x08000000) // CREATE_NO_WINDOW on Windows
+                .status()
+        }
+        #[cfg(not(windows))]
+        {
+            Command::new(&ffmpeg_path)
+                .args(&args)
+                .status()
+        }
+    };
 
     if ffmpeg_status.is_err() {
         logger::error!("Failed to convert audio to mp3: {}", ffmpeg_status.unwrap_err());

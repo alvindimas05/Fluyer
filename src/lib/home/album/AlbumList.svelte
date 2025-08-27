@@ -10,6 +10,7 @@ import { swipeMinimumTop } from "$lib/stores";
 import type { Unsubscriber } from "svelte/store";
 import { VList } from "virtua/svelte";
 import { filterAlbum, filterSearch } from "$lib/stores/filter";
+import {filterBarHeight} from "$lib/stores/filterbar";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
@@ -36,13 +37,11 @@ const rules = [
 let itemElementHeight = $state(0);
 let itemWidth = $state(0.5 * window.innerWidth);
 let itemHeight = $state(0);
-let filterBarHeight = $state(MusicConfig.filterBarHeight);
-let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + filterBarHeight);
+let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight);
 
 function updateSize() {
 	updateItemWidth();
 	itemHeight = itemElementHeight;
-    filterBarHeight = MusicConfig.filterBarHeight * (window.innerWidth > 640 ? 1 : 2);
 }
 
 function updateItemWidth() {

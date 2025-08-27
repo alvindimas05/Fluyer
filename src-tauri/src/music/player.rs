@@ -47,6 +47,13 @@ pub struct MusicPlayerSync {
     is_playing: bool,
 }
 
+const EQUALIZER_BANDS: [u32; 18] = [
+    65, 92, 131, 185, 262, 370, 523, 740, 1047,
+    1480, 2093, 2960, 4186, 5920, 8372, 11840,
+    16744, 20000,
+];
+
+
 #[cfg(desktop)]
 pub static GLOBAL_MUSIC_MPV: OnceLock<Mpv> = OnceLock::new();
 
@@ -420,23 +427,27 @@ impl MusicPlayer {
     }
 
     pub fn equalizer(&self, values: Vec<f32>) {
-        #[cfg(desktop)]
-        {
-            let mut arg = String::from("superequalizer=");
-            for (i, &gain) in values.iter().enumerate() {
-                if &gain == &0.0 {
-                    continue;
-                }
-                let band = i + 1; // bands are 1‑based: 1b ... 18b
-                arg.push_str(&format!("{}b={:.1}:", band, gain));
-            }
-            if arg.ends_with(':') {
-                arg.pop();
-            }
+        #[cfg(desktop)]{
+            let gains: String = values.iter()
+                .map(|g| format!("{:.1}", g))
+                .collect::<Vec<_>>()
+                .join(" ");
+
+            let bands: String = EQUALIZER_BANDS.iter()
+                .map(|f| f.to_string())
+                .collect::<Vec<_>>()
+                .join(" ");
+
+            let arg = format!(
+                "lavfi=[anull[a];afireqsrc=preset=custom:gains={}:bands={}\
+             [ir];[a][ir]afir]",
+                gains, bands
+            );
+
             GLOBAL_MUSIC_MPV
                 .get()
                 .unwrap()
-                .command("af", &["set", arg.as_str()])
+                .command("af", &["set", &arg])
                 .unwrap();
         }
     }

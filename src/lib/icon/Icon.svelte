@@ -6,9 +6,11 @@ import { iconTheme } from "$lib/stores/icon";
 
 interface Props {
 	type: IconType;
+    class?: string;
 }
 
-let { type }: Props = $props();
+const props = $props()
+let { type }: Props = props;
 let Component = $derived(
 	iconRegistry[$iconTheme]?.[type] ??
 		iconRegistry[$iconTheme]?.[IconType.Unknown],
@@ -41,7 +43,7 @@ $effect(configureIcon);
 </script>
 
 {#if Component}
-    <div class="w-full h-full aspect-square m-auto {classes}">
+    <div class="w-full h-full aspect-square m-auto {classes} {props.class}">
         <Component class="w-full h-full text-[100%]" {color} {weight} />
     </div>
 {:else}

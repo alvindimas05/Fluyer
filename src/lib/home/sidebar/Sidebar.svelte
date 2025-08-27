@@ -20,6 +20,8 @@ import { onMount } from "svelte";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {MusicConfig} from "$lib/controllers/MusicController";
 import Glass from "$lib/glass/Glass.svelte";
+import {playerBarHeight} from "$lib/stores/playerbar";
+import {filterBarHeight} from "$lib/stores/filterbar";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
@@ -47,7 +49,7 @@ const rules = [
 const SWIPE_RANGE = 125;
 
 let sidebarWidth = $state(window.innerWidth);
-let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + MusicConfig.filterBarHeight);
+let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight);
 
 let isMouseInsideArea = $state(false);
 let isShowing = $state(false);
@@ -130,9 +132,11 @@ onMount(() => {
 <svelte:body use:swipeable on:swiped={onSwipe} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="fixed top-0 z-10 px-3 h-[calc(100%-10rem)] pointer-events-none
+<div class="fixed top-0 z-10 px-3 pointer-events-none
 	{type === SidebarType.Right ? 'right-0' : 'left-0'}
 	{isMounted ? '' : 'invisible'}"
+	style="height: calc(100% - {$playerBarHeight}px - {paddingTop}px);
+	top: {paddingTop}px;"
 	onmouseleave={onMouseLeave}>
 	<Glass enableHoverAnimation={false} enableBlur={true}
 		class="
@@ -148,7 +152,6 @@ onMount(() => {
 		"
 		wrapperClass="!rounded-md {props.class}"
 		style="
-			margin-top: {paddingTop}px;
 			width: {sidebarWidth - 24}px;
 		"
 	>
