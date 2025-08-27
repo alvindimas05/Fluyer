@@ -36,7 +36,6 @@ const rules = [
 
 let element: HTMLDivElement;
 let gridSize = $state("");
-let listType = $derived($musicListType);
 
 function updateGridSizing() {
     const w = window.innerWidth;
@@ -85,7 +84,7 @@ onMount(() => {
         <div class="w-full h-full grid grid-cols-[min-content_auto] items-center gap-x-2 px-3
             text-sm text-white/70">
             <div class="w-4">
-                <Icon type={listType === MusicListType.Folder ? IconType.Note : IconType.Folder} />
+                <Icon type={$musicListType === MusicListType.Folder ? IconType.Note : IconType.Folder} />
             </div>
             <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>
         </div>
