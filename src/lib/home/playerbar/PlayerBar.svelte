@@ -23,6 +23,8 @@ import type { Unsubscriber } from "svelte/store";
 import Glass from "$lib/glass/Glass.svelte";
 import {playerBarHeight} from "$lib/stores/playerbar";
 
+const tooltipMargin = 12;
+
 let element: HTMLDivElement;
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
@@ -105,11 +107,11 @@ function updateTooltip(
 	const rect = e.currentTarget.getBoundingClientRect();
 	const x = e.clientX - rect.left;
 	tooltipPosition = x - tooltip.offsetWidth / 2;
-	if (tooltipPosition < 0) tooltipPosition = 0;
-	else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth)
-		tooltipPosition = window.innerWidth - tooltip.offsetWidth;
+	if (tooltipPosition < tooltipMargin) tooltipPosition = tooltipMargin;
+	else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth - tooltipMargin)
+		tooltipPosition = window.innerWidth - tooltip.offsetWidth - tooltipMargin;
 
-	const percentage = (x / window.innerWidth) * 100;
+	const percentage = (x / (window.innerWidth - tooltipMargin * 2)) * 100;
 	tooltipText =
 		MusicController.parsePercentageProgressDurationIntoText(percentage);
 	tooltipVisible = true;
@@ -120,17 +122,17 @@ function updateTooltipTouch(
 		currentTarget: EventTarget & HTMLDivElement;
 	},
 ) {
-	const rect = e.currentTarget.getBoundingClientRect();
-	const x = e.touches[0].clientX - rect.left;
-	tooltipPosition = x - tooltip.offsetWidth / 2;
-	if (tooltipPosition < 0) tooltipPosition = 0;
-	else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth)
-		tooltipPosition = window.innerWidth - tooltip.offsetWidth;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    tooltipPosition = x - tooltip.offsetWidth / 2;
+    if (tooltipPosition < tooltipMargin) tooltipPosition = tooltipMargin;
+    else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth - tooltipMargin)
+        tooltipPosition = window.innerWidth - tooltip.offsetWidth - tooltipMargin;
 
-	const percentage = (x / window.innerWidth) * 100;
-	tooltipText =
-		MusicController.parsePercentageProgressDurationIntoText(percentage);
-	tooltipVisible = true;
+    const percentage = (x / (window.innerWidth - tooltipMargin * 2)) * 100;
+    tooltipText =
+        MusicController.parsePercentageProgressDurationIntoText(percentage);
+    tooltipVisible = true;
 
 	touchLastX = x;
 }
@@ -146,7 +148,7 @@ function updateProgress(
 ) {
 	const rect = e.currentTarget.getBoundingClientRect();
 	const x = e.clientX - rect.left;
-	const percentage = (x / window.innerWidth) * 100;
+	const percentage = (x / (window.innerWidth - (tooltipMargin * 2))) * 100;
 	MusicController.updateProgressByPercentage(percentage);
 }
 
@@ -196,15 +198,12 @@ onDestroy(() => {
 <div class="absolute bottom-0 w-full p-3 animate__animated animate__slideInUp"
     style="margin-bottom: {$mobileNavigationBarHeight}px;"
     bind:this={element}>
-    <div class="absolute bottom-8 w-full pt-2">
-        <div class="w-fit absolute border rounded-lg px-2 py-1 shadow-xl text-sm backdrop-blur-xl"
-             style="
-            left: {tooltipPosition}px;
-            visibility: {tooltipVisible ? 'visible' : 'hidden'};
-            bottom: {(window.innerWidth > 640 ? 80 : 72) + $mobileNavigationBarHeight}px;
-        "
-             bind:this={tooltip}>{tooltipText}</div>
-    </div>
+    <div class="w-fit absolute top-[-1.5rem] border rounded-lg px-2 py-1 shadow-xl text-sm backdrop-blur-xl"
+    style="
+        left: {tooltipPosition}px;
+        visibility: {tooltipVisible ? 'visible' : 'hidden'};
+    "
+    bind:this={tooltip}>{tooltipText}</div>
     <div class="relative mb-3">
         <div class="absolute w-full h-10 bottom-[-20px] left-0 cursor-pointer z-10"
              onmouseenter={updateTooltip}
