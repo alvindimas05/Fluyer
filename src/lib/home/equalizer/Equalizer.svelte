@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {isAndroid, isMacos} from "$lib/platform";
+import {isAndroid, isMacos} from "$lib/platform";
 import { equalizerShow, equalizerValues } from "$lib/stores/equalizer";
 import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
@@ -82,8 +82,8 @@ onMount(() => {
                     <div>{label > 1000 ? (label / 1000).toFixed(1) : label}</div>
                     <div>{label > 1000 ? 'kHz' : 'Hz'}</div>
                     <input type="range" class="range-slider"
-                       min={0}
-                       max={20}
+                       min={-12}
+                       max={12}
                        step={0.1}
                        value={$equalizerValues[i]}
                        onchange={(e) => updateValues(i, e.currentTarget.valueAsNumber)}/>
