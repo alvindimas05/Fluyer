@@ -1,19 +1,19 @@
 use std::sync::Mutex;
 use tauri::{Manager, State};
 
+use tauri::path::BaseDirectory;
 #[cfg(desktop)]
 use tauri::{AppHandle, Emitter};
-use tauri::path::BaseDirectory;
 #[cfg(desktop)]
 use tauri_plugin_dialog::DialogExt;
 
 #[cfg(desktop)]
-use crate::{store::GLOBAL_APP_STORE};
+use crate::store::GLOBAL_APP_STORE;
 
 use crate::GLOBAL_APP_HANDLE;
 
-use crate::{logger, music::metadata::MusicMetadata, AppState};
 use crate::music::player::MusicPlayer;
+use crate::{logger, music::metadata::MusicMetadata, AppState};
 
 pub static MUSIC_STORE_PATH_NAME: &str = "music-path";
 
@@ -105,7 +105,7 @@ pub fn music_equalizer(state: State<'_, Mutex<AppState>>, values: Vec<f32>) {
     state.music_player.equalizer(values);
 }
 
-#[tauri::command]   
+#[tauri::command]
 pub fn music_get_image(path: String) -> Option<String> {
     MusicMetadata::get_image_from_path(path)
 }
@@ -117,9 +117,9 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
         return std::fs::read(path).ok();
     }
 
+    use std::path::PathBuf;
     use std::process::Command;
     use std::time::{SystemTime, UNIX_EPOCH};
-    use std::path::PathBuf;
 
     // // Get the bundled ffmpeg path
     let ffmpeg_binary = if cfg!(target_os = "windows") {
@@ -128,8 +128,12 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
         "libs/ffmpeg/bin/ffmpeg"
     };
 
-    let ffmpeg_path = GLOBAL_APP_HANDLE.get().unwrap().path()
-        .resolve(ffmpeg_binary, BaseDirectory::Resource).unwrap();
+    let ffmpeg_path = GLOBAL_APP_HANDLE
+        .get()
+        .unwrap()
+        .path()
+        .resolve(ffmpeg_binary, BaseDirectory::Resource)
+        .unwrap();
 
     let tmp_dir = std::env::temp_dir();
     let unique_id = SystemTime::now()
@@ -140,16 +144,23 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
 
     let args = [
         "-y", // overwrite
-        "-i", &path, // input
-        "-ac", "1",  // mono
-        "-ar", "44100", // fixed sample rate
-        "-b:a", "192k", // fixed bitrate
-        "-q:a", "5", // ~45–55 kbps
-        "-c:a", "libmp3lame", // MP3 encoder
-        "-map", "0:a", // only audio
+        "-i",
+        &path, // input
+        "-ac",
+        "1", // mono
+        "-ar",
+        "44100", // fixed sample rate
+        "-b:a",
+        "192k", // fixed bitrate
+        "-q:a",
+        "5", // ~45–55 kbps
+        "-c:a",
+        "libmp3lame", // MP3 encoder
+        "-map",
+        "0:a", // only audio
         tmp_file.to_str().unwrap(),
     ];
-    
+
     let ffmpeg_status = {
         #[cfg(windows)]
         {
@@ -161,14 +172,15 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
         }
         #[cfg(not(windows))]
         {
-            Command::new(&ffmpeg_path)
-                .args(&args)
-                .status()
+            Command::new(&ffmpeg_path).args(&args).status()
         }
     };
 
     if ffmpeg_status.is_err() {
-        logger::error!("Failed to convert audio to mp3: {}", ffmpeg_status.unwrap_err());
+        logger::error!(
+            "Failed to convert audio to mp3: {}",
+            ffmpeg_status.unwrap_err()
+        );
         return std::fs::read(path).ok();
     }
 
@@ -192,4 +204,10 @@ pub fn music_get_current_duration(state: State<'_, Mutex<AppState>>) -> Option<u
 #[tauri::command]
 pub fn music_request_sync() {
     MusicPlayer::emit_sync(false);
+}
+
+
+#[tauri::command]
+pub fn music_get_lyrics(path: String) -> Option<String> {
+    MusicMetadata::get_lyrics_from_path(path)
 }

@@ -9,12 +9,12 @@ use tauri_plugin_decorum::WebviewWindowExt;
 
 mod api;
 mod commands;
+mod database;
 mod file;
 mod logger;
 mod music;
 mod platform;
 mod store;
-mod database;
 
 #[cfg(target_os = "macos")]
 const MACOS_TRAFFIC_LIGHTS_INSET_X: f32 = 12.0;
@@ -85,6 +85,7 @@ pub fn run() {
             commands::music::music_get_image,
             commands::music::music_get_current_duration,
             commands::music::music_request_sync,
+            commands::music::music_get_lyrics,
 
             commands::folder::folder_get_items,
             commands::folder::folder_get_image,

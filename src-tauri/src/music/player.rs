@@ -48,11 +48,9 @@ pub struct MusicPlayerSync {
 }
 
 const EQUALIZER_BANDS: [u32; 18] = [
-    65, 92, 131, 185, 262, 370, 523, 740, 1047,
-    1480, 2093, 2960, 4186, 5920, 8372, 11840,
-    16744, 20000,
+    65, 92, 131, 185, 262, 370, 523, 740, 1047, 1480, 2093, 2960, 4186, 5920, 8372, 11840, 16744,
+    20000,
 ];
-
 
 #[cfg(desktop)]
 pub static GLOBAL_MUSIC_MPV: OnceLock<Mpv> = OnceLock::new();
@@ -109,7 +107,7 @@ impl MusicPlayer {
                         logger::debug!("The mpv log file is saved at {}", log_path);
                         Ok(())
                     })
-                        .unwrap(),
+                    .unwrap(),
                 )
                 .ok();
         }
@@ -239,7 +237,8 @@ impl MusicPlayer {
             .unwrap();
     }
     pub fn get_current_duration(&self) -> u128 {
-        #[cfg(target_os = "android")]{
+        #[cfg(target_os = "android")]
+        {
             let info = GLOBAL_APP_HANDLE
                 .get()
                 .unwrap()
@@ -248,9 +247,14 @@ impl MusicPlayer {
                 .unwrap();
             info.current_position as u128
         }
-        #[cfg(desktop)]{
-            (crate::music::player::GLOBAL_MUSIC_MPV.get().unwrap()
-                .get_property::<f64>("time-pos").unwrap() * 1000.0) as u128
+        #[cfg(desktop)]
+        {
+            (crate::music::player::GLOBAL_MUSIC_MPV
+                .get()
+                .unwrap()
+                .get_property::<f64>("time-pos")
+                .unwrap()
+                * 1000.0) as u128
         }
     }
     pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
@@ -427,13 +431,16 @@ impl MusicPlayer {
     }
 
     pub fn equalizer(&self, values: Vec<f32>) {
-        #[cfg(desktop)]{
-            let gains: String = values.iter()
+        #[cfg(desktop)]
+        {
+            let gains: String = values
+                .iter()
                 .map(|g| format!("{:.1}", g))
                 .collect::<Vec<_>>()
                 .join(" ");
 
-            let bands: String = EQUALIZER_BANDS.iter()
+            let bands: String = EQUALIZER_BANDS
+                .iter()
                 .map(|f| f.to_string())
                 .collect::<Vec<_>>()
                 .join(" ");

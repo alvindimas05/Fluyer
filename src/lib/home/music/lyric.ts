@@ -2,15 +2,16 @@ export default class MusicLyric {
 	duration = 0;
 	value = "";
 	constructor(text: string | null) {
-		if (text == null) return;
-		let [timestamp, lyric] = text.split(/(?<=^\S+)\s/);
-		const match = timestamp.match(/\[(\d{2}):(\d{2})\.(\d{2})\]/);
+		if (!text) return;
+
+		const match = text.match(/\[(\d{2}):(\d{2})\.(\d{2})\](.*)/);
 		if (match) {
-			const [, minutes, seconds, milliseconds] = match.map(Number);
-			this.duration = minutes * 60 + seconds + milliseconds / 100;
-		}
-		if (lyric.length > 0) {
-			this.value = lyric;
+			const [, minutes, seconds, milliseconds, lyric] = match;
+			this.duration =
+				parseInt(minutes) * 60 +
+				parseInt(seconds) +
+				parseInt(milliseconds) / 100;
+			this.value = lyric.trim();
 		}
 	}
 }

@@ -1,22 +1,18 @@
 use std::path::Path;
 
-use chrono::{DateTime, Utc};
 #[cfg(target_os = "android")]
 use crate::commands::mobile::check_read_audio_permission;
+use crate::database::database::GLOBAL_DATABASE;
 use crate::{
-    commands::music::MUSIC_STORE_PATH_NAME,
-    logger,
-    music::metadata::MusicMetadata,
-    platform::is_ios,
-    store::GLOBAL_APP_STORE,
-    GLOBAL_APP_HANDLE,
+    commands::music::MUSIC_STORE_PATH_NAME, logger, music::metadata::MusicMetadata,
+    platform::is_ios, store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE,
 };
+use chrono::{DateTime, Utc};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
-use crate::database::database::GLOBAL_DATABASE;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FolderItem {
@@ -55,7 +51,11 @@ pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
         .max_depth(1)
         .into_iter()
         .filter_map(Result::ok)
-        .filter(|e| e.file_type().is_dir() && e.path().to_str().unwrap_or_default() != path && is_not_hidden(e))
+        .filter(|e| {
+            e.file_type().is_dir()
+                && e.path().to_str().unwrap_or_default() != path
+                && is_not_hidden(e)
+        })
         .map(|entry| FolderItem {
             path: normalize_path(entry.path().to_str().unwrap_or_default().to_string()),
         })
@@ -66,10 +66,10 @@ pub fn get_folder_image(path: &str) -> Option<String> {
     let mut conn_guard = GLOBAL_DATABASE.lock().ok().unwrap();
     let conn = conn_guard.as_mut().unwrap();
 
-    let mut stmt = conn.prepare("SELECT path FROM musics WHERE path LIKE ? ORDER BY path LIMIT 1")
+    let mut stmt = conn
+        .prepare("SELECT path FROM musics WHERE path LIKE ? ORDER BY path LIMIT 1")
         .expect("Failed to prepare statement");
-    if let Ok(res) = stmt.query_one(params![format!("{}%", path)],
-        |row| Ok(row.get(0))) {
+    if let Ok(res) = stmt.query_one(params![format!("{}%", path)], |row| Ok(row.get(0))) {
         if let Ok(path) = res {
             return MusicMetadata::get_image_from_path(path);
         }
@@ -156,7 +156,9 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
             .unwrap_or_else(|| "".to_string());
 
         // Check if exists
-        let mut stmt = tx.prepare("SELECT modified_at FROM musics WHERE path = ?1").ok()?;
+        let mut stmt = tx
+            .prepare("SELECT modified_at FROM musics WHERE path = ?1")
+            .ok()?;
         let result: Result<String, _> = stmt.query_row(params![path], |row| row.get(0));
 
         match result {
@@ -230,8 +232,10 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
 
     delete_non_existing_paths(conn, musics);
 
-
-    Some(get_musics_from_db(conn, GetMusicFromDbOptions { path: None }))
+    Some(get_musics_from_db(
+        conn,
+        GetMusicFromDbOptions { path: None },
+    ))
 }
 
 struct GetMusicFromDbOptions {
@@ -255,42 +259,46 @@ fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> 
         params![]
     };
     stmt.query_map(params, |row| {
-            let path: String = row.get(0)?;
-            let filename = Path::new(&path)
-                .file_name()
-                .map(|s| s.to_string_lossy().to_string());
+        let path: String = row.get(0)?;
+        let filename = Path::new(&path)
+            .file_name()
+            .map(|s| s.to_string_lossy().to_string());
 
-            Ok(MusicMetadata {
-                path: path.clone(),
-                duration: row.get::<_, Option<i64>>(1)?.map(|v| v as u128),
-                title: row.get(2)?,
-                artist: row.get(3)?,
-                album: row.get(4)?,
-                album_artist: row.get(5)?,
-                track_number: row.get(6)?,
-                genre: row.get(7)?,
-                bits_per_sample: row.get::<_, Option<i64>>(8)?.map(|v| v as u32),
-                sample_rate: row.get::<_, Option<i64>>(9)?.map(|v| v as u32),
-                date: row.get(10)?,
+        Ok(MusicMetadata {
+            path: path.clone(),
+            duration: row.get::<_, Option<i64>>(1)?.map(|v| v as u128),
+            title: row.get(2)?,
+            artist: row.get(3)?,
+            album: row.get(4)?,
+            album_artist: row.get(5)?,
+            track_number: row.get(6)?,
+            genre: row.get(7)?,
+            bits_per_sample: row.get::<_, Option<i64>>(8)?.map(|v| v as u32),
+            sample_rate: row.get::<_, Option<i64>>(9)?.map(|v| v as u32),
+            date: row.get(10)?,
 
-                filename,
-                image: None,
-                extra_tags: None,
-            })
+            filename,
+            image: None,
+            extra_tags: None,
         })
-        .ok()
-        .unwrap()
-        .filter_map(|r| r.ok())
-        .collect()
+    })
+    .ok()
+    .unwrap()
+    .filter_map(|r| r.ok())
+    .collect()
 }
 
 fn normalize_path(path: String) -> String {
     path.replace(":\\\\", ":\\")
 }
 
-fn windows_fix_music_paths_older_version(conn: &mut Connection){
+fn windows_fix_music_paths_older_version(conn: &mut Connection) {
     let tx = conn.transaction().unwrap();
-    tx.execute("UPDATE musics SET path = REPLACE(path, ':\\\\', ':\\')", params![]).unwrap();
+    tx.execute(
+        "UPDATE musics SET path = REPLACE(path, ':\\\\', ':\\')",
+        params![],
+    )
+    .unwrap();
     tx.commit().unwrap();
 }
 
@@ -298,15 +306,19 @@ fn delete_non_existing_paths(conn: &mut Connection, musics: Vec<String>) {
     let tx = conn.transaction().unwrap();
 
     // Create temporary table to hold all current paths
-    tx.execute("DROP TABLE IF EXISTS temp_existing_paths", []).unwrap();
+    tx.execute("DROP TABLE IF EXISTS temp_existing_paths", [])
+        .unwrap();
     tx.execute(
         "CREATE TEMP TABLE temp_existing_paths (path TEXT PRIMARY KEY)",
         [],
-    ).unwrap();
+    )
+    .unwrap();
 
     // Insert all known existing paths into the temp table
     {
-        let mut stmt = tx.prepare("INSERT INTO temp_existing_paths (path) VALUES (?)").unwrap();
+        let mut stmt = tx
+            .prepare("INSERT INTO temp_existing_paths (path) VALUES (?)")
+            .unwrap();
         for path in &musics {
             stmt.execute(params![path]).unwrap();
         }
@@ -316,7 +328,8 @@ fn delete_non_existing_paths(conn: &mut Connection, musics: Vec<String>) {
     tx.execute(
         "DELETE FROM musics WHERE path NOT IN (SELECT path FROM temp_existing_paths)",
         [],
-    ).unwrap();
+    )
+    .unwrap();
 
     tx.commit().unwrap();
 }
