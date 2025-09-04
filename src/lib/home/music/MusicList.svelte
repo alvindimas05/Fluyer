@@ -29,10 +29,10 @@ const rules = [
 
 let columnCount = $state(1);
 function updateColumnCount() {
-	if(type === "folder") {
-		columnCount = 1;
-		return;
-	}
+	// if(type === "folder") {
+	// 	columnCount = 1;
+	// 	return;
+	// }
 
 	const w = window.innerWidth;
 	const dpi = window.devicePixelRatio;

@@ -16,6 +16,7 @@ export const CommandRoutes = {
 	MUSIC_GET_IMAGE: "music_get_image",
 	MUSIC_GET_BUFFER: "music_get_buffer",
 	MUSIC_GET_CURRENT_DURATION: "music_get_current_duration",
+	MUSIC_GET_LYRICS: "music_get_lyrics",
 
 	FOLDER_GET_ITEMS: "folder_get_items",
 	FOLDER_GET_IMAGE: "folder_get_image",

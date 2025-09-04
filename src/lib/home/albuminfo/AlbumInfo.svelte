@@ -12,8 +12,11 @@ import PersistentStoreController from "$lib/controllers/PersistentStoreControlle
 import Glass from "$lib/glass/Glass.svelte";
 
 let album = $derived($filterAlbum);
-let showBackButton = $derived.by(async () => $musicListType !== MusicListType.Folder ||
-    ($folderCurrent && !(await PersistentStoreController.musicPath.get()).includes($folderCurrent!!.path)));
+let showBackButton = $derived.by(async () => {
+    if($musicListType === MusicListType.Folder && !$folderCurrent) return false;
+
+    if((await PersistentStoreController.musicPath.get()).length > 1) return true;
+});
 
 let musicList = $derived.by(() => {
     if($musicListType === MusicListType.Folder){

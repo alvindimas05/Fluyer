@@ -268,4 +268,28 @@ impl MusicMetadata {
 
         None
     }
+    pub fn get_lyrics_from_path(path: String) -> Option<String> {
+        let lyrics_path = Path::new(&path).with_extension("lrc");
+        if let Ok(lyrics) = std::fs::read_to_string(&lyrics_path) {
+            return Some(lyrics);
+        }
+
+        // let _format = MusicMetadata::get_format(path);
+        // if _format.is_none() {
+        //     return None;
+        // }
+        // let mut format = _format.unwrap();
+        //
+        // if let Some(rev) = format.metadata().current() {
+        //     for tag in rev.tags() {
+        //         if let Some(std_key) = tag.std_key {
+        //             match std_key {
+        //                 StandardTagKey::Lyrics => return Some(tag.value.to_string()),
+        //                 _ => {}
+        //             }
+        //         }
+        //     }
+        // }
+        None
+    }
 }
