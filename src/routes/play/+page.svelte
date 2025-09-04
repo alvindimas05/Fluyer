@@ -8,7 +8,6 @@ import {
 } from "$lib/stores/music";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
-import LrcLib from "$lib/api/lrclib";
 import {
     mobileNavigationBarHeight,
     mobileStatusBarHeight,
@@ -25,6 +24,7 @@ import {
 } from "$lib/stores/setting";
 import { showThenFade } from "$lib/controllers/UIController";
 import Glass from "$lib/glass/Glass.svelte";
+import LyricController from "$lib/controllers/LyricController";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -96,7 +96,7 @@ async function resetLyrics() {
     selectedLyricIndex = 0;
 
     if (MusicController.currentMusic() == null) return;
-    const resLyrics = await LrcLib.getLyrics(MusicController.currentMusic()!);
+    const resLyrics = await LyricController.get(MusicController.currentMusic()!);
     if (resLyrics == null) {
         lyrics = [];
         return;

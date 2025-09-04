@@ -3,7 +3,10 @@ fn main() {
         // if let Ok(source) = std::env::var("FLUYER_MPV_SOURCE") {
         //     println!("cargo:rustc-link-search=native={}", source);
         // }
-        println!("cargo:rustc-link-search=native={}", std::env::var("FLUYER_MPV_SOURCE").unwrap());
+        println!(
+            "cargo:rustc-link-search=native={}",
+            std::env::var("FLUYER_MPV_SOURCE").unwrap()
+        );
     }
     tauri_build::build()
 }
