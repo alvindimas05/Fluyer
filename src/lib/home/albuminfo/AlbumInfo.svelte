@@ -13,9 +13,13 @@ import Glass from "$lib/glass/Glass.svelte";
 
 let album = $derived($filterAlbum);
 let showBackButton = $derived.by(async () => {
-    if($musicListType === MusicListType.Folder && !$folderCurrent) return false;
+    const isNotFolderView = $musicListType !== MusicListType.Folder;
 
-    if((await PersistentStoreController.musicPath.get()).length > 1) return true;
+    const folderPath = $folderCurrent?.path;
+    const storedPath = await PersistentStoreController.musicPath.get();
+    const isOutsideStoredPath = folderPath ? !storedPath.includes(folderPath) : false;
+
+    return isNotFolderView || (storedPath.length === 1 && isOutsideStoredPath) || (storedPath.length > 1);
 });
 
 let musicList = $derived.by(() => {
