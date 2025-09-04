@@ -1,5 +1,5 @@
 use crate::database::migrations::DATABASE_MIGRATIONS;
-use crate::{logger, GLOBAL_APP_HANDLE};
+use crate::GLOBAL_APP_HANDLE;
 use rusqlite::Connection;
 use std::sync::Mutex;
 use tauri::Manager;

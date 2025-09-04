@@ -19,6 +19,7 @@ interface Props {
 
 const componentId = crypto.randomUUID();
 let props: Props = $props();
+let glassEffectId = `glass-distortion-${componentId}`;
 let { children, showShine = true, enableHoverAnimation = true, enableBlur = false, glassEffectScale = 0 } = props;
 </script>
 
@@ -30,7 +31,7 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
     " {...props.events}>
     <div class="liquidGlass-effect {enableBlur ? 'liquidGlass-blur' : ''} {props.wrapperClass}"
         style="--blur: {isAndroid() ? '8px' : '12px'};
-        --glass-effect-id: url(#glass-distortion-{componentId});
+        --glass-effect-id: url(#{glassEffectId});
         {props.wrapperStyle}"></div>
     <div class="liquidGlass-tint {props.wrapperClass}" style="{props.wrapperStyle}"></div>
     {#if showShine}
@@ -41,10 +42,10 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
     </div>
 </div>
 
-{#if glassEffectScale > 0}
+{#if glassEffectScale > 0 && !isAndroid()}
     <svg style="display: none">
         <filter
-                id="glass-distortion-{componentId}"
+                id="{glassEffectId}"
                 x="0%"
                 y="0%"
                 width="100%"
