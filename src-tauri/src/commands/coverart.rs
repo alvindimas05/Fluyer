@@ -11,6 +11,7 @@ use std::path::Path;
 use tauri::Manager;
 
 use crate::{api::musicbrainz::MusicBrainz, GLOBAL_APP_HANDLE};
+use crate::music::image::ImageHandler;
 
 #[derive(Clone, Debug)]
 struct CoverArtRequest {
@@ -47,7 +48,7 @@ lazy_static! {
 }
 
 #[tauri::command]
-pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
+pub async fn cover_art_get(query: CoverArtQuery, size: Option<String>) -> CoverArtResponse {
     if query.album.is_none() && query.title.is_none() {
         return CoverArtResponse {
             name: String::from(""),
@@ -70,7 +71,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
     let file_path = format!("{}/{}/{}", cover_art_cache_directory(), folder_name, name);
     let queue = cover_art_get_queue(name.clone());
     if queue.is_none() {
-        if let Some(image) = cover_art_get_from_path(file_path.clone()).await {
+        if let Some(image) = cover_art_get_from_path(file_path.clone(), size.clone()).await {
             cover_art_set_status(name.clone(), CoverArtRequestStatus::Loaded);
 
             return CoverArtResponse {
@@ -80,7 +81,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
             };
         }
 
-        let cover_art = cover_art_request(query).await;
+        let cover_art = cover_art_request(query, size).await;
 
         if cover_art.is_none() {
             cover_art_set_status(name.clone(), CoverArtRequestStatus::Failed);
@@ -99,7 +100,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
     }
 
     if queue.unwrap().status == CoverArtRequestStatus::Loaded {
-        if let Some(image) = cover_art_get_from_path(file_path.clone()).await {
+        if let Some(image) = cover_art_get_from_path(file_path.clone(), size).await {
             return CoverArtResponse {
                 name,
                 status: CoverArtRequestStatus::Loaded,
@@ -115,7 +116,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
     }
 }
 
-async fn cover_art_get_from_path(file_path: String) -> Option<String> {
+async fn cover_art_get_from_path(file_path: String, size: Option<String>) -> Option<String> {
     if let Ok(data) = std::fs::read(&file_path) {
         let ext = Path::new(&file_path)
             .extension()
@@ -125,7 +126,7 @@ async fn cover_art_get_from_path(file_path: String) -> Option<String> {
 
         // If it's already PNG or JPEG, don't re-encode
         if ext == "png" || ext == "jpg" || ext == "jpeg" {
-            return Some(base64_simd::STANDARD.encode_to_string(data));
+            return ImageHandler::resize_image_to_base64(data.as_slice(), size);
         }
 
         let reader = ImageReader::new(Cursor::new(data)).with_guessed_format();
@@ -137,7 +138,7 @@ async fn cover_art_get_from_path(file_path: String) -> Option<String> {
                 .write_to(&mut buf, image::ImageFormat::Png)
                 .is_ok()
             {
-                return Some(base64_simd::STANDARD.encode_to_string(buf.get_ref()));
+                return ImageHandler::resize_image_to_base64(buf.get_ref(), size);
             }
         }
     }
@@ -145,7 +146,7 @@ async fn cover_art_get_from_path(file_path: String) -> Option<String> {
     None
 }
 
-async fn cover_art_request(query: CoverArtQuery) -> Option<String> {
+async fn cover_art_request(query: CoverArtQuery, size: Option<String>) -> Option<String> {
     let url = MusicBrainz::get_cover_art(query.clone()).await;
 
     if url.is_none() {
@@ -199,7 +200,7 @@ async fn cover_art_request(query: CoverArtQuery) -> Option<String> {
         return None;
     }
 
-    Some(base64_simd::STANDARD.encode_to_string(content.into_inner()))
+    ImageHandler::resize_image_to_base64(content.get_ref(), size)
 }
 
 fn cover_art_get_queue(album: String) -> Option<CoverArtRequest> {

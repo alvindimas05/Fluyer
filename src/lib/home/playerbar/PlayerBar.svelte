@@ -14,7 +14,7 @@ import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { onDestroy, onMount } from "svelte";
-import { type MusicData, RepeatMode } from "$lib/home/music/types";
+import {type MusicData, MusicSize, RepeatMode} from "$lib/home/music/types";
 import {
 	settingUiShowRepeatButton,
 	settingUiShowShuffleButton,
@@ -29,7 +29,7 @@ let element: HTMLDivElement;
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
-let albumImage = $derived(MusicController.getAlbumImageFromMusic(oldMusic));
+let albumImage = $derived(MusicController.getAlbumImageFromMusic(oldMusic, MusicSize.Music));
 
 let isPlaying = $derived($musicIsPlaying);
 let progressPercentage = $state(MusicController.progressPercentage());

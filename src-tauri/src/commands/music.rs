@@ -106,8 +106,8 @@ pub fn music_equalizer(state: State<'_, Mutex<AppState>>, values: Vec<f32>) {
 }
 
 #[tauri::command]
-pub async fn music_get_image(path: String) -> Option<String> {
-    MusicMetadata::get_image_from_path_async(path).await
+pub async fn music_get_image(path: String, size: Option<String>) -> Option<String> {
+    MusicMetadata::get_image_from_path_async(path, size).await
 }
 
 #[tauri::command]

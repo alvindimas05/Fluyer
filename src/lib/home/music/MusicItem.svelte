@@ -1,22 +1,25 @@
 <script lang="ts">
-import {type FolderData, type MusicData, MusicListType} from "./types";
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import Icon from "$lib/icon/Icon.svelte";
-import { IconType } from "$lib/icon/types";
-import { isDesktop, isLinux } from "$lib/platform";
-import FolderController from "$lib/controllers/FolderController";
-import {musicListType} from "$lib/stores/music";
-import {folderCurrent} from "$lib/stores/folder";
+	import {type FolderData, type MusicData, MusicListType, MusicSize} from "./types";
+	import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
+	import Icon from "$lib/icon/Icon.svelte";
+	import {IconType} from "$lib/icon/types";
+	import {isDesktop, isLinux} from "$lib/platform";
+	import FolderController from "$lib/controllers/FolderController";
+	import {musicListType} from "$lib/stores/music";
+	import {folderCurrent} from "$lib/stores/folder";
 
-interface Props {
+	interface Props {
 	music: MusicData;
 	folder?: FolderData;
 }
 
 let { music, folder }: Props = $props();
 
-let albumImage = $derived.by(() => folder ? FolderController.getImageFromPath(folder.path)
-	: MusicController.getAlbumImageFromMusic(music));
+let albumImage = $derived.by(async () => {
+	if(folder) return await FolderController.getImageFromPath(folder.path, MusicSize.Music);
+
+	return await MusicController.getAlbumImageFromMusic(music, MusicSize.Music);
+});
 let titleLabel = $derived.by(() => {
 	if(folder){
 		if($folderCurrent){

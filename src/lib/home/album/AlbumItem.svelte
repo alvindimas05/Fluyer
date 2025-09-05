@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import type { AlbumData, MusicData } from "../music/types";
+import {type AlbumData, type MusicData, MusicSize} from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
 import { coverArtCaches } from "$lib/stores/coverart";
@@ -20,7 +20,7 @@ let isValidFilterAlbum = $derived(
 	$filterAlbum && music.album && $filterAlbum.name === music.album,
 );
 
-let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
+let albumImage = $derived(MusicController.getAlbumImageFromMusic(music, MusicSize.Album));
 
 async function setFilterAlbum() {
 	FilterController.setFilterAlbum({

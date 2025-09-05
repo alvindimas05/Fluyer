@@ -23,6 +23,12 @@ export interface MusicData {
 	date: string | null;
 }
 
+export enum MusicSize {
+	Music = 100,
+	Album = 400,
+	AnimatedBackground = 50,
+}
+
 export interface FolderData {
 	path: string;
 }

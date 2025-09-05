@@ -7,8 +7,8 @@ use std::path::Path;
 use symphonia::core::formats::{FormatOptions, FormatReader};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
-use base64_simd;
 use crate::logger;
+use crate::music::image::ImageHandler;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -203,26 +203,26 @@ impl MusicMetadata {
     }
 
     // Optimized image extraction with caching and compression
-    pub fn get_image_from_path(path: String) -> Option<String> {
+    pub fn get_image_from_path(path: String, size: Option<String>) -> Option<String> {
         // Extract and optimize image
-        Self::extract_and_optimize_image(&path)
+        Self::extract_and_optimize_image(&path, size)
     }
 
-    fn extract_and_optimize_image(path: &str) -> Option<String> {
+    fn extract_and_optimize_image(path: &str, size: Option<String>) -> Option<String> {
         let format = Self::get_format(path.to_string())?;
         let mut format = format;
 
         if let Some(rev) = format.metadata().current() {
             for visual in rev.visuals() {
-                return Some(base64_simd::STANDARD.encode_to_string(&visual.data));
+                return ImageHandler::resize_image_to_base64(&visual.data, size)
             }
         }
         None
     }
     // Async version for better UI responsiveness
-    pub async fn get_image_from_path_async(path: String) -> Option<String> {
+    pub async fn get_image_from_path_async(path: String, size: Option<String>) -> Option<String> {
         tokio::task::spawn_blocking(move || {
-            Self::get_image_from_path(path)
+            Self::get_image_from_path(path, size)
         }).await.ok().flatten()
     }
 

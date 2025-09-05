@@ -4,7 +4,7 @@ import UtilsController from "$lib/controllers/UtilsController";
 import {folderCurrent, folderList} from "$lib/stores/folder";
 import {get} from "svelte/store";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import type {FolderData, MusicData} from "$lib/home/music/types";
+import {type FolderData, type MusicData, MusicSize} from "$lib/home/music/types";
 import {musicList} from "$lib/stores/music";
 import MusicController from "$lib/controllers/MusicController";
 import { isWindows } from "$lib/platform";
@@ -52,8 +52,9 @@ const FolderController = {
         return remainingPath !== '' && !remainingPath.includes(pathSeparator);
     },
     isMusicInFolderRecursive: (music: MusicData, folder: FolderData | null) => folder && music.path.startsWith(folder.path),
-    getImageFromPath: async (path: string) => {
-        const base64 =  await invoke<string>(CommandRoutes.FOLDER_GET_IMAGE, { path });
+    getImageFromPath: async (path: string, size: MusicSize | null) => {
+        const imageSize = size ? size.toString() : null;
+        const base64 =  await invoke<string>(CommandRoutes.FOLDER_GET_IMAGE, { path, size: imageSize });
         if (base64) return UtilsController.withBase64(base64);
         return null;
     },

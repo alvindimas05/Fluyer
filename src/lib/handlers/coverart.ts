@@ -20,11 +20,11 @@ export interface CoverArtCacheQuery {
 }
 
 const CoverArt = {
-	getImageFromQuery: async (query: CoverArtCacheQuery) => {
+	getImageFromQuery: async (query: CoverArtCacheQuery, size: string | null = null) => {
 		try {
 			return (
 				await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
-					query,
+					query, size
 				})
 			).image;
 		} catch (err) {

@@ -62,7 +62,7 @@ pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
         .collect()
 }
 
-pub fn get_folder_image(path: &str) -> Option<String> {
+pub fn get_folder_image(path: &str, size: Option<String>) -> Option<String> {
     let mut conn_guard = GLOBAL_DATABASE.lock().ok().unwrap();
     let conn = conn_guard.as_mut().unwrap();
 
@@ -71,7 +71,7 @@ pub fn get_folder_image(path: &str) -> Option<String> {
         .expect("Failed to prepare statement");
     if let Ok(res) = stmt.query_one(params![format!("{}%", path)], |row| Ok(row.get(0))) {
         if let Ok(path) = res {
-            return MusicMetadata::get_image_from_path(path);
+            return MusicMetadata::get_image_from_path(path, size);
         }
     }
     None

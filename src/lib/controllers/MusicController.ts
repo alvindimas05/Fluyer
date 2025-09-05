@@ -15,7 +15,7 @@ import { get } from "svelte/store";
 import {
 	type MusicPlayerSync,
 	type MusicData,
-	RepeatMode,
+	RepeatMode, MusicSize,
 } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
@@ -83,11 +83,12 @@ const MusicController = {
 			MusicController.currentMusic(),
 		);
 	},
-	getAlbumImageFromMusic: async (music: MusicData | null) => {
+	getAlbumImageFromMusic: async (music: MusicData | null, size: MusicSize | null) => {
 		if (music === null) return MusicConfig.defaultAlbumImage;
+		const imageSize = size ? size.toString() : null;
 		try {
 			const image = await invoke<string>(CommandRoutes.MUSIC_GET_IMAGE, {
-				path: music?.path,
+				path: music?.path, size: imageSize,
 			});
 			if (image !== null) return UtilsController.withBase64(image);
 		} catch (e) {}
@@ -97,7 +98,7 @@ const MusicController = {
 			artist: music.artist!,
 			title: music.album ? undefined : music.title!,
 			album: music.album ?? undefined,
-		});
+		}, imageSize);
 		return coverArt
 			? UtilsController.withBase64(coverArt)
 			: MusicConfig.defaultAlbumImage;

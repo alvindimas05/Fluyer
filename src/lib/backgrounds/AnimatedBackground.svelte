@@ -15,6 +15,7 @@ import { prominent } from "color.js";
 import type { Unsubscriber } from "svelte/store";
 import {page} from "$app/state";
 import {PageRoutes} from "$lib/pages";
+import {MusicSize} from "$lib/home/music/types";
 
 const SCALE = 0.05;
 const CANVAS_BLOCK_SIZE = 150;
@@ -130,7 +131,10 @@ function getLuminance(r: number, g: number, b: number): number {
 }
 
 async function getColors(force = false): Promise<string[] | null> {
-	const currentAlbumImage = await MusicController.currentMusicAlbumImage();
+	const currentAlbumImage = await MusicController.getAlbumImageFromMusic(
+        MusicController.currentMusic(),
+        MusicSize.AnimatedBackground,
+    );
 	if (previousBackground === currentAlbumImage && !force) return null;
 
 	let image = new Image();
