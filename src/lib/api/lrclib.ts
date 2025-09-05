@@ -52,31 +52,113 @@ const LrcLib = {
 		return matrix[str2.length][str1.length];
 	},
 
-	// Score a result based on how well it matches our music data
+	// Option 1: Very strict duration matching (±5 seconds max)
 	scoreResult: (result: LrcLibResult, music: MusicData): number => {
 		let score = 0;
 
-		// Title matching (most important - weight: 0.5)
+		// Title matching (weight: 0.4)
 		const titleSimilarity = LrcLib.calculateSimilarity(
 			LrcLib.normalizeString(result.name),
 			LrcLib.normalizeString(music.title || '')
 		);
-		score += titleSimilarity * 0.5;
+		score += titleSimilarity * 0.4;
 
 		// Artist matching (weight: 0.3)
 		if (music.artist && result.artistName) {
 			const artistSimilarity = LrcLib.calculateSimilarity(
 				LrcLib.normalizeString(result.artistName),
-				LrcLib.normalizeString(music.artist.split(MusicConfig.artistSeparator)[0]) // Use primary artist
+				LrcLib.normalizeString(music.artist.split(MusicConfig.artistSeparator)[0])
 			);
 			score += artistSimilarity * 0.3;
 		}
 
-		// Duration matching (weight: 0.2)
+		// STRICT Duration matching (weight: 0.3)
 		if (music.duration && result.duration) {
 			const durationDiff = Math.abs(result.duration - Math.floor(music.duration / 1000));
-			const durationSimilarity = Math.max(0, 1 - (durationDiff / 30)); // Allow 30s tolerance
-			score += durationSimilarity * 0.2;
+
+			// Only allow ±5 seconds tolerance
+			if (durationDiff <= 5) {
+				const durationSimilarity = 1 - (durationDiff / 5); // Linear falloff within 5s
+				score += durationSimilarity * 0.3;
+			} else {
+				// Heavily penalize anything beyond 5 seconds
+				score *= 0.1; // Reduce total score by 90%
+			}
+		}
+
+		return score;
+	},
+
+	// Option 2: Ultra-strict - exact duration match required
+	scoreResultUltraStrict: (result: LrcLibResult, music: MusicData): number => {
+		// First check: duration must be within ±3 seconds or reject immediately
+		if (music.duration && result.duration) {
+			const durationDiff = Math.abs(result.duration - Math.floor(music.duration / 1000));
+			if (durationDiff > 3) {
+				return 0; // Reject immediately if duration is off by more than 3 seconds
+			}
+		}
+
+		let score = 0;
+
+		// Title matching (weight: 0.4)
+		const titleSimilarity = LrcLib.calculateSimilarity(
+			LrcLib.normalizeString(result.name),
+			LrcLib.normalizeString(music.title || '')
+		);
+		score += titleSimilarity * 0.4;
+
+		// Artist matching (weight: 0.3)
+		if (music.artist && result.artistName) {
+			const artistSimilarity = LrcLib.calculateSimilarity(
+				LrcLib.normalizeString(result.artistName),
+				LrcLib.normalizeString(music.artist.split(MusicConfig.artistSeparator)[0])
+			);
+			score += artistSimilarity * 0.3;
+		}
+
+		// Duration matching (weight: 0.3) - only for fine-tuning since we already filtered
+		if (music.duration && result.duration) {
+			const durationDiff = Math.abs(result.duration - Math.floor(music.duration / 1000));
+			const durationSimilarity = 1 - (durationDiff / 3); // Perfect match = 1, 3s diff = 0
+			score += durationSimilarity * 0.3;
+		}
+
+		return score;
+	},
+
+	// Option 3: Exponential penalty for duration differences
+	scoreResultExponentialPenalty: (result: LrcLibResult, music: MusicData): number => {
+		let score = 0;
+
+		// Title matching (weight: 0.4)
+		const titleSimilarity = LrcLib.calculateSimilarity(
+			LrcLib.normalizeString(result.name),
+			LrcLib.normalizeString(music.title || '')
+		);
+		score += titleSimilarity * 0.4;
+
+		// Artist matching (weight: 0.3)
+		if (music.artist && result.artistName) {
+			const artistSimilarity = LrcLib.calculateSimilarity(
+				LrcLib.normalizeString(result.artistName),
+				LrcLib.normalizeString(music.artist.split(MusicConfig.artistSeparator)[0])
+			);
+			score += artistSimilarity * 0.3;
+		}
+
+		// EXPONENTIAL Duration penalty (weight: 0.3)
+		if (music.duration && result.duration) {
+			const durationDiff = Math.abs(result.duration - Math.floor(music.duration / 1000));
+
+			// Exponential decay: perfect match = 1, each second reduces score exponentially
+			const durationSimilarity = Math.exp(-durationDiff / 3); // e^(-diff/3)
+			score += durationSimilarity * 0.3;
+
+			// Additional penalty: if off by more than 10 seconds, multiply total score by penalty
+			if (durationDiff > 10) {
+				score *= 0.2; // 80% penalty to total score
+			}
 		}
 
 		return score;
@@ -133,7 +215,7 @@ const LrcLib = {
 			const scoredResults = uniqueResults
 				.map(result => ({
 					result,
-					score: LrcLib.scoreResult(result, music)
+					score: LrcLib.scoreResultUltraStrict(result, music)
 				}))
 				.filter(({ score, result }) =>
 					score > 0.4 && // Minimum similarity threshold
