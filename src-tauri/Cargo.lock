@@ -1220,7 +1220,6 @@ dependencies = [
 name = "fluyer"
 version = "1.1.5"
 dependencies = [
- "base64 0.22.1",
  "base64-simd",
  "chrono",
  "dotenvy",
@@ -1237,7 +1236,6 @@ dependencies = [
  "rusqlite",
  "rusqlite_migration",
  "serde",
- "serde_json",
  "simplelog",
  "symphonia",
  "tauri",
@@ -1248,6 +1246,7 @@ dependencies = [
  "tauri-plugin-os",
  "tauri-plugin-prevent-default",
  "tauri-plugin-store",
+ "tokio",
  "walkdir",
 ]
 

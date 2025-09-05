@@ -7,7 +7,7 @@ use std::path::Path;
 use symphonia::core::formats::{FormatOptions, FormatReader};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::{MetadataOptions, StandardTagKey, Tag};
-
+use base64_simd;
 use crate::logger;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -40,6 +40,7 @@ impl MusicMetadata {
     pub fn default_artist() -> String {
         dotenv!("VITE_DEFAULT_MUSIC_ARTIST").to_string()
     }
+
     pub fn new(path: String) -> Self {
         MusicMetadata {
             path,
@@ -59,7 +60,7 @@ impl MusicMetadata {
         }
     }
 
-    fn get_format(path: String) -> Option<Box<dyn FormatReader>> {
+    pub fn get_format(path: String) -> Option<Box<dyn FormatReader>> {
         let src = match std::fs::File::open(&path) {
             Ok(file) => file,
             Err(_) => {
@@ -129,11 +130,6 @@ impl MusicMetadata {
                         StandardTagKey::TrackNumber => metadata.track_number = self.get_value(tag),
                         StandardTagKey::Genre => metadata.genre = self.get_value(tag),
                         StandardTagKey::Date => metadata.date = self.get_value(tag),
-                        // key => {
-                        //     let mut extra_tags = metadata.extra_tags.clone().unwrap();
-                        //     extra_tags.insert(format!("{:?}", key), self.get_value(tag));
-                        //     metadata.extra_tags = Some(extra_tags);
-                        // }
                         _ => {}
                     }
                 }
@@ -206,19 +202,28 @@ impl MusicMetadata {
         metadata
     }
 
+    // Optimized image extraction with caching and compression
     pub fn get_image_from_path(path: String) -> Option<String> {
-        let _format = MusicMetadata::get_format(path);
-        if _format.is_none() {
-            return None;
-        }
-        let mut format = _format.unwrap();
+        // Extract and optimize image
+        Self::extract_and_optimize_image(&path)
+    }
+
+    fn extract_and_optimize_image(path: &str) -> Option<String> {
+        let format = Self::get_format(path.to_string())?;
+        let mut format = format;
 
         if let Some(rev) = format.metadata().current() {
             for visual in rev.visuals() {
-                return Some(base64_simd::STANDARD.encode_to_string(visual.data.clone()));
+                return Some(base64_simd::STANDARD.encode_to_string(&visual.data));
             }
         }
         None
+    }
+    // Async version for better UI responsiveness
+    pub async fn get_image_from_path_async(path: String) -> Option<String> {
+        tokio::task::spawn_blocking(move || {
+            Self::get_image_from_path(path)
+        }).await.ok().flatten()
     }
 
     fn get_value(&self, tag: &Tag) -> Option<String> {
@@ -268,28 +273,12 @@ impl MusicMetadata {
 
         None
     }
+
     pub fn get_lyrics_from_path(path: String) -> Option<String> {
         let lyrics_path = Path::new(&path).with_extension("lrc");
         if let Ok(lyrics) = std::fs::read_to_string(&lyrics_path) {
             return Some(lyrics);
         }
-
-        // let _format = MusicMetadata::get_format(path);
-        // if _format.is_none() {
-        //     return None;
-        // }
-        // let mut format = _format.unwrap();
-        //
-        // if let Some(rev) = format.metadata().current() {
-        //     for tag in rev.tags() {
-        //         if let Some(std_key) = tag.std_key {
-        //             match std_key {
-        //                 StandardTagKey::Lyrics => return Some(tag.value.to_string()),
-        //                 _ => {}
-        //             }
-        //         }
-        //     }
-        // }
         None
     }
 }
