@@ -3,7 +3,7 @@ import {type FolderData, type MusicData, MusicListType} from "./types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import { isDesktop } from "$lib/platform";
+import { isDesktop, isLinux } from "$lib/platform";
 import FolderController from "$lib/controllers/FolderController";
 import {musicListType} from "$lib/stores/music";
 import {folderCurrent} from "$lib/stores/folder";
@@ -89,7 +89,7 @@ async function selectFolder(){
 		{:then image}
 			{#if image}
 				<img
-					class="w-12 h-12 md:w-14 md:h-14 relative rounded {isDesktop() && 'animate__animated animate__fadeIn'}"
+					class="w-12 h-12 md:w-14 md:h-14 relative rounded {isDesktop() && !isLinux() && 'animate__animated animate__fadeIn'}"
 					src={image}
 					alt="Album"
 				/>

@@ -10,7 +10,7 @@ interface Props {
 const props = $props();
 let { children, type }: Props = props;
 
-import { isMobile, isWindows } from "$lib/platform";
+import { isLinux, isMobile, isWindows } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
@@ -140,7 +140,7 @@ onMount(() => {
 		glassEffectScale={50}
 		class="
 			h-full p-3 !rounded-md pointer-events-auto
-			animate__animated animate__faster
+			animate__animated
 			{isShowing
 				? (type === SidebarType.Right
 					? 'animate__slideInRight'
@@ -152,6 +152,7 @@ onMount(() => {
 		wrapperClass="!rounded-md {props.class}"
 		style="
 			width: {sidebarWidth - 24}px;
+			animation-duration: {isLinux() ? '350ms' : '500ms'};
 		"
 	>
 		{@render children?.()}
