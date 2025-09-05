@@ -31,7 +31,7 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
     " {...props.events}>
     <div class="liquidGlass-effect {isAndroid() ? 'backdrop-blur-[8px]' : 'backdrop-blur-md'}
         {enableBlur ? 'liquidGlass-blur' : ''} {props.wrapperClass}"
-        style="--glass-effect-id: url(#{glassEffectId}); {props.wrapperStyle}"></div>
+        style="filter: url(#{glassEffectId}); {props.wrapperStyle}"></div>
     <div class="liquidGlass-tint {props.wrapperClass}" style="{props.wrapperStyle}"></div>
     {#if showShine}
         <div class="liquidGlass-shine {props.wrapperClass}" style="{props.wrapperStyle}"></div>
@@ -130,7 +130,6 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
     z-index: 0;
     inset: 0;
 
-    filter: var(--glass-effect-id);
     overflow: hidden;
     isolation: isolate;
   }
