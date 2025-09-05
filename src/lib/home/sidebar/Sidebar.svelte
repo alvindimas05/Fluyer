@@ -20,6 +20,7 @@ import { onMount } from "svelte";
 import Glass from "$lib/glass/Glass.svelte";
 import {playerBarHeight} from "$lib/stores/playerbar";
 import {filterBarHeight} from "$lib/stores/filterbar";
+    import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
@@ -53,10 +54,10 @@ let isMouseInsideArea = $state(false);
 let isShowing = $state(false);
 let isMounted = $state(false);
 
-function onMouseMove(e: MouseEvent) {
+async function onMouseMove(e: MouseEvent) {
 	if (
-		((type === SidebarType.Right && e.clientX > window.innerWidth - 20) ||
-			(type === SidebarType.Left && e.clientX < 20)) &&
+		((type === SidebarType.Right && e.clientX > window.innerWidth - (isWindows() || !(await getCurrentWindow().isMaximized()) ? 12 : 4)) ||
+			(type === SidebarType.Left && e.clientX < (await getCurrentWindow().isMaximized() ? 4 : 12))) &&
 		e.clientY <= window.innerHeight - 8 * 16 &&
 		!isMouseInsideArea
 	) {
