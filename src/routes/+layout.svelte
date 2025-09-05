@@ -4,7 +4,7 @@ import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
 import "../app.scss";
 import "toastify-js/src/toastify.css";
 import TitleBar from "$lib/titlebar/TitleBar.svelte";
-import { isDesktop, isMobile, isWindows } from "$lib/platform";
+import { isDesktop, isLinux, isMobile, isWindows } from "$lib/platform";
 import MusicController from "$lib/controllers/MusicController";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
@@ -23,7 +23,7 @@ import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
 import { mobileShowSwipeGuide } from "$lib/stores/mobile";
 import FolderController from "$lib/controllers/FolderController";
 
-if (isWindows()) {
+if (isWindows() || isLinux()) {
 	import("$lib/scss/rounded-windows.scss");
 }
 
