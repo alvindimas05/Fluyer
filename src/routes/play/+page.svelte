@@ -205,7 +205,10 @@ function scrollToSelectedLyric() {
         ${lyrics.length > 1 ? "justify-end" : "justify-center"}`}
     >
         <div
-            class={`w-full md:w-[80%] lg:w-[75%] xl:w-[65%] text-white ${lyrics.length > 0 && "ms-auto"}`}
+            class="w-full text-white {lyrics.length > 0 && 'ms-auto'}
+            md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
+            md-hdpi:w-[80%] lg-hdpi:w-[70%]
+            md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
         >
             {#await albumImage}
                 <div class="w-full aspect-square"></div>
@@ -219,9 +222,13 @@ function scrollToSelectedLyric() {
         </div>
     </div>
     <div
-        class={`md:row-[2] md:col-[1] order-last md:order-2 ${isMobile() ? "px-5" : "px-4"} pb-5 pt-2 ${isMobile() && "mb-5"} md:p-0 md:pb-0 flex ${lyrics.length > 0 ? "justify-end" : "justify-center"}`}
+        class="md:row-[2] md:col-[1] order-last md:order-2 {isMobile() ? 'px-5' : 'px-4'} pb-5 pt-2 {isMobile() && 'mb-5'}
+        md:p-0 md:pb-0 flex {lyrics.length > 0 ? 'justify-end' : 'justify-center'}"
     >
-        <Glass class="w-full md:w-[80%] lg:w-[75%] xl:w-[65%] h-fit md:mt-4 !rounded-2xl"
+        <Glass class="w-full h-fit md:mt-4 !rounded-2xl
+            md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
+            md-hdpi:w-[80%] lg-hdpi:w-[70%]
+            md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
             wrapperClass="!rounded-2xl"
             padding="1.2rem"
             paddingHover="1.5rem">
@@ -398,9 +405,10 @@ function scrollToSelectedLyric() {
             <div class="flex">
                 <div
                     id="lyrics"
-                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold
-                    text-[1.15rem] sm:text-[1.25rem] md:text-[1.4rem] lg:text-[1.7rem]
-                    md-hdpi:text-[1.15rem] lg-hdpi:text-[1.4rem]"
+                    class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.15rem]
+                    sm-mdpi:text-[1.25rem] md-mdpi:text-[1.4rem] lg-mdpi:text-[1.7rem]
+                    md-hdpi:text-[1.3rem] lg-hdpi:text-[1.6rem]
+                    md-xhdpi:text-[1.2rem] lg-xhdpi:text-[1.5rem]"
                 >
                     {#each lyrics as lyric, i}
                         <div
@@ -408,9 +416,11 @@ function scrollToSelectedLyric() {
                                 ? "selected-lyric"
                                 : ""}
                             class={selectedLyricIndex === i
-                                ? `text-[1.25rem] sm:text-[1.35rem] md:text-[1.55rem] lg:text-[1.85rem]
-                                  md-hdpi:text-[1.25rem] lg-hdpi:text-[1.55rem]
-                                  py-5 md:py-7 lg:py-10`
+                                ? `text-[1.25rem]
+                                    sm-mdpi:text-[1.35rem] md-mdpi:text-[1.55rem] lg-mdpi:text-[1.85rem]
+                                    md-hdpi:text-[1.4rem] lg-hdpi:text-[1.75rem]
+                                    md-xhdpi:text-[1.3rem] lg-xhdpi:text-[1.65rem]
+                                    py-5 md:py-7 lg:py-10`
                                 : "opacity-50 py-5 md:py-7 lg:py-10"}
                         >
                             {#if lyric.value.length > 0}
