@@ -75,15 +75,14 @@ async function setAudio(music: MusicData | null = null) {
 	if (!MusicController.isPlaying()) return;
 
 	try {
-        const now = performance.now();
 		const buffer = await MusicController.getBuffer(
 			music ? music.path : MusicController.currentMusic().path,
 		);
 		if (buffer === null) return;
 
-        console.log("Audio request time: ", performance.now() - now, "ms");
-
+        const now = performance.now();
 		await AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
+        console.log("AudioAnalyser.makeAudio took", performance.now() - now, "ms");
 	} catch (e) {}
 }
 
@@ -100,7 +99,9 @@ let unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async (index) => {
     visualizers[currentVisualizerIndex].executeOnNewSong();
     setAudio(MusicController.getMusicByIndex(index));
 });
-onMount(start);
+onMount(() => {
+    start();
+});
 
 onDestroy(() => {
 	if (unlistenMusicCurrentIndex) unlistenMusicCurrentIndex();

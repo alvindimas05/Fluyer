@@ -135,6 +135,16 @@ pub fn music_get_buffer(path: String) -> Option<Vec<u8>> {
         .resolve(ffmpeg_binary, BaseDirectory::Resource)
         .unwrap();
 
+    #[cfg(any(target_os = "linux", target_os = "macos"))]{
+        // Make sure ffmpeg is executable
+        use std::os::unix::fs::PermissionsExt;
+        if let Ok(metadata) = std::fs::metadata(&ffmpeg_path) {
+            let mut permissions = metadata.permissions();
+            permissions.set_mode(0o755); // rwxr-xr-x
+            let _ = std::fs::set_permissions(&ffmpeg_path, permissions);
+        }
+    }
+
     let tmp_dir = std::env::temp_dir();
     let unique_id = SystemTime::now()
         .duration_since(UNIX_EPOCH)

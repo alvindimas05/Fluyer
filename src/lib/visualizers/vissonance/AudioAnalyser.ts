@@ -1,4 +1,5 @@
 import MusicController from "$lib/controllers/MusicController";
+import sleep from "sleep-promise";
 
 interface AnalyserInterface {
 	audioContext: AudioContext;
@@ -49,7 +50,7 @@ const AudioAnalyser = {
 			AudioAnalyser.data.audioContext.destination,
 		);
 
-			let duration = await MusicController.mpvMusicCurrentDuration();
+		let duration = await MusicController.mpvMusicCurrentDuration();
 		if (duration === null) return;
 		duration = duration / 1000;
 
