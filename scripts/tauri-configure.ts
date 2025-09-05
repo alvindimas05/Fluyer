@@ -47,5 +47,4 @@ let _env = {
 };
 if (os.platform() !== "win32")
 	_env["PATH"] = `${process.env.PATH}:${mpvSource}`;
-if (os.platform() === "linux") _env["WEBKIT_DISABLE_DMABUF_RENDERER"] = "1";
 export const env = _env;

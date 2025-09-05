@@ -17,8 +17,6 @@ import { swipeMinimumTop } from "$lib/stores";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import { sidebarShowingType } from "$lib/stores/sidebar";
 import { onMount } from "svelte";
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import {MusicConfig} from "$lib/controllers/MusicController";
 import Glass from "$lib/glass/Glass.svelte";
 import {playerBarHeight} from "$lib/stores/playerbar";
 import {filterBarHeight} from "$lib/stores/filterbar";

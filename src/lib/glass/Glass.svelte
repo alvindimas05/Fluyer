@@ -29,10 +29,9 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
         --padding-hover: {props.paddingHover || '0.8rem'};
         {props.style}
     " {...props.events}>
-    <div class="liquidGlass-effect {enableBlur ? 'liquidGlass-blur' : ''} {props.wrapperClass}"
-        style="--blur: {isAndroid() ? '8px' : '12px'};
-        --glass-effect-id: url(#{glassEffectId});
-        {props.wrapperStyle}"></div>
+    <div class="liquidGlass-effect {isAndroid() ? 'backdrop-blur-[8px]' : 'backdrop-blur-md'}
+        {enableBlur ? 'liquidGlass-blur' : ''} {props.wrapperClass}"
+        style="--glass-effect-id: url(#{glassEffectId}); {props.wrapperStyle}"></div>
     <div class="liquidGlass-tint {props.wrapperClass}" style="{props.wrapperStyle}"></div>
     {#if showShine}
         <div class="liquidGlass-shine {props.wrapperClass}" style="{props.wrapperStyle}"></div>
@@ -121,9 +120,10 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
   }
 
-  .liquidGlass-blur {
-    backdrop-filter: blur(var(--blur));
-  }
+  // .liquidGlass-blur {
+  //   backdrop-filter: blur(var(--blur));
+  //   -webkit-backdrop-filter: blur(var(--blur));
+  // }
 
   .liquidGlass-effect {
     position: absolute;
