@@ -23,14 +23,14 @@ let glassEffectId = `glass-distortion-${componentId}`;
 let { children, showShine = true, enableHoverAnimation = true, enableBlur = false, glassEffectScale = 0 } = props;
 </script>
 
-<div class="liquidGlass-wrapper {enableHoverAnimation ? 'hover-animation' : ''} {props.class}"
+<div class="liquidGlass-wrapper {enableHoverAnimation && !isAndroid() ? 'hover-animation' : ''} {props.class}"
     style="
         --padding: {props.padding || '0.6rem'};
         --padding-hover: {props.paddingHover || '0.8rem'};
         {props.style}
     " {...props.events}>
     <div class="liquidGlass-effect
-        {enableBlur ? (isAndroid() ? 'backdrop-blur-[8px]' : 'backdrop-blur-md') : ''}
+        {enableBlur ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
         {props.wrapperClass}"
         style="filter: url(#{glassEffectId}); {props.wrapperStyle}"></div>
     <div class="liquidGlass-tint {props.wrapperClass}" style="{props.wrapperStyle}"></div>

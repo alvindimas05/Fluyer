@@ -195,8 +195,8 @@ onDestroy(() => {
 <svelte:window onresize={updatePlayerBarHeight} />
 <svelte:document onkeydown={onKeyDown} />
 
-<div class="absolute bottom-0 w-full p-3 animate__animated animate__slideInUp"
-    style="margin-bottom: {$mobileNavigationBarHeight}px;"
+<div class="absolute bottom-0 w-full px-3 pt-3 animate__animated animate__slideInUp"
+    style="padding-bottom: {$mobileNavigationBarHeight > 12 ? $mobileNavigationBarHeight : 12}px;"
     bind:this={element}>
     <div class="w-fit absolute top-[-1.5rem] border rounded-lg px-2 py-1 shadow-xl text-sm backdrop-blur-xl"
     style="
