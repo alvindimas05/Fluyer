@@ -33,7 +33,7 @@ const MobileController = {
 	},
 	listenPageChange: () => {
 		page.subscribe(async ($page) => {
-			const visible = $page.url.pathname !== PageRoutes.PLAY;
+			const visible = ![PageRoutes.PLAY, PageRoutes.VISUALIZER].includes($page.url.pathname);
 			await MobileController.setNavigationBarVisibility(visible);
 		});
 	},
