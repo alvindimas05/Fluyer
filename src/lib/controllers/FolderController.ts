@@ -6,7 +6,7 @@ import {get} from "svelte/store";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import {type FolderData, type MusicData, MusicSize} from "$lib/home/music/types";
 import {musicList} from "$lib/stores/music";
-import MusicController from "$lib/controllers/MusicController";
+import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
 import { isWindows } from "$lib/platform";
 
 const pathSeparator = isWindows() ? '\\' : '/';
@@ -56,7 +56,7 @@ const FolderController = {
         const imageSize = size ? size.toString() : null;
         const base64 =  await invoke<string>(CommandRoutes.FOLDER_GET_IMAGE, { path, size: imageSize });
         if (base64) return UtilsController.withBase64(base64);
-        return null;
+        return MusicConfig.defaultAlbumImage;
     },
     getMusicListFromFolder: (folder: FolderData | null) => {
         if (!folder) return [];

@@ -22,6 +22,8 @@ import { musicList } from "$lib/stores/music";
 import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
 import { mobileShowSwipeGuide } from "$lib/stores/mobile";
 import FolderController from "$lib/controllers/FolderController";
+import DeveloperDebugOverlay from "$lib/developer/DeveloperDebugOverlay.svelte";
+import {settingDeveloperMode} from "$lib/stores/setting";
 
 if (isWindows() || isLinux()) {
 	import("$lib/scss/rounded-windows.scss");
@@ -76,3 +78,6 @@ onMount(initialize);
         <TitleBar />
     {/if}
 </div>
+{#if $settingDeveloperMode}
+    <DeveloperDebugOverlay />
+{/if}

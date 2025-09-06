@@ -16,9 +16,11 @@
 let { music, folder }: Props = $props();
 
 let albumImage = $derived.by(async () => {
-	if(folder) return await FolderController.getImageFromPath(folder.path, MusicSize.Music);
-
-	return await MusicController.getAlbumImageFromMusic(music, MusicSize.Music);
+	// const now = performance.now();
+	const image = folder ? await FolderController.getImageFromPath(folder.path, MusicSize.Music)
+		: await MusicController.getAlbumImageFromMusic(music, null);
+	// console.log('Music image loaded in', Math.round(performance.now() - now), 'ms for music:', music.title);
+	return image;
 });
 let titleLabel = $derived.by(() => {
 	if(folder){

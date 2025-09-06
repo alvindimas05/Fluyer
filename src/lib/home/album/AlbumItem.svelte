@@ -1,12 +1,8 @@
 <script lang="ts">
-import { onMount } from "svelte";
 import {type AlbumData, type MusicData, MusicSize} from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import CoverArt, { CoverArtStatus } from "$lib/handlers/coverart";
-import { coverArtCaches } from "$lib/stores/coverart";
 import { filterAlbum, filterSearch } from "$lib/stores/filter";
 import FilterController from "$lib/controllers/FilterController";
-import { musicList as storeMusicList } from "$lib/stores/music";
 import { isDesktop, isLinux } from "$lib/platform";
 
 interface Props {
@@ -20,7 +16,12 @@ let isValidFilterAlbum = $derived(
 	$filterAlbum && music.album && $filterAlbum.name === music.album,
 );
 
-let albumImage = $derived(MusicController.getAlbumImageFromMusic(music, MusicSize.Album));
+let albumImage = $derived.by(async () => {
+    // const now = performance.now();
+    const image = await MusicController.getAlbumImageFromMusic(music, null);
+    // console.log('Album image loaded in', Math.round(performance.now() - now), 'ms for album:', music.album);
+    return image;
+});
 
 async function setFilterAlbum() {
 	FilterController.setFilterAlbum({
