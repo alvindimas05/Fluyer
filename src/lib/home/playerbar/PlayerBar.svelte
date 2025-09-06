@@ -123,7 +123,8 @@ function updateTooltipTouch(
 	},
 ) {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
     tooltipPosition = x - tooltip.offsetWidth / 2;
     if (tooltipPosition < tooltipMargin) tooltipPosition = tooltipMargin;
     else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth - tooltipMargin)
@@ -136,7 +137,6 @@ function updateTooltipTouch(
 
 	touchLastX = x;
 }
-
 function hideTooltip() {
 	tooltipVisible = false;
 }
