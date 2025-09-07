@@ -14,4 +14,3 @@ export let musicPlaylist = writable<MusicData[]>([]);
 export let musicRepeatMode = writable<RepeatMode>(RepeatMode.None);
 export let musicReset = writable(false);
 export let musicListType = writable(MusicListType.All);
-export let musicListFolder = writable<null | string>(null);

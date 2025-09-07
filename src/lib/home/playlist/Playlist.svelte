@@ -90,8 +90,6 @@ onMount(() => {
 	initMuuri();
 
 	unlistenMusicPlaylist = musicPlaylist.subscribe((playlist) => {
-		if (playlist.length < 1) return;
-
 		const removedIndices = $musicReset
 			? oldPlaylist.map((_, index) => index)
 			: oldPlaylist
