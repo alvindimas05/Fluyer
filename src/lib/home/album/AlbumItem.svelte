@@ -26,7 +26,7 @@ let albumImage = $derived.by(async () => {
 async function setFilterAlbum() {
 	FilterController.setFilterAlbum({
 		name: music.album,
-		artist: music.albumArtist ?? MusicController.getFullArtistFromMusic(music),
+		artist: music.albumArtist ?? music.artist,
 		year: MusicController.getYearFromDate(music.date),
 		duration: MusicController.parseMilisecondsIntoText(
 			musicList.map((m) => m.duration).reduce((a, b) => a + b, 0),
@@ -61,7 +61,7 @@ async function setFilterAlbum() {
         {music.album}
     </p>
     <p class="text-[15px] md:text-base text-opacity-background-80 whitespace-nowrap overflow-hidden animate-scroll-overflow-text">
-        {music.albumArtist ?? MusicController.getFullArtistFromMusic(music)}
+        {music.albumArtist ?? music.artist}
     </p>
 </div>
 

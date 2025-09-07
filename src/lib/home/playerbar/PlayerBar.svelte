@@ -95,7 +95,7 @@ function refresh() {
 
 		oldMusic = music;
 		title = music.title!;
-		artist = MusicController.getFullArtistFromMusic(music);
+		artist = music.artist;
 	}, 0);
 }
 

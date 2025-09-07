@@ -366,13 +366,9 @@ const MusicController = {
 		let isPlaylistEmpty = !MusicController.musicPlaylist().length;
 		await MusicController.addSinkMusics(
 			musicDataList.map((music) => {
-				const { path, title } = music;
+				const { path, title, artist } = music;
 				if (isDesktop()) return { path } as MusicData;
-				return {
-					path,
-					title,
-					artist: MusicController.getFullArtistFromMusic(music),
-				} as MusicData;
+				return { path, title, artist } as MusicData;
 			}),
 		);
 

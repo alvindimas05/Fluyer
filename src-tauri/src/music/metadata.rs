@@ -41,6 +41,10 @@ impl MusicMetadata {
         dotenv!("VITE_DEFAULT_MUSIC_ARTIST").to_string()
     }
 
+    pub fn artist_separator() -> String {
+        "||".to_string()
+    }
+
     pub fn new(path: String) -> Self {
         MusicMetadata {
             path,
@@ -117,8 +121,9 @@ impl MusicMetadata {
                                 && metadata.artist.clone().unwrap() != self.get_value(tag).unwrap()
                             {
                                 metadata.artist = Some(format!(
-                                    "{}||{}",
+                                    "{}{}{}",
                                     metadata.artist.unwrap(),
+                                    MusicMetadata::artist_separator(),
                                     self.get_value(tag).unwrap()
                                 ));
                             } else {

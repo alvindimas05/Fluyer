@@ -268,7 +268,7 @@ fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> 
             path: path.clone(),
             duration: row.get::<_, Option<i64>>(1)?.map(|v| v as u128),
             title: row.get(2)?,
-            artist: row.get(3)?,
+            artist: row.get::<_, Option<String>>(3)?.map(|v| v.replace(&MusicMetadata::artist_separator(), " ")),
             album: row.get(4)?,
             album_artist: row.get(5)?,
             track_number: row.get(6)?,
