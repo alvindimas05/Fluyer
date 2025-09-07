@@ -207,7 +207,7 @@ function scrollToSelectedLyric() {
         <div
             class="w-full text-white {lyrics.length > 0 && 'ms-auto'}
             md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
-            md-hdpi:w-[80%] lg-hdpi:w-[70%]
+            md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%]
             md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
         >
             {#await albumImage}
@@ -227,7 +227,7 @@ function scrollToSelectedLyric() {
     >
         <Glass class="w-full h-fit md:mt-4 !rounded-2xl
             md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
-            md-hdpi:w-[80%] lg-hdpi:w-[70%]
+            md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%]
             md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
             wrapperClass="!rounded-2xl"
             padding="1.2rem"
@@ -407,8 +407,8 @@ function scrollToSelectedLyric() {
                     id="lyrics"
                     class="w-full md:w-[55vw] h-full md:my-[40vh] font-bold text-[1.15rem]
                     sm-mdpi:text-[1.25rem] md-mdpi:text-[1.4rem] lg-mdpi:text-[1.7rem]
-                    md-hdpi:text-[1.3rem] lg-hdpi:text-[1.6rem]
-                    md-xhdpi:text-[1.2rem] lg-xhdpi:text-[1.5rem]"
+                    md-hdpi:text-[1.3rem] lg-hdpi:text-[1.45rem]
+                    md-xhdpi:text-[1.2rem] lg-xhdpi:text-[1.4rem]"
                 >
                     {#each lyrics as lyric, i}
                         <div
@@ -418,8 +418,8 @@ function scrollToSelectedLyric() {
                             class={selectedLyricIndex === i
                                 ? `text-[1.25rem]
                                     sm-mdpi:text-[1.35rem] md-mdpi:text-[1.55rem] lg-mdpi:text-[1.85rem]
-                                    md-hdpi:text-[1.4rem] lg-hdpi:text-[1.75rem]
-                                    md-xhdpi:text-[1.3rem] lg-xhdpi:text-[1.65rem]
+                                    md-hdpi:text-[1.4rem] lg-hdpi:text-[1.6rem]
+                                    md-xhdpi:text-[1.3rem] lg-xhdpi:text-[1.55rem]
                                     py-5 md:py-7 lg:py-10`
                                 : "opacity-50 py-5 md:py-7 lg:py-10"}
                         >
