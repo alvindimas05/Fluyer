@@ -10,6 +10,7 @@ import {MusicListType} from "$lib/home/music/types";
 import {folderCurrent} from "$lib/stores/folder";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import Glass from "$lib/glass/Glass.svelte";
+import ToastController from "$lib/controllers/ToastController";
 
 let album = $derived($filterAlbum);
 let showBackButton = $derived.by(async () => {
@@ -63,7 +64,11 @@ async function addMusicListAndPlay() {
 }
 
 async function addMusicList() {
-	MusicController.addMusicList(musicList);
+	await MusicController.addMusicList(musicList);
+    const label = $musicListType === MusicListType.Folder && $folderCurrent
+        ? $folderCurrent.path
+        : (album ? `${album.name} ${MusicConfig.separatorAlbum} ${album.artist}` : null);
+    ToastController.info(`Added music list to queue: ${label}`);
 }
 
 async function playShuffle() {

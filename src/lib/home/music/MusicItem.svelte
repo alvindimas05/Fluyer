@@ -7,6 +7,7 @@
 	import FolderController from "$lib/controllers/FolderController";
 	import {musicListType} from "$lib/stores/music";
 	import {folderCurrent} from "$lib/stores/folder";
+	import ToastController from "$lib/controllers/ToastController";
 
 	interface Props {
 	music: MusicData;
@@ -77,6 +78,7 @@ async function addMusic() {
 	} else {
 		await MusicController.resetAndAddMusicList(FolderController.getMusicListFromFolder(folder!!));
 	}
+	ToastController.info(`Added music to queue: ${music.title ?? music.filename ?? MusicConfig.defaultTitle} ${MusicConfig.separatorAlbum} ${music.artist ?? MusicConfig.defaultArtist}`);
 }
 
 async function selectFolder(){
