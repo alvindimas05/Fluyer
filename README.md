@@ -23,8 +23,8 @@
 ---
 
 <p align="center">
-  <img src="assets/preview1.png" alt="Fluyer Preview 1" width="45%"/>
-  <img src="assets/preview2.png" alt="Fluyer Preview 2" width="45%"/>
+  <img src="assets/preview1.png" alt="Fluyer Preview 1" width="49%"/>
+  <img src="assets/preview2.png" alt="Fluyer Preview 2" width="49%"/>
 </p>
 
 ---
