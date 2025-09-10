@@ -148,3 +148,15 @@ pub struct NavigationBarVisibility {
 pub struct WatcherPickFolder {
     pub value: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct VisualizerGetBufferArgs {
+    pub args: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct VisualizerGetBuffer {
+    pub value: bool,
+}

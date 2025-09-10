@@ -1,6 +1,3 @@
-use std::fs::File;
-use std::io::BufWriter;
-use std::time::{SystemTime, UNIX_EPOCH};
 use fast_image_resize::{IntoImageView, ResizeAlg, ResizeOptions, Resizer};
 use fast_image_resize::images::Image;
 use image::{ImageEncoder, ImageFormat, ExtendedColorType};

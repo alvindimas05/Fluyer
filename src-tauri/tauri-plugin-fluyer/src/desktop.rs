@@ -91,6 +91,10 @@ impl<R: Runtime> Fluyer<R> {
     ) -> crate::Result<WatchPickFolderResponse> {
         Ok(WatchPickFolderResponse { value: false })
     }
+    
+    pub fn visualizer_get_buffer(&self, _args: String) -> crate::Result<VisualizerGetBuffer> {
+        Ok(VisualizerGetBuffer { value: false })
+    }
 }
 
 impl<R: Runtime> Fluyer<R> {}

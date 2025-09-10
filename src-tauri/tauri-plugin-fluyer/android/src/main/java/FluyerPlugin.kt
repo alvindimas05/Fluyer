@@ -41,6 +41,11 @@ class NavigationBarVisibilityArgs {
     var value by Delegates.notNull<Boolean>()
 }
 
+@InvokeArg
+class VisualizerGetBufferArgs {
+    lateinit var args: String
+}
+
 private const val ALIAS_READ_AUDIO: String = "audio"
 private const val ALIAS_EXTERNAL_STORAGE: String = "storage"
 const val LOG_TAG = "Fluyer"
@@ -203,5 +208,19 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
             }
         }
         pickFolderChannel!!.send(JSObject().put("value", null))
+    }
+    
+    @Command
+    fun visualizerGetBuffer(invoke: Invoke): Boolean {
+        try {
+            val args = invoke.parseArgs(VisualizerGetBufferArgs::class.java)
+            val result = FluyerVisualizer.getBuffer(args.args)
+            invoke.resolve(JSObject().put("value", result))
+            return result
+        } catch (err: Exception){
+            Log.e(LOG_TAG, err.toString())
+            invoke.resolve(JSObject().put("value", false))
+            return false
+        }
     }
 }

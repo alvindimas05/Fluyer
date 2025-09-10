@@ -598,8 +598,8 @@ const MusicController = {
 		await MusicController.setEqualizer(values);
 	},
 
-	getBuffer: async (path: string) => {
-		return await invoke<ArrayBuffer | null>(CommandRoutes.MUSIC_GET_BUFFER, {
+	getVisualizerBuffer: async (path: string) => {
+		return await invoke<ArrayBuffer | null>(CommandRoutes.MUSIC_GET_VISUALIZER_BUFFER, {
 			path,
 		});
 	},

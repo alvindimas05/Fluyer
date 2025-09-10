@@ -75,7 +75,7 @@ async function setAudio(music: MusicData | null = null) {
 	if (!MusicController.isPlaying()) return;
 
 	try {
-		const buffer = await MusicController.getBuffer(
+		const buffer = await MusicController.getVisualizerBuffer(
 			music ? music.path : MusicController.currentMusic().path,
 		);
 		if (buffer === null) return;

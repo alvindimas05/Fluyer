@@ -168,6 +168,12 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("requestPickFolder", WatchPickFolderPayload { channel })
             .map_err(Into::into)
     }
+    
+    pub fn visualizer_get_buffer(&self, args: String) -> crate::Result<VisualizerGetBuffer> {
+        self.0
+            .run_mobile_plugin("visualizerGetBuffer", VisualizerGetBufferArgs { args })
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]

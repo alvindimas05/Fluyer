@@ -57,6 +57,6 @@ class FluyerMain(private val activity: Activity) {
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val mainIntent = Intent.makeRestartActivityTask(intent!!.component)
         context.startActivity(mainIntent)
-        Runtime.getRuntime().exit(0);
+        Runtime.getRuntime().exit(0)
     }
 }

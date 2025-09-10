@@ -77,7 +77,7 @@ pub fn run() {
             commands::music::music_set_volume,
             commands::music::music_playlist_goto,
             commands::music::music_playlist_moveto,
-            commands::music::music_get_buffer,
+            commands::music::music_get_visualizer_buffer,
             #[cfg(desktop)]
             commands::music::music_request_directory,
             #[cfg(desktop)]

@@ -6,7 +6,7 @@ use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Emitter};
 #[cfg(desktop)]
 use tauri_plugin_dialog::DialogExt;
-
+use tauri_plugin_fluyer::FluyerExt;
 #[cfg(desktop)]
 use crate::store::GLOBAL_APP_STORE;
 
@@ -14,6 +14,10 @@ use crate::GLOBAL_APP_HANDLE;
 
 use crate::music::player::MusicPlayer;
 use crate::{logger, music::metadata::MusicMetadata, AppState};
+
+use std::path::PathBuf;
+use std::process::Command;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub static MUSIC_STORE_PATH_NAME: &str = "music-path";
 
@@ -111,18 +115,54 @@ pub async fn music_get_image(path: String, size: Option<String>) -> Option<Strin
 }
 
 #[tauri::command]
-pub async fn music_get_buffer(path: String) -> Option<Vec<u8>> {
+pub async fn music_get_visualizer_buffer(path: String) -> Option<Vec<u8>> {
     tokio::task::spawn_blocking(move || {
         if cfg!(mobile) {
-            // FIXME: Mobile platforms does not support ffmpeg conversion
+            // FIXME: On mobile, just return the original file for now
             return std::fs::read(path).ok();
         }
 
-        use std::path::PathBuf;
-        use std::process::Command;
-        use std::time::{SystemTime, UNIX_EPOCH};
+        let tmp_dir = std::env::temp_dir();
+        let unique_id = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis();
+        let tmp_file: PathBuf = tmp_dir.join(format!("converted_{}.mp3", unique_id));
 
-        // // Get the bundled ffmpeg path
+        #[cfg(desktop)]
+        let music_path = &path;
+        #[cfg(target_os = "android")]
+        let music_path = format!("\"{}\"", &path);
+
+        let mut args = vec![];
+        #[cfg(desktop)]
+        args.push("-y"); // overwrite
+        args.extend([
+            "-i", music_path.as_str(), // input
+            "-ac", "1", // mono
+            "-ar", "44100", // fixed sample rate
+            "-b:a", "192k", // fixed bitrate
+            "-q:a", "5", // ~45-55 kbps
+            "-c:a", "libmp3lame", // mp3 encoder
+            "-map", "0:a", // only audio
+            tmp_file.to_str().unwrap(),
+        ]);
+
+
+        if cfg!(mobile) {
+            let result = GLOBAL_APP_HANDLE.get().unwrap().fluyer().visualizer_get_buffer(args.join(" "));
+            if result.is_err() {
+                logger::error!(
+                    "Failed to convert audio to mp3: {}",
+                    result.unwrap_err()
+                );
+                return std::fs::read(path).ok();
+            }
+
+            return std::fs::read(tmp_file).ok();
+        }
+
+        // Get the bundled ffmpeg path
         let ffmpeg_binary = if cfg!(target_os = "windows") {
             "libs/ffmpeg/bin/ffmpeg.exe"
         } else {
@@ -145,32 +185,6 @@ pub async fn music_get_buffer(path: String) -> Option<Vec<u8>> {
                 let _ = std::fs::set_permissions(&ffmpeg_path, permissions);
             }
         }
-
-        let tmp_dir = std::env::temp_dir();
-        let unique_id = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis();
-        let tmp_file: PathBuf = tmp_dir.join(format!("converted_{}.mp3", unique_id));
-
-        let args = [
-            "-y", // overwrite
-            "-i",
-            &path, // input
-            "-ac",
-            "1", // mono
-            "-ar",
-            "44100", // fixed sample rate
-            "-b:a",
-            "192k", // fixed bitrate
-            "-q:a",
-            "5", // ~45–55 kbps
-            "-c:a",
-            "libmp3lame", // MP3 encoder
-            "-map",
-            "0:a", // only audio
-            tmp_file.to_str().unwrap(),
-        ];
 
         let ffmpeg_status = {
             #[cfg(windows)]
