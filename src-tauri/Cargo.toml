@@ -20,7 +20,7 @@ tauri-build = { version = "2.0.3", features = [] }
 [dependencies]
 tauri = { version = "2.8.5", features = [] }
 serde = { version = "1", features = ["derive"] }
-symphonia = { version = "0.5.4", features = ["all"] }
+symphonia = { version = "0.5.4", features = ["all", "opt-simd"] }
 log = "0.4.22"
 walkdir = "2.5.0"
 tauri-plugin-store = "2"
