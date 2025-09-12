@@ -1,5 +1,6 @@
 <script lang="ts">
 import {isAndroid} from "$lib/platform";
+import * as uuid from 'uuid';
 
 interface Props {
     children?: import("svelte").Snippet;
@@ -17,7 +18,7 @@ interface Props {
     events?: any;
 }
 
-const componentId = crypto.randomUUID();
+const componentId = uuid.v4();
 let props: Props = $props();
 let glassEffectId = `glass-distortion-${componentId}`;
 let { children, showShine = true, enableHoverAnimation = true, enableBlur = false, glassEffectScale = 0 } = props;
