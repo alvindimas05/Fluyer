@@ -1,5 +1,5 @@
 <script lang="ts">
-import {isAndroid} from "$lib/platform";
+import {isAndroid, isMacos, isWindows} from "$lib/platform";
 import * as uuid from 'uuid';
 
 interface Props {
@@ -24,16 +24,22 @@ let glassEffectId = `glass-distortion-${componentId}`;
 let { children, showShine = true, enableHoverAnimation = true, enableBlur = false, glassEffectScale = 0 } = props;
 </script>
 
-<div class="liquidGlass-wrapper {enableHoverAnimation && !isAndroid() ? 'hover-animation' : ''} {props.class}"
+<div class="liquidGlass-wrapper
+    {enableBlur && !isWindows() ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
+    {enableHoverAnimation && !isAndroid() ? 'hover-animation' : ''}
+    {props.class}"
     style="
         --padding: {props.padding || '0.6rem'};
         --padding-hover: {props.paddingHover || '0.8rem'};
+        {isAndroid() ? '-webkit-transform: translate3d(0, 0, 0);' : ''}
         {props.style}
     " {...props.events}>
-    <div class="liquidGlass-effect
+    {#if isWindows()}
+      <div class="liquidGlass-effect
         {enableBlur ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
         {props.wrapperClass}"
         style="filter: url(#{glassEffectId}); {props.wrapperStyle}"></div>
+    {/if}
     <div class="liquidGlass-tint {props.wrapperClass}" style="{props.wrapperStyle}"></div>
     {#if showShine}
         <div class="liquidGlass-shine {props.wrapperClass}" style="{props.wrapperStyle}"></div>
@@ -43,7 +49,7 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
     </div>
 </div>
 
-{#if glassEffectScale > 0 && !isAndroid()}
+{#if isWindows() && glassEffectScale > 0}
     <svg style="display: none">
         <filter
                 id="{glassEffectId}"
