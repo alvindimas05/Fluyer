@@ -23,15 +23,15 @@ pub fn get_mpv_log_path() -> String {
 #[macro_export]
 macro_rules! debug {
     ($msg:expr) => {
-        if cfg!(debug_assertions) || !crate::platform::is_mobile() {
+        if cfg!(debug_assertions) || crate::platform::is_desktop() {
             log::debug!("{}", $msg);
         } else {
             println!("{}", $msg);
         }
     };
     ($msg:expr, $( $args:expr ),+ ) => {
-        if (cfg!(debug_assertions) || !crate::platform::is_mobile()) {
-            println!($msg, $( $args ),+);
+        if cfg!(debug_assertions) || crate::platform::is_desktop() {
+            log::debug!($msg, $( $args ),+);
         } else {
             println!($msg, $( $args ),+);
         }
@@ -41,17 +41,17 @@ macro_rules! debug {
 #[macro_export]
 macro_rules! error {
     ($msg:expr) => {
-        if cfg!(debug_assertions) || !crate::platform::is_mobile() {
+        if cfg!(debug_assertions) || crate::platform::is_desktop() {
             log::error!("{}", $msg);
         } else {
-            eprintln!("{}", $msg);
+            println!("{}", $msg);
         }
     };
     ($msg:expr, $( $args:expr ),+ ) => {
-        if cfg!(debug_assertions) || !crate::platform::is_mobile() {
+        if cfg!(debug_assertions) || crate::platform::is_desktop() {
             log::error!($msg, $( $args ),+);
         } else {
-            eprintln!($msg, $( $args ),+);
+            println!($msg, $( $args ),+);
         }
     };
 }

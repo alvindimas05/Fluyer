@@ -1,5 +1,9 @@
 use tauri_plugin_os::platform;
 
+pub fn is_desktop() -> bool {
+    platform() == "linux" || platform() == "macos" || platform() == "windows"
+}
+
 pub fn is_android() -> bool {
     platform() == "android"
 }

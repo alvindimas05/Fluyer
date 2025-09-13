@@ -44,6 +44,7 @@ if [[ "$os" == "android" ]]; then
     base64 -d <<< "$ANDROID_KEY_BASE64" > $RUNNER_TEMP/keystore.jks
     echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
     cd ../../../
+    bun android:configure
     bun tauri android build -v --target $ANDROID_ARCH
     # Note: It's not executed in the workflow for some reason. So we need to add it manually in the workflow.
     # mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_$APP_VERSION_$ANDROID_ARCH.apk

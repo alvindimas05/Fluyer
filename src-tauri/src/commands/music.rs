@@ -1,9 +1,9 @@
 use std::sync::Mutex;
-use tauri::{Manager, State};
+use tauri::{AppHandle, Manager, State};
 
 use tauri::path::BaseDirectory;
 #[cfg(desktop)]
-use tauri::{AppHandle, Emitter};
+use tauri::Emitter;
 #[cfg(desktop)]
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_fluyer::FluyerExt;
@@ -115,19 +115,19 @@ pub async fn music_get_image(path: String, size: Option<String>) -> Option<Strin
 }
 
 #[tauri::command]
-pub async fn music_get_visualizer_buffer(path: String) -> Option<Vec<u8>> {
+pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) -> Option<Vec<u8>> {
     tokio::task::spawn_blocking(move || {
-        if cfg!(mobile) {
-            // FIXME: On mobile, just return the original file for now
-            return std::fs::read(path).ok();
-        }
+        #[cfg(desktop)]
+        let dir = std::env::temp_dir();
 
-        let tmp_dir = std::env::temp_dir();
+        #[cfg(mobile)]
+        let dir = app_handle.path().app_cache_dir().ok().unwrap();
+
         let unique_id = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_millis();
-        let tmp_file: PathBuf = tmp_dir.join(format!("converted_{}.mp3", unique_id));
+        let tmp_file: PathBuf = dir.join(format!("converted_{}.mp3", unique_id));
 
         #[cfg(desktop)]
         let music_path = &path;
@@ -143,82 +143,84 @@ pub async fn music_get_visualizer_buffer(path: String) -> Option<Vec<u8>> {
             "-ar", "44100", // fixed sample rate
             "-b:a", "192k", // fixed bitrate
             "-q:a", "5", // ~45-55 kbps
-            "-c:a", "libmp3lame", // mp3 encoder
+            // "-c:a", "libmp3lame", // mp3 encoder
             "-map", "0:a", // only audio
             tmp_file.to_str().unwrap(),
         ]);
 
-
-        if cfg!(mobile) {
-            let result = GLOBAL_APP_HANDLE.get().unwrap().fluyer().visualizer_get_buffer(args.join(" "));
+        #[cfg(mobile)]{
+            let result = app_handle.fluyer().visualizer_get_buffer(args.join(" "));
             if result.is_err() {
-                logger::error!(
+                println!(
                     "Failed to convert audio to mp3: {}",
                     result.unwrap_err()
                 );
                 return std::fs::read(path).ok();
             }
 
+            if !result.unwrap().value {
+                println!("Failed to convert audio to mp3");
+                return std::fs::read(path).ok();
+            }
+
             return std::fs::read(tmp_file).ok();
         }
+        #[cfg(desktop)]{
+            // Get the bundled ffmpeg path
+            let ffmpeg_binary = if cfg!(target_os = "windows") {
+                "libs/ffmpeg/bin/ffmpeg.exe"
+            } else {
+                "libs/ffmpeg/bin/ffmpeg"
+            };
 
-        // Get the bundled ffmpeg path
-        let ffmpeg_binary = if cfg!(target_os = "windows") {
-            "libs/ffmpeg/bin/ffmpeg.exe"
-        } else {
-            "libs/ffmpeg/bin/ffmpeg"
-        };
+            let ffmpeg_path = app_handle.path()
+                .resolve(ffmpeg_binary, BaseDirectory::Resource)
+                .unwrap();
 
-        let ffmpeg_path = GLOBAL_APP_HANDLE
-            .get()
-            .unwrap()
-            .path()
-            .resolve(ffmpeg_binary, BaseDirectory::Resource)
-            .unwrap();
-
-        #[cfg(any(target_os = "linux", target_os = "macos"))]{
-            // Make sure ffmpeg is executable
-            use std::os::unix::fs::PermissionsExt;
-            if let Ok(metadata) = std::fs::metadata(&ffmpeg_path) {
-                let mut permissions = metadata.permissions();
-                permissions.set_mode(0o755); // rwxr-xr-x
-                let _ = std::fs::set_permissions(&ffmpeg_path, permissions);
+            #[cfg(any(target_os = "linux", target_os = "macos"))]{
+                // Make sure ffmpeg is executable
+                use std::os::unix::fs::PermissionsExt;
+                if let Ok(metadata) = std::fs::metadata(&ffmpeg_path) {
+                    let mut permissions = metadata.permissions();
+                    permissions.set_mode(0o755); // rwxr-xr-x
+                    let _ = std::fs::set_permissions(&ffmpeg_path, permissions);
+                }
             }
-        }
 
-        let ffmpeg_status = {
-            #[cfg(windows)]
-            {
-                use std::os::windows::process::CommandExt;
-                Command::new(&ffmpeg_path)
-                    .args(&args)
-                    .creation_flags(0x08000000) // CREATE_NO_WINDOW on Windows
-                    .status()
+            let ffmpeg_status = {
+                #[cfg(windows)]
+                {
+                    use std::os::windows::process::CommandExt;
+                    Command::new(&ffmpeg_path)
+                        .args(&args)
+                        .creation_flags(0x08000000) // CREATE_NO_WINDOW on Windows
+                        .status()
+                }
+                #[cfg(not(windows))]
+                {
+                    Command::new(&ffmpeg_path).args(&args).status()
+                }
+            };
+
+            if ffmpeg_status.is_err() {
+                logger::error!(
+                    "Failed to convert audio to mp3: {}",
+                    ffmpeg_status.unwrap_err()
+                );
+                return std::fs::read(path).ok();
             }
-            #[cfg(not(windows))]
-            {
-                Command::new(&ffmpeg_path).args(&args).status()
+
+            if !tmp_file.exists() {
+                logger::error!("Failed to convert audio to mp3");
+                return std::fs::read(path).ok();
             }
-        };
 
-        if ffmpeg_status.is_err() {
-            logger::error!(
-            "Failed to convert audio to mp3: {}",
-            ffmpeg_status.unwrap_err()
-        );
-            return std::fs::read(path).ok();
+            let data = std::fs::read(&tmp_file).ok();
+
+            let _ = std::fs::remove_file(tmp_file);
+
+            return data;
         }
-
-        if !tmp_file.exists() {
-            logger::error!("Failed to convert audio to mp3");
-            return std::fs::read(path).ok();
-        }
-
-        let data = std::fs::read(&tmp_file).ok();
-
-        let _ = std::fs::remove_file(tmp_file);
-
-        data
     }).await.ok().flatten()
 }
 

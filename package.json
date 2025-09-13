@@ -13,8 +13,9 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"tauri": "tauri",
-		"android": "tauri android dev",
-		"android:build": "tauri android build -v --target aarch64",
+		"android": "bun scripts/tauri-android-dev.ts",
+		"android:configure": "bun scripts/tauri-android-configure.ts",
+		"android:build": "bun scripts/tauri-android-build.ts",
 		"ios": "tauri ios dev",
 		"ios:build": "tauri ios build"
 	},

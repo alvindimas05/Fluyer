@@ -1,4 +1,3 @@
-import axios from "axios";
 import * as path from "path";
 import fs from "fs/promises";
 import os from "os";
