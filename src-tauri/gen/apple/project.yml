@@ -51,8 +51,8 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        CFBundleShortVersionString: 1.1.5
-        CFBundleVersion: 1.1.5
+        CFBundleShortVersionString: 1.2.0
+        CFBundleVersion: 1.2.0
     entitlements:
       path: fluyer_iOS/fluyer_iOS.entitlements
     scheme:
