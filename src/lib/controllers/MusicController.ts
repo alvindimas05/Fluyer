@@ -83,7 +83,7 @@ const MusicController = {
 			MusicController.currentMusic(),
 		);
 	},
-	getAlbumImageFromMusic: async (music: MusicData | null, size: MusicSize | null) => {
+	getAlbumImageFromMusic: async (music: MusicData | null, size: MusicSize | null = null) => {
 		if (music === null) return MusicConfig.defaultAlbumImage;
 		const imageSize = size ? size.toString() : null;
 		try {

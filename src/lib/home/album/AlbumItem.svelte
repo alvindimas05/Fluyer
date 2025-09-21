@@ -18,7 +18,7 @@ let isValidFilterAlbum = $derived(
 
 let albumImage = $derived.by(async () => {
     // const now = performance.now();
-    const image = await MusicController.getAlbumImageFromMusic(music, null);
+    const image = await MusicController.getAlbumImageFromMusic(music);
     // console.log('Album image loaded in', Math.round(performance.now() - now), 'ms for album:', music.album);
     return image;
 });

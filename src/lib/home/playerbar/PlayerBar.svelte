@@ -29,7 +29,7 @@ let element: HTMLDivElement;
 let oldMusic: MusicData | null = $state(null);
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
-let albumImage = $derived(MusicController.getAlbumImageFromMusic(oldMusic, MusicSize.Music));
+let albumImage = $derived(MusicController.getAlbumImageFromMusic(oldMusic));
 
 let isPlaying = $derived($musicIsPlaying);
 let progressPercentage = $state(MusicController.progressPercentage());
