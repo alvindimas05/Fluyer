@@ -10,8 +10,6 @@ import {MusicListType} from "$lib/home/music/types";
 import FolderController from "$lib/controllers/FolderController";
 import {playerBarHeight} from "$lib/stores/playerbar";
 
-let type = $derived($musicListType)
-
 // Responsive rules: [minWidth, maxDppxExclusive, columns]
 const rules = [
 	[1280, 2.01, 4], // xhdpi
@@ -91,6 +89,8 @@ let data = $derived.by(() => {
 		result.push(list.slice(i, i + columnCount));
 	}
 	if ($musicListType === MusicListType.Folder){
+		_folderList = _folderList.filter((folder) => FolderController.getMusicListFromFolder(folder).length > 0);
+
 		for (let i = 0; i < _folderList.length; i += columnCount) {
 			result.push(_folderList.slice(i, i + columnCount));
 		}
