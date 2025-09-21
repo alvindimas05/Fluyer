@@ -20,7 +20,7 @@ import { onMount } from "svelte";
 import Glass from "$lib/glass/Glass.svelte";
 import {playerBarHeight} from "$lib/stores/playerbar";
 import {filterBarHeight} from "$lib/stores/filterbar";
-    import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
@@ -55,12 +55,20 @@ let isShowing = $state(false);
 let isMounted = $state(false);
 
 async function onMouseMove(e: MouseEvent) {
-	if (
-		((type === SidebarType.Right && e.clientX > window.innerWidth - (isWindows() || !(await getCurrentWindow().isMaximized()) ? 12 : 4)) ||
-			(type === SidebarType.Left && e.clientX < (await getCurrentWindow().isMaximized() ? 4 : 12))) &&
-		e.clientY <= window.innerHeight - 8 * 16 &&
-		!isMouseInsideArea
-	) {
+	const win = getCurrentWindow();
+	const isMaximized = await win.isMaximized();
+
+	const onRightEdge =
+			type === SidebarType.Right &&
+			e.clientX > window.innerWidth - (isWindows() || !isMaximized ? 12 : 4);
+
+	const onLeftEdge =
+			type === SidebarType.Left &&
+			e.clientX < (isMaximized ? 4 : 12);
+
+	const withinVerticalBounds = e.clientY <= window.innerHeight - 8 * 16;
+
+	if ((onRightEdge || onLeftEdge) && withinVerticalBounds && !isMouseInsideArea) {
 		isMouseInsideArea = true;
 		isShowing = true;
 		$sidebarShowingType = type;
@@ -68,31 +76,32 @@ async function onMouseMove(e: MouseEvent) {
 }
 
 async function onMouseLeave(e: MouseEvent) {
-	if (
-		!isMouseInsideArea || (e.clientX > window.innerWidth - 20 || e.clientX < 20)
-	)
-		return;
+	const nearScreenEdge = e.clientX <= 20 || e.clientX >= window.innerWidth - 20;
+
+	if (!isMouseInsideArea || nearScreenEdge) return;
+
 	isShowing = false;
 	isMouseInsideArea = false;
 	$sidebarShowingType = null;
 }
 
 function onSwipe(e: CustomEvent<SwipeEventData>) {
-	if (e.detail.initial[1] < $swipeMinimumTop) return;
+	const { initial, deltaX } = e.detail;
+	if (initial[1] < $swipeMinimumTop) return;
 
-	if (
-		((type === SidebarType.Right && e.detail.deltaX < -SWIPE_RANGE) ||
-			(type === SidebarType.Left && e.detail.deltaX > SWIPE_RANGE)) &&
-		$sidebarShowingType === null
-	) {
+	const swipeOpen =
+			(type === SidebarType.Right && deltaX < -SWIPE_RANGE) ||
+			(type === SidebarType.Left && deltaX > SWIPE_RANGE);
+
+	const swipeClose =
+			(type === SidebarType.Right && deltaX > SWIPE_RANGE) ||
+			(type === SidebarType.Left && deltaX < -SWIPE_RANGE);
+
+	if (swipeOpen && $sidebarShowingType === null) {
 		isMouseInsideArea = true;
 		isShowing = true;
 		$sidebarShowingType = type;
-	} else if (
-		((type === SidebarType.Right && e.detail.deltaX > SWIPE_RANGE) ||
-			(type === SidebarType.Left && e.detail.deltaX < -SWIPE_RANGE)) &&
-		$sidebarShowingType === type
-	) {
+	} else if (swipeClose && $sidebarShowingType === type) {
 		setTimeout(() => {
 			isMouseInsideArea = false;
 			isShowing = false;
@@ -100,6 +109,7 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 		});
 	}
 }
+
 
 function updateSidebarWidth() {
 	const w = window.innerWidth;
