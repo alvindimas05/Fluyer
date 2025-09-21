@@ -31,18 +31,25 @@ pub struct MusicMetadata {
     pub extra_tags: Option<HashMap<String, Option<String>>>,
 }
 
+#[cfg(mobile)]
+const DEFAULT_TITLE: &str = dotenv!("VITE_DEFAULT_MUSIC_TITLE");
+#[cfg(mobile)]
+const DEFAULT_ARTIST: &str = dotenv!("VITE_DEFAULT_MUSIC_ARTIST");
+
 impl MusicMetadata {
     #[cfg(mobile)]
-    pub fn default_title() -> String {
-        dotenv!("VITE_DEFAULT_MUSIC_TITLE").to_string()
+    pub fn default_title() -> &'static str {
+        DEFAULT_TITLE
     }
     #[cfg(mobile)]
-    pub fn default_artist() -> String {
-        dotenv!("VITE_DEFAULT_MUSIC_ARTIST").to_string()
+    pub fn default_artist() -> &'static str {
+        DEFAULT_ARTIST
     }
-
-    pub fn artist_separator() -> String {
-        "||".to_string()
+    pub fn artist_separator() -> &'static str {
+        "||"
+    }
+    pub fn separator() -> &'static str {
+        " • "
     }
 
     pub fn new(path: String) -> Self {

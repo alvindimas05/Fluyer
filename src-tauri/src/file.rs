@@ -14,6 +14,8 @@ use serde::{Deserialize, Serialize};
 use tauri::Manager;
 use walkdir::{DirEntry, WalkDir};
 
+const MUSIC_PATH_SEPARATOR: &str = "||";
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct FolderItem {
     path: String,
@@ -91,7 +93,7 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
         .get()?
         .get(MUSIC_STORE_PATH_NAME)?
         .to_string();
-    let dir_paths = dir.split("||");
+    let dir_paths = dir.split(MUSIC_PATH_SEPARATOR);
 
     for d in dir_paths {
         let trimmed = d.trim().trim_matches('"'); // optionally remove whitespace and quotes
@@ -268,7 +270,9 @@ fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> 
             path: path.clone(),
             duration: row.get::<_, Option<i64>>(1)?.map(|v| v as u128),
             title: row.get(2)?,
-            artist: row.get::<_, Option<String>>(3)?.map(|v| v.replace(&MusicMetadata::artist_separator(), " ")),
+            artist: row.get::<_, Option<String>>(3)?.map(|v| v.replace(
+                &MusicMetadata::artist_separator(), MusicMetadata::separator()
+            )),
             album: row.get(4)?,
             album_artist: row.get(5)?,
             track_number: row.get(6)?,

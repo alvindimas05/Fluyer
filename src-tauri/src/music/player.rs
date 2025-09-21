@@ -313,14 +313,13 @@ impl MusicPlayer {
             }
         }
 
-        #[cfg(target_os = "android")]
-        {
+        #[cfg(target_os = "android")]{
             let music_playlist = playlist
                 .into_iter()
                 .map(|music| PlaylistAddMusic {
                     file_path: music.path,
-                    title: music.title.unwrap_or(MusicMetadata::default_title()),
-                    artist: music.artist.unwrap_or(MusicMetadata::default_artist()),
+                    title: music.title.unwrap_or(MusicMetadata::default_title().to_string()),
+                    artist: music.artist.unwrap_or(MusicMetadata::default_artist().to_string()),
                     // image: music.image,
                     image: None,
                 })
