@@ -231,7 +231,8 @@ function scrollToSelectedLyric() {
             md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
             wrapperClass="!rounded-2xl"
             padding="1.2rem"
-            paddingHover="1.5rem">
+            paddingHover="1.5rem"
+            enableHoverAnimation={true}>
             <div class="w-full grid grid-cols-[auto,1fr,auto]">
                 <div class="text-xs lg-mdpi:text-sm flex w-12">
                     <span class="self-end opacity-75"

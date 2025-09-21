@@ -137,7 +137,7 @@ onMount(() => {
 	style="height: calc(100% - {$playerBarHeight}px - {paddingTop}px);
 	top: {paddingTop}px;"
 	onmouseleave={onMouseLeave}>
-	<Glass enableHoverAnimation={false} enableBlur={true}
+	<Glass enableBlur={true}
 		glassEffectScale={50}
 		class="
 			h-full p-3 !rounded-md pointer-events-auto

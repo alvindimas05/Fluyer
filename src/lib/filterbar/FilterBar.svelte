@@ -10,6 +10,7 @@ import {MusicListType} from "$lib/home/music/types";
 import UIController from "$lib/controllers/UIController";
 import Glass from "$lib/glass/Glass.svelte";
 import {filterBarHeight} from "$lib/stores/filterbar";
+import Toggle from "$lib/toggle/Toggle.svelte";
 
 const rules = [
     // xhdpi (DPR > 2.0)
@@ -73,22 +74,25 @@ onMount(() => {
     style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};"
     bind:this={element}>
-    <Glass class="!hidden sm:!block h-fit sm:h-full sm:mx-3 text-start pointer-events-auto
-        cursor-pointer hover:bg-white/10
-        animate__animated animate__fadeIn animate__slow"
-       padding="4px"
-       paddingHover="6px"
-        events={{
-            onclick: UIController.toggleMusicListType
-        }}>
-        <div class="w-full h-full grid grid-cols-[min-content_auto] items-center gap-x-2 px-3
-            text-sm text-white/70">
-            <div class="w-4">
-                <Icon type={$musicListType === MusicListType.Folder ? IconType.Note : IconType.Folder} />
-            </div>
-            <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>
-        </div>
-    </Glass>
+<!--    <Glass class="!hidden sm:!block h-fit sm:h-full sm:mx-3 text-start pointer-events-auto-->
+<!--        cursor-pointer hover:bg-white/10-->
+<!--        animate__animated animate__fadeIn animate__slow"-->
+<!--       padding="4px"-->
+<!--       paddingHover="6px"-->
+<!--        events={{-->
+<!--            onclick: UIController.toggleMusicListType-->
+<!--        }}>-->
+<!--        <div class="w-full h-full grid grid-cols-[min-content_auto] items-center gap-x-2 px-3-->
+<!--            text-sm text-white/70">-->
+<!--            <div class="w-4">-->
+<!--                <Icon type={$musicListType === MusicListType.Folder ? IconType.Note : IconType.Folder} />-->
+<!--            </div>-->
+<!--            <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>-->
+<!--        </div>-->
+<!--    </Glass>-->
+    <div class="hidden sm:grid mx-3 pointer-events-auto grid-cols-[30%] justify-end gap-x-3">
+        <Toggle class="w-full h-full" checkedIcon={IconType.Folder} uncheckedIcon={IconType.Note} onchange={UIController.toggleMusicListType} />
+    </div>
     <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
         {isMacos() ? 'order-last' : 'order-first'}
         animate__animated animate__fadeIn animate__slow"

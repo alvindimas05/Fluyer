@@ -19,9 +19,9 @@ interface Props {
 }
 
 const componentId = uuid.v4();
-let props: Props = $props();
 let glassEffectId = `glass-distortion-${componentId}`;
-let { children, showShine = true, enableHoverAnimation = true, enableBlur = false, glassEffectScale = 0 } = props;
+let { children, showShine = true, enableHoverAnimation = false, enableBlur = false, glassEffectScale = 0,
+    thisElement = $bindable(), ...props} = $props();
 </script>
 
 <div class="liquidGlass-wrapper
@@ -33,7 +33,8 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
         --padding-hover: {props.paddingHover || '0.8rem'};
         {isAndroid() ? '-webkit-transform: translate3d(0, 0, 0);' : ''}
         {props.style}
-    " {...props.events}>
+    " {...props.events}
+    bind:this={thisElement}>
     {#if isWindows()}
       <div class="liquidGlass-effect
         {enableBlur ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
@@ -135,6 +136,7 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
 
     overflow: hidden;
     isolation: isolate;
+    pointer-events: none;
   }
 
   .liquidGlass-tint {
@@ -142,6 +144,7 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
     position: absolute;
     inset: 0;
     //background: rgba(255, 255, 255, 0.25);
+    pointer-events: none;
   }
 
   .liquidGlass-shine {
@@ -153,6 +156,7 @@ let { children, showShine = true, enableHoverAnimation = true, enableBlur = fals
 
     box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
     inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+    pointer-events: none;
   }
 
   .liquidGlass-text {

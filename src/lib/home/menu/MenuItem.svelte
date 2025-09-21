@@ -14,6 +14,7 @@ const { onclick, icon, label }: Props = $props();
 <Glass class="mx-2 my-3 cursor-pointer hover:bg-white/10"
     padding="10px"
     paddingHover="12px"
+    enableHoverAnimation={true}
     events={{
         onclick
     }}>

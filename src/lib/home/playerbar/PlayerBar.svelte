@@ -233,6 +233,7 @@ onDestroy(() => {
         />
     </div>
     <Glass enableBlur={true}
+        enableHoverAnimation={true}
         glassEffectScale={50}>
         <div class="w-full grid grid-cols-[auto_min-content] md:grid-cols-3 py-1">
             <div class="flex items-center md:gap-2">
