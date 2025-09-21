@@ -47,10 +47,7 @@ function darkenTooBright(hex: string): string {
 
     // Adjust lightness while preserving hue and saturation
     if (hsl.l > 0.7) { // If color is too bright
-        hsl.l = Math.max(0.3, hsl.l * 0.8); // Reduce lightness by 20%, but not below 20%
-        // if (hsl.s < 0.5) { // Boost saturation for washed-out colors
-        //     hsl.s = Math.min(1, hsl.s * 1.1);
-        // }
+        hsl.l = Math.max(0.3, hsl.l * 0.6); // Reduce lightness by 20%, but not below 20%
     }
 
     // Convert back to RGB
