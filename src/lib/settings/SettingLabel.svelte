@@ -6,9 +6,11 @@ interface Props {
 
 const { title, description } = $props<Props>();
 </script>
-{#if title}
-    <p class="font-semibold">{title}</p>
-{/if}
-{#if description}
-    <p>{description}</p>
-{/if}
+<div class="mx-5">
+    {#if title}
+        <p class="font-semibold">{title}</p>
+    {/if}
+    {#if description}
+        <p>{description}</p>
+    {/if}
+</div>

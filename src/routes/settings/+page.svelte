@@ -19,10 +19,10 @@ let isLoading = $derived($settingIsLoading);
 
 <div class="w-full h-full md:px-3 md:pb-4 md:pt-10">
         <div class="w-full h-full grid grid-rows-[min-content_auto_min-content]
-        p-5 bg-gray-500 bg-opacity-30 rounded-lg shadow-2xl border border-white/20 text-white"
+        py-5 bg-gray-500 bg-opacity-30 rounded-lg shadow-2xl border border-white/20 text-white"
              style="{isMobile() && `padding-top: ${$mobileStatusBarHeight}px;`}
              padding-bottom: {$mobileNavigationBarHeight > 0 ? $mobileNavigationBarHeight : 24}px;">
-            <p class="text-2xl font-semibold text-white mb-4">Settings</p>
+            <p class="text-2xl font-semibold text-white mb-4 mx-5">Settings</p>
             <div class="overflow-auto mb-3 scrollbar-hidden">
                 <SettingMusicPaths />
                 <SettingAnimatedBackground />
@@ -30,7 +30,7 @@ let isLoading = $derived($settingIsLoading);
                 <SettingUserInteface />
                 <SettingDeveloper />
             </div>
-            <Glass class="w-fit !rounded-lg" wrapperClass="!rounded-lg"
+            <Glass class="w-fit mx-5 !rounded-lg" wrapperClass="!rounded-lg"
                 padding="0">
                 <button
                         class="w-fit text-white text-start px-3 py-2
