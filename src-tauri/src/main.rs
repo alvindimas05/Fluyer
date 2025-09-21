@@ -49,7 +49,7 @@ fn init_logging() {
     let log_file = File::create(log_path.clone());
     if log_file.is_ok() {
         logs.push(WriteLogger::new(
-            LevelFilter::Warn,
+            LevelFilter::Debug,
             config,
             log_file.unwrap(),
         ));
