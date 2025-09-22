@@ -1,12 +1,10 @@
 <script lang="ts">
-import Glass from "$lib/glass/Glass.svelte";
+    interface Props {
+        children?: import("svelte").Snippet;
+    }
 
-interface Props {
-	children?: import("svelte").Snippet;
-}
-
-let { children }: Props = $props();
+    let { children }: Props = $props();
 </script>
-<Glass class="my-3 mx-5 bg-gray-300/15 !rounded-lg !shadow-xl" wrapperClass="!rounded-lg" padding="0">
+<div class="bg-gradient-to-r from-white/15 to-white/10 rounded-lg shadow-md my-3 mx-5">
     {@render children?.()}
-</Glass>
+</div>
