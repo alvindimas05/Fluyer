@@ -7,6 +7,6 @@ interface Props {
 
 let { children }: Props = $props();
 </script>
-<Glass class="my-3 mx-5 !rounded-lg" wrapperClass="!rounded-lg" padding="0">
+<Glass class="my-3 mx-5 bg-gray-300/15 !rounded-lg !shadow-xl" wrapperClass="!rounded-lg" padding="0">
     {@render children?.()}
 </Glass>

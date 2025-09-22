@@ -12,6 +12,7 @@ interface Props {
     paddingHover?: string;
     showShine?: boolean;
     shineColor?: string;
+    showShadow?: boolean;
     enableHoverAnimation?: boolean;
     // Note: Enable if needed, disabled by default to increase performance :)
     enableBlur?: boolean;
