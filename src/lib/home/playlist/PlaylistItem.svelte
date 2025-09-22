@@ -44,7 +44,7 @@ function gotoPlaylist() {
         </div>
         <div class="ms-3 text-sm md:text-base">
             <p class="font-medium">{music.title}</p>
-            <p class="text-opacity-background-70">{music.artist}</p>
+            <p class="text-opacity-background-80">{music.artist}</p>
         </div>
         <div class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 md-hdpi:w-11 md-hdpi:h-11 lg-hdpi:w-12 lg-hdpi:h-12"></div>
     </div>

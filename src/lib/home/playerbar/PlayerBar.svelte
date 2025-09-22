@@ -232,7 +232,7 @@ onDestroy(() => {
                 step={MusicConfig.step}
         />
     </div>
-    <Glass class="bg-gray-500/40"
+    <Glass class="bg-gray-400/20"
         shineColor="rgba(255, 255, 255, 0.4)"
         padding="0.5rem"
         paddingHover="0.7rem"
