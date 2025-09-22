@@ -29,8 +29,8 @@ let { children, showShine = true, enableHoverAnimation = false, enableBlur = fal
     {enableHoverAnimation && !isAndroid() ? 'hover-animation' : ''}
     {props.class}"
     style="
-        --padding: {props.padding || '0.6rem'};
-        --padding-hover: {props.paddingHover || '0.8rem'};
+        --padding: {props.padding || '0'};
+        --padding-hover: {props.paddingHover || '0'};
         {isAndroid() ? '-webkit-transform: translate3d(0, 0, 0);' : ''}
         {props.style}
     " {...props.events}

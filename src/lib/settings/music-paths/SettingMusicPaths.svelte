@@ -91,7 +91,7 @@ onMount(refreshPath);
 <SettingInput>
     <div class="w-full grid grid-cols-[auto_min-content] cursor-pointer px-3 py-2">
         <input
-            class="w-full bg-transparent text-gray-300 cursor-pointer"
+            class="w-full bg-transparent text-white text-opacity-background-70 cursor-pointer"
             value="Add new music path..."
             readonly
             disabled={isLoading}

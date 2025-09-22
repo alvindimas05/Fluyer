@@ -233,6 +233,8 @@ onDestroy(() => {
         />
     </div>
     <Glass class="bg-gray-300/20"
+        padding="0.5rem"
+        paddingHover="0.7rem"
         enableBlur={true}
         enableHoverAnimation={true}
         glassEffectScale={50}>

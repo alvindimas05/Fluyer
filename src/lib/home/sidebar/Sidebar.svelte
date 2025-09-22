@@ -161,6 +161,7 @@ onMount(() => {
 					: 'animate__slideOutLeft')}
 		"
 		wrapperClass="!rounded-md {props.class}"
+		padding="12px"
 		style="
 			width: {sidebarWidth - 24}px;
 			animation-duration: {isLinux() ? '350ms' : '500ms'};

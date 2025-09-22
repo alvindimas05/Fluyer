@@ -76,10 +76,10 @@ async function playShuffle() {
 }
 </script>
 {#if album || $folderCurrent}
-    <Glass
-        class="mx-3 mb-2 !rounded-xl"
+    <Glass class="mx-3 mb-2 !rounded-xl"
         wrapperClass="md:grid grid-cols-[auto_max-content] px-2 !rounded-xl
-        box-border animate__animated animate__fadeIn">
+        box-border animate__animated animate__fadeIn"
+        padding="0.6rem">
         <div class="grid items-center">
             <div class="text-sm md:text-base font-medium text-white overflow-hidden">
                 <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">{label}</p>
