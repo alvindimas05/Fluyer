@@ -70,7 +70,8 @@ onMount(() => {
 <svelte:window onresize={updateSize} />
 <div class="w-full sm:grid gap-y-2 px-3 sm:px-0 pb-3 pointer-events-none
     {isMacos() ? 'justify-end' : ''}
-    {isMacos() ? 'right-0' : 'left-0'}"
+    {isMacos() ? 'right-0' : 'left-0'}
+    animate__animated animate__fadeIn animate__slow"
     style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};"
     bind:this={element}>
@@ -94,8 +95,7 @@ onMount(() => {
         <Toggle class="w-full h-full pointer-events-auto" checkedIcon={IconType.Folder} uncheckedIcon={IconType.Note} onchange={UIController.toggleMusicListType} />
     </div>
     <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
-        {isMacos() ? 'order-last' : 'order-first'}
-        animate__animated animate__fadeIn animate__slow"
+        {isMacos() ? 'order-last' : 'order-first'}"
         padding="6px"
         paddingHover="8px">
         <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2">
