@@ -27,7 +27,7 @@ let { children, showShine = true, enableHoverAnimation = false, enableBlur = fal
 </script>
 
 <div class="liquidGlass-wrapper
-    {enableBlur && !isWindows() ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
+    {enableBlur && !isWindows() ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-lg') : ''}
     {enableHoverAnimation && !isAndroid() ? 'hover-animation' : ''}
     {props.class}"
     style="
