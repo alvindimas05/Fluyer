@@ -46,7 +46,7 @@ function darkenTooBright(hex: string): string {
     const hsl = rgbToHsl(r, g, b);
 
     // Adjust lightness while preserving hue and saturation
-    if (hsl.l > 0.7) { // If color is too bright
+    if (hsl.l > 0.6) { // If color is too bright
         hsl.l = Math.min(0.6, hsl.l * 0.8); // Darken it
     }
 
