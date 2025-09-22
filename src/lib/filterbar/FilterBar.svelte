@@ -90,8 +90,8 @@ onMount(() => {
 <!--            <p>Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}</p>-->
 <!--        </div>-->
 <!--    </Glass>-->
-    <div class="hidden sm:grid mx-3 pointer-events-auto grid-cols-[30%] justify-end gap-x-3">
-        <Toggle class="w-full h-full" checkedIcon={IconType.Folder} uncheckedIcon={IconType.Note} onchange={UIController.toggleMusicListType} />
+    <div class="hidden sm:grid mx-3 pointer-events-none grid-cols-[30%] justify-end gap-x-3">
+        <Toggle class="w-full h-full pointer-events-auto" checkedIcon={IconType.Folder} uncheckedIcon={IconType.Note} onchange={UIController.toggleMusicListType} />
     </div>
     <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
         {isMacos() ? 'order-last' : 'order-first'}
