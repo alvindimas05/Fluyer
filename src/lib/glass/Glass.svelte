@@ -11,6 +11,7 @@ interface Props {
     padding?: string;
     paddingHover?: string;
     showShine?: boolean;
+    shineColor?: string;
     enableHoverAnimation?: boolean;
     // Note: Enable if needed, disabled by default to increase performance :)
     enableBlur?: boolean;
@@ -41,9 +42,10 @@ let { children, showShine = true, enableHoverAnimation = false, enableBlur = fal
         {props.wrapperClass}"
         style="filter: url(#{glassEffectId}); {props.wrapperStyle}"></div>
     {/if}
-    <div class="liquidGlass-tint {props.wrapperClass}" style="{props.wrapperStyle}"></div>
     {#if showShine}
-        <div class="liquidGlass-shine {props.wrapperClass}" style="{props.wrapperStyle}"></div>
+        <div class="liquidGlass-shine {props.wrapperClass}" style="
+            --shine-color: {props.shineColor || 'rgba(255, 255, 255, 0.5)'};
+            {props.wrapperStyle}"></div>
     {/if}
     <div class="liquidGlass-text w-full h-full {props.wrapperClass}" style="{props.wrapperStyle}">
         {@render children?.()}
@@ -154,8 +156,8 @@ let { children, showShine = true, enableHoverAnimation = false, enableBlur = fal
 
     overflow: hidden;
 
-    box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
-    inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5);
+    box-shadow: inset 2px 2px 1px 0 var(--shine-color),
+    inset -1px -1px 1px 1px var(--shine-color);
     pointer-events: none;
   }
 

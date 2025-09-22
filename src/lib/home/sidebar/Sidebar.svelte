@@ -149,7 +149,7 @@ onMount(() => {
 	onmouseleave={onMouseLeave}>
 	<Glass enableBlur={true}
 		glassEffectScale={50}
-		class="bg-gray-400/40
+	    class="bg-gray-500/40
 			h-full p-3 !rounded-md pointer-events-auto
 			animate__animated
 			{isShowing
@@ -162,6 +162,7 @@ onMount(() => {
 		"
 		wrapperClass="!rounded-md {props.class}"
 		padding="12px"
+	    shineColor="rgba(255, 255, 255, 0.4)"
 		style="
 			width: {sidebarWidth - 24}px;
 			animation-duration: {isLinux() ? '350ms' : '500ms'};
