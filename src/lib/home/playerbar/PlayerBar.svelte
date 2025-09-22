@@ -198,7 +198,7 @@ onDestroy(() => {
 <div class="absolute bottom-0 w-full px-3 pt-3 animate__animated animate__slideInUp"
     style="padding-bottom: {$mobileNavigationBarHeight > 12 ? $mobileNavigationBarHeight : 12}px;"
     bind:this={element}>
-    <div class="w-fit absolute top-[-1.5rem] border rounded-lg px-2 py-1 shadow-xl text-sm backdrop-blur-xl text-shadow-background"
+    <div class="w-fit absolute top-[-1.5rem] border rounded-lg px-2 py-1 shadow-xl text-sm backdrop-blur-xl"
     style="
         left: {tooltipPosition}px;
         visibility: {tooltipVisible ? 'visible' : 'hidden'};
@@ -232,7 +232,7 @@ onDestroy(() => {
                 step={MusicConfig.step}
         />
     </div>
-    <Glass class="bg-gray-400/20 text-shadow-background icon-shadow-background"
+    <Glass class="bg-gray-400/20"
         shineColor="rgba(255, 255, 255, 0.4)"
         padding="0.5rem"
         paddingHover="0.7rem"

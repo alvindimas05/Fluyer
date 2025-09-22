@@ -39,7 +39,7 @@ let { children, showShine = true, enableHoverAnimation = false, enableBlur = fal
     bind:this={thisElement}>
     {#if isWindows()}
       <div class="liquidGlass-effect
-        {enableBlur ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
+        {enableBlur ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-lg') : ''}
         {props.wrapperClass}"
         style="filter: url(#{glassEffectId}); {props.wrapperStyle}"></div>
     {/if}

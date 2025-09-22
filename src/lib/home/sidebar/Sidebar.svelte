@@ -149,7 +149,7 @@ onMount(() => {
 	onmouseleave={onMouseLeave}>
 	<Glass enableBlur={true}
 		glassEffectScale={50}
-	    class="bg-gray-400/20 text-shadow-background icon-shadow-background
+	    class="bg-gray-400/20
 			h-full p-3 !rounded-md pointer-events-auto
 			animate__animated
 			{isShowing
