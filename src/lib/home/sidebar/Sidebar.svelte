@@ -141,7 +141,7 @@ onMount(() => {
 <svelte:body use:swipeable on:swiped={onSwipe} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="fixed top-0 z-10 px-3 pointer-events-none
+<div id="sidebar" class="fixed top-0 z-10 px-3 pointer-events-none
 	{type === SidebarType.Right ? 'right-0' : 'left-0'}
 	{isMounted ? '' : 'invisible'}"
 	style="height: calc(100% - {$playerBarHeight}px - {paddingTop}px);
@@ -149,14 +149,14 @@ onMount(() => {
 	onmouseleave={onMouseLeave}>
 	<Glass enableBlur={true}
 		glassEffectScale={50}
-		class="
+		class="bg-gray-400/40
 			h-full p-3 !rounded-md pointer-events-auto
 			animate__animated
 			{isShowing
 				? (type === SidebarType.Right
 					? 'animate__slideInRight'
 					: 'animate__slideInLeft')
-				: (type === SidebarType.Right
+					: (type === SidebarType.Right
 					? 'animate__slideOutRight'
 					: 'animate__slideOutLeft')}
 		"

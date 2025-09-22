@@ -232,7 +232,8 @@ onDestroy(() => {
                 step={MusicConfig.step}
         />
     </div>
-    <Glass enableBlur={true}
+    <Glass class="bg-gray-300/20"
+        enableBlur={true}
         enableHoverAnimation={true}
         glassEffectScale={50}>
         <div class="w-full grid grid-cols-[auto_min-content] md:grid-cols-3 py-1">
