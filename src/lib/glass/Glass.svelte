@@ -27,7 +27,7 @@ let { children, showShine = true, enableHoverAnimation = false, enableBlur = fal
 </script>
 
 <div class="liquidGlass-wrapper
-    {enableBlur && !isWindows() ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-lg') : ''}
+    {enableBlur && !isWindows() ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
     {enableHoverAnimation && !isAndroid() ? 'hover-animation' : ''}
     {props.class}"
     style="
@@ -39,7 +39,7 @@ let { children, showShine = true, enableHoverAnimation = false, enableBlur = fal
     bind:this={thisElement}>
     {#if isWindows()}
       <div class="liquidGlass-effect
-        {enableBlur ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-lg') : ''}
+        {enableBlur ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
         {props.wrapperClass}"
         style="filter: url(#{glassEffectId}); {props.wrapperStyle}"></div>
     {/if}
