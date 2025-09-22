@@ -27,7 +27,6 @@ const FolderController = {
     },
     setMusicListToFolder: async () => {
         const musicPaths = await PersistentStoreController.musicPath.get();
-        console.log(musicPaths);
         if(musicPaths.length < 2) folderCurrent.set({path: musicPaths[0]} as FolderData);
         else folderCurrent.set(null);
         FolderController.setFolderList();
