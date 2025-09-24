@@ -15,6 +15,7 @@ mod logger;
 mod music;
 mod platform;
 mod store;
+mod utils;
 
 #[cfg(target_os = "macos")]
 const MACOS_TRAFFIC_LIGHTS_INSET_X: f32 = 12.0;

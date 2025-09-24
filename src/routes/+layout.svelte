@@ -24,6 +24,7 @@ import { mobileShowSwipeGuide } from "$lib/stores/mobile";
 import FolderController from "$lib/controllers/FolderController";
 import DeveloperDebugOverlay from "$lib/developer/DeveloperDebugOverlay.svelte";
 import {settingDeveloperMode} from "$lib/stores/setting";
+import toastHandler from "$lib/handlers/toast";
 
 if (isWindows() || isLinux()) {
 	import("$lib/scss/rounded-windows.scss");
@@ -38,6 +39,7 @@ let isAppReady = $state(false);
 
 async function initialize() {
 	logHandler();
+    toastHandler();
 	await Promise.all([
 		PersistentStoreController.initialize(),
 		MusicController.initialize(),

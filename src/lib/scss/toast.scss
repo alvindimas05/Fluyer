@@ -1,6 +1,7 @@
 .toast {
-  @apply px-5 py-2 border rounded-lg p-4 shadow-xl backdrop-blur-md #{!important};
+  @apply px-5 py-2 border rounded-lg p-4 shadow-xl #{!important};
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 
   &-info {
     background: rgba(255, 255, 255, 0.1) !important;

@@ -27,12 +27,10 @@ function onDeveloperModeChange(
 
 async function saveLog() {
 	await invoke(CommandRoutes.DEVELOPER_SAVE_LOG);
-	ToastController.info("Log saved at Downloads");
 }
 
 async function saveMpvLog() {
 	await invoke(CommandRoutes.DEVELOPER_SAVE_MPV_LOG);
-	ToastController.info("MPV log saved at Downloads");
 }
 </script>
 
