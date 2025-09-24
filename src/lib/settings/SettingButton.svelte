@@ -11,10 +11,10 @@ interface Props {
 const { onclick, label, icon }: Props = $props();
 </script>
 <button
-        class="w-full text-white text-start px-3 py-2 my-3
-        bg-gradient-to-r from-white/15 to-white/10 rounded shadow-md
-        hover:from-white/25 hover:to-white/30
-        focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-200
+        class="w-full text-white text-start px-3 py-2 my-3 mx-5
+        bg-white/5 border border-white/30 rounded-lg shadow-md
+        hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30
+        transition-all duration-200
         {icon ? 'grid items-center grid-cols-[min-content_auto] gap-2' : ''}"
         onclick={onclick}
 >
