@@ -65,14 +65,6 @@ function handleButtonNext() {
 	MusicController.nextMusic();
 }
 
-async function onKeyDown(
-	e: KeyboardEvent & {
-		currentTarget: EventTarget & Document;
-	},
-) {
-	if (e.key === " ") handleButtonPlayPause();
-}
-
 function redirectToPlay() {
 	PageController.goto(PageRoutes.PLAY);
 }
@@ -193,7 +185,6 @@ onDestroy(() => {
 </script>
 
 <svelte:window onresize={updatePlayerBarHeight} />
-<svelte:document onkeydown={onKeyDown} />
 
 <div class="absolute bottom-0 w-full px-3 pt-3 animate__animated animate__slideInUp"
     style="padding-bottom: {$mobileNavigationBarHeight > 12 ? $mobileNavigationBarHeight : 12}px;"

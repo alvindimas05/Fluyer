@@ -1,16 +1,18 @@
 // @ts-ignore
 import { fluidScroll } from "fluidscroll";
 import { equalizerShow } from "$lib/stores/equalizer";
-import {get} from "svelte/store";
-import {musicListType} from "$lib/stores/music";
-import {MusicListType} from "$lib/home/music/types";
+import { get } from "svelte/store";
+import { musicListType } from "$lib/stores/music";
+import { MusicListType } from "$lib/home/music/types";
 import FilterController from "$lib/controllers/FilterController";
 import FolderController from "$lib/controllers/FolderController";
+import MusicController from "./MusicController";
 
 const UIController = {
 	initialize: async () => {
 		UIController.listenAnimateScrollOverflowText();
 		UIController.listenDisableKeyActions();
+		UIController.listenSpaceKeydown();
 	},
 	listenAnimateScrollOverflowText: () => {
 		const scrollDuration = 3000;
@@ -32,12 +34,34 @@ const UIController = {
 			if (['Tab', 'Escape', 'Space', 'Enter'].includes(e.key)) e.preventDefault();
 		});
 	},
+	listenSpaceKeydown: () => {
+		document.addEventListener('keydown', function (e) {
+			if (e.code !== 'Space') return;
+
+			const target = e.target;
+
+			if(target == document.body) e.preventDefault();
+
+			if (target.matches('a, button, input, textarea, select')) {
+				e.preventDefault();
+				e.stopPropagation();
+				target.blur();
+				
+				document.body.focus();
+			}
+
+			if (MusicController.isPlaying()) {
+				MusicController.setIsPlaying(false);
+				MusicController.pause();
+			} else MusicController.play();
+		}, true);
+	},
 	toggleEqualizer: (value: boolean) => {
 		equalizerShow.set(value);
 	},
 	toggleMusicListType: async () => {
 		const listType = get(musicListType);
-		if(listType === MusicListType.All){
+		if (listType === MusicListType.All) {
 			FilterController.setFilterAlbum(null);
 			await FolderController.setMusicListToFolder();
 		} else {
