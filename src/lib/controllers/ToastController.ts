@@ -9,7 +9,7 @@ const ToastController = {
 	create: (message: string, type: ToastType) => {
 		Toastify({
 			text: message,
-			duration: 30000,
+			duration: 3000,
 			gravity: "top",
 			position: "right",
 			className: `toast toast-${type}`,
