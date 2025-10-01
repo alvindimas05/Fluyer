@@ -89,7 +89,6 @@ async function onKeyDown(
     },
 ) {
     if (e.key === "Escape") handleButtonBack();
-    if (e.key === " ") handleButtonPlayPause();
 }
 
 async function resetLyrics() {
