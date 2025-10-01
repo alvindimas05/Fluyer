@@ -89,7 +89,7 @@ async function selectFolder(){
 
 <div class="relative text-sm md:text-base">
 	<div
-		class="grid grid-cols-[max-content_auto] py-2"
+		class="grid grid-cols-[max-content_auto_max-content] py-2"
 	>
 		{#await albumImage}
 			<div class="w-12 h-12 md:w-14 md:h-14 relative aspect-square"></div>
@@ -114,6 +114,7 @@ async function selectFolder(){
 				text-xs/[14px] pt-[4px] md:text-xs md:pt-0 animate-scroll-overflow-text">{mediumLabel}</p>
 			<p class="text-xs/[14px] md:text-xs mt-[2px] text-opacity-background-90">{smallLabel}</p>
 		</div>
+		<div class="w-12 h-12 md:w-14 md:h-14 ps-2"></div>
 	</div>
 	<div class="absolute top-0 left-0 py-2 w-full">
 		<div class="w-full grid grid-cols-[max-content_auto_max-content] music-item-play">
