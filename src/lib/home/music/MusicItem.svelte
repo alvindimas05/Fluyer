@@ -124,7 +124,7 @@ async function selectFolder(){
 			>
 				<div
 						class="bg-black bg-opacity-40 grid box-border justify-items-center items-center rounded"
-				><Icon class="p-1" type={IconType.Play}/></div>
+				><Icon class="md:p-1" type={IconType.Play}/></div>
 			</button>
 			<div class="{folder ? 'cursor-pointer' : 'cursor-default'}" onclick={selectFolder}></div>
 			<div class="w-12 h-12 md:w-14 md:h-14 ps-4">
