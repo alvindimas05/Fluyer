@@ -52,7 +52,7 @@ onMount(() => {
     grid items-center justify-items-center pointer-events-none
     {isMounted ? '' : 'invisible'}
     animate__animated {$equalizerShow ? 'animate__slideInUp' : 'animate__slideOutDown'}">
-    <Glass class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] pointer-events-auto"
+    <Glass class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] bg-gray-400/20 pointer-events-auto"
         wrapperClass="p-4 grid grid-rows-[min-content_auto]"
         enableBlur={true} enableHoverAnimation={!isMacos()}
         glassEffectScale={100}>
