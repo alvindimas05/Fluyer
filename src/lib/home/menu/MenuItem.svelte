@@ -11,7 +11,7 @@ interface Props {
 
 const { onclick, icon, label }: Props = $props();
 </script>
-<Glass class="mx-2 my-3 cursor-pointer hover:bg-white/10"
+<Glass class="mx-2 my-3 cursor-pointer bg-white/15 hover:bg-white/25"
     padding="10px"
     paddingHover="12px"
     enableHoverAnimation={true}
