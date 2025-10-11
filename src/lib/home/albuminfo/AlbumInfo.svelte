@@ -76,7 +76,7 @@ async function playShuffle() {
 }
 </script>
 {#if album || $folderCurrent}
-    <Glass class="mx-3 mb-2 !rounded-xl"
+    <Glass class="mx-3 mb-2 !rounded-xl bg-gray-400/10"
         wrapperClass="md:grid grid-cols-[auto_max-content] px-2 !rounded-xl
         box-border animate__animated animate__fadeIn"
         padding="0.6rem">

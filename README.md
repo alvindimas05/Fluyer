@@ -4,7 +4,11 @@
 
 <h1 align="center">🦋🎵 Fluyer</h1>
 <p align="center">A Beautiful Cross-Platform Music Player</p>
-
+<p align="center">
+  <a href="https://discord.gg/UNZMGGPjpD">
+    <img alt="Join our Discord" src="https://img.shields.io/discord/1422926610859950143?style=flat-square&logo=discord&label=Discord&color=5865F2">
+  </a>
+</p>
 <p align="center">
   <a href="https://github.com/alvindimas05/Fluyer/stargazers">
     <img alt="GitHub stars" src="https://img.shields.io/github/stars/alvindimas05/Fluyer?style=flat-square&color=ffd700">
