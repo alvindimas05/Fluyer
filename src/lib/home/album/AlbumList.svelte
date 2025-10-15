@@ -58,7 +58,7 @@ function updateItemWidth() {
 	itemWidth = 0.5 * window.innerWidth;
 }
 
-let _data = $derived.by(async () => {
+let data = $derived.by(() => {
     if (!Array.isArray($musicAlbumList)) return [];
 
     const sortAsc = $filterBarSortAsc;
@@ -134,42 +134,25 @@ $effect(() => {
 </script>
 
 <svelte:window onresize={updateSize} />
-<!--<div-->
-<!--    class="grid auto-cols-[50%] sm:auto-cols-[33.3334%]-->
-<!--        md-mdpi:auto-cols-[20%] lg-mdpi:auto-cols-[16.6667%] xl-mdpi:auto-cols-[12.5%]-->
-<!--        md-hdpi:auto-cols-[20%] lg-hdpi:auto-cols-[16.6667%]-->
-<!--        grid-rows-[1fr] w-full overflow-x-auto scrollbar-hidden"-->
-<!--    style="padding-top: ${(isMobile() ? $mobileStatusBarHeight : 0) + 44}px"-->
-<!--    bind:offsetHeight={elementHeight}-->
-<!--	bind:this={element}-->
-<!--    onwheel={onMouseWheel}>-->
-<!--    {#each $musicAlbumList as musicList}-->
-<!--        <AlbumItem {musicList} />-->
-<!--    {/each}-->
-<!--</div>-->
 
 <div style="width: 100%;
     height: {itemHeight}px;">
-    {#key $filterBarSortAsc}
-        {#await _data then data}
-            <!-- Note: Ignore this  -->
-            <VList onwheel={onMouseWheel}
-                   class="scrollbar-hidden"
-                   {data}
-                   horizontal>
-                {#snippet children(musicList, index)}
-                    {#if index === 0}
-                        <div class="h-fit" style="width: {itemWidth}px;"
-                             bind:clientHeight={itemElementHeight}>
-                            <AlbumItem {musicList} />
-                        </div>
-                    {:else}
-                        <div class="h-fit" style="width: {itemWidth}px;">
-                            <AlbumItem {musicList} />
-                        </div>
-                    {/if}
-                {/snippet}
-            </VList>
-        {/await}
-    {/key}
+    <!-- Note: Ignore this  -->
+    <VList onwheel={onMouseWheel}
+           class="scrollbar-hidden"
+           {data}
+           horizontal>
+        {#snippet children(musicList, index)}
+            {#if index === 0}
+                <div class="h-fit" style="width: {itemWidth}px;"
+                     bind:clientHeight={itemElementHeight}>
+                    <AlbumItem {musicList} />
+                </div>
+            {:else}
+                <div class="h-fit" style="width: {itemWidth}px;">
+                    <AlbumItem {musicList} />
+                </div>
+            {/if}
+        {/snippet}
+    </VList>
 </div>
