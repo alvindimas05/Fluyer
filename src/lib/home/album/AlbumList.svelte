@@ -4,7 +4,7 @@ import { musicAlbumList, musicList } from "$lib/stores/music";
 import AlbumItem from "./AlbumItem.svelte";
 import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
 import { onDestroy, onMount } from "svelte";
-import { isMobile } from "$lib/platform";
+import {isDesktop, isLinux, isMobile} from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import { swipeMinimumTop } from "$lib/stores";
 import type { Unsubscriber } from "svelte/store";
@@ -35,14 +35,11 @@ const rules = [
 	[768, 0, 0.25], // md → 25%
 	[640, 0, 0.33334], // sm → 33.3334%
 ];
-let itemElementHeight = $state(0);
 let itemWidth = $state(0.5 * window.innerWidth);
-let itemHeight = $state(0);
 let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight);
 
 function updateSize() {
 	updateItemWidth();
-	itemHeight = itemElementHeight;
 }
 
 function updateItemWidth() {
@@ -128,31 +125,22 @@ onDestroy(() => {
 });
 
 $effect(() => {
-	itemHeight = itemElementHeight > itemHeight ? itemElementHeight : itemHeight;
-	$swipeMinimumTop = itemHeight + paddingTop;
+	$swipeMinimumTop = paddingTop;
 });
 </script>
 
 <svelte:window onresize={updateSize} />
 
-<div style="width: 100%;
-    height: {itemHeight}px;">
+<div class="w-full" style="height: {itemWidth + 40}px;">
     <!-- Note: Ignore this  -->
     <VList onwheel={onMouseWheel}
            class="scrollbar-hidden"
            {data}
            horizontal>
         {#snippet children(musicList, index)}
-            {#if index === 0}
-                <div class="h-fit" style="width: {itemWidth}px;"
-                     bind:clientHeight={itemElementHeight}>
-                    <AlbumItem {musicList} />
-                </div>
-            {:else}
-                <div class="h-fit" style="width: {itemWidth}px;">
-                    <AlbumItem {musicList} />
-                </div>
-            {/if}
+            <div style="width: {itemWidth}px;">
+                <AlbumItem {musicList} />
+            </div>
         {/snippet}
     </VList>
 </div>
