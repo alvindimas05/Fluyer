@@ -96,7 +96,7 @@ async function selectFolder(){
 		{:then image}
 			{#if image}
 				<img
-					class="w-12 h-12 md:w-14 md:h-14 relative rounded {isDesktop() && !isLinux() && 'animate__animated animate__fadeIn'}"
+					class="w-12 h-12 md:w-14 md:h-14 object-cover relative rounded {isDesktop() && !isLinux() && 'animate__animated animate__fadeIn'}"
 					src={image}
 					alt="Album"
 				/>

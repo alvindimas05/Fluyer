@@ -267,7 +267,7 @@ onDestroy(() => {
                             <div class="w-full aspect-square"></div>
                         {:then image}
                             <img
-                                    class="w-full rounded animate__animated animate__fadeIn"
+                                    class="w-full aspect-square object-cover rounded animate__animated animate__fadeIn"
                                     src={image}
                                     alt="Album"
                             />
