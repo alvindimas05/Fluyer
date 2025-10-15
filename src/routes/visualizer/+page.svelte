@@ -11,7 +11,7 @@ import { isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import Barred from "$lib/visualizers/vissonance/visualizers/Barred";
 import Fracture from "$lib/visualizers/vissonance/visualizers/Fracture";
-import HillFog from "$lib/visualizers/vissonance/visualizers/HillFog";
+// import HillFog from "$lib/visualizers/vissonance/visualizers/HillFog";
 import Iris from "$lib/visualizers/vissonance/visualizers/Iris";
 import Silk from "$lib/visualizers/vissonance/visualizers/Silk";
 import Siphon from "$lib/visualizers/vissonance/visualizers/Siphon";
@@ -27,7 +27,7 @@ const DEFAULT_VISUALIZER_INDEX = 0;
 let visualizers: Visualizer[] = [
     new Barred(),
     new Fracture(),
-    new HillFog(),
+    // new HillFog(),
     new Iris(),
     new Silk(),
     new Tricentric(),
