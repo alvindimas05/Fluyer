@@ -131,10 +131,10 @@ $effect(() => {
 
 <svelte:window onresize={updateSize} />
 
-<div class="w-full" style="height: {itemWidth + 40}px;">
+<div class="w-full" style="height: {itemWidth + 52}px;">
     <!-- Note: Ignore this  -->
     <VList onwheel={onMouseWheel}
-           class="scrollbar-hidden"
+           class="scrollbar-hidden overflow-y-clip"
            {data}
            horizontal>
         {#snippet children(musicList, index)}
