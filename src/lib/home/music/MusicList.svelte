@@ -9,6 +9,7 @@ import {folderCurrent, folderList} from "$lib/stores/folder";
 import {MusicListType} from "$lib/home/music/types";
 import FolderController from "$lib/controllers/FolderController";
 import {playerBarHeight} from "$lib/stores/playerbar";
+import {filterBarSortAsc} from "$lib/stores/filterbar";
 
 // Responsive rules: [minWidth, maxDppxExclusive, columns]
 const rules = [
@@ -76,13 +77,15 @@ let data = $derived.by(() => {
 			return matchesAlbum && (!hasSearch || matchesSearch);
 		}
 	}));
+    if(!$filterBarSortAsc) list.reverse();
+
 	let _folderList = $folderList.filter((folder) => {
 		const search = $filterSearch.toLowerCase();
 		return folder.path.toLowerCase().includes(search);
 	});
-	if ($filterAlbum) {
-		list = MusicController.sortMusicList(list);
-	}
+    if(!$filterBarSortAsc) _folderList.reverse();
+
+	if ($filterAlbum) list = MusicController.sortMusicList(list);
 
 	const result: any[][] = [];
 	for (let i = 0; i < list.length; i += columnCount) {

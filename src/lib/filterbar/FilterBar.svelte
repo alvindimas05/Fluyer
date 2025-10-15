@@ -9,7 +9,7 @@ import {musicListType} from "$lib/stores/music";
 import {MusicListType} from "$lib/home/music/types";
 import UIController from "$lib/controllers/UIController";
 import Glass from "$lib/glass/Glass.svelte";
-import {filterBarHeight} from "$lib/stores/filterbar";
+import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
 import Toggle from "$lib/toggle/Toggle.svelte";
 
 const rules = [
@@ -57,6 +57,11 @@ function updateFilterBarHeight(){
     $filterBarHeight = element.offsetHeight + 8;
 }
 
+function toggleSort(){
+    $filterBarSortAsc = !$filterBarSortAsc;
+    console.log($filterBarSortAsc);
+}
+
 function updateSize(){
     updateGridSizing();
     updateFilterBarHeight()
@@ -75,14 +80,30 @@ onMount(() => {
     style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};"
     bind:this={element}>
-    <div class="hidden sm:grid mx-3 pointer-events-none grid-cols-[30%] gap-x-3 {isMacos() ? 'justify-end' : 'justify-start'}">
+    <div class="hidden sm:grid mx-3 pointer-events-none grid-cols-[auto_30%] gap-x-5 {isMacos() ? 'justify-end' : 'justify-start'}">
+        <div>
+            <button class="h-full aspect-square pointer-events-auto"
+                onclick={toggleSort}>
+                <Glass class="w-full h-full bg-gray-400/20">
+                    <div class="w-full h-full grid items-center justify-center">
+                        <div class="w-5">
+                            {#if $filterBarSortAsc}
+                                <Icon type={IconType.SortAsc} />
+                            {:else}
+                                <Icon type={IconType.SortDesc} />
+                            {/if}
+                        </div>
+                    </div>
+                </Glass>
+            </button>
+        </div>
         <Toggle class="w-full h-full pointer-events-auto"
             checked={$musicListType === MusicListType.Folder}
             checkedIcon={IconType.Folder}
             uncheckedIcon={IconType.Note}
             onchange={UIController.toggleMusicListType} />
     </div>
-    <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
+    <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3 bg-gray-400/20
         {isMacos() ? 'order-last' : 'order-first'}"
         padding="6px"
         paddingHover="8px">

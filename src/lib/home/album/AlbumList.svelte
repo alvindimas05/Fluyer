@@ -10,7 +10,8 @@ import { swipeMinimumTop } from "$lib/stores";
 import type { Unsubscriber } from "svelte/store";
 import { VList } from "virtua/svelte";
 import { filterAlbum, filterSearch } from "$lib/stores/filter";
-import {filterBarHeight} from "$lib/stores/filterbar";
+import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
+import sleep from "sleep-promise";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
@@ -57,23 +58,29 @@ function updateItemWidth() {
 	itemWidth = 0.5 * window.innerWidth;
 }
 
-let data = $derived.by(() => {
-	if (!Array.isArray($musicAlbumList)) return [];
+let _data = $derived.by(async () => {
+    if (!Array.isArray($musicAlbumList)) return [];
 
-	const search = $filterSearch.toLowerCase();
-	if (!search) return $musicAlbumList;
+    const sortAsc = $filterBarSortAsc;
 
-	return $musicAlbumList.filter((musicList) => {
-		return (
-			($filterAlbum && musicList[0].album === $filterAlbum.name) ||
-			musicList[0].album?.toLowerCase().includes(search) ||
-			musicList[0].albumArtist?.toLowerCase().includes(search)
-		);
-	});
+    const search = $filterSearch.toLowerCase();
+    let list = $musicAlbumList;
+    if (!search) return sortAsc ? list : list.toReversed();
+
+    list = list.filter((musicList) => {
+        return (
+            ($filterAlbum && musicList[0].album === $filterAlbum.name) ||
+            musicList[0].album?.toLowerCase().includes(search) ||
+            musicList[0].albumArtist?.toLowerCase().includes(search)
+        );
+    });
+    if(!sortAsc) list.reverse();
+    return list;
 });
 
 function groupByAlbum(): MusicData[][] {
-	const albumsMap = MusicController.musicList()!.reduce(
+    let musicList = MusicController.musicList()!;
+	const albumsMap = musicList.reduce(
 		(acc, item) => {
 			if (item.album === null || item.album.trim() === "") {
 				return acc;
@@ -113,9 +120,7 @@ let unlistenMusicList: Unsubscriber;
 onMount(() => {
 	updateSize();
 	MusicController.setMusicAlbumList(groupByAlbum());
-	unlistenMusicList = musicList.subscribe(() =>
-		MusicController.setMusicAlbumList(groupByAlbum()),
-	);
+	unlistenMusicList = musicList.subscribe(() => MusicController.setMusicAlbumList(groupByAlbum()));
 });
 
 onDestroy(() => {
@@ -145,22 +150,26 @@ $effect(() => {
 
 <div style="width: 100%;
     height: {itemHeight}px;">
-    <!-- Note: Ignore this  -->
-    <VList onwheel={onMouseWheel}
-       class="scrollbar-hidden"
-       {data}
-       horizontal>
-        {#snippet children(musicList, index)}
-            {#if index === 0}
-                <div class="h-fit" style="width: {itemWidth}px;"
-                    bind:clientHeight={itemElementHeight}>
-                    <AlbumItem {musicList} />
-                </div>
-            {:else}
-                <div class="h-fit" style="width: {itemWidth}px;">
-                    <AlbumItem {musicList} />
-                </div>
-            {/if}
-        {/snippet}
-    </VList>
+    {#key $filterBarSortAsc}
+        {#await _data then data}
+            <!-- Note: Ignore this  -->
+            <VList onwheel={onMouseWheel}
+                   class="scrollbar-hidden"
+                   {data}
+                   horizontal>
+                {#snippet children(musicList, index)}
+                    {#if index === 0}
+                        <div class="h-fit" style="width: {itemWidth}px;"
+                             bind:clientHeight={itemElementHeight}>
+                            <AlbumItem {musicList} />
+                        </div>
+                    {:else}
+                        <div class="h-fit" style="width: {itemWidth}px;">
+                            <AlbumItem {musicList} />
+                        </div>
+                    {/if}
+                {/snippet}
+            </VList>
+        {/await}
+    {/key}
 </div>

@@ -25,6 +25,8 @@ import FileDocumentOutline from "svelte-material-icons/FileDocumentOutline.svelt
 import TuneVerticalVariant from "svelte-material-icons/TuneVerticalVariant.svelte";
 import Poll from "svelte-material-icons/Poll.svelte";
 import Folder from "svelte-material-icons/Folder.svelte";
+import MenuUp from "svelte-material-icons/MenuUp.svelte";
+import MenuDown from "svelte-material-icons/MenuDown.svelte";
 
 const iconRegistryMaterial = {
 	[IconType.Unknown]: HelpCircleOutline,
@@ -58,6 +60,8 @@ const iconRegistryMaterial = {
 	[IconType.Close]: CloseCircleOutline,
 	[IconType.Visualizer]: Poll,
 	[IconType.Folder]: Folder,
+    [IconType.SortAsc]: MenuUp,
+    [IconType.SortDesc]: MenuDown,
 };
 
 export default iconRegistryMaterial;

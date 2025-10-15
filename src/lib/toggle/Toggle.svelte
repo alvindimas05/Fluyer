@@ -48,7 +48,7 @@ onDestroy(() => {
 });
 </script>
 
-<Glass class={props.class} padding="0" bind:thisElement={toggleElement}>
+<Glass class="bg-gray-400/20 {props.class}" padding="0" bind:thisElement={toggleElement}>
     <label class="w-full h-full relative inline-flex items-center cursor-pointer">
         <input class="sr-only" type="checkbox" onchange={handleChange} bind:checked />
         <!-- Toggle thumb with icon -->
