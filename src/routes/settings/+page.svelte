@@ -30,16 +30,13 @@ let isLoading = $derived($settingIsLoading);
                 <SettingUserInteface />
                 <SettingDeveloper />
             </div>
-            <Glass class="w-fit mx-5 !rounded-lg" wrapperClass="!rounded-lg"
-               padding="0">
-                <button class="w-fit text-white text-start px-3 py-2
-                    hover:bg-white/15 transition-all duration-200
-                    grid grid-cols-[min-content_auto] items-center gap-2"
-                    onclick={() => PageController.back()}>
-                    <div class="w-4"><Icon type={IconType.Back}/></div>
-                    <div>Back</div>
-                </button>
-            </Glass>
+            <button class="w-fit bg-white/5 border border-white/30 rounded-lg shadow-md mx-5 px-3 py-2
+                grid grid-cols-[min-content_auto] items-center gap-2
+                hover:bg-white/10 hover:border-white/45"
+                onclick={() => PageController.back()}>
+                <div class="w-4"><Icon type={IconType.Back}/></div>
+                <div>Back</div>
+            </button>
         </div>
     </Glass>
 </div>
