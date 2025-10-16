@@ -46,6 +46,7 @@ const PersistentStoreController = {
 			PersistentStoreController.userInterface.showRepeatButton.initialize(),
 			PersistentStoreController.userInterface.showShuffleButton.initialize(),
 			PersistentStoreController.equalizer.initialize(),
+            PersistentStoreController.bitPerfectMode.initialize(),
 		]);
 	},
 
