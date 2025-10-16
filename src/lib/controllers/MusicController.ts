@@ -25,7 +25,7 @@ import CoverArt, {
 	type CoverArtCacheQuery,
 	type CoverArtResponse,
 } from "$lib/handlers/coverart";
-import { isDesktop, isMobile } from "$lib/platform";
+import {isAndroid, isDesktop, isMobile} from "$lib/platform";
 import { equalizerValues } from "$lib/stores/equalizer";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import UtilsController from "$lib/controllers/UtilsController";
@@ -215,9 +215,12 @@ const MusicController = {
 		);
 	},
 
-	previousMusic: () => {
+	previousMusic: async () => {
 		if (MusicController.currentMusicIndex() <= 0) return;
-		MusicController.gotoPlaylist(MusicController.currentMusicIndex() - 1);
+		if(isAndroid()) await MusicController.gotoPlaylist(MusicController.currentMusicIndex() - 1);
+        else await invoke(CommandRoutes.MUSIC_PLAYLIST_GOTO_DESKTOP, {
+            music: MusicController.musicPlaylist()[MusicController.currentMusicIndex() - 1]
+        });
 	},
 
 	nextMusic: async () => {
@@ -227,18 +230,22 @@ const MusicController = {
 				MusicController.musicPlaylist().length - 1
 		)
 			return;
-		MusicController.sendCommandController("next");
+		if(isAndroid()) await MusicController.sendCommandController("next");
+        else await invoke(CommandRoutes.MUSIC_PLAYLIST_GOTO_DESKTOP, {
+            music: MusicController.musicPlaylist()[MusicController.currentMusicIndex() + 1]
+        });
 	},
 
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-			MusicController.setCurrentMusicIndex(e.payload.index);
+			console.log(e.payload);
+            MusicController.setCurrentMusicIndex(e.payload.index);
 			if (e.payload.isPlaying)
 				MusicController.startProgress({ resetProgress: true });
 			else MusicController.stopProgress();
 
 			MusicController.setProgressValue(
-				MusicController.parseProgressDurationIntoValue(
+                MusicController.parseProgressDurationIntoValue(
 					MusicController.parseProgressDuration(e.payload.currentPosition),
 					MusicController.parseProgressDuration(
 						MusicController.musicPlaylist()[e.payload.index].duration,
@@ -321,10 +328,10 @@ const MusicController = {
 			MusicController.sendCommandController("play");
 		}
 	},
-	pause: (sendCommand: boolean = true) => {
+	pause: async (sendCommand: boolean = true) => {
 		musicIsPlaying.set(false);
 		MusicController.stopProgress();
-		if (sendCommand) MusicController.sendCommandController("pause");
+		if (sendCommand) await MusicController.sendCommandController("pause");
 	},
 	sendCommandController: async (command: string) => {
 		await invoke(CommandRoutes.MUSIC_CONTROLLER, { command });
@@ -464,8 +471,8 @@ const MusicController = {
 		return mapped.map((item) => item.original);
 	},
 
-	gotoPlaylist: (index: number) => {
-		invoke(CommandRoutes.MUSIC_PLAYLIST_GOTO, { index });
+	gotoPlaylist: async (index: number) => {
+		await invoke(CommandRoutes.MUSIC_PLAYLIST_GOTO, { index });
 	},
 
 	reset: async () => {
@@ -482,7 +489,7 @@ const MusicController = {
 	},
 
 	resetAndAddMusicList: async (musicList: MusicData[]) => {
-		MusicController.pause();
+		await MusicController.pause();
 		await MusicController.sendCommandController("clear");
 		MusicController.stopProgress();
 		MusicController.resetProgress();

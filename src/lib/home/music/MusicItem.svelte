@@ -8,6 +8,7 @@
 	import {musicListType} from "$lib/stores/music";
 	import {folderCurrent} from "$lib/stores/folder";
 	import ToastController from "$lib/controllers/ToastController";
+    import sleep from "sleep-promise";
 
 	interface Props {
 	music: MusicData;
@@ -69,7 +70,7 @@ async function addMusicAndPlay() {
 	} else {
 		await MusicController.resetAndAddMusicList(FolderController.getMusicListFromFolder(folder!!));
 	}
-	MusicController.play();
+	await MusicController.play();
 }
 
 async function addMusic() {

@@ -43,6 +43,7 @@ chrono = "0.4.41"
 rusqlite_migration = "2.3.0"
 tokio = "1.47.1"
 fast_image_resize = { version = "5.3.0", features = ["rayon", "image"] }
+libc = "0.2.172"
 
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
 libmpv2 = "5.0.1"
