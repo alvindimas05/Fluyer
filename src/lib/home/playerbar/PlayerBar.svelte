@@ -16,8 +16,9 @@ import { IconType } from "$lib/icon/types";
 import { onDestroy, onMount } from "svelte";
 import {type MusicData, MusicSize, RepeatMode} from "$lib/home/music/types";
 import {
-	settingUiShowRepeatButton,
-	settingUiShowShuffleButton,
+    settingBitPerfectMode,
+    settingUiShowRepeatButton,
+    settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import type { Unsubscriber } from "svelte/store";
 import Glass from "$lib/glass/Glass.svelte";
@@ -308,14 +309,14 @@ onDestroy(() => {
                             <Icon type={IconType.Shuffle} />
                         </button>
                     {/if}
-                    <button class="w-6" onclick={handleVolumeButton}>
+                    <button class="w-6 {$settingBitPerfectMode ? 'pointer-events-none' : ''}" onclick={handleVolumeButton}>
                         {#if volumePercentage > 0}
                             <Icon type={IconType.Speaker} />
                         {:else}
                             <Icon type={IconType.Mute} />
                         {/if}
                     </button>
-                    <div class="relative w-24">
+                    <div class="relative w-24 {$settingBitPerfectMode ? 'pointer-events-none' : ''}">
                         <input
                                 class={`absolute w-24 volume-progress-bar-end`}
                                 type="range"

@@ -14,6 +14,8 @@ import SettingUserInteface from "$lib/settings/user-interface/SettingUserIntefac
 import SettingDeveloper from "$lib/settings/developer/SettingDeveloper.svelte";
 import SettingIconTheme from "$lib/settings/icon-theme/SettingIconTheme.svelte";
 import Glass from "$lib/glass/Glass.svelte";
+import SettingMusicPlayerConfiguration
+    from "$lib/settings/music-player-configuration/SettingMusicPlayerConfiguration.svelte";
 let isLoading = $derived($settingIsLoading);
 </script>
 
@@ -24,6 +26,7 @@ let isLoading = $derived($settingIsLoading);
                 padding-bottom: {$mobileNavigationBarHeight > 0 ? $mobileNavigationBarHeight : 24}px;">
             <p class="text-2xl font-semibold text-white mb-4 mx-5">Settings</p>
             <div class="w-full overflow-auto mb-3 scrollbar-hidden">
+                <SettingMusicPlayerConfiguration />
                 <SettingMusicPaths />
                 <SettingAnimatedBackground />
                 <SettingIconTheme />

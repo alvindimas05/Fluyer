@@ -1,10 +1,10 @@
 import { Store } from "@tauri-apps/plugin-store";
 import {
-	settingAnimatedBackgroundType,
-	settingDeveloperMode,
-	settingUiPlayShowBackButton, settingUiPlayShowVolume,
-	settingUiShowRepeatButton,
-	settingUiShowShuffleButton,
+    settingAnimatedBackgroundType, settingBitPerfectMode,
+    settingDeveloperMode,
+    settingUiPlayShowBackButton, settingUiPlayShowVolume,
+    settingUiShowRepeatButton,
+    settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { IconThemeType } from "$lib/icon/types";
@@ -77,6 +77,8 @@ const PersistentStoreController = {
 	developerMode: makeBinding("developer-mode", false, settingDeveloperMode.set),
 
 	iconTheme: makeBinding("icon-theme", IconThemeType.Phosphor, iconTheme.set),
+
+    bitPerfectMode: makeBinding("bit-perfect-mode", false, settingBitPerfectMode.set),
 
 	swipeGuide: {
 		get: makeGetter<boolean>("swipe-guide", true),

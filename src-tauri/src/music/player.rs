@@ -79,35 +79,69 @@ impl MusicPlayer {
                         // Buffer and cache settings for smoother transitions
                         mpv.set_property("cache", "yes")?;
                         mpv.set_property("demuxer-max-bytes", "100000000")?; // 100MB for high-res audio
-                        mpv.set_property("demuxer-readahead-secs", "10")?; // More buffer for large files
+                        mpv.set_property("demuxer-readahead-secs", "10")?;
 
                         // Playlist optimization
                         mpv.set_property("prefetch-playlist", "yes")?;
                         mpv.set_property("gapless-audio", "yes")?;
 
-                        // AUDIOPHILE SETTINGS - Preserve original quality
-                        // Remove the audio-samplerate setting to use original sample rates
-                        mpv.set_property("audio-format", "floatp")?; // Use floating point for best quality
-                        mpv.set_property("audio-normalize-downmix", "no")?; // Preserve dynamics
-                        mpv.set_property("volume-max", "100")?; // Prevent digital amplification
+                        // === BIT-PERFECT AUDIO SETTINGS ===
 
-                        // High-quality resampling when needed (format changes)
-                        mpv.set_property("audio-resample-filter-size", "32")?;
-                        mpv.set_property("audio-resample-cutoff", "0.95")?;
+                        // 1. Use the original audio format without conversion
+                        // Remove audio-format setting to pass through native format
+                        // mpv.set_property("audio-format", "floatp")?; // REMOVE THIS
 
-                        // Exclusive audio mode (if supported by OS)
-                        // mpv.set_property("audio-exclusive", "yes")?;
+                        // 2. Disable ALL audio processing
+                        mpv.set_property("af", "")?; // Clear audio filters
+                        mpv.set_property("audio-normalize-downmix", "no")?;
+                        mpv.set_property("audio-pitch-correction", "no")?;
+                        mpv.set_property("replaygain", "no")?; // Disable ReplayGain
+                        mpv.set_property("replaygain-fallback", "0")?;
 
-                        // Larger audio buffer for high-res files
+                        // 3. Set volume to maximum to avoid software volume control
+                        mpv.set_property("volume", "100")?;
+                        mpv.set_property("volume-max", "100")?;
+
+                        // 4. Disable resampling - use native sample rate
+                        mpv.set_property("audio-samplerate", "0")?; // 0 = use source sample rate
+                        mpv.set_property("audio-channels", "auto")?; // Preserve channel layout
+
+                        // 5. Use exclusive mode for direct hardware access (OS-dependent)
+                        // Uncomment for Windows (WASAPI) or Linux (ALSA)
+                        mpv.set_property("audio-exclusive", "yes")?;
+
+                        // 6. Specify audio output driver for bit-perfect playback
+                        // Uncomment the appropriate one for your OS:
+
+                        // Windows - WASAPI exclusive mode (recommended)
+                        #[cfg(target_os = "windows")]
+                        mpv.set_property("ao", "wasapi")?;
+
+                        // macOS - CoreAudio
+                        #[cfg(target_os = "macos")]
+                        mpv.set_property("ao", "coreaudio")?;
+
+                        // Linux - ALSA direct hardware access
+                        #[cfg(target_os = "linux")]{
+                            mpv.set_property("ao", "alsa")?;
+                            mpv.set_property("alsa-resample", "no")?; // Disable ALSA resampling
+                        }
+
+                        // 7. Increase audio buffer for stability (doesn't affect quality)
                         mpv.set_property("audio-buffer", "2")?;
 
-                        // Disable any audio processing that might degrade quality
-                        mpv.set_property("audio-pitch-correction", "no")?;
+                        // 8. Disable any format conversions during playback
+                        mpv.set_property("audio-stream-silence", "no")?;
+                        mpv.set_property("audio-wait-open", "2")?; // Wait for audio device
+
+                        // 9. Optional: Verify bit-perfect output in logs
+                        mpv.set_property("msg-level", "all=warn,ao=debug")?;
 
                         logger::debug!("The mpv log file is saved at {}", log_path);
+                        logger::debug!("Bit-perfect audio mode enabled");
                         Ok(())
                     })
-                    .unwrap(),
+                        .unwrap(),
                 )
                 .ok();
         }
@@ -454,6 +488,17 @@ impl MusicPlayer {
                 .get()
                 .unwrap()
                 .command("af", &["set", &arg])
+                .unwrap();
+        }
+    }
+
+    pub fn reset_equalizer(&self) {
+        #[cfg(desktop)]
+        {
+            GLOBAL_MUSIC_MPV
+                .get()
+                .unwrap()
+                .set_property("af", "")
                 .unwrap();
         }
     }

@@ -110,6 +110,12 @@ pub fn music_equalizer(state: State<'_, Mutex<AppState>>, values: Vec<f32>) {
 }
 
 #[tauri::command]
+pub fn music_equalizer_reset(state: State<'_, Mutex<AppState>>) {
+    let state = state.lock().unwrap();
+    state.music_player.reset_equalizer();
+}
+
+#[tauri::command]
 pub async fn music_get_image(path: String, size: Option<String>) -> Option<String> {
     MusicMetadata::get_image_from_path_async(path, size).await
 }

@@ -29,6 +29,7 @@ import { isDesktop, isMobile } from "$lib/platform";
 import { equalizerValues } from "$lib/stores/equalizer";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import UtilsController from "$lib/controllers/UtilsController";
+import {settingBitPerfectMode} from "$lib/stores/setting";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -317,8 +318,8 @@ const MusicController = {
 		musicIsPlaying.set(true);
 		MusicController.startProgress({ resetProgress: false });
 		if (sendCommand) {
-			await MusicController.applyEqualizer();
-			MusicController.sendCommandController("play");
+			if(!get(settingBitPerfectMode)) await MusicController.applyEqualizer();
+			await MusicController.sendCommandController("play");
 		}
 	},
 	pause: (sendCommand: boolean = true) => {
@@ -595,7 +596,8 @@ const MusicController = {
 		const values = Array(18).fill(0);
 		equalizerValues.set(values);
 		await PersistentStoreController.equalizer.set(values);
-		await MusicController.setEqualizer(values);
+
+        await invoke(CommandRoutes.MUSIC_EQUALIZER_RESET);
 	},
 
 	getVisualizerBuffer: async (path: string) => {

@@ -11,3 +11,4 @@ export const settingUiShowShuffleButton = writable(true);
 export const settingUiPlayShowBackButton = writable(true);
 export const settingUiPlayShowVolume = writable(true);
 export const settingDeveloperMode = writable(false);
+export const settingBitPerfectMode = writable(false);

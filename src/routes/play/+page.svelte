@@ -18,6 +18,7 @@ import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { RepeatMode } from "$lib/home/music/types";
 import {
+    settingBitPerfectMode,
     settingUiPlayShowBackButton, settingUiPlayShowVolume,
     settingUiShowRepeatButton,
     settingUiShowShuffleButton,
@@ -356,7 +357,7 @@ function scrollToSelectedLyric() {
                     {/if}
                 </div>
             </div>
-            {#if $settingUiPlayShowVolume}
+            {#if $settingUiPlayShowVolume && !$settingBitPerfectMode}
                 <div id="volume-bar" class="mt-5">
                     <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                         <button

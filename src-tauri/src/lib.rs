@@ -83,6 +83,8 @@ pub fn run() {
             commands::music::music_request_directory,
             #[cfg(desktop)]
             commands::music::music_equalizer,
+            #[cfg(desktop)]
+            commands::music::music_equalizer_reset,
             commands::music::music_get_image,
             commands::music::music_get_current_duration,
             commands::music::music_request_sync,

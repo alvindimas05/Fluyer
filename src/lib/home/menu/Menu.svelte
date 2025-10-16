@@ -9,6 +9,7 @@ import UIController from "$lib/controllers/UIController";
 import { isDesktop } from "$lib/platform";
 import {musicListType} from "$lib/stores/music";
 import {MusicListType} from "$lib/home/music/types";
+import {settingBitPerfectMode} from "$lib/stores/setting";
 </script>
 
 <Sidebar type={SidebarType.Left}>
@@ -20,7 +21,7 @@ import {MusicListType} from "$lib/home/music/types";
     </div>
     <MenuItem label="Play Screen" icon={IconType.Fullscreen}
               onclick={() => PageController.goto(PageRoutes.PLAY)}/>
-    {#if isDesktop()}
+    {#if isDesktop() && !$settingBitPerfectMode}
         <MenuItem label="Equalizer" icon={IconType.Equalizer}
                   onclick={() => UIController.toggleEqualizer(true)}/>
     {/if}
