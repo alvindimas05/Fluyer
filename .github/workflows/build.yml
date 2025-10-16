@@ -42,11 +42,9 @@ jobs:
         id: set-matrix
         run: |
           if [ "${{ github.event.inputs.platforms }}" == "all" ]; then
-            # echo 'matrix=["windows-x86_64","windows-arm64","macos-intel","macos-silicon","linux","android-armv7","android-aarch64","android-i686","android-x86_64","ios"]' >> $GITHUB_OUTPUT
             echo 'matrix=["windows-x86_64","macos-intel","macos-silicon","linux","android-armv7","android-aarch64","android-i686","android-x86_64"]' >> $GITHUB_OUTPUT
           else
-            platforms=$(echo "${{ github.event.inputs.platforms }}" | jq -R -c 'split(",") | map(select(length > 0))')
-            echo "matrix=$platforms" >> $GITHUB_OUTPUT
+            echo 'matrix=["${{ github.event.inputs.platforms }}"]' >> $GITHUB_OUTPUT
           fi
 
   build:
