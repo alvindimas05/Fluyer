@@ -23,7 +23,7 @@ let isLoading = $derived($settingIsLoading);
             style="{isMobile() && `padding-top: ${$mobileStatusBarHeight}px;`}
                 padding-bottom: {$mobileNavigationBarHeight > 0 ? $mobileNavigationBarHeight : 24}px;">
             <p class="text-2xl font-semibold text-white mb-4 mx-5">Settings</p>
-            <div class="overflow-auto mb-3 scrollbar-hidden">
+            <div class="w-full overflow-auto mb-3 scrollbar-hidden">
                 <SettingMusicPaths />
                 <SettingAnimatedBackground />
                 <SettingIconTheme />
