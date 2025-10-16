@@ -10,6 +10,7 @@ import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background
 import { IconThemeType } from "$lib/icon/types";
 import { iconTheme } from "$lib/stores/icon";
 import { equalizerValues } from "$lib/stores/equalizer";
+import {musicVolume} from "$lib/stores/music";
 
 const storePath = "store.json";
 const storeOptions = { autoSave: true };
@@ -47,6 +48,7 @@ const PersistentStoreController = {
 			PersistentStoreController.userInterface.showShuffleButton.initialize(),
 			PersistentStoreController.equalizer.initialize(),
             PersistentStoreController.bitPerfectMode.initialize(),
+            PersistentStoreController.volume.initialize(),
 		]);
 	},
 
@@ -68,6 +70,8 @@ const PersistentStoreController = {
 			await PersistentStoreController.musicPath.set(paths);
 		},
 	},
+
+    volume: makeBinding<number>("volume", 1, musicVolume.set),
 
 	animatedBackgroundType: makeBinding<SettingAnimatedBackgroundType>(
 		"animated-background-type",

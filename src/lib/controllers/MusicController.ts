@@ -318,6 +318,7 @@ const MusicController = {
 		musicIsPlaying.set(true);
 		MusicController.startProgress({ resetProgress: false });
 		if (sendCommand) {
+            await MusicController.applyVolume();
 			if(!get(settingBitPerfectMode)) await MusicController.applyEqualizer();
 			await MusicController.sendCommandController("play");
 		}
@@ -398,21 +399,20 @@ const MusicController = {
 	volume: () => get(musicVolume),
 	setVolume: (value: number) => {
 		musicVolume.set(value);
-		invoke(CommandRoutes.MUSIC_SET_VOLUME, {
-			volume: MusicController.volume(),
-		});
 	},
 	volumePercentage: () =>
 		((MusicController.volume() - MusicConfig.vmin) /
 			(MusicConfig.vmax - MusicConfig.vmin)) *
 		100,
 	handleVolumeChange: () => {
-		musicVolume.subscribe(() => {
-			invoke(CommandRoutes.MUSIC_SET_VOLUME, {
-				volume: MusicController.volume(),
-			});
-		});
+		musicVolume.subscribe(async (value) => {
+            await PersistentStoreController.volume.set(value);
+            await MusicController.applyVolume(value);
+        });
 	},
+    applyVolume: (volume: number) => {
+        return invoke(CommandRoutes.MUSIC_SET_VOLUME, { volume });
+    },
 
 	getCoverArtCache: (query: CoverArtCacheQuery) => {
 		let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
