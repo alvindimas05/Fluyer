@@ -14,6 +14,7 @@ function onBitPerfectModeChange(
     settingBitPerfectMode.set(e.currentTarget.checked);
     PersistentStoreController.bitPerfectMode.set(e.currentTarget.checked);
     MusicController.resetEqualizer();
+    MusicController.setVolume(1);
     ToastController.info(
         `Bit Perfect mode is ${e.currentTarget.checked ? "enabled" : "disabled"}`,
     );
