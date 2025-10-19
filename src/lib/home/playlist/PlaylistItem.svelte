@@ -55,7 +55,7 @@ function gotoPlaylist() {
             <div class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 md-hdpi:w-11 md-hdpi:h-11 lg-hdpi:w-12 lg-hdpi:h-12 aspect-square"></div>
             <div></div>
             <div class="w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 md-hdpi:w-11 md-hdpi:h-11 lg-hdpi:w-12 lg-hdpi:h-12 aspect-square p-1 lg:p-3">
-                <div class="w-full animate__animated animate__infinite animate__pulse">
+                <div class="w-3/4 md:w-full animate__animated animate__infinite animate__pulse">
                     <Icon type={IconType.Playing} />
                 </div>
             </div>
