@@ -227,7 +227,7 @@ function scrollToSelectedLyric() {
         md:p-0 md:pb-0 flex {lyrics.length > 0 ? 'justify-end' : 'justify-center'}"
     >
         <View class="w-full h-fit md:mt-4 rounded-xl
-            px-4 py-5
+            px-4 py-5 hover:py-7 hover:px-5
             md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
             md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%]
             md-xhdpi:w-[80%] lg-xhdpi:w-[70%]">
