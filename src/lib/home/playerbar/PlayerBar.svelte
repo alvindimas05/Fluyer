@@ -225,7 +225,7 @@ onDestroy(() => {
                 step={MusicConfig.step}
         />
     </div>
-    <View class="bg-gray-400/30 px-3 py-2 hover:px-4 hover:py-3 rounded-full"
+    <View class="bg-gray-400/35 px-3 py-2 hover:px-4 hover:py-3 rounded-full"
         glassEnableBlur={true}>
         <div class="w-full grid grid-cols-[auto_min-content] md:grid-cols-3 py-1">
             <div class="flex items-center md:gap-2">

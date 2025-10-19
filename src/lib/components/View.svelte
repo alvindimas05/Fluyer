@@ -17,6 +17,6 @@ let {
 }: Props = $props();
 </script>
 
-<Glass class="bg-gray-400/20 {props.class}" style={props.style} enableBlur={glassEnableBlur} bind:thisElement={thisElement}>
+<Glass class="bg-gray-300/10 {props.class}" style={props.style} enableBlur={glassEnableBlur} bind:thisElement={thisElement}>
     {@render children?.()}
 </Glass>

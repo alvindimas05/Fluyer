@@ -149,7 +149,7 @@ onMount(() => {
 	top: {paddingTop}px;"
 	onmouseleave={onMouseLeave}>
 	<View glassEnableBlur={true}
-        class="bg-gray-400/30 pointer-events-auto h-full p-3 rounded-lg
+        class="bg-gray-400/35 pointer-events-auto h-full p-3 rounded-lg
 			animate__animated
 			{isShowing
 				? (type === SidebarType.Right
