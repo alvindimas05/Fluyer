@@ -479,8 +479,10 @@ impl MusicPlayer {
     }
 
     pub fn toggle_bit_perfect(&self, enable: bool){
-        GLOBAL_MUSIC_MPV.get().unwrap()
-            .set_property("audio-exclusive", if enable { "yes" } else { "no" }).ok();
+        #[cfg(desktop)]{
+            GLOBAL_MUSIC_MPV.get().unwrap()
+                .set_property("audio-exclusive", if enable { "yes" } else { "no" }).ok();
+        }
     }
 
     #[cfg(desktop)]
