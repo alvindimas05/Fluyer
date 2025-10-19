@@ -318,7 +318,7 @@ const MusicController = {
 		musicIsPlaying.set(true);
 		MusicController.startProgress({ resetProgress: false });
 		if (sendCommand) {
-            await MusicController.applyVolume();
+            await MusicController.applyVolume(MusicController.volume());
 			if(!get(settingBitPerfectMode)) await MusicController.applyEqualizer();
 			await MusicController.sendCommandController("play");
 		}
