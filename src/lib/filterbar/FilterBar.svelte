@@ -106,7 +106,7 @@ onMount(() => {
     </div>
     <View class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
         {isMacos() ? 'order-last' : 'order-first'} rounded">
-        <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2">
+        <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2 py-[6px]">
             <input
                     class="w-full h-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"
                     placeholder="Search..."
