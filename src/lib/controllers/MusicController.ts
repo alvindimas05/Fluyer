@@ -50,6 +50,9 @@ const MusicController = {
 	initialize: async () => {
 		MusicController.listenSyncMusic();
 		MusicController.handleVolumeChange();
+
+        MusicController.onBitPerfectModeChange(get(settingBitPerfectMode));
+        settingBitPerfectMode.subscribe(MusicController.onBitPerfectModeChange);
 	},
 	musicList: () => get(musicList),
 	setMusicList: (value: MusicData[] | null) => musicList.set(value),
@@ -318,8 +321,6 @@ const MusicController = {
 		musicIsPlaying.set(true);
 		MusicController.startProgress({ resetProgress: false });
 		if (sendCommand) {
-            await MusicController.applyVolume(MusicController.volume());
-			if(!get(settingBitPerfectMode)) await MusicController.applyEqualizer();
 			await MusicController.sendCommandController("play");
 		}
 	},
@@ -605,6 +606,20 @@ const MusicController = {
 			path,
 		});
 	},
+
+    onBitPerfectModeChange: (bitPerfectMode: boolean) => {
+        MusicController.setVolume(1);
+        MusicController.applyVolume(1);
+        if(bitPerfectMode){
+            MusicController.applyEqualizer();
+        } else {
+            MusicController.resetEqualizer();
+        }
+        MusicController.toggleBitPerfectMode(bitPerfectMode);
+    },
+    toggleBitPerfectMode: (enable: boolean) => {
+        return invoke(CommandRoutes.MUSIC_TOGGLE_BIT_PERFECT, { enable });
+    },
 };
 
 export default MusicController;

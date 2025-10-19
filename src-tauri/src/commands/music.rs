@@ -245,3 +245,8 @@ pub fn music_request_sync() {
 pub fn music_get_lyrics(path: String) -> Option<String> {
     MusicMetadata::get_lyrics_from_path(path)
 }
+
+#[tauri::command]
+pub fn music_toggle_bit_perfect(state: State<'_, Mutex<AppState>>, enable: bool){
+    state.lock().unwrap().music_player.toggle_bit_perfect(enable);
+}

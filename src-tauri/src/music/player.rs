@@ -95,8 +95,6 @@ impl MusicPlayer {
                         mpv.set_property("audio-samplerate", "0")?; // 0 = use source sample rate
                         mpv.set_property("audio-channels", "auto")?; // Preserve channel layout
 
-                        mpv.set_property("audio-exclusive", "yes")?;
-
                         #[cfg(target_os = "windows")]
                         mpv.set_property("ao", "wasapi")?;
 
@@ -478,6 +476,11 @@ impl MusicPlayer {
                 .set_property("af", "")
                 .unwrap();
         }
+    }
+
+    pub fn toggle_bit_perfect(&self, enable: bool){
+        GLOBAL_MUSIC_MPV.get().unwrap()
+            .set_property("audio-exclusive", if enable { "yes" } else { "no" }).ok();
     }
 
     #[cfg(desktop)]
