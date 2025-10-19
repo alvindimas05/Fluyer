@@ -35,10 +35,6 @@ function configureIcon() {
 			weight = "bold";
 			break;
 	}
-	switch ($iconTheme) {
-		case IconThemeType.Lucide:
-            iconSize = 90;
-	}
 }
 
 $effect(configureIcon);
@@ -47,7 +43,7 @@ $effect(configureIcon);
 {#if Component}
     <div class="w-full h-full aspect-square m-auto {classes} {props.class}"
         style={props.style}>
-        <Component class="w-[{iconSize}%] h-full" {color} {weight} />
+        <Component class="w-full h-full text-[100%] {$iconTheme === IconThemeType.Lucide && 'p-[10%]'}" {color} {weight} />
     </div>
 {:else}
     <span class="text-red-500">Icon not found</span>
