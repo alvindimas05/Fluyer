@@ -9,8 +9,8 @@ import {
     Lock,
     Search,
     Music2,
-    PauseCircle,
-    PlayCircle,
+    Pause,
+    Play,
     HelpCircle,
     ListPlus,
     Repeat,
@@ -30,8 +30,8 @@ import {
 
 const iconRegistryLucide = {
 	[IconType.Unknown]: HelpCircle,
-	[IconType.Play]: PlayCircle,
-	[IconType.Pause]: PauseCircle,
+	[IconType.Play]: Play,
+	[IconType.Pause]: Pause,
 	[IconType.Previous]: SkipBack,
 	[IconType.Next]: SkipForward,
 	[IconType.Playing]: Music2,
