@@ -77,7 +77,6 @@ let data = $derived.by(() => {
 			return matchesAlbum && (!hasSearch || matchesSearch);
 		}
 	}));
-    if(!$filterBarSortAsc) list.reverse();
 
 	let _folderList = $folderList.filter((folder) => {
 		const search = $filterSearch.toLowerCase();
@@ -86,6 +85,8 @@ let data = $derived.by(() => {
     if(!$filterBarSortAsc) _folderList.reverse();
 
 	if ($filterAlbum) list = MusicController.sortMusicList(list);
+
+    if(!$filterBarSortAsc) list.reverse();
 
 	const result: any[][] = [];
 	for (let i = 0; i < list.length; i += columnCount) {
