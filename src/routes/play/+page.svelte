@@ -26,6 +26,7 @@ import {
 import { showThenFade } from "$lib/controllers/UIController";
 import Glass from "$lib/glass/Glass.svelte";
 import LyricController from "$lib/controllers/LyricController";
+import View from "$lib/components/View.svelte";
 
 let music = $state(MusicController.currentMusic());
 let progressPercentage = $state(MusicController.progressPercentage());
@@ -225,14 +226,11 @@ function scrollToSelectedLyric() {
         class="md:row-[2] md:col-[1] order-last md:order-2 {isMobile() ? 'px-5' : 'px-4'} pb-5 pt-2 {isMobile() && 'mb-5'}
         md:p-0 md:pb-0 flex {lyrics.length > 0 ? 'justify-end' : 'justify-center'}"
     >
-        <Glass class="w-full h-fit md:mt-4 !rounded-xl bg-gray-400/10
+        <View class="w-full h-fit md:mt-4 rounded-xl
+            px-4 py-5
             md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
             md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%]
-            md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
-            wrapperClass="!rounded-xl"
-            padding="1.2rem"
-            paddingHover="1.5rem"
-            enableHoverAnimation={true}>
+            md-xhdpi:w-[80%] lg-xhdpi:w-[70%]">
             <div class="w-full grid grid-cols-[auto,1fr,auto]">
                 <div class="text-xs lg-mdpi:text-sm flex w-12">
                     <span class="self-end opacity-75"
@@ -394,7 +392,7 @@ function scrollToSelectedLyric() {
                     </div>
                 </div>
             {/if}
-        </Glass>
+        </View>
     </div>
     {#if lyrics.length > 0}
         <div

@@ -10,7 +10,8 @@ import {MusicListType} from "$lib/home/music/types";
 import UIController from "$lib/controllers/UIController";
 import Glass from "$lib/glass/Glass.svelte";
 import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
-import Toggle from "$lib/toggle/Toggle.svelte";
+import Toggle from "$lib/components/Toggle.svelte";
+import View from "$lib/components/View.svelte";
 
 const rules = [
     // xhdpi (DPR > 2.0)
@@ -84,7 +85,7 @@ onMount(() => {
         <div>
             <button class="h-full aspect-square pointer-events-auto"
                 onclick={toggleSort}>
-                <Glass class="w-full h-full bg-gray-400/20">
+                <View class="w-full h-full rounded">
                     <div class="w-full h-full grid items-center justify-center">
                         <div class="w-5">
                             {#if $filterBarSortAsc}
@@ -94,7 +95,7 @@ onMount(() => {
                             {/if}
                         </div>
                     </div>
-                </Glass>
+                </View>
             </button>
         </div>
         <Toggle class="w-full h-full pointer-events-auto"
@@ -103,10 +104,8 @@ onMount(() => {
             uncheckedIcon={IconType.Note}
             onchange={UIController.toggleMusicListType} />
     </div>
-    <Glass class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3 bg-gray-400/20
-        {isMacos() ? 'order-last' : 'order-first'}"
-        padding="6px"
-        paddingHover="8px">
+    <View class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
+        {isMacos() ? 'order-last' : 'order-first'} rounded">
         <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2">
             <input
                     class="w-full h-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"
@@ -117,5 +116,5 @@ onMount(() => {
                 <Icon type={IconType.Search} />
             </div>
         </div>
-    </Glass>
+    </View>
 </div>

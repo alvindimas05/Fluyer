@@ -3,6 +3,7 @@ import type {IconType} from "$lib/icon/types";
 import Glass from "$lib/glass/Glass.svelte";
 import {onDestroy, onMount} from "svelte";
 import Icon from "$lib/icon/Icon.svelte";
+import View from "$lib/components/View.svelte";
 
 interface Props {
     class?: string,
@@ -48,7 +49,7 @@ onDestroy(() => {
 });
 </script>
 
-<Glass class="bg-gray-400/20 {props.class}" padding="0" bind:thisElement={toggleElement}>
+<View class="rounded {props.class}" bind:thisElement={toggleElement}>
     <label class="w-full h-full relative inline-flex items-center cursor-pointer">
         <input class="sr-only" type="checkbox" onchange={handleChange} bind:checked />
         <!-- Toggle thumb with icon -->
@@ -65,4 +66,4 @@ onDestroy(() => {
             {/if}
         </div>
     </label>
-</Glass>
+</View>

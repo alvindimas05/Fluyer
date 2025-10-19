@@ -1,183 +1,46 @@
 <script lang="ts">
-import {isAndroid, isMacos, isWindows} from "$lib/platform";
-import * as uuid from 'uuid';
+import { isAndroid } from "$lib/platform";
 
 interface Props {
     children?: import("svelte").Snippet;
     class?: string;
-    wrapperClass?: string;
     style?: string;
-    wrapperStyle?: string;
-    padding?: string;
-    paddingHover?: string;
     showShine?: boolean;
     shineColor?: string;
     showShadow?: boolean;
-    enableHoverAnimation?: boolean;
-    // Note: Enable if needed, disabled by default to increase performance :)
     enableBlur?: boolean;
-    glassEffectScale?: number;
-    events?: any;
+    thisElement?: HTMLDivElement;
+    onclick?: (event: MouseEvent & {
+        currentTarget: (EventTarget & HTMLDivElement)
+    }) => void;
 }
 
-const componentId = uuid.v4();
-let glassEffectId = `glass-distortion-${componentId}`;
-let { children, showShine = true, enableHoverAnimation = false, enableBlur = false, glassEffectScale = 0,
-    thisElement = $bindable(), ...props} = $props();
+let {
+    children,
+    shineColor = 'rgba(255, 255, 255, 0.5)',
+    enableBlur = false,
+    thisElement = $bindable<HTMLDivElement>(),
+    ...props
+}: Props = $props();
+
+const getBlurClass = () => {
+    if (!enableBlur) return '';
+    return isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md';
+};
+
+const getHoverClasses = () => {
+    if (isAndroid()) return '';
+    return 'transition-all duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)]';
+};
 </script>
 
-<div class="liquidGlass-wrapper
-    {enableBlur && !isWindows() ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
-    {enableHoverAnimation && !isAndroid() ? 'hover-animation' : ''}
-    {props.class}"
-    style="
-        --padding: {props.padding || '0'};
-        --padding-hover: {props.paddingHover || '0'};
-        {isAndroid() ? '-webkit-transform: translate3d(0, 0, 0);' : ''}
-        {props.style}
-    " {...props.events}
-    bind:this={thisElement}>
-    {#if isWindows()}
-      <div class="liquidGlass-effect
-        {enableBlur ? (isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md') : ''}
-        {props.wrapperClass}"
-        style="filter: url(#{glassEffectId}); {props.wrapperStyle}"></div>
-    {/if}
-    {#if showShine}
-        <div class="liquidGlass-shine {props.wrapperClass}" style="
-            --shine-color: {props.shineColor || 'rgba(255, 255, 255, 0.5)'};
-            {props.wrapperStyle}"></div>
-    {/if}
-    <div class="liquidGlass-text w-full h-full {props.wrapperClass}" style="{props.wrapperStyle}">
-        {@render children?.()}
-    </div>
+<div
+    class="{getBlurClass()} {getHoverClasses()}
+        shadow-[inset_2px_2px_1px_0_var(--shine-color),inset_-1px_-1px_1px_1px_var(--shine-color),0_10px_15px_-3px_rgb(0_0_0_/_0.1),0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
+        {props.class || ''}"
+    style="--shine-color: {shineColor}; {isAndroid() ? '-webkit-transform: translate3d(0, 0, 0);' : ''} {props.style || ''}"
+    onclick={props.onclick}
+    bind:this={thisElement}
+>
+    {@render children?.()}
 </div>
-
-<!--{#if isWindows() && glassEffectScale > 0}-->
-<!--    <svg style="display: none">-->
-<!--        <filter-->
-<!--                id="{glassEffectId}"-->
-<!--                x="0%"-->
-<!--                y="0%"-->
-<!--                width="100%"-->
-<!--                height="100%"-->
-<!--                filterUnits="objectBoundingBox"-->
-<!--        >-->
-<!--            <feTurbulence-->
-<!--                    type="fractalNoise"-->
-<!--                    baseFrequency="0.01 0.01"-->
-<!--                    numOctaves="1"-->
-<!--                    seed="5"-->
-<!--                    result="turbulence"-->
-<!--            />-->
-<!--            &lt;!&ndash; Seeds: 14, 17,  &ndash;&gt;-->
-
-<!--            <feComponentTransfer in="turbulence" result="mapped">-->
-<!--                <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />-->
-<!--                <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />-->
-<!--                <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />-->
-<!--            </feComponentTransfer>-->
-
-<!--            <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />-->
-
-<!--            <feSpecularLighting-->
-<!--                    in="softMap"-->
-<!--                    surfaceScale="5"-->
-<!--                    specularConstant="1"-->
-<!--                    specularExponent="100"-->
-<!--                    lighting-color="white"-->
-<!--                    result="specLight"-->
-<!--            >-->
-<!--                <fePointLight x="-200" y="-200" z="300" />-->
-<!--            </feSpecularLighting>-->
-
-<!--            <feComposite-->
-<!--                    in="specLight"-->
-<!--                    operator="arithmetic"-->
-<!--                    k1="0"-->
-<!--                    k2="1"-->
-<!--                    k3="1"-->
-<!--                    k4="0"-->
-<!--                    result="litImage"-->
-<!--            />-->
-
-<!--            <feDisplacementMap-->
-<!--                    in="SourceGraphic"-->
-<!--                    in2="softMap"-->
-<!--                    scale={glassEffectScale}-->
-<!--                    xChannelSelector="R"-->
-<!--                    yChannelSelector="G"-->
-<!--            />-->
-<!--        </filter>-->
-<!--    </svg>-->
-<!--{/if}-->
-
-<style lang="scss">
-  /* LIQUID GLASS STYLES */
-
-  .liquidGlass-wrapper {
-    position: relative;
-    display: flex;
-    overflow: hidden;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border-radius: 2rem;
-    padding: var(--padding);
-
-    color: black;
-
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
-
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
-  }
-
-  .liquidGlass-effect {
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-
-    overflow: hidden;
-    isolation: isolate;
-    pointer-events: none;
-  }
-
-  .liquidGlass-tint {
-    z-index: 1;
-    position: absolute;
-    inset: 0;
-    //background: rgba(255, 255, 255, 0.25);
-    pointer-events: none;
-  }
-
-  .liquidGlass-shine {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-
-    overflow: hidden;
-
-    box-shadow: inset 2px 2px 1px 0 var(--shine-color),
-    inset -1px -1px 1px 1px var(--shine-color);
-    pointer-events: none;
-  }
-
-  .liquidGlass-text {
-    z-index: 3;
-    color: black;
-  }
-
-  .liquidGlass-wrapper,
-  .liquidGlass-wrapper > div {
-    border-radius: 2rem;
-  }
-
-  .hover-animation:hover {
-    padding: var(--padding-hover);
-    border-radius: 2.5rem;
-  }
-
-  .hover-animation:hover > div {
-    border-radius: 2.5rem;
-  }
-</style>

@@ -23,6 +23,7 @@ import {
 import type { Unsubscriber } from "svelte/store";
 import Glass from "$lib/glass/Glass.svelte";
 import {playerBarHeight} from "$lib/stores/playerbar";
+import View from "$lib/components/View.svelte";
 
 const tooltipMargin = 12;
 
@@ -224,13 +225,8 @@ onDestroy(() => {
                 step={MusicConfig.step}
         />
     </div>
-    <Glass class="bg-gray-400/20"
-        shineColor="rgba(255, 255, 255, 0.4)"
-        padding="0.5rem"
-        paddingHover="0.7rem"
-        enableBlur={true}
-        enableHoverAnimation={true}
-        glassEffectScale={50}>
+    <View class="bg-gray-400/30 px-3 py-2 hover:px-4 hover:py-3 rounded-full"
+        glassEnableBlur={true}>
         <div class="w-full grid grid-cols-[auto_min-content] md:grid-cols-3 py-1">
             <div class="flex items-center md:gap-2">
                 <button
@@ -338,5 +334,5 @@ onDestroy(() => {
                 </div>
             </div>
         </div>
-    </Glass>
+    </View>
 </div>

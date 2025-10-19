@@ -16,11 +16,12 @@ import SettingIconTheme from "$lib/settings/icon-theme/SettingIconTheme.svelte";
 import Glass from "$lib/glass/Glass.svelte";
 import SettingMusicPlayerConfiguration
     from "$lib/settings/music-player-configuration/SettingMusicPlayerConfiguration.svelte";
+import View from "$lib/components/View.svelte";
 let isLoading = $derived($settingIsLoading);
 </script>
 
 <div class="w-full h-full md:px-3 md:pb-4 md:pt-10">
-    <Glass class="w-full h-full !rounded-xl" wrapperClass="!rounded-xl">
+    <View class="w-full h-full rounded-xl">
         <div class="w-full h-full grid grid-rows-[min-content_auto_min-content] py-5 text-white"
             style="{isMobile() && `padding-top: ${$mobileStatusBarHeight}px;`}
                 padding-bottom: {$mobileNavigationBarHeight > 0 ? $mobileNavigationBarHeight : 24}px;">
@@ -41,5 +42,5 @@ let isLoading = $derived($settingIsLoading);
                 <div>Back</div>
             </button>
         </div>
-    </Glass>
+    </View>
 </div>

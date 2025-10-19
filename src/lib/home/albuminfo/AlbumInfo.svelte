@@ -11,6 +11,7 @@ import {folderCurrent} from "$lib/stores/folder";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import Glass from "$lib/glass/Glass.svelte";
 import ToastController from "$lib/controllers/ToastController";
+import View from "$lib/components/View.svelte";
 
 let album = $derived($filterAlbum);
 let showBackButton = $derived.by(async () => {
@@ -76,10 +77,8 @@ async function playShuffle() {
 }
 </script>
 {#if album || $folderCurrent}
-    <Glass class="mx-3 mb-2 !rounded-xl bg-gray-400/10"
-        wrapperClass="md:grid grid-cols-[auto_max-content] px-2 !rounded-xl
-        box-border animate__animated animate__fadeIn"
-        padding="0.6rem">
+    <View class="mx-3 mb-2 bg-gray-400/20 md:grid grid-cols-[auto_max-content] px-4 py-2 rounded-xl
+        box-border animate__animated animate__fadeIn">
         <div class="grid items-center">
             <div class="text-sm md:text-base font-medium text-white overflow-hidden">
                 <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">{label}</p>
@@ -111,7 +110,7 @@ async function playShuffle() {
                 </div>
             {/await}
         </div>
-    </Glass>
+    </View>
 {:else}
     <div></div>
 {/if}

@@ -21,6 +21,7 @@ import Glass from "$lib/glass/Glass.svelte";
 import {playerBarHeight} from "$lib/stores/playerbar";
 import {filterBarHeight} from "$lib/stores/filterbar";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import View from "$lib/components/View.svelte";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
@@ -147,10 +148,8 @@ onMount(() => {
 	style="height: calc(100% - {$playerBarHeight}px - {paddingTop}px);
 	top: {paddingTop}px;"
 	onmouseleave={onMouseLeave}>
-	<Glass enableBlur={true}
-		glassEffectScale={50}
-	    class="bg-gray-400/20
-			h-full p-3 !rounded-md pointer-events-auto
+	<View glassEnableBlur={true}
+        class="bg-gray-400/30 pointer-events-auto h-full p-3 rounded-lg
 			animate__animated
 			{isShowing
 				? (type === SidebarType.Right
@@ -159,15 +158,13 @@ onMount(() => {
 					: (type === SidebarType.Right
 					? 'animate__slideOutRight'
 					: 'animate__slideOutLeft')}
+            {props.class}
 		"
-		wrapperClass="!rounded-md {props.class}"
-		padding="12px"
-	    shineColor="rgba(255, 255, 255, 0.4)"
 		style="
 			width: {sidebarWidth - 24}px;
 			animation-duration: {isLinux() ? '350ms' : '500ms'};
 		"
 	>
 		{@render children?.()}
-	</Glass>
+	</View>
 </div>
