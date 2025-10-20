@@ -113,7 +113,7 @@ onDestroy(() => {
 </script>
 
 <svelte:window onresize={updateSize} />
-<div class="h-full px-3 text-white">
+<div class="h-full px-3">
 	{#if data && columnCount}
 		<VList class="scrollbar-hidden" {data}
 		   style="padding-bottom: {$playerBarHeight}px;"

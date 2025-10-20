@@ -108,7 +108,7 @@ onMount(() => {
         {isMacos() ? 'order-last' : 'order-first'} rounded">
         <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2 py-[6px]">
             <input
-                    class="w-full h-full bg-transparent placeholder:text-white/70 text-white outline-none text-sm"
+                    class="w-full h-full bg-transparent placeholder:text-white/70 outline-none text-sm"
                     placeholder="Search..."
                     bind:value={$filterSearch}
             />

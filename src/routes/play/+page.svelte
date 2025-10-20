@@ -206,7 +206,7 @@ function scrollToSelectedLyric() {
         ${lyrics.length > 1 ? "justify-end" : "justify-center"}`}
     >
         <div
-            class="w-full text-white {lyrics.length > 0 && 'ms-auto'}
+            class="w-full {lyrics.length > 0 && 'ms-auto'}
             md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
             md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%]
             md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"

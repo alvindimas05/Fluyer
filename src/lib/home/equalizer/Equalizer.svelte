@@ -8,6 +8,8 @@ import UIController from "$lib/controllers/UIController";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import Glass from "$lib/glass/Glass.svelte";
 import { onMount } from "svelte";
+import View from "$lib/components/View.svelte";
+import Button from "$lib/components/Button.svelte";
 const LABELS = [
 	65, // 1b  - Sub-bass
 	92, // 2b
@@ -52,29 +54,21 @@ onMount(() => {
     grid items-center justify-items-center pointer-events-none
     {isMounted ? '' : 'invisible'}
     animate__animated {$equalizerShow ? 'animate__slideInUp' : 'animate__slideOutDown'}">
-    <Glass class="w-[calc(100%-1.5rem)] md:w-fit h-[50vh] bg-gray-400/20 pointer-events-auto !rounded-lg"
-        wrapperClass="p-4 grid grid-rows-[min-content_auto] !rounded-lg"
-        enableBlur={true} enableHoverAnimation={!isMacos()}
-        glassEffectScale={100}>
+    <View class="grid grid-rows-[min-content_auto] w-[calc(100%-1.5rem)] md:w-fit h-[50vh] bg-gray-400/20 pointer-events-auto rounded-lg p-4"
+        glassEnableBlur={true}>
         <div class="w-full grid grid-cols-2">
             <div class="flex justify-start">
                 <button class="w-8 my-2 ms-2"
                     onclick={() => UIController.toggleEqualizer(false)}><Icon type={IconType.Close} /></button>
             </div>
             <div class="flex justify-end">
-                <Glass
-                        class="w-fit text-white text-start px-3 my-2 !rounded-md
+                <Button
+                        class="h-fit px-3 py-2 rounded-md
                         hover:bg-white/10 cursor-pointer"
-                        wrapperClass="!rounded-md"
-                        padding="0.5rem"
-                        paddingHover="0.6rem"
-                        enableHoverAnimation={!isMacos()}
-                        events={{
-                            onclick: MusicController.resetEqualizer
-                        }}
+                        onclick={MusicController.resetEqualizer}
                 >
                     <div>Reset</div>
-                </Glass>
+                </Button>
             </div>
         </div>
         <div class="w-full grid grid-cols-[repeat(18,1fr)] overflow-auto scrollbar-hidden">
@@ -94,7 +88,7 @@ onMount(() => {
                 </div>
             {/each}
         </div>
-    </Glass>
+    </View>
 </div>
 
 <style lang="scss">

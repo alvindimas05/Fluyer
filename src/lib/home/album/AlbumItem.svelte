@@ -37,7 +37,7 @@ async function setFilterAlbum() {
 </script>
 
 <div
-    class="h-fit px-3 pb-3 text-white row-[1] col-auto"
+    class="h-fit px-3 pb-3 row-[1] col-auto"
 >
     <div class="relative w-full">
         {#if isValidFilterAlbum}

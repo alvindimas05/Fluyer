@@ -12,7 +12,7 @@ const { onclick, label, icon }: Props = $props();
 </script>
 <div class="w-full px-5">
     <button
-            class="w-full text-white text-start px-3 py-2 my-3
+            class="w-full text-start px-3 py-2 my-3
         bg-white/5 border border-white/30 rounded-lg shadow-md
         hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30
         transition-all duration-200

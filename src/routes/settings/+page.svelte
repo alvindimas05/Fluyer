@@ -22,10 +22,10 @@ let isLoading = $derived($settingIsLoading);
 
 <div class="w-full h-full md:px-3 md:pb-4 md:pt-10">
     <View class="w-full h-full rounded-xl">
-        <div class="w-full h-full grid grid-rows-[min-content_auto_min-content] py-5 text-white"
+        <div class="w-full h-full grid grid-rows-[min-content_auto_min-content] py-5"
             style="{isMobile() && `padding-top: ${$mobileStatusBarHeight}px;`}
                 padding-bottom: {$mobileNavigationBarHeight > 0 ? $mobileNavigationBarHeight : 24}px;">
-            <p class="text-2xl font-semibold text-white mb-4 mx-5">Settings</p>
+            <p class="text-2xl font-semibold mb-4 mx-5">Settings</p>
             <div class="w-full overflow-auto mb-3 scrollbar-hidden">
                 <SettingMusicPlayerConfiguration />
                 <SettingMusicPaths />

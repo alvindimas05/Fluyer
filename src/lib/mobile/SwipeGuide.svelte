@@ -24,7 +24,7 @@ import MobileController from "$lib/controllers/MobileController";
     <div class="mt-3">Swipe in the opposite direction to close</div>
 
     <div class="w-full grid justify-center">
-        <button class="w-fit bg-gray-500/80 text-white rounded-md px-3 py-2 mt-3"
+        <button class="w-fit bg-gray-500/80 rounded-md px-3 py-2 mt-3"
             onclick={MobileController.hideSwipeGuide}>Got it</button>
     </div>
 </div>
