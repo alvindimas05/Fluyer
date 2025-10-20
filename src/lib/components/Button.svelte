@@ -1,5 +1,6 @@
 <script lang="ts">
 import Glass from "$lib/glass/Glass.svelte";
+import View from "$lib/components/View.svelte";
 
 interface Props {
     children?: import("svelte").Snippet;
@@ -10,9 +11,20 @@ interface Props {
 }
 
 const props: Props = $props();
+
+let isPressed = $state(false);
+
+const handleClick = (event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement }) => {
+    isPressed = true;
+
+    setTimeout(() => isPressed = false, 150);
+
+    setTimeout(() => props.onclick && props.onclick(event), 200);
+};
 </script>
 
-<Glass class={props.class}
-    onclick={props.onclick}>
+<View
+    class="cursor-pointer {props.class} {isPressed ? 'scale-95' : 'scale-100'} active:scale-95"
+    onclick={handleClick}>
     {@render props.children?.()}
-</Glass>
+</View>

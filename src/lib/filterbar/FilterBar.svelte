@@ -12,6 +12,7 @@ import Glass from "$lib/glass/Glass.svelte";
 import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
 import Toggle from "$lib/components/Toggle.svelte";
 import View from "$lib/components/View.svelte";
+import Button from "$lib/components/Button.svelte";
 
 const rules = [
     // xhdpi (DPR > 2.0)
@@ -60,7 +61,6 @@ function updateFilterBarHeight(){
 
 function toggleSort(){
     $filterBarSortAsc = !$filterBarSortAsc;
-    console.log($filterBarSortAsc);
 }
 
 function updateSize(){
@@ -83,20 +83,16 @@ onMount(() => {
     bind:this={element}>
     <div class="hidden sm:grid mx-3 pointer-events-none grid-cols-[auto_30%] gap-x-5 {isMacos() ? 'justify-end' : 'justify-start'}">
         <div>
-            <button class="h-full aspect-square pointer-events-auto"
+            <Button class="h-full aspect-square rounded grid justify-center pointer-events-auto"
                 onclick={toggleSort}>
-                <View class="w-full h-full rounded">
-                    <div class="w-full h-full grid items-center justify-center">
-                        <div class="w-5">
-                            {#if $filterBarSortAsc}
-                                <Icon type={IconType.SortAsc} />
-                            {:else}
-                                <Icon type={IconType.SortDesc} />
-                            {/if}
-                        </div>
-                    </div>
-                </View>
-            </button>
+                <div class="w-5">
+                    {#if $filterBarSortAsc}
+                        <Icon type={IconType.SortAsc} />
+                    {:else}
+                        <Icon type={IconType.SortDesc} />
+                    {/if}
+                </div>
+            </Button>
         </div>
         <Toggle class="w-full h-full pointer-events-auto"
             checked={$musicListType === MusicListType.Folder}

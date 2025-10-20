@@ -7,6 +7,9 @@ interface Props {
     style?: string;
     thisElement?: HTMLDivElement;
     glassEnableBlur?: boolean;
+    onclick?: (event: MouseEvent & {
+        currentTarget: EventTarget & HTMLDivElement;
+    }) => void;
 }
 
 let {
@@ -17,6 +20,10 @@ let {
 }: Props = $props();
 </script>
 
-<Glass class="bg-gray-300/10 {props.class}" style={props.style} enableBlur={glassEnableBlur} bind:thisElement={thisElement}>
+<Glass class="bg-gray-300/10 {props.class}"
+    style={props.style}
+    enableBlur={glassEnableBlur}
+    bind:thisElement={thisElement}
+    onclick={props.onclick}>
     {@render children?.()}
 </Glass>

@@ -78,7 +78,8 @@ async function playShuffle() {
 </script>
 {#if album || $folderCurrent}
     <View class="mx-3 mb-2 md:grid grid-cols-[auto_max-content] px-4 py-2 rounded-xl
-        box-border animate__animated animate__fadeIn">
+        box-border animate__animated animate__fadeIn
+        hover:px-5 hover:py-3">
         <div class="grid items-center">
             <div class="text-sm md:text-base font-medium overflow-hidden">
                 <p class="whitespace-nowrap overflow-x-hidden animate-scroll-overflow-text">{label}</p>
