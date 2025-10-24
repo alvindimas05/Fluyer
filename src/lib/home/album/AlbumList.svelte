@@ -37,6 +37,7 @@ const rules = [
 ];
 let itemWidth = $state(0.5 * window.innerWidth);
 let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight);
+let itemHeight = $derived(itemWidth + 52);
 
 function updateSize() {
 	updateItemWidth();
@@ -125,13 +126,13 @@ onDestroy(() => {
 });
 
 $effect(() => {
-	$swipeMinimumTop = paddingTop;
+	$swipeMinimumTop = paddingTop + itemHeight;
 });
 </script>
 
 <svelte:window onresize={updateSize} />
 
-<div class="w-full" style="height: {itemWidth + 52}px;">
+<div class="w-full" style="height: {itemHeight}px;">
     <!-- Note: Ignore this  -->
     <VList onwheel={onMouseWheel}
            class="scrollbar-hidden overflow-y-clip"
