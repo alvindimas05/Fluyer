@@ -13,6 +13,7 @@ import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
 import Toggle from "$lib/components/Toggle.svelte";
 import View from "$lib/components/View.svelte";
 import Button from "$lib/components/Button.svelte";
+import Input from "$lib/components/Input.svelte";
 
 const rules = [
     // xhdpi (DPR > 2.0)
@@ -100,17 +101,11 @@ onMount(() => {
             uncheckedIcon={IconType.Note}
             onchange={UIController.toggleMusicListType} />
     </div>
-    <View class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
-        {isMacos() ? 'order-last' : 'order-first'} rounded">
-        <div class="w-full h-full grid grid-cols-[auto_min-content] items-center cursor-text px-2 py-[6px]">
-            <input
-                    class="w-full h-full bg-transparent placeholder:text-white/70 outline-none text-sm"
-                    placeholder="Search..."
-                    bind:value={$filterSearch}
-            />
-            <div class="w-4">
-                <Icon type={IconType.Search} />
-            </div>
-        </div>
-    </View>
+    <Input
+        class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
+            {isMacos() ? 'order-last' : 'order-first'} rounded"
+        icon={IconType.Search}
+        placeholder="Search..."
+        bind:value={$filterSearch}
+    />
 </div>
