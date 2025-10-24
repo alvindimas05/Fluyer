@@ -25,11 +25,10 @@ let {
 
 const getBlurClass = () => {
     if (!enableBlur) return '';
-    return isAndroid() ? 'backdrop-blur-sm' : 'backdrop-blur-md';
+    return isAndroid() ? 'backdrop-blur-xs' : 'backdrop-blur-md';
 };
 
 const getHoverClasses = () => {
-    if (isAndroid()) return '';
     return 'transition-all duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)]';
 };
 </script>

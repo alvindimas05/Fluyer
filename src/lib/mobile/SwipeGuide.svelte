@@ -2,6 +2,7 @@
 import { DotLottieSvelte } from "@lottiefiles/dotlottie-svelte";
 import { swipeMinimumTop } from "$lib/stores";
 import MobileController from "$lib/controllers/MobileController";
+import Button from "$lib/components/Button.svelte";
 </script>
 
 <div class="fixed top-0 left-0 w-full h-full bg-gray-700/80 z-10 font-semibold text-center"
@@ -24,7 +25,7 @@ import MobileController from "$lib/controllers/MobileController";
     <div class="mt-3">Swipe in the opposite direction to close</div>
 
     <div class="w-full grid justify-center">
-        <button class="w-fit bg-gray-500/80 rounded-md px-3 py-2 mt-3"
-            onclick={MobileController.hideSwipeGuide}>Got it</button>
+        <Button class="w-fit rounded-md px-3 py-2 mt-3"
+            onclick={MobileController.hideSwipeGuide}>Got it</Button>
     </div>
 </div>

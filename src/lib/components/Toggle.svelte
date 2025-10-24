@@ -40,6 +40,14 @@ function listenResize(){
     toggleObserver.observe(toggleElement);
 }
 
+let isPressed = $state(false);
+
+const handleClick = (event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement }) => {
+    isPressed = true;
+
+    setTimeout(() => isPressed = false, 150);
+};
+
 onMount(() => {
     setTimeout(updateProperties, 10);
     listenResize();
@@ -49,7 +57,8 @@ onDestroy(() => {
 });
 </script>
 
-<View class="rounded {props.class}" bind:thisElement={toggleElement}>
+<View class="rounded  {isPressed ? 'scale-95' : 'scale-100'} {props.class}"
+    bind:thisElement={toggleElement} onclick={handleClick}>
     <label class="w-full h-full relative inline-flex items-center cursor-pointer">
         <input class="sr-only" type="checkbox" onchange={handleChange} bind:checked />
         <!-- Toggle thumb with icon -->

@@ -6,6 +6,7 @@ import { isAndroid, isDesktop, isMobile } from "$lib/platform";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
+import Button from "$lib/components/Button.svelte";
 
 let animatedClasses = $state("animate__fadeIn");
 
@@ -51,14 +52,14 @@ function onAnimationEnd() {
                 Select your music folder to get started.
             {/if}
         </p>
-        <button
-            class="border border-gray-300 bg-gray-500 bg-opacity-10 hover:bg-opacity-20 rounded w-fit mt-5 p-2"
+        <Button
+            class="rounded w-fit mt-5 p-2"
             onclick={requestAction}>
             {#if isAndroid()}
                 Allow Access & Choose Folder
             {:else if isDesktop()}
                 Choose Folder
             {/if}
-        </button>
+        </Button>
     </div>
 </div>
