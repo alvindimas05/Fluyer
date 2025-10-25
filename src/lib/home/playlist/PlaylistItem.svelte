@@ -3,21 +3,22 @@ import type { MusicData } from "../music/types";
 
 interface Props {
     music: MusicData;
+    uuid: string;
 }
 
 import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
-import { isAndroid, isWindows } from "$lib/platform";
+import {musicCurrentIndex, musicPlaylistIds} from "$lib/stores/music";
 
-let { music }: Props = $props();
+let { music, uuid }: Props = $props();
 
-let index = $derived($musicPlaylist.findIndex((m) => m.path === music.path));
+let index = $derived($musicPlaylistIds.indexOf(uuid));
 let isPlaying = $derived($musicCurrentIndex === index);
 let isPrevious = $derived(index < $musicCurrentIndex);
 let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
 
+console.log(index);
 function removePlaylist() {
     MusicController.removeMusic(index);
 }
