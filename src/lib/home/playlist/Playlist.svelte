@@ -159,7 +159,7 @@ onMount(() => {
 
         // Add new items to Muuri grid
         if (newItems.length > 0) {
-            let playlistIds: string[] = [];
+            let playlistIds = $musicReset ? [] : $musicPlaylistIds;
             muuri.add(
                 newItems.map(({ music }) => {
                     const uuid = crypto.randomUUID();
@@ -174,7 +174,7 @@ onMount(() => {
         elementToggleDraggable();
 
         // Store current playlist state for next comparison
-        oldPlaylist = [...playlist];
+        oldPlaylist = playlist;
     });
 });
 

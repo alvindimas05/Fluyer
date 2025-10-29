@@ -72,7 +72,11 @@ function gotoPlaylist() {
                     <div
                             class="w-full h-full bg-black bg-opacity-40 rounded lg:p-1"
                     >
-                        <Icon type={isPrevious ? IconType.Previous : IconType.Next} />
+                        {#if isPrevious}
+                            <Icon type={IconType.Previous} />
+                        {:else}
+                            <Icon type={IconType.Next} />
+                        {/if}
                     </div>
                 {/if}
             </button>
