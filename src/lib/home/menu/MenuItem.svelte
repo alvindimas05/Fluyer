@@ -12,9 +12,9 @@ interface Props {
 const { onclick, icon, label }: Props = $props();
 </script>
 
-<Button class="mx-2 my-3 cursor-pointer bg-gray-300/25 hover:bg-gray-200/35 font-medium tracking-wide
+<Button class="mx-2 my-3 cursor-pointer font-medium tracking-wide
     text-base md:text-lg grid grid-cols-[min-content_auto] gap-3 items-center rounded-md
-    px-3 py-2 hover:px-4 hover:py-3"
+    px-3 py-2 hover:px-[15px] hover:py-[11px]"
     {onclick}>
     <div class="w-6"><Icon type={icon}/></div>
     <div class="text-start">{label}</div>

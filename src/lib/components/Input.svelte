@@ -28,10 +28,14 @@ const handleClick = (event: MouseEvent & { currentTarget: EventTarget & HTMLDivE
 };
 </script>
 
-<View class="{props.class} {isPressed ? 'scale-[.99]' : 'scale-100'}" onclick={handleClick}>
+<View class="{props.class} {isPressed ? 'scale-[.99]' : 'scale-100'}"
+    glassEnableHoverEffect={true}
+    events={{
+        onclick: handleClick,
+        ontouchstart: handleClick,
+    }}>
     <div class="w-full h-full grid items-center cursor-text px-2 py-[6px]
-        {icon && 'grid-cols-[auto_min-content]'}"
-         onclick={handleClick}>
+        {icon && 'grid-cols-[auto_min-content]'}">
         <input
                 class="w-full h-full bg-transparent placeholder:text-white/70 outline-none text-sm"
                 placeholder={props.placeholder}

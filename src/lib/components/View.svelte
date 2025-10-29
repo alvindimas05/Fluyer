@@ -7,23 +7,23 @@ interface Props {
     style?: string;
     thisElement?: HTMLDivElement;
     glassEnableBlur?: boolean;
-    onclick?: (event: MouseEvent & {
-        currentTarget: EventTarget & HTMLDivElement;
-    }) => void;
+    glassEnableHoverEffect?: boolean;
+    events: any;
 }
 
 let {
     glassEnableBlur = false,
+    glassEnableHoverEffect = false,
     children,
     thisElement = $bindable<HTMLDivElement>(),
     ...props
 }: Props = $props();
 </script>
 
-<Glass class="bg-gray-300/10 {props.class}"
+<Glass class="bg-gray-300/10 {glassEnableHoverEffect && 'hover:bg-gray-200/20'} {props.class}"
     style={props.style}
     enableBlur={glassEnableBlur}
     bind:thisElement={thisElement}
-    onclick={props.onclick}>
+    events={props.events}>
     {@render children?.()}
 </Glass>

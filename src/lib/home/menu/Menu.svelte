@@ -14,11 +14,6 @@ import {settingBitPerfectMode} from "$lib/stores/setting";
 
 <Sidebar type={SidebarType.Left}>
     <p class="text-[1.2rem] md:text-[1.5rem] font-semibold px-3 py-2">Menu</p>
-    <div class="md:hidden">
-        <MenuItem label="Browse {$musicListType === MusicListType.Folder ? 'All' : 'Folder'}"
-            icon={$musicListType === MusicListType.Folder ? IconType.Note : IconType.Folder}
-            onclick={UIController.toggleMusicListType}/>
-    </div>
     <MenuItem label="Play Screen" icon={IconType.Fullscreen}
               onclick={() => PageController.goto(PageRoutes.PLAY)}/>
     {#if isDesktop() && !$settingBitPerfectMode}

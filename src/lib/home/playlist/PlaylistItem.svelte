@@ -18,7 +18,6 @@ let isPlaying = $derived($musicCurrentIndex === index);
 let isPrevious = $derived(index < $musicCurrentIndex);
 let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
 
-console.log(index);
 function removePlaylist() {
     MusicController.removeMusic(index);
 }

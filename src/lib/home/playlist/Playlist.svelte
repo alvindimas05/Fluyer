@@ -159,7 +159,7 @@ onMount(() => {
 
         // Add new items to Muuri grid
         if (newItems.length > 0) {
-            let playlistIds = $musicPlaylistIds;
+            let playlistIds: string[] = [];
             muuri.add(
                 newItems.map(({ music }) => {
                     const uuid = crypto.randomUUID();

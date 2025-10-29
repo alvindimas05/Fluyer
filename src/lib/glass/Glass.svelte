@@ -10,9 +10,7 @@ interface Props {
     showShadow?: boolean;
     enableBlur?: boolean;
     thisElement?: HTMLDivElement;
-    onclick?: (event: MouseEvent & {
-        currentTarget: (EventTarget & HTMLDivElement)
-    }) => void;
+    events?: any;
 }
 
 let {
@@ -36,10 +34,10 @@ const getHoverClasses = () => {
 <div
     class="{getBlurClass()} {getHoverClasses()}
         shadow-[inset_2px_2px_1px_0_var(--shine-color),inset_-1px_-1px_1px_1px_var(--shine-color),0_10px_15px_-3px_rgb(0_0_0_/_0.1),0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        {props.class || ''}"
+        {props.class ?? ''}"
     style="--shine-color: {shineColor}; {isAndroid() ? '-webkit-transform: translate3d(0, 0, 0);' : ''} {props.style || ''}"
-    onclick={props.onclick}
     bind:this={thisElement}
+    {...props.events}
 >
     {@render children?.()}
 </div>

@@ -58,7 +58,12 @@ onDestroy(() => {
 </script>
 
 <View class="rounded {isPressed ? 'scale-95' : 'scale-100'} {props.class}"
-    bind:thisElement={toggleElement} onclick={handleClick}>
+    glassEnableHoverEffect={true}
+    bind:thisElement={toggleElement}
+    events={{
+        onclick: handleClick,
+        ontouchstart: handleClick,
+    }}>
     <label class="w-full h-full relative inline-flex items-center cursor-pointer">
         <input class="sr-only" type="checkbox" onchange={handleChange} bind:checked />
         <!-- Toggle thumb with icon -->

@@ -17,14 +17,17 @@ let isPressed = $state(false);
 const handleClick = (event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement }) => {
     isPressed = true;
 
-    setTimeout(() => isPressed = false, 150);
+    setTimeout(() => isPressed = false, 100);
 
     setTimeout(() => props.onclick && props.onclick(event), 200);
 };
 </script>
 
 <View
-    class="cursor-pointer {props.class} {isPressed ? 'scale-95' : 'scale-100'} active:scale-95"
-    onclick={handleClick}>
+    class="cursor-pointer {props.class} {isPressed ? 'scale-95' : 'scale-100'}"
+    glassEnableHoverEffect={true}
+    events={{
+        onclick: handleClick,
+    }}>
     {@render props.children?.()}
 </View>
