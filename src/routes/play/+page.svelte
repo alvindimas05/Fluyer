@@ -34,7 +34,7 @@ let progressDurationText = $state(MusicController.progressDurationText());
 let progressDurationNegativeText = $state(
     MusicController.progressDurationText(true),
 );
-let albumImage = $state(MusicController.currentMusicAlbumImage());
+let albumImage = $state(MusicController.currentMusicAlbumImage);
 
 let lyrics: MusicLyric[] = $state([]);
 let selectedLyricIndex = $state(0);
@@ -55,7 +55,7 @@ const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
 });
 const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async () => {
     music = MusicController.currentMusic;
-    albumImage = MusicController.currentMusicAlbumImage();
+    albumImage = MusicController.currentMusicAlbumImage;
     resetLyrics();
 });
 
