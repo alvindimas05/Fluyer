@@ -50,7 +50,7 @@ const UIController = {
 				document.body.focus();
 			}
 
-			if (MusicController.isPlaying()) {
+			if (MusicController.isPlaying) {
 				MusicController.setIsPlaying(false);
 				MusicController.pause();
 			} else MusicController.play();

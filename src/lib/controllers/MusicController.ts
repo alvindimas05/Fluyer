@@ -65,26 +65,34 @@ const MusicController = {
 		LoadingController.setLoadingMusicList(true);
 	},
 
-	isPlaying: () => get(musicIsPlaying),
+	get isPlaying() {
+        return get(musicIsPlaying);
+    },
 	setIsPlaying: (value: boolean) => musicIsPlaying.set(value),
 
-	currentMusic: () => get(musicPlaylist)[get(musicCurrentIndex)] ?? null,
-	currentMusicIndex: () => get(musicCurrentIndex),
+	get currentMusic(){
+        return get(musicPlaylist)[get(musicCurrentIndex)] ?? null;
+    },
+	get currentMusicIndex() {
+        return get(musicCurrentIndex);
+    },
 	setCurrentMusicIndex: (value: number) => musicCurrentIndex.set(value),
-	getMusicByIndex: (index: number) => MusicController.musicPlaylist()[index],
+	getMusicByIndex: (index: number) => MusicController.musicPlaylist[index],
 
-	musicPlaylist: () => get(musicPlaylist),
+	get musicPlaylist(){
+        return get(musicPlaylist);
+    },
 	addMusicPlaylist: (value: MusicData[]) =>
-		musicPlaylist.set([...MusicController.musicPlaylist(), ...value]),
+		musicPlaylist.set([...MusicController.musicPlaylist, ...value]),
 	removeMusicPlaylist: (index: number) => {
-		let playlist = MusicController.musicPlaylist();
+		let playlist = MusicController.musicPlaylist;
 		playlist.splice(index, 1);
 		musicPlaylist.set(playlist);
 	},
 
-	currentMusicAlbumImage: () => {
+	get currentMusicAlbumImage() {
 		return MusicController.getAlbumImageFromMusic(
-			MusicController.currentMusic(),
+			MusicController.currentMusic,
 		);
 	},
 	getAlbumImageFromMusic: async (music: MusicData | null, size: MusicSize | null = null) => {
@@ -114,29 +122,35 @@ const MusicController = {
 		return music.artist.replace(/\|\|/g, ` ${MusicConfig.separator} `);
 	},
 
-	currentMusicDuration: () =>
-		MusicController.currentMusic() != null
+	get currentMusicDuration(){
+		return MusicController.currentMusic != null
 			? MusicController.parseProgressDuration(
-					MusicController.currentMusic()!.duration,
+					MusicController.currentMusic!.duration,
 				)
-			: 0,
-	currentMusicRealDuration: () =>
-		MusicController.currentMusic() != null
-			? MusicController.currentMusicDuration() * 1000
-			: 0,
-	progressValue: () => get(musicProgressValue),
+			: 0;
+    },
+	get currentMusicRealDuration() {
+		return MusicController.currentMusic != null
+			? MusicController.currentMusicDuration * 1000
+			: 0},
+	get progressValue() {
+        return get(musicProgressValue);
+    },
 	setProgressValue: (value: number) => musicProgressValue.set(value),
 
-	progressPercentage: () =>
-		((get(musicProgressValue) - MusicConfig.min) /
-			(MusicConfig.max - MusicConfig.min)) *
-		100,
-	progressDuration: () =>
-		MusicController.currentMusic() != null
-			? (MusicController.progressValue() / MusicConfig.max) *
-				MusicController.currentMusicDuration()
-			: 0,
-	realProgressDuration: () => MusicController.progressDuration() * 1000,
+	get progressPercentage () {
+        return ((get(musicProgressValue) - MusicConfig.min) /
+        (MusicConfig.max - MusicConfig.min)) * 100;
+    },
+	get progressDuration() {
+        return MusicController.currentMusic != null
+            ? (MusicController.progressValue / MusicConfig.max) *
+            MusicController.currentMusicDuration
+            : 0;
+    },
+	get realProgressDuration() {
+        return MusicController.progressDuration * 1000;
+    },
 	parseProgressDuration: (value: number) => value / 1000,
 	parseProgressDurationIntoValue: (value: number, max: number) =>
 		(value / max) * MusicConfig.max,
@@ -161,9 +175,9 @@ const MusicController = {
 	progressDurationText: (negative = false): string => {
 		return MusicController.parseProgressDurationIntoText(
 			negative
-				? MusicController.currentMusicDuration() -
-						MusicController.progressDuration()
-				: MusicController.progressDuration(),
+				? MusicController.currentMusicDuration -
+						MusicController.progressDuration
+				: MusicController.progressDuration,
 			negative,
 		);
 	},
@@ -173,8 +187,8 @@ const MusicController = {
 	) => {
 		return MusicController.parseProgressDurationIntoText(
 			negative
-				? MusicController.currentMusicDuration() * ((100 - value) / 100)
-				: MusicController.currentMusicDuration() * (value / 100),
+				? MusicController.currentMusicDuration * ((100 - value) / 100)
+				: MusicController.currentMusicDuration * (value / 100),
 			negative,
 		);
 	},
@@ -194,7 +208,7 @@ const MusicController = {
 
 	startProgress: ({ resetProgress } = { resetProgress: true }) => {
 		const updateInterval =
-			(MusicController.currentMusicDuration() / MusicConfig.max) *
+			(MusicController.currentMusicDuration / MusicConfig.max) *
 			MusicConfig.step *
 			1000;
 
@@ -205,12 +219,12 @@ const MusicController = {
 			setInterval(() => {
 				MusicController.setProgressValue(
 					Math.min(
-						MusicController.progressValue() + MusicConfig.step,
+						MusicController.progressValue + MusicConfig.step,
 						MusicConfig.max,
 					),
 				);
 
-				if (MusicController.progressValue() >= MusicConfig.max) {
+				if (MusicController.progressValue >= MusicConfig.max) {
 					MusicController.setIsPlaying(false);
 					MusicController.stopProgress();
 					MusicController.resetProgress();
@@ -220,15 +234,15 @@ const MusicController = {
 	},
 
 	previousMusic: () => {
-		if (MusicController.currentMusicIndex() <= 0) return;
-		MusicController.gotoPlaylist(MusicController.currentMusicIndex() - 1);
+		if (MusicController.currentMusicIndex <= 0) return;
+		MusicController.gotoPlaylist(MusicController.currentMusicIndex - 1);
 	},
 
 	nextMusic: async () => {
 		if (
-			MusicController.musicPlaylist().length === 0 ||
-			MusicController.currentMusicIndex() >=
-				MusicController.musicPlaylist().length - 1
+			MusicController.musicPlaylist.length === 0 ||
+			MusicController.currentMusicIndex >=
+				MusicController.musicPlaylist.length - 1
 		)
 			return;
 		MusicController.sendCommandController("next");
@@ -245,7 +259,7 @@ const MusicController = {
 				MusicController.parseProgressDurationIntoValue(
 					MusicController.parseProgressDuration(e.payload.currentPosition),
 					MusicController.parseProgressDuration(
-						MusicController.musicPlaylist()[e.payload.index].duration,
+						MusicController.musicPlaylist[e.payload.index].duration,
 					),
 				),
 			);
@@ -263,12 +277,12 @@ const MusicController = {
 	},
 
 	getParsedDuration: (negative = false) => {
-		if (MusicController.isCurrentMusicFinished()) return null;
+		if (MusicController.isCurrentMusicFinished) return null;
 
 		let seconds = negative
-			? MusicController.currentMusicDuration() -
-				MusicController.progressDuration()
-			: MusicController.progressDuration();
+			? MusicController.currentMusicDuration -
+				MusicController.progressDuration
+			: MusicController.progressDuration;
 
 		return MusicController.parseSecondsIntoText(seconds);
 	},
@@ -308,14 +322,14 @@ const MusicController = {
 	},
 
 	play: async (sendCommand: boolean = true) => {
-		if (MusicController.musicPlaylist().length === 0) return;
+		if (MusicController.musicPlaylist.length === 0) return;
 		if (
-			MusicController.isCurrentMusicFinished() &&
-			MusicController.isProgressValueEnd() &&
-			MusicController.currentMusicIndex() <
-				MusicController.musicPlaylist().length
+			MusicController.isCurrentMusicFinished &&
+			MusicController.isProgressValueEnd &&
+			MusicController.currentMusicIndex <
+				MusicController.musicPlaylist.length
 		) {
-			MusicController.gotoPlaylist(MusicController.currentMusicIndex());
+			MusicController.gotoPlaylist(MusicController.currentMusicIndex);
 		}
 
 		musicIsPlaying.set(true);
@@ -344,9 +358,9 @@ const MusicController = {
 	},
 	removeMusic: (index: number) => {
 		MusicController.removeMusicPlaylist(index);
-		if (index <= MusicController.currentMusicIndex())
+		if (index <= MusicController.currentMusicIndex)
 			MusicController.setCurrentMusicIndex(
-				MusicController.currentMusicIndex() - 1,
+				MusicController.currentMusicIndex - 1,
 			);
 		invoke(CommandRoutes.MUSIC_PLAYLIST_REMOVE, { index });
 	},
@@ -366,7 +380,7 @@ const MusicController = {
 			resetPlaylist?: boolean;
 		},
 	) => {
-		let isPlaylistEmpty = !MusicController.musicPlaylist().length;
+		let isPlaylistEmpty = !MusicController.musicPlaylist.length;
 		await MusicController.addSinkMusics(
 			musicDataList.map((music) => {
 				const { path, title, artist } = music;
@@ -380,22 +394,23 @@ const MusicController = {
 
 		if (
 			options?.forceSetCurrentMusicIndex ||
-			(MusicController.currentMusicIndex() === -1 && isPlaylistEmpty)
+			(MusicController.currentMusicIndex === -1 && isPlaylistEmpty)
 		)
 			MusicController.setCurrentMusicIndex(0);
 	},
 
-	isCurrentMusicFinished: () => {
+	get isCurrentMusicFinished() {
 		return (
-			MusicController.isProgressValueEnd() ||
-			MusicController.currentMusic() === null ||
+			MusicController.isProgressValueEnd ||
+			MusicController.currentMusic === null ||
 			get(musicProgressIntervalId) === null
 		);
 	},
 
-	isProgressValueEnd: () =>
-		MusicController.progressValue() >= MusicConfig.max ||
-		MusicController.progressValue() <= MusicConfig.min,
+	get isProgressValueEnd() {
+        return MusicController.progressValue >= MusicConfig.max ||
+        MusicController.progressValue <= MusicConfig.min;
+    },
 
 	volume: () => get(musicVolume),
 	setVolume: (value: number) => {
@@ -489,7 +504,7 @@ const MusicController = {
 		MusicController.stopProgress();
 		MusicController.resetProgress();
 
-		if (MusicController.currentMusicIndex() >= 0)
+		if (MusicController.currentMusicIndex >= 0)
 			MusicController.setCurrentMusicIndex(0);
 		musicReset.set(true);
 		await MusicController.addMusicList(musicList, {
@@ -500,8 +515,8 @@ const MusicController = {
 
 	onPlayerBarChange: () => {
 		if (
-			MusicController.isProgressValueEnd() ||
-			MusicController.currentMusicIndex() < 0
+			MusicController.isProgressValueEnd ||
+			MusicController.currentMusicIndex < 0
 		) {
 			MusicController.setProgressValue(0);
 			return;
@@ -509,15 +524,15 @@ const MusicController = {
 
 		setTimeout(() =>
 			MusicController.sendCommandSetPosition(
-				MusicController.realProgressDuration(),
+				MusicController.realProgressDuration,
 			),
 		);
 	},
 
 	updateProgressByPercentage: (percentage: number) => {
 		if (
-			MusicController.isProgressValueEnd() ||
-			MusicController.currentMusicIndex() < 0
+			MusicController.isProgressValueEnd ||
+			MusicController.currentMusicIndex < 0
 		) {
 			MusicController.setProgressValue(0);
 			return;
@@ -529,7 +544,7 @@ const MusicController = {
 					MusicController.parseProgressPercentageIntoValue(percentage),
 				);
 			MusicController.sendCommandSetPosition(
-				MusicController.currentMusicRealDuration() * (percentage / 100),
+				MusicController.currentMusicRealDuration * (percentage / 100),
 			);
 		});
 	},
@@ -552,7 +567,7 @@ const MusicController = {
 		});
 	},
 	playShuffle: async (playlist: MusicData[] | null = null) => {
-		if (!playlist) playlist = MusicController.musicPlaylist();
+		if (!playlist) playlist = MusicController.musicPlaylist;
 		if (playlist.length < 2) return;
 
 		for (let i = playlist.length - 1; i > 0; i--) {
@@ -565,8 +580,8 @@ const MusicController = {
 	playlistMoveto: async (fromIndex: number, toIndex: number) => {
 		if (fromIndex === toIndex) return;
 
-		const currentMusic = MusicController.currentMusic();
-		const playlist = MusicController.musicPlaylist();
+		const currentMusic = MusicController.currentMusic;
+		const playlist = MusicController.musicPlaylist;
 		const music = playlist[fromIndex];
 		playlist.splice(fromIndex, 1);
 		playlist.splice(toIndex, 0, music);
@@ -574,7 +589,7 @@ const MusicController = {
 		await invoke(CommandRoutes.MUSIC_PLAYLIST_MOVETO, {
 			from: fromIndex,
 			to:
-				isDesktop() && fromIndex < MusicController.currentMusicIndex()
+				isDesktop() && fromIndex < MusicController.currentMusicIndex
 					? toIndex + 1
 					: toIndex,
 		});

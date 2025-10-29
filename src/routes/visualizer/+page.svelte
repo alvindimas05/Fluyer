@@ -72,12 +72,12 @@ async function setCurrentVisualizer(index: number){
 }
 
 async function setAudio(music: MusicData | null = null) {
-	if (!MusicController.isPlaying()) return;
+	if (!MusicController.isPlaying) return;
 
 	try {
         let now = performance.now();
 		const buffer = await MusicController.getVisualizerBuffer(
-			music ? music.path : MusicController.currentMusic().path,
+			music ? music.path : MusicController.currentMusic.path,
 		);
 		if (buffer === null) return;
         console.log("MusicController.getVisualizerBuffer took", performance.now() - now, "ms");

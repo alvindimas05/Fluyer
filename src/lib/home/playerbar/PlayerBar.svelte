@@ -34,7 +34,7 @@ let artist = $state(MusicConfig.defaultArtist);
 let albumImage = $derived(MusicController.getAlbumImageFromMusic(oldMusic));
 
 let isPlaying = $derived($musicIsPlaying);
-let progressPercentage = $state(MusicController.progressPercentage());
+let progressPercentage = $state(MusicController.progressPercentage);
 let volumePercentage = $state(MusicController.volumePercentage());
 
 let tooltip: HTMLDivElement;
@@ -53,7 +53,7 @@ const gridRight = (() => {
 })();
 
 function handleButtonPlayPause() {
-	if (MusicController.isPlaying()) {
+	if (MusicController.isPlaying) {
 		MusicController.setIsPlaying(false);
 		MusicController.pause();
 	} else MusicController.play();
@@ -77,7 +77,7 @@ function handleVolumeButton() {
 
 function refresh() {
 	setTimeout(async () => {
-		let music = MusicController.currentMusic();
+		let music = MusicController.currentMusic;
 
 		if (music === null) {
 			title = MusicConfig.defaultTitle;
@@ -168,7 +168,7 @@ let unlistenMusicPlaylist: Unsubscriber;
 
 onMount(() => {
 	unlistenMusicProgressValue = musicProgressValue.subscribe(
-		() => (progressPercentage = MusicController.progressPercentage()),
+		() => (progressPercentage = MusicController.progressPercentage),
 	);
 	unlistenMusicVolume = musicVolume.subscribe(
 		() => (volumePercentage = MusicController.volumePercentage()),

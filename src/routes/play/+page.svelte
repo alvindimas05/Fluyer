@@ -28,8 +28,8 @@ import Glass from "$lib/glass/Glass.svelte";
 import LyricController from "$lib/controllers/LyricController";
 import View from "$lib/components/View.svelte";
 
-let music = $state(MusicController.currentMusic());
-let progressPercentage = $state(MusicController.progressPercentage());
+let music = $state(MusicController.currentMusic);
+let progressPercentage = $state(MusicController.progressPercentage);
 let progressDurationText = $state(MusicController.progressDurationText());
 let progressDurationNegativeText = $state(
     MusicController.progressDurationText(true),
@@ -45,7 +45,7 @@ let updateProgressText = $state(true);
 let touchLastX = $state(0);
 
 const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
-    progressPercentage = MusicController.progressPercentage();
+    progressPercentage = MusicController.progressPercentage;
     if (updateProgressText) {
         progressDurationText = MusicController.progressDurationText();
         progressDurationNegativeText = MusicController.progressDurationText(true);
@@ -54,7 +54,7 @@ const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
     resetSelectedLyricIndex();
 });
 const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async () => {
-    music = MusicController.currentMusic();
+    music = MusicController.currentMusic;
     albumImage = MusicController.currentMusicAlbumImage();
     resetLyrics();
 });
@@ -64,7 +64,7 @@ const unlistenMusicVolume = musicVolume.subscribe(() => {
 });
 
 function handleButtonPlayPause() {
-    if (MusicController.isPlaying()) {
+    if (MusicController.isPlaying) {
         MusicController.setIsPlaying(false);
         MusicController.pause();
     } else MusicController.play();
@@ -96,8 +96,8 @@ async function onKeyDown(
 async function resetLyrics() {
     selectedLyricIndex = 0;
 
-    if (MusicController.currentMusic() == null) return;
-    const resLyrics = await LyricController.get(MusicController.currentMusic()!);
+    if (MusicController.currentMusic == null) return;
+    const resLyrics = await LyricController.get(MusicController.currentMusic!);
     if (resLyrics == null) {
         lyrics = [];
         return;
@@ -108,13 +108,13 @@ async function resetLyrics() {
 function resetSelectedLyricIndex() {
     if (lyrics.length < 1) return;
 
-    if (MusicController.progressDuration() < lyrics[0].duration) {
+    if (MusicController.progressDuration < lyrics[0].duration) {
         scrollToSelectedLyric();
         return;
     }
     // Note: Using for loop since it's the fastest. Just in case though :)
     for (var i = 0; i < lyrics.length; i++) {
-        if (MusicController.progressDuration() < lyrics[i].duration) {
+        if (MusicController.progressDuration < lyrics[i].duration) {
             selectedLyricIndex = i - 1;
             scrollToSelectedLyric();
             return;
