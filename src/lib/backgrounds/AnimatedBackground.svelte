@@ -31,26 +31,33 @@ let previousColors: string[] = [];
 let previousBackgroundColors: string[][] = [];
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
-	const bigint = parseInt(hex.slice(1), 16);
-	const r = (bigint >> 16) & 255;
-	const g = (bigint >> 8) & 255;
-	const b = bigint & 255;
-	return { r, g, b };
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return { r, g, b };
 }
 
-function darkenTooBright(hex: string): string {
-    // Convert hex to RGB
+function balanceColor(hex: string): string {
     const { r, g, b } = hexToRgb(hex);
-
-    // Convert RGB to HSL
     const hsl = rgbToHsl(r, g, b);
 
-    // Adjust lightness while preserving hue and saturation
-    if (hsl.l > 0.6) { // If color is too bright
-        hsl.l = Math.min(0.6, hsl.l * 0.8); // Darken it
+    // Balance saturation - reduce overly vibrant colors
+    if (hsl.s > 0.7) {
+        // Very saturated colors - tone them down significantly
+        hsl.s = 0.5 + (hsl.s - 0.7) * 0.4;
     }
 
-    // Convert back to RGB
+    // Balance lightness for better visibility
+    if (hsl.l > 0.7) {
+        // Too bright - darken more aggressively
+        hsl.l = 0.45 + (hsl.l - 0.7) * 0.3;
+    }
+
+    // Ensure we stay within reasonable bounds
+    hsl.s = Math.max(0.15, Math.min(0.65, hsl.s));
+    hsl.l = Math.max(0.2, Math.min(0.6, hsl.l));
+
     const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
     return rgbToHex(rgb.r, rgb.g, rgb.b);
 }
@@ -110,57 +117,49 @@ function hslToRgb(h: number, s: number, l: number): { r: number, g: number, b: n
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
-	return (
-		"#" +
-		[r, g, b]
-			.map((v) => v.toString(16).padStart(2, "0"))
-			.join("")
-			.toUpperCase()
-	);
-}
-
-function getLuminance(r: number, g: number, b: number): number {
-	const a = [r, g, b].map((v) => {
-		v /= 255;
-		return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-	});
-	return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+    return (
+        "#" +
+        [r, g, b]
+            .map((v) => v.toString(16).padStart(2, "0"))
+            .join("")
+            .toUpperCase()
+    );
 }
 
 async function getColors(force = false): Promise<string[] | null> {
-	const currentAlbumImage = await MusicController.getAlbumImageFromMusic(
+    const currentAlbumImage = await MusicController.getAlbumImageFromMusic(
         MusicController.currentMusic,
         MusicSize.AnimatedBackground,
     );
-	if (previousBackground === currentAlbumImage && !force) return null;
+    if (previousBackground === currentAlbumImage && !force) return null;
 
-	let image = new Image();
-	image.src = previousBackground = currentAlbumImage;
-	if (!image.complete) {
-		await new Promise((resolve, reject) => {
-			image.onload = () => resolve();
-			image.onerror = (err) => reject(err);
-		});
-	}
+    let image = new Image();
+    image.src = previousBackground = currentAlbumImage;
+    if (!image.complete) {
+        await new Promise((resolve, reject) => {
+            image.onload = () => resolve();
+            image.onerror = (err) => reject(err);
+        });
+    }
 
-	let colors: string[] = [];
-	if (
-		$settingAnimatedBackgroundType === SettingAnimatedBackgroundType.Prominent
-	) {
-		// @ts-ignore
-		colors = await prominent(image, {
-			amount: 10,
-			format: "hex",
-		});
-	} else {
-		const colorThief = new ColorThief();
-		colors = (await colorThief.getPalette(image, 10)).map((rgb) =>
-			rgbToHex(rgb[0], rgb[1], rgb[2]),
-		);
-	}
+    let colors: string[] = [];
+    if (
+        $settingAnimatedBackgroundType === SettingAnimatedBackgroundType.Prominent
+    ) {
+        // @ts-ignore
+        colors = await prominent(image, {
+            amount: 10,
+            format: "hex",
+        });
+    } else {
+        const colorThief = new ColorThief();
+        colors = (await colorThief.getPalette(image, 10)).map((rgb) =>
+            rgbToHex(rgb[0], rgb[1], rgb[2]),
+        );
+    }
 
-	colors = colors.map((hex) => darkenTooBright(hex));
-	return colors;
+    colors = colors.map((hex) => balanceColor(hex));
+    return colors;
 }
 
 async function createCanvas(
