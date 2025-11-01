@@ -57,7 +57,7 @@ function updateGridSizing() {
 }
 
 function updateFilterBarHeight(){
-    $filterBarHeight = element.offsetHeight + 8;
+    $filterBarHeight = element.offsetHeight + (window.innerWidth > 640 ? 8 : 16);
 }
 
 function toggleSort(){
@@ -66,25 +66,23 @@ function toggleSort(){
 
 function updateSize(){
     updateGridSizing();
-    updateFilterBarHeight()
-}
-onMount(() => {
-    updateSize();
+    updateFilterBarHeight();
     setTimeout(updateFilterBarHeight, 0);
-});
+}
+onMount(updateSize);
 </script>
 
 <svelte:window onresize={updateSize} />
-<div class="w-full grid gap-y-2 px-3 sm:px-0 md:pb-3 pointer-events-none
+<div class="w-full grid gap-y-2 px-3 sm:px-0 sm:pb-3 pointer-events-none
     {isMacos() ? 'justify-end' : ''}
     {isMacos() ? 'right-0' : 'left-0'}
     animate__animated animate__fadeIn animate__slow"
     style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};"
     bind:this={element}>
-    <div class="grid pointer-events-none grid-cols-[auto_4rem] md:grid-cols-[auto_30%] gap-x-2 sm:gap-x-5 {isMacos() ? 'justify-end' : 'justify-start'}">
+    <div class="grid pointer-events-none grid-cols-[auto_4rem] md:grid-cols-[auto_30%] sm:mx-3 gap-x-2 sm:gap-x-4 {isMacos() ? 'justify-end' : 'justify-start'}">
         <div>
-            <Button class="h-full aspect-square rounded grid justify-center pointer-events-auto"
+            <Button class="h-full aspect-square rounded grid justify-center pointer-events-auto p-1 md:p-0"
                 onclick={toggleSort}>
                 <div class="w-5">
                     {#if $filterBarSortAsc}
