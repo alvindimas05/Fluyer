@@ -1,6 +1,7 @@
 export const CommandRoutes = {
 	MUSIC_CONTROLLER: "music_controller",
-	MUSIC_PLAYER_SYNC: "music_player_sync",
+    MUSIC_PLAYER_SYNC: "music_player_sync",
+    MUSIC_PLAYER_REQUEST_SYNC: "music_player_sync",
 	MUSIC_PLAYER_NEXT: "music_player_next",
 	MUSIC_GET_ALL: "music_get_all",
 	MUSIC_GET_INFO: "music_get_info",

@@ -250,7 +250,7 @@ const MusicController = {
 
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-			MusicController.setCurrentMusicIndex(e.payload.index);
+            MusicController.setCurrentMusicIndex(e.payload.index);
 			if (e.payload.isPlaying)
 				MusicController.startProgress({ resetProgress: true });
 			else MusicController.stopProgress();
@@ -412,14 +412,17 @@ const MusicController = {
         MusicController.progressValue <= MusicConfig.min;
     },
 
-	volume: () => get(musicVolume),
+	get volume(){
+        return get(musicVolume);
+    },
 	setVolume: (value: number) => {
 		musicVolume.set(value);
 	},
-	volumePercentage: () =>
-		((MusicController.volume() - MusicConfig.vmin) /
-			(MusicConfig.vmax - MusicConfig.vmin)) *
-		100,
+	get volumePercentage(){
+        return ((MusicController.volume - MusicConfig.vmin) /
+            (MusicConfig.vmax - MusicConfig.vmin)) *
+        100;
+    },
 	handleVolumeChange: () => {
 		musicVolume.subscribe(async (value) => {
             await PersistentStoreController.volume.set(value);

@@ -293,7 +293,7 @@ impl MusicPlayer {
                 current_position: if is_from_next {
                     0
                 } else {
-                    (mpv.get_property::<f64>("time-pos").unwrap() * 1000.0) as u128
+                    (mpv.get_property::<f64>("time-pos").unwrap_or(0.0) * 1000.0) as u128
                 },
                 is_playing: if is_from_next {
                     true

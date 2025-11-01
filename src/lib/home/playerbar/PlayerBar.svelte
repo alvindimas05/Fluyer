@@ -35,7 +35,7 @@ let albumImage = $derived(MusicController.getAlbumImageFromMusic(oldMusic));
 
 let isPlaying = $derived($musicIsPlaying);
 let progressPercentage = $state(MusicController.progressPercentage);
-let volumePercentage = $state(MusicController.volumePercentage());
+let volumePercentage = $state(MusicController.volumePercentage);
 
 let tooltip: HTMLDivElement;
 let tooltipPosition = $state(0);
@@ -72,7 +72,7 @@ function redirectToPlay() {
 }
 
 function handleVolumeButton() {
-	MusicController.setVolume(MusicController.volume() > 0 ? 0 : 1);
+	MusicController.setVolume(MusicController.volume > 0 ? 0 : 1);
 }
 
 function refresh() {
@@ -135,7 +135,7 @@ function hideTooltip() {
 	tooltipVisible = false;
 }
 
-function updateProgress(
+async function updateProgress(
 	e: MouseEvent & {
 		currentTarget: EventTarget & HTMLDivElement;
 	},
@@ -146,7 +146,7 @@ function updateProgress(
 	MusicController.updateProgressByPercentage(percentage);
 }
 
-function updateProgressTouch(
+async function updateProgressTouch(
 	e: TouchEvent & {
 		currentTarget: EventTarget & HTMLDivElement;
 	},
@@ -171,7 +171,7 @@ onMount(() => {
 		() => (progressPercentage = MusicController.progressPercentage),
 	);
 	unlistenMusicVolume = musicVolume.subscribe(
-		() => (volumePercentage = MusicController.volumePercentage()),
+		() => (volumePercentage = MusicController.volumePercentage),
 	);
 	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(refresh);
 	unlistenMusicPlaylist = musicPlaylist.subscribe(refresh);

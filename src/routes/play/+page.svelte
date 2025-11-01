@@ -38,7 +38,7 @@ let albumImage = $state(MusicController.currentMusicAlbumImage);
 
 let lyrics: MusicLyric[] = $state([]);
 let selectedLyricIndex = $state(0);
-let volumePercentage = $state(MusicController.volumePercentage());
+let volumePercentage = $state(MusicController.volumePercentage);
 
 let progressBar: HTMLDivElement;
 let updateProgressText = $state(true);
@@ -60,7 +60,7 @@ const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async () => {
 });
 
 const unlistenMusicVolume = musicVolume.subscribe(() => {
-    volumePercentage = MusicController.volumePercentage();
+    volumePercentage = MusicController.volumePercentage;
 });
 
 function handleButtonPlayPause() {
