@@ -1,5 +1,5 @@
 <script lang="ts">
-import {type AlbumData, type MusicData, MusicSize} from "../music/types";
+import { type AlbumData, type MusicData, MusicSize } from "../music/types";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import { filterAlbum, filterSearch } from "$lib/stores/filter";
 import FilterController from "$lib/controllers/FilterController";
@@ -17,10 +17,10 @@ let isValidFilterAlbum = $derived(
 );
 
 let albumImage = $derived.by(async () => {
-    // const now = performance.now();
-    const image = await MusicController.getAlbumImageFromMusic(music);
-    // console.log('Album image loaded in', Math.round(performance.now() - now), 'ms for album:', music.album);
-    return image;
+	// const now = performance.now();
+	const image = await MusicController.getAlbumImageFromMusic(music);
+	// console.log('Album image loaded in', Math.round(performance.now() - now), 'ms for album:', music.album);
+	return image;
 });
 
 async function setFilterAlbum() {

@@ -2,9 +2,10 @@
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
 import {
-    settingUiPlayShowBackButton, settingUiPlayShowVolume,
-    settingUiShowRepeatButton,
-    settingUiShowShuffleButton,
+	settingUiPlayShowBackButton,
+	settingUiPlayShowVolume,
+	settingUiShowRepeatButton,
+	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import { isDesktop } from "$lib/platform";
@@ -25,15 +26,17 @@ function onUiPlayShowBackButtonChange(
 }
 
 function onUiPlayShowVolumeChange(
-    e: Event & {
-        currentTarget: EventTarget & HTMLInputElement;
-    },
+	e: Event & {
+		currentTarget: EventTarget & HTMLInputElement;
+	},
 ) {
-    settingUiPlayShowVolume.set(e.currentTarget.checked);
-    PersistentStoreController.userInterface.play.showVolume.set(e.currentTarget.checked);
-    ToastController.info(
-        `Play Volume ${e.currentTarget.checked ? "enabled" : "disabled"}`,
-    );
+	settingUiPlayShowVolume.set(e.currentTarget.checked);
+	PersistentStoreController.userInterface.play.showVolume.set(
+		e.currentTarget.checked,
+	);
+	ToastController.info(
+		`Play Volume ${e.currentTarget.checked ? "enabled" : "disabled"}`,
+	);
 }
 
 function onUiShowRepeatButtonChange(

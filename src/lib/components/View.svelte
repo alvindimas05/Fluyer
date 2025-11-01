@@ -2,21 +2,21 @@
 import Glass from "$lib/glass/Glass.svelte";
 
 interface Props {
-    children?: import("svelte").Snippet;
-    class?: string;
-    style?: string;
-    thisElement?: HTMLDivElement;
-    glassEnableBlur?: boolean;
-    glassEnableHoverEffect?: boolean;
-    events: any;
+	children?: import("svelte").Snippet;
+	class?: string;
+	style?: string;
+	thisElement?: HTMLDivElement;
+	glassEnableBlur?: boolean;
+	glassEnableHoverEffect?: boolean;
+	events: any;
 }
 
 let {
-    glassEnableBlur = false,
-    glassEnableHoverEffect = false,
-    children,
-    thisElement = $bindable<HTMLDivElement>(),
-    ...props
+	glassEnableBlur = false,
+	glassEnableHoverEffect = false,
+	children,
+	thisElement = $bindable<HTMLDivElement>(),
+	...props
 }: Props = $props();
 </script>
 

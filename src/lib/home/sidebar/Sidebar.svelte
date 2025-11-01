@@ -18,8 +18,8 @@ import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import { sidebarShowingType } from "$lib/stores/sidebar";
 import { onMount } from "svelte";
 import Glass from "$lib/glass/Glass.svelte";
-import {playerBarHeight} from "$lib/stores/playerbar";
-import {filterBarHeight} from "$lib/stores/filterbar";
+import { playerBarHeight } from "$lib/stores/playerbar";
+import { filterBarHeight } from "$lib/stores/filterbar";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import View from "$lib/components/View.svelte";
 
@@ -49,7 +49,9 @@ const rules = [
 const SWIPE_RANGE = 125;
 
 let sidebarWidth = $state(window.innerWidth);
-let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight);
+let paddingTop = $derived(
+	(isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight,
+);
 
 let isMouseInsideArea = $state(false);
 let isShowing = $state(false);
@@ -60,16 +62,19 @@ async function onMouseMove(e: MouseEvent) {
 	const isMaximized = await win.isMaximized();
 
 	const onRightEdge =
-			type === SidebarType.Right &&
-			e.clientX > window.innerWidth - (isWindows() || !isMaximized ? 12 : 4);
+		type === SidebarType.Right &&
+		e.clientX > window.innerWidth - (isWindows() || !isMaximized ? 12 : 4);
 
 	const onLeftEdge =
-			type === SidebarType.Left &&
-			e.clientX < (isMaximized ? 4 : 12);
+		type === SidebarType.Left && e.clientX < (isMaximized ? 4 : 12);
 
 	const withinVerticalBounds = e.clientY <= window.innerHeight - 8 * 16;
 
-	if ((onRightEdge || onLeftEdge) && withinVerticalBounds && !isMouseInsideArea) {
+	if (
+		(onRightEdge || onLeftEdge) &&
+		withinVerticalBounds &&
+		!isMouseInsideArea
+	) {
 		isMouseInsideArea = true;
 		isShowing = true;
 		$sidebarShowingType = type;
@@ -91,12 +96,12 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 	if (initial[1] < $swipeMinimumTop) return;
 
 	const swipeOpen =
-			(type === SidebarType.Right && deltaX < -SWIPE_RANGE) ||
-			(type === SidebarType.Left && deltaX > SWIPE_RANGE);
+		(type === SidebarType.Right && deltaX < -SWIPE_RANGE) ||
+		(type === SidebarType.Left && deltaX > SWIPE_RANGE);
 
 	const swipeClose =
-			(type === SidebarType.Right && deltaX > SWIPE_RANGE) ||
-			(type === SidebarType.Left && deltaX < -SWIPE_RANGE);
+		(type === SidebarType.Right && deltaX > SWIPE_RANGE) ||
+		(type === SidebarType.Left && deltaX < -SWIPE_RANGE);
 
 	if (swipeOpen && $sidebarShowingType === null) {
 		isMouseInsideArea = true;
@@ -110,7 +115,6 @@ function onSwipe(e: CustomEvent<SwipeEventData>) {
 		});
 	}
 }
-
 
 function updateSidebarWidth() {
 	const w = window.innerWidth;
@@ -134,7 +138,7 @@ function updateSize() {
 onMount(() => {
 	updateSize();
 	$sidebarShowingType = null;
-	setTimeout(() => isMounted = true, 750);
+	setTimeout(() => (isMounted = true), 750);
 });
 </script>
 

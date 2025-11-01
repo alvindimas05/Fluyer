@@ -1,5 +1,5 @@
 <script lang="ts">
-import {isAndroid, isMacos} from "$lib/platform";
+import { isAndroid, isMacos } from "$lib/platform";
 import { equalizerShow, equalizerValues } from "$lib/stores/equalizer";
 import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
@@ -43,7 +43,7 @@ function updateValues(index: number, value: number) {
 }
 
 onMount(() => {
-    setTimeout(() => isMounted = true, 1000);
+	setTimeout(() => (isMounted = true), 1000);
 });
 </script>
 

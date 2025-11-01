@@ -1,16 +1,18 @@
 import { Store } from "@tauri-apps/plugin-store";
 import {
-    settingAnimatedBackgroundType, settingBitPerfectMode,
-    settingDeveloperMode,
-    settingUiPlayShowBackButton, settingUiPlayShowVolume,
-    settingUiShowRepeatButton,
-    settingUiShowShuffleButton,
+	settingAnimatedBackgroundType,
+	settingBitPerfectMode,
+	settingDeveloperMode,
+	settingUiPlayShowBackButton,
+	settingUiPlayShowVolume,
+	settingUiShowRepeatButton,
+	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { IconThemeType } from "$lib/icon/types";
 import { iconTheme } from "$lib/stores/icon";
 import { equalizerValues } from "$lib/stores/equalizer";
-import {musicVolume} from "$lib/stores/music";
+import { musicVolume } from "$lib/stores/music";
 
 const storePath = "store.json";
 const storeOptions = { autoSave: true };
@@ -47,8 +49,8 @@ const PersistentStoreController = {
 			PersistentStoreController.userInterface.showRepeatButton.initialize(),
 			PersistentStoreController.userInterface.showShuffleButton.initialize(),
 			PersistentStoreController.equalizer.initialize(),
-            PersistentStoreController.bitPerfectMode.initialize(),
-            PersistentStoreController.volume.initialize(),
+			PersistentStoreController.bitPerfectMode.initialize(),
+			PersistentStoreController.volume.initialize(),
 		]);
 	},
 
@@ -71,7 +73,7 @@ const PersistentStoreController = {
 		},
 	},
 
-    volume: makeBinding<number>("volume", 1, musicVolume.set),
+	volume: makeBinding<number>("volume", 1, musicVolume.set),
 
 	animatedBackgroundType: makeBinding<SettingAnimatedBackgroundType>(
 		"animated-background-type",
@@ -83,7 +85,11 @@ const PersistentStoreController = {
 
 	iconTheme: makeBinding("icon-theme", IconThemeType.Phosphor, iconTheme.set),
 
-    bitPerfectMode: makeBinding("bit-perfect-mode", false, settingBitPerfectMode.set),
+	bitPerfectMode: makeBinding(
+		"bit-perfect-mode",
+		false,
+		settingBitPerfectMode.set,
+	),
 
 	swipeGuide: {
 		get: makeGetter<boolean>("swipe-guide", true),
@@ -110,7 +116,7 @@ const PersistentStoreController = {
 			showVolume: makeBinding(
 				"ui-play-show-volume",
 				true,
-				settingUiPlayShowVolume.set
+				settingUiPlayShowVolume.set,
 			),
 		},
 	},

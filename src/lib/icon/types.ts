@@ -37,6 +37,6 @@ export enum IconType {
 	// Reset,
 	Visualizer,
 	Folder,
-    SortAsc,
-    SortDesc,
+	SortAsc,
+	SortDesc,
 }

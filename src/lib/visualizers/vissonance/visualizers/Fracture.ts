@@ -5,7 +5,7 @@ import View from "$lib/visualizers/vissonance/View";
 import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 
 class Fracture extends Visualizer {
-	name = 'Fracture';
+	name = "Fracture";
 	// @ts-ignore
 	group2: THREE.Object3D;
 	vertexShader = [

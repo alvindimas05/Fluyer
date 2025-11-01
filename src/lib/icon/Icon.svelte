@@ -6,11 +6,11 @@ import { iconTheme } from "$lib/stores/icon";
 
 interface Props {
 	type: IconType;
-    class?: string;
-    style?: string;
+	class?: string;
+	style?: string;
 }
 
-const props = $props()
+const props = $props();
 let { type }: Props = props;
 let Component = $derived(
 	iconRegistry[$iconTheme]?.[type] ??

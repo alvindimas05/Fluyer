@@ -1,20 +1,22 @@
 <script lang="ts">
 import Playlist from "$lib/home/playlist/Playlist.svelte";
-import {musicList, musicListType} from "$lib/stores/music";
+import { musicList, musicListType } from "$lib/stores/music";
 import Intro from "$lib/home/intro/Intro.svelte";
 import Menu from "$lib/home/menu/Menu.svelte";
 import AlbumList from "$lib/home/album/AlbumList.svelte";
 import MusicList from "$lib/home/music/MusicList.svelte";
 import PlayerBar from "$lib/home/playerbar/PlayerBar.svelte";
-import {loadingShow} from "$lib/stores/loading";
+import { loadingShow } from "$lib/stores/loading";
 import AlbumInfo from "$lib/home/albuminfo/AlbumInfo.svelte";
 import Equalizer from "$lib/home/equalizer/Equalizer.svelte";
-import {isDesktop, isMobile} from "$lib/platform";
-import {MusicListType} from "$lib/home/music/types";
-import {mobileStatusBarHeight} from "$lib/stores/mobile";
-import {filterBarHeight} from "$lib/stores/filterbar";
+import { isDesktop, isMobile } from "$lib/platform";
+import { MusicListType } from "$lib/home/music/types";
+import { mobileStatusBarHeight } from "$lib/stores/mobile";
+import { filterBarHeight } from "$lib/stores/filterbar";
 
-let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight);
+let paddingTop = $derived(
+	(isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight,
+);
 </script>
 
 {#if $loadingShow}

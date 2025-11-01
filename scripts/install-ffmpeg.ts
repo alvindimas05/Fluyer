@@ -7,21 +7,24 @@ const downloadOutputDir = path.resolve("src-tauri", "libs");
 const outputDir = path.resolve(downloadOutputDir, "ffmpeg");
 
 function getLibName() {
-    let versionName: string;
-    switch(os.platform()) {
-        case "win32":
-            versionName = "x86_64-w64-mingw32";
-            break;
-        case "darwin":
-            versionName = process.arch === "arm64" ? "arm64-apple-macos11" : "x86_64-apple-macos10.9";
-            break;
-        case "linux":
-            versionName = "x86_64-linux-gnu";
-            break;
-        default:
-            throw new Error("Unsupported platform");
-    }
-    return `ffmpeg-${version}-audio-${versionName}`;
+	let versionName: string;
+	switch (os.platform()) {
+		case "win32":
+			versionName = "x86_64-w64-mingw32";
+			break;
+		case "darwin":
+			versionName =
+				process.arch === "arm64"
+					? "arm64-apple-macos11"
+					: "x86_64-apple-macos10.9";
+			break;
+		case "linux":
+			versionName = "x86_64-linux-gnu";
+			break;
+		default:
+			throw new Error("Unsupported platform");
+	}
+	return `ffmpeg-${version}-audio-${versionName}`;
 }
 function getDownloadUrl(): string {
 	return `https://github.com/alvindimas05/ffmpeg-build/releases/download/v${version}/${getLibName()}.tar.gz`;
@@ -41,11 +44,8 @@ async function main() {
 		await downloadFile(url, destPath);
 		await extractTarGz(destPath, downloadOutputDir);
 
-        console.log(path.resolve(downloadOutputDir, getLibName()));
-        fs.rename(
-            path.resolve(downloadOutputDir, getLibName()),
-            outputDir,
-        );
+		console.log(path.resolve(downloadOutputDir, getLibName()));
+		fs.rename(path.resolve(downloadOutputDir, getLibName()), outputDir);
 	} catch (err) {
 		console.error("Failed:", err);
 	}

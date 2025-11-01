@@ -15,7 +15,8 @@ import { get } from "svelte/store";
 import {
 	type MusicPlayerSync,
 	type MusicData,
-	RepeatMode, MusicSize,
+	RepeatMode,
+	MusicSize,
 } from "$lib/home/music/types";
 import LoadingController from "$lib/controllers/LoadingController";
 import { listen } from "@tauri-apps/api/event";
@@ -29,7 +30,7 @@ import { isDesktop, isMobile } from "$lib/platform";
 import { equalizerValues } from "$lib/stores/equalizer";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import UtilsController from "$lib/controllers/UtilsController";
-import {settingBitPerfectMode} from "$lib/stores/setting";
+import { settingBitPerfectMode } from "$lib/stores/setting";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -51,8 +52,8 @@ const MusicController = {
 		MusicController.listenSyncMusic();
 		MusicController.handleVolumeChange();
 
-        MusicController.onBitPerfectModeChange(get(settingBitPerfectMode));
-        settingBitPerfectMode.subscribe(MusicController.onBitPerfectModeChange);
+		MusicController.onBitPerfectModeChange(get(settingBitPerfectMode));
+		settingBitPerfectMode.subscribe(MusicController.onBitPerfectModeChange);
 	},
 	musicList: () => get(musicList),
 	setMusicList: (value: MusicData[] | null) => musicList.set(value),
@@ -66,22 +67,22 @@ const MusicController = {
 	},
 
 	get isPlaying() {
-        return get(musicIsPlaying);
-    },
+		return get(musicIsPlaying);
+	},
 	setIsPlaying: (value: boolean) => musicIsPlaying.set(value),
 
-	get currentMusic(){
-        return get(musicPlaylist)[get(musicCurrentIndex)] ?? null;
-    },
+	get currentMusic() {
+		return get(musicPlaylist)[get(musicCurrentIndex)] ?? null;
+	},
 	get currentMusicIndex() {
-        return get(musicCurrentIndex);
-    },
+		return get(musicCurrentIndex);
+	},
 	setCurrentMusicIndex: (value: number) => musicCurrentIndex.set(value),
 	getMusicByIndex: (index: number) => MusicController.musicPlaylist[index],
 
-	get musicPlaylist(){
-        return get(musicPlaylist);
-    },
+	get musicPlaylist() {
+		return get(musicPlaylist);
+	},
 	addMusicPlaylist: (value: MusicData[]) =>
 		musicPlaylist.set([...MusicController.musicPlaylist, ...value]),
 	removeMusicPlaylist: (index: number) => {
@@ -91,26 +92,31 @@ const MusicController = {
 	},
 
 	get currentMusicAlbumImage() {
-		return MusicController.getAlbumImageFromMusic(
-			MusicController.currentMusic,
-		);
+		return MusicController.getAlbumImageFromMusic(MusicController.currentMusic);
 	},
-	getAlbumImageFromMusic: async (music: MusicData | null, size: MusicSize | null = null) => {
+	getAlbumImageFromMusic: async (
+		music: MusicData | null,
+		size: MusicSize | null = null,
+	) => {
 		if (music === null) return MusicConfig.defaultAlbumImage;
 		const imageSize = size ? size.toString() : null;
 		try {
 			const image = await invoke<string>(CommandRoutes.MUSIC_GET_IMAGE, {
-				path: music?.path, size: imageSize,
+				path: music?.path,
+				size: imageSize,
 			});
 			if (image !== null) return UtilsController.withBase64(image);
 		} catch (e) {}
 		if (music.title == null || music.artist == null)
 			return MusicConfig.defaultAlbumImage;
-		const coverArt = await CoverArt.getImageFromQuery({
-			artist: music.artist!,
-			title: music.album ? undefined : music.title!,
-			album: music.album ?? undefined,
-		}, imageSize);
+		const coverArt = await CoverArt.getImageFromQuery(
+			{
+				artist: music.artist!,
+				title: music.album ? undefined : music.title!,
+				album: music.album ?? undefined,
+			},
+			imageSize,
+		);
 		return coverArt
 			? UtilsController.withBase64(coverArt)
 			: MusicConfig.defaultAlbumImage;
@@ -122,35 +128,39 @@ const MusicController = {
 		return music.artist.replace(/\|\|/g, ` ${MusicConfig.separator} `);
 	},
 
-	get currentMusicDuration(){
+	get currentMusicDuration() {
 		return MusicController.currentMusic != null
 			? MusicController.parseProgressDuration(
 					MusicController.currentMusic!.duration,
 				)
 			: 0;
-    },
+	},
 	get currentMusicRealDuration() {
 		return MusicController.currentMusic != null
 			? MusicController.currentMusicDuration * 1000
-			: 0},
+			: 0;
+	},
 	get progressValue() {
-        return get(musicProgressValue);
-    },
+		return get(musicProgressValue);
+	},
 	setProgressValue: (value: number) => musicProgressValue.set(value),
 
-	get progressPercentage () {
-        return ((get(musicProgressValue) - MusicConfig.min) /
-        (MusicConfig.max - MusicConfig.min)) * 100;
-    },
+	get progressPercentage() {
+		return (
+			((get(musicProgressValue) - MusicConfig.min) /
+				(MusicConfig.max - MusicConfig.min)) *
+			100
+		);
+	},
 	get progressDuration() {
-        return MusicController.currentMusic != null
-            ? (MusicController.progressValue / MusicConfig.max) *
-            MusicController.currentMusicDuration
-            : 0;
-    },
+		return MusicController.currentMusic != null
+			? (MusicController.progressValue / MusicConfig.max) *
+					MusicController.currentMusicDuration
+			: 0;
+	},
 	get realProgressDuration() {
-        return MusicController.progressDuration * 1000;
-    },
+		return MusicController.progressDuration * 1000;
+	},
 	parseProgressDuration: (value: number) => value / 1000,
 	parseProgressDurationIntoValue: (value: number, max: number) =>
 		(value / max) * MusicConfig.max,
@@ -250,7 +260,7 @@ const MusicController = {
 
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-            MusicController.setCurrentMusicIndex(e.payload.index);
+			MusicController.setCurrentMusicIndex(e.payload.index);
 			if (e.payload.isPlaying)
 				MusicController.startProgress({ resetProgress: true });
 			else MusicController.stopProgress();
@@ -280,8 +290,7 @@ const MusicController = {
 		if (MusicController.isCurrentMusicFinished) return null;
 
 		let seconds = negative
-			? MusicController.currentMusicDuration -
-				MusicController.progressDuration
+			? MusicController.currentMusicDuration - MusicController.progressDuration
 			: MusicController.progressDuration;
 
 		return MusicController.parseSecondsIntoText(seconds);
@@ -326,8 +335,7 @@ const MusicController = {
 		if (
 			MusicController.isCurrentMusicFinished &&
 			MusicController.isProgressValueEnd &&
-			MusicController.currentMusicIndex <
-				MusicController.musicPlaylist.length
+			MusicController.currentMusicIndex < MusicController.musicPlaylist.length
 		) {
 			MusicController.gotoPlaylist(MusicController.currentMusicIndex);
 		}
@@ -408,30 +416,34 @@ const MusicController = {
 	},
 
 	get isProgressValueEnd() {
-        return MusicController.progressValue >= MusicConfig.max ||
-        MusicController.progressValue <= MusicConfig.min;
-    },
+		return (
+			MusicController.progressValue >= MusicConfig.max ||
+			MusicController.progressValue <= MusicConfig.min
+		);
+	},
 
-	get volume(){
-        return get(musicVolume);
-    },
+	get volume() {
+		return get(musicVolume);
+	},
 	setVolume: (value: number) => {
 		musicVolume.set(value);
 	},
-	get volumePercentage(){
-        return ((MusicController.volume - MusicConfig.vmin) /
-            (MusicConfig.vmax - MusicConfig.vmin)) *
-        100;
-    },
+	get volumePercentage() {
+		return (
+			((MusicController.volume - MusicConfig.vmin) /
+				(MusicConfig.vmax - MusicConfig.vmin)) *
+			100
+		);
+	},
 	handleVolumeChange: () => {
 		musicVolume.subscribe(async (value) => {
-            await PersistentStoreController.volume.set(value);
-            await MusicController.applyVolume(value);
-        });
+			await PersistentStoreController.volume.set(value);
+			await MusicController.applyVolume(value);
+		});
 	},
-    applyVolume: (volume: number) => {
-        return invoke(CommandRoutes.MUSIC_SET_VOLUME, { volume });
-    },
+	applyVolume: (volume: number) => {
+		return invoke(CommandRoutes.MUSIC_SET_VOLUME, { volume });
+	},
 
 	getCoverArtCache: (query: CoverArtCacheQuery) => {
 		let fquery = `${query.artist} ${query.album ?? query.title ?? ""}`;
@@ -458,12 +470,12 @@ const MusicController = {
 
 		// Schwartzian transform to avoid re-computing values in the sort callback
 		const mapped = list.map((original) => {
-			const trackNumberString = original.trackNumber?.split('/')[0];
+			const trackNumberString = original.trackNumber?.split("/")[0];
 			const track = trackNumberString ? parseInt(trackNumberString, 10) : NaN;
 
 			return {
 				original,
-				album: original.album || '',
+				album: original.album || "",
 				track: isNaN(track) ? Infinity : track, // Sort items without a valid track number last
 				filename: original.filename,
 			};
@@ -616,28 +628,31 @@ const MusicController = {
 		equalizerValues.set(values);
 		await PersistentStoreController.equalizer.set(values);
 
-        await invoke(CommandRoutes.MUSIC_EQUALIZER_RESET);
+		await invoke(CommandRoutes.MUSIC_EQUALIZER_RESET);
 	},
 
 	getVisualizerBuffer: async (path: string) => {
-		return await invoke<ArrayBuffer | null>(CommandRoutes.MUSIC_GET_VISUALIZER_BUFFER, {
-			path,
-		});
+		return await invoke<ArrayBuffer | null>(
+			CommandRoutes.MUSIC_GET_VISUALIZER_BUFFER,
+			{
+				path,
+			},
+		);
 	},
 
-    onBitPerfectModeChange: (bitPerfectMode: boolean) => {
-        MusicController.setVolume(1);
-        MusicController.applyVolume(1);
-        if(bitPerfectMode){
-            MusicController.applyEqualizer();
-        } else {
-            MusicController.resetEqualizer();
-        }
-        MusicController.toggleBitPerfectMode(bitPerfectMode);
-    },
-    toggleBitPerfectMode: (enable: boolean) => {
-        return invoke(CommandRoutes.MUSIC_TOGGLE_BIT_PERFECT, { enable });
-    },
+	onBitPerfectModeChange: (bitPerfectMode: boolean) => {
+		MusicController.setVolume(1);
+		MusicController.applyVolume(1);
+		if (bitPerfectMode) {
+			MusicController.applyEqualizer();
+		} else {
+			MusicController.resetEqualizer();
+		}
+		MusicController.toggleBitPerfectMode(bitPerfectMode);
+	},
+	toggleBitPerfectMode: (enable: boolean) => {
+		return invoke(CommandRoutes.MUSIC_TOGGLE_BIT_PERFECT, { enable });
+	},
 };
 
 export default MusicController;

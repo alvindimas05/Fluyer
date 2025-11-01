@@ -2,32 +2,32 @@
 import { isAndroid } from "$lib/platform";
 
 interface Props {
-    children?: import("svelte").Snippet;
-    class?: string;
-    style?: string;
-    showShine?: boolean;
-    shineColor?: string;
-    showShadow?: boolean;
-    enableBlur?: boolean;
-    thisElement?: HTMLDivElement;
-    events?: any;
+	children?: import("svelte").Snippet;
+	class?: string;
+	style?: string;
+	showShine?: boolean;
+	shineColor?: string;
+	showShadow?: boolean;
+	enableBlur?: boolean;
+	thisElement?: HTMLDivElement;
+	events?: any;
 }
 
 let {
-    children,
-    shineColor = 'rgba(255, 255, 255, 0.5)',
-    enableBlur = false,
-    thisElement = $bindable<HTMLDivElement>(),
-    ...props
+	children,
+	shineColor = "rgba(255, 255, 255, 0.5)",
+	enableBlur = false,
+	thisElement = $bindable<HTMLDivElement>(),
+	...props
 }: Props = $props();
 
 const getBlurClass = () => {
-    if (!enableBlur) return '';
-    return isAndroid() ? 'backdrop-blur-xs' : 'backdrop-blur-md';
+	if (!enableBlur) return "";
+	return isAndroid() ? "backdrop-blur-xs" : "backdrop-blur-md";
 };
 
 const getHoverClasses = () => {
-    return 'transition-all duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)]';
+	return "transition-all duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)]";
 };
 </script>
 

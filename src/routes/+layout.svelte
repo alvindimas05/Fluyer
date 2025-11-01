@@ -23,7 +23,7 @@ import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
 import { mobileShowSwipeGuide } from "$lib/stores/mobile";
 import FolderController from "$lib/controllers/FolderController";
 import DeveloperDebugOverlay from "$lib/developer/DeveloperDebugOverlay.svelte";
-import {settingDeveloperMode} from "$lib/stores/setting";
+import { settingDeveloperMode } from "$lib/stores/setting";
 import toastHandler from "$lib/handlers/toast";
 
 if (isWindows() || isLinux()) {
@@ -39,19 +39,19 @@ let isAppReady = $state(false);
 
 async function initialize() {
 	logHandler();
-    toastHandler();
+	toastHandler();
 	await Promise.all([
 		PersistentStoreController.initialize(),
 		MusicController.initialize(),
 		UIController.initialize(),
 		MobileController.initialize(),
-        FolderController.initialize(),
+		FolderController.initialize(),
 	]);
 
-	if (isDesktop()){
-        await getCurrentWindow().show();
-        await getCurrentWindow().toggleMaximize();
-    }
+	if (isDesktop()) {
+		await getCurrentWindow().show();
+		await getCurrentWindow().toggleMaximize();
+	}
 
 	LoadingController.listen();
 	isAppReady = true;

@@ -5,7 +5,7 @@ import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 class Siphon extends Visualizer {
-	name = 'Siphon';
+	name = "Siphon";
 	cylRadius = 100;
 	vertexShader = [
 		"varying vec4 pos;",

@@ -5,7 +5,7 @@ import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 class Silk extends Visualizer {
-	name = 'Silk';
+	name = "Silk";
 	// @ts-ignore
 	group2: THREE.Object3D;
 	// @ts-ignore

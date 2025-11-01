@@ -3,7 +3,7 @@ import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
 import View from "$lib/visualizers/vissonance/View";
 
 class Visualizer {
-	name = 'Visualizer';
+	name = "Visualizer";
 	// @ts-ignore
 	group: THREE.Object3D;
 	// @ts-ignore

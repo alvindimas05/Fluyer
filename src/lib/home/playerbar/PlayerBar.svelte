@@ -14,15 +14,15 @@ import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { onDestroy, onMount } from "svelte";
-import {type MusicData, MusicSize, RepeatMode} from "$lib/home/music/types";
+import { type MusicData, MusicSize, RepeatMode } from "$lib/home/music/types";
 import {
-    settingBitPerfectMode,
-    settingUiShowRepeatButton,
-    settingUiShowShuffleButton,
+	settingBitPerfectMode,
+	settingUiShowRepeatButton,
+	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import type { Unsubscriber } from "svelte/store";
 import Glass from "$lib/glass/Glass.svelte";
-import {playerBarHeight} from "$lib/stores/playerbar";
+import { playerBarHeight } from "$lib/stores/playerbar";
 import View from "$lib/components/View.svelte";
 
 const tooltipMargin = 12;
@@ -102,7 +102,10 @@ function updateTooltip(
 	const x = e.clientX - rect.left;
 	tooltipPosition = x - tooltip.offsetWidth / 2;
 	if (tooltipPosition < tooltipMargin) tooltipPosition = tooltipMargin;
-	else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth - tooltipMargin)
+	else if (
+		tooltipPosition + tooltip.offsetWidth >
+		window.innerWidth - tooltipMargin
+	)
 		tooltipPosition = window.innerWidth - tooltip.offsetWidth - tooltipMargin;
 
 	const percentage = (x / (window.innerWidth - tooltipMargin * 2)) * 100;
@@ -116,18 +119,21 @@ function updateTooltipTouch(
 		currentTarget: EventTarget & HTMLDivElement;
 	},
 ) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    tooltipPosition = x - tooltip.offsetWidth / 2;
-    if (tooltipPosition < tooltipMargin) tooltipPosition = tooltipMargin;
-    else if (tooltipPosition + tooltip.offsetWidth > window.innerWidth - tooltipMargin)
-        tooltipPosition = window.innerWidth - tooltip.offsetWidth - tooltipMargin;
+	const rect = e.currentTarget.getBoundingClientRect();
+	const touch = e.touches[0];
+	const x = touch.clientX - rect.left;
+	tooltipPosition = x - tooltip.offsetWidth / 2;
+	if (tooltipPosition < tooltipMargin) tooltipPosition = tooltipMargin;
+	else if (
+		tooltipPosition + tooltip.offsetWidth >
+		window.innerWidth - tooltipMargin
+	)
+		tooltipPosition = window.innerWidth - tooltip.offsetWidth - tooltipMargin;
 
-    const percentage = (x / (window.innerWidth - tooltipMargin * 2)) * 100;
-    tooltipText =
-        MusicController.parsePercentageProgressDurationIntoText(percentage);
-    tooltipVisible = true;
+	const percentage = (x / (window.innerWidth - tooltipMargin * 2)) * 100;
+	tooltipText =
+		MusicController.parsePercentageProgressDurationIntoText(percentage);
+	tooltipVisible = true;
 
 	touchLastX = x;
 }
@@ -142,7 +148,7 @@ async function updateProgress(
 ) {
 	const rect = e.currentTarget.getBoundingClientRect();
 	const x = e.clientX - rect.left;
-	const percentage = (x / (window.innerWidth - (tooltipMargin * 2))) * 100;
+	const percentage = (x / (window.innerWidth - tooltipMargin * 2)) * 100;
 	MusicController.updateProgressByPercentage(percentage);
 }
 
@@ -157,8 +163,8 @@ async function updateProgressTouch(
 	hideTooltip();
 }
 
-function updatePlayerBarHeight(){
-    $playerBarHeight = element.offsetHeight;
+function updatePlayerBarHeight() {
+	$playerBarHeight = element.offsetHeight;
 }
 
 let unlistenMusicProgressValue: Unsubscriber;
@@ -175,7 +181,7 @@ onMount(() => {
 	);
 	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(refresh);
 	unlistenMusicPlaylist = musicPlaylist.subscribe(refresh);
-    updatePlayerBarHeight();
+	updatePlayerBarHeight();
 });
 
 onDestroy(() => {

@@ -47,7 +47,7 @@ window.onResized(async (_) => {
 
 afterNavigate((navigation) => {
 	isPlayPage = navigation.to?.route.id === PageRoutes.PLAY;
-    isVisualizerPage = navigation.to?.route.id === PageRoutes.VISUALIZER;
+	isVisualizerPage = navigation.to?.route.id === PageRoutes.VISUALIZER;
 });
 </script>
 

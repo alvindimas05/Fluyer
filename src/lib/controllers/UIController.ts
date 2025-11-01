@@ -31,30 +31,35 @@ const UIController = {
 	},
 	listenDisableKeyActions: () => {
 		window.addEventListener("keydown", (e) => {
-			if (['Tab', 'Escape', 'Space', 'Enter'].includes(e.key)) e.preventDefault();
+			if (["Tab", "Escape", "Space", "Enter"].includes(e.key))
+				e.preventDefault();
 		});
 	},
 	listenSpaceKeydown: () => {
-		document.addEventListener('keydown', function (e) {
-			if (e.code !== 'Space') return;
+		document.addEventListener(
+			"keydown",
+			function (e) {
+				if (e.code !== "Space") return;
 
-			const target = e.target;
+				const target = e.target;
 
-			if(target == document.body) e.preventDefault();
+				if (target == document.body) e.preventDefault();
 
-			if (target.matches('a, button, input, textarea, select')) {
-				e.preventDefault();
-				e.stopPropagation();
-				target.blur();
-				
-				document.body.focus();
-			}
+				if (target.matches("a, button, input, textarea, select")) {
+					e.preventDefault();
+					e.stopPropagation();
+					target.blur();
 
-			if (MusicController.isPlaying) {
-				MusicController.setIsPlaying(false);
-				MusicController.pause();
-			} else MusicController.play();
-		}, true);
+					document.body.focus();
+				}
+
+				if (MusicController.isPlaying) {
+					MusicController.setIsPlaying(false);
+					MusicController.pause();
+				} else MusicController.play();
+			},
+			true,
+		);
 	},
 	toggleEqualizer: (value: boolean) => {
 		equalizerShow.set(value);
@@ -67,16 +72,21 @@ const UIController = {
 		} else {
 			FolderController.setFolder(null);
 		}
-		musicListType.set(listType === MusicListType.All ? MusicListType.Folder : MusicListType.All);
-	}
+		musicListType.set(
+			listType === MusicListType.All ? MusicListType.Folder : MusicListType.All,
+		);
+	},
 };
 
-export function showThenFade(node: HTMLElement, options?: {
-	initialVisibleDuration?: number,
-	transitionInDuration?: number,
-	transitionOutDuration?: number,
-	transitionDelayDuration?: number,
-}) {
+export function showThenFade(
+	node: HTMLElement,
+	options?: {
+		initialVisibleDuration?: number;
+		transitionInDuration?: number;
+		transitionOutDuration?: number;
+		transitionDelayDuration?: number;
+	},
+) {
 	const {
 		initialVisibleDuration = 2000,
 		transitionInDuration = 500,
@@ -84,20 +94,29 @@ export function showThenFade(node: HTMLElement, options?: {
 		transitionDelayDuration = 2000,
 	} = options || {};
 
-	node.style.setProperty('--show-then-fade-transition-in-duration', `${transitionInDuration}ms`);
-	node.style.setProperty('--show-then-fade-transition-delay-duration', `${transitionDelayDuration}ms`);
-	node.style.setProperty('--show-then-fade-transition-out-duration', `${transitionOutDuration}ms`);
-	node.classList.add('visible-initially');
+	node.style.setProperty(
+		"--show-then-fade-transition-in-duration",
+		`${transitionInDuration}ms`,
+	);
+	node.style.setProperty(
+		"--show-then-fade-transition-delay-duration",
+		`${transitionDelayDuration}ms`,
+	);
+	node.style.setProperty(
+		"--show-then-fade-transition-out-duration",
+		`${transitionOutDuration}ms`,
+	);
+	node.classList.add("visible-initially");
 
 	const timer = setTimeout(() => {
-		node.classList.remove('visible-initially');
+		node.classList.remove("visible-initially");
 	}, initialVisibleDuration);
 
 	return {
 		destroy() {
 			clearTimeout(timer);
-			node.classList.remove('visible-initially');
-		}
+			node.classList.remove("visible-initially");
+		},
 	};
 }
 

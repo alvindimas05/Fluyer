@@ -2,33 +2,33 @@
 import type { MusicData } from "$lib/home/music/types";
 import { musicAlbumList, musicList } from "$lib/stores/music";
 import AlbumItem from "./AlbumItem.svelte";
-import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import { onDestroy, onMount } from "svelte";
-import {isDesktop, isLinux, isMobile} from "$lib/platform";
+import { isDesktop, isLinux, isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile";
 import { swipeMinimumTop } from "$lib/stores";
 import type { Unsubscriber } from "svelte/store";
 import { VList } from "virtua/svelte";
 import { filterAlbum, filterSearch } from "$lib/stores/filter";
-import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
+import { filterBarHeight, filterBarSortAsc } from "$lib/stores/filterbar";
 import sleep from "sleep-promise";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
-    [1536, 2.01, 0.125], // 2xl → 12.5%
+	[1536, 2.01, 0.125], // 2xl → 12.5%
 	[1280, 2.01, 0.16667], // xl-xhdpi → 16.6667%
 	[1024, 2.01, 0.2], // lg-xhdpi → 20%
 	[768, 2.01, 0.25], // md-xhdpi → 25%
-    [640, 2.01, 0.33334], // sm-xhdpi → 33.3334%
+	[640, 2.01, 0.33334], // sm-xhdpi → 33.3334%
 
-    // hdpi (1.01 ≤ DPR ≤ 2.0)
+	// hdpi (1.01 ≤ DPR ≤ 2.0)
 	[1536, 1.01, 0.125], // 2xl → 12.5%
 	[1280, 1.01, 0.16667], // xl-hdpi → 16.6667%
 	[1024, 1.01, 0.2], // lg-hdpi → 20%
 	[768, 1.01, 0.25], // md-hdpi → 25%
-    [640, 1.01, 0.33334], // sm-hdpi → 33.3334%
+	[640, 1.01, 0.33334], // sm-hdpi → 33.3334%
 
-    // default (DPR <= 1.0)
+	// default (DPR <= 1.0)
 	[1536, 0, 0.125], // 2xl → 12.5%
 	[1280, 0, 0.16667], // xl → 16.6667%
 	[1024, 0, 0.2], // lg → 20%
@@ -36,7 +36,9 @@ const rules = [
 	[640, 0, 0.33334], // sm → 33.3334%
 ];
 let itemWidth = $state(0.5 * window.innerWidth);
-let paddingTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight);
+let paddingTop = $derived(
+	(isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight,
+);
 let itemHeight = $derived(itemWidth + 52);
 
 function updateSize() {
@@ -57,27 +59,27 @@ function updateItemWidth() {
 }
 
 let data = $derived.by(() => {
-    if (!Array.isArray($musicAlbumList)) return [];
+	if (!Array.isArray($musicAlbumList)) return [];
 
-    const sortAsc = $filterBarSortAsc;
+	const sortAsc = $filterBarSortAsc;
 
-    const search = $filterSearch.toLowerCase();
-    let list = $musicAlbumList;
-    if (!search) return sortAsc ? list : list.toReversed();
+	const search = $filterSearch.toLowerCase();
+	let list = $musicAlbumList;
+	if (!search) return sortAsc ? list : list.toReversed();
 
-    list = list.filter((musicList) => {
-        return (
-            ($filterAlbum && musicList[0].album === $filterAlbum.name) ||
-            musicList[0].album?.toLowerCase().includes(search) ||
-            musicList[0].albumArtist?.toLowerCase().includes(search)
-        );
-    });
-    if(!sortAsc) list.reverse();
-    return list;
+	list = list.filter((musicList) => {
+		return (
+			($filterAlbum && musicList[0].album === $filterAlbum.name) ||
+			musicList[0].album?.toLowerCase().includes(search) ||
+			musicList[0].albumArtist?.toLowerCase().includes(search)
+		);
+	});
+	if (!sortAsc) list.reverse();
+	return list;
 });
 
 function groupByAlbum(): MusicData[][] {
-    let musicList = MusicController.musicList()!;
+	let musicList = MusicController.musicList()!;
 	const albumsMap = musicList.reduce(
 		(acc, item) => {
 			if (item.album === null || item.album.trim() === "") {
@@ -118,7 +120,9 @@ let unlistenMusicList: Unsubscriber;
 onMount(() => {
 	updateSize();
 	MusicController.setMusicAlbumList(groupByAlbum());
-	unlistenMusicList = musicList.subscribe(() => MusicController.setMusicAlbumList(groupByAlbum()));
+	unlistenMusicList = musicList.subscribe(() =>
+		MusicController.setMusicAlbumList(groupByAlbum()),
+	);
 });
 
 onDestroy(() => {

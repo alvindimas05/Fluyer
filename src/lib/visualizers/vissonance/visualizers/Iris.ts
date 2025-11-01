@@ -5,7 +5,7 @@ import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 class Iris extends Visualizer {
-	name = 'Iris';
+	name = "Iris";
 	vertexShader = [
 		"varying vec4 pos;",
 		"void main() {",

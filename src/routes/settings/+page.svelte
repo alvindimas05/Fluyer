@@ -14,8 +14,7 @@ import SettingUserInteface from "$lib/settings/user-interface/SettingUserIntefac
 import SettingDeveloper from "$lib/settings/developer/SettingDeveloper.svelte";
 import SettingIconTheme from "$lib/settings/icon-theme/SettingIconTheme.svelte";
 import Glass from "$lib/glass/Glass.svelte";
-import SettingMusicPlayerConfiguration
-    from "$lib/settings/music-player-configuration/SettingMusicPlayerConfiguration.svelte";
+import SettingMusicPlayerConfiguration from "$lib/settings/music-player-configuration/SettingMusicPlayerConfiguration.svelte";
 import View from "$lib/components/View.svelte";
 let isLoading = $derived($settingIsLoading);
 </script>

@@ -5,7 +5,7 @@ import Spectrum from "$lib/visualizers/vissonance/Spectrum";
 import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
 
 class Tricentric extends Visualizer {
-	name = 'Tricentric';
+	name = "Tricentric";
 	vertexShader = [
 		"void main() {",
 		"gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",

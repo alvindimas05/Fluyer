@@ -60,8 +60,8 @@ const iconRegistryMaterial = {
 	[IconType.Close]: CloseCircleOutline,
 	[IconType.Visualizer]: Poll,
 	[IconType.Folder]: Folder,
-    [IconType.SortAsc]: MenuUp,
-    [IconType.SortDesc]: MenuDown,
+	[IconType.SortAsc]: MenuUp,
+	[IconType.SortDesc]: MenuDown,
 };
 
 export default iconRegistryMaterial;

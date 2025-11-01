@@ -1,23 +1,23 @@
 <script lang="ts">
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
-import {settingBitPerfectMode} from "$lib/stores/setting";
+import { settingBitPerfectMode } from "$lib/stores/setting";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import ToastController from "$lib/controllers/ToastController";
 import MusicController from "$lib/controllers/MusicController";
 
 function onBitPerfectModeChange(
-    e: Event & {
-        currentTarget: EventTarget & HTMLInputElement;
-    },
+	e: Event & {
+		currentTarget: EventTarget & HTMLInputElement;
+	},
 ) {
-    settingBitPerfectMode.set(e.currentTarget.checked);
-    PersistentStoreController.bitPerfectMode.set(e.currentTarget.checked);
-    MusicController.resetEqualizer();
-    MusicController.setVolume(1);
-    ToastController.info(
-        `Bit Perfect mode is ${e.currentTarget.checked ? "enabled" : "disabled"}`,
-    );
+	settingBitPerfectMode.set(e.currentTarget.checked);
+	PersistentStoreController.bitPerfectMode.set(e.currentTarget.checked);
+	MusicController.resetEqualizer();
+	MusicController.setVolume(1);
+	ToastController.info(
+		`Bit Perfect mode is ${e.currentTarget.checked ? "enabled" : "disabled"}`,
+	);
 }
 </script>
 

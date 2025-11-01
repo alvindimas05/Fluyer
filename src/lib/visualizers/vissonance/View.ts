@@ -27,7 +27,7 @@ const View = {
 		View.data.camera.position.z = 500;
 		View.data.scene = new THREE.Scene();
 
-		View.resetRenderer()
+		View.resetRenderer();
 
 		View.loopAnimate();
 	},
@@ -85,7 +85,7 @@ const View = {
 	clear: () => {
 		View.data.scene = new THREE.Scene();
 		View.data.renderer.clear();
-	}
+	},
 };
 
 export default View;

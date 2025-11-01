@@ -1,30 +1,27 @@
 <script lang="ts">
-import {IconType} from "$lib/icon/types.js";
+import { IconType } from "$lib/icon/types.js";
 import Icon from "$lib/icon/Icon.svelte";
 import View from "$lib/components/View.svelte";
 
 interface Props {
-    class?: string;
-    value?: string;
-    placeholder?: string;
-    icon?: IconType;
+	class?: string;
+	value?: string;
+	placeholder?: string;
+	icon?: IconType;
 }
 
-let {
-    value = $bindable(),
-    icon,
-    ...props
-}: Props = $props();
-
+let { value = $bindable(), icon, ...props }: Props = $props();
 
 let isPressed = $state(false);
 let inputElement: HTMLInputElement;
 
-const handleClick = (event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement }) => {
-    isPressed = true;
+const handleClick = (
+	event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
+) => {
+	isPressed = true;
 
-    setTimeout(() => isPressed = false, 150);
-    inputElement.focus();
+	setTimeout(() => (isPressed = false), 150);
+	inputElement.focus();
 };
 </script>
 

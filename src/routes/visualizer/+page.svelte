@@ -25,13 +25,13 @@ let container: HTMLDivElement;
 
 const DEFAULT_VISUALIZER_INDEX = 0;
 let visualizers: Visualizer[] = [
-    new Barred(),
-    new Fracture(),
-    // new HillFog(),
-    new Iris(),
-    new Silk(),
-    new Tricentric(),
-    new Siphon(),
+	new Barred(),
+	new Fracture(),
+	// new HillFog(),
+	new Iris(),
+	new Silk(),
+	new Tricentric(),
+	new Siphon(),
 ];
 let currentVisualizerIndex = $state(-1);
 
@@ -55,36 +55,43 @@ async function start() {
 	AudioAnalyser.initialize();
 	View.initialize(container);
 
-    await setCurrentVisualizer(DEFAULT_VISUALIZER_INDEX);
+	await setCurrentVisualizer(DEFAULT_VISUALIZER_INDEX);
 
 	await setAudio();
 }
 
-async function setCurrentVisualizer(index: number){
-    if(index === currentVisualizerIndex) return;
+async function setCurrentVisualizer(index: number) {
+	if (index === currentVisualizerIndex) return;
 
-    View.data.renderVisualization = null;
-    if(visualizers[currentVisualizerIndex]) visualizers[currentVisualizerIndex].destroy();
-    currentVisualizerIndex = index;
-    View.clear();
-    await visualizers[currentVisualizerIndex].make();
-    View.data.renderVisualization = visualizers[currentVisualizerIndex].render.bind(visualizers[currentVisualizerIndex]);
+	View.data.renderVisualization = null;
+	if (visualizers[currentVisualizerIndex])
+		visualizers[currentVisualizerIndex].destroy();
+	currentVisualizerIndex = index;
+	View.clear();
+	await visualizers[currentVisualizerIndex].make();
+	View.data.renderVisualization = visualizers[
+		currentVisualizerIndex
+	].render.bind(visualizers[currentVisualizerIndex]);
 }
 
 async function setAudio(music: MusicData | null = null) {
 	if (!MusicController.isPlaying) return;
 
 	try {
-        let now = performance.now();
+		let now = performance.now();
 		const buffer = await MusicController.getVisualizerBuffer(
 			music ? music.path : MusicController.currentMusic.path,
 		);
 		if (buffer === null) return;
-        console.log("MusicController.getVisualizerBuffer took", performance.now() - now, "ms");
+		console.log(
+			"MusicController.getVisualizerBuffer took",
+			performance.now() - now,
+			"ms",
+		);
 
-        now = performance.now();
+		now = performance.now();
 		await AudioAnalyser.makeAudio(new Uint8Array(buffer).buffer);
-        console.log("AudioAnalyser.makeAudio took", performance.now() - now, "ms");
+		console.log("AudioAnalyser.makeAudio took", performance.now() - now, "ms");
 	} catch (e) {}
 }
 
@@ -97,12 +104,12 @@ function toastError() {
 }
 
 let unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async (index) => {
-    if(currentVisualizerIndex === -1) return;
-    visualizers[currentVisualizerIndex].executeOnNewSong();
-    setAudio(MusicController.getMusicByIndex(index));
+	if (currentVisualizerIndex === -1) return;
+	visualizers[currentVisualizerIndex].executeOnNewSong();
+	setAudio(MusicController.getMusicByIndex(index));
 });
 onMount(() => {
-    start();
+	start();
 });
 
 onDestroy(() => {

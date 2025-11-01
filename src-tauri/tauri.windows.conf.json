@@ -1,8 +1,5 @@
 {
 	"bundle": {
-		"resources": [
-			"./libs/ffmpeg/**/*",
-			"./libmpv-2.dll"
-		]
+		"resources": ["./libs/ffmpeg/**/*", "./libmpv-2.dll"]
 	}
 }

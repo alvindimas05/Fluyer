@@ -1,5 +1,5 @@
 <script lang="ts">
-import {onDestroy, onMount} from "svelte";
+import { onDestroy, onMount } from "svelte";
 
 let visible = $state(false);
 let fps = $state(0);
@@ -25,143 +25,143 @@ let overlayElement = $state<HTMLElement | null>(null);
 let navigationEntry = $state<PerformanceEntry | null>(null);
 
 function startFPSMonitoring() {
-    function calculateFPS(currentTime: number) {
-        frameCount++;
+	function calculateFPS(currentTime: number) {
+		frameCount++;
 
-        if (currentTime >= lastTime + 1000) {
-            fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-            frameCount = 0;
-            lastTime = currentTime;
-        }
+		if (currentTime >= lastTime + 1000) {
+			fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+			frameCount = 0;
+			lastTime = currentTime;
+		}
 
-        animationFrame = requestAnimationFrame(calculateFPS);
-    }
+		animationFrame = requestAnimationFrame(calculateFPS);
+	}
 
-    animationFrame = requestAnimationFrame(calculateFPS);
+	animationFrame = requestAnimationFrame(calculateFPS);
 }
 
 function updateMetrics() {
-    timestamp = Date.now();
+	timestamp = Date.now();
 
-    // Get memory usage if available
-    if ('memory' in performance) {
-        ramUsage = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
-        ramLimit = Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024);
-    }
+	// Get memory usage if available
+	if ("memory" in performance) {
+		ramUsage = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+		ramLimit = Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024);
+	}
 }
 
 function getConnectionType() {
-    if ('connection' in navigator) {
-        return navigator.connection.effectiveType || 'unknown';
-    }
-    return 'unknown';
+	if ("connection" in navigator) {
+		return navigator.connection.effectiveType || "unknown";
+	}
+	return "unknown";
 }
 
 function toggleVisibility() {
-    visible = !visible;
+	visible = !visible;
 }
 
 // Drag functionality
 function handleMouseDown(e: MouseEvent) {
-    if (e.target !== e.currentTarget) return; // Only drag from header
-    isDragging = true;
-    dragStartX = e.clientX - overlayX;
-    dragStartY = e.clientY - overlayY;
+	if (e.target !== e.currentTarget) return; // Only drag from header
+	isDragging = true;
+	dragStartX = e.clientX - overlayX;
+	dragStartY = e.clientY - overlayY;
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    e.preventDefault();
+	document.addEventListener("mousemove", handleMouseMove);
+	document.addEventListener("mouseup", handleMouseUp);
+	e.preventDefault();
 }
 
 function handleMouseMove(e: MouseEvent) {
-    if (!isDragging) return;
+	if (!isDragging) return;
 
-    const newX = e.clientX - dragStartX;
-    const newY = e.clientY - dragStartY;
+	const newX = e.clientX - dragStartX;
+	const newY = e.clientY - dragStartY;
 
-    // Constrain to viewport
-    const maxX = window.innerWidth - (overlayElement?.offsetWidth || 320);
-    const maxY = window.innerHeight - (overlayElement?.offsetHeight || 200);
+	// Constrain to viewport
+	const maxX = window.innerWidth - (overlayElement?.offsetWidth || 320);
+	const maxY = window.innerHeight - (overlayElement?.offsetHeight || 200);
 
-    overlayX = Math.max(0, Math.min(newX, maxX));
-    overlayY = Math.max(0, Math.min(newY, maxY));
+	overlayX = Math.max(0, Math.min(newX, maxX));
+	overlayY = Math.max(0, Math.min(newY, maxY));
 }
 
 function handleMouseUp() {
-    isDragging = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
+	isDragging = false;
+	document.removeEventListener("mousemove", handleMouseMove);
+	document.removeEventListener("mouseup", handleMouseUp);
 }
 
 function handleTouchStart(e: TouchEvent) {
-    if (e.target !== e.currentTarget) return; // Only drag from header
-    const touch = e.touches[0];
-    isDragging = true;
-    dragStartX = touch.clientX - overlayX;
-    dragStartY = touch.clientY - overlayY;
+	if (e.target !== e.currentTarget) return; // Only drag from header
+	const touch = e.touches[0];
+	isDragging = true;
+	dragStartX = touch.clientX - overlayX;
+	dragStartY = touch.clientY - overlayY;
 
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd);
-    e.preventDefault();
+	document.addEventListener("touchmove", handleTouchMove, { passive: false });
+	document.addEventListener("touchend", handleTouchEnd);
+	e.preventDefault();
 }
 
 function handleTouchMove(e: TouchEvent) {
-    if (!isDragging) return;
+	if (!isDragging) return;
 
-    const touch = e.touches[0];
-    const newX = touch.clientX - dragStartX;
-    const newY = touch.clientY - dragStartY;
+	const touch = e.touches[0];
+	const newX = touch.clientX - dragStartX;
+	const newY = touch.clientY - dragStartY;
 
-    // Constrain to viewport
-    const maxX = window.innerWidth - (overlayElement?.offsetWidth || 320);
-    const maxY = window.innerHeight - (overlayElement?.offsetHeight || 200);
+	// Constrain to viewport
+	const maxX = window.innerWidth - (overlayElement?.offsetWidth || 320);
+	const maxY = window.innerHeight - (overlayElement?.offsetHeight || 200);
 
-    overlayX = Math.max(0, Math.min(newX, maxX));
-    overlayY = Math.max(0, Math.min(newY, maxY));
+	overlayX = Math.max(0, Math.min(newX, maxX));
+	overlayY = Math.max(0, Math.min(newY, maxY));
 
-    e.preventDefault();
+	e.preventDefault();
 }
 
 function handleTouchEnd() {
-    isDragging = false;
-    document.removeEventListener('touchmove', handleTouchMove);
-    document.removeEventListener('touchend', handleTouchEnd);
+	isDragging = false;
+	document.removeEventListener("touchmove", handleTouchMove);
+	document.removeEventListener("touchend", handleTouchEnd);
 }
 
 onMount(() => {
-    // Initialize overlay position (top-right by default)
-    overlayX = window.innerWidth - 340; // 320px width + 20px margin
-    overlayY = 80; // 5rem from top
+	// Initialize overlay position (top-right by default)
+	overlayX = window.innerWidth - 340; // 320px width + 20px margin
+	overlayY = 80; // 5rem from top
 
-    // Get page load time
-    if (performance.getEntriesByType) {
-        const navEntries = performance.getEntriesByType('navigation');
-        if (navEntries.length > 0) {
-            navigationEntry = navEntries[0];
-            // loadTime = Math.round(navigationEntry.loadEventEnd - navigationEntry.loadEventStart);
-        }
-    }
+	// Get page load time
+	if (performance.getEntriesByType) {
+		const navEntries = performance.getEntriesByType("navigation");
+		if (navEntries.length > 0) {
+			navigationEntry = navEntries[0];
+			// loadTime = Math.round(navigationEntry.loadEventEnd - navigationEntry.loadEventStart);
+		}
+	}
 
-    // Start FPS monitoring
-    startFPSMonitoring();
+	// Start FPS monitoring
+	startFPSMonitoring();
 
-    // Update RAM usage periodically
-    fpsInterval = setInterval(updateMetrics, 1000);
+	// Update RAM usage periodically
+	fpsInterval = setInterval(updateMetrics, 1000);
 });
 
 onDestroy(() => {
-    if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-    }
-    if (fpsInterval) {
-        clearInterval(fpsInterval);
-    }
+	if (animationFrame) {
+		cancelAnimationFrame(animationFrame);
+	}
+	if (fpsInterval) {
+		clearInterval(fpsInterval);
+	}
 
-    // Clean up event listeners
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-    document.removeEventListener('touchmove', handleTouchMove);
-    document.removeEventListener('touchend', handleTouchEnd);
+	// Clean up event listeners
+	document.removeEventListener("mousemove", handleMouseMove);
+	document.removeEventListener("mouseup", handleMouseUp);
+	document.removeEventListener("touchmove", handleTouchMove);
+	document.removeEventListener("touchend", handleTouchEnd);
 });
 </script>
 

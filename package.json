@@ -9,6 +9,7 @@
 		"tauri:build": "bun scripts/tauri-build.ts",
 		"build": "vite build",
 		"preview": "vite preview",
+		"format": "bun biome",
 		"biome": "bunx biome format --write",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

@@ -1,15 +1,20 @@
 <script lang="ts">
-	import {type FolderData, type MusicData, MusicListType, MusicSize} from "./types";
-	import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
-	import Icon from "$lib/icon/Icon.svelte";
-	import {IconType} from "$lib/icon/types";
-	import {isDesktop, isLinux} from "$lib/platform";
-	import FolderController from "$lib/controllers/FolderController";
-	import {musicListType} from "$lib/stores/music";
-	import {folderCurrent} from "$lib/stores/folder";
-	import ToastController from "$lib/controllers/ToastController";
+import {
+	type FolderData,
+	type MusicData,
+	MusicListType,
+	MusicSize,
+} from "./types";
+import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
+import Icon from "$lib/icon/Icon.svelte";
+import { IconType } from "$lib/icon/types";
+import { isDesktop, isLinux } from "$lib/platform";
+import FolderController from "$lib/controllers/FolderController";
+import { musicListType } from "$lib/stores/music";
+import { folderCurrent } from "$lib/stores/folder";
+import ToastController from "$lib/controllers/ToastController";
 
-	interface Props {
+interface Props {
 	music: MusicData;
 	folder?: FolderData;
 }
@@ -18,35 +23,39 @@ let { music, folder }: Props = $props();
 
 let albumImage = $derived.by(async () => {
 	// const now = performance.now();
-	const image = folder ? await FolderController.getImageFromPath(folder.path)
+	const image = folder
+		? await FolderController.getImageFromPath(folder.path)
 		: await MusicController.getAlbumImageFromMusic(music);
 	// console.log('Music image loaded in', Math.round(performance.now() - now), 'ms for music:', music.title);
 	return image;
 });
 let titleLabel = $derived.by(() => {
-	if(folder){
-		if($folderCurrent){
+	if (folder) {
+		if ($folderCurrent) {
 			return folder.path.split(FolderController.pathSeparator).pop();
 		}
 		return folder.path;
 	} else {
-		if($musicListType === MusicListType.Folder){
+		if ($musicListType === MusicListType.Folder) {
 			return music.filename;
 		}
 		return music.title;
 	}
 });
 let mediumLabel = $derived.by(() => {
-	if(folder){
-		return 'Folder';
+	if (folder) {
+		return "Folder";
 	} else {
-		return `${music.album ? `${music.album} ${MusicConfig.separatorAlbum} ` : ''} ${music.artist}`;
+		return `${music.album ? `${music.album} ${MusicConfig.separatorAlbum} ` : ""} ${music.artist}`;
 	}
 });
 let smallLabel = $derived.by(() => {
-	if(folder){
+	if (folder) {
 		const folderMusic = FolderController.getMusicListFromFolder(folder);
-		const totalDuration = folderMusic.reduce((acc, music) => acc + music.duration, 0);
+		const totalDuration = folderMusic.reduce(
+			(acc, music) => acc + music.duration,
+			0,
+		);
 
 		return `${folderMusic.length} ${MusicConfig.separator} ${MusicController.parseMilisecondsIntoText(totalDuration)}`;
 	} else {
@@ -64,24 +73,30 @@ let smallLabel = $derived.by(() => {
 });
 
 async function addMusicAndPlay() {
-	if (music){
+	if (music) {
 		await MusicController.resetAndAddMusic(music);
 	} else {
-		await MusicController.resetAndAddMusicList(FolderController.getMusicListFromFolder(folder!!));
+		await MusicController.resetAndAddMusicList(
+			FolderController.getMusicListFromFolder(folder!!),
+		);
 	}
 	MusicController.play();
 }
 
 async function addMusic() {
-	if (music){
+	if (music) {
 		await MusicController.addMusic(music);
 	} else {
-		await MusicController.resetAndAddMusicList(FolderController.getMusicListFromFolder(folder!!));
+		await MusicController.resetAndAddMusicList(
+			FolderController.getMusicListFromFolder(folder!!),
+		);
 	}
-	ToastController.info(`Added music to queue: ${music.title ?? music.filename ?? MusicConfig.defaultTitle} ${MusicConfig.separatorAlbum} ${music.artist ?? MusicConfig.defaultArtist}`);
+	ToastController.info(
+		`Added music to queue: ${music.title ?? music.filename ?? MusicConfig.defaultTitle} ${MusicConfig.separatorAlbum} ${music.artist ?? MusicConfig.defaultArtist}`,
+	);
 }
 
-async function selectFolder(){
+async function selectFolder() {
 	if (!folder) return;
 	await FolderController.setFolder(folder);
 }

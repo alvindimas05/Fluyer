@@ -1,15 +1,15 @@
 <script lang="ts">
-import {musicList, musicListType} from "$lib/stores/music";
+import { musicList, musicListType } from "$lib/stores/music";
 import MusicItem from "./MusicItem.svelte";
-import {VList} from "virtua/svelte";
-import {onDestroy, onMount} from "svelte";
-import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import { VList } from "virtua/svelte";
+import { onDestroy, onMount } from "svelte";
+import { filterAlbum, filterSearch } from "$lib/stores/filter";
 import MusicController from "$lib/controllers/MusicController";
-import {folderCurrent, folderList} from "$lib/stores/folder";
-import {MusicListType} from "$lib/home/music/types";
+import { folderCurrent, folderList } from "$lib/stores/folder";
+import { MusicListType } from "$lib/home/music/types";
 import FolderController from "$lib/controllers/FolderController";
-import {playerBarHeight} from "$lib/stores/playerbar";
-import {filterBarSortAsc} from "$lib/stores/filterbar";
+import { playerBarHeight } from "$lib/stores/playerbar";
+import { filterBarSortAsc } from "$lib/stores/filterbar";
 
 // Responsive rules: [minWidth, maxDppxExclusive, columns]
 const rules = [
@@ -51,49 +51,56 @@ function updateSize() {
 
 let data = $derived.by(() => {
 	if (!Array.isArray($musicList)) return [];
-	let list = MusicController.sortMusicList($musicList.filter((music) => {
-		const search = $filterSearch.toLowerCase();
-		const album = $filterAlbum;
+	let list = MusicController.sortMusicList(
+		$musicList.filter((music) => {
+			const search = $filterSearch.toLowerCase();
+			const album = $filterAlbum;
 
-		const hasSearch = !!search;
-		const hasAlbum = !!album;
+			const hasSearch = !!search;
+			const hasAlbum = !!album;
 
-		const matchesSearch =
-			hasSearch &&
-			(music.album?.toLowerCase().includes(search) ||
-				music.title?.toLowerCase().includes(search) ||
-				music.artist?.toLowerCase().includes(search) ||
-				music.albumArtist?.toLowerCase().includes(search));
+			const matchesSearch =
+				hasSearch &&
+				(music.album?.toLowerCase().includes(search) ||
+					music.title?.toLowerCase().includes(search) ||
+					music.artist?.toLowerCase().includes(search) ||
+					music.albumArtist?.toLowerCase().includes(search));
 
-		const matchesAlbum = hasAlbum && album.name === music.album;
+			const matchesAlbum = hasAlbum && album.name === music.album;
 
-		const matchesFolder = FolderController.isMusicInFolder(music, $folderCurrent);
+			const matchesFolder = FolderController.isMusicInFolder(
+				music,
+				$folderCurrent,
+			);
 
-		if($musicListType === MusicListType.Folder) {
-			return matchesFolder && (!hasSearch || matchesSearch);
-		} else if (!hasAlbum) {
-			return !hasSearch || matchesSearch;
-		} else {
-			return matchesAlbum && (!hasSearch || matchesSearch);
-		}
-	}));
+			if ($musicListType === MusicListType.Folder) {
+				return matchesFolder && (!hasSearch || matchesSearch);
+			} else if (!hasAlbum) {
+				return !hasSearch || matchesSearch;
+			} else {
+				return matchesAlbum && (!hasSearch || matchesSearch);
+			}
+		}),
+	);
 
 	let _folderList = $folderList.filter((folder) => {
 		const search = $filterSearch.toLowerCase();
 		return folder.path.toLowerCase().includes(search);
 	});
-    if(!$filterBarSortAsc) _folderList.reverse();
+	if (!$filterBarSortAsc) _folderList.reverse();
 
 	if ($filterAlbum) list = MusicController.sortMusicList(list);
 
-    if(!$filterBarSortAsc) list.reverse();
+	if (!$filterBarSortAsc) list.reverse();
 
 	const result: any[][] = [];
 	for (let i = 0; i < list.length; i += columnCount) {
 		result.push(list.slice(i, i + columnCount));
 	}
-	if ($musicListType === MusicListType.Folder){
-		_folderList = _folderList.filter((folder) => FolderController.getMusicListFromFolder(folder).length > 0);
+	if ($musicListType === MusicListType.Folder) {
+		_folderList = _folderList.filter(
+			(folder) => FolderController.getMusicListFromFolder(folder).length > 0,
+		);
 
 		for (let i = 0; i < _folderList.length; i += columnCount) {
 			result.push(_folderList.slice(i, i + columnCount));
@@ -102,7 +109,9 @@ let data = $derived.by(() => {
 	return result;
 });
 
-let unsubscribeMusicListType = musicListType.subscribe(() => setTimeout(updateSize));
+let unsubscribeMusicListType = musicListType.subscribe(() =>
+	setTimeout(updateSize),
+);
 onMount(() => {
 	updateSize();
 });

@@ -2,14 +2,14 @@
 import type { MusicData } from "../music/types";
 
 interface Props {
-    music: MusicData;
-    uuid: string;
+	music: MusicData;
+	uuid: string;
 }
 
 import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import {musicCurrentIndex, musicPlaylistIds} from "$lib/stores/music";
+import { musicCurrentIndex, musicPlaylistIds } from "$lib/stores/music";
 
 let { music, uuid }: Props = $props();
 
@@ -19,11 +19,11 @@ let isPrevious = $derived(index < $musicCurrentIndex);
 let albumImage = $derived(MusicController.getAlbumImageFromMusic(music));
 
 function removePlaylist() {
-    MusicController.removeMusic(index);
+	MusicController.removeMusic(index);
 }
 
 function gotoPlaylist() {
-    MusicController.gotoPlaylist(index);
+	MusicController.gotoPlaylist(index);
 }
 </script>
 
