@@ -5,10 +5,11 @@ import LoadingController from "$lib/controllers/LoadingController";
 import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
 import { onDestroy, onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
+// @ts-ignore
 import ColorThief from "colorthief/dist/color-thief.mjs";
 import {
-	settingAnimatedBackgroundType,
-	settingTriggerAnimatedBackground,
+    settingAnimatedBackgroundType,
+    settingTriggerAnimatedBackground,
 } from "$lib/stores/setting";
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { prominent } from "color.js";
@@ -26,9 +27,32 @@ let previousBackground: string | null = null;
 let canvas: HTMLCanvasElement;
 let canvasContext: CanvasRenderingContext2D;
 let currentCanvas: HTMLCanvasElement | null = null;
-let newCanvas: HTMLCanvasElement | null = null;
 let previousColors: string[] = [];
 let previousBackgroundColors: string[][] = [];
+
+// Transition queue management
+let pendingTransition: HTMLCanvasElement | null = null;
+let activeTransition: number | null = null;
+
+// Performance optimization: reuse canvases
+const canvasPool: HTMLCanvasElement[] = [];
+const MAX_POOL_SIZE = 3;
+
+function getCanvasFromPool(width: number, height: number): HTMLCanvasElement {
+    let canvas = canvasPool.pop();
+    if (!canvas) {
+        canvas = document.createElement("canvas");
+    }
+    canvas.width = width;
+    canvas.height = height;
+    return canvas;
+}
+
+function returnCanvasToPool(canvas: HTMLCanvasElement) {
+    if (canvasPool.length < MAX_POOL_SIZE) {
+        canvasPool.push(canvas);
+    }
+}
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
     const bigint = parseInt(hex.slice(1), 16);
@@ -44,13 +68,11 @@ function balanceColor(hex: string): string {
 
     // Balance saturation - reduce overly vibrant colors
     if (hsl.s > 0.7) {
-        // Very saturated colors - tone them down significantly
         hsl.s = 0.5 + (hsl.s - 0.7) * 0.4;
     }
 
     // Balance lightness for better visibility
     if (hsl.l > 0.7) {
-        // Too bright - darken more aggressively
         hsl.l = 0.45 + (hsl.l - 0.7) * 0.3;
     }
 
@@ -134,10 +156,12 @@ async function getColors(force = false): Promise<string[] | null> {
     if (previousBackground === currentAlbumImage && !force) return null;
 
     let image = new Image();
+    image.crossOrigin = "anonymous";
     image.src = previousBackground = currentAlbumImage;
+
     if (!image.complete) {
         await new Promise((resolve, reject) => {
-            image.onload = () => resolve();
+            image.onload = () => resolve(null);
             image.onerror = (err) => reject(err);
         });
     }
@@ -193,10 +217,8 @@ async function createCanvas(
         }
     }
 
-    const baseCanvas = document.createElement("canvas");
-    baseCanvas.width = scaledWidth;
-    baseCanvas.height = scaledHeight;
-    const baseContext = baseCanvas.getContext("2d")!;
+    const baseCanvas = getCanvasFromPool(scaledWidth, scaledHeight);
+    const baseContext = baseCanvas.getContext("2d", { alpha: false })!;
 
     for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
@@ -212,118 +234,173 @@ async function createCanvas(
 }
 
 async function initializeCanvas(reinitialize = false) {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-	currentCanvas = await createCanvas({ usePreviousColors: reinitialize });
+    const newCanvas = await createCanvas({ usePreviousColors: reinitialize });
+    if (!newCanvas) return;
 
-	if (reinitialize) {
-		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-		canvasContext.drawImage(currentCanvas!, 0, 0, canvas.width, canvas.height);
-	} else {
-		canvasContext = canvas.getContext("2d")!;
+    if (reinitialize) {
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        canvasContext.drawImage(newCanvas, 0, 0, canvas.width, canvas.height);
 
-		const startTime = performance.now();
+        // Clean up old canvas
+        if (currentCanvas) {
+            returnCanvasToPool(currentCanvas);
+        }
+        currentCanvas = newCanvas;
+    } else {
+        canvasContext = canvas.getContext("2d")!;
+        currentCanvas = newCanvas;
 
-		function fadeIn(currentTime: number) {
-			let elapsed = currentTime - startTime;
+        const startTime = performance.now();
+
+        function fadeIn(currentTime: number) {
+            let elapsed = currentTime - startTime;
             if (elapsed < 0) elapsed = 0;
-			const alpha = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
+            const alpha = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
 
-			canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-			canvasContext.globalAlpha = alpha;
-			canvasContext.drawImage(currentCanvas!, 0, 0, canvas.width, canvas.height);
-			canvasContext.globalAlpha = 1.0;
+            canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+            canvasContext.globalAlpha = alpha;
+            canvasContext.drawImage(currentCanvas!, 0, 0, canvas.width, canvas.height);
+            canvasContext.globalAlpha = 1.0;
 
-			if (alpha < 1) {
-				requestAnimationFrame(fadeIn);
-			} else {
-				afterInitializeCanvas();
-			}
-		}
+            if (alpha < 1) {
+                requestAnimationFrame(fadeIn);
+            } else {
+                afterInitializeCanvas();
+            }
+        }
 
-		requestAnimationFrame(fadeIn);
-	}
+        requestAnimationFrame(fadeIn);
+    }
 }
 
 async function afterInitializeCanvas() {
-	LoadingController.setLoadingBackground(true);
+    LoadingController.setLoadingBackground(true);
 }
 
+// New smooth transition function with interruption support
 async function transitionToNewCanvas(force = false) {
-	const _newCanvas = await createCanvas({ force });
+    const _newCanvas = await createCanvas({ force });
+    if (!_newCanvas) return;
 
-	if (!_newCanvas || newCanvas !== null) return;
+    // Cancel active transition and use its target as new starting point
+    if (activeTransition !== null) {
+        cancelAnimationFrame(activeTransition);
+        activeTransition = null;
 
-	newCanvas = _newCanvas;
+        // If there was a pending canvas, use it as current
+        if (pendingTransition) {
+            if (currentCanvas) {
+                returnCanvasToPool(currentCanvas);
+            }
+            currentCanvas = pendingTransition;
+            pendingTransition = null;
+        }
+    }
 
-	const width = canvas.width;
-	const height = canvas.height;
+    // Set new pending canvas
+    if (pendingTransition) {
+        returnCanvasToPool(pendingTransition);
+    }
+    pendingTransition = _newCanvas;
 
-	const buffer = document.createElement("canvas");
-	buffer.width = width;
-	buffer.height = height;
-	const bufferContext = buffer.getContext("2d")!;
+    const width = canvas.width;
+    const height = canvas.height;
 
-	const startTime = performance.now();
+    // Reuse buffer canvas
+    const buffer = getCanvasFromPool(width, height);
+    const bufferContext = buffer.getContext("2d", { alpha: false })!;
 
-	function animate(currentTime: number) {
-		let elapsed = currentTime - startTime;
-		if (elapsed < 0) elapsed = 0;
-		const progress = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
+    const startTime = performance.now();
+    let lastProgress = 0;
 
-		bufferContext.clearRect(0, 0, width, height);
+    function animate(currentTime: number) {
+        let elapsed = currentTime - startTime;
+        if (elapsed < 0) elapsed = 0;
 
-		bufferContext.globalAlpha = 1;
-		bufferContext.drawImage(currentCanvas!, 0, 0, width, height);
+        // Linear progress
+        const progress = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
 
-		bufferContext.globalAlpha = progress;
-		bufferContext.drawImage(newCanvas!, 0, 0, width, height);
+        // Only update if progress changed significantly (optimization)
+        if (Math.abs(progress - lastProgress) < 0.01 && progress < 1) {
+            activeTransition = requestAnimationFrame(animate);
+            return;
+        }
+        lastProgress = progress;
 
-		bufferContext.globalAlpha = 1;
-		canvasContext.clearRect(0, 0, width, height);
-		canvasContext.drawImage(buffer, 0, 0, width, height);
+        bufferContext.clearRect(0, 0, width, height);
 
-		if (progress < 1) {
-			requestAnimationFrame(animate);
-		} else {
-			currentCanvas = newCanvas;
-			newCanvas = null;
-		}
-	}
+        bufferContext.globalAlpha = 1;
+        if (currentCanvas) {
+            bufferContext.drawImage(currentCanvas, 0, 0, width, height);
+        }
 
-	requestAnimationFrame(animate);
+        bufferContext.globalAlpha = progress;
+        bufferContext.drawImage(pendingTransition!, 0, 0, width, height);
+
+        bufferContext.globalAlpha = 1;
+        canvasContext.clearRect(0, 0, width, height);
+        canvasContext.drawImage(buffer, 0, 0, width, height);
+
+        if (progress < 1) {
+            activeTransition = requestAnimationFrame(animate);
+        } else {
+            // Transition complete
+            if (currentCanvas) {
+                returnCanvasToPool(currentCanvas);
+            }
+            currentCanvas = pendingTransition;
+            pendingTransition = null;
+            activeTransition = null;
+            returnCanvasToPool(buffer);
+        }
+    }
+
+    activeTransition = requestAnimationFrame(animate);
 }
 
 function onWindowResize() {
-	initializeCanvas(true);
+    initializeCanvas(true);
 }
 
 let isMounted = false;
-
 let unlistenMusicCurrentIndex: Unsubscriber;
 let unlistenMusicPlaylist: Unsubscriber;
 let unlistenSettingTriggerAnimatedBackground: Unsubscriber;
 
 onMount(() => {
-	initializeCanvas();
-	unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() =>
-		setTimeout(transitionToNewCanvas, 0),
-	);
-	unlistenMusicPlaylist = musicPlaylist.subscribe(() =>
-		setTimeout(transitionToNewCanvas, 0),
-	);
-	unlistenSettingTriggerAnimatedBackground =
-		settingTriggerAnimatedBackground.subscribe(() => {
-			if (isMounted) setTimeout(() => transitionToNewCanvas(true), 0);
-			else isMounted = true;
-		});
+    initializeCanvas();
+    unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(() =>
+        transitionToNewCanvas()
+    );
+    unlistenMusicPlaylist = musicPlaylist.subscribe(() =>
+        transitionToNewCanvas()
+    );
+    unlistenSettingTriggerAnimatedBackground =
+        settingTriggerAnimatedBackground.subscribe(() => {
+            if (isMounted) transitionToNewCanvas(true);
+            else isMounted = true;
+        });
 });
 
 onDestroy(() => {
-	unlistenMusicCurrentIndex();
-	unlistenMusicPlaylist();
-	unlistenSettingTriggerAnimatedBackground();
+    // Cancel any active transitions
+    if (activeTransition !== null) {
+        cancelAnimationFrame(activeTransition);
+    }
+
+    // Clean up canvases
+    if (currentCanvas) returnCanvasToPool(currentCanvas);
+    if (pendingTransition) returnCanvasToPool(pendingTransition);
+
+    // Clear pool
+    canvasPool.length = 0;
+
+    unlistenMusicCurrentIndex();
+    unlistenMusicPlaylist();
+    unlistenSettingTriggerAnimatedBackground();
 });
 </script>
 
