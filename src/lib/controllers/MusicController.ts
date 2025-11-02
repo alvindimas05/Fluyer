@@ -260,7 +260,7 @@ const MusicController = {
 
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-			if (e.payload.isPlaying)
+            if (e.payload.isPlaying)
 				MusicController.startProgress({ resetProgress: true });
 			else MusicController.stopProgress();
 
