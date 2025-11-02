@@ -260,22 +260,30 @@ const MusicController = {
 
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-			MusicController.setCurrentMusicIndex(e.payload.index);
 			if (e.payload.isPlaying)
 				MusicController.startProgress({ resetProgress: true });
 			else MusicController.stopProgress();
 
-			MusicController.setProgressValue(
-				MusicController.parseProgressDurationIntoValue(
-					MusicController.parseProgressDuration(e.payload.currentPosition),
-					MusicController.parseProgressDuration(
-						MusicController.musicPlaylist[e.payload.index].duration,
-					),
-				),
-			);
+			if(e.payload.index > -1){
+                MusicController.setCurrentMusicIndex(e.payload.index);
+
+                MusicController.setProgressValue(
+                    MusicController.parseProgressDurationIntoValue(
+                        MusicController.parseProgressDuration(e.payload.currentPosition),
+                        MusicController.parseProgressDuration(
+                            MusicController.musicPlaylist[e.payload.index].duration,
+                        ),
+                    ),
+                );
+            } else {
+                MusicController.resetProgress();
+            }
 			MusicController.setIsPlaying(e.payload.isPlaying);
 		});
 	},
+    requestSync: () => {
+        return invoke(CommandRoutes.MUSIC_PLAYER_REQUEST_SYNC);
+    },
 
 	resetProgress: () => musicProgressValue.set(MusicConfig.min),
 

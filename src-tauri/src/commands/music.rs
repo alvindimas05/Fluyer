@@ -236,7 +236,7 @@ pub fn music_get_current_duration(state: State<'_, Mutex<AppState>>) -> Option<u
 }
 
 #[tauri::command]
-pub fn music_request_sync() {
+pub fn music_player_request_sync() {
     MusicPlayer::emit_sync(false);
 }
 

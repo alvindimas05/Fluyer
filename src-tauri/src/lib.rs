@@ -87,7 +87,7 @@ pub fn run() {
             commands::music::music_equalizer_reset,
             commands::music::music_get_image,
             commands::music::music_get_current_duration,
-            commands::music::music_request_sync,
+            commands::music::music_player_request_sync,
             commands::music::music_get_lyrics,
             commands::music::music_toggle_bit_perfect,
 

@@ -106,7 +106,7 @@ pub struct PlayerGetInfo {
     pub current_position: u128,
     pub is_empty: bool,
     pub is_playing: bool,
-    pub index: usize,
+    pub index: i64,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

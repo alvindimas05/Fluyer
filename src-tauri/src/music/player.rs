@@ -42,7 +42,7 @@ pub struct MusicPlayer {}
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MusicPlayerSync {
-    index: usize,
+    index: i64,
     current_position: u128,
     is_playing: bool,
 }
@@ -243,7 +243,7 @@ impl MusicPlayer {
                     "absolute",
                 ],
             )
-            .unwrap();
+            .ok();
     }
     pub fn get_current_duration(&self) -> u128 {
         #[cfg(target_os = "android")]
@@ -288,17 +288,19 @@ impl MusicPlayer {
         #[cfg(desktop)]
         {
             let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
+            let index = mpv.get_property::<i64>("playlist-pos").unwrap_or(-1);
+
             MusicPlayerSync {
-                index: mpv.get_property::<i64>("playlist-pos").unwrap() as usize,
+                index: mpv.get_property::<i64>("playlist-pos").unwrap_or(-1),
                 current_position: if is_from_next {
                     0
                 } else {
-                    (mpv.get_property::<f64>("time-pos").unwrap_or(0.0) * 1000.0) as u128
+                    mpv.get_property::<f64>("time-pos").unwrap_or(0.0) as u128
                 },
                 is_playing: if is_from_next {
                     true
                 } else {
-                    !mpv.get_property::<bool>("pause").unwrap()
+                    index > -1 && !mpv.get_property::<bool>("pause").unwrap()
                 },
             }
         }
@@ -522,17 +524,6 @@ impl MusicPlayer {
     }
 
     pub fn emit_sync(is_from_next: bool) {
-        #[cfg(desktop)]
-        if GLOBAL_MUSIC_MPV
-            .get()
-            .unwrap()
-            .get_property::<i64>("playlist-pos")
-            .unwrap()
-            < 0
-        {
-            return;
-        }
-
         GLOBAL_APP_HANDLE
             .get()
             .unwrap()
@@ -563,6 +554,12 @@ impl MusicPlayer {
                     Ok(Event::PlaybackRestart) => {
                         MusicPlayer::emit_sync(false);
                     }
+                    Ok(Event::EndFile(reason)) => {
+                        // Note: reason 0 means EOF
+                        if reason == 0 {
+                            MusicPlayer::emit_sync(false);
+                        }
+                    },
                     Ok(_) => {}
                     Err(_) => {}
                 }

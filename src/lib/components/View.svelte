@@ -8,7 +8,7 @@ interface Props {
 	thisElement?: HTMLDivElement;
 	glassEnableBlur?: boolean;
 	glassEnableHoverEffect?: boolean;
-	events: any;
+	events?: any;
 }
 
 let {
