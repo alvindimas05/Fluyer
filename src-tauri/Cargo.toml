@@ -44,6 +44,11 @@ rusqlite_migration = "2.3.0"
 tokio = "1.47.1"
 fast_image_resize = { version = "5.3.0", features = ["rayon", "image"] }
 
+# FIXME: Use Tao dev branch temporarily because it fixed the fullscreen gap issue on Windows
+# Use stable version after Tauri is updated
+[patch.crates-io]
+tao = { git = "https://github.com/tauri-apps/tao", branch = "dev" }
+
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
 libmpv2 = "5.0.1"
 
