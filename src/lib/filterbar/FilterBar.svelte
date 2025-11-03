@@ -76,15 +76,18 @@ onMount(updateSize);
 
 <svelte:window onresize={updateSize} />
 <div class="w-full grid gap-y-2 px-3 sm:px-0 sm:pb-3 pointer-events-none
-    {isMacos() ? 'justify-end' : ''}
+    {isMacos() ? 'sm:justify-end' : ''}
     {isMacos() ? 'right-0' : 'left-0'}
     animate__animated animate__fadeIn animate__slow"
     style="margin-top: {isMobile() ? $mobileStatusBarHeight : 8}px;
         grid-template-columns: {gridSize};"
     bind:this={element}>
-    <div class="grid pointer-events-none grid-cols-[auto_4rem] md:grid-cols-[auto_30%] sm:mx-3 gap-x-2 sm:gap-x-4 {isMacos() ? 'justify-end' : 'justify-start'}">
+    <div class="h-fit sm:h-auto grid pointer-events-none
+        grid-cols-[auto_4rem] md:grid-cols-[auto_30%]
+        sm:mx-3 gap-x-2 sm:gap-x-4
+        {isMacos() ? 'justify-end' : 'justify-start'}">
         <div>
-            <Button class="h-full aspect-square rounded grid justify-center pointer-events-auto p-1 md:p-0"
+            <Button class="h-full aspect-square rounded grid justify-center pointer-events-auto p-[3.5px] sm:p-0"
                 onclick={toggleSort}>
                 <div class="w-5">
                     {#if $filterBarSortAsc}
@@ -103,7 +106,7 @@ onMount(updateSize);
     </div>
     <Input
         class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
-            {isMacos() ? 'order-last' : 'order-first'} rounded"
+            {isMacos() ? 'md:order-last' : 'order-first'} rounded"
         icon={IconType.Search}
         placeholder="Search..."
         bind:value={$filterSearch}
