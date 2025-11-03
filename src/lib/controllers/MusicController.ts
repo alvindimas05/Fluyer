@@ -31,6 +31,7 @@ import { equalizerValues } from "$lib/stores/equalizer";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import UtilsController from "$lib/controllers/UtilsController";
 import { settingBitPerfectMode } from "$lib/stores/setting";
+import {playlistMoveQueue} from "$lib/home/playlist/PlaylistMoveQueue";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -600,27 +601,30 @@ const MusicController = {
 		await MusicController.resetAndAddMusicList(playlist);
 		MusicController.play();
 	},
-	playlistMoveto: async (fromIndex: number, toIndex: number) => {
-		if (fromIndex === toIndex) return;
 
-		const currentMusic = MusicController.currentMusic;
-		const playlist = MusicController.musicPlaylist;
-		const music = playlist[fromIndex];
-		playlist.splice(fromIndex, 1);
-		playlist.splice(toIndex, 0, music);
+    playlistMoveto: async (fromIndex: number, toIndex: number) => {
+        return playlistMoveQueue.add(async () => {
+            if (fromIndex === toIndex) return;
 
-		await invoke(CommandRoutes.MUSIC_PLAYLIST_MOVETO, {
-			from: fromIndex,
-			to:
-				isDesktop() && fromIndex < MusicController.currentMusicIndex
-					? toIndex + 1
-					: toIndex,
-		});
-		musicPlaylist.set(playlist);
-		musicCurrentIndex.set(
-			playlist.findIndex((m) => m.path === currentMusic.path),
-		);
-	},
+            const currentMusic = MusicController.currentMusic;
+            const playlist = MusicController.musicPlaylist;
+            const music = playlist[fromIndex];
+            playlist.splice(fromIndex, 1);
+            playlist.splice(toIndex, 0, music);
+
+            await invoke(CommandRoutes.MUSIC_PLAYLIST_MOVETO, {
+                from: fromIndex,
+                to: isDesktop() && fromIndex < MusicController.currentMusicIndex
+                    ? toIndex + 1
+                    : toIndex,
+            });
+
+            musicPlaylist.set(playlist);
+            musicCurrentIndex.set(
+                playlist.findIndex((m) => m.path === currentMusic.path),
+            );
+        });
+    },
 
 	setEqualizer: async (values: number[]) => {
 		if (isDesktop())
