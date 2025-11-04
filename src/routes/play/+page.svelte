@@ -25,9 +25,9 @@ import {
 	settingUiShowShuffleButton,
 } from "$lib/stores/setting";
 import { showThenFade } from "$lib/controllers/UIController";
-import Glass from "$lib/glass/Glass.svelte";
 import LyricController from "$lib/controllers/LyricController";
 import View from "$lib/components/View.svelte";
+import ProgressBar from "$lib/components/ProgressBar.svelte";
 
 let music = $state(MusicController.currentMusic);
 let progressPercentage = $state(MusicController.progressPercentage);
@@ -41,16 +41,10 @@ let lyrics: MusicLyric[] = $state([]);
 let selectedLyricIndex = $state(0);
 let volumePercentage = $state(MusicController.volumePercentage);
 
-let progressBar: HTMLDivElement;
 let updateProgressText = $state(true);
-let touchLastX = $state(0);
 
 const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
-	progressPercentage = MusicController.progressPercentage;
-	if (updateProgressText) {
-		progressDurationText = MusicController.progressDurationText();
-		progressDurationNegativeText = MusicController.progressDurationText(true);
-	}
+    refreshProgressText();
 
 	resetSelectedLyricIndex();
 });
@@ -125,64 +119,36 @@ function resetSelectedLyricIndex() {
 	scrollToSelectedLyric();
 }
 
-function setProgressText(
-	e: MouseEvent & {
-		currentTarget: EventTarget & HTMLDivElement;
-	},
-) {
-	const rect = e.currentTarget.getBoundingClientRect();
-	const x = e.clientX - rect.left;
-	const percentage = (x / progressBar.offsetWidth) * 100;
-	updateProgressText = false;
-	progressDurationText =
-		MusicController.parsePercentageProgressDurationIntoText(percentage);
-	progressDurationNegativeText =
-		MusicController.parsePercentageProgressDurationIntoText(percentage, true);
+function refreshProgressText() {
+    if (!updateProgressText) return;
+    progressDurationText = MusicController.progressDurationText();
+    progressDurationNegativeText = MusicController.progressDurationText(true);
 }
 
-function setProgressTextTouch(
-	e: TouchEvent & {
-		currentTarget: EventTarget & HTMLDivElement;
-	},
-) {
-	const rect = e.currentTarget.getBoundingClientRect();
-	const x = e.touches[0].clientX - rect.left;
-	const percentage = (x / progressBar.offsetWidth) * 100;
-	updateProgressText = false;
-	progressDurationText =
-		MusicController.parsePercentageProgressDurationIntoText(percentage);
-	progressDurationNegativeText =
-		MusicController.parsePercentageProgressDurationIntoText(percentage, true);
-
-	touchLastX = x;
+function handleProgressClick(percentage: number) {
+    MusicController.updateProgressByPercentage(percentage);
 }
 
-function updateProgress(
-	e: MouseEvent & {
-		currentTarget: EventTarget & HTMLDivElement;
-	},
-) {
-	const rect = e.currentTarget.getBoundingClientRect();
-	const x = e.clientX - rect.left;
-	const percentage = (x / progressBar.offsetWidth) * 100;
-	MusicController.updateProgressByPercentage(percentage);
-
-	resetProgressText();
+function handleProgressEnter(){
+    updateProgressText = false;
 }
 
-function updateProgressTouch(
-	e: TouchEvent & {
-		currentTarget: EventTarget & HTMLDivElement;
-	},
-) {
-	const percentage = (touchLastX / progressBar.offsetWidth) * 100;
-	MusicController.updateProgressByPercentage(percentage);
-
-	resetProgressText();
+function handleProgressMove(percentage: number) {
+    updateProgressText = false;
+    progressDurationText =
+        MusicController.parsePercentageProgressDurationIntoText(percentage);
+    progressDurationNegativeText =
+        MusicController.parsePercentageProgressDurationIntoText(percentage, true);
 }
 
-function resetProgressText() {
-	updateProgressText = true;
+function handleProgressLeave(){
+    updateProgressText = true;
+    refreshProgressText();
+}
+
+
+function handleVolumeProgressClick(percentage: number) {
+    MusicController.setVolume(percentage / 100);
 }
 
 function scrollToSelectedLyric() {
@@ -260,34 +226,19 @@ function scrollToSelectedLyric() {
                     >
                 </div>
             </div>
-            <div class="w-full pt-4 pb-2 relative">
-                <input
-                    class={`w-full absolute music-progress-bar-play`}
-                    type="range"
-                    style={`--progress-width: ${progressPercentage}%`}
-                    bind:value={$musicProgressValue}
-                    min={MusicConfig.min}
-                    max={MusicConfig.max}
-                    step={MusicConfig.step}
+            <div class="w-full pt-4 pb-2">
+                <ProgressBar
+                        bind:value={$musicProgressValue}
+                        min={MusicConfig.min}
+                        max={MusicConfig.max}
+                        step={MusicConfig.step}
+                        progressPercentage={progressPercentage}
+                        onProgressClick={handleProgressClick}
+                        onProgressEnter={handleProgressEnter}
+                        onProgressMove={handleProgressMove}
+                        onProgressLeave={handleProgressLeave}
+                        size="md"
                 />
-                <input
-                    class={`w-full absolute music-progress-bar-play-end`}
-                    type="range"
-                    style={`--progress-width: ${progressPercentage}%`}
-                    bind:value={$musicProgressValue}
-                    min={MusicConfig.min}
-                    max={MusicConfig.max}
-                    step={MusicConfig.step}
-                />
-                <div class="w-full h-5 absolute left-0 top-[8px] cursor-pointer"
-                    bind:this={progressBar}
-                    onmouseenter={setProgressText}
-                    onmousemove={setProgressText}
-                    onmouseleave={resetProgressText}
-                    ontouchstart={setProgressTextTouch}
-                    ontouchmove={setProgressTextTouch}
-                    ontouchend={updateProgressTouch}
-                    onclick={updateProgress}></div>
             </div>
             <div
                 class={`w-full grid ${isAndroid() || !$settingUiPlayShowBackButton ? "grid-cols-[1fr_auto_auto_auto_1fr]" : "grid-cols-7"} items-center gap-2 mt-4`}
@@ -366,22 +317,15 @@ function scrollToSelectedLyric() {
                             <Icon type={IconType.Mute} />
                         </button>
                         <div class="relative">
-                            <input
-                                    class={`absolute w-full volume-progress-bar-end`}
-                                    type="range"
-                                    style={`--progress-width: ${volumePercentage}%`}
-                                    min={MusicConfig.vmin}
-                                    max={MusicConfig.vmax}
-                                    step={MusicConfig.vstep}
-                            />
-                            <input
-                                    class={`absolute w-full volume-progress-bar`}
-                                    type="range"
-                                    style={`--progress-width: ${volumePercentage}%`}
+                            <ProgressBar
                                     bind:value={$musicVolume}
+                                    progressPercentage={volumePercentage}
+                                    onProgressClick={handleVolumeProgressClick}
                                     min={MusicConfig.vmin}
                                     max={MusicConfig.vmax}
                                     step={MusicConfig.vstep}
+                                    showTooltip={false}
+                                    size="sm"
                             />
                         </div>
                         <button

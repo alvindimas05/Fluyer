@@ -171,16 +171,19 @@ const MusicController = {
 	parseProgressPercentageIntoValue: (value: number) =>
 		(value / 100) * MusicConfig.max,
 
-	parseProgressDurationIntoText: (value: number, negative = false) => {
-		let minutes = 0;
-		let seconds: number;
-		for (seconds = value; seconds >= 60; seconds -= 60) {
-			minutes++;
-		}
-		if (seconds < 0) seconds = seconds + 60;
-		seconds = Math.round(seconds);
-		return `${negative ? "-" : ""}${minutes}:${seconds > 9 ? seconds : "0" + seconds.toString()}`;
-	},
+    parseProgressDurationIntoText: (value: number, negative = false) => {
+        let totalSeconds = Math.max(0, value);
+        let minutes = Math.floor(totalSeconds / 60);
+        let seconds = Math.round(totalSeconds % 60);
+
+        if (seconds === 60) {
+            minutes += 1;
+            seconds = 0;
+        }
+
+        return `${negative ? "-" : ""}${minutes}:${seconds.toString().padStart(2, "0")}`;
+    },
+
 	mpvMusicCurrentDuration: () =>
 		invoke<number | null>(CommandRoutes.MUSIC_GET_CURRENT_DURATION),
 	progressDurationText: (negative = false): string => {
