@@ -1283,6 +1283,7 @@ dependencies = [
  "tauri-plugin-prevent-default",
  "tauri-plugin-store",
  "tokio",
+ "uuid",
  "walkdir",
 ]
 

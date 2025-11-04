@@ -86,7 +86,7 @@ function refresh() {
 }
 
 function handleProgressClick(percentage: number) {
-    MusicController.updateProgressByPercentage(percentage);
+    MusicController.seekByPercentage(percentage);
 }
 
 function handleVolumeProgressClick(percentage: number) {

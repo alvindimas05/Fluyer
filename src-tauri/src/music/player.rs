@@ -1,3 +1,4 @@
+use std::sync::atomic::{AtomicU64, Ordering};
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 
@@ -10,12 +11,16 @@ use libmpv2::Mpv;
 #[cfg(desktop)]
 use std::sync::OnceLock;
 use std::thread;
+use std::time::{SystemTime, UNIX_EPOCH};
+use libmpv2::events::PropertyData;
+use libmpv2::Format;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistAddMusic;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
+use uuid::{uuid, Uuid};
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -69,56 +74,53 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         {
-            GLOBAL_MUSIC_MPV
-                .set(
-                    Mpv::with_initializer(|mpv| {
-                        let log_path = logger::get_mpv_log_path();
-                        mpv.set_option("log-file", log_path.clone())?;
-                        mpv.set_property("vo", "null")?;
+            let mpv = Mpv::with_initializer(|mpv| {
+                let log_path = logger::get_mpv_log_path();
+                mpv.set_option("log-file", log_path.clone())?;
+                mpv.set_property("vo", "null")?;
 
-                        mpv.set_property("cache", "yes")?;
-                        mpv.set_property("demuxer-max-bytes", "100000000")?; // 100MB for high-res audio
-                        mpv.set_property("demuxer-readahead-secs", "10")?;
+                mpv.set_property("cache", "yes")?;
+                mpv.set_property("demuxer-max-bytes", "100000000")?; // 100MB for high-res audio
+                mpv.set_property("demuxer-readahead-secs", "10")?;
 
-                        mpv.set_property("prefetch-playlist", "yes")?;
-                        mpv.set_property("gapless-audio", "yes")?;
+                mpv.set_property("prefetch-playlist", "yes")?;
+                mpv.set_property("gapless-audio", "yes")?;
 
-                        mpv.set_property("af", "")?; // Clear audio filters
-                        mpv.set_property("audio-normalize-downmix", "no")?;
-                        mpv.set_property("audio-pitch-correction", "no")?;
-                        mpv.set_property("replaygain", "no")?; // Disable ReplayGain
-                        mpv.set_property("replaygain-fallback", "0")?;
+                mpv.set_property("af", "")?; // Clear audio filters
+                mpv.set_property("audio-normalize-downmix", "no")?;
+                mpv.set_property("audio-pitch-correction", "no")?;
+                mpv.set_property("replaygain", "no")?; // Disable ReplayGain
+                mpv.set_property("replaygain-fallback", "0")?;
 
-                        mpv.set_property("volume", "100")?;
-                        mpv.set_property("volume-max", "100")?;
+                mpv.set_property("volume", "100")?;
+                mpv.set_property("volume-max", "100")?;
 
-                        mpv.set_property("audio-samplerate", "0")?; // 0 = use source sample rate
-                        mpv.set_property("audio-channels", "auto")?; // Preserve channel layout
+                mpv.set_property("audio-samplerate", "0")?; // 0 = use source sample rate
+                mpv.set_property("audio-channels", "auto")?; // Preserve channel layout
 
-                        #[cfg(target_os = "windows")]
-                        mpv.set_property("ao", "wasapi")?;
+                #[cfg(target_os = "windows")]
+                mpv.set_property("ao", "wasapi")?;
 
-                        #[cfg(target_os = "macos")]
-                        mpv.set_property("ao", "coreaudio")?;
+                #[cfg(target_os = "macos")]
+                mpv.set_property("ao", "coreaudio")?;
 
-                        #[cfg(target_os = "linux")]{
-                            mpv.set_property("ao", "alsa")?;
-                            mpv.set_property("alsa-resample", "no")?; // Disable ALSA resampling
-                        }
+                #[cfg(target_os = "linux")]{
+                    mpv.set_property("ao", "alsa")?;
+                    mpv.set_property("alsa-resample", "no")?; // Disable ALSA resampling
+                }
 
-                        mpv.set_property("audio-buffer", "2")?;
+                mpv.set_property("audio-buffer", "2")?;
 
-                        mpv.set_property("audio-stream-silence", "no")?;
-                        mpv.set_property("audio-wait-open", "2")?; // Wait for audio device
+                mpv.set_property("audio-stream-silence", "no")?;
+                mpv.set_property("audio-wait-open", "2")?; // Wait for audio device
 
-                        mpv.set_property("msg-level", "all=warn,ao=debug")?;
+                mpv.set_property("msg-level", "all=warn,ao=debug")?;
 
-                        logger::debug!("The mpv log file is saved at {}", log_path);
-                        Ok(())
-                    })
-                        .unwrap(),
-                )
-                .ok();
+                logger::debug!("The mpv log file is saved at {}", log_path);
+                Ok(())
+            }).unwrap();
+
+            GLOBAL_MUSIC_MPV.set(mpv).ok();
         }
         MusicPlayer::start_listener();
 
@@ -544,14 +546,15 @@ impl MusicPlayer {
             // Note: libmpv2 v5.0.0
             use libmpv2::events::Event;
             let mut client = GLOBAL_MUSIC_MPV.get().unwrap().create_client(None).unwrap();
+            client.observe_property("time-pos", Format::Double, 1).unwrap();
             thread::spawn(move || loop {
                 // let event = event_context.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
                 let event = client.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
                 match event {
-                    Ok(Event::FileLoaded) => {
+                    Ok(Event::StartFile) => {
                         MusicPlayer::emit_sync(true);
                     }
-                    Ok(Event::PlaybackRestart) => {
+                    Ok(Event::Seek) => {
                         MusicPlayer::emit_sync(false);
                     }
                     Ok(Event::EndFile(reason)) => {
@@ -560,6 +563,15 @@ impl MusicPlayer {
                             MusicPlayer::emit_sync(false);
                         }
                     },
+                    Ok(Event::PropertyChange { name, change, .. }) => {
+                        if name == "time-pos" {
+                            if let PropertyData::Double(position) = change {
+                                GLOBAL_APP_HANDLE.get().unwrap()
+                                    .emit(crate::commands::route::MUSIC_PROGRESS_SYNC, position)
+                                .unwrap();
+                            }
+                        }
+                    }
                     Ok(_) => {},
                     Err(_) => {},
                 }

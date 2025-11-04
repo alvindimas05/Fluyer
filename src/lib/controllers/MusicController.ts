@@ -1,7 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import {
 	musicIsPlaying,
-	musicProgressIntervalId,
 	musicProgressValue,
 	musicList,
 	musicVolume,
@@ -220,33 +219,6 @@ const MusicController = {
 		return date;
 	},
 
-	startProgress: ({ resetProgress } = { resetProgress: true }) => {
-		const updateInterval =
-			(MusicController.currentMusicDuration / MusicConfig.max) *
-			MusicConfig.step *
-			1000;
-
-		if (resetProgress) MusicController.resetProgress();
-		MusicController.stopProgress();
-
-		musicProgressIntervalId.set(
-			setInterval(() => {
-				MusicController.setProgressValue(
-					Math.min(
-						MusicController.progressValue + MusicConfig.step,
-						MusicConfig.max,
-					),
-				);
-
-				if (MusicController.progressValue >= MusicConfig.max) {
-					MusicController.setIsPlaying(false);
-					MusicController.stopProgress();
-					MusicController.resetProgress();
-				}
-			}, updateInterval),
-		);
-	},
-
 	previousMusic: () => {
 		if (MusicController.currentMusicIndex <= 0) return;
 		MusicController.gotoPlaylist(MusicController.currentMusicIndex - 1);
@@ -264,39 +236,18 @@ const MusicController = {
 
 	listenSyncMusic: () => {
 		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-            if (e.payload.isPlaying)
-				MusicController.startProgress({ resetProgress: true });
-			else MusicController.stopProgress();
-
-			if(e.payload.index > -1){
-                MusicController.setCurrentMusicIndex(e.payload.index);
-
-                MusicController.setProgressValue(
-                    MusicController.parseProgressDurationIntoValue(
-                        MusicController.parseProgressDuration(e.payload.currentPosition),
-                        MusicController.parseProgressDuration(
-                            MusicController.musicPlaylist[e.payload.index].duration,
-                        ),
-                    ),
-                );
-            } else {
-                MusicController.resetProgress();
-            }
+            if(e.payload.index > -1) MusicController.setCurrentMusicIndex(e.payload.index);
 			MusicController.setIsPlaying(e.payload.isPlaying);
 		});
+        listen<number>(CommandRoutes.MUSIC_PROGRESS_SYNC, async (e) => {
+            if(e.payload < 0) return;
+            MusicController.setProgressValue(
+                MusicController.parseProgressDurationIntoValue(e.payload, MusicController.currentMusicDuration)
+            );
+        });
 	},
-    requestSync: () => {
-        return invoke(CommandRoutes.MUSIC_PLAYER_REQUEST_SYNC);
-    },
 
 	resetProgress: () => musicProgressValue.set(MusicConfig.min),
-
-	stopProgress: () => {
-		if (get(musicProgressIntervalId)) {
-			clearInterval(get(musicProgressIntervalId)!);
-			musicProgressIntervalId.set(null);
-		}
-	},
 
 	getParsedDuration: (negative = false) => {
 		if (MusicController.isCurrentMusicFinished) return null;
@@ -353,14 +304,12 @@ const MusicController = {
 		}
 
 		musicIsPlaying.set(true);
-		MusicController.startProgress({ resetProgress: false });
 		if (sendCommand) {
 			await MusicController.sendCommandController("play");
 		}
 	},
 	pause: (sendCommand: boolean = true) => {
 		musicIsPlaying.set(false);
-		MusicController.stopProgress();
 		if (sendCommand) MusicController.sendCommandController("pause");
 	},
 	sendCommandController: async (command: string) => {
@@ -422,8 +371,7 @@ const MusicController = {
 	get isCurrentMusicFinished() {
 		return (
 			MusicController.isProgressValueEnd ||
-			MusicController.currentMusic === null ||
-			get(musicProgressIntervalId) === null
+			MusicController.currentMusic === null
 		);
 	},
 
@@ -517,7 +465,6 @@ const MusicController = {
 		await MusicController.sendCommandController("clear");
 		musicCurrentIndex.set(-1);
 		musicPlaylist.set([]);
-		MusicController.stopProgress();
 		MusicController.resetProgress();
 	},
 
@@ -528,7 +475,6 @@ const MusicController = {
 	resetAndAddMusicList: async (musicList: MusicData[]) => {
 		MusicController.pause();
 		await MusicController.sendCommandController("clear");
-		MusicController.stopProgress();
 		MusicController.resetProgress();
 
 		if (MusicController.currentMusicIndex >= 0)
@@ -540,41 +486,13 @@ const MusicController = {
 		musicReset.set(false);
 	},
 
-	onPlayerBarChange: () => {
-		if (
-			MusicController.isProgressValueEnd ||
-			MusicController.currentMusicIndex < 0
-		) {
-			MusicController.setProgressValue(0);
-			return;
-		}
+    seekByPercentage: (percentage: number) => {
+        const clamped = Math.min(100, Math.max(0, percentage));
+        const position = MusicController.currentMusicRealDuration * (clamped / 100);
 
-		setTimeout(() =>
-			MusicController.sendCommandSetPosition(
-				MusicController.realProgressDuration,
-			),
-		);
-	},
+        MusicController.sendCommandSetPosition(position);
+    },
 
-	updateProgressByPercentage: (percentage: number) => {
-		if (
-			MusicController.isProgressValueEnd ||
-			MusicController.currentMusicIndex < 0
-		) {
-			MusicController.setProgressValue(0);
-			return;
-		}
-
-		setTimeout(() => {
-			if (isMobile())
-				MusicController.setProgressValue(
-					MusicController.parseProgressPercentageIntoValue(percentage),
-				);
-			MusicController.sendCommandSetPosition(
-				MusicController.currentMusicRealDuration * (percentage / 100),
-			);
-		});
-	},
 
 	toggleRepeatMode: () => {
 		const nextRepeatMode = (() => {
