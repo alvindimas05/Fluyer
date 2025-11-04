@@ -1,3 +1,4 @@
+use std::ffi::c_double;
 use std::sync::atomic::{AtomicU64, Ordering};
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
@@ -247,6 +248,7 @@ impl MusicPlayer {
             )
             .ok();
     }
+
     pub fn get_current_duration(&self) -> u128 {
         #[cfg(target_os = "android")]
         {
@@ -260,14 +262,14 @@ impl MusicPlayer {
         }
         #[cfg(desktop)]
         {
-            (crate::music::player::GLOBAL_MUSIC_MPV
+            (GLOBAL_MUSIC_MPV
                 .get()
                 .unwrap()
                 .get_property::<f64>("time-pos")
-                .unwrap()
-                * 1000.0) as u128
+                .unwrap() * 1000.0) as u128
         }
     }
+
     pub fn get_sync_info(is_from_next: bool) -> MusicPlayerSync {
         #[cfg(target_os = "android")]
         {
@@ -525,6 +527,12 @@ impl MusicPlayer {
         // }
     }
 
+    pub fn emit_progress_sync(position: f64){
+        GLOBAL_APP_HANDLE.get().unwrap()
+            .emit(crate::commands::route::MUSIC_PROGRESS_SYNC, position)
+            .unwrap();
+    }
+
     pub fn emit_sync(is_from_next: bool) {
         GLOBAL_APP_HANDLE
             .get()
@@ -560,15 +568,14 @@ impl MusicPlayer {
                     Ok(Event::EndFile(reason)) => {
                         // Note: reason 0 means EOF
                         if reason == 0 {
+                            MusicPlayer::emit_progress_sync(0.0);
                             MusicPlayer::emit_sync(false);
                         }
                     },
                     Ok(Event::PropertyChange { name, change, .. }) => {
                         if name == "time-pos" {
                             if let PropertyData::Double(position) = change {
-                                GLOBAL_APP_HANDLE.get().unwrap()
-                                    .emit(crate::commands::route::MUSIC_PROGRESS_SYNC, position)
-                                .unwrap();
+                                MusicPlayer::emit_progress_sync(position as f64);
                             }
                         }
                     }
