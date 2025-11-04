@@ -1,5 +1,6 @@
 <script lang="ts">
 import Glass from "$lib/glass/Glass.svelte";
+import type {GlassShineSize} from "$lib/glass/types";
 
 interface Props {
 	children?: import("svelte").Snippet;
@@ -8,12 +9,14 @@ interface Props {
 	thisElement?: HTMLDivElement;
 	glassEnableBlur?: boolean;
 	glassEnableHoverEffect?: boolean;
+    glassShineSize?: GlassShineSize;
 	events?: any;
 }
 
 let {
 	glassEnableBlur = false,
 	glassEnableHoverEffect = false,
+    glassShineSize = "md",
 	children,
 	thisElement = $bindable<HTMLDivElement>(),
 	...props
@@ -23,6 +26,7 @@ let {
 <Glass class="bg-gray-300/10 {glassEnableHoverEffect && 'hover:bg-gray-200/20'} {props.class}"
     style={props.style}
     enableBlur={glassEnableBlur}
+    shineSize={glassShineSize}
     bind:thisElement={thisElement}
     events={props.events}>
     {@render children?.()}

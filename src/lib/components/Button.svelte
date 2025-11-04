@@ -1,6 +1,6 @@
 <script lang="ts">
-import Glass from "$lib/glass/Glass.svelte";
 import View from "$lib/components/View.svelte";
+import type {GlassShineSize} from "$lib/glass/types";
 
 interface Props {
 	children?: import("svelte").Snippet;
@@ -10,6 +10,7 @@ interface Props {
 			currentTarget: EventTarget & HTMLDivElement;
 		},
 	) => void;
+    glassShineSize?: GlassShineSize;
 }
 
 const props: Props = $props();
@@ -30,6 +31,7 @@ const handleClick = (
 <View
     class="cursor-pointer {props.class} {isPressed ? 'scale-95' : 'scale-100'}"
     glassEnableHoverEffect={true}
+    glassShineSize={props.glassShineSize}
     events={{
         onclick: handleClick,
     }}>

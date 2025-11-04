@@ -1,4 +1,6 @@
 <script lang="ts">
+import View from "$lib/components/View.svelte";
+
 interface Props {
 	children?: import("svelte").Snippet;
 }
@@ -6,7 +8,8 @@ interface Props {
 let { children }: Props = $props();
 </script>
 <div class="w-full px-5">
-    <div class="w-full bg-white/5 border border-white/30 rounded-lg shadow-md my-3">
+    <View class="w-full my-3 rounded"
+        glassShineSize="sm">
         {@render children?.()}
-    </div>
+    </View>
 </div>
