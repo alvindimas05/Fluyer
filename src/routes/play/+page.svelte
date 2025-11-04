@@ -44,8 +44,9 @@ let volumePercentage = $state(MusicController.volumePercentage);
 let updateProgressText = $state(true);
 
 const unlistenMusicProgressValue = musicProgressValue.subscribe(() => {
-    refreshProgressText();
+    progressPercentage = MusicController.progressPercentage;
 
+    refreshProgressText();
 	resetSelectedLyricIndex();
 });
 const unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async () => {
