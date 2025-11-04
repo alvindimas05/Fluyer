@@ -1,24 +1,21 @@
 <script lang="ts">
-import MusicController from "$lib/controllers/MusicController";
-import "./background.scss";
-import LoadingController from "$lib/controllers/LoadingController";
-import { musicCurrentIndex, musicPlaylist } from "$lib/stores/music";
-import { onDestroy, onMount } from "svelte";
-import * as StackBlur from "stackblur-canvas";
-// @ts-ignore
-import ColorThief from "colorthief/dist/color-thief.mjs";
-import {
-	settingAnimatedBackgroundType,
-	settingTriggerAnimatedBackground,
-} from "$lib/stores/setting";
-import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
-import { prominent } from "color.js";
-import type { Unsubscriber } from "svelte/store";
-import { page } from "$app/state";
-import { PageRoutes } from "$lib/pages";
-import { MusicSize } from "$lib/home/music/types";
+    import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
+    import "./background.scss";
+    import LoadingController from "$lib/controllers/LoadingController";
+    import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music";
+    import {onDestroy, onMount} from "svelte";
+    import * as StackBlur from "stackblur-canvas";
+    // @ts-ignore
+    import ColorThief from "colorthief/dist/color-thief.mjs";
+    import {settingAnimatedBackgroundType, settingTriggerAnimatedBackground,} from "$lib/stores/setting";
+    import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
+    import {prominent} from "color.js";
+    import type {Unsubscriber} from "svelte/store";
+    import {page} from "$app/state";
+    import {PageRoutes} from "$lib/pages";
+    import {MusicSize} from "$lib/home/music/types";
 
-const SCALE = 0.05;
+    const SCALE = 0.05;
 const CANVAS_BLOCK_SIZE = 150;
 const CANVAS_TRANSITION_DURATION = 750;
 const CANVAS_BLUR_RADIUS = 200;
@@ -29,6 +26,7 @@ let canvasContext: CanvasRenderingContext2D;
 let currentCanvas: HTMLCanvasElement | null = null;
 let previousColors: string[] = [];
 let previousBackgroundColors: string[][] = [];
+let currentAlbumImage: string | null = null;
 
 // Transition queue management
 let pendingTransition: HTMLCanvasElement | null = null;
@@ -66,19 +64,21 @@ function balanceColor(hex: string): string {
 	const { r, g, b } = hexToRgb(hex);
 	const hsl = rgbToHsl(r, g, b);
 
-	// Balance saturation - reduce overly vibrant colors
-	if (hsl.s > 0.7) {
-		hsl.s = 0.5 + (hsl.s - 0.7) * 0.4;
-	}
-
 	// Balance lightness for better visibility
 	if (hsl.l > 0.7) {
 		hsl.l = 0.45 + (hsl.l - 0.7) * 0.3;
 	}
 
 	// Ensure we stay within reasonable bounds
-	hsl.s = Math.max(0.15, Math.min(0.65, hsl.s));
-	hsl.l = Math.max(0.2, Math.min(0.6, hsl.l));
+    if(currentAlbumImage === MusicConfig.defaultAlbumImage){
+        hsl.s = 0.6;
+        hsl.l = 0.6;
+    } else {
+        if($settingAnimatedBackgroundType === SettingAnimatedBackgroundType.Prominent){
+            hsl.s = Math.min(0.7, hsl.s);
+        }
+        hsl.l = Math.max(0.1, Math.min(0.7, hsl.l));
+    }
 
 	const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
 	return rgbToHex(rgb.r, rgb.g, rgb.b);
@@ -165,7 +165,7 @@ function rgbToHex(r: number, g: number, b: number): string {
 }
 
 async function getColors(force = false): Promise<string[] | null> {
-	const currentAlbumImage = await MusicController.getAlbumImageFromMusic(
+    currentAlbumImage = await MusicController.getAlbumImageFromMusic(
 		MusicController.currentMusic,
 		MusicSize.AnimatedBackground,
 	);
