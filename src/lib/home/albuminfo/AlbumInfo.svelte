@@ -90,7 +90,7 @@ async function playShuffle() {
 }
 </script>
 {#if album || $folderCurrent}
-    <View class="mx-3 mb-2 md:grid grid-cols-[auto_max-content] px-4 py-2 rounded-xl
+    <View class="mx-3 mb-2 md:grid grid-cols-[auto_max-content] px-4 py-2 rounded-lg
         box-border animate__animated animate__fadeIn
         hover:px-5 hover:py-3">
         <div class="grid items-center">
