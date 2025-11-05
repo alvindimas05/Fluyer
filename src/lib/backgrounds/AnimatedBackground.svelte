@@ -74,9 +74,6 @@ function balanceColor(hex: string): string {
         hsl.s = 0.6;
         hsl.l = 0.6;
     } else {
-        if($settingAnimatedBackgroundType === SettingAnimatedBackgroundType.Prominent){
-            hsl.s = Math.min(0.7, hsl.s);
-        }
         hsl.l = Math.max(0.1, Math.min(0.7, hsl.l));
     }
 
