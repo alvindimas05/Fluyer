@@ -27,6 +27,8 @@ import Poll from "svelte-material-icons/Poll.svelte";
 import Folder from "svelte-material-icons/Folder.svelte";
 import MenuUp from "svelte-material-icons/MenuUp.svelte";
 import MenuDown from "svelte-material-icons/MenuDown.svelte";
+import GridLarge from "svelte-material-icons/GridLarge.svelte";
+import Album from "svelte-material-icons/Album.svelte";
 
 const iconRegistryMaterial = {
 	[IconType.Unknown]: HelpCircleOutline,
@@ -62,6 +64,10 @@ const iconRegistryMaterial = {
 	[IconType.Folder]: Folder,
 	[IconType.SortAsc]: MenuUp,
 	[IconType.SortDesc]: MenuDown,
+    [IconType.MusicListTypeAll]: GridLarge,
+    [IconType.MusicListTypeAlbum]: Album,
+    [IconType.MusicListTypeMusic]: MusicNote,
+    [IconType.MusicListTypeFolder]: Folder,
 };
 
 export default iconRegistryMaterial;

@@ -1,22 +1,22 @@
 <script lang="ts">
-    import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
-    import "./background.scss";
-    import LoadingController from "$lib/controllers/LoadingController";
-    import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music";
-    import {onDestroy, onMount} from "svelte";
-    import * as StackBlur from "stackblur-canvas";
-    // @ts-ignore
-    import ColorThief from "colorthief/dist/color-thief.mjs";
-    import {settingAnimatedBackgroundType, settingTriggerAnimatedBackground,} from "$lib/stores/setting";
-    import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
-    import {prominent} from "color.js";
-    import type {Unsubscriber} from "svelte/store";
-    import {page} from "$app/state";
-    import {PageRoutes} from "$lib/pages";
-    import {MusicSize} from "$lib/home/music/types";
+import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
+import "./background.scss";
+import LoadingController from "$lib/controllers/LoadingController";
+import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music";
+import {onDestroy, onMount} from "svelte";
+import * as StackBlur from "stackblur-canvas";
+// @ts-ignore
+import ColorThief from "colorthief/dist/color-thief.mjs";
+import {settingAnimatedBackgroundType, settingTriggerAnimatedBackground,} from "$lib/stores/setting";
+import {SettingAnimatedBackgroundType} from "$lib/settings/animated-background/types";
+import {prominent} from "color.js";
+import type {Unsubscriber} from "svelte/store";
+import {page} from "$app/state";
+import {PageRoutes} from "$lib/pages";
+import {MusicSize} from "$lib/home/music/types";
 
-    const SCALE = 0.05;
-const CANVAS_BLOCK_SIZE = 150;
+const SCALE = 0.05;
+const CANVAS_BLOCK_SIZE = $derived(window.innerWidth > 640 ? 150 : 100);
 const CANVAS_TRANSITION_DURATION = 750;
 const CANVAS_BLUR_RADIUS = 200;
 

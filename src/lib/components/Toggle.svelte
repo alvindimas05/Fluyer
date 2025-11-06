@@ -1,87 +1,111 @@
 <script lang="ts">
 import type { IconType } from "$lib/icon/types";
-import Glass from "$lib/glass/Glass.svelte";
-import { onDestroy, onMount } from "svelte";
 import Icon from "$lib/icon/Icon.svelte";
 import View from "$lib/components/View.svelte";
+import { onDestroy, onMount } from "svelte";
+
+interface ToggleOption {
+    value: string | number;
+    icon: IconType;
+    label?: string; // Optional tooltip/label
+}
 
 interface Props {
-	class?: string;
-	checked?: boolean;
-	onchange?: (checked: boolean) => void;
-	checkedIcon?: IconType;
-	uncheckedIcon?: IconType;
+    class?: string;
+    iconClass?: string;
+    iconStyle?: string;
+    options: ToggleOption[];
+    selected?: string | number;
+    onchange?: (value: string | number) => void;
 }
 
 const props = $props();
-const { onchange, checkedIcon, uncheckedIcon }: Props = props;
+const { options, onchange }: Props = props;
 
 let toggleElement: HTMLDivElement;
 let toggleObserver: ResizeObserver;
-let checked = $state(props.checked);
-let toggleHeight = $state(0);
+let selected = $state(props.selected ?? options[0]?.value);
+let indicatorWidth = $state(0);
 let translateX = $state(0);
 
-function handleChange(
-	e: Event & {
-		currentTarget: HTMLInputElement;
-	},
-) {
-	onchange?.(checked);
+let pressedIndex = $state<number | null>(null);
+
+function handleSelect(value: string | number, index: number) {
+    if (selected === value) return;
+
+    pressedIndex = index;
+    setTimeout(() => (pressedIndex = null), 150);
+
+    selected = value;
+    onchange?.(value);
+    updateIndicatorPosition();
 }
 
-function updateProperties() {
-	if (!toggleElement) return;
-	toggleHeight = toggleElement.offsetHeight - 8; // Account for 4px padding on each side
-	translateX = toggleElement.offsetWidth - toggleHeight - 8; // Total width - thumb size - padding
+function updateIndicatorPosition() {
+    if (!toggleElement || !options.length) return;
+
+    const selectedIndex = options.findIndex(opt => opt.value === selected);
+
+    if (selectedIndex === -1) return;
+
+    // Calculate indicator size based on full width divided by options
+    indicatorWidth = toggleElement.offsetWidth / options.length;
+
+    // Calculate position
+    translateX = selectedIndex * indicatorWidth;
 }
 
 function listenResize() {
-	if (!toggleElement) return;
-	toggleObserver = new ResizeObserver(updateProperties);
-	toggleObserver.observe(toggleElement);
+    if (!toggleElement) return;
+    toggleObserver = new ResizeObserver(updateIndicatorPosition);
+    toggleObserver.observe(toggleElement);
 }
 
-let isPressed = $state(false);
-
-const handleClick = (
-	event: MouseEvent & { currentTarget: EventTarget & HTMLDivElement },
-) => {
-	isPressed = true;
-
-	setTimeout(() => (isPressed = false), 150);
-};
-
 onMount(() => {
-	setTimeout(updateProperties, 10);
-	listenResize();
+    setTimeout(updateIndicatorPosition);
+    listenResize();
 });
+
 onDestroy(() => {
-	toggleObserver?.disconnect();
+    toggleObserver?.disconnect();
+});
+
+// Watch for selected changes from parent
+$effect(() => {
+    if (props.selected !== undefined && props.selected !== selected) {
+        selected = props.selected;
+        updateIndicatorPosition();
+    }
 });
 </script>
 
-<View class="rounded {isPressed ? 'scale-95' : 'scale-100'} {props.class}"
-    glassEnableHoverEffect={true}
-    bind:thisElement={toggleElement}
-    events={{
-        onclick: handleClick,
-        ontouchstart: handleClick,
-    }}>
-    <label class="w-full h-full relative inline-flex items-center cursor-pointer">
-        <input class="sr-only" type="checkbox" onchange={handleChange} bind:checked />
-        <!-- Toggle thumb with icon -->
-        <div class="absolute top-1 left-1 rounded-full
-            flex items-center justify-center px-[2px]
-            transition-all duration-500 pointer-events-none"
-            style="width: {toggleHeight}px;
-                height: {toggleHeight}px;
-                transform: translateX({checked ? translateX : 0}px);">
-            {#if checked}
-                <Icon type={checkedIcon} />
-            {:else}
-                <Icon type={uncheckedIcon} />
-            {/if}
-        </div>
-    </label>
+<View
+        class="w-full h-full rounded {props.class}"
+        glassEnableHoverEffect={false}
+        bind:thisElement={toggleElement}
+>
+    <div class="w-full h-full relative flex items-center">
+        <!-- Sliding indicator -->
+        <div
+            class="h-full absolute top-0 left-0 z-[-1] rounded-sm
+                transition-all duration-300 ease-out pointer-events-none
+                bg-white/20 backdrop-blur-sm"
+            style="width: {indicatorWidth}px;
+                transform: translateX({translateX}px);"
+        ></div>
+        {#each options as option, index}
+            <button
+                class="flex-1 h-full grid items-center justify-center
+                    relative z-10 transition-all duration-150
+                    {pressedIndex === index ? 'scale-90' : 'scale-100'}
+                    {selected === option.value ? 'text-white' : 'text-white/60'}
+                    hover:text-white/90"
+                onclick={() => handleSelect(option.value, index)}
+                title={option.label}>
+                <div class={props.iconClass} style={props.iconStyle}>
+                    <Icon type={option.icon} />
+                </div>
+            </button>
+        {/each}
+    </div>
 </View>

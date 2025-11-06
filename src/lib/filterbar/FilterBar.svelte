@@ -1,21 +1,20 @@
 <script lang="ts">
-import Icon from "$lib/icon/Icon.svelte";
-import { IconType } from "$lib/icon/types";
-import { isMacos, isMobile } from "$lib/platform";
-import { filterSearch } from "$lib/stores/filter";
-import { mobileStatusBarHeight } from "$lib/stores/mobile";
-import { onMount } from "svelte";
-import { musicListType } from "$lib/stores/music";
-import { MusicListType } from "$lib/home/music/types";
-import UIController from "$lib/controllers/UIController";
-import Glass from "$lib/glass/Glass.svelte";
-import { filterBarHeight, filterBarSortAsc } from "$lib/stores/filterbar";
-import Toggle from "$lib/components/Toggle.svelte";
-import View from "$lib/components/View.svelte";
-import Button from "$lib/components/Button.svelte";
-import Input from "$lib/components/Input.svelte";
+    import Icon from "$lib/icon/Icon.svelte";
+    import {IconThemeType, IconType} from "$lib/icon/types";
+    import {isMacos, isMobile} from "$lib/platform";
+    import {filterSearch} from "$lib/stores/filter";
+    import {mobileStatusBarHeight} from "$lib/stores/mobile";
+    import {onMount} from "svelte";
+    import {musicListType} from "$lib/stores/music";
+    import {MusicListType} from "$lib/home/music/types";
+    import UIController from "$lib/controllers/UIController";
+    import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
+    import Toggle from "$lib/components/Toggle.svelte";
+    import Button from "$lib/components/Button.svelte";
+    import Input from "$lib/components/Input.svelte";
+    import {iconTheme} from "$lib/stores/icon";
 
-const rules = [
+    const rules = [
 	// xhdpi (DPR > 2.0)
 	[1536, 2.01, 0.125], // 2xl → 12.5%
 	[1280, 2.01, 0.16667], // xl-xhdpi → 16.6667%
@@ -38,8 +37,23 @@ const rules = [
 	[640, 0, 0.33334], // sm → 33.3334%
 ];
 
+const musicListOptions = [
+    { value: MusicListType.All, icon: IconType.MusicListTypeAll, label: "All" },
+    { value: MusicListType.Album, icon: IconType.MusicListTypeAlbum, label: "Album" },
+    { value: MusicListType.Music, icon: IconType.MusicListTypeMusic, label: "Music" },
+    { value: MusicListType.Folder, icon: IconType.MusicListTypeFolder, label: "Folder" },
+
+];
+
 let element: HTMLDivElement;
 let gridSize = $state("");
+let iconSize = $derived.by(() => {
+    switch ($iconTheme){
+        case IconThemeType.Phosphor: return 19;
+        case IconThemeType.Material: return 18;
+        case IconThemeType.Lucide: return 20;
+    }
+});
 
 function updateGridSizing() {
 	const w = window.innerWidth;
@@ -83,7 +97,7 @@ onMount(updateSize);
         grid-template-columns: {gridSize};"
     bind:this={element}>
     <div class="h-fit sm:h-auto grid pointer-events-none
-        grid-cols-[auto_4rem] md:grid-cols-[auto_30%]
+        grid-cols-[min-content_1fr]
         sm:mx-3 gap-x-2 sm:gap-x-4
         {isMacos() ? 'justify-end' : 'justify-start'}">
         <div>
@@ -99,14 +113,15 @@ onMount(updateSize);
             </Button>
         </div>
         <Toggle class="w-full h-full pointer-events-auto"
-            checked={$musicListType === MusicListType.Folder}
-            checkedIcon={IconType.Folder}
-            uncheckedIcon={IconType.Note}
-            onchange={UIController.toggleMusicListType} />
+            iconStyle="width: {iconSize}px;"
+            options={musicListOptions}
+            selected={$musicListType}
+            onchange={UIController.setMusicListType}
+        />
     </div>
     <Input
         class="h-fit sm:h-full pointer-events-auto p-0 sm:mx-3
-            {isMacos() ? 'md:order-last' : 'order-first'} rounded"
+            {isMacos() ? 'order-first sm:order-last' : 'order-first'} rounded"
         icon={IconType.Search}
         placeholder="Search..."
         bind:value={$filterSearch}

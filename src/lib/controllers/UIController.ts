@@ -64,17 +64,15 @@ const UIController = {
 	toggleEqualizer: (value: boolean) => {
 		equalizerShow.set(value);
 	},
-	toggleMusicListType: async () => {
-		const listType = get(musicListType);
-		if (listType === MusicListType.All) {
+    setMusicListType: async (type: MusicListType) => {
+        FilterController.setFilterAlbum(null);
+		if (type === MusicListType.Folder) {
 			FilterController.setFilterAlbum(null);
 			await FolderController.setMusicListToFolder();
 		} else {
-			FolderController.setFolder(null);
+			await FolderController.setFolder(null);
 		}
-		musicListType.set(
-			listType === MusicListType.All ? MusicListType.Folder : MusicListType.All,
-		);
+		musicListType.set(type);
 	},
 };
 

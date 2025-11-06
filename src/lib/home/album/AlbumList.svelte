@@ -1,17 +1,17 @@
 <script lang="ts">
-import type { MusicData } from "$lib/home/music/types";
-import { musicAlbumList, musicList } from "$lib/stores/music";
+import {type MusicData, MusicListType} from "$lib/home/music/types";
+import {musicAlbumList, musicList, musicListType} from "$lib/stores/music";
 import AlbumItem from "./AlbumItem.svelte";
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import { onDestroy, onMount } from "svelte";
-import { isDesktop, isLinux, isMobile } from "$lib/platform";
-import { mobileStatusBarHeight } from "$lib/stores/mobile";
-import { swipeMinimumTop } from "$lib/stores";
-import type { Unsubscriber } from "svelte/store";
-import { VList } from "virtua/svelte";
-import { filterAlbum, filterSearch } from "$lib/stores/filter";
-import { filterBarHeight, filterBarSortAsc } from "$lib/stores/filterbar";
-import sleep from "sleep-promise";
+import MusicController from "$lib/controllers/MusicController";
+import {onDestroy, onMount, type SvelteComponent} from "svelte";
+import {isMobile} from "$lib/platform";
+import {mobileStatusBarHeight} from "$lib/stores/mobile";
+import {albumListScrollIndex, swipeMinimumTop} from "$lib/stores";
+import type {Unsubscriber} from "svelte/store";
+import {type VirtualizerHandle, VList} from "virtua/svelte";
+import {filterAlbum, filterSearch} from "$lib/stores/filter";
+import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
+import {playerBarHeight} from "$lib/stores/playerbar";
 
 const rules = [
 	// xhdpi (DPR > 2.0)
@@ -35,11 +35,14 @@ const rules = [
 	[768, 0, 0.25], // md → 25%
 	[640, 0, 0.33334], // sm → 33.3334%
 ];
+let virtualizerHandle: VirtualizerHandle;
+let columnCount = $state(2);
 let itemWidth = $state(0.5 * window.innerWidth);
 let paddingTop = $derived(
 	(isMobile() ? $mobileStatusBarHeight : 0) + $filterBarHeight,
 );
-let itemHeight = $derived(itemWidth + 52);
+let itemHeight = $derived(itemWidth + (window.innerWidth > 640 ? 52 : 44));
+let isHorizontal = $derived($musicListType !== MusicListType.Album);
 
 function updateSize() {
 	updateItemWidth();
@@ -52,29 +55,41 @@ function updateItemWidth() {
 	for (const [minW, minDppx, width] of rules) {
 		if (w >= minW && dpi >= minDppx) {
 			itemWidth = width * window.innerWidth;
+            columnCount = Math.round(1 / width);
 			return;
 		}
 	}
+    columnCount = 2;
 	itemWidth = 0.5 * window.innerWidth;
 }
 
-let data = $derived.by(() => {
+let data: any[] = $derived.by(() => {
 	if (!Array.isArray($musicAlbumList)) return [];
 
 	const sortAsc = $filterBarSortAsc;
 
 	const search = $filterSearch.toLowerCase();
 	let list = $musicAlbumList;
-	if (!search) return sortAsc ? list : list.toReversed();
-
-	list = list.filter((musicList) => {
-		return (
-			($filterAlbum && musicList[0].album === $filterAlbum.name) ||
-			musicList[0].album?.toLowerCase().includes(search) ||
-			musicList[0].albumArtist?.toLowerCase().includes(search)
-		);
-	});
+	if(search){
+        list = list.filter((musicList) => {
+            return (
+                ($filterAlbum && musicList[0].album === $filterAlbum.name) ||
+                musicList[0].album?.toLowerCase().includes(search) ||
+                musicList[0].albumArtist?.toLowerCase().includes(search)
+            );
+        });
+    }
 	if (!sortAsc) list.reverse();
+
+    if($musicListType === MusicListType.Album) {
+        const chunks: MusicData[][][] = [];
+        for (let i = 0; i < list.length; i += columnCount) {
+            chunks.push(list.slice(i, i + columnCount));
+        }
+        console.log(chunks);
+        return chunks;
+    }
+
 	return list;
 });
 
@@ -116,17 +131,24 @@ function onMouseWheel(
 	}
 }
 
+function scrollTo(y: number){
+    virtualizerHandle.scrollToIndex(y, { align: 'nearest', smooth: true });
+}
+
 let unlistenMusicList: Unsubscriber;
+let unlistenAlbumListScrollIndex: Unsubscriber;
 onMount(() => {
 	updateSize();
 	MusicController.setMusicAlbumList(groupByAlbum());
 	unlistenMusicList = musicList.subscribe(() =>
 		MusicController.setMusicAlbumList(groupByAlbum()),
 	);
+    unlistenAlbumListScrollIndex = albumListScrollIndex.subscribe(scrollTo);
 });
 
 onDestroy(() => {
 	unlistenMusicList();
+    unlistenAlbumListScrollIndex();
 });
 
 $effect(() => {
@@ -136,16 +158,30 @@ $effect(() => {
 
 <svelte:window onresize={updateSize} />
 
-<div class="w-full" style="height: {itemHeight}px;">
-    <!-- Note: Ignore this  -->
-    <VList onwheel={onMouseWheel}
-           class="scrollbar-hidden overflow-y-clip"
-           {data}
-           horizontal>
-        {#snippet children(musicList, index)}
-            <div style="width: {itemWidth}px;">
-                <AlbumItem {musicList} />
-            </div>
-        {/snippet}
-    </VList>
+<div class="w-full" style="
+    height: {isHorizontal ? itemHeight : window.innerHeight - $filterBarHeight}px;">
+    {#key isHorizontal}
+        <VList onwheel={isHorizontal ? onMouseWheel : undefined} {data}
+            class="scrollbar-hidden {isHorizontal ? '' : 'overflow-y-clip'}"
+            horizontal={isHorizontal}
+            style="padding-bottom: {isHorizontal ? 0 : $playerBarHeight}px;"
+            getKey={(_, i) => i}
+            bind:this={virtualizerHandle}>
+            {#snippet children(dataList, index)}
+                {#if isHorizontal}
+                    <div style="width: {itemWidth}px;">
+                        <AlbumItem musicList={dataList} {index} />
+                    </div>
+                {:else}
+                    <div class="flex">
+                        {#each dataList as musicList, dataIndex}
+                            <div style="width: {itemWidth}px;">
+                                <AlbumItem {musicList} index={(index * columnCount) + dataIndex} />
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
+            {/snippet}
+        </VList>
+    {/key}
 </div>

@@ -1,15 +1,19 @@
 <script lang="ts">
-import { type AlbumData, type MusicData, MusicSize } from "../music/types";
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import { filterAlbum, filterSearch } from "$lib/stores/filter";
+import {type AlbumData, type MusicData, MusicListType} from "../music/types";
+import MusicController from "$lib/controllers/MusicController";
+import {filterAlbum} from "$lib/stores/filter";
 import FilterController from "$lib/controllers/FilterController";
-import { isDesktop, isLinux } from "$lib/platform";
+import {isDesktop, isLinux} from "$lib/platform";
+import UIController from "$lib/controllers/UIController";
+import {albumListScrollIndex} from "$lib/stores";
+import {musicListType} from "$lib/stores/music";
 
 interface Props {
 	musicList: MusicData[];
+    index: number;
 }
 
-let { musicList }: Props = $props();
+let { musicList, index }: Props = $props();
 let music = $derived(musicList[0]);
 
 let isValidFilterAlbum = $derived(
@@ -24,6 +28,8 @@ let albumImage = $derived.by(async () => {
 });
 
 async function setFilterAlbum() {
+    const isAlbumType = $musicListType === MusicListType.Album;
+    UIController.setMusicListType(MusicListType.All);
 	FilterController.setFilterAlbum({
 		name: music.album,
 		artist: music.albumArtist ?? music.artist,
@@ -33,6 +39,7 @@ async function setFilterAlbum() {
 		),
 		musicList,
 	} as AlbumData);
+    if(isAlbumType) setTimeout(() => $albumListScrollIndex = index, 500);
 }
 </script>
 

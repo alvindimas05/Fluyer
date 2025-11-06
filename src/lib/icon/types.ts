@@ -39,4 +39,8 @@ export enum IconType {
 	Folder,
 	SortAsc,
 	SortDesc,
+    MusicListTypeAll,
+    MusicListTypeAlbum,
+    MusicListTypeMusic,
+    MusicListTypeFolder,
 }
