@@ -70,7 +70,7 @@ let data: any[] = $derived.by(() => {
 
 	const search = $filterSearch.toLowerCase();
 	let list = $musicAlbumList;
-	if(search){
+	if(search || $filterAlbum){
         list = list.filter((musicList) => {
             return (
                 ($filterAlbum && musicList[0].album === $filterAlbum.name) ||
@@ -79,16 +79,17 @@ let data: any[] = $derived.by(() => {
             );
         });
     }
-	if (!sortAsc) list.reverse();
+	if (!sortAsc) list = list.toReversed();
 
     if($musicListType === MusicListType.Album) {
         const chunks: MusicData[][][] = [];
         for (let i = 0; i < list.length; i += columnCount) {
             chunks.push(list.slice(i, i + columnCount));
         }
-        console.log(chunks);
         return chunks;
     }
+
+    console.log(list);
 
 	return list;
 });
