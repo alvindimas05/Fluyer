@@ -239,8 +239,10 @@ const MusicController = {
 
     listenSyncMusic: () => {
         listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-            if (e.payload.isPlaying)
-                MusicController.startProgress({ resetProgress: true });
+            if (e.payload.isPlaying){
+                MusicController.resetProgress();
+                MusicController.startProgress();
+            }
             else MusicController.stopProgress();
 
             if(e.payload.index > -1){
@@ -272,13 +274,12 @@ const MusicController = {
         }
     },
 
-    startProgress: ({ resetProgress } = { resetProgress: true }) => {
+    startProgress: () => {
         const updateInterval =
             (MusicController.currentMusicDuration / MusicConfig.max) *
             MusicConfig.step *
             1000;
 
-        if (resetProgress) MusicController.resetProgress();
         MusicController.stopProgress();
 
         musicProgressIntervalId.set(
@@ -354,7 +355,7 @@ const MusicController = {
 		}
 
 		musicIsPlaying.set(true);
-        MusicController.startProgress({ resetProgress: false });
+        MusicController.startProgress();
         if (sendCommand) {
 			await MusicController.sendCommandController("play");
 		}
@@ -423,7 +424,8 @@ const MusicController = {
 	get isCurrentMusicFinished() {
 		return (
 			MusicController.isProgressValueEnd ||
-			MusicController.currentMusic === null
+			MusicController.currentMusic === null ||
+            get(musicProgressIntervalId) === null
 		);
 	},
 
@@ -517,6 +519,7 @@ const MusicController = {
 		await MusicController.sendCommandController("clear");
 		musicCurrentIndex.set(-1);
 		musicPlaylist.set([]);
+        MusicController.stopProgress();
 		MusicController.resetProgress();
 	},
 
@@ -526,6 +529,7 @@ const MusicController = {
 
 	resetAndAddMusicList: async (musicList: MusicData[]) => {
 		await MusicController.sendCommandController("clear");
+        MusicController.stopProgress();
 		MusicController.resetProgress();
 
 		musicReset.set(true);
