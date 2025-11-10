@@ -1,5 +1,4 @@
 pub const MUSIC_PLAYER_SYNC: &str = "music_player_sync";
-pub const MUSIC_PROGRESS_SYNC: &str = "music_progress_sync";
 #[cfg(desktop)]
 pub const MUSIC_REQUEST_DIRECTORY: &str = "music_request_directory";
 // pub const CHECK_READ_AUDIO_PERMISSION: &str = "check_read_audio_permission";

@@ -89,8 +89,6 @@ let data: any[] = $derived.by(() => {
         return chunks;
     }
 
-    console.log(list);
-
 	return list;
 });
 

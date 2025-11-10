@@ -22,21 +22,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 pub static MUSIC_STORE_PATH_NAME: &str = "music-path";
 
 #[tauri::command]
-pub fn music_controller(state: State<'_, Mutex<AppState>>, command: String) {
-    let mut state = state.lock().unwrap();
-    state.music_player.send_command(command.clone());
+pub fn music_controller(command: String) {
+    MusicPlayer::send_command(command.clone());
 }
 
 #[tauri::command]
-pub fn music_position_set(state: State<'_, Mutex<AppState>>, position: u64) {
-    let mut state = state.lock().unwrap();
-    state.music_player.set_pos(position);
+pub fn music_position_set(position: u64) {
+    MusicPlayer::set_pos(position);
 }
-
-// #[tauri::command]
-// pub fn music_get_info() -> crate::music::player::MusicPlayerSync {
-//     MusicPlayer::get_sync_info()
-// }
 
 #[tauri::command]
 pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
@@ -44,9 +37,8 @@ pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
 }
 
 #[tauri::command]
-pub fn music_playlist_add(state: State<'_, Mutex<AppState>>, playlist: Vec<MusicMetadata>) {
-    let mut state = state.lock().unwrap();
-    state.music_player.add_playlist(playlist);
+pub fn music_playlist_add(playlist: Vec<MusicMetadata>) {
+    MusicPlayer::add_playlist(playlist);
 }
 
 #[cfg(desktop)]
@@ -80,39 +72,33 @@ pub fn music_request_directory(app: AppHandle) {
 }
 
 #[tauri::command]
-pub fn music_playlist_remove(state: State<'_, Mutex<AppState>>, index: usize) {
-    let mut state = state.lock().unwrap();
-    state.music_player.remove_playlist(index);
+pub fn music_playlist_remove(index: usize) {
+    MusicPlayer::remove_playlist(index);
 }
 
 #[tauri::command]
-pub fn music_set_volume(state: State<'_, Mutex<AppState>>, volume: f32) {
-    let mut state = state.lock().unwrap();
-    state.music_player.set_volume(volume);
+pub fn music_set_volume(volume: f32) {
+    MusicPlayer::set_volume(volume);
 }
 
 #[tauri::command]
-pub fn music_playlist_goto(state: State<'_, Mutex<AppState>>, index: usize) {
-    let mut state = state.lock().unwrap();
-    state.music_player.goto_playlist(index);
+pub fn music_playlist_goto(index: usize) {
+    MusicPlayer::goto_playlist(index);
 }
 
 #[tauri::command]
-pub fn music_playlist_moveto(state: State<'_, Mutex<AppState>>, from: usize, to: usize) {
-    let mut state = state.lock().unwrap();
-    state.music_player.moveto_playlist(from, to);
+pub fn music_playlist_moveto(from: usize, to: usize) {
+    MusicPlayer::moveto_playlist(from, to);
 }
 
 #[tauri::command]
-pub fn music_equalizer(state: State<'_, Mutex<AppState>>, values: Vec<f32>) {
-    let state = state.lock().unwrap();
-    state.music_player.equalizer(values);
+pub fn music_equalizer(values: Vec<f32>) {
+    MusicPlayer::equalizer(values);
 }
 
 #[tauri::command]
-pub fn music_equalizer_reset(state: State<'_, Mutex<AppState>>) {
-    let state = state.lock().unwrap();
-    state.music_player.reset_equalizer();
+pub fn music_equalizer_reset() {
+    MusicPlayer::reset_equalizer();
 }
 
 #[tauri::command]
@@ -231,15 +217,14 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
 }
 
 #[tauri::command]
-pub fn music_get_current_duration(state: State<'_, Mutex<AppState>>) -> Option<u128> {
-    Some(state.lock().unwrap().music_player.get_current_duration())
+pub fn music_get_current_duration() -> Option<f64> {
+    Some(MusicPlayer::get_current_duration())
 }
 
 #[tauri::command]
 pub fn music_player_request_sync() {
-    MusicPlayer::emit_sync(false);
+    MusicPlayer::request_sync();
 }
-
 
 #[tauri::command]
 pub fn music_get_lyrics(path: String) -> Option<String> {
@@ -247,6 +232,6 @@ pub fn music_get_lyrics(path: String) -> Option<String> {
 }
 
 #[tauri::command]
-pub fn music_toggle_bit_perfect(state: State<'_, Mutex<AppState>>, enable: bool){
-    state.lock().unwrap().music_player.toggle_bit_perfect(enable);
+pub fn music_toggle_bit_perfect(enable: bool){
+    MusicPlayer::toggle_bit_perfect(enable);
 }

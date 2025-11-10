@@ -25,12 +25,14 @@ import CoverArt, {
 	type CoverArtCacheQuery,
 	type CoverArtResponse,
 } from "$lib/handlers/coverart";
-import { isDesktop, isMobile } from "$lib/platform";
+import {isAndroid, isDesktop, isMobile} from "$lib/platform";
 import { equalizerValues } from "$lib/stores/equalizer";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import UtilsController from "$lib/controllers/UtilsController";
 import { settingBitPerfectMode } from "$lib/stores/setting";
 import {playlistMoveQueue} from "$lib/home/playlist/PlaylistMoveQueue";
+import {Music} from "@lucide/svelte";
+import sleep from "sleep-promise";
 
 export const MusicConfig = {
 	step: 0.01,
@@ -53,6 +55,7 @@ const MusicController = {
 		MusicController.handleVolumeChange();
 
 		MusicController.onBitPerfectModeChange(get(settingBitPerfectMode));
+        // MusicController.listenProgressAndroid();
 		settingBitPerfectMode.subscribe(MusicController.onBitPerfectModeChange);
 	},
 	musicList: () => get(musicList),
@@ -234,18 +237,49 @@ const MusicController = {
 		MusicController.sendCommandController("next");
 	},
 
-	listenSyncMusic: () => {
-		listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-            if(e.payload.index > -1) MusicController.setCurrentMusicIndex(e.payload.index);
-			MusicController.setIsPlaying(e.payload.isPlaying);
-		});
-        listen<number>(CommandRoutes.MUSIC_PROGRESS_SYNC, async (e) => {
-            if(e.payload < 0) return;
-            MusicController.setProgressValue(
-                MusicController.parseProgressDurationIntoValue(e.payload, MusicController.currentMusicDuration)
-            );
+    listenSyncMusic: () => {
+        listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
+            const index = e.payload.index;
+            MusicController.setIsPlaying(e.payload.isPlaying);
+
+            let position = e.payload.currentPosition ? e.payload.currentPosition / 1000 : null;
+
+            // Handle index changes first - update immediately when index changes
+            // regardless of position value
+            if(index > -1 && index !== MusicController.currentMusicIndex && position && position >= 0) {
+                console.log("Setting index: ", index)
+                console.log("Current position: ", position);
+                MusicController.setCurrentMusicIndex(index);
+            }
+
+            // Note: For some reason, libmpv will give negative position when it's almost 2-3 seconds finished.
+            // So to get that missing position, just substract it with current music duration.
+            if(position && position < 0 && MusicController.currentMusicDuration > 0 && index > 0){
+                position = MusicController.currentMusicDuration + position;
+                console.log("Setting negative position: ", position);
+            }
+
+            // Only update progress for valid positive positions within the track duration
+            if(position && position >= 0 && position <= MusicController.currentMusicDuration && index > -1){
+                console.log("Setting position: ", position);
+                MusicController.setProgressValue(
+                    MusicController.parseProgressDurationIntoValue(position, MusicController.currentMusicDuration)
+                );
+            }
         });
-	},
+    },
+    requestSync: () => {
+        return invoke(CommandRoutes.MUSIC_PLAYER_REQUEST_SYNC);
+    },
+    listenProgressAndroid: async () => {
+        if(!isAndroid()) return;
+
+        while(true){
+            await sleep(500);
+            if(!MusicController.isPlaying) return;
+            await MusicController.requestSync();
+        }
+    },
 
 	resetProgress: () => musicProgressValue.set(MusicConfig.min),
 
@@ -361,11 +395,11 @@ const MusicController = {
 		if (options?.resetPlaylist) musicPlaylist.set(musicDataList);
 		else MusicController.addMusicPlaylist(musicDataList);
 
-		if (
-			options?.forceSetCurrentMusicIndex ||
-			(MusicController.currentMusicIndex === -1 && isPlaylistEmpty)
-		)
-			MusicController.setCurrentMusicIndex(0);
+		// if (
+		// 	options?.forceSetCurrentMusicIndex ||
+		// 	(MusicController.currentMusicIndex === -1 && isPlaylistEmpty)
+		// )
+		// 	MusicController.setCurrentMusicIndex(0);
 	},
 
 	get isCurrentMusicFinished() {
@@ -477,8 +511,8 @@ const MusicController = {
 		await MusicController.sendCommandController("clear");
 		MusicController.resetProgress();
 
-		if (MusicController.currentMusicIndex >= 0)
-			MusicController.setCurrentMusicIndex(0);
+		// if (MusicController.currentMusicIndex >= 0)
+		// 	MusicController.setCurrentMusicIndex(0);
 		musicReset.set(true);
 		await MusicController.addMusicList(musicList, {
 			resetPlaylist: true,
