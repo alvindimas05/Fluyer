@@ -135,6 +135,7 @@ function handleProgressEnter(){
 }
 
 function handleProgressMove(percentage: number) {
+    console.log(percentage);
     updateProgressText = false;
     progressDurationText =
         MusicController.parsePercentageProgressDurationIntoText(percentage);

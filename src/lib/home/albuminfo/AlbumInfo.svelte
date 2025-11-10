@@ -71,7 +71,7 @@ async function handleBack() {
 
 async function addMusicListAndPlay() {
 	await MusicController.resetAndAddMusicList(musicList);
-	MusicController.play();
+	if(!MusicController.isPlaying) MusicController.play();
 }
 
 async function addMusicList() {

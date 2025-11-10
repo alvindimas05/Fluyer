@@ -64,6 +64,8 @@ function getPointerPercentage(x: number) {
 }
 
 function getEventPercentage(e: MouseEvent | TouchEvent) {
+    updateContainerWidth();
+
     const rect = container.getBoundingClientRect();
     const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
 
@@ -85,7 +87,7 @@ function handleMove(e: MouseEvent | TouchEvent) {
     setTooltipVisible(true, percentage);
 }
 
-function handleLeave(e?: MouseEvent | TouchEvent) {
+function handleLeave(e: MouseEvent | TouchEvent) {
     const percentage = getEventPercentage(e);
     onProgressLeave?.(percentage);
     setTooltipVisible(false);

@@ -80,7 +80,7 @@ async function addMusicAndPlay() {
 			FolderController.getMusicListFromFolder(folder!!),
 		);
 	}
-	MusicController.play();
+	if(!MusicController.isPlaying) MusicController.play();
 }
 
 async function addMusic() {

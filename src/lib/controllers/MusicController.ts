@@ -1,14 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import {
-	musicIsPlaying,
-	musicProgressValue,
-	musicList,
-	musicVolume,
-	musicAlbumList,
-	musicPlaylist,
-	musicCurrentIndex,
-	musicRepeatMode,
-	musicReset,
+    musicIsPlaying,
+    musicProgressValue,
+    musicList,
+    musicVolume,
+    musicAlbumList,
+    musicPlaylist,
+    musicCurrentIndex,
+    musicRepeatMode,
+    musicReset, musicProgressIntervalId,
 } from "$lib/stores/music";
 import { get } from "svelte/store";
 import {
@@ -239,51 +239,67 @@ const MusicController = {
 
     listenSyncMusic: () => {
         listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-            const index = e.payload.index;
-            MusicController.setIsPlaying(e.payload.isPlaying);
+            if (e.payload.isPlaying)
+                MusicController.startProgress({ resetProgress: true });
+            else MusicController.stopProgress();
 
-            let position = e.payload.currentPosition ? e.payload.currentPosition / 1000 : null;
+            if(e.payload.index > -1){
+                MusicController.setCurrentMusicIndex(e.payload.index);
 
-            // Handle index changes first - update immediately when index changes
-            // regardless of position value
-            if(index > -1 && index !== MusicController.currentMusicIndex && position && position >= 0) {
-                console.log("Setting index: ", index)
-                console.log("Current position: ", position);
-                MusicController.setCurrentMusicIndex(index);
-            }
-
-            // Note: For some reason, libmpv will give negative position when it's almost 2-3 seconds finished.
-            // So to get that missing position, just substract it with current music duration.
-            if(position && position < 0 && MusicController.currentMusicDuration > 0 && index > 0){
-                position = MusicController.currentMusicDuration + position;
-                console.log("Setting negative position: ", position);
-            }
-
-            // Only update progress for valid positive positions within the track duration
-            if(position && position >= 0 && position <= MusicController.currentMusicDuration && index > -1){
-                console.log("Setting position: ", position);
                 MusicController.setProgressValue(
-                    MusicController.parseProgressDurationIntoValue(position, MusicController.currentMusicDuration)
+                    MusicController.parseProgressDurationIntoValue(
+                        MusicController.parseProgressDuration(e.payload.currentPosition),
+                        MusicController.parseProgressDuration(
+                            MusicController.musicPlaylist[e.payload.index].duration,
+                        ),
+                    ),
                 );
+            } else {
+                MusicController.resetProgress();
             }
+            MusicController.setIsPlaying(e.payload.isPlaying);
         });
     },
     requestSync: () => {
         return invoke(CommandRoutes.MUSIC_PLAYER_REQUEST_SYNC);
     },
-    listenProgressAndroid: async () => {
-        if(!isAndroid()) return;
+	resetProgress: () => musicProgressValue.set(MusicConfig.min),
 
-        while(true){
-            await sleep(500);
-            if(!MusicController.isPlaying) return;
-            await MusicController.requestSync();
+    stopProgress: () => {
+        if (get(musicProgressIntervalId)) {
+            clearInterval(get(musicProgressIntervalId)!);
+            musicProgressIntervalId.set(null);
         }
     },
 
-	resetProgress: () => musicProgressValue.set(MusicConfig.min),
+    startProgress: ({ resetProgress } = { resetProgress: true }) => {
+        const updateInterval =
+            (MusicController.currentMusicDuration / MusicConfig.max) *
+            MusicConfig.step *
+            1000;
 
-	getParsedDuration: (negative = false) => {
+        if (resetProgress) MusicController.resetProgress();
+        MusicController.stopProgress();
+
+        musicProgressIntervalId.set(
+            setInterval(() => {
+                MusicController.setProgressValue(
+                    Math.min(
+                        MusicController.progressValue + MusicConfig.step,
+                        MusicConfig.max,
+                    ),
+                );
+
+                if (MusicController.progressValue >= MusicConfig.max) {
+                    MusicController.setIsPlaying(false);
+                    MusicController.stopProgress();
+                    MusicController.resetProgress();
+                }
+            }, updateInterval),
+        );
+    },
+
+    getParsedDuration: (negative = false) => {
 		if (MusicController.isCurrentMusicFinished) return null;
 
 		let seconds = negative
@@ -338,12 +354,14 @@ const MusicController = {
 		}
 
 		musicIsPlaying.set(true);
-		if (sendCommand) {
+        MusicController.startProgress({ resetProgress: false });
+        if (sendCommand) {
 			await MusicController.sendCommandController("play");
 		}
 	},
 	pause: (sendCommand: boolean = true) => {
 		musicIsPlaying.set(false);
+        MusicController.stopProgress();
 		if (sendCommand) MusicController.sendCommandController("pause");
 	},
 	sendCommandController: async (command: string) => {
@@ -507,12 +525,9 @@ const MusicController = {
 	},
 
 	resetAndAddMusicList: async (musicList: MusicData[]) => {
-		MusicController.pause();
 		await MusicController.sendCommandController("clear");
 		MusicController.resetProgress();
 
-		// if (MusicController.currentMusicIndex >= 0)
-		// 	MusicController.setCurrentMusicIndex(0);
 		musicReset.set(true);
 		await MusicController.addMusicList(musicList, {
 			resetPlaylist: true,
@@ -521,12 +536,13 @@ const MusicController = {
 	},
 
     seekByPercentage: (percentage: number) => {
+        console.log("Seeking at percentage: ", percentage);
         const clamped = Math.min(100, Math.max(0, percentage));
         const position = MusicController.currentMusicRealDuration * (clamped / 100);
 
         MusicController.sendCommandSetPosition(position);
+        MusicController.requestSync();
     },
-
 
 	toggleRepeatMode: () => {
 		const nextRepeatMode = (() => {
@@ -554,7 +570,7 @@ const MusicController = {
 			[playlist[i], playlist[j]] = [playlist[j], playlist[i]];
 		}
 		await MusicController.resetAndAddMusicList(playlist);
-		MusicController.play();
+		if(!MusicController.isPlaying) MusicController.play();
 	},
 
     playlistMoveto: async (fromIndex: number, toIndex: number) => {

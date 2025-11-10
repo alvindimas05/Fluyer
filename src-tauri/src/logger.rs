@@ -39,6 +39,42 @@ macro_rules! debug {
 }
 
 #[macro_export]
+macro_rules! info {
+    ($msg:expr) => {
+        if cfg!(debug_assertions) || crate::platform::is_desktop() {
+            log::info!("{}", $msg);
+        } else {
+            println!("{}", $msg);
+        }
+    };
+    ($msg:expr, $( $args:expr ),+ ) => {
+        if cfg!(debug_assertions) || crate::platform::is_desktop() {
+            log::info!($msg, $( $args ),+);
+        } else {
+            println!($msg, $( $args ),+);
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! warn_ {
+    ($msg:expr) => {
+        if cfg!(debug_assertions) || crate::platform::is_desktop() {
+            log::warn!("{}", $msg);
+        } else {
+            println!("{}", $msg);
+        }
+    };
+    ($msg:expr, $( $args:expr ),+ ) => {
+        if cfg!(debug_assertions) || crate::platform::is_desktop() {
+            log::warn!($msg, $( $args ),+);
+        } else {
+            println!($msg, $( $args ),+);
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! error {
     ($msg:expr) => {
         if cfg!(debug_assertions) || crate::platform::is_desktop() {
@@ -57,6 +93,4 @@ macro_rules! error {
 }
 
 #[allow(unused_imports)]
-pub(crate) use debug;
-#[allow(unused_imports)]
-pub(crate) use error;
+pub(crate) use {debug, info, warn_ as warn, error};

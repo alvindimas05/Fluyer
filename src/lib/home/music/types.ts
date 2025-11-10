@@ -35,7 +35,7 @@ export interface FolderData {
 
 export interface MusicPlayerSync {
 	index: number;
-	currentPosition: number | null;
+	currentPosition: number;
 	isPlaying: boolean;
 	duration: number;
 }

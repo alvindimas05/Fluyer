@@ -1,22 +1,57 @@
+use std::ffi::CString;
+use std::ptr;
+use std::sync::{OnceLock, Mutex};
+use std::thread;
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
-
-#[cfg(desktop)]
-use crate::logger;
+use crate::{logger, GLOBAL_APP_HANDLE};
 use crate::music::metadata::MusicMetadata;
-use crate::GLOBAL_APP_HANDLE;
-#[cfg(desktop)]
-use libmpv2::Mpv;
-#[cfg(desktop)]
-use std::sync::OnceLock;
-use std::thread;
-use libmpv2::Format;
+
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistAddMusic;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
+
+const BASS_PLUGINS: [&str; 2] = ["bassflac", "bassmix"];
+
+const BASS_SAMPLE_FLOAT: u32 = 0x100;
+const BASS_STREAM_DECODE: u32 = 0x200000;
+const BASS_MIXER_NORAMPIN: u32 = 0x800000;
+const BASS_ACTIVE_STOPPED: u32 = 0;
+const BASS_ACTIVE_PLAYING: u32 = 1;
+const BASS_ACTIVE_PAUSED: u32 = 3;
+const BASS_POS_BYTE: u32 = 0;
+const BASS_ATTRIB_VOL: u32 = 2;
+
+#[cfg(desktop)]
+#[link(name = "bass")]
+#[link(name = "bassmix")]
+extern "C" {
+    fn BASS_Init(device: i32, freq: u32, flags: u32, win: *mut std::ffi::c_void, clsid: *mut std::ffi::c_void) -> i32;
+    fn BASS_PluginLoad(file: *const std::ffi::c_char, flags: u32) -> u32;
+    fn BASS_PluginFree(handle: u32) -> i32;
+    fn BASS_StreamCreateFile(mem: bool, file: *const std::ffi::c_void, offset: u64, length: u64, flags: u32) -> u32;
+    fn BASS_Mixer_StreamCreate(freq: u32, chans: u32, flags: u32) -> u32;
+    fn BASS_Mixer_StreamAddChannel(handle: u32, channel: u32, flags: u32) -> i32;
+    fn BASS_Mixer_ChannelRemove(handle: u32) -> u32;
+    fn BASS_Mixer_ChannelIsActive(handle: u32) -> u32;
+    fn BASS_StreamFree(handle: u32) -> i32;
+    fn BASS_ChannelPlay(handle: u32, restart: i32) -> i32;
+    fn BASS_ChannelPause(handle: u32) -> i32;
+    fn BASS_ChannelStop(handle: u32) -> i32;
+    fn BASS_ChannelIsActive(handle: u32) -> u32;
+    fn BASS_ChannelGetLength(handle: u32, mode: u32) -> u64;
+    fn BASS_ChannelGetPosition(handle: u32, mode: u32) -> u64;
+    fn BASS_ChannelSetPosition(handle: u32, pos: u64, mode: u32) -> i32;
+    fn BASS_ChannelBytes2Seconds(handle: u32, pos: u64) -> f64;
+    fn BASS_ChannelSeconds2Bytes(handle: u32, pos: f64) -> u64;
+    fn BASS_ChannelSetAttribute(handle: u32, attrib: u32, value: f32) -> i32;
+    fn BASS_ChannelGetAttribute(handle: u32, attrib: u32, value: *mut f32) -> i32;
+    fn BASS_ErrorGetCode() -> i32;
+    fn BASS_Free() -> i32;
+}
 
 #[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -38,7 +73,20 @@ pub enum MusicState {
     #[default]
     Pause,
 }
+
+#[derive(Clone, Debug)]
+struct PlaylistItem {
+    metadata: MusicMetadata,
+}
+
 pub struct MusicPlayer {}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum RepeatMode {
+    None,
+    All,
+    One,
+}
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -54,7 +102,19 @@ const EQUALIZER_BANDS: [u32; 18] = [
 ];
 
 #[cfg(desktop)]
-pub static GLOBAL_MUSIC_MPV: OnceLock<Mpv> = OnceLock::new();
+static mut GLOBAL_BASS_MIXER: u32 = 0;
+#[cfg(desktop)]
+static mut CURRENT_STREAM: u32 = 0;
+#[cfg(desktop)]
+static GLOBAL_PLAYER_STATE: OnceLock<Mutex<PlayerState>> = OnceLock::new();
+
+#[cfg(desktop)]
+#[derive(Debug, Clone)]
+struct PlayerState {
+    playlist: Vec<PlaylistItem>,
+    current_index: Option<usize>,
+    repeat_mode: RepeatMode,
+}
 
 impl MusicPlayer {
     pub fn spawn() -> Self {
@@ -70,58 +130,55 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         {
-            let mpv = Mpv::with_initializer(|mpv| {
-                let log_path = logger::get_mpv_log_path();
-                mpv.set_option("log-file", log_path.clone())?;
-                mpv.set_property("vo", "null")?;
+            // Initialize global player state
+            GLOBAL_PLAYER_STATE.get_or_init(|| {
+                Mutex::new(PlayerState {
+                    playlist: Vec::new(),
+                    current_index: None,
+                    repeat_mode: RepeatMode::None,
+                })
+            });
 
-                mpv.set_property("cache", "yes")?;
-                mpv.set_property("demuxer-max-bytes", "100000000")?; // 100MB for high-res audio
-                mpv.set_property("demuxer-readahead-secs", "10")?;
-
-                mpv.set_property("prefetch-playlist", "yes")?;
-                mpv.set_property("gapless-audio", "yes")?;
-
-                mpv.set_property("af", "")?; // Clear audio filters
-                mpv.set_property("audio-normalize-downmix", "no")?;
-                mpv.set_property("audio-pitch-correction", "no")?;
-                mpv.set_property("replaygain", "no")?; // Disable ReplayGain
-                mpv.set_property("replaygain-fallback", "0")?;
-
-                mpv.set_property("volume", "100")?;
-                mpv.set_property("volume-max", "100")?;
-
-                mpv.set_property("audio-samplerate", "0")?; // 0 = use source sample rate
-                mpv.set_property("audio-channels", "auto")?; // Preserve channel layout
-
-                #[cfg(target_os = "windows")]
-                mpv.set_property("ao", "wasapi")?;
-
-                #[cfg(target_os = "macos")]
-                mpv.set_property("ao", "coreaudio")?;
-
-                #[cfg(target_os = "linux")]{
-                    mpv.set_property("ao", "alsa")?;
-                    mpv.set_property("alsa-resample", "no")?; // Disable ALSA resampling
+            unsafe {
+                if BASS_Init(-1, 44100, 0, ptr::null_mut(), ptr::null_mut()) == 0 {
+                    logger::error!("Failed to initialize BASS, error: {}", BASS_ErrorGetCode());
+                } else {
+                    logger::info!("BASS initialized successfully");
                 }
 
-                mpv.set_property("audio-buffer", "2")?;
+                // Load plugins based on platform
+                #[cfg(target_os = "macos")]
+                let extension = "dylib";
+                #[cfg(target_os = "windows")]
+                let extension = "dll";
+                #[cfg(target_os = "linux")]
+                let extension = "so";
 
-                mpv.set_property("audio-stream-silence", "no")?;
-                mpv.set_property("audio-wait-open", "2")?; // Wait for audio device
+                for plugin in BASS_PLUGINS {
+                    let c_path = CString::new(format!("{}.{}", plugin, extension)).unwrap();
+                    let handle = BASS_PluginLoad(c_path.as_ptr(), 0);
 
-                mpv.set_property("msg-level", "all=warn,ao=debug")?;
+                    if handle == 0 {
+                        logger::warn!("Failed to load plugin: {}, error: {}", plugin, BASS_ErrorGetCode());
+                    } else {
+                        logger::info!("Loaded plugin: {}", plugin);
+                    }
+                }
 
-                logger::debug!("The mpv log file is saved at {}", log_path);
-                Ok(())
-            }).unwrap();
-
-            GLOBAL_MUSIC_MPV.set(mpv).ok();
+                GLOBAL_BASS_MIXER = BASS_Mixer_StreamCreate(44100, 2, BASS_SAMPLE_FLOAT);
+                if GLOBAL_BASS_MIXER == 0 {
+                    logger::error!("Failed to create BASS mixer stream, error: {}", BASS_ErrorGetCode());
+                } else {
+                    logger::info!("BASS mixer created successfully");
+                }
+            }
         }
+
         Self::start_listener();
 
         Self {}
     }
+
     pub fn send_command(command: String) {
         let _command = match command.as_str() {
             "play" => MusicCommand::Play,
@@ -133,6 +190,7 @@ impl MusicPlayer {
             "repeatNone" => MusicCommand::RepeatNone,
             _ => MusicCommand::None,
         };
+
         if _command == MusicCommand::Play || _command == MusicCommand::Pause {
             Self::play_pause(_command == MusicCommand::Play);
             return;
@@ -146,14 +204,9 @@ impl MusicPlayer {
                 .fluyer()
                 .player_run_command(PlayerCommandArguments::new(PlayerCommand::Clear))
                 .ok();
+
             #[cfg(desktop)]
-            {
-                let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
-                mpv.command("playlist-clear", &[]).unwrap();
-                if mpv.get_property::<i64>("playlist-pos").unwrap() >= 0 {
-                    mpv.command("playlist-remove", &["0"]).unwrap();
-                }
-            }
+            Self::clear_playlist();
             return;
         }
 
@@ -165,12 +218,9 @@ impl MusicPlayer {
                 .fluyer()
                 .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next))
                 .ok();
+
             #[cfg(desktop)]
-            GLOBAL_MUSIC_MPV
-                .get()
-                .unwrap()
-                .command("playlist-next", &[])
-                .unwrap();
+            Self::play_next();
             return;
         }
 
@@ -193,31 +243,24 @@ impl MusicPlayer {
                     .player_run_command(args)
                     .ok();
             }
+
             #[cfg(desktop)]
             {
-                let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
-                mpv.set_property(
-                    "loop-file",
-                    if _command == MusicCommand::RepeatOne {
-                        "inf"
-                    } else {
-                        "no"
-                    },
-                )
-                .unwrap();
-                mpv.set_property(
-                    "loop-playlist",
-                    if _command == MusicCommand::Repeat {
-                        "inf"
-                    } else {
-                        "no"
-                    },
-                )
-                .unwrap();
+                if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+                    if let Ok(mut state) = state_lock.lock() {
+                        state.repeat_mode = match _command {
+                            MusicCommand::Repeat => RepeatMode::All,
+                            MusicCommand::RepeatOne => RepeatMode::One,
+                            MusicCommand::RepeatNone => RepeatMode::None,
+                            _ => RepeatMode::None,
+                        };
+                    }
+                }
             }
             return;
         }
     }
+
     pub fn set_pos(position: u64) {
         #[cfg(target_os = "android")]
         {
@@ -230,18 +273,24 @@ impl MusicPlayer {
                 .player_run_command(args)
                 .ok();
         }
+
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV
-            .get()
-            .unwrap()
-            .command(
-                "seek",
-                &[
-                    format!("{:.3}", position as f64 / 1000.0).as_str(),
-                    "absolute",
-                ],
-            )
-            .ok();
+        unsafe {
+            if CURRENT_STREAM != 0 && GLOBAL_BASS_MIXER != 0 {
+                // Pause the mixer to prevent delay from buffered data
+                BASS_ChannelPause(GLOBAL_BASS_MIXER);
+
+                // Set the new position on the source stream
+                let seconds = position as f64 / 1000.0;
+                let byte_pos = BASS_ChannelSeconds2Bytes(CURRENT_STREAM, seconds);
+                if BASS_ChannelSetPosition(CURRENT_STREAM, byte_pos, BASS_POS_BYTE) == 0 {
+                    logger::error!("Failed to set position, error: {}", BASS_ErrorGetCode());
+                }
+
+                // Restart the mixer with restart=true to clear the buffer
+                BASS_ChannelPlay(GLOBAL_BASS_MIXER, 1);
+            }
+        }
     }
 
     pub fn get_current_duration() -> f64 {
@@ -255,13 +304,15 @@ impl MusicPlayer {
                 .unwrap();
             info.current_position
         }
+
         #[cfg(desktop)]
-        {
-            GLOBAL_MUSIC_MPV
-                .get()
-                .unwrap()
-                .get_property::<f64>("time-pos")
-                .unwrap() * 1000.0
+        unsafe {
+            if CURRENT_STREAM == 0 {
+                return 0.0;
+            }
+            let byte_pos = BASS_ChannelGetPosition(CURRENT_STREAM, BASS_POS_BYTE);
+            let seconds = BASS_ChannelBytes2Seconds(CURRENT_STREAM, byte_pos);
+            seconds * 1000.0
         }
     }
 
@@ -277,65 +328,79 @@ impl MusicPlayer {
             MusicPlayerSync {
                 index: info.index,
                 current_position: if is_reset {
-                    0
+                    Some(0.0)
                 } else {
-                    info.current_position
+                    Some(info.current_position)
                 },
                 is_playing: if is_reset { true } else { info.is_playing },
             }
         }
+
         #[cfg(desktop)]
-        {
-            let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
-            let index = mpv.get_property::<i64>("playlist-pos").unwrap_or(-1);
-            let time_pos = mpv.get_property::<f64>("time-pos");
+        unsafe {
+            let current_position = if is_reset || CURRENT_STREAM == 0 {
+                Some(0.0)
+            } else {
+                let byte_pos = BASS_ChannelGetPosition(CURRENT_STREAM, BASS_POS_BYTE);
+                let seconds = BASS_ChannelBytes2Seconds(CURRENT_STREAM, byte_pos);
+                Some(seconds * 1000.0)
+            };
+
+            let is_playing = if is_reset {
+                true
+            } else if GLOBAL_BASS_MIXER == 0 {
+                false
+            } else {
+                let state = BASS_ChannelIsActive(GLOBAL_BASS_MIXER);
+                state == BASS_ACTIVE_PLAYING
+            };
+
+            // Get current index from global state
+            let index = GLOBAL_PLAYER_STATE
+                .get()
+                .and_then(|state| state.lock().ok())
+                .and_then(|state| state.current_index)
+                .map(|i| i as i64)
+                .unwrap_or(-1);
 
             MusicPlayerSync {
-                index: mpv.get_property::<i64>("playlist-pos").unwrap_or(-1),
-                current_position: if is_reset {
-                    Some(0.0)
-                } else {
-                    if let Ok(time) = time_pos {
-                        Some(time * 1000.0)
-                    } else {
-                        None
-                    }
-                },
-                is_playing: if is_reset {
-                    true
-                } else {
-                    index > -1 && !mpv.get_property::<bool>("pause").unwrap()
-                },
+                index,
+                current_position,
+                is_playing,
             }
         }
     }
+
     pub fn add_playlist(playlist: Vec<MusicMetadata>) {
         #[cfg(desktop)]
         {
-            let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
+            if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+                if let Ok(mut state) = state_lock.lock() {
+                    let was_empty = state.playlist.is_empty();
 
-            for (_, music) in playlist.iter().enumerate() {
-                // Note: libmpv2 v4.1.0
-                // let path = format!("\"{}\"", music.path)
-                //     .replace("\\", "/")
-                //     .replace("//", "/");
+                    for music in playlist {
+                        state.playlist.push(PlaylistItem {
+                            metadata: music,
+                        });
+                    }
 
-                // Note: libmpv2 v5.0.0
-                let path = format!("{}", music.path)
-                    .replace("\\", "/")
-                    .replace("//", "/");
-                mpv.command("loadfile", &[path.as_str(), "append"]).unwrap();
+                    // Auto-play first track if nothing is playing
+                    if was_empty && !state.playlist.is_empty() && state.current_index.is_none() {
+                        drop(state); // Release lock before calling goto_playlist
+                        Self::goto_playlist(0);
+                    }
+                }
             }
         }
 
-        #[cfg(target_os = "android")]{
+        #[cfg(target_os = "android")]
+        {
             let music_playlist = playlist
                 .into_iter()
                 .map(|music| PlaylistAddMusic {
                     file_path: music.path,
                     title: music.title.unwrap_or(MusicMetadata::default_title().to_string()),
                     artist: music.artist.unwrap_or(MusicMetadata::default_artist().to_string()),
-                    // image: music.image,
                     image: None,
                 })
                 .collect::<Vec<_>>();
@@ -362,11 +427,37 @@ impl MusicPlayer {
         }
 
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV
-            .get()
-            .unwrap()
-            .command("playlist-remove", &[index.to_string().as_str()])
-            .unwrap();
+        {
+            if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+                if let Ok(mut state) = state_lock.lock() {
+                    if index >= state.playlist.len() {
+                        return;
+                    }
+
+                    // Free stream if it's the current one
+                    if let Some(current) = state.current_index {
+                        if current == index {
+                            drop(state); // Release lock before calling stop
+                            Self::stop_current_stream();
+                            if let Ok(mut state) = state_lock.lock() {
+                                state.current_index = None;
+                                state.playlist.remove(index);
+                            }
+                            return;
+                        }
+                    }
+
+                    state.playlist.remove(index);
+
+                    // Adjust current index
+                    if let Some(current) = state.current_index {
+                        if index < current {
+                            state.current_index = Some(current - 1);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     pub fn goto_playlist(index: usize) {
@@ -381,12 +472,137 @@ impl MusicPlayer {
                 .player_run_command(args)
                 .ok();
         }
+
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV
-            .get()
-            .unwrap()
-            .command("playlist-play-index", &[index.to_string().as_str()])
-            .unwrap();
+        {
+            if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+                let music = {
+                    let state = state_lock.lock().unwrap();
+                    if index >= state.playlist.len() {
+                        return;
+                    }
+                    state.playlist[index].metadata.clone()
+                };
+
+                Self::stop_current_stream();
+
+                if Self::load_music(music) {
+                    if let Ok(mut state) = state_lock.lock() {
+                        state.current_index = Some(index);
+                    }
+                    Self::play_pause(true);
+                    Self::emit_sync(true);
+                }
+            }
+        }
+    }
+
+    #[cfg(desktop)]
+    fn stop_current_stream() {
+        unsafe {
+            if CURRENT_STREAM != 0 {
+                BASS_ChannelStop(CURRENT_STREAM);
+                BASS_Mixer_ChannelRemove(CURRENT_STREAM);
+                BASS_StreamFree(CURRENT_STREAM);
+                CURRENT_STREAM = 0;
+            }
+            // Also clear the mixer buffer
+            if GLOBAL_BASS_MIXER != 0 {
+                BASS_ChannelSetPosition(GLOBAL_BASS_MIXER, 0, BASS_POS_BYTE);
+            }
+        }
+    }
+
+    #[cfg(desktop)]
+    fn clear_playlist() {
+        unsafe {
+            // Completely stop and clear the mixer
+            if GLOBAL_BASS_MIXER != 0 {
+                BASS_ChannelStop(GLOBAL_BASS_MIXER);
+                BASS_ChannelSetPosition(GLOBAL_BASS_MIXER, 0, BASS_POS_BYTE);
+            }
+        }
+        Self::stop_current_stream();
+        if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+            if let Ok(mut state) = state_lock.lock() {
+                state.playlist.clear();
+                state.current_index = None;
+            }
+        }
+    }
+
+    #[cfg(desktop)]
+    fn play_next() {
+        if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+            let next_index = {
+                let state = state_lock.lock().unwrap();
+                match (state.current_index, state.repeat_mode) {
+                    (Some(current), RepeatMode::One) => Some(current),
+                    (Some(current), _) if current + 1 < state.playlist.len() => Some(current + 1),
+                    (Some(_), RepeatMode::All) => Some(0),
+                    _ => None,
+                }
+            };
+
+            if let Some(index) = next_index {
+                // Get the next music metadata
+                let music = {
+                    let state = state_lock.lock().unwrap();
+                    state.playlist[index].metadata.clone()
+                };
+
+                // For gapless playback, remove the old stream and load the new one without stopping the mixer
+                unsafe {
+                    if CURRENT_STREAM != 0 {
+                        BASS_Mixer_ChannelRemove(CURRENT_STREAM);
+                        BASS_StreamFree(CURRENT_STREAM);
+                        CURRENT_STREAM = 0;
+                    }
+                }
+
+                if Self::load_music(music) {
+                    if let Ok(mut state) = state_lock.lock() {
+                        state.current_index = Some(index);
+                    }
+                    Self::emit_sync(true);
+                }
+            } else {
+                Self::stop_current_stream();
+                if let Ok(mut state) = state_lock.lock() {
+                    state.current_index = None;
+                }
+            }
+        }
+    }
+
+    #[cfg(desktop)]
+    fn load_music(music: MusicMetadata) -> bool {
+        unsafe {
+            let path = CString::new(music.path.clone()).unwrap();
+            let stream = BASS_StreamCreateFile(
+                false,
+                path.as_ptr() as *const _,
+                0,
+                0,
+                BASS_STREAM_DECODE,
+            );
+
+            if stream == 0 {
+                logger::error!("Failed to load BASS music: {}, error: {}", music.path, BASS_ErrorGetCode());
+                return false;
+            }
+
+            let ok = BASS_Mixer_StreamAddChannel(GLOBAL_BASS_MIXER, stream, BASS_MIXER_NORAMPIN);
+            if ok == 0 {
+                logger::error!("Failed to add channel to mixer: {}, error: {}", music.path, BASS_ErrorGetCode());
+                BASS_StreamFree(stream);
+                return false;
+            }
+
+            CURRENT_STREAM = stream;
+            logger::info!("Successfully loaded: {}", music.path);
+            true
+        }
     }
 
     pub fn moveto_playlist(from: usize, to: usize) {
@@ -397,15 +613,35 @@ impl MusicPlayer {
             .fluyer()
             .player_playlist_move_to(from, to)
             .ok();
+
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV
-            .get()
-            .unwrap()
-            .command(
-                "playlist-move",
-                &[from.to_string().as_str(), to.to_string().as_str()],
-            )
-            .unwrap();
+        {
+            if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+                if let Ok(mut state) = state_lock.lock() {
+                    if from >= state.playlist.len() || to >= state.playlist.len() {
+                        return;
+                    }
+
+                    let item = state.playlist.remove(from);
+                    state.playlist.insert(to, item);
+
+                    // Adjust current index
+                    if let Some(current) = state.current_index {
+                        state.current_index = Some(
+                            if current == from {
+                                to
+                            } else if from < current && to >= current {
+                                current - 1
+                            } else if from > current && to <= current {
+                                current + 1
+                            } else {
+                                current
+                            }
+                        );
+                    }
+                }
+            }
+        }
     }
 
     pub fn set_volume(volume: f32) {
@@ -420,12 +656,16 @@ impl MusicPlayer {
                 .player_run_command(args)
                 .ok();
         }
+
         #[cfg(desktop)]
-        GLOBAL_MUSIC_MPV
-            .get()
-            .unwrap()
-            .set_property("volume", (volume * 100.0).round() as i64)
-            .unwrap();
+        unsafe {
+            if GLOBAL_BASS_MIXER != 0 {
+                let clamped_volume = volume.max(0.0).min(1.0);
+                if BASS_ChannelSetAttribute(GLOBAL_BASS_MIXER, BASS_ATTRIB_VOL, clamped_volume) == 0 {
+                    logger::error!("Failed to set volume, error: {}", BASS_ErrorGetCode());
+                }
+            }
+        }
     }
 
     fn play_pause(play: bool) {
@@ -440,94 +680,53 @@ impl MusicPlayer {
                 PlayerCommand::Pause
             }))
             .ok();
+
         #[cfg(desktop)]
-        Self::mpv_play_pause(play);
+        unsafe {
+            if GLOBAL_BASS_MIXER == 0 {
+                return;
+            }
+
+            if play {
+                if BASS_ChannelPlay(GLOBAL_BASS_MIXER, 0) == 0 {
+                    logger::error!("Failed to play, error: {}", BASS_ErrorGetCode());
+                }
+            } else {
+                if BASS_ChannelPause(GLOBAL_BASS_MIXER) == 0 {
+                    logger::error!("Failed to pause, error: {}", BASS_ErrorGetCode());
+                }
+            }
+        }
     }
 
     pub fn equalizer(values: Vec<f32>) {
+        // Note: BASS equalizer implementation would require BASS_FX plugin
+        // and DSP effects setup. This is a placeholder for future implementation.
         #[cfg(desktop)]
         {
-            let gains: String = values
-                .iter()
-                .map(|g| format!("{:.1}", g))
-                .collect::<Vec<_>>()
-                .join(" ");
-
-            let bands: String = EQUALIZER_BANDS
-                .iter()
-                .map(|f| f.to_string())
-                .collect::<Vec<_>>()
-                .join(" ");
-
-            let arg = format!(
-                "lavfi=[anull[a];afireqsrc=preset=custom:gains={}:bands={}\
-             [ir];[a][ir]afir]",
-                gains, bands
-            );
-
-            GLOBAL_MUSIC_MPV
-                .get()
-                .unwrap()
-                .command("af", &["set", &arg])
-                .unwrap();
+            logger::info!("Equalizer called with {} bands (not yet implemented)", values.len());
+            // TODO: Implement BASS_FX equalizer with proper DSP chain
         }
     }
 
     pub fn reset_equalizer() {
         #[cfg(desktop)]
         {
-            GLOBAL_MUSIC_MPV
-                .get()
-                .unwrap()
-                .set_property("af", "")
-                .unwrap();
+            logger::info!("Reset equalizer (not yet implemented)");
+            // TODO: Clear BASS_FX equalizer DSP chain
         }
     }
 
-    pub fn toggle_bit_perfect(enable: bool){
-        #[cfg(desktop)]{
-            GLOBAL_MUSIC_MPV.get().unwrap()
-                .set_property("audio-exclusive", if enable { "yes" } else { "no" }).ok();
+    pub fn toggle_bit_perfect(enable: bool) {
+        #[cfg(desktop)]
+        {
+            logger::info!("Bit-perfect mode toggle (not yet implemented for BASS): {}", enable);
+            // TODO: Configure BASS for bit-perfect playback if supported
+            // This may require specific device initialization flags
         }
     }
 
-    #[cfg(desktop)]
-    fn mpv_play_pause(play: bool) {
-        let mpv = GLOBAL_MUSIC_MPV.get().unwrap();
-        let playlist_count = mpv.get_property::<i64>("playlist-count").unwrap();
-
-        if playlist_count < 1 {
-            return;
-        }
-        if mpv.get_property::<i64>("playlist-pos").unwrap() < 0 {
-            mpv.set_property("playlist-pos", 0).unwrap();
-        }
-        mpv.set_property("pause", !play).unwrap();
-
-        // let sink = GLOBAL_MUSIC_SINK.get().unwrap();
-        // let max_volume = MUSIC_VOLUME.load(Ordering::SeqCst);
-        // let mut range: Vec<f32> = (if play { 1..21 } else { 0..20 })
-        //     .map(|i| i as f32 * max_volume / 20.)
-        //     .collect();
-        // if play {
-        //     sink.play();
-        // } else {
-        //     range.reverse();
-        // }
-
-        // for i in range {
-        //     sink.set_volume(i);
-        //     thread::sleep(Duration::from_millis(20));
-        // }
-
-        // if play {
-        //     sink.play();
-        // } else {
-        //     sink.pause();
-        // }
-    }
-
-    pub fn request_sync(){
+    pub fn request_sync() {
         Self::emit_sync(false);
     }
 
@@ -545,30 +744,21 @@ impl MusicPlayer {
     pub fn start_listener() {
         #[cfg(desktop)]
         {
-            // Note: libmpv2 v4.1.0
-            // use libmpv2::events::{Event, EventContext};
-            // let mut event_context = EventContext::new(GLOBAL_MUSIC_MPV.get().unwrap().ctx);
+            // Spawn a thread to monitor playback state
+            thread::spawn(move || {
+                loop {
+                    thread::sleep(std::time::Duration::from_millis(100));
 
-            // Note: libmpv2 v5.0.0
-            use libmpv2::events::Event;
-            let mut client = GLOBAL_MUSIC_MPV.get().unwrap().create_client(None).unwrap();
-            client.observe_property("time-pos", Format::Double, 1).unwrap();
-            thread::spawn(move || loop {
-                // let event = event_context.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
-                let event = client.wait_event(0.1).unwrap_or(Err(libmpv2::Error::Null));
-                match event {
-                    Ok(Event::PropertyChange { name, .. }) => {
-                        if name == "time-pos" {
-                            Self::emit_sync(false);
+                    unsafe {
+                        if CURRENT_STREAM != 0 {
+                            let state = BASS_ChannelIsActive(CURRENT_STREAM);
+                            if state == BASS_ACTIVE_STOPPED {
+                                // Track ended, trigger next
+                                logger::info!("Track ended, playing next");
+                                Self::play_next();
+                            }
                         }
                     }
-                    Ok(Event::EndFile(reason)) => {
-                        if reason == 0 {
-                            Self::emit_sync(true);
-                        }
-                    }
-                    Ok(_) => {},
-                    Err(_) => {},
                 }
             });
         }
@@ -580,7 +770,6 @@ impl MusicPlayer {
                 .unwrap()
                 .fluyer()
                 .watch_playlist_change(|payload| {
-                    // Note: Thread spawn is required for unknown reasons.
                     thread::spawn(move || {
                         println!("Music player background event: {:?}", payload);
                         Self::emit_sync(payload.is_next);
@@ -601,5 +790,19 @@ impl MusicPlayer {
                 MusicPlayer::emit_sync(false);
             });
     }
+}
 
+impl Drop for MusicPlayer {
+    fn drop(&mut self) {
+        #[cfg(desktop)]
+        unsafe {
+            Self::stop_current_stream();
+            if GLOBAL_BASS_MIXER != 0 {
+                BASS_StreamFree(GLOBAL_BASS_MIXER);
+                GLOBAL_BASS_MIXER = 0;
+            }
+            BASS_Free();
+            logger::info!("BASS cleaned up");
+        }
+    }
 }
