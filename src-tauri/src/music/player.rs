@@ -108,14 +108,6 @@ impl MusicPlayer {
     pub fn spawn() -> Self {
         Self::start_focus_listener();
 
-        #[cfg(target_os = "linux")]
-        unsafe {
-            extern crate libc;
-            use libc::{setlocale, LC_NUMERIC};
-            use std::ffi::CString;
-            setlocale(LC_NUMERIC, CString::new("C").unwrap().as_ptr());
-        }
-
         #[cfg(desktop)]
         {
             // Initialize global player state
