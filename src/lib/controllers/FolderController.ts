@@ -20,20 +20,22 @@ const FolderController = {
 		await FolderController.setFolderList();
 	},
 	currentFolder: () => get(folderCurrent),
-	setFolderList: async () => {
-		const folder = FolderController.currentFolder();
-		if (folder) {
-			folderList.set(
-				await invoke(CommandRoutes.FOLDER_GET_ITEMS, { path: folder.path }),
-			);
-		} else {
-			folderList.set(
-				(await PersistentStoreController.musicPath.get()).map(
-					(path) => ({ path }) as FolderData,
-				),
-			);
-		}
-	},
+    setFolderList: async () => {
+        const folder = FolderController.currentFolder();
+        let list: FolderData[];
+
+        if (folder) {
+            list = await invoke(CommandRoutes.FOLDER_GET_ITEMS, { path: folder.path });
+        } else {
+            list = (await PersistentStoreController.musicPath.get()).map(
+                (path) => ({ path }) as FolderData,
+            );
+        }
+        list.sort((a, b) => a.path.localeCompare(b.path, undefined, { sensitivity: 'base' }));
+
+        folderList.set(list);
+    },
+
 	setMusicListToFolder: async () => {
 		const musicPaths = await PersistentStoreController.musicPath.get();
 		if (musicPaths.length < 2)
