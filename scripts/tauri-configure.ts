@@ -32,6 +32,5 @@ let _env = {
 	...process.env,
 	FLUYER_LIBS_SOURCE: source,
 };
-if (os.platform() !== "win32")
-	_env["PATH"] = `${process.env.PATH}:${source}`;
+_env["PATH"] = `${process.env.PATH}${os.platform() === "win32" ? ";" : ":"}${source}`;
 export const env = _env;

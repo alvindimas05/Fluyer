@@ -43,7 +43,7 @@ export async function extractZip(
 	console.log("Extracting", filePath);
 	await extract(filePath, { dir: destination });
 	await fs.rm(filePath);
-	console.log("Extraction complete to", destination);
+	console.log("Extraction complete from", filePath, "to", destination);
 }
 
 export async function extractTarGz(

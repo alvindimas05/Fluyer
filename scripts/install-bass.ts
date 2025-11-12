@@ -12,13 +12,15 @@ async function installLib(name: string) {
     const downloadName = crypto.randomUUID();
     const downloadPath = path.join(os.tmpdir(), `${downloadName}.zip`);
     const extractPath = path.join(os.tmpdir(), downloadName);
+    const libWindowsPath = path.join(extractPath, "c", "x64", `${name}.lib`);
+
     let platform = "";
 
     let libPath = "";
     switch(os.platform()){
         case "win32":
             platform = "";
-            libPath = path.join(extractPath, `${name}.dll`);
+            libPath = path.join(extractPath, "x64", `${name}.dll`);
             break;
         case "darwin":
             platform = "-osx";
@@ -47,8 +49,10 @@ async function installLib(name: string) {
             break;
     }
 
+    const destLibPath = path.join(destPath, path.basename(libPath));
+
     try {
-        await fs.access(path.join(destPath, path.basename(libPath)));
+        await fs.access(destLibPath);
         return;
     } catch(e) {}
 
@@ -56,7 +60,15 @@ async function installLib(name: string) {
 
     await downloadFile(`https://www.un4seen.com/files/${name}${VERSION}${platform}.zip`, downloadPath);
     await extractZip(downloadPath, extractPath);
-    await fs.copyFile(libPath, path.join(destPath, path.basename(libPath)));
+
+    console.log("Copying", libPath, "to", destLibPath);
+    await fs.copyFile(libPath, destLibPath);
+
+    if(os.platform() === "win32"){
+        const destLibWindowsPath = path.join(destPath, path.basename(libWindowsPath));
+        console.log("Copying", libWindowsPath, "to", destLibWindowsPath);
+        await fs.copyFile(libWindowsPath, destLibWindowsPath);
+    }
 
     try {
         await fs.rm(downloadPath);
