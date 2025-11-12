@@ -14,11 +14,12 @@ import type {Unsubscriber} from "svelte/store";
 import {page} from "$app/state";
 import {PageRoutes} from "$lib/pages";
 import {MusicSize} from "$lib/home/music/types";
+import {isMobile} from "$lib/platform";
 
-const SCALE = 0.05;
+const SCALE = isMobile() ? 0.03 : 0.05;
 const CANVAS_BLOCK_SIZE = $derived(window.innerWidth > 640 ? 150 : 100);
 const CANVAS_TRANSITION_DURATION = 750;
-const CANVAS_BLUR_RADIUS = 200;
+const CANVAS_BLUR_RADIUS = isMobile() ? 100 : 200;
 
 let previousBackground: string | null = null;
 let canvas: HTMLCanvasElement;

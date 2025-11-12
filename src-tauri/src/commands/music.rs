@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Manager};
 
 use tauri::path::BaseDirectory;
 #[cfg(desktop)]
@@ -7,6 +7,8 @@ use tauri::Emitter;
 use tauri_plugin_dialog::DialogExt;
 #[cfg(desktop)]
 use crate::store::GLOBAL_APP_STORE;
+#[cfg(target_os = "android")]
+use tauri_plugin_fluyer::FluyerExt;
 
 use crate::GLOBAL_APP_HANDLE;
 
