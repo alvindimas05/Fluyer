@@ -1,4 +1,3 @@
-use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
 
 use tauri::path::BaseDirectory;
@@ -6,14 +5,13 @@ use tauri::path::BaseDirectory;
 use tauri::Emitter;
 #[cfg(desktop)]
 use tauri_plugin_dialog::DialogExt;
-use tauri_plugin_fluyer::FluyerExt;
 #[cfg(desktop)]
 use crate::store::GLOBAL_APP_STORE;
 
 use crate::GLOBAL_APP_HANDLE;
 
 use crate::music::player::MusicPlayer;
-use crate::{logger, music::metadata::MusicMetadata, AppState};
+use crate::{logger, music::metadata::MusicMetadata};
 
 use std::path::PathBuf;
 use std::process::Command;
