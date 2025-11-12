@@ -44,7 +44,7 @@ jobs:
           if [ "${{ github.event.inputs.platforms }}" == "all" ]; then
             echo 'matrix=["windows-x86_64","macos-intel","macos-silicon","linux","android-armv7","android-aarch64","android-i686","android-x86_64"]' >> $GITHUB_OUTPUT
           else
-            echo 'matrix=["${{ github.event.inputs.platforms }}"]' >> $GITHUB_OUTPUT
+            echo "matrix=[\"${{ github.event.inputs.platforms }}\"]" >> $GITHUB_OUTPUT
           fi
 
   build:
@@ -202,6 +202,7 @@ jobs:
           tag: v${{ needs.prepare.outputs.version }}
           name: Fluyer v${{ needs.prepare.outputs.version }}
           allowUpdates: true
+          omitBodyDuringUpdate: true
           prerelease: true
           artifactErrorsFailBuild: true
           token: ${{ secrets.GITHUB_TOKEN }}
