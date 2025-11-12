@@ -67,13 +67,6 @@ pub enum MusicCommand {
     RepeatNone,
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub enum MusicState {
-    Play,
-    #[default]
-    Pause,
-}
-
 #[derive(Clone, Debug)]
 struct PlaylistItem {
     metadata: MusicMetadata,
@@ -95,11 +88,6 @@ pub struct MusicPlayerSync {
     current_position: Option<f64>,
     is_playing: bool,
 }
-
-const EQUALIZER_BANDS: [u32; 18] = [
-    65, 92, 131, 185, 262, 370, 523, 740, 1047, 1480, 2093, 2960, 4186, 5920, 8372, 11840, 16744,
-    20000,
-];
 
 #[cfg(desktop)]
 static mut GLOBAL_BASS_MIXER: u32 = 0;

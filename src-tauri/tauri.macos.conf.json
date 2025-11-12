@@ -1,0 +1,11 @@
+{
+    "bundle": {
+        "macOS": {
+            "frameworks": [
+                "./libs/libbass.dylib",
+                "./libs/libbassflac.dylib",
+                "./libs/libbassmix.dylib"
+            ]
+        }
+    }
+}

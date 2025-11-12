@@ -1,0 +1,10 @@
+{
+	"bundle": {
+		"resources": [
+            "./libs/ffmpeg/**/*",
+            "./libs/libbass.so",
+            "./libs/libbassflac.so",
+            "./libs/libbassmix.so"
+        ]
+	}
+}

@@ -186,7 +186,7 @@ const MusicController = {
         return `${negative ? "-" : ""}${minutes}:${seconds.toString().padStart(2, "0")}`;
     },
 
-	mpvMusicCurrentDuration: () =>
+    getPlayerCurrentDuration: () =>
 		invoke<number | null>(CommandRoutes.MUSIC_GET_CURRENT_DURATION),
 	progressDurationText: (negative = false): string => {
 		return MusicController.parseProgressDurationIntoText(

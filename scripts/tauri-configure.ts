@@ -4,7 +4,7 @@ import os from "os";
 import fs from "fs/promises";
 import { exit } from "process";
 
-const mpvSource = path.resolve("src-tauri", "libs");
+const source = path.resolve("src-tauri", "libs");
 
 export async function configure() {
 	try {
@@ -16,14 +16,7 @@ export async function configure() {
 		);
 		exit();
 	}
-	switch (os.platform()) {
-		case "win32":
-			await installLibmpvWindows();
-			break;
-		case "darwin":
-			await installLibsMacos();
-			break;
-	}
+    await installBass();
 	await installFfmpeg();
 }
 
@@ -31,20 +24,14 @@ async function installFfmpeg() {
 	await spawn("bun", ["scripts/install-ffmpeg.ts"], { stdio: "inherit" });
 }
 
-async function installLibmpvWindows() {
-	await spawn("bun", ["scripts/install-libmpv-windows.ts"], {
-		stdio: "inherit",
-	});
-}
-
-async function installLibsMacos() {
-	await spawn("bun", ["scripts/install-libs-macos.ts"], { stdio: "inherit" });
+async function installBass(){
+    await spawn("bun", ["scripts/install-bass.ts"], { stdio: "inherit" });
 }
 
 let _env = {
 	...process.env,
-	FLUYER_MPV_SOURCE: mpvSource,
+	FLUYER_LIBS_SOURCE: source,
 };
 if (os.platform() !== "win32")
-	_env["PATH"] = `${process.env.PATH}:${mpvSource}`;
+	_env["PATH"] = `${process.env.PATH}:${source}`;
 export const env = _env;

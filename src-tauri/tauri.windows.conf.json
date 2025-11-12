@@ -1,5 +1,10 @@
 {
 	"bundle": {
-		"resources": ["./libs/ffmpeg/**/*", "./libmpv-2.dll"]
+		"resources": [
+            "./libs/ffmpeg/**/*",
+            "./libs/libbass.dll",
+            "./libs/libbassflac.dll",
+            "./libs/libbassmix.dll"
+        ]
 	}
 }
