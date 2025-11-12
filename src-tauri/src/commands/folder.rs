@@ -6,6 +6,6 @@ pub fn folder_get_items(path: String) -> Vec<FolderItem> {
 }
 
 #[tauri::command]
-pub fn folder_get_image(path: String, size: Option<String>) -> Option<String> {
-    crate::file::get_folder_image(path.as_str(), size)
+pub fn folder_get_first_music_path(path: String, size: Option<String>) -> Option<String> {
+    crate::file::get_folder_first_music_path(path.as_str(), size)
 }

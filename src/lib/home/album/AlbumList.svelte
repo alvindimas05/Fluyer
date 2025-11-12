@@ -93,7 +93,7 @@ let data: any[] = $derived.by(() => {
 });
 
 function groupByAlbum(): MusicData[][] {
-	let musicList = MusicController.musicList()!;
+	let musicList = MusicController.musicList!;
 	const albumsMap = musicList.reduce(
 		(acc, item) => {
 			if (item.album === null || item.album.trim() === "") {

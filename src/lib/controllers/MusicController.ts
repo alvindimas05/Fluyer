@@ -58,10 +58,12 @@ const MusicController = {
         // MusicController.listenProgressAndroid();
 		settingBitPerfectMode.subscribe(MusicController.onBitPerfectModeChange);
 	},
-	musicList: () => get(musicList),
+	get musicList(){
+        return get(musicList);
+    },
 	setMusicList: (value: MusicData[] | null) => musicList.set(value),
 	getMusics: async (force = false) => {
-		if (MusicController.musicList()?.length && !force) return;
+		if (MusicController.musicList?.length && !force) return;
 		const musics = await invoke<MusicData[] | null>(
 			CommandRoutes.MUSIC_GET_ALL,
 		);

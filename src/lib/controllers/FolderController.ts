@@ -70,13 +70,10 @@ const FolderController = {
 	isMusicInFolderRecursive: (music: MusicData, folder: FolderData | null) =>
 		folder && music.path.startsWith(folder.path),
 	getImageFromPath: async (path: string, size: MusicSize | null) => {
-		const imageSize = size ? size.toString() : null;
-		const base64 = await invoke<string>(CommandRoutes.FOLDER_GET_IMAGE, {
-			path,
-			size: imageSize,
-		});
-		if (base64) return UtilsController.withBase64(base64);
-		return MusicConfig.defaultAlbumImage;
+		const musicPath = await invoke<string>(CommandRoutes.FOLDER_GET_FIRST_MUSIC_PATH, {path});
+        const music = MusicController.musicList?.find(music => music.path === musicPath);
+        if(!music) return MusicConfig.defaultAlbumImage;
+		return MusicController.getAlbumImageFromMusic(music);
 	},
 	getMusicListFromFolder: (folder: FolderData | null) => {
 		if (!folder) return [];

@@ -22,7 +22,7 @@ export const CommandRoutes = {
     MUSIC_TOGGLE_BIT_PERFECT: "music_toggle_bit_perfect",
 
 	FOLDER_GET_ITEMS: "folder_get_items",
-	FOLDER_GET_IMAGE: "folder_get_image",
+	FOLDER_GET_FIRST_MUSIC_PATH: "folder_get_first_music_path",
 
 	CHECK_READ_AUDIO_PERMISSION: "check_read_audio_permission",
 	REQUEST_READ_AUDIO_PERMISSION: "request_read_audio_permission",
