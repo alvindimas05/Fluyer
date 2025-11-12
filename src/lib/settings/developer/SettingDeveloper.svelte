@@ -54,8 +54,8 @@ async function saveMpvLog() {
             label="Save Log"
             icon={IconType.SaveLog}
             onclick={saveLog}/>
-    <SettingButton
-            label="Save MPV Log"
-            icon={IconType.SaveLog}
-            onclick={saveMpvLog} />
+<!--    <SettingButton-->
+<!--            label="Save MPV Log"-->
+<!--            icon={IconType.SaveLog}-->
+<!--            onclick={saveMpvLog} />-->
 {/if}
