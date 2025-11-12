@@ -241,7 +241,7 @@ const MusicController = {
         listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
             if (e.payload.isPlaying){
                 MusicController.resetProgress();
-                MusicController.startProgress();
+                setTimeout(MusicController.startProgress);
             }
             else MusicController.stopProgress();
 
