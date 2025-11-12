@@ -91,6 +91,7 @@ async function onKeyDown(
 
 async function resetLyrics() {
 	selectedLyricIndex = 0;
+    lyrics = [];
 
 	if (MusicController.currentMusic == null) return;
 	const resLyrics = await LyricController.get(MusicController.currentMusic!);
@@ -135,7 +136,6 @@ function handleProgressEnter(){
 }
 
 function handleProgressMove(percentage: number) {
-    console.log(percentage);
     updateProgressText = false;
     progressDurationText =
         MusicController.parsePercentageProgressDurationIntoText(percentage);
