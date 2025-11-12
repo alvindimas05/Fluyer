@@ -2,9 +2,9 @@
 	"bundle": {
 		"resources": [
             "./libs/ffmpeg/**/*",
-            "./libs/libbass.dll",
-            "./libs/libbassflac.dll",
-            "./libs/libbassmix.dll"
+            "./libs/bass.dll",
+            "./libs/bassflac.dll",
+            "./libs/bassmix.dll"
         ]
 	}
 }

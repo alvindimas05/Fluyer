@@ -290,7 +290,7 @@ impl MusicPlayer {
                 .fluyer()
                 .player_get_info()
                 .unwrap();
-            info.current_position
+            info.current_position as f64
         }
 
         #[cfg(desktop)]
@@ -318,7 +318,7 @@ impl MusicPlayer {
                 current_position: if is_reset {
                     Some(0.0)
                 } else {
-                    Some(info.current_position)
+                    Some(info.current_position as f64)
                 },
                 is_playing: if is_reset { true } else { info.is_playing },
             }
