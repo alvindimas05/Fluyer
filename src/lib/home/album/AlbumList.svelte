@@ -142,7 +142,11 @@ onMount(() => {
 	unlistenMusicList = musicList.subscribe(() =>
 		MusicController.setMusicAlbumList(groupByAlbum()),
 	);
-    unlistenAlbumListScrollIndex = albumListScrollIndex.subscribe(scrollTo);
+    unlistenAlbumListScrollIndex = albumListScrollIndex.subscribe((value) => {
+        if(value < 0) return;
+        scrollTo(value);
+        $albumListScrollIndex = -1;
+    });
 });
 
 onDestroy(() => {
