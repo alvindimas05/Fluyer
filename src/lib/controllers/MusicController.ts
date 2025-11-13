@@ -243,7 +243,7 @@ const MusicController = {
         listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
             if (e.payload.isPlaying){
                 MusicController.resetProgress();
-                setTimeout(MusicController.startProgress);
+                setTimeout(MusicController.startProgress, 10);
             }
             else MusicController.stopProgress();
 
@@ -277,6 +277,7 @@ const MusicController = {
     },
 
     startProgress: () => {
+        console.log(MusicController.currentMusicDuration);
         const updateInterval =
             (MusicController.currentMusicDuration / MusicConfig.max) *
             MusicConfig.step *
