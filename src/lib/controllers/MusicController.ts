@@ -58,10 +58,12 @@ const MusicController = {
         // MusicController.listenProgressAndroid();
 		settingBitPerfectMode.subscribe(MusicController.onBitPerfectModeChange);
 	},
-	musicList: () => get(musicList),
+	get musicList(){
+        return get(musicList);
+    },
 	setMusicList: (value: MusicData[] | null) => musicList.set(value),
 	getMusics: async (force = false) => {
-		if (MusicController.musicList()?.length && !force) return;
+		if (MusicController.musicList?.length && !force) return;
 		const musics = await invoke<MusicData[] | null>(
 			CommandRoutes.MUSIC_GET_ALL,
 		);
@@ -241,7 +243,7 @@ const MusicController = {
         listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
             if (e.payload.isPlaying){
                 MusicController.resetProgress();
-                MusicController.startProgress();
+                setTimeout(MusicController.startProgress, 10);
             }
             else MusicController.stopProgress();
 
@@ -275,6 +277,7 @@ const MusicController = {
     },
 
     startProgress: () => {
+        console.log(MusicController.currentMusicDuration);
         const updateInterval =
             (MusicController.currentMusicDuration / MusicConfig.max) *
             MusicConfig.step *

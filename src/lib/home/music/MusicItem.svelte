@@ -46,7 +46,7 @@ let mediumLabel = $derived.by(() => {
 	if (folder) {
 		return "Folder";
 	} else {
-		return `${music.album ? `${music.album} ${MusicConfig.separatorAlbum} ` : ""} ${music.artist}`;
+		return `${music.album ? `${music.album} ${MusicConfig.separatorAlbum} ` : ""}${music.artist ?? MusicConfig.defaultArtist}`;
 	}
 });
 let smallLabel = $derived.by(() => {

@@ -34,7 +34,7 @@
 		"@types/tar": "^6.1.13",
 		"animate.css": "^4.1.1",
 		"axios": "^1.9.0",
-		"caniuse-lite": "^1.0.30001717",
+		"caniuse-lite": "^1.0.30001754",
 		"color.js": "^1.2.0",
 		"colorthief": "^2.6.0",
 		"fluidscroll": "^2.0.0",

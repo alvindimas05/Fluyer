@@ -5,7 +5,7 @@ import AlbumItem from "./AlbumItem.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import {onDestroy, onMount, type SvelteComponent} from "svelte";
 import {isMobile} from "$lib/platform";
-import {mobileStatusBarHeight} from "$lib/stores/mobile";
+import {mobileNavigationBarHeight, mobileStatusBarHeight} from "$lib/stores/mobile";
 import {albumListScrollIndex, swipeMinimumTop} from "$lib/stores";
 import type {Unsubscriber} from "svelte/store";
 import {type VirtualizerHandle, VList} from "virtua/svelte";
@@ -93,7 +93,7 @@ let data: any[] = $derived.by(() => {
 });
 
 function groupByAlbum(): MusicData[][] {
-	let musicList = MusicController.musicList()!;
+	let musicList = MusicController.musicList!;
 	const albumsMap = musicList.reduce(
 		(acc, item) => {
 			if (item.album === null || item.album.trim() === "") {
@@ -142,7 +142,11 @@ onMount(() => {
 	unlistenMusicList = musicList.subscribe(() =>
 		MusicController.setMusicAlbumList(groupByAlbum()),
 	);
-    unlistenAlbumListScrollIndex = albumListScrollIndex.subscribe(scrollTo);
+    unlistenAlbumListScrollIndex = albumListScrollIndex.subscribe((value) => {
+        if(value < 0) return;
+        scrollTo(value);
+        $albumListScrollIndex = -1;
+    });
 });
 
 onDestroy(() => {
@@ -158,12 +162,12 @@ $effect(() => {
 <svelte:window onresize={updateSize} />
 
 <div class="w-full" style="
-    height: {isHorizontal ? itemHeight : window.innerHeight - $filterBarHeight}px;">
+    height: {isHorizontal ? itemHeight : window.innerHeight}px;">
     {#key isHorizontal}
         <VList onwheel={isHorizontal ? onMouseWheel : undefined} {data}
             class="scrollbar-hidden {isHorizontal ? '' : 'overflow-y-clip'}"
             horizontal={isHorizontal}
-            style="padding-bottom: {isHorizontal ? 0 : $playerBarHeight}px;"
+            style="padding-bottom: {isHorizontal ? 0 : $playerBarHeight + $filterBarHeight + $mobileNavigationBarHeight + $mobileStatusBarHeight}px;"
             getKey={(_, i) => i}
             bind:this={virtualizerHandle}>
             {#snippet children(dataList, index)}

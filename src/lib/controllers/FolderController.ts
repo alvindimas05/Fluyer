@@ -20,20 +20,22 @@ const FolderController = {
 		await FolderController.setFolderList();
 	},
 	currentFolder: () => get(folderCurrent),
-	setFolderList: async () => {
-		const folder = FolderController.currentFolder();
-		if (folder) {
-			folderList.set(
-				await invoke(CommandRoutes.FOLDER_GET_ITEMS, { path: folder.path }),
-			);
-		} else {
-			folderList.set(
-				(await PersistentStoreController.musicPath.get()).map(
-					(path) => ({ path }) as FolderData,
-				),
-			);
-		}
-	},
+    setFolderList: async () => {
+        const folder = FolderController.currentFolder();
+        let list: FolderData[];
+
+        if (folder) {
+            list = await invoke(CommandRoutes.FOLDER_GET_ITEMS, { path: folder.path });
+        } else {
+            list = (await PersistentStoreController.musicPath.get()).map(
+                (path) => ({ path }) as FolderData,
+            );
+        }
+        list.sort((a, b) => a.path.localeCompare(b.path, undefined, { sensitivity: 'base' }));
+
+        folderList.set(list);
+    },
+
 	setMusicListToFolder: async () => {
 		const musicPaths = await PersistentStoreController.musicPath.get();
 		if (musicPaths.length < 2)
@@ -70,13 +72,10 @@ const FolderController = {
 	isMusicInFolderRecursive: (music: MusicData, folder: FolderData | null) =>
 		folder && music.path.startsWith(folder.path),
 	getImageFromPath: async (path: string, size: MusicSize | null) => {
-		const imageSize = size ? size.toString() : null;
-		const base64 = await invoke<string>(CommandRoutes.FOLDER_GET_IMAGE, {
-			path,
-			size: imageSize,
-		});
-		if (base64) return UtilsController.withBase64(base64);
-		return MusicConfig.defaultAlbumImage;
+		const musicPath = await invoke<string>(CommandRoutes.FOLDER_GET_FIRST_MUSIC_PATH, {path});
+        const music = MusicController.musicList?.find(music => music.path === musicPath);
+        if(!music) return MusicConfig.defaultAlbumImage;
+		return MusicController.getAlbumImageFromMusic(music);
 	},
 	getMusicListFromFolder: (folder: FolderData | null) => {
 		if (!folder) return [];

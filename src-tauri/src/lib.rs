@@ -92,7 +92,7 @@ pub fn run() {
             commands::music::music_toggle_bit_perfect,
 
             commands::folder::folder_get_items,
-            commands::folder::folder_get_image,
+            commands::folder::folder_get_first_music_path,
 
             commands::log::log_error,
             #[cfg(target_os = "android")]
