@@ -13,7 +13,6 @@ export async function downloadFile(
 	console.log("Downloading", url);
 	const response = await axios.get(url, { responseType: "stream" });
 	await pipeline(response.data, createWriteStream(destPath));
-	console.log("Downloaded to", destPath);
 }
 
 export async function extract7z(
@@ -33,7 +32,6 @@ export async function extract7z(
 	});
 
 	await fs.rm(filePath);
-	console.log("Extraction complete to", destination);
 }
 
 export async function extractZip(
@@ -43,7 +41,6 @@ export async function extractZip(
 	console.log("Extracting", filePath);
 	await extract(filePath, { dir: destination });
 	await fs.rm(filePath);
-	console.log("Extraction complete from", filePath, "to", destination);
 }
 
 export async function extractTarGz(
@@ -56,5 +53,4 @@ export async function extractTarGz(
 		cwd: destination,
 	});
 	await fs.rm(filePath);
-	console.log("Extraction complete to", destination);
 }

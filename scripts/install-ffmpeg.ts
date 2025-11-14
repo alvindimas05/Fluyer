@@ -44,8 +44,7 @@ async function main() {
 		await downloadFile(url, destPath);
 		await extractTarGz(destPath, downloadOutputDir);
 
-		console.log(path.resolve(downloadOutputDir, getLibName()));
-		fs.rename(path.resolve(downloadOutputDir, getLibName()), outputDir);
+ 		await fs.rename(path.resolve(downloadOutputDir, getLibName()), outputDir);
 	} catch (err) {
 		console.error("Failed:", err);
 	}

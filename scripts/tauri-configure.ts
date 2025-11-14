@@ -16,8 +16,8 @@ export async function configure() {
 		);
 		exit();
 	}
-    await installBass();
-	await installFfmpeg();
+    const promises = [installBass(), installFfmpeg()];
+    await Promise.all(promises);
 }
 
 async function installFfmpeg() {
