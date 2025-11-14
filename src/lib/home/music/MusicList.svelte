@@ -11,133 +11,137 @@ import FolderController from "$lib/controllers/FolderController";
 import { playerBarHeight } from "$lib/stores/playerbar";
 import { filterBarSortAsc } from "$lib/stores/filterbar";
 
-// Responsive rules: [minWidth, maxDppxExclusive, columns]
+// [minWidth, minDppx, columns]
 const rules = [
-	[1280, 2.01, 4], // xhdpi
-	[1024, 2.01, 3],
-	[768, 2.01, 2],
-
-	[1536, 1.01, 4], // hdpi
-	[1280, 1.01, 3],
-	[768, 1.01, 2],
-
-	[1536, 1.0, 4], // default
-	[1024, 1.0, 3],
-	[768, 1.0, 2],
+    [1280, 2.01, 4], [1024, 2.01, 3], [768, 2.01, 2],
+    [1536, 1.01, 4], [1280, 1.01, 3], [768, 1.01, 2],
+    [1536, 1.0, 4],  [1024, 1.0, 3],  [768, 1.0, 2],
 ];
 
 let columnCount = $state(1);
+
 function updateColumnCount() {
-	// if(type === "folder") {
-	// 	columnCount = 1;
-	// 	return;
-	// }
+    const w = window.innerWidth;
+    const dpi = window.devicePixelRatio;
 
-	const w = window.innerWidth;
-	const dpi = window.devicePixelRatio;
-
-	for (const [minW, minDppx, cols] of rules) {
-		if (w >= minW && dpi >= minDppx) {
-			columnCount = cols;
-			return;
-		}
-	}
-	columnCount = 1;
+    for (const [minW, minDppx, cols] of rules) {
+        if (w >= minW && dpi >= minDppx) {
+            columnCount = cols;
+            return;
+        }
+    }
+    columnCount = 1;
 }
 
-function updateSize() {
-	updateColumnCount();
-}
+const updateSize = () => updateColumnCount();
 
 let data = $derived.by(() => {
-	if (!Array.isArray($musicList)) return [];
-	let list = MusicController.sortMusicList(
-		$musicList.filter((music) => {
-			const search = $filterSearch.toLowerCase();
-			const album = $filterAlbum;
+    if (!Array.isArray($musicList)) return [];
 
-			const hasSearch = !!search;
-			const hasAlbum = !!album;
+    const search = $filterSearch.toLowerCase();
+    const album = $filterAlbum;
+    const hasSearch = search.length > 0;
+    const hasAlbum = !!album;
+    const isFolderMode = $musicListType === MusicListType.Folder;
 
-			const matchesSearch =
-				hasSearch &&
-				(music.album?.toLowerCase().includes(search) ||
-					music.title?.toLowerCase().includes(search) ||
-					music.artist?.toLowerCase().includes(search) ||
-					music.albumArtist?.toLowerCase().includes(search));
+    // Music Filter
+    const list = MusicController.sortMusicList(
+        $musicList.filter((music) => {
+            const matchesSearch =
+                hasSearch &&
+                [
+                    music.album,
+                    music.title,
+                    music.artist,
+                    music.albumArtist,
+                ].some((v) => v?.toLowerCase().includes(search));
 
-			const matchesAlbum = hasAlbum && album.name === music.album;
+            const matchesAlbum = hasAlbum && album.name === music.album;
+            const matchesFolder = FolderController.isMusicInFolder(
+                music,
+                $folderCurrent,
+            );
 
-			const matchesFolder = FolderController.isMusicInFolder(
-				music,
-				$folderCurrent,
-			);
+            if (isFolderMode)
+                return matchesFolder && (!hasSearch || matchesSearch);
 
-			if ($musicListType === MusicListType.Folder) {
-				return matchesFolder && (!hasSearch || matchesSearch);
-			} else if (!hasAlbum) {
-				return !hasSearch || matchesSearch;
-			} else {
-				return matchesAlbum && (!hasSearch || matchesSearch);
-			}
-		}),
-	);
+            if (!hasAlbum)
+                return !hasSearch || matchesSearch;
 
-	let _folderList = $folderList.filter((folder) => {
-		const search = $filterSearch.toLowerCase();
-		return folder.path.toLowerCase().includes(search);
-	});
-	if (!$filterBarSortAsc) _folderList.reverse();
+            return matchesAlbum && (!hasSearch || matchesSearch);
+        })
+    );
 
-	if ($filterAlbum) list = MusicController.sortMusicList(list);
+    // Folder Filter
+    let filteredFolders = $folderList
+        .filter((folder) =>
+            folder.path.toLowerCase().includes(search)
+        );
 
-	if (!$filterBarSortAsc) list.reverse();
+    if (!$filterBarSortAsc) filteredFolders = [...filteredFolders].reverse();
 
-	const result: any[][] = [];
-	for (let i = 0; i < list.length; i += columnCount) {
-		result.push(list.slice(i, i + columnCount));
-	}
-	if ($musicListType === MusicListType.Folder) {
-		_folderList = _folderList.filter(
-			(folder) => FolderController.getMusicListFromFolder(folder).length > 0,
-		);
+    // Sort again if Album Filter
+    let finalList = $filterAlbum
+        ? MusicController.sortMusicList(list)
+        : [...list];
 
-		for (let i = 0; i < _folderList.length; i += columnCount) {
-			result.push(_folderList.slice(i, i + columnCount));
-		}
-	}
-	return result;
+    if (!$filterBarSortAsc) finalList.reverse();
+
+    // Paginate into rows
+    const chunk = (arr: any[]) => {
+        const rows: any[][] = [];
+        for (let i = 0; i < arr.length; i += columnCount)
+            rows.push(arr.slice(i, i + columnCount));
+        return rows;
+    };
+
+    const result = chunk(finalList);
+
+    // Add Folders (only in folder mode)
+    if (isFolderMode) {
+        const nonEmptyFolders = filteredFolders.filter(
+            (f) => FolderController.getMusicListFromFolder(f).length > 0
+        );
+
+        result.push(...chunk(nonEmptyFolders));
+    }
+
+    return result;
 });
 
-let unsubscribeMusicListType = musicListType.subscribe(() =>
-	setTimeout(updateSize),
+
+const unsubscribeMusicListType = musicListType.subscribe(() =>
+    setTimeout(updateSize)
 );
-onMount(() => {
-	updateSize();
-});
 
-onDestroy(() => {
-	unsubscribeMusicListType();
-});
+onMount(updateSize);
+onDestroy(unsubscribeMusicListType);
 </script>
 
 <svelte:window onresize={updateSize} />
+
 <div class="h-full px-3">
-	{#if data && columnCount}
-		<VList class="scrollbar-hidden" {data}
-		   style="padding-bottom: {$playerBarHeight}px;"
-		   getKey={(_, i) => i}>
-			{#snippet children(list)}
-				<div class="grid gap-x-6" style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr))">
-					{#each list as data}
-						{#if 'duration' in data}
-							<MusicItem music={data} />
-						{:else}
-							<MusicItem folder={data} />
-						{/if}
-					{/each}
-				</div>
-			{/snippet}
-		</VList>
-	{/if}
+    {#if data && columnCount}
+        <VList
+                class="scrollbar-hidden"
+                {data}
+                style="padding-bottom: {$playerBarHeight}px;"
+                getKey={(_, i) => i}
+        >
+            {#snippet children(list)}
+                <div
+                        class="grid gap-x-6"
+                        style="grid-template-columns: repeat({columnCount}, minmax(0, 1fr))"
+                >
+                    {#each list as item}
+                        {#if 'duration' in item}
+                            <MusicItem music={item} />
+                        {:else}
+                            <MusicItem folder={item} />
+                        {/if}
+                    {/each}
+                </div>
+            {/snippet}
+        </VList>
+    {/if}
 </div>
