@@ -30,6 +30,10 @@ if (isWindows() || isLinux()) {
 	import("$lib/scss/rounded-windows.scss");
 }
 
+if(isLinux()){
+	import("$lib/scss/text-linux.scss");
+}
+
 interface Props {
 	children?: import("svelte").Snippet;
 }
