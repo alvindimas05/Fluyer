@@ -14,7 +14,7 @@ use tauri_plugin_fluyer::models::{PlayerCommand, PlayerCommandArguments};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 
-const BASS_PLUGINS: [&str; 2] = ["bassflac", "bassmix"];
+const BASS_PLUGINS: [&str; 1] = ["bassflac"];
 
 const BASS_SAMPLE_FLOAT: u32 = 0x100;
 const BASS_STREAM_DECODE: u32 = 0x200000;
@@ -135,7 +135,11 @@ impl MusicPlayer {
                 let extension = "so";
 
                 for plugin in BASS_PLUGINS {
+                    #[cfg(not(target_os = "linux"))]
                     let c_path = CString::new(format!("{}.{}", plugin, extension)).unwrap();
+                    #[cfg(target_os = "linux")]
+                    let c_path = CString::new(format!("lib{}.{}", plugin, extension)).unwrap();
+
                     let handle = BASS_PluginLoad(c_path.as_ptr(), 0);
 
                     if handle == 0 {

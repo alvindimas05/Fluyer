@@ -14,7 +14,8 @@ import type {Unsubscriber} from "svelte/store";
 import {page} from "$app/state";
 import {PageRoutes} from "$lib/pages";
 import {MusicSize} from "$lib/home/music/types";
-import {isMobile} from "$lib/platform";
+import {isLinux, isMobile} from "$lib/platform";
+import { afterNavigate } from "$app/navigation";
 
 const SCALE = isMobile() ? 0.03 : 0.05;
 const CANVAS_BLOCK_SIZE = $derived(window.innerWidth > 640 ? 150 : 100);
@@ -403,6 +404,12 @@ onMount(() => {
 			if (isMounted) transitionToNewCanvas(true);
 			else isMounted = true;
 		});
+	
+	if(isLinux())
+	afterNavigate((navigation) => {
+		if(navigation.from?.route.id !== PageRoutes.VISUALIZER) return;
+		initializeCanvas(true);
+	});
 });
 
 onDestroy(() => {

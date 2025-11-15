@@ -1,12 +1,12 @@
 use tauri::{AppHandle, Manager};
 
+#[cfg(desktop)]
+use crate::store::GLOBAL_APP_STORE;
 use tauri::path::BaseDirectory;
 #[cfg(desktop)]
 use tauri::Emitter;
 #[cfg(desktop)]
 use tauri_plugin_dialog::DialogExt;
-#[cfg(desktop)]
-use crate::store::GLOBAL_APP_STORE;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 
@@ -130,23 +130,27 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
         #[cfg(desktop)]
         args.push("-y"); // overwrite
         args.extend([
-            "-i", music_path.as_str(), // input
-            "-ac", "1", // mono
-            "-ar", "44100", // fixed sample rate
-            "-b:a", "192k", // fixed bitrate
-            "-q:a", "5", // ~45-55 kbps
+            "-i",
+            music_path.as_str(), // input
+            "-ac",
+            "1", // mono
+            "-ar",
+            "44100", // fixed sample rate
+            "-b:a",
+            "192k", // fixed bitrate
+            "-q:a",
+            "5", // ~45-55 kbps
             // "-c:a", "libmp3lame", // mp3 encoder
-            "-map", "0:a", // only audio
+            "-map",
+            "0:a", // only audio
             tmp_file.to_str().unwrap(),
         ]);
 
-        #[cfg(mobile)]{
+        #[cfg(mobile)]
+        {
             let result = app_handle.fluyer().visualizer_get_buffer(args.join(" "));
             if result.is_err() {
-                println!(
-                    "Failed to convert audio to mp3: {}",
-                    result.unwrap_err()
-                );
+                println!("Failed to convert audio to mp3: {}", result.unwrap_err());
                 return std::fs::read(path).ok();
             }
 
@@ -157,25 +161,32 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
 
             return std::fs::read(tmp_file).ok();
         }
-        #[cfg(desktop)]{
+        #[cfg(desktop)]
+        {
             // Get the bundled ffmpeg path
-            let ffmpeg_binary = if cfg!(target_os = "windows") {
-                "libs/ffmpeg/bin/ffmpeg.exe"
+            let ffmpeg_path = if cfg!(target_os = "linux") && !cfg!(debug_assertions) {
+                PathBuf::from("/usr/lib/fluyer/ffmpeg")
+            } else if cfg!(target_os = "windows") {
+                app_handle
+                    .path()
+                    .resolve("libs/ffmpeg/bin/ffmpeg.exe", BaseDirectory::Resource)
+                    .unwrap()
             } else {
-                "libs/ffmpeg/bin/ffmpeg"
+                app_handle
+                    .path()
+                    .resolve("libs/ffmpeg/bin/ffmpeg", BaseDirectory::Resource)
+                    .unwrap()
             };
 
-            let ffmpeg_path = app_handle.path()
-                .resolve(ffmpeg_binary, BaseDirectory::Resource)
-                .unwrap();
-
-            #[cfg(any(target_os = "linux", target_os = "macos"))]{
-                // Make sure ffmpeg is executable
+            #[cfg(any(target_os = "linux", target_os = "macos"))]
+            {
                 use std::os::unix::fs::PermissionsExt;
                 if let Ok(metadata) = std::fs::metadata(&ffmpeg_path) {
                     let mut permissions = metadata.permissions();
-                    permissions.set_mode(0o755); // rwxr-xr-x
-                    let _ = std::fs::set_permissions(&ffmpeg_path, permissions);
+                    permissions.set_mode(0o755);
+                    if let Err(e) = std::fs::set_permissions(&ffmpeg_path, permissions) {
+                        logger::error!("Failed to set ffmpeg permissions: {}", e);
+                    }
                 }
             }
 
@@ -213,7 +224,10 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
 
             return data;
         }
-    }).await.ok().flatten()
+    })
+    .await
+    .ok()
+    .flatten()
 }
 
 #[tauri::command]
@@ -232,6 +246,6 @@ pub fn music_get_lyrics(path: String) -> Option<String> {
 }
 
 #[tauri::command]
-pub fn music_toggle_bit_perfect(enable: bool){
+pub fn music_toggle_bit_perfect(enable: bool) {
     MusicPlayer::toggle_bit_perfect(enable);
 }
