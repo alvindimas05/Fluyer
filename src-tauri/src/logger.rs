@@ -11,13 +11,14 @@ pub fn get_mpv_log_name() -> String {
 }
 
 #[allow(dead_code)]
+#[allow(dead_code)]
 pub fn get_log_path() -> String {
-    format!("{}{}", temp_dir().display(), get_log_name())
+    temp_dir().join(get_log_name()).display().to_string()
 }
 
 #[allow(dead_code)]
 pub fn get_mpv_log_path() -> String {
-    format!("{}{}", temp_dir().display(), get_mpv_log_name())
+    temp_dir().join(get_mpv_log_name()).display().to_string()
 }
 
 #[macro_export]
@@ -93,4 +94,4 @@ macro_rules! error {
 }
 
 #[allow(unused_imports)]
-pub(crate) use {debug, info, warn_ as warn, error};
+pub(crate) use {debug, error, info, warn_ as warn};

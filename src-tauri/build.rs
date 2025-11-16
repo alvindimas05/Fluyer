@@ -1,4 +1,7 @@
 fn main() {
+    #[cfg(target_os = "linux")]
+    println!("cargo:rustc-link-arg=-Wl,-rpath,/usr/lib/fluyer");
+
     if !std::env::var("TARGET").unwrap().contains("android") {
         // Note: Required to satisfy both rust-analyzer and cargo run or build
         // For some reason, cargo can't detect the Ok() condition.

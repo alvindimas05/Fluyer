@@ -41,168 +41,171 @@ jobs:
       - name: Set build matrix
         id: set-matrix
         run: |
-          if [ "${{ github.event.inputs.platforms }}" == "all" ]; then
+          if [ "${{ github.event.inputs.platforms }}" = "all" ]; then
             echo 'matrix=["windows-x86_64","macos-intel","macos-silicon","linux","android-armv7","android-aarch64","android-i686","android-x86_64"]' >> $GITHUB_OUTPUT
           else
             echo "matrix=[\"${{ github.event.inputs.platforms }}\"]" >> $GITHUB_OUTPUT
           fi
 
-  build:
-    needs: prepare
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: ${{ fromJson(needs.prepare.outputs.matrix) }}
-        include:
-          # Desktop platforms
-          - platform: windows-x86_64
-            os: windows-latest
-            rust_target: x86_64-pc-windows-msvc
-            artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*.exe
-            artifact_name: windows-x86_64
-          # - platform: windows-arm64
-          #   os: windows-11-arm
-          #   rust_target: aarch64-pc-windows-msvc
-          #   artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*_arm64-setup.exe
-          #   artifact_name: windows-arm64
-          #   bun_url: https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip
-          - platform: macos-intel
-            os: macos-13
-            rust_target: x86_64-apple-darwin
-            artifact_path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_x64.dmg
-            artifact_name: macos-intel
-          - platform: macos-silicon
-            os: macos-latest
-            rust_target: aarch64-apple-darwin
-            artifact_path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_aarch64.dmg
-            artifact_name: macos-silicon
-          - platform: linux
-            os: ubuntu-latest
-            rust_target: x86_64-unknown-linux-gnu
-            artifact_path: ./src-tauri/target/release/bundle/deb/Fluyer_*_amd64.deb,./src-tauri/target/release/bundle/appimage/Fluyer_*_amd64.AppImage
-            artifact_name: linux
-          # Mobile platforms
-          - platform: android-armv7
-            os: ubuntu-latest
-            rust_target: armv7-linux-androideabi
-            artifact_path: ./Fluyer_*_armv7.apk
-            artifact_name: android-armv7
-            android_arch: armv7
-          - platform: android-aarch64
-            os: ubuntu-latest
-            rust_target: aarch64-linux-android
-            artifact_path: ./Fluyer_*_aarch64.apk
-            artifact_name: android-aarch64
-            android_arch: aarch64
-          - platform: android-i686
-            os: ubuntu-latest
-            rust_target: i686-linux-android
-            artifact_path: ./Fluyer_*_i686.apk
-            artifact_name: android-i686
-            android_arch: i686
-          - platform: android-x86_64
-            os: ubuntu-latest
-            rust_target: x86_64-linux-android
-            artifact_path: ./Fluyer_*_x86_64.apk
-            artifact_name: android-x86_64
-            android_arch: x86_64
-          # - platform: ios
-          #   os: macos-latest
-          #   rust_target: aarch64-apple-ios
-          #   artifact_path: ./ipas/Fluyer_*.ipa
-          #   artifact_name: ios
+      - run: echo "${{ steps.set-matrix.outputs.matrix }}"
 
-    runs-on: ${{ matrix.os }}
-    permissions: write-all
 
-    steps:
-      - uses: actions/checkout@v4
-
-      # Setup Bun (with custom URL for Windows ARM)
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-download-url: ${{ matrix.bun_url || '' }}
-
-      # Android-specific setup
-      - name: Setup Java (Android only)
-        if: startsWith(matrix.platform, 'android')
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        if: startsWith(matrix.platform, 'android')
-        uses: android-actions/setup-android@v3
-
-      - name: Install NDK
-        if: startsWith(matrix.platform, 'android')
-        run: sdkmanager "ndk;28.0.13004108"
-
-      # Rust setup
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.rust_target }}
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      # Build setup and execution
-      - name: Setup Workflow
-        shell: bash
-        run: |
-          case "${{ matrix.platform }}" in
-            windows-*)
-              os=windows bash scripts/setup-workflow.sh
-              ;;
-            macos-intel)
-              bash scripts/setup-workflow.sh
-              ;;
-            macos-silicon)
-              bash scripts/setup-workflow.sh
-              ;;
-            linux)
-              bash scripts/setup-workflow.sh
-              ;;
-            android-*)
-              bash scripts/setup-workflow.sh
-              ;;
-            ios)
-              bash scripts/setup-workflow.sh
-              ;;
-          esac
-        env:
-          os: ${{ startsWith(matrix.platform, 'windows') && 'windows' || startsWith(matrix.platform, 'macos') && 'macos' || startsWith(matrix.platform, 'android') && 'android' || startsWith(matrix.platform, 'linux') && 'linux' || 'ios' }}
-          arch: ${{ matrix.platform == 'windows-arm64' && 'arm64' || '' }}
-          macos_type: ${{ matrix.platform == 'macos-intel' && 'intel' || matrix.platform == 'macos-silicon' && 'silicon' || '' }}
-          ANDROID_ARCH: ${{ matrix.android_arch || '' }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
-          RUNNER_TEMP: ${{ runner.temp }}
-          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
-
-      - name: Build (Desktop)
-        if: "!startsWith(matrix.platform, 'android') && matrix.platform != 'ios'"
-        run: bun tauri:build
-
-      # Android-specific build steps
-      - name: Rename Android APK
-        if: startsWith(matrix.platform, 'android')
-        run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ needs.prepare.outputs.version }}_${{ matrix.android_arch }}.apk
-
-      # Publish release
-      - name: Publish release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: ${{ matrix.artifact_path }}
-          tag: v${{ needs.prepare.outputs.version }}
-          name: Fluyer v${{ needs.prepare.outputs.version }}
-          allowUpdates: true
-          omitBodyDuringUpdate: true
-          prerelease: true
-          artifactErrorsFailBuild: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+#  build:
+#    needs: prepare
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        platform: ${{ fromJson(needs.prepare.outputs.matrix) }}
+#        include:
+#          # Desktop platforms
+#          - platform: windows-x86_64
+#            os: windows-latest
+#            rust_target: x86_64-pc-windows-msvc
+#            artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*.exe
+#            artifact_name: windows-x86_64
+#          # - platform: windows-arm64
+#          #   os: windows-11-arm
+#          #   rust_target: aarch64-pc-windows-msvc
+#          #   artifact_path: ./src-tauri/target/release/bundle/nsis/Fluyer_*_arm64-setup.exe
+#          #   artifact_name: windows-arm64
+#          #   bun_url: https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip
+#          - platform: macos-intel
+#            os: macos-13
+#            rust_target: x86_64-apple-darwin
+#            artifact_path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_x64.dmg
+#            artifact_name: macos-intel
+#          - platform: macos-silicon
+#            os: macos-latest
+#            rust_target: aarch64-apple-darwin
+#            artifact_path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_aarch64.dmg
+#            artifact_name: macos-silicon
+#          - platform: linux
+#            os: ubuntu-latest
+#            rust_target: x86_64-unknown-linux-gnu
+#            artifact_path: ./src-tauri/target/release/bundle/deb/Fluyer_*_amd64.deb,./src-tauri/target/release/bundle/appimage/Fluyer_*_amd64.AppImage
+#            artifact_name: linux
+#          # Mobile platforms
+#          - platform: android-armv7
+#            os: ubuntu-latest
+#            rust_target: armv7-linux-androideabi
+#            artifact_path: ./Fluyer_*_armv7.apk
+#            artifact_name: android-armv7
+#            android_arch: armv7
+#          - platform: android-aarch64
+#            os: ubuntu-latest
+#            rust_target: aarch64-linux-android
+#            artifact_path: ./Fluyer_*_aarch64.apk
+#            artifact_name: android-aarch64
+#            android_arch: aarch64
+#          - platform: android-i686
+#            os: ubuntu-latest
+#            rust_target: i686-linux-android
+#            artifact_path: ./Fluyer_*_i686.apk
+#            artifact_name: android-i686
+#            android_arch: i686
+#          - platform: android-x86_64
+#            os: ubuntu-latest
+#            rust_target: x86_64-linux-android
+#            artifact_path: ./Fluyer_*_x86_64.apk
+#            artifact_name: android-x86_64
+#            android_arch: x86_64
+#          # - platform: ios
+#          #   os: macos-latest
+#          #   rust_target: aarch64-apple-ios
+#          #   artifact_path: ./ipas/Fluyer_*.ipa
+#          #   artifact_name: ios
+#
+#    runs-on: ${{ matrix.os }}
+#    permissions: write-all
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      # Setup Bun (with custom URL for Windows ARM)
+#      - uses: oven-sh/setup-bun@v2
+#        with:
+#          bun-download-url: ${{ matrix.bun_url || '' }}
+#
+#      # Android-specific setup
+#      - name: Setup Java (Android only)
+#        if: startsWith(matrix.platform, 'android')
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: 'zulu'
+#          java-version: '17'
+#
+#      - name: Setup Android SDK
+#        if: startsWith(matrix.platform, 'android')
+#        uses: android-actions/setup-android@v3
+#
+#      - name: Install NDK
+#        if: startsWith(matrix.platform, 'android')
+#        run: sdkmanager "ndk;28.0.13004108"
+#
+#      # Rust setup
+#      - name: Install Rust stable
+#        uses: dtolnay/rust-toolchain@stable
+#        with:
+#          targets: ${{ matrix.rust_target }}
+#
+#      - name: Rust cache
+#        uses: swatinem/rust-cache@v2
+#        with:
+#          workspaces: './src-tauri -> target'
+#
+#      # Build setup and execution
+#      - name: Setup Workflow
+#        shell: bash
+#        run: |
+#          case "${{ matrix.platform }}" in
+#            windows-*)
+#              os=windows bash scripts/setup-workflow.sh
+#              ;;
+#            macos-intel)
+#              bash scripts/setup-workflow.sh
+#              ;;
+#            macos-silicon)
+#              bash scripts/setup-workflow.sh
+#              ;;
+#            linux)
+#              bash scripts/setup-workflow.sh
+#              ;;
+#            android-*)
+#              bash scripts/setup-workflow.sh
+#              ;;
+#            ios)
+#              bash scripts/setup-workflow.sh
+#              ;;
+#          esac
+#        env:
+#          os: ${{ startsWith(matrix.platform, 'windows') && 'windows' || startsWith(matrix.platform, 'macos') && 'macos' || startsWith(matrix.platform, 'android') && 'android' || startsWith(matrix.platform, 'linux') && 'linux' || 'ios' }}
+#          arch: ${{ matrix.platform == 'windows-arm64' && 'arm64' || '' }}
+#          macos_type: ${{ matrix.platform == 'macos-intel' && 'intel' || matrix.platform == 'macos-silicon' && 'silicon' || '' }}
+#          ANDROID_ARCH: ${{ matrix.android_arch || '' }}
+#          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+#          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+#          ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+#          RUNNER_TEMP: ${{ runner.temp }}
+#          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
+#
+#      - name: Build (Desktop)
+#        if: "!startsWith(matrix.platform, 'android') && matrix.platform != 'ios'"
+#        run: bun tauri:build
+#
+#      # Android-specific build steps
+#      - name: Rename Android APK
+#        if: startsWith(matrix.platform, 'android')
+#        run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ needs.prepare.outputs.version }}_${{ matrix.android_arch }}.apk
+#
+#      # Publish release
+#      - name: Publish release
+#        uses: ncipollo/release-action@v1
+#        with:
+#          artifacts: ${{ matrix.artifact_path }}
+#          tag: v${{ needs.prepare.outputs.version }}
+#          name: Fluyer v${{ needs.prepare.outputs.version }}
+#          allowUpdates: true
+#          omitBodyDuringUpdate: true
+#          prerelease: true
+#          artifactErrorsFailBuild: true
+#          token: ${{ secrets.GITHUB_TOKEN }}

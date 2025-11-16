@@ -16,21 +16,22 @@ export async function configure() {
 		);
 		exit();
 	}
-    await installBass();
-	await installFfmpeg();
+	const promises = [installBass(), installFfmpeg()];
+	await Promise.all(promises);
 }
 
 async function installFfmpeg() {
 	await spawn("bun", ["scripts/install-ffmpeg.ts"], { stdio: "inherit" });
 }
 
-async function installBass(){
-    await spawn("bun", ["scripts/install-bass.ts"], { stdio: "inherit" });
+async function installBass() {
+	await spawn("bun", ["scripts/install-bass.ts"], { stdio: "inherit" });
 }
 
 let _env = {
 	...process.env,
 	FLUYER_LIBS_SOURCE: source,
+	LD_LIBRARY_PATH: source,
 };
 _env["PATH"] = `${process.env.PATH}${os.platform() === "win32" ? ";" : ":"}${source}`;
 export const env = _env;

@@ -10,8 +10,8 @@ const libs = ["bass", "bassmix", "bassflac"];
 
 async function installLib(name: string) {
     const downloadName = crypto.randomUUID();
-    const downloadPath = path.join(os.tmpdir(), `${downloadName}.zip`);
-    const extractPath = path.join(os.tmpdir(), downloadName);
+    const downloadPath = path.join(destPath, `${downloadName}.zip`);
+    const extractPath = path.join(destPath, downloadName);
     const libWindowsPath = path.join(extractPath, "c", "x64", `${name}.lib`);
 
     let platform = "";
@@ -61,12 +61,10 @@ async function installLib(name: string) {
     await downloadFile(`https://www.un4seen.com/files/${name}${VERSION}${platform}.zip`, downloadPath);
     await extractZip(downloadPath, extractPath);
 
-    console.log("Copying", libPath, "to", destLibPath);
     await fs.copyFile(libPath, destLibPath);
 
     if(os.platform() === "win32"){
         const destLibWindowsPath = path.join(destPath, path.basename(libWindowsPath));
-        console.log("Copying", libWindowsPath, "to", destLibWindowsPath);
         await fs.copyFile(libWindowsPath, destLibWindowsPath);
     }
 
