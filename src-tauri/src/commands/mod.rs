@@ -6,3 +6,4 @@ pub mod log;
 pub mod mobile;
 pub mod music;
 pub mod route;
+pub mod playist;

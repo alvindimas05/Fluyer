@@ -7,6 +7,7 @@ export interface AlbumData {
 }
 
 export interface MusicData {
+    id: number;
 	path: string;
 	filename: string;
 	duration: number;
@@ -51,4 +52,10 @@ export enum MusicListType {
 	Folder = "folder",
     Album = "album",
     Music = "music",
+    Playlist = "playlist",
+}
+
+export interface LibraryPlaylistData {
+    name: string;
+    musicIds: number[];
 }

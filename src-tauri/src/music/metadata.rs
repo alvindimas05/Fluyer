@@ -13,6 +13,7 @@ use crate::music::image::ImageHandler;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MusicMetadata {
+    pub id: i16,
     pub path: String,
     pub duration: Option<u128>,
     pub filename: Option<String>,
@@ -54,6 +55,7 @@ impl MusicMetadata {
 
     pub fn new(path: String) -> Self {
         MusicMetadata {
+            id: -1,
             path,
             duration: None,
             filename: None,

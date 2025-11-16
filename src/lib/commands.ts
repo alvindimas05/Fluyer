@@ -21,6 +21,8 @@ export const CommandRoutes = {
     MUSIC_GET_LYRICS: "music_get_lyrics",
     MUSIC_TOGGLE_BIT_PERFECT: "music_toggle_bit_perfect",
 
+    PLAYLIST_GET_ALL: "playlist_get_all",
+
 	FOLDER_GET_ITEMS: "folder_get_items",
 	FOLDER_GET_FIRST_MUSIC_PATH: "folder_get_first_music_path",
 

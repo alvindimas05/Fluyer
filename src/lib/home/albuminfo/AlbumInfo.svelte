@@ -89,7 +89,7 @@ async function playShuffle() {
 	MusicController.playShuffle(musicList);
 }
 </script>
-{#if album || $folderCurrent}
+{#if album || $folderCurrent || $musicListType === MusicListType.Playlist}
     <View class="mx-3 mb-2 md:grid grid-cols-[auto_max-content] px-4 py-2 rounded-lg
         box-border animate__animated animate__fadeIn
         hover:px-5 hover:py-3">
@@ -99,6 +99,9 @@ async function playShuffle() {
             </div>
         </div>
         <div class="w-fit">
+            <div>
+
+            </div>
             {#await showBackButton then showBackButton}
                 <div class="grid gap-x-2 md:gap-x-3 mt-2 md:mt-0"
                      class:grid-cols-4={showBackButton}

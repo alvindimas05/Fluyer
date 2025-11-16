@@ -38,13 +38,13 @@ let gridClass = $derived.by(() => {
         <Menu />
         <div class="h-full grid {gridClass}"
             style="padding-top: {paddingTop}px;">
-            {#if [MusicListType.All, MusicListType.Album].includes($musicListType)}
+            {#if [MusicListType.All, MusicListType.Album, MusicListType.Playlist].includes($musicListType)}
                 <AlbumList />
             {/if}
-            {#if ![MusicListType.Music, MusicListType.Album].includes($musicListType)}
+            {#if [MusicListType.All, MusicListType.Folder, MusicListType.Playlist].includes($musicListType)}
                 <AlbumInfo />
             {/if}
-            {#if $musicListType !== MusicListType.Album}
+            {#if [MusicListType.All,  MusicListType.Music, MusicListType.Folder, MusicListType.Playlist].includes($musicListType)}
                 <MusicList />
             {/if}
         </div>

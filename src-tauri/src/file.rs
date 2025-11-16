@@ -248,7 +248,7 @@ fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> 
     // Retrieve and return the final state from DB
     let mut query = "
         SELECT path, duration, title, artist, album, album_artist, track_number,
-        genre, bits_per_sample, sample_rate, date FROM musics
+        genre, bits_per_sample, sample_rate, date, id FROM musics
     "
     .to_string();
     if options.path.is_some() {
@@ -267,6 +267,7 @@ fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> 
             .map(|s| s.to_string_lossy().to_string());
 
         Ok(MusicMetadata {
+            id: row.get(11)?,
             path: path.clone(),
             duration: row.get::<_, Option<i64>>(1)?.map(|v| v as u128),
             title: row.get(2)?,
