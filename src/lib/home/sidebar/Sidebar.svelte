@@ -14,13 +14,11 @@ import { isLinux, isMobile, isWindows } from "$lib/platform";
 import { swipeable } from "@react2svelte/swipeable";
 import type { SwipeEventData } from "@react2svelte/swipeable";
 import { swipeMinimumTop } from "$lib/stores";
-import { mobileStatusBarHeight } from "$lib/stores/mobile";
-import { sidebarShowingType } from "$lib/stores/sidebar";
 import { onMount } from "svelte";
-import { playerBarHeight } from "$lib/stores/playerbar";
+import { playerBarHeight } from "$lib/stores/playerbar.svelte";
 import { filterBarHeight } from "$lib/stores/filterbar";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import View from "$lib/components/View.svelte";
+import View from "$lib/ui/components/View.svelte";
 
 const rules = [
 	// xhdpi (DPR > 2.0)

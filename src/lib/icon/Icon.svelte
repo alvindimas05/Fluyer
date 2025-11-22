@@ -2,7 +2,7 @@
 import { IconThemeType, IconType } from "$lib/icon/types";
 import { iconRegistry } from "$lib/icon/registry/icon-registry";
 import type { IconWeight } from "phosphor-svelte";
-import { iconTheme } from "$lib/stores/icon";
+import { iconTheme } from "$lib/stores/icon.svelte";
 
 interface Props {
 	type: IconType;

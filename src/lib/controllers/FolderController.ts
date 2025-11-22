@@ -9,7 +9,7 @@ import {
 	type MusicData,
 	MusicSize,
 } from "$lib/home/music/types";
-import { musicList } from "$lib/stores/music";
+import { musicList } from "$lib/stores/music.svelte";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import { isWindows } from "$lib/platform";
 

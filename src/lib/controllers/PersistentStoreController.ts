@@ -10,9 +10,9 @@ import {
 } from "$lib/stores/setting";
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 import { IconThemeType } from "$lib/icon/types";
-import { iconTheme } from "$lib/stores/icon";
-import { equalizerValues } from "$lib/stores/equalizer";
-import { musicVolume } from "$lib/stores/music";
+import { iconTheme } from "$lib/stores/icon.svelte";
+import { equalizerValues } from "$lib/stores/equalizer.svelte";
+import { musicVolume } from "$lib/stores/music.svelte";
 
 const storePath = "store.json";
 const storeOptions = { autoSave: true };

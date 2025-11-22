@@ -27,6 +27,6 @@ pub fn initialize_database() {
     let mut conn = Connection::open(db_path).unwrap();
     conn.pragma_update_and_check(None, "journal_mode", &"WAL", |_| Ok(()))
         .unwrap();
-    DATABASE_MIGRATIONS.to_latest(&mut conn).unwrap();
+    DATABASE_MIGRATIONS.to_latest(&mut conn).ok();
     GLOBAL_DATABASE.lock().unwrap().replace(conn);
 }

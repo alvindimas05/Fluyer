@@ -1,5 +1,5 @@
 <script lang="ts">
-import View from "$lib/components/View.svelte";
+import View from "$lib/ui/components/View.svelte";
 
 interface Props {
 	children?: import("svelte").Snippet;

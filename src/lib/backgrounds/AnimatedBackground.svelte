@@ -2,7 +2,7 @@
 import MusicController, {MusicConfig} from "$lib/controllers/MusicController";
 import "./background.scss";
 import LoadingController from "$lib/controllers/LoadingController";
-import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music";
+import {musicCurrentIndex, musicPlaylist} from "$lib/stores/music.svelte";
 import {onDestroy, onMount} from "svelte";
 import * as StackBlur from "stackblur-canvas";
 // @ts-ignore

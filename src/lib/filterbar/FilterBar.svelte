@@ -2,17 +2,17 @@
     import Icon from "$lib/icon/Icon.svelte";
     import {IconThemeType, IconType} from "$lib/icon/types";
     import {isMacos, isMobile} from "$lib/platform";
-    import {filterSearch} from "$lib/stores/filter";
-    import {mobileStatusBarHeight} from "$lib/stores/mobile";
+    import {filterSearch} from "$lib/stores/filter.svelte";
+    import {mobileStatusBarHeight} from "$lib/stores/mobile.svelte";
     import {onMount} from "svelte";
-    import {musicListType} from "$lib/stores/music";
+    import {musicListType} from "$lib/stores/music.svelte";
     import {MusicListType} from "$lib/home/music/types";
     import UIController from "$lib/controllers/UIController";
     import {filterBarHeight, filterBarSortAsc} from "$lib/stores/filterbar";
-    import Toggle from "$lib/components/Toggle.svelte";
-    import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import {iconTheme} from "$lib/stores/icon";
+    import Toggle from "$lib/ui/components/Toggle.svelte";
+    import Button from "$lib/ui/components/Button.svelte";
+    import Input from "$lib/ui/components/Input.svelte";
+    import {iconTheme} from "$lib/stores/icon.svelte";
 
     const rules = [
 	// xhdpi (DPR > 2.0)

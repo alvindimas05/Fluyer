@@ -4,7 +4,7 @@ import SettingInput from "$lib/settings/SettingInput.svelte";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import ToastController from "$lib/controllers/ToastController";
 import { IconThemeType } from "$lib/icon/types";
-import { iconTheme } from "$lib/stores/icon";
+import { iconTheme } from "$lib/stores/icon.svelte";
 
 async function onMethodChange(
 	e: Event & {

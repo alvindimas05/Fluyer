@@ -3,7 +3,7 @@ import {
 	loadingBackground,
 	loadingMusicList,
 	loadingShow,
-} from "$lib/stores/loading";
+} from "$lib/stores/loading.svelte";
 import MusicController from "./MusicController";
 
 const LoadingController = {

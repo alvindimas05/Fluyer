@@ -7,8 +7,8 @@ import {
     musicProgressValue,
     musicRepeatMode,
     musicVolume,
-} from "$lib/stores/music";
-import { mobileNavigationBarHeight } from "$lib/stores/mobile";
+} from "$lib/stores/music.svelte";
+import { mobileNavigationBarHeight } from "$lib/stores/mobile.svelte";
 import PageController from "$lib/controllers/PageController";
 import { PageRoutes } from "$lib/pages";
 import Icon from "$lib/icon/Icon.svelte";
@@ -22,9 +22,9 @@ import {
 } from "$lib/stores/setting";
 import type { Unsubscriber } from "svelte/store";
 import Glass from "$lib/glass/Glass.svelte";
-import { playerBarHeight } from "$lib/stores/playerbar";
-import View from "$lib/components/View.svelte";
-import ProgressBar from "$lib/components/ProgressBar.svelte";
+import { playerBarHeight } from "$lib/stores/playerbar.svelte";
+import View from "$lib/ui/components/View.svelte";
+import ProgressBar from "$lib/ui/components/ProgressBar.svelte";
 
 let element: HTMLDivElement;
 let oldMusic: MusicData | null = $state(null);

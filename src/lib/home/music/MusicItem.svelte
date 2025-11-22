@@ -9,7 +9,7 @@ import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import { isDesktop, isLinux } from "$lib/platform";
 import FolderController from "$lib/controllers/FolderController";
-import { musicListType } from "$lib/stores/music";
+import { musicListType } from "$lib/stores/music.svelte";
 import { folderCurrent } from "$lib/stores/folder";
 import ToastController from "$lib/controllers/ToastController";
 

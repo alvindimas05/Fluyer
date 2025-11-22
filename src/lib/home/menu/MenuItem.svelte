@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { IconType } from "$lib/icon/types";
 import Icon from "$lib/icon/Icon.svelte";
-import Button from "$lib/components/Button.svelte";
+import Button from "$lib/ui/components/Button.svelte";
 
 interface Props {
 	onclick: () => void;

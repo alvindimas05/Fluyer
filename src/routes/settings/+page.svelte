@@ -8,15 +8,15 @@ import SettingAnimatedBackground from "$lib/settings/animated-background/Setting
 import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
-} from "$lib/stores/mobile";
+} from "$lib/stores/mobile.svelte";
 import { settingIsLoading } from "$lib/stores/setting";
 import SettingUserInteface from "$lib/settings/user-interface/SettingUserInteface.svelte";
 import SettingDeveloper from "$lib/settings/developer/SettingDeveloper.svelte";
 import SettingIconTheme from "$lib/settings/icon-theme/SettingIconTheme.svelte";
 import Glass from "$lib/glass/Glass.svelte";
 import SettingMusicPlayerConfiguration from "$lib/settings/music-player-configuration/SettingMusicPlayerConfiguration.svelte";
-import View from "$lib/components/View.svelte";
-import Button from "$lib/components/Button.svelte";
+import View from "$lib/ui/components/View.svelte";
+import Button from "$lib/ui/components/Button.svelte";
 let isLoading = $derived($settingIsLoading);
 </script>
 

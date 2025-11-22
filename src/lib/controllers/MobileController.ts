@@ -4,7 +4,7 @@ import {
 	mobileNavigationBarHeight,
 	mobileShowSwipeGuide,
 	mobileStatusBarHeight,
-} from "$lib/stores/mobile";
+} from "$lib/stores/mobile.svelte";
 import { invoke } from "@tauri-apps/api/core";
 import { PageRoutes } from "$lib/pages";
 import { page } from "$app/stores";

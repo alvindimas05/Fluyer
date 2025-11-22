@@ -1,14 +1,14 @@
 <script lang="ts">
-import { musicList, musicListType } from "$lib/stores/music";
+import { musicList, musicListType } from "$lib/stores/music.svelte";
 import MusicItem from "./MusicItem.svelte";
 import { VList } from "virtua/svelte";
 import { onDestroy, onMount } from "svelte";
-import { filterAlbum, filterSearch } from "$lib/stores/filter";
+import { filterAlbum, filterSearch } from "$lib/stores/filter.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import { folderCurrent, folderList } from "$lib/stores/folder";
 import { MusicListType } from "$lib/home/music/types";
 import FolderController from "$lib/controllers/FolderController";
-import { playerBarHeight } from "$lib/stores/playerbar";
+import { playerBarHeight } from "$lib/stores/playerbar.svelte";
 import { filterBarSortAsc } from "$lib/stores/filterbar";
 
 // [minWidth, minDppx, columns]

@@ -1,4 +1,4 @@
-import { filterAlbum } from "$lib/stores/filter";
+import { filterAlbum } from "$lib/stores/filter.svelte";
 import type { AlbumData } from "$lib/home/music/types";
 
 const FilterController = {

@@ -1,24 +1,27 @@
 <script lang="ts">
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
-import { filterAlbum } from "$lib/stores/filter";
-import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
-import FilterController from "$lib/controllers/FilterController";
-import FolderController from "$lib/controllers/FolderController";
-import { musicListType } from "$lib/stores/music";
-import { MusicListType } from "$lib/home/music/types";
-import { folderCurrent } from "$lib/stores/folder";
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import Glass from "$lib/glass/Glass.svelte";
-import ToastController from "$lib/controllers/ToastController";
-import View from "$lib/components/View.svelte";
+import View from "$lib/ui/components/View.svelte";
+import filterStore from "$lib/stores/filter.svelte";
+import musicStore from "$lib/stores/music.svelte";
+import {MusicListType} from "$lib/features/music/types";
+import folderStore from "$lib/stores/folder.svelte";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import FolderService from "$lib/services/FolderService.svelte";
+import LibraryService from "$lib/services/LibraryService.svelte";
+import {MusicConfig} from "$lib/constants/music";
+import ProgressService from "$lib/services/ProgressService.svelte";
+import folderSvelte from "$lib/stores/folder.svelte";
+import QueueService from "$lib/services/QueueService.svelte";
+import MusicPlayerService from "$lib/services/MusicPlayerService.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
 
-let album = $derived($filterAlbum);
+let album = $derived(filterStore.album);
 let showBackButton = $derived.by(async () => {
-	const isNotFolderView = $musicListType !== MusicListType.Folder;
+	const isNotFolderView = musicStore.listType !== MusicListType.Folder;
 
-	const folderPath = $folderCurrent?.path;
-	const storedPath = await PersistentStoreController.musicPath.get();
+	const folderPath = folderStore.currentFolder?.path;
+	const storedPath = await PersistentStoreService.musicPath.get();
 	const isOutsideStoredPath = folderPath
 		? !storedPath.includes(folderPath)
 		: false;
@@ -31,23 +34,23 @@ let showBackButton = $derived.by(async () => {
 });
 
 let musicList = $derived.by(() => {
-	if ($musicListType === MusicListType.Folder) {
-		return FolderController.getMusicListFromFolder($folderCurrent);
+	if (musicStore.listType === MusicListType.Folder) {
+		return FolderService.getMusicList(folderStore.currentFolder);
 	} else if (album) {
-		return MusicController.sortMusicList(album.musicList);
+		return LibraryService.sortMusicList(album.musicList);
 	}
 	return [];
 });
 
 let label = $derived.by(() => {
-	if ($musicListType === MusicListType.Folder && $folderCurrent) {
-		const folderMusic = FolderController.getMusicListFromFolder($folderCurrent);
+	if (musicStore.listType === MusicListType.Folder && folderStore.currentFolder) {
+		const folderMusic = FolderService.getMusicList(folderStore.currentFolder);
 		const totalDuration = folderMusic.reduce(
 			(acc, music) => acc + music.duration,
 			0,
 		);
 
-		return `${$folderCurrent.path} ${MusicConfig.separator} ${folderMusic.length} ${MusicConfig.separator} ${MusicController.parseMilisecondsIntoText(totalDuration)}`;
+		return `${folderStore.currentFolder.path} ${MusicConfig.separator} ${folderMusic.length} ${MusicConfig.separator} ${ProgressService.formatDuration(totalDuration)}`;
 	} else if (album) {
 		return [album.name, album.artist, album.year, album.duration]
 			.filter(Boolean)
@@ -57,39 +60,39 @@ let label = $derived.by(() => {
 });
 
 async function handleBack() {
-	if ($musicListType === MusicListType.Folder) {
-		const musicPaths = await PersistentStoreController.musicPath.get();
-		if (musicPaths.includes($folderCurrent!!.path)) {
-			FolderController.setFolder(null);
+	if (musicStore.listType === MusicListType.Folder) {
+		const musicPaths = await PersistentStoreService.musicPath.get();
+		if (musicPaths.includes(folderStore.currentFolder!!.path)) {
+			folderSvelte.currentFolder = null;
 			return;
 		}
-		FolderController.setFolderToParent($folderCurrent);
+		await FolderService.navigateToParent(folderStore.currentFolder)
 	} else {
-		FilterController.setFilterAlbum(null);
+		filterStore.album = null
 	}
 }
 
 async function addMusicListAndPlay() {
-	await MusicController.resetAndAddMusicList(musicList);
-	if(!MusicController.isPlaying) MusicController.play();
+	await QueueService.resetAndAddList(musicList);
+	if(!musicStore.isPlaying) MusicPlayerService.play();
 }
 
 async function addMusicList() {
-	await MusicController.addMusicList(musicList);
+	await QueueService.addList(musicList);
 	const label =
-		$musicListType === MusicListType.Folder && $folderCurrent
-			? $folderCurrent.path
+		musicStore.listType === MusicListType.Folder && folderStore.currentFolder
+			? folderStore.currentFolder.path
 			: album
 				? `${album.name} ${MusicConfig.separatorAlbum} ${album.artist}`
 				: null;
-	ToastController.info(`Added music list to queue: ${label}`);
+	ToastService.info(`Added music list to queue: ${label}`);
 }
 
-async function playShuffle() {
-	MusicController.playShuffle(musicList);
+function playShuffle() {
+	return MusicPlayerService.playShuffle(musicList);
 }
 </script>
-{#if album || $folderCurrent || $musicListType === MusicListType.Playlist}
+{#if album || folderStore.currentFolder || musicStore.listType === MusicListType.Playlist}
     <View class="mx-3 mb-2 md:grid grid-cols-[auto_max-content] px-4 py-2 rounded-lg
         box-border animate__animated animate__fadeIn
         hover:px-5 hover:py-3">

@@ -17,10 +17,10 @@ import PersistentStoreController from "$lib/controllers/PersistentStoreControlle
 import FilterBar from "$lib/filterbar/FilterBar.svelte";
 import { page } from "$app/state";
 import LoadingController from "$lib/controllers/LoadingController";
-import { loadingShow } from "$lib/stores/loading";
-import { musicList } from "$lib/stores/music";
+import { loadingShow } from "$lib/stores/loading.svelte";
+import { musicList } from "$lib/stores/music.svelte";
 import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
-import { mobileShowSwipeGuide } from "$lib/stores/mobile";
+import { mobileShowSwipeGuide } from "$lib/stores/mobile.svelte";
 import FolderController from "$lib/controllers/FolderController";
 import DeveloperDebugOverlay from "$lib/developer/DeveloperDebugOverlay.svelte";
 import { settingDeveloperMode } from "$lib/stores/setting";

@@ -9,7 +9,7 @@ import {
     musicCurrentIndex,
     musicRepeatMode,
     musicReset, musicProgressIntervalId,
-} from "$lib/stores/music";
+} from "$lib/stores/music.svelte";
 import { get } from "svelte/store";
 import {
 	type MusicPlayerSync,
@@ -26,7 +26,7 @@ import CoverArt, {
 	type CoverArtResponse,
 } from "$lib/handlers/coverart";
 import {isAndroid, isDesktop, isMobile} from "$lib/platform";
-import { equalizerValues } from "$lib/stores/equalizer";
+import { equalizerValues } from "$lib/stores/equalizer.svelte";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import UtilsController from "$lib/controllers/UtilsController";
 import { settingBitPerfectMode } from "$lib/stores/setting";
@@ -34,7 +34,7 @@ import {playlistMoveQueue} from "$lib/home/playlist/PlaylistMoveQueue";
 import {Music} from "@lucide/svelte";
 import sleep from "sleep-promise";
 
-export const MusicConfig = {
+const MusicConfig = {
 	step: 0.01,
 	min: 0,
 	max: 10,

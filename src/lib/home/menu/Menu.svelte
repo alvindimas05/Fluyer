@@ -7,7 +7,7 @@ import { IconType } from "$lib/icon/types";
 import MenuItem from "$lib/home/menu/MenuItem.svelte";
 import UIController from "$lib/controllers/UIController";
 import { isDesktop } from "$lib/platform";
-import { musicListType } from "$lib/stores/music";
+import { musicListType } from "$lib/stores/music.svelte";
 import { MusicListType } from "$lib/home/music/types";
 import { settingBitPerfectMode } from "$lib/stores/setting";
 </script>

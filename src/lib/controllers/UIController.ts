@@ -1,8 +1,8 @@
 // @ts-ignore
 import { fluidScroll } from "fluidscroll";
-import { equalizerShow } from "$lib/stores/equalizer";
+import { equalizerShow } from "$lib/stores/equalizer.svelte";
 import { get } from "svelte/store";
-import { musicListType } from "$lib/stores/music";
+import { musicListType } from "$lib/stores/music.svelte";
 import { MusicListType } from "$lib/home/music/types";
 import FilterController from "$lib/controllers/FilterController";
 import FolderController from "$lib/controllers/FolderController";

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { isAndroid, isMacos } from "$lib/platform";
-import { equalizerShow, equalizerValues } from "$lib/stores/equalizer";
+import { equalizerShow, equalizerValues } from "$lib/stores/equalizer.svelte";
 import MusicController from "$lib/controllers/MusicController";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
@@ -8,8 +8,8 @@ import UIController from "$lib/controllers/UIController";
 import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import Glass from "$lib/glass/Glass.svelte";
 import { onMount } from "svelte";
-import View from "$lib/components/View.svelte";
-import Button from "$lib/components/Button.svelte";
+import View from "$lib/ui/components/View.svelte";
+import Button from "$lib/ui/components/Button.svelte";
 const LABELS = [
 	65, // 1b  - Sub-bass
 	92, // 2b

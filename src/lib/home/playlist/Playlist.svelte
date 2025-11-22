@@ -1,21 +1,15 @@
 <script lang="ts">
 import Sidebar from "$lib/home/sidebar/Sidebar.svelte";
-import {
-	musicCurrentIndex,
-	musicPlaylist,
-	musicPlaylistIds,
-	musicReset,
-} from "$lib/stores/music";
 import PlaylistItem from "./PlaylistItem.svelte";
 import { SidebarType } from "$lib/home/sidebar/types";
 import Icon from "$lib/icon/Icon.svelte";
 import { IconType } from "$lib/icon/types";
 import MusicController from "$lib/controllers/MusicController";
 import Muuri from "muuri";
-import { mount, onDestroy, onMount, unmount } from "svelte";
+import {mount, onMount, unmount} from "svelte";
 import { isMobile } from "$lib/platform";
-import type { MusicData } from "$lib/home/music/types";
-import type { Unsubscriber } from "svelte/store";
+import type { MusicData } from "$lib/features/music/types";
+import musicStore from "$lib/stores/music.svelte";
 
 let gridElement: HTMLDivElement;
 let muuri: Muuri;
@@ -58,13 +52,13 @@ function initMuuri() {
 
 	// Store the starting position when drag begins
 	muuri.on("dragStart", (item, _) => {
-		if (!$musicPlaylist) return;
+		if (!musicStore.queue) return;
 		fromIndex = muuri.getItems().indexOf(item);
 	});
 
 	// Handle reordering when drag ends
 	muuri.on("dragEnd", async (item, _) => {
-		if (!muuri || !$musicPlaylist) return;
+		if (!muuri || !musicStore.queue) return;
 
 		const toIndex = muuri.getItems().indexOf(item);
 
@@ -73,11 +67,11 @@ function initMuuri() {
 
 		dragging = false;
 
-		let playlistIds = $musicPlaylistIds;
+		let playlistIds = musicStore.queueIds;
 		const uuid = playlistIds[fromIndex];
 		playlistIds.splice(fromIndex, 1);
 		playlistIds.splice(toIndex, 0, uuid);
-		$musicPlaylistIds = playlistIds;
+		musicStore.queueIds = playlistIds;
 
 		// Temporarily disable dragging during playlist update
 		await MusicController.playlistMoveto(fromIndex, toIndex);
@@ -116,72 +110,62 @@ function elementToggleDraggable() {
 	}
 }
 
-let unlistenMusicPlaylist: Unsubscriber;
 
-onMount(() => {
-	initMuuri();
+$effect(() => {
+    let playlist = musicStore.list!!;
+    // Determine which items were removed from the playlist
+    const removedIndices = musicStore.reset
+        ? oldPlaylist.map((_, index) => index) // Reset: remove all items
+        : oldPlaylist
+            .map((music, index) => (!playlist.includes(music) ? index : -1))
+            .filter((index) => index !== -1); // Keep only valid indices
 
-	unlistenMusicPlaylist = musicPlaylist.subscribe((playlist) => {
-		// Determine which items were removed from the playlist
-		const removedIndices = $musicReset
-			? oldPlaylist.map((_, index) => index) // Reset: remove all items
-			: oldPlaylist
-					.map((music, index) => (!playlist.includes(music) ? index : -1))
-					.filter((index) => index !== -1); // Keep only valid indices
+    // Remove items from Muuri grid
+    if (removedIndices.length > 0) {
+        const items = muuri.getItems();
+        const removedItems = removedIndices.map((i) => items[i]);
 
-		// Remove items from Muuri grid
-		if (removedIndices.length > 0) {
-			const items = muuri.getItems();
-			const removedItems = removedIndices.map((i) => items[i]);
+        // Unmount Svelte components before removing
+        for (const item of removedItems) {
+            unmount(item.getElement()!!);
+        }
 
-			// Unmount Svelte components before removing
-			for (const item of removedItems) {
-				unmount(item.getElement()!!);
-			}
+        muuri.remove(removedItems, { removeElements: true });
+    }
 
-			muuri.remove(removedItems, { removeElements: true });
-		}
+    // Determine which items are new to the playlist
+    const newItems = musicStore.reset
+        ? playlist.map((music, index) => ({ music, index })) // Reset: all items are new
+        : playlist
+            .map((music, index) =>
+                !oldPlaylist.includes(music) ? { music, index } : null,
+            )
+            .filter(
+                (item): item is { music: MusicData; index: number } =>
+                    item !== null,
+            );
 
-		// Determine which items are new to the playlist
-		const newItems = $musicReset
-			? playlist.map((music, index) => ({ music, index })) // Reset: all items are new
-			: playlist
-					.map((music, index) =>
-						!oldPlaylist.includes(music) ? { music, index } : null,
-					)
-					.filter(
-						(item): item is { music: MusicData; index: number } =>
-							item !== null,
-					);
+    // Add new items to Muuri grid
+    if (newItems.length > 0) {
+        let playlistIds = musicStore.reset ? [] : musicStore.queueIds;
+        muuri.add(
+            newItems.map(({ music }) => {
+                const uuid = crypto.randomUUID();
+                playlistIds.push(uuid);
+                return createPlaylistItem(music, uuid);
+            }),
+        );
+        musicStore.queueIds = playlistIds;
+    }
 
-		// Add new items to Muuri grid
-		if (newItems.length > 0) {
-			let playlistIds = $musicReset ? [] : $musicPlaylistIds;
-			muuri.add(
-				newItems.map(({ music }) => {
-					const uuid = crypto.randomUUID();
-					playlistIds.push(uuid);
-					return createPlaylistItem(music, uuid);
-				}),
-			);
-			$musicPlaylistIds = playlistIds;
-		}
+    // Update touch behavior for all playlist items
+    elementToggleDraggable();
 
-		// Update touch behavior for all playlist items
-		elementToggleDraggable();
-
-		// Store current playlist state for next comparison
-		oldPlaylist = playlist;
-	});
+    // Store current playlist state for next comparison
+    oldPlaylist = playlist;
 });
-
-onDestroy(() => {
-	// Clean up subscription when component is destroyed
-	unlistenMusicPlaylist();
-});
-
-// Reactively update draggable state when dependencies change
 $effect(elementToggleDraggable);
+onMount(initMuuri);
 </script>
 
 <Sidebar type={SidebarType.Right} class="flex flex-col">

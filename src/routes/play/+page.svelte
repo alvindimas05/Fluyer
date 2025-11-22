@@ -5,13 +5,13 @@ import {
 	musicProgressValue,
 	musicRepeatMode,
 	musicVolume,
-} from "$lib/stores/music";
+} from "$lib/stores/music.svelte";
 import MusicController, { MusicConfig } from "$lib/controllers/MusicController";
 import type MusicLyric from "$lib/home/music/lyric";
 import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
-} from "$lib/stores/mobile";
+} from "$lib/stores/mobile.svelte";
 import { isAndroid, isMacos, isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/icon/Icon.svelte";
@@ -26,8 +26,8 @@ import {
 } from "$lib/stores/setting";
 import { showThenFade } from "$lib/controllers/UIController";
 import LyricController from "$lib/controllers/LyricController";
-import View from "$lib/components/View.svelte";
-import ProgressBar from "$lib/components/ProgressBar.svelte";
+import View from "$lib/ui/components/View.svelte";
+import ProgressBar from "$lib/ui/components/ProgressBar.svelte";
 
 let music = $state(MusicController.currentMusic);
 let progressPercentage = $state(MusicController.progressPercentage);
