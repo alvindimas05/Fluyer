@@ -1,26 +1,26 @@
 <script lang="ts">
 import MusicItem from "./MusicItem.svelte";
 import { VList } from "virtua/svelte";
-import { playerBarHeight } from "$lib/stores/playerbar.svelte";
 import { useMusicList } from "../viewmodels/useMusicList.svelte";
+import playerBarStore from "$lib/stores/playerbar.svelte";
 
 const vm = useMusicList();
 </script>
 
-<svelte:window on:resize={vm.updateSize} />
+<svelte:window onresize={vm.updateSize} />
 
 <div class="h-full px-3">
-    {#if vm.data && vm.columnCount}
+    {#if vm.data && vm.state.columnCount}
         <VList
                 class="scrollbar-hidden"
                 data={vm.data}
                 getKey={(_, i) => i}
-                style="padding-bottom: {$playerBarHeight}px;"
+                style="padding-bottom: {playerBarStore.height}px;"
         >
             {#snippet children(list)}
                 <div
                         class="grid gap-x-6"
-                        style="grid-template-columns: repeat({vm.columnCount}, minmax(0, 1fr));"
+                        style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
                 >
                     {#each list as item}
                         {#if 'duration' in item}

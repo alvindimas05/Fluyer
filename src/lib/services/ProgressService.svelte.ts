@@ -36,7 +36,7 @@ const ProgressService = {
         return musicStore.progressValue;
     },
     set value(value: number) {
-        musicStore.progressValue = value;
+        musicStore.progressValue = (value / musicStore.currentMusic!!.duration) * MusicConfig.max;
     },
     formatDuration: (value: number, negative?: boolean) => {
         // detect ms vs sec

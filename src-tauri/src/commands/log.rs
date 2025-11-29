@@ -5,6 +5,12 @@ pub fn log_error(message: String) {
     logger::error!("{}", message);
 }
 
+
+#[tauri::command]
+pub fn log_info(message: String) {
+    logger::info!("{}", message);
+}
+
 #[cfg(target_os = "android")]
 #[tauri::command]
 pub fn toast(message: String) {

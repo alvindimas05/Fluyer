@@ -1,24 +1,23 @@
 <script lang="ts">
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import { open } from "@tauri-apps/plugin-dialog";
-import MusicController from "$lib/controllers/MusicController";
-import { IconType } from "$lib/icon/types";
-import Icon from "$lib/icon/Icon.svelte";
-import { settingIsLoading } from "$lib/stores/setting";
+import { IconType } from "$lib/ui/icon/types";
+import Icon from "$lib/ui/icon/Icon.svelte";
 import { onMount } from "svelte";
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
-import ToastController from "$lib/controllers/ToastController";
 import { isAndroid, isDesktop } from "$lib/platform";
 import { invoke } from "@tauri-apps/api/core";
 import { CommandRoutes } from "$lib/commands.js";
 import { listen } from "@tauri-apps/api/event";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import LibraryService from "$lib/services/LibraryService.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
 
 let musicPath = $state<string[]>([]);
-let isLoading = $derived($settingIsLoading);
+let isLoading = $state(false);
 
 async function refreshPath() {
-	musicPath = await PersistentStoreController.musicPath.get();
+	musicPath = await PersistentStoreService.musicPath.get();
 }
 
 async function addPath() {
@@ -45,22 +44,22 @@ async function addPath() {
 	if (!newPath || musicPath.includes(newPath)) return;
 
 	isLoading = true;
-	await PersistentStoreController.musicPath.add(newPath);
+	await PersistentStoreService.musicPath.add(newPath);
 	await refreshPath();
-	await MusicController.getMusics(true);
+	await LibraryService.loadMusicList();
 	isLoading = false;
 
-	ToastController.info("Music path added");
+	ToastService.info("Music path added");
 }
 
 async function removePath(index: number) {
 	isLoading = true;
-	await PersistentStoreController.musicPath.remove(index);
-	await refreshPath();
-	await MusicController.getMusics(true);
+	await PersistentStoreService.musicPath.remove(index);
+    await refreshPath();
+    await LibraryService.loadMusicList();
 	isLoading = false;
 
-	ToastController.info("Music path removed");
+	ToastService.info("Music path removed");
 }
 
 onMount(refreshPath);

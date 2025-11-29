@@ -2,12 +2,7 @@
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types.js";
-import {
-	settingAnimatedBackgroundType,
-	settingTriggerAnimatedBackground,
-} from "$lib/stores/setting";
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import ToastController from "$lib/controllers/ToastController";
+import settingStore from "$lib/stores/setting.svelte";
 
 async function onMethodChange(
 	e: Event & {
@@ -34,7 +29,7 @@ async function onMethodChange(
                 name="animatedBackgroundMethod"
                 class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
                 value={SettingAnimatedBackgroundType.Prominent}
-                checked={$settingAnimatedBackgroundType === SettingAnimatedBackgroundType.Prominent}
+                checked={settingStore.animatedBackground.type === SettingAnimatedBackgroundType.Prominent}
                 onchange={onMethodChange}
         />
         <div>
@@ -49,7 +44,7 @@ async function onMethodChange(
             name="animatedBackgroundMethod"
             class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
             value={SettingAnimatedBackgroundType.Pallete}
-            checked={$settingAnimatedBackgroundType === SettingAnimatedBackgroundType.Pallete}
+            checked={settingStore.animatedBackground.type === SettingAnimatedBackgroundType.Pallete}
             onchange={onMethodChange}
         />
         <div>

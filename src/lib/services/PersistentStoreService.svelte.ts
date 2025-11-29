@@ -1,180 +1,122 @@
 import { Store } from "@tauri-apps/plugin-store";
-import musicStore from "$lib/stores/music.svelte";
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
+import { IconThemeType } from "$lib/ui/icon/types";
+import musicStore from "$lib/stores/music.svelte";
 import settingStore from "$lib/stores/setting.svelte";
-import { IconThemeType } from "$lib/icon/types";
+import mobileStore from "$lib/stores/mobile.svelte";
 import iconStore from "$lib/stores/icon.svelte";
 import equalizerStore from "$lib/stores/equalizer.svelte";
 
-const storePath = "store.json";
-const storeOptions = { autoSave: true };
+const STORE_PATH = "store.json";
 
-const getStore = async () => Store.load(storePath, storeOptions);
-
-type InitTask = () => Promise<void>;
-
-interface PersistedProperty<T> {
-    get: () => Promise<T>;
-    set: (value: T) => Promise<void>;
-}
-
-interface PersistentStoreServiceType {
-    _initTasks: InitTask[];
-    initialize: () => Promise<void>;
-    volume: PersistedProperty<number>;
-    animatedBackgroundType: PersistedProperty<SettingAnimatedBackgroundType>;
-    developerMode: PersistedProperty<boolean>;
-    iconTheme: PersistedProperty<IconThemeType>;
-    bitPerfectMode: PersistedProperty<boolean>;
-    equalizer: PersistedProperty<number[]>;
-    uiShowRepeatButton: PersistedProperty<boolean>;
-    uiShowShuffleButton: PersistedProperty<boolean>;
-    uiPlayShowBackButton: PersistedProperty<boolean>;
-    uiPlayShowVolume: PersistedProperty<boolean>;
-    musicPath: {
-        get: () => Promise<string[]>;
-        set: (list: string[]) => Promise<void>;
-        add: (path: string) => Promise<void>;
-        remove: (index: number) => Promise<void>;
-    };
-}
-
-function definePersistedProperty<T>(
-    target: Record<string, unknown>,
+const getStore = async () => Store.load(STORE_PATH, { autoSave: true });
+const makeGetter =
+    <T>(key: string, fallback?: T) =>
+        async () =>
+            (await (await getStore()).get<T>(key)) ?? fallback;
+const makeSetter =
+    <T>(key: string) =>
+        async (value: T) =>
+            (await getStore()).set(key, value);
+const makeBinding = <T>(
     key: string,
-    storeKey: string,
     fallback: T,
-    onLoad?: (value: T) => void
-) {
-    target[key] = {
-        get: async () => {
-            const store = await getStore();
-            return (await store.get<T>(storeKey)) ?? fallback;
-        },
-        set: async (value: T) => {
-            const store = await getStore();
-            await store.set(storeKey, value);
-        },
-    };
+    setStoreFn: (v: T) => void,
+) => ({
+    // @ts-ignore
+    initialize: async () => setStoreFn(await makeGetter<T>(key, fallback)()),
+    get: makeGetter<T>(key, fallback),
+    set: makeSetter<T>(key),
+});
 
-    const initTasks = target._initTasks as InitTask[];
-    initTasks.push(async () => {
-        const store = await getStore();
-        const v = (await store.get<T>(storeKey)) ?? fallback;
-        onLoad?.(v);
-    });
-}
-
-const PersistentStoreService: PersistentStoreServiceType = {
-    _initTasks: [],
+const PersistentStoreService = {
+    get: getStore,
 
     initialize: async () => {
-        for (const fn of PersistentStoreService._initTasks) {
-            await fn();
-        }
+        await Promise.all([
+            PersistentStoreService.animatedBackgroundType.initialize(),
+            PersistentStoreService.iconTheme.initialize(),
+            PersistentStoreService.developerMode.initialize(),
+            PersistentStoreService.userInterface.play.showBackButton.initialize(),
+            PersistentStoreService.userInterface.play.showVolume.initialize(),
+            PersistentStoreService.userInterface.showRepeatButton.initialize(),
+            PersistentStoreService.userInterface.showShuffleButton.initialize(),
+            PersistentStoreService.equalizer.initialize(),
+            PersistentStoreService.bitPerfectMode.initialize(),
+            PersistentStoreService.volume.initialize(),
+        ]);
     },
-} as PersistentStoreServiceType;
 
-definePersistedProperty(
-    PersistentStoreService,
-    "volume",
-    "volume",
-    1,
-    (v) => musicStore.volume = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "animatedBackgroundType",
-    "animated-background-type",
-    SettingAnimatedBackgroundType.Prominent,
-    (v) => settingStore.animatedBackground.type = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "developerMode",
-    "developer-mode",
-    false,
-    (v) => settingStore.developerMode = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "iconTheme",
-    "icon-theme",
-    IconThemeType.Phosphor,
-    (v) => iconStore.theme = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "bitPerfectMode",
-    "bit-perfect-mode",
-    false,
-    (v) => settingStore.bitPerfectMode = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "equalizer",
-    "equalizer",
-    Array(18).fill(0),
-    (v) => equalizerStore.values = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "uiShowRepeatButton",
-    "ui-show-repeat-button",
-    true,
-    (v) => settingStore.ui.showRepeatButton = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "uiShowShuffleButton",
-    "ui-show-shuffle-button",
-    true,
-    (v) => settingStore.ui.showShuffleButton = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "uiPlayShowBackButton",
-    "ui-play-show-back-button",
-    true,
-    (v) => settingStore.ui.play.showBackButton = v
-);
-
-definePersistedProperty(
-    PersistentStoreService,
-    "uiPlayShowVolume",
-    "ui-play-show-volume",
-    true,
-    (v) => settingStore.ui.play.showVolume = v
-);
-
-PersistentStoreService.musicPath = {
-    get: async () => {
-        const store = await getStore();
-        const raw = await store.get<string>("music-path");
-        return raw ? raw.split("||") : [];
+    musicPath: {
+        key: "music-path",
+        separator: "||",
+        get: async () =>
+            (await makeGetter<string>("music-path")())?.split("||") ?? [],
+        set: async (value: string[]) =>
+            (await getStore()).set("music-path", value.join("||")),
+        add: async (value: string) => {
+            const paths = await PersistentStoreService.musicPath.get();
+            paths.push(value);
+            await PersistentStoreService.musicPath.set(paths);
+        },
+        remove: async (index: number) => {
+            const paths = await PersistentStoreService.musicPath.get();
+            paths.splice(index, 1);
+            await PersistentStoreService.musicPath.set(paths);
+        },
     },
-    set: async (list: string[]) => {
-        const store = await getStore();
-        await store.set("music-path", list.join("||"));
+
+    volume: makeBinding<number>("volume", 1, (value) => musicStore.volume = value),
+
+    animatedBackgroundType: makeBinding<SettingAnimatedBackgroundType>(
+        "animated-background-type",
+        SettingAnimatedBackgroundType.Prominent,
+        (value) => settingStore.animatedBackground.type = value,
+    ),
+
+    developerMode: makeBinding("developer-mode", false,
+        (value) => settingStore.developerMode = value),
+
+    iconTheme: makeBinding("icon-theme", IconThemeType.Phosphor, (value) => iconStore.theme = value),
+
+    bitPerfectMode: makeBinding(
+        "bit-perfect-mode",
+        false,
+        (value) => settingStore.bitPerfectMode = value,
+    ),
+
+    swipeGuide: makeBinding("swipe-guide", true, (value) => mobileStore.showSwipeGuide = value),
+
+    userInterface: {
+        showRepeatButton: makeBinding(
+            "ui-show-repeat-button",
+            true,
+            (value) => settingStore.ui.showRepeatButton = value,
+        ),
+        showShuffleButton: makeBinding(
+            "ui-show-shuffle-button",
+            true,
+            (value) => settingStore.ui.showShuffleButton = value,
+        ),
+        play: {
+            showBackButton: makeBinding(
+                "ui-play-show-back-button",
+                true,
+                (value) => settingStore.ui.play.showBackButton = value,
+            ),
+            showVolume: makeBinding(
+                "ui-play-show-volume",
+                true,
+                (value) => settingStore.ui.play.showVolume = value,
+            ),
+        },
     },
-    add: async (path: string) => {
-        const arr = await PersistentStoreService.musicPath.get();
-        arr.push(path);
-        await PersistentStoreService.musicPath.set(arr);
-    },
-    remove: async (index: number) => {
-        const arr = await PersistentStoreService.musicPath.get();
-        arr.splice(index, 1);
-        await PersistentStoreService.musicPath.set(arr);
-    },
+
+    equalizer: makeBinding<number[]>(
+        "equalizer",
+        Array(18).fill(0),
+        (value) => equalizerStore.values = value,
+    ),
 };
 
 export default PersistentStoreService;

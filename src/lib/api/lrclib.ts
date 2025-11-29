@@ -1,6 +1,6 @@
 import type { MusicData } from "$lib/home/music/types";
 import axios from "axios";
-import { MusicConfig } from "$lib/controllers/MusicController";
+import {MusicConfig} from "$lib/constants/music";
 
 interface LrcLibResult {
 	name: string;
@@ -262,7 +262,7 @@ const LrcLib = {
 	},
 
 	// Alternative method for exact search when you have precise metadata
-	getExactLyrics: async (
+    getExactLyrics: async (
 		title: string,
 		artist: string,
 		album?: string,

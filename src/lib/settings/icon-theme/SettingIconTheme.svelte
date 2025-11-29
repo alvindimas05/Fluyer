@@ -1,10 +1,10 @@
 <script lang="ts">
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import ToastController from "$lib/controllers/ToastController";
-import { IconThemeType } from "$lib/icon/types";
-import { iconTheme } from "$lib/stores/icon.svelte";
+import { IconThemeType } from "$lib/ui/icon/types";
+import iconStore from "$lib/stores/icon.svelte";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
 
 async function onMethodChange(
 	e: Event & {
@@ -12,10 +12,10 @@ async function onMethodChange(
 	},
 ) {
 	const value = <IconThemeType>e.currentTarget.value;
-	if (value === $iconTheme) return;
-	iconTheme.set(value);
-	await PersistentStoreController.iconTheme.set(value);
-	ToastController.info("Icon theme changed to " + value);
+	if (value === iconStore.theme) return;
+	iconStore.theme = value;
+	await PersistentStoreService.iconTheme.set(value);
+	ToastService.info("Icon theme changed to " + value);
 }
 </script>
 
@@ -29,7 +29,7 @@ async function onMethodChange(
                 name="iconTheme"
                 class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
                 value={IconThemeType.Phosphor}
-                checked={$iconTheme === IconThemeType.Phosphor}
+                checked={iconStore.theme === IconThemeType.Phosphor}
                 onchange={onMethodChange}
         />
         <div>
@@ -44,7 +44,7 @@ async function onMethodChange(
                 name="iconTheme"
                 class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
                 value={IconThemeType.Material}
-                checked={$iconTheme === IconThemeType.Material}
+                checked={iconStore.theme === IconThemeType.Material}
                 onchange={onMethodChange}
         />
         <div>
@@ -59,7 +59,7 @@ async function onMethodChange(
                 name="iconTheme"
                 class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
                 value={IconThemeType.Lucide}
-                checked={$iconTheme === IconThemeType.Lucide}
+                checked={iconStore.theme === IconThemeType.Lucide}
                 onchange={onMethodChange}
         />
         <div>

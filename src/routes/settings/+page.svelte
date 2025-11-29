@@ -1,7 +1,7 @@
 <script lang="ts">
 import PageController from "$lib/controllers/PageController";
-import Icon from "$lib/icon/Icon.svelte";
-import { IconType } from "$lib/icon/types";
+import Icon from "$lib/ui/icon/Icon.svelte";
+import { IconType } from "$lib/ui/icon/types";
 import SettingMusicPaths from "$lib/settings/music-paths/SettingMusicPaths.svelte";
 import { isMobile } from "$lib/platform";
 import SettingAnimatedBackground from "$lib/settings/animated-background/SettingAnimatedBackground.svelte";
@@ -13,7 +13,7 @@ import { settingIsLoading } from "$lib/stores/setting";
 import SettingUserInteface from "$lib/settings/user-interface/SettingUserInteface.svelte";
 import SettingDeveloper from "$lib/settings/developer/SettingDeveloper.svelte";
 import SettingIconTheme from "$lib/settings/icon-theme/SettingIconTheme.svelte";
-import Glass from "$lib/glass/Glass.svelte";
+import Glass from "$lib/ui/glass/Glass.svelte";
 import SettingMusicPlayerConfiguration from "$lib/settings/music-player-configuration/SettingMusicPlayerConfiguration.svelte";
 import View from "$lib/ui/components/View.svelte";
 import Button from "$lib/ui/components/Button.svelte";

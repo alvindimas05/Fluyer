@@ -1,6 +1,5 @@
 import {invoke} from "@tauri-apps/api/core";
 import {CommandRoutes} from "$lib/commands";
-import type {MusicData} from "$lib/home/music/types";
 
 export enum TauriMusicCommand {
     None = "none",
@@ -24,6 +23,9 @@ const TauriMusicAPI = {
     },
     requestSync: () => {
         return invoke(CommandRoutes.MUSIC_PLAYER_REQUEST_SYNC);
+    },
+    setVolume: (volume: number) => {
+        return invoke(CommandRoutes.MUSIC_SET_VOLUME, { volume });
     },
 }
 

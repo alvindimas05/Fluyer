@@ -1,30 +1,28 @@
 <script lang="ts">
 import "animate.css";
-import AnimatedBackground from "$lib/backgrounds/AnimatedBackground.svelte";
+import AnimatedBackground from "$lib/features/animated_background/components/AnimatedBackground.svelte";
 import "../app.scss";
 import "toastify-js/src/toastify.css";
-import TitleBar from "$lib/titlebar/TitleBar.svelte";
 import { isDesktop, isLinux, isMobile, isWindows } from "$lib/platform";
-import MusicController from "$lib/controllers/MusicController";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
-import Font from "$lib/font/Font.svelte";
-import UIController from "$lib/controllers/UIController";
-import MobileController from "$lib/controllers/MobileController.js";
-import logHandler from "$lib/handlers/log";
 import { PageRoutes } from "$lib/pages";
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import FilterBar from "$lib/filterbar/FilterBar.svelte";
 import { page } from "$app/state";
-import LoadingController from "$lib/controllers/LoadingController";
-import { loadingShow } from "$lib/stores/loading.svelte";
-import { musicList } from "$lib/stores/music.svelte";
-import SwipeGuide from "$lib/mobile/SwipeGuide.svelte";
-import { mobileShowSwipeGuide } from "$lib/stores/mobile.svelte";
-import FolderController from "$lib/controllers/FolderController";
-import DeveloperDebugOverlay from "$lib/developer/DeveloperDebugOverlay.svelte";
-import { settingDeveloperMode } from "$lib/stores/setting";
-import toastHandler from "$lib/handlers/toast";
+import SwipeGuide from "$lib/features/swipe_guide/components/SwipeGuide.svelte";
+import DeveloperDebugOverlay from "$lib/features/developer_debug_overlay/components/DeveloperDebugOverlay.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import mobileStore from "$lib/stores/mobile.svelte";
+import musicStore from "$lib/stores/music.svelte";
+import MusicPlayerService from "$lib/services/MusicPlayerService.svelte";
+import UIInteractionService from "$lib/services/UIInteractionService.svelte";
+import MobileService from "$lib/services/MobileService.svelte";
+import settingStore from "$lib/stores/setting.svelte";
+import FolderService from "$lib/services/FolderService.svelte";
+import LogService from "$lib/services/LogService.svelte";
+import Font from "$lib/ui/font/Font.svelte";
+import FilterBar from "$lib/features/filterbar/components/FilterBar.svelte";
+import TitleBar from "$lib/features/titlebar/components/TitleBar.svelte";
 
 if (isWindows() || isLinux()) {
 	import("$lib/scss/rounded-windows.scss");
@@ -41,27 +39,26 @@ interface Props {
 let { children }: Props = $props();
 let isAppReady = $state(false);
 
-async function initialize() {
-	logHandler();
-	toastHandler();
-	await Promise.all([
-		PersistentStoreController.initialize(),
-		MusicController.initialize(),
-		UIController.initialize(),
-		MobileController.initialize(),
-		FolderController.initialize(),
-	]);
+onMount(async () => {
+    await Promise.all([
+        LogService.initialize(),
+        ToastService.initialize(),
+        PersistentStoreService.initialize(),
+        MusicPlayerService.initialize(),
+        UIInteractionService.initialize(),
+        MobileService.initialize(),
+        FolderService.initialize(),
+    ]);
 
-	if (isDesktop()) {
-		await getCurrentWindow().show();
-		await getCurrentWindow().toggleMaximize();
-	}
+    if (isDesktop()) {
+        await getCurrentWindow().show();
+        await getCurrentWindow().toggleMaximize();
+    }
 
-	LoadingController.listen();
-	isAppReady = true;
-}
+    isAppReady = true;
 
-onMount(initialize);
+    console.log("Front-end is initialized");
+});
 </script>
 
 <Font />
@@ -72,11 +69,11 @@ onMount(initialize);
     {@render children?.()}
 </div>
 <div class="fixed top-0 left-0 w-full h-12 z-[99999] grid grid-cols-[1fr_auto]">
-    {#if $loadingShow && Array.isArray($musicList)}
+    {#if Array.isArray(musicStore.list)}
         {#if [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
             <FilterBar />
         {/if}
-        {#if isMobile() && $mobileShowSwipeGuide}
+        {#if isMobile() && mobileStore.showSwipeGuide}
             <SwipeGuide />
         {/if}
     {/if}
@@ -84,6 +81,6 @@ onMount(initialize);
         <TitleBar />
     {/if}
 </div>
-{#if $settingDeveloperMode}
+{#if settingStore.developerMode}
     <DeveloperDebugOverlay />
 {/if}

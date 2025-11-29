@@ -3,10 +3,16 @@ import ProgressService from "$lib/services/ProgressService.svelte";
 import TauriMusicAPI, {TauriMusicCommand} from "$lib/tauri/TauriMusicAPI";
 import QueueService from "$lib/services/QueueService.svelte";
 import musicSvelte from "$lib/stores/music.svelte";
-import {RepeatMode} from "$lib/home/music/types";
-import type {MusicData} from "$lib/features/music/types";
+import {type MusicData, type MusicPlayerSync, RepeatMode} from "$lib/features/music/types";
+import {listen} from "@tauri-apps/api/event";
+import {CommandRoutes} from "$lib/commands";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
 
 const MusicPlayerService = {
+    initialize: async () => {
+        MusicPlayerService.listenSyncEvents();
+        MusicPlayerService.listenVolumeEvents();
+    },
     play: () => {
         if (musicStore.queue.length === 0) return;
 
@@ -54,6 +60,32 @@ const MusicPlayerService = {
         }
         await QueueService.resetAndAddList(list);
         if(!musicStore.isPlaying) MusicPlayerService.play();
+    },
+
+    listenSyncEvents: () => {
+        return listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
+            if (e.payload.isPlaying){
+                ProgressService.reset();
+                ProgressService.start();
+            }
+            else ProgressService.stop();
+
+            if(e.payload.index > -1){
+                musicStore.currentIndex = e.payload.index;
+                ProgressService.value = e.payload.currentPosition;
+            } else {
+                ProgressService.reset();
+            }
+            musicStore.isPlaying = e.payload.isPlaying;
+        });
+    },
+    listenVolumeEvents: () => {
+        $effect(() => {
+            (async () => {
+                await PersistentStoreService.volume.set(musicStore.volume);
+                await TauriMusicAPI.setVolume(musicStore.volume);
+            })();
+        });
     },
 };
 

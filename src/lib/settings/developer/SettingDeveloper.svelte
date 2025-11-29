@@ -1,26 +1,23 @@
 <script lang="ts">
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
-import {
-	settingDeveloperMode,
-	settingUiShowShuffleButton,
-} from "$lib/stores/setting";
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import ToastController from "$lib/controllers/ToastController";
 import SettingButton from "$lib/settings/SettingButton.svelte";
-import { IconType } from "$lib/icon/types";
+import { IconType } from "$lib/ui/icon/types";
 import { invoke } from "@tauri-apps/api/core";
 import { CommandRoutes } from "$lib/commands";
 import { isDesktop } from "$lib/platform";
+import settingStore from "$lib/stores/setting.svelte";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
 
 function onDeveloperModeChange(
 	e: Event & {
 		currentTarget: EventTarget & HTMLInputElement;
 	},
 ) {
-	settingDeveloperMode.set(e.currentTarget.checked);
-	PersistentStoreController.developerMode.set(e.currentTarget.checked);
-	ToastController.info(
+	settingStore.developerMode = e.currentTarget.checked;
+	PersistentStoreService.developerMode.set(e.currentTarget.checked);
+	ToastService.info(
 		`Developer mode is ${e.currentTarget.checked ? "enabled" : "disabled"}`,
 	);
 }
@@ -29,9 +26,6 @@ async function saveLog() {
 	await invoke(CommandRoutes.DEVELOPER_SAVE_LOG);
 }
 
-async function saveMpvLog() {
-	await invoke(CommandRoutes.DEVELOPER_SAVE_MPV_LOG);
-}
 </script>
 
 <SettingLabel
@@ -43,19 +37,15 @@ async function saveMpvLog() {
         <input
                 type="checkbox"
                 class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
-                checked={$settingDeveloperMode}
+                checked={settingStore.developerMode}
                 onchange={onDeveloperModeChange}
         />
         <div>Developer Mode</div>
     </label>
 </SettingInput>
-{#if $settingDeveloperMode && isDesktop()}
+{#if settingStore.developerMode && isDesktop()}
     <SettingButton
             label="Save Log"
             icon={IconType.SaveLog}
             onclick={saveLog}/>
-<!--    <SettingButton-->
-<!--            label="Save MPV Log"-->
-<!--            icon={IconType.SaveLog}-->
-<!--            onclick={saveMpvLog} />-->
 {/if}

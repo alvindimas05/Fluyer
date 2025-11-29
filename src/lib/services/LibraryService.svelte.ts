@@ -1,19 +1,23 @@
 import type {MusicData} from "$lib/features/music/types";
 import musicStore from "$lib/stores/music.svelte";
-import loadingStore from "$lib/stores/loading.svelte";
 import TauriLibraryAPI from "$lib/tauri/TauriLibraryAPI";
 
 const LibraryService = {
+    initialize: async () => {
+        await LibraryService.loadAlbumList();
+        await LibraryService.loadMusicList();
+    },
     loadMusicList: async () => {
-        if (musicStore.list) return;
+        console.log("Getting music list...");
         musicStore.list = await TauriLibraryAPI.getMusicList();
-        loadingStore.musicList = true;
     },
     loadAlbumList: async () => {
-        $effect(() => {
+        $effect.root(() => {
+            if(!musicStore.list) return;
+            console.log("Refreshing album list...");
             const albumsMap: Record<string, MusicData[]> = {};
 
-            for (const item of musicStore.list!!) {
+            for (const item of musicStore.list) {
                 const album = item.album?.trim();
                 if (!album) continue;
 

@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { IconType } from "$lib/icon/types";
-import Icon from "$lib/icon/Icon.svelte";
+import type { IconType } from "$lib/ui/icon/types";
+import Icon from "$lib/ui/icon/Icon.svelte";
 import Button from "$lib/ui/components/Button.svelte";
 
 interface Props {

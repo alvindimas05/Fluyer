@@ -34,7 +34,8 @@ export const CommandRoutes = {
 	SET_NAVIGATION_BAR_VISIBILITY: "set_navigation_bar_visibility",
 	ANDROID_REQUEST_DIRECTORY: "android_request_directory",
 
-	LOG_ERROR: "log_error",
+    LOG_INFO: "log_info",
+    LOG_ERROR: "log_error",
 
 	COVER_ART_GET: "cover_art_get",
 

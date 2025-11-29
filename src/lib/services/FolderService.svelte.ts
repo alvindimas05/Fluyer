@@ -1,11 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
 import { CommandRoutes } from "$lib/commands";
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import { type FolderData, type MusicData } from "$lib/features/music/types";
 import { isWindows } from "$lib/platform";
 import folderStore from "$lib/stores/folder.svelte";
 import musicSvelte from "$lib/stores/music.svelte";
 import LibraryService from "$lib/services/LibraryService.svelte";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
 
 const PATH_SEPARATOR = isWindows() ? "\\" : "/";
 
@@ -25,7 +25,7 @@ const FolderService = {
                 path: currentFolder.path
             });
         } else {
-            const musicPaths = await PersistentStoreController.musicPath.get();
+            const musicPaths = await PersistentStoreService.musicPath.get();
             folders = musicPaths.map(path => ({ path } as FolderData));
         }
 
@@ -37,12 +37,12 @@ const FolderService = {
     },
 
     navigateToRoot: async () => {
-        const musicPaths = await PersistentStoreController.musicPath.get();
+        const musicPaths = await PersistentStoreService.musicPath.get();
 
         if (musicPaths.length === 1) {
             folderStore.currentFolder = { path: musicPaths[0] };
         } else {
-            folderStore.currentFolder = null;
+            folderStore.currentFolder = undefined;
         }
 
         await FolderService.loadList();
@@ -59,7 +59,7 @@ const FolderService = {
         folderStore.currentFolder = { path } as FolderData
     },
 
-    containsMusic: (music: MusicData, folder: FolderData | null): boolean => {
+    containsMusic: (music: MusicData, folder: FolderData | undefined): boolean => {
         if (!folder || !music.path.startsWith(folder.path)) return false;
 
         const folderPathWithSlash = folder.path.endsWith(PATH_SEPARATOR)

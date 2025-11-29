@@ -1,5 +1,4 @@
 import { CommandRoutes } from "$lib/commands";
-import MusicController from "$lib/controllers/MusicController";
 import { invoke } from "@tauri-apps/api/core";
 
 export enum CoverArtStatus {

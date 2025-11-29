@@ -1,7 +1,7 @@
-import { isAndroid, isDesktop } from "$lib/platform";
+import { isAndroid } from "$lib/platform";
 import TauriIntroAPI from "$lib/tauri/TauriIntroAPI";
 import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
-import loadingStore from "$lib/stores/loading.svelte";
+import LibraryService from "$lib/services/LibraryService.svelte";
 
 export function useIntro() {
     let animatedClasses = $state("animate__fadeIn");
@@ -23,7 +23,7 @@ export function useIntro() {
 
     function onAnimationEnd(currentClass: string) {
         if (currentClass === "animate__fadeIn") return;
-        loadingStore.musicList = false;
+        LibraryService.initialize();
     }
 
     return {

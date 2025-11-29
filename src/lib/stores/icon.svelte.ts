@@ -1,4 +1,4 @@
-import { IconThemeType } from "$lib/icon/types";
+import { IconThemeType } from "$lib/ui/icon/types";
 
 const iconStore = $state({
     theme: IconThemeType.Phosphor,

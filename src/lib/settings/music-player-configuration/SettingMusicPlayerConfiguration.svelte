@@ -1,23 +1,21 @@
 <script lang="ts">
 import SettingLabel from "$lib/settings/SettingLabel.svelte";
 import SettingInput from "$lib/settings/SettingInput.svelte";
-import { settingBitPerfectMode } from "$lib/stores/setting";
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
-import ToastController from "$lib/controllers/ToastController";
-import MusicController from "$lib/controllers/MusicController";
+import settingStore from "$lib/stores/setting.svelte";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import musicStore from "$lib/stores/music.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
 
 function onBitPerfectModeChange(
 	e: Event & {
 		currentTarget: EventTarget & HTMLInputElement;
 	},
 ) {
-	settingBitPerfectMode.set(e.currentTarget.checked);
-	PersistentStoreController.bitPerfectMode.set(e.currentTarget.checked);
-	MusicController.resetEqualizer();
-	MusicController.setVolume(1);
-	ToastController.info(
-		`Bit Perfect mode is ${e.currentTarget.checked ? "enabled" : "disabled"}`,
-	);
+	settingStore.bitPerfectMode = e.currentTarget.checked;
+	PersistentStoreService.bitPerfectMode.set(e.currentTarget.checked);
+	// MusicPlayerService.resetEqualizer();
+	musicStore.volume = 1;
+	ToastService.info(`Bit Perfect mode is ${e.currentTarget.checked ? "enabled" : "disabled"}`);
 }
 </script>
 
@@ -30,7 +28,7 @@ function onBitPerfectModeChange(
         <input
                 type="checkbox"
                 class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
-                checked={$settingBitPerfectMode}
+                checked={settingStore.bitPerfectMode}
                 onchange={onBitPerfectModeChange}
         />
         <div>Bit Perfect Mode</div>

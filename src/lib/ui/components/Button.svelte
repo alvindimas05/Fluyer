@@ -1,6 +1,6 @@
 <script lang="ts">
 import View from "$lib/ui/components/View.svelte";
-import type {GlassShineSize} from "$lib/glass/types";
+import type {GlassShineSize} from "$lib/ui/glass/types";
 
 interface Props {
 	children?: import("svelte").Snippet;

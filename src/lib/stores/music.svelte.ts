@@ -4,6 +4,7 @@ import {type MusicData, MusicListType, RepeatMode} from "$lib/features/music/typ
 const musicStore = $state({
     // Library
     list: undefined as MusicData[] | null | undefined,
+    listIds: [] as string[],
     albumList: [] as MusicData[][],
     listType: MusicListType.All,
 
@@ -25,8 +26,8 @@ const musicStore = $state({
     reset: false,
     albumListScrollIndex: -1,
 
-    get currentMusic(): MusicData | null {
-        return this.queue[this.currentIndex] ?? null;
+    get currentMusic(): MusicData | undefined {
+        return this.queue[this.currentIndex] ?? undefined;
     },
     get progressDuration(): number {
         return (this.progressValue / MusicConfig.max) * (this.currentMusic?.duration ?? 0);

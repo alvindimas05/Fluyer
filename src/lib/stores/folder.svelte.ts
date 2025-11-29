@@ -2,7 +2,7 @@ import {type FolderData} from "$lib/features/music/types";
 
 const folderStore = $state({
     list: [] as FolderData[],
-    currentFolder: null as FolderData | null,
+    currentFolder: undefined as FolderData | undefined,
 });
 
 export default folderStore;

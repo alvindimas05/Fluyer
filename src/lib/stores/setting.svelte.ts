@@ -1,7 +1,6 @@
 import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
 
 const settingStore = $state({
-    isLoading: false,
     animatedBackground: {
         trigger: "",
         type: SettingAnimatedBackgroundType.Pallete,

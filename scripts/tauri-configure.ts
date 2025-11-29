@@ -34,4 +34,5 @@ let _env = {
 	LD_LIBRARY_PATH: source,
 };
 _env["PATH"] = `${process.env.PATH}${os.platform() === "win32" ? ";" : ":"}${source}`;
+console.log(source);
 export const env = _env;

@@ -1,8 +1,8 @@
 <script lang="ts">
 import { type MusicData, type FolderData } from "../types";
 import { useMusicItem } from "../viewmodels/useMusicItem.svelte";
-import Icon from "$lib/icon/Icon.svelte";
-import { IconType } from "$lib/icon/types";
+import Icon from "$lib/ui/icon/Icon.svelte";
+import { IconType } from "$lib/ui/icon/types";
 import { isDesktop, isLinux } from "$lib/platform";
 
 interface Props {

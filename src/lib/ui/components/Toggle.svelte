@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { IconType } from "$lib/icon/types";
-import Icon from "$lib/icon/Icon.svelte";
+import type { IconType } from "$lib/ui/icon/types";
+import Icon from "$lib/ui/icon/Icon.svelte";
 import View from "$lib/ui/components/View.svelte";
 import { onDestroy, onMount } from "svelte";
 

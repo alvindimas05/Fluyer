@@ -97,6 +97,7 @@ pub fn run() {
             commands::folder::folder_get_first_music_path,
 
             commands::log::log_error,
+            commands::log::log_info,
             #[cfg(target_os = "android")]
             commands::log::toast,
             #[cfg(target_os = "android")]

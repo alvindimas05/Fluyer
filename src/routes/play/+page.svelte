@@ -14,8 +14,8 @@ import {
 } from "$lib/stores/mobile.svelte";
 import { isAndroid, isMacos, isMobile } from "$lib/platform";
 import PageController from "$lib/controllers/PageController";
-import Icon from "$lib/icon/Icon.svelte";
-import { IconType } from "$lib/icon/types";
+import Icon from "$lib/ui/icon/Icon.svelte";
+import { IconType } from "$lib/ui/icon/types";
 import { RepeatMode } from "$lib/home/music/types";
 import {
 	settingBitPerfectMode,
