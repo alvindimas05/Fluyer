@@ -5,15 +5,25 @@ import { useMusicList } from "../viewmodels/useMusicList.svelte";
 import playerBarStore from "$lib/stores/playerbar.svelte";
 
 const vm = useMusicList();
+
+function chunkData(data: any[], columnCount: number) {
+    const rows = [];
+    for (let i = 0; i < data.length; i += columnCount) {
+        rows.push(data.slice(i, i + columnCount));
+    }
+    return rows;
+}
+
+let chunkedData = $derived(vm.data ? chunkData(vm.data, vm.state.columnCount) : []);
 </script>
 
 <svelte:window onresize={vm.updateSize} />
 
 <div class="h-full px-3">
-    {#if vm.data && vm.state.columnCount}
+    {#if chunkedData.length > 0 && vm.state.columnCount}
         <VList
                 class="scrollbar-hidden"
-                data={vm.data}
+                data={chunkedData}
                 getKey={(_, i) => i}
                 style="padding-bottom: {playerBarStore.height}px;"
         >

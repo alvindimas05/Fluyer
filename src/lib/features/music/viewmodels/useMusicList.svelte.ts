@@ -75,23 +75,14 @@ const data = $derived.by(() => {
 
     if (!filterStore.bar.sortAsc) finalList.reverse();
 
-    const chunk = (arr: any[]) => {
-        const rows = [];
-        for (let i = 0; i < arr.length; i += state.columnCount)
-            rows.push(arr.slice(i, i + state.columnCount));
-        return rows;
-    };
-
-    const result = chunk(finalList);
-
     if (isFolderMode) {
         const nonEmpty = filteredFolders.filter(
             f => FolderService.getMusicList(f).length > 0
         );
-        result.push(...chunk(nonEmpty));
+        finalList.push(...nonEmpty);
     }
 
-    return result;
+    return finalList;
 });
 
 export function useMusicList() {
