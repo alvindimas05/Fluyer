@@ -20,7 +20,6 @@ const ProgressService = {
             if (musicStore.progressValue >= MusicConfig.max) {
                 musicStore.isPlaying = false;
                 ProgressService.stop();
-                ProgressService.start();
             }
         }, updateInterval);
     },

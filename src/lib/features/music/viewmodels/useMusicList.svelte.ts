@@ -1,4 +1,4 @@
-import { MusicListType } from "$lib/features/music/types";
+import {MusicListType} from "$lib/features/music/types";
 import musicStore from "$lib/stores/music.svelte";
 import filterStore from "$lib/stores/filter.svelte";
 import folderStore from "$lib/stores/folder.svelte";
@@ -69,7 +69,7 @@ const data = $derived.by(() => {
 
     if (!filterStore.bar.sortAsc) filteredFolders = [...filteredFolders].reverse();
 
-    let finalList = filterStore.album
+    let finalList: any[] = filterStore.album
         ? LibraryService.sortMusicList(filteredMusic)
         : [...filteredMusic];
 

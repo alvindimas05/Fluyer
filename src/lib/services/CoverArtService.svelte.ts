@@ -34,7 +34,7 @@ const CoverArtService = {
             return (
                 await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
                     query,
-                    size,
+                    size: size?.toString(),
                 })
             ).image;
         } catch (err) {

@@ -8,8 +8,11 @@ const LibraryService = {
         await LibraryService.loadMusicList();
     },
     loadMusicList: async () => {
-        console.log("Getting music list...");
+        const now = performance.now();
+
         musicStore.list = await TauriLibraryAPI.getMusicList();
+
+        console.log(`Getting music list took ${performance.now() - now} ms`);
     },
     loadAlbumList: async () => {
         $effect.root(() => {

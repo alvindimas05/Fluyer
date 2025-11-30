@@ -19,7 +19,7 @@ const vm = useFilterBar();
         {isMacos() ? 'right-0' : 'left-0'}
         animate__animated animate__fadeIn animate__slow"
     style="margin-top: {isMobile() ? mobileStore.statusBarHeight : 8}px;
-        grid-template-columns: {vm.gridSize};"
+        grid-template-columns: {vm.state.gridSize};"
     bind:this={vm.element}>
     <div class="h-fit sm:h-auto grid pointer-events-none
         grid-cols-[min-content_1fr]

@@ -40,6 +40,7 @@ let { children }: Props = $props();
 let isAppReady = $state(false);
 
 onMount(async () => {
+    const now = performance.now();
     await Promise.all([
         LogService.initialize(),
         ToastService.initialize(),
@@ -52,12 +53,12 @@ onMount(async () => {
 
     if (isDesktop()) {
         await getCurrentWindow().show();
-        await getCurrentWindow().toggleMaximize();
+        if(!await getCurrentWindow().isMaximized()) await getCurrentWindow().toggleMaximize();
     }
 
     isAppReady = true;
 
-    console.log("Front-end is initialized");
+    console.log(`Front-end is initialized. Took ${performance.now() - now} ms`);
 });
 </script>
 

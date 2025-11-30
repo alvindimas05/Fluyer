@@ -304,6 +304,8 @@ async function afterInitializeCanvas() {
 
 // New smooth transition function with interruption support
 async function transitionToNewCanvas(force = false) {
+    const now = performance.now();
+
     const _newCanvas = await createCanvas({ force });
     if (!_newCanvas) return;
 
@@ -377,6 +379,8 @@ async function transitionToNewCanvas(force = false) {
             pendingTransition = null;
             activeTransition = null;
             returnCanvasToPool(buffer);
+
+            console.log(`Animated Background transition took ${performance.now() - now} ms`);
         }
     }
 

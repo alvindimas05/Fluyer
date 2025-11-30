@@ -24,8 +24,11 @@ const RESPONSIVE_RULES = [
     [640, 0, 0.33334],
 ];
 
-let element = $state<HTMLDivElement>();
-let gridSize = $state("");
+
+let element: HTMLDivElement;
+let state = $state({
+    gridSize: '',
+});
 
 const iconSize = $derived.by(() => {
     switch (iconStore.theme){
@@ -50,13 +53,13 @@ function updateGridSizing() {
     for (const [minW, minDppx, width] of RESPONSIVE_RULES) {
         if (w >= minW && dpi >= minDppx) {
             const columnPercentage = width * window.innerWidth;
-            gridSize = isMacos()
+            state.gridSize = isMacos()
                 ? `${columnPercentage}px ${columnPercentage * 2}px`
                 : `${columnPercentage * 2}px ${columnPercentage}px`;
             return;
         }
     }
-    gridSize = "";
+    state.gridSize = "";
 }
 
 function updateFilterBarHeight() {
@@ -83,15 +86,13 @@ function updateSize() {
 
 export function useFilterBar() {
     return {
+        state,
         get element() {
             return element;
         },
         set element(value) {
             element = value;
             updateSize();
-        },
-        get gridSize() {
-            return gridSize;
         },
         iconSize,
         musicListOptions,
