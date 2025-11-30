@@ -4,7 +4,6 @@ import TauriLibraryAPI from "$lib/tauri/TauriLibraryAPI";
 
 const LibraryService = {
     initialize: async () => {
-        await LibraryService.loadAlbumList();
         await LibraryService.loadMusicList();
     },
     loadMusicList: async () => {
@@ -13,25 +12,25 @@ const LibraryService = {
         musicStore.list = await TauriLibraryAPI.getMusicList();
 
         console.log(`Getting music list took ${performance.now() - now} ms`);
+
+        await LibraryService.loadAlbumList();
     },
     loadAlbumList: async () => {
-        $effect.root(() => {
-            if(!musicStore.list) return;
-            console.log("Refreshing album list...");
-            const albumsMap: Record<string, MusicData[]> = {};
+        if(!musicStore.list) return;
+        console.log("Refreshing album list...");
+        const albumsMap: Record<string, MusicData[]> = {};
 
-            for (const item of musicStore.list) {
-                const album = item.album?.trim();
-                if (!album) continue;
+        for (const item of musicStore.list) {
+            const album = item.album?.trim();
+            if (!album) continue;
 
-                if (!albumsMap[album]) albumsMap[album] = [];
-                albumsMap[album].push(item);
-            }
+            if (!albumsMap[album]) albumsMap[album] = [];
+            albumsMap[album].push(item);
+        }
 
-            musicStore.albumList = Object.keys(albumsMap)
-                .sort()
-                .map(key => LibraryService.sortMusicList(albumsMap[key]));
-        });
+        musicStore.albumList = Object.keys(albumsMap)
+            .sort()
+            .map(key => LibraryService.sortMusicList(albumsMap[key]));
     },
     sortMusicList: (list: MusicData[]) => {
         if (!list) return [];
