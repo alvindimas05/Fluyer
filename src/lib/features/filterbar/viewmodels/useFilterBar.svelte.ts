@@ -25,6 +25,14 @@ const RESPONSIVE_RULES = [
 ];
 
 
+const musicListOptions = [
+    { value: MusicListType.All, icon: IconType.MusicListTypeAll, label: "All" },
+    { value: MusicListType.Album, icon: IconType.MusicListTypeAlbum, label: "Album" },
+    { value: MusicListType.Music, icon: IconType.MusicListTypeMusic, label: "Music" },
+    { value: MusicListType.Folder, icon: IconType.MusicListTypeFolder, label: "Folder" },
+    { value: MusicListType.Playlist, icon: IconType.Unknown, label: "Playlist" },
+];
+
 let element: HTMLDivElement;
 let state = $state({
     gridSize: '',
@@ -37,14 +45,6 @@ const iconSize = $derived.by(() => {
         case IconThemeType.Lucide: return 20;
     }
 });
-
-const musicListOptions = [
-    { value: MusicListType.All, icon: IconType.MusicListTypeAll, label: "All" },
-    { value: MusicListType.Album, icon: IconType.MusicListTypeAlbum, label: "Album" },
-    { value: MusicListType.Music, icon: IconType.MusicListTypeMusic, label: "Music" },
-    { value: MusicListType.Folder, icon: IconType.MusicListTypeFolder, label: "Folder" },
-    { value: MusicListType.Playlist, icon: IconType.Unknown, label: "Playlist" },
-];
 
 function updateGridSizing() {
     const w = window.innerWidth;
@@ -87,6 +87,8 @@ function updateSize() {
 export function useFilterBar() {
     return {
         state,
+
+        musicListOptions,
         get element() {
             return element;
         },
@@ -94,8 +96,9 @@ export function useFilterBar() {
             element = value;
             updateSize();
         },
-        iconSize,
-        musicListOptions,
+        get iconSize() {
+            return iconSize;
+        },
         toggleSort,
         handleToggleChange,
         updateSize,
