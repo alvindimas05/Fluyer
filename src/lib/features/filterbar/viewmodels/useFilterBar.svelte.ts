@@ -81,7 +81,7 @@ async function handleToggleChange(type: MusicListType){
 
 function updateSize() {
     updateGridSizing();
-    updateFilterBarHeight();
+    setTimeout(updateFilterBarHeight);
 }
 
 export function useFilterBar() {
