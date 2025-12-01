@@ -75,7 +75,7 @@ async function handleToggleChange(type: MusicListType){
     filterStore.album = null;
     if(type === MusicListType.Folder) {
         const musicPaths = await PersistentStoreService.musicPath.get();
-        folderStore.currentFolder = musicPaths.length > 2 ? { path: musicPaths[0] } as FolderData : undefined;
+        folderStore.currentFolder = musicPaths.length > 2 ? { path: musicPaths[0] } as FolderData : null;
     }
 }
 

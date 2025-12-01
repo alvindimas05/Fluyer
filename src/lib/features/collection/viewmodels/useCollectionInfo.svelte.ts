@@ -3,7 +3,6 @@ import FolderService from "$lib/services/FolderService.svelte";
 import LibraryService from "$lib/services/LibraryService.svelte";
 import {MusicConfig} from "$lib/constants/music";
 import ProgressService from "$lib/services/ProgressService.svelte";
-import folderSvelte from "$lib/stores/folder.svelte";
 import QueueService from "$lib/services/QueueService.svelte";
 import MusicPlayerService from "$lib/services/MusicPlayerService.svelte";
 import ToastService from "$lib/services/ToastService.svelte";
@@ -60,7 +59,7 @@ export default function useCollectionInfo(){
         if (musicStore.listType === MusicListType.Folder) {
             const musicPaths = await PersistentStoreService.musicPath.get();
             if (musicPaths.includes(folderStore.currentFolder!!.path)) {
-                folderSvelte.currentFolder = null;
+                folderStore.currentFolder = null;
                 return;
             }
             await FolderService.navigateToParent(folderStore.currentFolder)
@@ -90,9 +89,16 @@ export default function useCollectionInfo(){
     }
 
     return {
-        album,
-        label,
-        showBackButton,
+        get album(){
+            return album;
+        },
+        get showBackButton(){
+            return showBackButton;
+        },
+        get label(){
+            return label;
+        },
+
         handleBack,
         addMusicListAndPlay,
         addMusicList,

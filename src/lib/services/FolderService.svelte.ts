@@ -42,7 +42,7 @@ const FolderService = {
         if (musicPaths.length === 1) {
             folderStore.currentFolder = { path: musicPaths[0] };
         } else {
-            folderStore.currentFolder = undefined;
+            folderStore.currentFolder = null;
         }
 
         await FolderService.loadList();
