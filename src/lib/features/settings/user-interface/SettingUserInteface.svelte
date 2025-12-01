@@ -1,6 +1,6 @@
 <script lang="ts">
-import SettingLabel from "$lib/settings/SettingLabel.svelte";
-import SettingInput from "$lib/settings/SettingInput.svelte";
+import SettingLabel from "$lib/features/settings/SettingLabel.svelte";
+import SettingInput from "$lib/features/settings/SettingInput.svelte";
 import {
 	settingUiPlayShowBackButton,
 	settingUiPlayShowVolume,

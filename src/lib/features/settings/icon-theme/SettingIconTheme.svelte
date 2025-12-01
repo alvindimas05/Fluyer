@@ -1,10 +1,10 @@
 <script lang="ts">
-import SettingLabel from "$lib/settings/SettingLabel.svelte";
-import SettingInput from "$lib/settings/SettingInput.svelte";
+import SettingLabel from "$lib/features/settings/SettingLabel.svelte";
+import SettingInput from "$lib/features/settings/SettingInput.svelte";
 import { IconThemeType } from "$lib/ui/icon/types";
-import iconStore from "$lib/stores/icon.svelte";
-import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
-import ToastService from "$lib/services/ToastService.svelte";
+import iconStore from "$lib/stores/icon.svelte.js";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte.js";
+import ToastService from "$lib/services/ToastService.svelte.js";
 
 async function onMethodChange(
 	e: Event & {

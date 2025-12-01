@@ -1,8 +1,8 @@
 <script lang="ts">
-import SettingLabel from "$lib/settings/SettingLabel.svelte";
-import SettingInput from "$lib/settings/SettingInput.svelte";
-import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types.js";
-import settingStore from "$lib/stores/setting.svelte";
+import SettingLabel from "$lib/features/settings/SettingLabel.svelte";
+import SettingInput from "$lib/features/settings/SettingInput.svelte";
+import { SettingAnimatedBackgroundType } from "$lib/features/settings/animated-background/types.js";
+import settingStore from "$lib/stores/setting.svelte.js";
 
 async function onMethodChange(
 	e: Event & {

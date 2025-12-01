@@ -1,10 +1,10 @@
 <script lang="ts">
-import SettingLabel from "$lib/settings/SettingLabel.svelte";
-import SettingInput from "$lib/settings/SettingInput.svelte";
-import settingStore from "$lib/stores/setting.svelte";
-import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
-import musicStore from "$lib/stores/music.svelte";
-import ToastService from "$lib/services/ToastService.svelte";
+import SettingLabel from "$lib/features/settings/SettingLabel.svelte";
+import SettingInput from "$lib/features/settings/SettingInput.svelte";
+import settingStore from "$lib/stores/setting.svelte.js";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte.js";
+import musicStore from "$lib/stores/music.svelte.js";
+import ToastService from "$lib/services/ToastService.svelte.js";
 
 function onBitPerfectModeChange(
 	e: Event & {

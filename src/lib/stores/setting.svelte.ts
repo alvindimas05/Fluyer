@@ -1,4 +1,4 @@
-import { SettingAnimatedBackgroundType } from "$lib/settings/animated-background/types";
+import { SettingAnimatedBackgroundType } from "$lib/features/settings/animated-background/types";
 
 const settingStore = $state({
     animatedBackground: {

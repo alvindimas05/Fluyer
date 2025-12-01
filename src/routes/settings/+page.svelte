@@ -2,19 +2,19 @@
 import PageController from "$lib/controllers/PageController";
 import Icon from "$lib/ui/icon/Icon.svelte";
 import { IconType } from "$lib/ui/icon/types";
-import SettingMusicPaths from "$lib/settings/music-paths/SettingMusicPaths.svelte";
+import SettingMusicPaths from "$lib/features/settings/music-paths/SettingMusicPaths.svelte";
 import { isMobile } from "$lib/platform";
-import SettingAnimatedBackground from "$lib/settings/animated-background/SettingAnimatedBackground.svelte";
+import SettingAnimatedBackground from "$lib/features/settings/animated-background/SettingAnimatedBackground.svelte";
 import {
 	mobileNavigationBarHeight,
 	mobileStatusBarHeight,
 } from "$lib/stores/mobile.svelte";
 import { settingIsLoading } from "$lib/stores/setting";
-import SettingUserInteface from "$lib/settings/user-interface/SettingUserInteface.svelte";
-import SettingDeveloper from "$lib/settings/developer/SettingDeveloper.svelte";
-import SettingIconTheme from "$lib/settings/icon-theme/SettingIconTheme.svelte";
+import SettingUserInteface from "$lib/features/settings/user-interface/SettingUserInteface.svelte";
+import SettingDeveloper from "$lib/features/settings/developer/SettingDeveloper.svelte";
+import SettingIconTheme from "$lib/features/settings/icon-theme/SettingIconTheme.svelte";
 import Glass from "$lib/ui/glass/Glass.svelte";
-import SettingMusicPlayerConfiguration from "$lib/settings/music-player-configuration/SettingMusicPlayerConfiguration.svelte";
+import SettingMusicPlayerConfiguration from "$lib/features/settings/music-player-configuration/SettingMusicPlayerConfiguration.svelte";
 import View from "$lib/ui/components/View.svelte";
 import Button from "$lib/ui/components/Button.svelte";
 let isLoading = $derived($settingIsLoading);
