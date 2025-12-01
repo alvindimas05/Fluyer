@@ -4,7 +4,7 @@ import {onDestroy, onMount} from "svelte";
 import * as StackBlur from "stackblur-canvas";
 // @ts-ignore
 import ColorThief from "colorthief/dist/color-thief.mjs";
-import {SettingAnimatedBackgroundType} from "$lib/features/settings/animated-background/types";
+import {SettingAnimatedBackgroundType} from "$lib/features/settings/animated_background/types";
 import {prominent} from "color.js";
 import {page} from "$app/state";
 import {PageRoutes} from "$lib/pages";

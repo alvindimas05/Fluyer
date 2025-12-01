@@ -1,5 +1,5 @@
 import { Store } from "@tauri-apps/plugin-store";
-import { SettingAnimatedBackgroundType } from "$lib/features/settings/animated-background/types";
+import { SettingAnimatedBackgroundType } from "$lib/features/settings/animated_background/types";
 import { IconThemeType } from "$lib/ui/icon/types";
 import musicStore from "$lib/stores/music.svelte";
 import settingStore from "$lib/stores/setting.svelte";

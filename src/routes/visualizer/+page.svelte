@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
-import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
-import View from "$lib/visualizers/vissonance/View";
+import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
+import View from "$lib/features/visualizers/vissonance/View";
 import ToastController from "$lib/controllers/ToastController";
 import MusicController from "$lib/controllers/MusicController";
 import PageController from "$lib/controllers/PageController";
@@ -9,14 +9,14 @@ import { musicCurrentIndex } from "$lib/stores/music.svelte";
 import type { MusicData } from "$lib/home/music/types";
 import { isMobile } from "$lib/platform";
 import { mobileStatusBarHeight } from "$lib/stores/mobile.svelte";
-import Barred from "$lib/visualizers/vissonance/visualizers/Barred";
-import Fracture from "$lib/visualizers/vissonance/visualizers/Fracture";
+import Barred from "$lib/features/visualizers/vissonance/visualizers/Barred";
+import Fracture from "$lib/features/visualizers/vissonance/visualizers/Fracture";
 // import HillFog from "$lib/visualizers/vissonance/visualizers/HillFog";
-import Iris from "$lib/visualizers/vissonance/visualizers/Iris";
-import Silk from "$lib/visualizers/vissonance/visualizers/Silk";
-import Siphon from "$lib/visualizers/vissonance/visualizers/Siphon";
-import Tricentric from "$lib/visualizers/vissonance/visualizers/Tricentric";
-import type Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
+import Iris from "$lib/features/visualizers/vissonance/visualizers/Iris";
+import Silk from "$lib/features/visualizers/vissonance/visualizers/Silk";
+import Siphon from "$lib/features/visualizers/vissonance/visualizers/Siphon";
+import Tricentric from "$lib/features/visualizers/vissonance/visualizers/Tricentric";
+import type Visualizer from "$lib/features/visualizers/vissonance/visualizers/Visualizer";
 import { showThenFade } from "$lib/controllers/UIController";
 
 let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 40);

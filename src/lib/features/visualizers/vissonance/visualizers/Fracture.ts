@@ -1,8 +1,8 @@
-import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
+import Visualizer from "$lib/features/visualizers/vissonance/visualizers/Visualizer";
 import * as THREE from "three";
-import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
-import View from "$lib/visualizers/vissonance/View";
-import Spectrum from "$lib/visualizers/vissonance/Spectrum";
+import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
+import View from "$lib/features/visualizers/vissonance/View";
+import Spectrum from "$lib/features/visualizers/vissonance/Spectrum";
 
 class Fracture extends Visualizer {
 	name = "Fracture";

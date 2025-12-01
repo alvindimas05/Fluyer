@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import View from "$lib/visualizers/vissonance/View";
-import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
-import Spectrum from "$lib/visualizers/vissonance/Spectrum";
-import Visualizer from "$lib/visualizers/vissonance/visualizers/Visualizer";
+import View from "$lib/features/visualizers/vissonance/View";
+import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
+import Spectrum from "$lib/features/visualizers/vissonance/Spectrum";
+import Visualizer from "$lib/features/visualizers/vissonance/visualizers/Visualizer";
 
 class Siphon extends Visualizer {
 	name = "Siphon";

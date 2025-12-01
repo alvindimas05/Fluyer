@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import AudioAnalyser from "$lib/visualizers/vissonance/AudioAnalyser";
-import View from "$lib/visualizers/vissonance/View";
+import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
+import View from "$lib/features/visualizers/vissonance/View";
 
 class Visualizer {
 	name = "Visualizer";
