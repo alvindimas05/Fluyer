@@ -61,7 +61,9 @@ export function useMusicItem(music: MusicData, folder?: FolderData) {
                 FolderService.getMusicList(folder!)
             );
         }
-        if (!musicStore.isPlaying) MusicPlayerService.play();
+        if (!musicStore.isPlaying){
+            MusicPlayerService.play();
+        }
     }
 
     async function addMusic() {
@@ -87,10 +89,18 @@ export function useMusicItem(music: MusicData, folder?: FolderData) {
     }
 
     return {
-        albumImage,
-        titleLabel,
-        mediumLabel,
-        smallLabel,
+        get albumImage() {
+            return albumImage;
+        },
+        get titleLabel() {
+            return titleLabel;
+        },
+        get mediumLabel() {
+            return mediumLabel;
+        },
+        get smallLabel() {
+            return smallLabel;
+        },
         addMusicAndPlay,
         addMusic,
         selectFolder,

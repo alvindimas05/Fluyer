@@ -2,26 +2,29 @@ import musicStore from "$lib/stores/music.svelte";
 import {MusicConfig} from "$lib/constants/music";
 
 const ProgressService = {
-    start: () => {
-        const updateInterval =
-            (musicStore.currentMusic?.duration ?? 0 / MusicConfig.max) *
-            MusicConfig.step *
-            1000;
+    initialize: () => {
 
+    },
+    start: () => {
         ProgressService.stop();
 
-        musicStore.progressIntervalId = setInterval(() => {
-            musicStore.progressValue =
-                Math.min(
-                    musicStore.progressValue + MusicConfig.step,
-                    MusicConfig.max,
-                );
+        setTimeout(() => {
+            console.log(`Starting progress with duration: ${musicStore.currentMusic?.duration}`);
 
-            if (musicStore.progressValue >= MusicConfig.max) {
-                musicStore.isPlaying = false;
-                ProgressService.stop();
-            }
-        }, updateInterval);
+            const updateInterval =
+                (musicStore.currentMusic!!.duration / MusicConfig.max) *
+                MusicConfig.step;
+
+            musicStore.progressIntervalId = setInterval(() => {
+                musicStore.progressValue += MusicConfig.step;
+
+                if (musicStore.progressValue >= MusicConfig.max) {
+                    console.log('Progress value ended. Stopping...');
+                    musicStore.isPlaying = false;
+                    ProgressService.stop();
+                }
+            }, updateInterval);
+        }, 10);
     },
     stop: () => {
         if(!musicStore.progressIntervalId) return;
@@ -30,12 +33,6 @@ const ProgressService = {
     },
     reset: () => {
         musicStore.progressValue = 0;
-    },
-    get value() {
-        return musicStore.progressValue;
-    },
-    set value(value: number) {
-        musicStore.progressValue = (value / musicStore.currentMusic!!.duration) * MusicConfig.max;
     },
     formatDuration: (value: number, negative?: boolean) => {
         // detect ms vs sec

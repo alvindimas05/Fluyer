@@ -1,5 +1,4 @@
 import TauriMusicAPI, {TauriMusicCommand} from "$lib/tauri/TauriMusicAPI";
-import ProgressService from "$lib/services/ProgressService.svelte";
 import musicStore from "$lib/stores/music.svelte";
 import TauriQueueAPI from "$lib/tauri/TauriQueueAPI";
 import {isDesktop} from "$lib/platform";
@@ -69,7 +68,7 @@ const QueueService = {
     },
     resetAndAddList: async (list: MusicData[]) => {
         await TauriMusicAPI.sendCommand(TauriMusicCommand.Clear);
-        ProgressService.start();
+        musicStore.queue = [];
 
         musicStore.reset = true;
         await TauriQueueAPI.add(list);
