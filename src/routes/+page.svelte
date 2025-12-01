@@ -31,7 +31,7 @@ let gridClass = $derived.by(() => {
     <!--{#if isDesktop()}-->
     <!--    <Equalizer />-->
     <!--{/if}-->
-<!--    <MusicQueueList />-->
+    <MusicQueueList />
     <Menu />
     <div class="h-full grid {gridClass}"
         style="padding-top: {paddingTop}px;">

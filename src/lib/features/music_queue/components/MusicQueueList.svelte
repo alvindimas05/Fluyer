@@ -16,10 +16,10 @@ import MusicQueueItem from "$lib/features/music_queue/components/MusicQueueItem.
 let gridElement: HTMLDivElement;
 let muuri: Muuri;
 let dragging = $state(!isMobile());
-let oldPlaylist: MusicData[] = [];
+let oldQueue: MusicData[] = [];
 let fromIndex = $state(-1);
 
-function cleanPlaylist() {
+function cleanQueue() {
     MusicPlayerService.pause();
     ProgressService.reset();
 }
@@ -28,7 +28,7 @@ function dragToggle() {
     dragging = !dragging;
 }
 
-// Initializes the Muuri grid library for drag-and-drop playlist management
+// Initializes the Muuri grid library for drag-and-drop queue management
 function initMuuri() {
     muuri = new Muuri(gridElement, {
         // Enable drag and drop functionality
@@ -76,7 +76,7 @@ function initMuuri() {
         playlistIds.splice(toIndex, 0, uuid);
         musicStore.listIds = playlistIds;
 
-        // Temporarily disable dragging during playlist update
+        // Temporarily disable dragging during queue update
         await QueueService.moveTo(fromIndex, toIndex);
         dragging = true;
     });
@@ -84,10 +84,10 @@ function initMuuri() {
     return muuri;
 }
 
-// Creates a DOM element for a playlist item
-function createPlaylistItem(music: MusicData, uuid: string) {
+// Creates a DOM element for a queue item
+function createItem(music: MusicData, uuid: string) {
     const element = document.createElement("div");
-    element.className = "playlist-item absolute w-full h-fit";
+    element.className = "queue-item absolute w-full h-fit";
 
     // Mount the Svelte component to the element
     mount(MusicQueueItem, { target: element, props: { music, uuid } });
@@ -95,10 +95,10 @@ function createPlaylistItem(music: MusicData, uuid: string) {
     return element;
 }
 
-// Toggles touch-action CSS property on playlist items based on dragging state
+// Toggles touch-action CSS property on queue items based on dragging state
 // This enables/disables native touch scrolling during drag operations
 function elementToggleDraggable() {
-    const elements = document.querySelectorAll(".playlist-item");
+    const elements = document.querySelectorAll(".queue-item");
 
     if (dragging) {
         // Disable native touch actions to allow dragging
@@ -114,12 +114,12 @@ function elementToggleDraggable() {
 }
 
 $effect(() => {
-    const playlist = musicStore.list!!;
-    // Determine which items were removed from the playlist
+    const queue = musicStore.queue!!;
+    // Determine which items were removed from the queue
     const removedIndices = musicStore.reset
-        ? oldPlaylist.map((_, index) => index) // Reset: remove all items
-        : oldPlaylist
-            .map((music, index) => (!playlist.includes(music) ? index : -1))
+        ? oldQueue.map((_, index) => index) // Reset: remove all items
+        : oldQueue
+            .map((music, index) => (!queue.includes(music) ? index : -1))
             .filter((index) => index !== -1); // Keep only valid indices
 
     // Remove items from Muuri grid
@@ -135,12 +135,12 @@ $effect(() => {
         muuri.remove(removedItems, { removeElements: true });
     }
 
-    // Determine which items are new to the playlist
+    // Determine which items are new to the queue
     const newItems = musicStore.reset
-        ? playlist.map((music, index) => ({ music, index })) // Reset: all items are new
-        : playlist
+        ? queue.map((music, index) => ({ music, index })) // Reset: all items are new
+        : queue
             .map((music, index) =>
-                !oldPlaylist.includes(music) ? { music, index } : null,
+                !oldQueue.includes(music) ? { music, index } : null,
             )
             .filter(
                 (item): item is { music: MusicData; index: number } =>
@@ -149,22 +149,22 @@ $effect(() => {
 
     // Add new items to Muuri grid
     if (newItems.length > 0) {
-        let playlistIds = musicStore.reset ? [] : musicStore.listIds;
+        let listIds = musicStore.reset ? [] : musicStore.listIds;
         muuri.add(
             newItems.map(({ music }) => {
                 const uuid = crypto.randomUUID();
-                playlistIds.push(uuid);
-                return createPlaylistItem(music, uuid);
+                listIds.push(uuid);
+                return createItem(music, uuid);
             }),
         );
-        musicStore.listIds = playlistIds;
+        musicStore.listIds = listIds;
     }
 
-    // Update touch behavior for all playlist items
+    // Update touch behavior for all queue items
     elementToggleDraggable();
 
-    // Store current playlist state for next comparison
-    oldPlaylist = playlist;
+    // Store current queue state for next comparison
+    oldQueue = queue;
 })
 
 onMount(initMuuri);
@@ -176,8 +176,8 @@ $effect(elementToggleDraggable);
 <Sidebar type={SidebarType.Right} class="flex flex-col">
     <div class="grid grid-cols-[auto_max-content_max-content] items-center gap-3 p-3">
         <p class="text-[1.2rem] md:text-[1.5rem] font-semibold">Now Playing</p>
-        <button class="w-7" onclick={cleanPlaylist}>
-            <Icon type={IconType.CleanPlaylist} />
+        <button class="w-7" onclick={cleanQueue}>
+            <Icon type={IconType.CleanQueue} />
         </button>
         {#if isMobile()}
             <button class="w-7" onclick={dragToggle}>

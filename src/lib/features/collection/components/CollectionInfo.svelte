@@ -38,7 +38,7 @@ const vm = useCollectionInfo();
                     </button>
                     <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center"
                             onclick={vm.addMusicList}>
-                        <Icon type={IconType.QueuePlaylist} />
+                        <Icon type={IconType.QueueMusic} />
                     </button>
                     <button class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center"
                             onclick={vm.playShuffle}>

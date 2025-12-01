@@ -61,7 +61,7 @@ const shouldAnimate = isDesktop() && !isLinux();
 
             <div class="w-12 h-12 md:w-14 md:h-14 ps-4">
                 <button class="w-full h-full aspect-square" onclick={vm.addMusic}>
-                    <Icon type={IconType.QueuePlaylist} />
+                    <Icon type={IconType.QueueMusic} />
                 </button>
             </div>
         </div>
