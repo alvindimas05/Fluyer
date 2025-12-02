@@ -11,7 +11,7 @@ export function useAlbumItem(musicList: MusicData[], index: number){
         filterStore.album && music.album && filterStore.album.name === music.album,
     );
 
-    let albumImage = $derived.by(async () => MetadataService.getMusicCoverArt(music));
+    let albumImage = $derived.by(() => MetadataService.getMusicCoverArt(music));
 
     async function setFilterAlbum() {
         const isAlbumType = musicStore.listType === MusicListType.Album;
@@ -29,9 +29,15 @@ export function useAlbumItem(musicList: MusicData[], index: number){
     }
 
     return {
-        isValidFilterAlbum,
-        albumImage,
-        music,
+        get isValidFilterAlbum() {
+            return isValidFilterAlbum;
+        },
+        get albumImage() {
+            return albumImage;
+        },
+        get music() {
+            return music;
+        },
         setFilterAlbum,
     };
 }
