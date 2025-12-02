@@ -53,6 +53,7 @@ async function installLib(name: string) {
 
     try {
         await fs.access(destLibPath);
+        console.log(`${name} is already installed`);
         return;
     } catch(e) {}
 

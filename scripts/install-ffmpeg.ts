@@ -33,6 +33,7 @@ function getDownloadUrl(): string {
 async function main() {
 	try {
 		await fs.access(outputDir);
+        console.log("Ffmpeg is already installed");
 		return;
 	} catch {}
 	try {
