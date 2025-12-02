@@ -2,7 +2,7 @@
 import { isLinux, isWindows } from "$lib/platform";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
-import { PageRoutes } from "$lib/pages";
+import { PageRoutes } from "$lib/constants/PageRoutes";
 import { afterNavigate } from "$app/navigation";
 
 const LINUX_ICONS = {

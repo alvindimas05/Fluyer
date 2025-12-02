@@ -1,4 +1,4 @@
-import { CommandRoutes } from "$lib/commands";
+import { CommandRoutes } from "$lib/constants/CommandRoutes";
 import { invoke } from "@tauri-apps/api/core";
 
 export enum CoverArtStatus {

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { PageRoutes } from "$lib/pages";
+import { PageRoutes } from "$lib/constants/PageRoutes";
 import { IconType } from "$lib/ui/icon/types";
 import Sidebar from "$lib/features/sidebar/components/Sidebar.svelte";
 import MenuItem from "$lib/features/menu/components/MenuItem.svelte";

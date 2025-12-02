@@ -5,9 +5,9 @@ import TauriMusicAPI, {TauriMusicCommand} from "$lib/tauri/TauriMusicAPI";
 import QueueService from "$lib/services/QueueService.svelte";
 import {type MusicData, type MusicPlayerSync, RepeatMode} from "$lib/features/music/types";
 import {listen} from "@tauri-apps/api/event";
-import {CommandRoutes} from "$lib/commands";
+import {CommandRoutes} from "$lib/constants/CommandRoutes";
 import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
-import {MusicConfig} from "$lib/constants/music";
+import {MusicConfig} from "$lib/constants/MusicConfig";
 
 const MusicPlayerService = {
     initialize: async () => {

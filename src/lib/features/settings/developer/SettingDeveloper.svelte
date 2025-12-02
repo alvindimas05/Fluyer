@@ -4,7 +4,7 @@ import SettingInput from "$lib/features/settings/SettingInput.svelte";
 import SettingButton from "$lib/features/settings/SettingButton.svelte";
 import { IconType } from "$lib/ui/icon/types";
 import { invoke } from "@tauri-apps/api/core";
-import { CommandRoutes } from "$lib/commands";
+import { CommandRoutes } from "$lib/constants/CommandRoutes";
 import { isDesktop } from "$lib/platform";
 import settingStore from "$lib/stores/setting.svelte.js";
 import PersistentStoreService from "$lib/services/PersistentStoreService.svelte.js";

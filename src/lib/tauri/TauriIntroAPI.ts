@@ -1,5 +1,5 @@
 import {invoke} from "@tauri-apps/api/core";
-import {CommandRoutes} from "$lib/commands";
+import {CommandRoutes} from "$lib/constants/CommandRoutes";
 import {isAndroid} from "$lib/platform";
 import {listen} from "@tauri-apps/api/event";
 

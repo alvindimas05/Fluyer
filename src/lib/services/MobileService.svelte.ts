@@ -1,4 +1,4 @@
-import {PageRoutes} from "$lib/pages";
+import {PageRoutes} from "$lib/constants/PageRoutes";
 import {page} from "$app/state";
 import TauriMobileAPI from "$lib/tauri/TauriMobileAPI";
 import mobileStore from "$lib/stores/mobile.svelte";

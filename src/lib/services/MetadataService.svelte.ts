@@ -1,5 +1,5 @@
 import {type MusicData} from "$lib/features/music/types";
-import {MusicConfig} from "$lib/constants/music";
+import {MusicConfig} from "$lib/constants/MusicConfig";
 import musicStore from "$lib/stores/music.svelte";
 import TauriMetadataAPI from "$lib/tauri/TauriMetadataAPI";
 import CoverArtService, {CoverArtSize} from "$lib/services/CoverArtService.svelte";

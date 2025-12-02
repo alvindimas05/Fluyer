@@ -3,7 +3,7 @@ import MetadataService from "$lib/services/MetadataService.svelte";
 import folderStore from "$lib/stores/folder.svelte";
 import FolderService from "$lib/services/FolderService.svelte";
 import musicStore from "$lib/stores/music.svelte";
-import {MusicConfig} from "$lib/constants/music";
+import {MusicConfig} from "$lib/constants/MusicConfig";
 import ProgressService from "$lib/services/ProgressService.svelte";
 import QueueService from "$lib/services/QueueService.svelte";
 import MusicPlayerService from "$lib/services/MusicPlayerService.svelte";

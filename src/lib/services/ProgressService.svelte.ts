@@ -1,5 +1,5 @@
 import musicStore from "$lib/stores/music.svelte";
-import {MusicConfig} from "$lib/constants/music";
+import {MusicConfig} from "$lib/constants/MusicConfig";
 
 const ProgressService = {
     initialize: () => {

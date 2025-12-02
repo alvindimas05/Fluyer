@@ -7,7 +7,7 @@ import SettingLabel from "$lib/features/settings/SettingLabel.svelte";
 import SettingInput from "$lib/features/settings/SettingInput.svelte";
 import { isAndroid, isDesktop } from "$lib/platform";
 import { invoke } from "@tauri-apps/api/core";
-import { CommandRoutes } from "$lib/commands.js";
+import { CommandRoutes } from "$lib/constants/CommandRoutes.js";
 import { listen } from "@tauri-apps/api/event";
 import PersistentStoreService from "$lib/services/PersistentStoreService.svelte.js";
 import LibraryService from "$lib/services/LibraryService.svelte.js";

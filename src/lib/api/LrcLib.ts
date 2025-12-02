@@ -1,6 +1,6 @@
-import type { MusicData } from "$lib/home/music/types";
+import type { MusicData } from "$lib/features/music/types";
 import axios from "axios";
-import {MusicConfig} from "$lib/constants/music";
+import {MusicConfig} from "$lib/constants/MusicConfig";
 
 interface LrcLibResult {
 	name: string;

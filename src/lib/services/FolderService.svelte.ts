@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { CommandRoutes } from "$lib/commands";
+import { CommandRoutes } from "$lib/constants/CommandRoutes";
 import { type FolderData, type MusicData } from "$lib/features/music/types";
 import { isWindows } from "$lib/platform";
 import folderStore from "$lib/stores/folder.svelte";

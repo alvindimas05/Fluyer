@@ -1,5 +1,5 @@
 import {invoke} from "@tauri-apps/api/core";
-import {CommandRoutes} from "$lib/commands";
+import {CommandRoutes} from "$lib/constants/CommandRoutes";
 
 export enum TauriMusicCommand {
     None = "none",

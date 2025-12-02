@@ -1,4 +1,4 @@
-import {MusicConfig} from "$lib/constants/music";
+import {MusicConfig} from "$lib/constants/MusicConfig";
 import {type MusicData, MusicListType, RepeatMode} from "$lib/features/music/types";
 
 const musicStore = $state({

@@ -6,7 +6,7 @@ import "toastify-js/src/toastify.css";
 import { isDesktop, isLinux, isMobile, isWindows } from "$lib/platform";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onMount } from "svelte";
-import { PageRoutes } from "$lib/pages";
+import { PageRoutes } from "$lib/constants/PageRoutes";
 import { page } from "$app/state";
 import SwipeGuide from "$lib/features/swipe_guide/components/SwipeGuide.svelte";
 import DeveloperDebugOverlay from "$lib/features/developer_debug_overlay/components/DeveloperDebugOverlay.svelte";

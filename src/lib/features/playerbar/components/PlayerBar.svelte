@@ -1,7 +1,7 @@
 <script lang="ts">
-import { PageRoutes } from "$lib/pages";
+import { PageRoutes } from "$lib/constants/PageRoutes";
 import { IconType } from "$lib/ui/icon/types";
-import {MusicConfig} from "$lib/constants/music";
+import {MusicConfig} from "$lib/constants/MusicConfig";
 import {type MusicData, RepeatMode} from "$lib/features/music/types";
 import MetadataService from "$lib/services/MetadataService.svelte";
 import musicStore from "$lib/stores/music.svelte";
