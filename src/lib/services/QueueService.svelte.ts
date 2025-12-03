@@ -67,12 +67,12 @@ const QueueService = {
         return QueueService.resetAndAddList([music]);
     },
     resetAndAddList: async (list: MusicData[]) => {
+        console.log("Adding list to queue with reset:", list.length);
         await TauriMusicAPI.sendCommand(TauriMusicCommand.Clear);
-        musicStore.queue = [];
 
         musicStore.reset = true;
-        await TauriQueueAPI.add(list);
         musicStore.queue = list;
+        await TauriQueueAPI.add(list);
         musicStore.reset = false;
     },
     goTo: (index: number) => {

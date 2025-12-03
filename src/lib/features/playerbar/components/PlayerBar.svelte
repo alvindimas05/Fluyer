@@ -15,6 +15,8 @@ import ProgressBar from "$lib/ui/components/ProgressBar.svelte";
 import View from "$lib/ui/components/View.svelte";
 import Icon from "$lib/ui/icon/Icon.svelte";
 import {onMount} from "svelte";
+import QueueService from "$lib/services/QueueService.svelte";
+import LibraryService from "$lib/services/LibraryService.svelte";
 
 let element: HTMLDivElement;
 let oldMusic: MusicData | undefined = $state(undefined);
@@ -38,10 +40,8 @@ function handleButtonPlayPause() {
     if (musicStore.isPlaying) {
         musicStore.isPlaying = false;
         MusicPlayerService.pause();
-        ProgressService.stop();
     } else {
         MusicPlayerService.play();
-        ProgressService.start();
     }
 }
 
@@ -51,6 +51,17 @@ function handleButtonPrevious() {
 
 function handleButtonNext() {
     MusicPlayerService.next();
+}
+
+async function handleButtonShuffle() {
+    await MusicPlayerService.pause();
+
+    await QueueService.resetAndAddList(
+        await LibraryService.shuffleMusicList(musicStore.queue)
+    );
+
+    await MusicPlayerService.play();
+    ProgressService.start();
 }
 
 function redirectToPlay() {
@@ -90,13 +101,11 @@ function updatePlayerBarHeight() {
 }
 
 $effect(() => {
-    progressPercentage = ((musicStore.progressValue - MusicConfig.min) /
-            (MusicConfig.max - MusicConfig.min)) * 100;
+    progressPercentage = musicStore.progressPercentage;
 });
 
 $effect(() => {
-    volumePercentage = ((musicStore.volume - MusicConfig.vmin) /
-            (MusicConfig.vmax - MusicConfig.vmin)) * 100;
+    volumePercentage = musicStore.volumePercentage;
 });
 
 $effect(() => {
@@ -119,12 +128,14 @@ onMount(() => {
     <ProgressBar
             bind:value={musicStore.progressValue}
             {progressPercentage}
+            onProgressClick={handleProgressClick}
             min={MusicConfig.min}
             max={MusicConfig.max}
             step={MusicConfig.step}
             showTooltip={true}
-            tooltipFormatter={(percentage) => ProgressService.formatDuration(percentage)}
-            onProgressClick={handleProgressClick}
+            tooltipFormatter={(percentage) => ProgressService.formatDuration(
+                (musicStore.currentMusic?.duration ?? 0) * (percentage / 100)
+            )}
             class="mb-3"
             size="lg"
     />
@@ -204,7 +215,7 @@ onMount(() => {
                         </button>
                     {/if}
                     {#if settingStore.ui.showShuffleButton}
-                        <button class="w-6" onclick={() => MusicPlayerService.playShuffle()}>
+                        <button class="w-6" onclick={handleButtonShuffle}>
                             <Icon type={IconType.Shuffle} />
                         </button>
                     {/if}

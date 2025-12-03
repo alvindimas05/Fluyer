@@ -53,10 +53,8 @@ const UIInteractionService = {
                 if (musicStore.isPlaying) {
                     musicStore.isPlaying = false;
                     MusicPlayerService.pause();
-                    ProgressService.stop();
                 } else {
                     MusicPlayerService.play();
-                    ProgressService.start();
                 }
             },
             true,

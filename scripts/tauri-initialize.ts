@@ -1,7 +1,6 @@
 import path from "path";
 import { spawn } from "promisify-child-process";
 import fs from "fs/promises";
-import { exit } from "process";
 
 async function installFfmpeg() {
 	await spawn("bun", ["scripts/install-ffmpeg.ts"], { stdio: "inherit" });

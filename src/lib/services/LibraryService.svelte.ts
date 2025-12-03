@@ -32,6 +32,13 @@ const LibraryService = {
             .sort()
             .map(key => LibraryService.sortMusicList(albumsMap[key]));
     },
+    shuffleMusicList: async (list: MusicData[]) => {
+        for (let i = list.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [list[i], list[j]] = [list[j], list[i]];
+        }
+        return list;
+    },
     sortMusicList: (list: MusicData[]) => {
         if (!list) return [];
 

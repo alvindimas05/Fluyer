@@ -14,15 +14,33 @@ const MusicPlayerService = {
         MusicPlayerService.listenSyncEvents();
         MusicPlayerService.listenVolumeEvents();
     },
-    play: () => {
-        if (musicStore.queue.length === 0) return;
+    play: async () => {
+        if (musicStore.queue.length === 0) {
+            console.warn("Can't play music playback because the queue is empty.");
+            return;
+        }
+
+        if(musicStore.isPlaying){
+            console.warn("Can't play music because it is already playing.");
+            return;
+        }
+
+        console.log("Starting music playback...");
 
         musicStore.isPlaying = true
-        return TauriMusicAPI.sendCommand(TauriMusicCommand.Play);
+        await TauriMusicAPI.sendCommand(TauriMusicCommand.Play);
+        ProgressService.start();
     },
-    pause: () => {
-        musicStore.isPlaying = true;
-        return TauriMusicAPI.sendCommand(TauriMusicCommand.Pause);
+    pause: async () => {
+        if(!musicStore.isPlaying){
+            console.warn("Can't pause music because it is already paused.");
+            return;
+        }
+
+        console.log("Pausing music playback...");
+        musicStore.isPlaying = false;
+        await TauriMusicAPI.sendCommand(TauriMusicCommand.Pause);
+        ProgressService.stop();
     },
     next: () => {
         return TauriMusicAPI.sendCommand(TauriMusicCommand.Next);
@@ -53,23 +71,10 @@ const MusicPlayerService = {
         }
         musicStore.repeatMode = nextRepeatMode;
     },
-    playShuffle: async (list?: MusicData[]) => {
-        if(!list) list = musicStore.queue;
-        for (let i = list.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [list[i], list[j]] = [list[j], list[i]];
-        }
-        await QueueService.resetAndAddList(list);
-        if(!musicStore.isPlaying) MusicPlayerService.play();
-    },
 
     listenSyncEvents: () => {
         return listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
-            if (e.payload.isPlaying){
-                ProgressService.reset();
-                ProgressService.start();
-            }
-            else ProgressService.stop();
+            console.log("Received music player sync event:", e.payload);
 
             if(e.payload.index > -1){
                 musicStore.currentIndex = e.payload.index;
@@ -78,6 +83,13 @@ const MusicPlayerService = {
                 ProgressService.reset();
             }
             musicStore.isPlaying = e.payload.isPlaying;
+
+
+            if (e.payload.isPlaying){
+                ProgressService.reset();
+                ProgressService.start();
+            }
+            else ProgressService.stop();
         });
     },
     listenVolumeEvents: () => {

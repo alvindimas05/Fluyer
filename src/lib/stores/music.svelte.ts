@@ -29,8 +29,18 @@ const musicStore = $state({
     get currentMusic(): MusicData | undefined {
         return this.queue[this.currentIndex] ?? undefined;
     },
+
     get progressDuration(): number {
         return (this.progressValue / MusicConfig.max) * (this.currentMusic?.duration ?? 0);
+    },
+    get progressPercentage(): number {
+        return ((this.progressValue - MusicConfig.min) /
+            (MusicConfig.max - MusicConfig.min)) * 100;
+    },
+
+    get volumePercentage(): number {
+        return ((musicStore.volume - MusicConfig.vmin) /
+            (MusicConfig.vmax - MusicConfig.vmin)) * 100;
     }
 });
 

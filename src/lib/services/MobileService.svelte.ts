@@ -1,11 +1,11 @@
 import {PageRoutes} from "$lib/constants/PageRoutes";
 import {page} from "$app/state";
 import TauriMobileAPI from "$lib/tauri/TauriMobileAPI";
-import mobileStore from "$lib/stores/mobile.svelte";
-import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import {isAndroid} from "$lib/platform";
 
 const MobileService = {
     initialize: async () => {
+        if(!isAndroid()) return;
         MobileService.listenPageEvents();
     },
     listenPageEvents: () => {

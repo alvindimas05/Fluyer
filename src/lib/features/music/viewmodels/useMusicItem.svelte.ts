@@ -61,9 +61,7 @@ export function useMusicItem(music: MusicData, folder?: FolderData) {
                 FolderService.getMusicList(folder!)
             );
         }
-        if (!musicStore.isPlaying){
-            MusicPlayerService.play();
-        }
+        MusicPlayerService.play();
     }
 
     async function addMusic() {
