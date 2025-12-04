@@ -81,7 +81,7 @@ const MusicPlayerService = {
 
             musicStore.isPlaying = e.payload.isPlaying;
             if (e.payload.isPlaying){
-                ProgressService.reset();
+                ProgressService.stop();
                 ProgressService.start();
             } else ProgressService.stop();
         });

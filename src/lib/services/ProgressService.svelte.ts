@@ -27,7 +27,6 @@ const ProgressService = {
             }
         }, updateInterval);
 
-        console.log('Progress interval started with ID:', musicStore.progressIntervalId);
     },
     stop: () => {
         if(musicStore.progressIntervalId === null) {
@@ -35,7 +34,6 @@ const ProgressService = {
             return;
         }
         console.log("Stopping progress...");
-        console.log('Progress interval ID to clear:', musicStore.progressIntervalId);
         clearInterval(musicStore.progressIntervalId);
         musicStore.progressIntervalId = null;
     },

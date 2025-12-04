@@ -10,8 +10,6 @@ import {MusicConfig} from "$lib/constants/MusicConfig";
 import MetadataService from "$lib/services/MetadataService.svelte";
 import MusicPlayerService from "$lib/services/MusicPlayerService.svelte";
 import PageService from "$lib/services/PageService.svelte";
-import LrcLib from "$lib/api/LrcLib";
-import mobileStore from "$lib/stores/mobile.svelte";
 import settingStore from "$lib/stores/setting.svelte";
 import showThenFade from "$lib/actions/showThenFade";
 import {RepeatMode} from "$lib/features/music/types";
@@ -84,12 +82,13 @@ async function resetLyrics() {
 function resetSelectedLyricIndex() {
 	if (lyrics.length < 1) return;
 
-	if (musicStore.progressDuration < lyrics[0].duration) {
+    const duration = musicStore.progressDuration / 1000;
+	if (duration < lyrics[0].duration) {
 		scrollToSelectedLyric();
 		return;
 	}
 	for (let i = 0; i < lyrics.length; i++) {
-		if (musicStore.progressDuration < lyrics[i].duration) {
+		if (duration < lyrics[i].duration) {
 			selectedLyricIndex = i - 1;
 			scrollToSelectedLyric();
 			return;
