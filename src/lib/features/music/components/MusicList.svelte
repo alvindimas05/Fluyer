@@ -21,26 +21,28 @@ let chunkedData = $derived(vm.data ? chunkData(vm.data, vm.state.columnCount) : 
 
 <div class="h-full px-3">
     {#if chunkedData.length > 0 && vm.state.columnCount}
-        <VList
-                class="scrollbar-hidden"
-                data={chunkedData}
-                getKey={(_, i) => i}
-                style="padding-bottom: {playerBarStore.height}px;"
-        >
-            {#snippet children(list)}
-                <div
-                        class="grid gap-x-6"
-                        style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
-                >
-                    {#each list as item}
-                        {#if 'duration' in item}
-                            <MusicItem music={item}/>
-                        {:else}
-                            <MusicItem folder={item}/>
-                        {/if}
-                    {/each}
-                </div>
-            {/snippet}
-        </VList>
+        {#key chunkedData}
+            <VList
+                    class="scrollbar-hidden"
+                    data={chunkedData}
+                    getKey={(_, i) => i}
+                    style="padding-bottom: {playerBarStore.height}px;"
+            >
+                {#snippet children(list)}
+                    <div
+                            class="grid gap-x-6"
+                            style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
+                    >
+                        {#each list as item}
+                            {#if 'duration' in item}
+                                <MusicItem music={item}/>
+                            {:else}
+                                <MusicItem folder={item}/>
+                            {/if}
+                        {/each}
+                    </div>
+                {/snippet}
+            </VList>
+        {/key}
     {/if}
 </div>

@@ -92,8 +92,12 @@ export function useMusicList() {
     });
 
     return {
-        data,
         state,
+
+        get data() {
+            return data;
+        },
+
         updateSize,
     };
 }
