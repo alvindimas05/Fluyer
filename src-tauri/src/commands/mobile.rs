@@ -1,5 +1,5 @@
 #[cfg(mobile)]
-use crate::GLOBAL_APP_HANDLE;
+use crate::state::GLOBAL_APP_HANDLE;
 #[cfg(mobile)]
 use tauri::Emitter;
 #[cfg(mobile)]

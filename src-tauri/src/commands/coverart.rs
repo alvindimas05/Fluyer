@@ -10,8 +10,9 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use tauri::Manager;
 
-use crate::{api::musicbrainz::MusicBrainz, GLOBAL_APP_HANDLE};
+use crate::{api::musicbrainz::MusicBrainz};
 use crate::music::image::ImageHandler;
+use crate::state::GLOBAL_APP_HANDLE;
 
 #[derive(Clone, Debug)]
 struct CoverArtRequest {

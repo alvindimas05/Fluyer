@@ -5,8 +5,9 @@ use crate::commands::mobile::check_read_audio_permission;
 use crate::database::database::GLOBAL_DATABASE;
 use crate::{
     commands::music::MUSIC_STORE_PATH_NAME, logger, music::metadata::MusicMetadata,
-    platform::is_ios, store::GLOBAL_APP_STORE, GLOBAL_APP_HANDLE,
+    platform::is_ios, store::GLOBAL_APP_STORE
 };
+use crate::state::GLOBAL_APP_HANDLE;
 use chrono::{DateTime, Utc};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rusqlite::{params, Connection};

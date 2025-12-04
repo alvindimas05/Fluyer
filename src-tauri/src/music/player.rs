@@ -4,8 +4,9 @@ use std::sync::{OnceLock, Mutex};
 use std::thread;
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
-use crate::{logger, GLOBAL_APP_HANDLE};
+use crate::logger;
 use crate::music::metadata::MusicMetadata;
+use crate::state::{GLOBAL_APP_HANDLE, GLOBAL_MAIN_WINDOW};
 
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistAddMusic;
@@ -764,7 +765,6 @@ impl MusicPlayer {
     }
 
     fn start_focus_listener() {
-        use crate::GLOBAL_MAIN_WINDOW;
         use tauri::Listener;
 
         GLOBAL_MAIN_WINDOW

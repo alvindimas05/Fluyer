@@ -10,7 +10,7 @@ use tauri_plugin_dialog::DialogExt;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 
-use crate::GLOBAL_APP_HANDLE;
+use crate::state::GLOBAL_APP_HANDLE;
 
 use crate::music::player::MusicPlayer;
 use crate::{logger, music::metadata::MusicMetadata};

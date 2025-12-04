@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
-use crate::GLOBAL_APP_HANDLE;
+use crate::state::GLOBAL_APP_HANDLE;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

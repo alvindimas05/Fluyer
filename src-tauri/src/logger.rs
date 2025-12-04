@@ -1,4 +1,34 @@
+use simplelog::{
+    ColorChoice, CombinedLogger, ConfigBuilder, LevelFilter, SharedLogger, TermLogger,
+    TerminalMode, WriteLogger,
+};
+use std::fs::File;
 use std::env::temp_dir;
+
+/// Initialize logging system for the application
+#[cfg(desktop)]
+pub fn init() {
+    let log_path = get_log_path();
+
+    let config = ConfigBuilder::new()
+        .add_filter_ignore_str("symphonia_core")
+        .build();
+
+    let mut loggers: Vec<Box<dyn SharedLogger>> = vec![TermLogger::new(
+        LevelFilter::Debug,
+        config.clone(),
+        TerminalMode::Mixed,
+        ColorChoice::Auto,
+    )];
+
+    // Add file logger if file creation succeeds
+    if let Ok(log_file) = File::create(&log_path) {
+        loggers.push(WriteLogger::new(LevelFilter::Debug, config, log_file));
+    }
+
+    CombinedLogger::init(loggers).unwrap();
+    log::debug!("The log file is saved at {}", log_path);
+}
 
 #[allow(dead_code)]
 pub fn get_log_name() -> String {
