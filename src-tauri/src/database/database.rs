@@ -1,5 +1,5 @@
 use crate::database::migrations::DATABASE_MIGRATIONS;
-use crate::state::GLOBAL_APP_HANDLE;
+use crate::state::app_handle;
 use rusqlite::Connection;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -8,9 +8,7 @@ pub const DATABASE_NAME: &str = "fluyer.db";
 pub static GLOBAL_DATABASE: Mutex<Option<Connection>> = Mutex::new(None);
 
 pub fn initialize_database() {
-    let app_data_dir = GLOBAL_APP_HANDLE
-        .get()
-        .unwrap()
+    let app_data_dir = app_handle()
         .path()
         .app_data_dir()
         .unwrap();

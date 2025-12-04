@@ -12,7 +12,7 @@ use tauri::Manager;
 
 use crate::{api::musicbrainz::MusicBrainz};
 use crate::music::image::ImageHandler;
-use crate::state::GLOBAL_APP_HANDLE;
+use crate::state::app_handle;
 
 #[derive(Clone, Debug)]
 struct CoverArtRequest {
@@ -238,9 +238,7 @@ fn cover_art_remove(name: String) {
 fn cover_art_cache_directory() -> String {
     let dir = format!(
         "{}/coverarts",
-        GLOBAL_APP_HANDLE
-            .get()
-            .unwrap()
+        app_handle()
             .path()
             .app_cache_dir()
             .unwrap()

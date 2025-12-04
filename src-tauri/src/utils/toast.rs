@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
-use crate::state::GLOBAL_APP_HANDLE;
+use crate::state::app_handle;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,7 +20,7 @@ pub struct Toast {}
 
 impl Toast {
     pub fn show(message: String, toast_type: ToastType) {
-        GLOBAL_APP_HANDLE.get().unwrap().emit("toast",
+        app_handle().emit("toast",
     ToastData { message, toast_type }).ok();
     }
 }

@@ -1,4 +1,4 @@
-use crate::state::{initialize_store, GLOBAL_MAIN_WINDOW};
+use crate::state::{initialize_store, set_main_window};
 use tauri::{App, Manager};
 
 #[cfg(target_os = "macos")]
@@ -14,8 +14,7 @@ pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>
 
     configure_window(&main_window);
 
-    GLOBAL_MAIN_WINDOW.set(main_window)
-        .expect("Failed to set GLOBAL_MAIN_WINDOW");
+    set_main_window(main_window);
 
     initialize_store(app);
 

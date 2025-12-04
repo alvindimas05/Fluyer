@@ -1,7 +1,5 @@
 use tauri::{AppHandle, Manager};
 
-#[cfg(desktop)]
-use crate::store::GLOBAL_APP_STORE;
 use tauri::path::BaseDirectory;
 #[cfg(desktop)]
 use tauri::Emitter;
@@ -10,7 +8,7 @@ use tauri_plugin_dialog::DialogExt;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 
-use crate::state::GLOBAL_APP_HANDLE;
+use crate::state::{app_handle, app_store};
 
 use crate::music::player::MusicPlayer;
 use crate::{logger, music::metadata::MusicMetadata};
@@ -53,14 +51,9 @@ pub fn music_request_directory(app: AppHandle) {
             .into_string()
             .expect("Failed to get music dir path.");
 
-        GLOBAL_APP_STORE
-            .get()
-            .expect("Failed to get GLOBAL_APP_STORE")
-            .set(MUSIC_STORE_PATH_NAME, dir);
+        app_store().set(MUSIC_STORE_PATH_NAME, dir);
 
-        GLOBAL_APP_HANDLE
-            .get()
-            .unwrap()
+        app_handle()
             .emit(crate::commands::route::MUSIC_REQUEST_DIRECTORY, ())
             .unwrap_or_else(|_| {
                 eprintln!(

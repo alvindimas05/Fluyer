@@ -1,5 +1,5 @@
 use crate::logger;
-use crate::state::GLOBAL_APP_HANDLE;
+use crate::state::app_handle;
 use tauri::Manager;
 use crate::utils::toast::{Toast, ToastType};
 
@@ -7,13 +7,11 @@ use crate::utils::toast::{Toast, ToastType};
 pub fn developer_save_log() {
     let path = format!(
         "{}/{}",
-        GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
-                .path()
-                .home_dir()
-                .unwrap()
-                .display(),
+        app_handle()
+            .path()
+            .home_dir()
+            .unwrap()
+            .display(),
         logger::get_log_name());
     std::fs::copy(logger::get_log_path(), path.clone()).unwrap();
     Toast::show(format!("Log file saved to {}", path).to_string(), ToastType::Info);
@@ -23,13 +21,11 @@ pub fn developer_save_log() {
 pub fn developer_save_mpv_log() {
     let path = format!(
         "{}/{}",
-        GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
-                .path()
-                .home_dir()
-                .unwrap()
-                .display(),
+        app_handle()
+            .path()
+            .home_dir()
+            .unwrap()
+            .display(),
         logger::get_mpv_log_name());
     std::fs::copy(logger::get_mpv_log_path(), path.clone()).unwrap();
     Toast::show(format!("Log MPV file saved to {}", path).to_string(), ToastType::Info);

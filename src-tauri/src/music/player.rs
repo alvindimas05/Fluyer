@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 use crate::logger;
 use crate::music::metadata::MusicMetadata;
-use crate::state::{GLOBAL_APP_HANDLE, GLOBAL_MAIN_WINDOW};
+use crate::state::{app_handle, main_window};
 
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistAddMusic;
@@ -183,9 +183,7 @@ impl MusicPlayer {
 
         if _command == MusicCommand::Clear {
             #[cfg(target_os = "android")]
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            app_handle()
                 .fluyer()
                 .player_run_command(PlayerCommandArguments::new(PlayerCommand::Clear))
                 .ok();
@@ -197,9 +195,7 @@ impl MusicPlayer {
 
         if _command == MusicCommand::Next {
             #[cfg(target_os = "android")]
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            app_handle()
                 .fluyer()
                 .player_run_command(PlayerCommandArguments::new(PlayerCommand::Next))
                 .ok();
@@ -221,9 +217,7 @@ impl MusicPlayer {
                     MusicCommand::RepeatNone => PlayerCommand::RepeatNone,
                     _ => return,
                 });
-                GLOBAL_APP_HANDLE
-                    .get()
-                    .unwrap()
+                app_handle()
                     .fluyer()
                     .player_run_command(args)
                     .ok();
@@ -251,9 +245,7 @@ impl MusicPlayer {
         {
             let mut args = PlayerCommandArguments::new(PlayerCommand::Seek);
             args.seek_position = Some(position);
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            app_handle()
                 .fluyer()
                 .player_run_command(args)
                 .ok();
@@ -281,9 +273,7 @@ impl MusicPlayer {
     pub fn get_current_duration() -> f64 {
         #[cfg(target_os = "android")]
         {
-            let info = GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            let info = app_handle()
                 .fluyer()
                 .player_get_info()
                 .unwrap();
@@ -304,9 +294,7 @@ impl MusicPlayer {
     pub fn get_sync_info(is_reset: bool) -> MusicPlayerSync {
         #[cfg(target_os = "android")]
         {
-            let info = GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            let info = app_handle()
                 .fluyer()
                 .player_get_info()
                 .unwrap();
@@ -389,9 +377,7 @@ impl MusicPlayer {
                     image: None,
                 })
                 .collect::<Vec<_>>();
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            app_handle()
                 .fluyer()
                 .player_playlist_add(music_playlist)
                 .unwrap();
@@ -403,9 +389,7 @@ impl MusicPlayer {
         {
             let mut args = PlayerCommandArguments::new(PlayerCommand::RemovePlaylist);
             args.playlist_remove_index = Some(index);
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            app_handle()
                 .fluyer()
                 .player_run_command(args)
                 .unwrap();
@@ -450,9 +434,7 @@ impl MusicPlayer {
         {
             let mut args = PlayerCommandArguments::new(PlayerCommand::GotoPlaylist);
             args.playlist_goto_index = Some(index);
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            app_handle()
                 .fluyer()
                 .player_run_command(args)
                 .ok();
@@ -592,9 +574,7 @@ impl MusicPlayer {
 
     pub fn moveto_playlist(from: usize, to: usize) {
         #[cfg(target_os = "android")]
-        GLOBAL_APP_HANDLE
-            .get()
-            .unwrap()
+        app_handle()
             .fluyer()
             .player_playlist_move_to(from, to)
             .ok();
@@ -634,9 +614,7 @@ impl MusicPlayer {
         {
             let mut args = PlayerCommandArguments::new(PlayerCommand::Volume);
             args.volume = Some(volume);
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            app_handle()
                 .fluyer()
                 .player_run_command(args)
                 .ok();
@@ -655,9 +633,7 @@ impl MusicPlayer {
 
     fn play_pause(play: bool) {
         #[cfg(target_os = "android")]
-        GLOBAL_APP_HANDLE
-            .get()
-            .unwrap()
+        app_handle()
             .fluyer()
             .player_run_command(PlayerCommandArguments::new(if play {
                 PlayerCommand::Play
@@ -716,9 +692,7 @@ impl MusicPlayer {
     }
 
     pub fn emit_sync(is_reset: bool) {
-        GLOBAL_APP_HANDLE
-            .get()
-            .unwrap()
+        app_handle()
             .emit(
                 crate::commands::route::MUSIC_PLAYER_SYNC,
                 Self::get_sync_info(is_reset),
@@ -750,9 +724,7 @@ impl MusicPlayer {
 
         #[cfg(target_os = "android")]
         {
-            GLOBAL_APP_HANDLE
-                .get()
-                .unwrap()
+            app_handle()
                 .fluyer()
                 .watch_playlist_change(|payload| {
                     thread::spawn(move || {
@@ -767,9 +739,7 @@ impl MusicPlayer {
     fn start_focus_listener() {
         use tauri::Listener;
 
-        GLOBAL_MAIN_WINDOW
-            .get()
-            .unwrap()
+        main_window()
             .listen("tauri://focus", move |_| {
                 MusicPlayer::emit_sync(false);
             });

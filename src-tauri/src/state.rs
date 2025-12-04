@@ -23,51 +23,51 @@ impl Default for AppState {
     }
 }
 
-/// Global application handle
-pub static GLOBAL_APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
+static APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
+static MAIN_WINDOW: OnceLock<WebviewWindow> = OnceLock::new();
 
-/// Global main window reference
-pub static GLOBAL_MAIN_WINDOW: OnceLock<WebviewWindow> = OnceLock::new();
-
-/// Global application store
-static GLOBAL_STORE_NAME: &str = "store.json";
-pub static GLOBAL_APP_STORE: OnceLock<Arc<Store<Wry>>> = OnceLock::new();
+static STORE_NAME: &str = "store.json";
+static APP_STORE: OnceLock<Arc<Store<Wry>>> = OnceLock::new();
 
 /// Get the global application handle
 pub fn app_handle() -> &'static AppHandle {
-    GLOBAL_APP_HANDLE
+    APP_HANDLE
         .get()
-        .expect("GLOBAL_APP_HANDLE not initialized")
+        .expect("APP_HANDLE not initialized")
 }
 
 /// Get the global main window
 pub fn main_window() -> &'static WebviewWindow {
-    GLOBAL_MAIN_WINDOW
+    MAIN_WINDOW
         .get()
-        .expect("GLOBAL_MAIN_WINDOW not initialized")
+        .expect("MAIN_WINDOW not initialized")
+}
+
+pub fn set_main_window(window: WebviewWindow) {
+    MAIN_WINDOW.set(window).unwrap();
 }
 
 pub fn app_store() -> &'static Arc<Store<Wry>> {
-    GLOBAL_APP_STORE
+    APP_STORE
         .get()
-        .expect("GLOBAL_APP_STORE not initialized")
+        .expect("APP_STORE not initialized")
 }
 
 /// Initialize global state with app handle
 pub fn initialize_globals(app_handle: &AppHandle) {
-    GLOBAL_APP_HANDLE
+    APP_HANDLE
         .set(app_handle.clone())
-        .expect("Failed to set GLOBAL_APP_HANDLE");
+        .expect("Failed to set APP_HANDLE");
 
     app_handle.manage(Mutex::new(AppState::default()));
 }
 
 pub fn initialize_store(app: &mut App){
-    let store = app.store(GLOBAL_STORE_NAME)
+    let store = app.store(STORE_NAME)
         .expect("Failed to initialize store.");
 
-    if GLOBAL_APP_STORE.set(store).is_err() {
-        logger::error!("Failed to set GLOBAL_APP_STORE");
+    if APP_STORE.set(store).is_err() {
+        logger::error!("Failed to set APP_STORE");
     }
 }
 
