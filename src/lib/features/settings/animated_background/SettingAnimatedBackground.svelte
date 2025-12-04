@@ -3,6 +3,8 @@ import SettingLabel from "$lib/features/settings/SettingLabel.svelte";
 import SettingInput from "$lib/features/settings/SettingInput.svelte";
 import { SettingAnimatedBackgroundType } from "$lib/features/settings/animated_background/types.js";
 import settingStore from "$lib/stores/setting.svelte.js";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
 
 async function onMethodChange(
 	e: Event & {
@@ -10,12 +12,12 @@ async function onMethodChange(
 	},
 ) {
 	const value = <SettingAnimatedBackgroundType>e.currentTarget.value;
-	if (value === $settingAnimatedBackgroundType) return;
-	await PersistentStoreController.animatedBackgroundType.set(value);
-	$settingAnimatedBackgroundType = value;
-	$settingTriggerAnimatedBackground = new Date().toString();
+	if (value === settingStore.animatedBackground.type) return;
+	await PersistentStoreService.animatedBackgroundType.set(value);
+    settingStore.animatedBackground.type = value;
+    settingStore.animatedBackground.trigger = new Date().toString();
 
-	ToastController.info("Animated Background method changed to " + value);
+	ToastService.info("Animated Background method changed to " + value);
 }
 </script>
 

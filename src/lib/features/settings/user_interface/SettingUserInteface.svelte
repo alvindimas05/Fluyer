@@ -1,26 +1,21 @@
 <script lang="ts">
 import SettingLabel from "$lib/features/settings/SettingLabel.svelte";
 import SettingInput from "$lib/features/settings/SettingInput.svelte";
-import {
-	settingUiPlayShowBackButton,
-	settingUiPlayShowVolume,
-	settingUiShowRepeatButton,
-	settingUiShowShuffleButton,
-} from "$lib/stores/setting";
-import PersistentStoreController from "$lib/controllers/PersistentStoreController";
 import { isDesktop } from "$lib/platform";
-import ToastController from "$lib/controllers/ToastController";
+import settingStore from "$lib/stores/setting.svelte";
+import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
 
 function onUiPlayShowBackButtonChange(
 	e: Event & {
 		currentTarget: EventTarget & HTMLInputElement;
 	},
 ) {
-	settingUiPlayShowBackButton.set(e.currentTarget.checked);
-	PersistentStoreController.userInterface.play.showBackButton.set(
+	settingStore.ui.play.showBackButton = e.currentTarget.checked;
+	PersistentStoreService.userInterface.play.showBackButton.set(
 		e.currentTarget.checked,
 	);
-	ToastController.info(
+	ToastService.info(
 		`Play Back button ${e.currentTarget.checked ? "enabled" : "disabled"}`,
 	);
 }
@@ -30,11 +25,11 @@ function onUiPlayShowVolumeChange(
 		currentTarget: EventTarget & HTMLInputElement;
 	},
 ) {
-	settingUiPlayShowVolume.set(e.currentTarget.checked);
-	PersistentStoreController.userInterface.play.showVolume.set(
+	settingStore.ui.play.showVolume.set(e.currentTarget.checked);
+	PersistentStoreService.userInterface.play.showVolume.set(
 		e.currentTarget.checked,
 	);
-	ToastController.info(
+	ToastService.info(
 		`Play Volume ${e.currentTarget.checked ? "enabled" : "disabled"}`,
 	);
 }
@@ -44,11 +39,11 @@ function onUiShowRepeatButtonChange(
 		currentTarget: EventTarget & HTMLInputElement;
 	},
 ) {
-	settingUiShowRepeatButton.set(e.currentTarget.checked);
-	PersistentStoreController.userInterface.showRepeatButton.set(
+	settingStore.ui.showRepeatButton.set(e.currentTarget.checked);
+	PersistentStoreService.userInterface.showRepeatButton.set(
 		e.currentTarget.checked,
 	);
-	ToastController.info(
+	ToastService.info(
 		`Repeat button ${e.currentTarget.checked ? "enabled" : "disabled"}`,
 	);
 }
@@ -58,11 +53,11 @@ function onUiShowShuffleButtonChange(
 		currentTarget: EventTarget & HTMLInputElement;
 	},
 ) {
-	settingUiShowShuffleButton.set(e.currentTarget.checked);
-	PersistentStoreController.userInterface.showShuffleButton.set(
+	settingStore.ui.showShuffleButton = e.currentTarget.checked;
+	PersistentStoreService.userInterface.showShuffleButton.set(
 		e.currentTarget.checked,
 	);
-	ToastController.info(
+	ToastService.info(
 		`Shuffle button ${e.currentTarget.checked ? "enabled" : "disabled"}`,
 	);
 }
@@ -77,7 +72,7 @@ function onUiShowShuffleButtonChange(
         <input
                 type="checkbox"
                 class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
-                checked={$settingUiShowRepeatButton}
+                checked={settingStore.ui.showRepeatButton}
                 onchange={onUiShowRepeatButtonChange}
         />
         <div>Show Repeat Button</div>
@@ -88,7 +83,7 @@ function onUiShowShuffleButtonChange(
         <input
                 type="checkbox"
                 class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
-                checked={$settingUiShowShuffleButton}
+                checked={settingStore.ui.showShuffleButton}
                 onchange={onUiShowShuffleButtonChange}
         />
         <div>Show Shuffle Button</div>
@@ -101,7 +96,7 @@ function onUiShowShuffleButtonChange(
             <input
                     type="checkbox"
                     class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
-                    checked={$settingUiPlayShowBackButton}
+                    checked={settingStore.ui.play.showBackButton}
                     onchange={onUiPlayShowBackButtonChange}
             />
             <div>Show Back Button On Full Play Screen (You can still press Esc to go back)</div>
@@ -112,7 +107,7 @@ function onUiShowShuffleButtonChange(
             <input
                     type="checkbox"
                     class="w-4 h-4 accent-white bg-transparent border-white/40 rounded focus:ring-2 focus:ring-white/30 transition"
-                    checked={$settingUiPlayShowVolume}
+                    checked={settingStore.ui.play.showVolume}
                     onchange={onUiPlayShowVolumeChange}
             />
             <div>Show Volume On Full Play Screen</div>
