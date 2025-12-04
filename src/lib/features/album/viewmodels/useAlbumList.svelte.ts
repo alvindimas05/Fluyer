@@ -91,6 +91,7 @@ function onMouseWheel(e: WheelEvent & { currentTarget: EventTarget & HTMLDivElem
 }
 
 function scrollTo(index: number) {
+    if(index < 0 || !virtualizerHandle) return;
     virtualizerHandle.scrollToIndex(index, { align: 'nearest', smooth: true });
 }
 
