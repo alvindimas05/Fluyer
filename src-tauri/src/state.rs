@@ -1,6 +1,7 @@
 use crate::music::player::MusicPlayer;
-use std::sync::{Mutex, OnceLock};
-use tauri::{AppHandle, Manager, RunEvent, WebviewWindow};
+use std::sync::{Arc, Mutex, OnceLock};
+use tauri::{App, AppHandle, Manager, RunEvent, WebviewWindow, Wry};
+use tauri_plugin_store::{Store, StoreExt};
 use crate::logger;
 
 /// Global application state
@@ -22,11 +23,15 @@ impl Default for AppState {
     }
 }
 
-/// Global application handle - initialized once at startup
+/// Global application handle
 pub static GLOBAL_APP_HANDLE: OnceLock<AppHandle> = OnceLock::new();
 
-/// Global main window reference - initialized once at startup
+/// Global main window reference
 pub static GLOBAL_MAIN_WINDOW: OnceLock<WebviewWindow> = OnceLock::new();
+
+/// Global application store
+static GLOBAL_STORE_NAME: &str = "store.json";
+pub static GLOBAL_APP_STORE: OnceLock<Arc<Store<Wry>>> = OnceLock::new();
 
 /// Get the global application handle
 pub fn app_handle() -> &'static AppHandle {
@@ -42,6 +47,12 @@ pub fn main_window() -> &'static WebviewWindow {
         .expect("GLOBAL_MAIN_WINDOW not initialized")
 }
 
+pub fn app_store() -> &'static Arc<Store<Wry>> {
+    GLOBAL_APP_STORE
+        .get()
+        .expect("GLOBAL_APP_STORE not initialized")
+}
+
 /// Initialize global state with app handle
 pub fn initialize_globals(app_handle: &AppHandle) {
     GLOBAL_APP_HANDLE
@@ -49,6 +60,15 @@ pub fn initialize_globals(app_handle: &AppHandle) {
         .expect("Failed to set GLOBAL_APP_HANDLE");
 
     app_handle.manage(Mutex::new(AppState::default()));
+}
+
+pub fn initialize_store(app: &mut App){
+    let store = app.store(GLOBAL_STORE_NAME)
+        .expect("Failed to initialize store.");
+
+    if GLOBAL_APP_STORE.set(store).is_err() {
+        logger::error!("Failed to set GLOBAL_APP_STORE");
+    }
 }
 
 /// Handle application runtime events

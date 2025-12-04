@@ -5,7 +5,6 @@ mod database;
 mod file;
 mod music;
 mod playlist;
-mod store;
 mod utils;
 mod logger;
 
