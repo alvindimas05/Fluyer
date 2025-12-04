@@ -216,7 +216,6 @@ const LrcLib = {
 					}
 				} catch (queryErr) {
 					console.warn(`Query "${query}" failed:`, queryErr);
-					continue;
 				}
 			}
 

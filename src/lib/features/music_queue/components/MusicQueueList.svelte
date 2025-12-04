@@ -80,8 +80,6 @@ function initMuuri() {
         await QueueService.moveTo(fromIndex, toIndex);
         dragging = true;
     });
-
-    return muuri;
 }
 
 // Creates a DOM element for a queue item
@@ -113,7 +111,7 @@ function elementToggleDraggable() {
     }
 }
 
-$effect(() => {
+function refreshGrid(){
     const queue = musicStore.queue!!;
     // Determine which items were removed from the queue
     const removedIndices = musicStore.reset
@@ -165,9 +163,12 @@ $effect(() => {
 
     // Store current queue state for next comparison
     oldQueue = queue;
-})
+}
 
-onMount(initMuuri);
+onMount(() => {
+    initMuuri();
+    $effect(refreshGrid);
+});
 
 // Reactively update draggable state when dependencies change
 $effect(elementToggleDraggable);
