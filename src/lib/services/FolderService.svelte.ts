@@ -59,7 +59,7 @@ const FolderService = {
         folderStore.currentFolder = { path } as FolderData
     },
 
-    containsMusic: (music: MusicData, folder: FolderData | undefined): boolean => {
+    containsMusic: (music: MusicData, folder: FolderData | null): boolean => {
         if (!folder || !music.path.startsWith(folder.path)) return false;
 
         const folderPathWithSlash = folder.path.endsWith(PATH_SEPARATOR)

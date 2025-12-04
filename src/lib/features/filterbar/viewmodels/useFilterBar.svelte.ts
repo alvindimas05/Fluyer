@@ -5,6 +5,7 @@ import filterStore from "$lib/stores/filter.svelte";
 import iconStore from "$lib/stores/icon.svelte";
 import folderStore from "$lib/stores/folder.svelte";
 import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
+import musicStore from "$lib/stores/music.svelte";
 
 const RESPONSIVE_RULES = [
     [1536, 2.01, 0.125],
@@ -73,10 +74,16 @@ function toggleSort() {
 
 async function handleToggleChange(type: MusicListType){
     filterStore.album = null;
+
+    // Set the current folder to the first music path if only one is set
     if(type === MusicListType.Folder) {
         const musicPaths = await PersistentStoreService.musicPath.get();
-        folderStore.currentFolder = musicPaths.length > 2 ? { path: musicPaths[0] } as FolderData : null;
+        folderStore.currentFolder = musicPaths.length === 1 ? { path: musicPaths[0] } as FolderData : null;
     }
+
+    musicStore.listType = type;
+
+    console.log("Music list type changed to:", type);
 }
 
 function updateSize() {
