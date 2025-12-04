@@ -3,7 +3,7 @@ import musicSvelte from "$lib/stores/music.svelte";
 import ProgressService from "$lib/services/ProgressService.svelte";
 import TauriMusicAPI, {TauriMusicCommand} from "$lib/tauri/TauriMusicAPI";
 import QueueService from "$lib/services/QueueService.svelte";
-import {type MusicData, type MusicPlayerSync, RepeatMode} from "$lib/features/music/types";
+import {type MusicPlayerSync, RepeatMode} from "$lib/features/music/types";
 import {listen} from "@tauri-apps/api/event";
 import {CommandRoutes} from "$lib/constants/CommandRoutes";
 import PersistentStoreService from "$lib/services/PersistentStoreService.svelte";
@@ -21,20 +21,18 @@ const MusicPlayerService = {
         }
 
         if(musicStore.isPlaying){
-            console.warn("Can't play music because it is already playing.");
-            return;
+            console.warn("Playing music playback called but music is already played.");
         }
 
         console.log("Starting music playback...");
 
-        musicStore.isPlaying = true
+        musicStore.isPlaying = true;
         await TauriMusicAPI.sendCommand(TauriMusicCommand.Play);
         ProgressService.start();
     },
     pause: async () => {
         if(!musicStore.isPlaying){
-            console.warn("Can't pause music because it is already paused.");
-            return;
+            console.warn("Pausing music playback called but music is already paused.");
         }
 
         console.log("Pausing music playback...");
@@ -79,17 +77,13 @@ const MusicPlayerService = {
             if(e.payload.index > -1){
                 musicStore.currentIndex = e.payload.index;
                 musicStore.progressValue = (e.payload.currentPosition / musicStore.currentMusic!!.duration) * MusicConfig.max;
-            } else {
-                ProgressService.reset();
-            }
+            } else ProgressService.reset();
+
             musicStore.isPlaying = e.payload.isPlaying;
-
-
             if (e.payload.isPlaying){
                 ProgressService.reset();
                 ProgressService.start();
-            }
-            else ProgressService.stop();
+            } else ProgressService.stop();
         });
     },
     listenVolumeEvents: () => {

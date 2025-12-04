@@ -11,12 +11,16 @@ const LogService = {
     listenLog: () => {
         const handler = {
             apply(target: any, thisArg: any, args: any) {
-                invoke(CommandRoutes.LOG_INFO, { message: args.map(String).join(" ") });
+                const message = args
+                    .map((arg: any) => (typeof arg === "object" && arg !== null ? JSON.stringify(arg) : String(arg)))
+                    .join(" ");
+                invoke(CommandRoutes.LOG_INFO, { message });
                 return Reflect.apply(target, thisArg, args);
             }
         };
 
         console.log = new Proxy(console.log, handler);
+
     },
     listenError: () => {
         window.addEventListener("error", async (e) => {
