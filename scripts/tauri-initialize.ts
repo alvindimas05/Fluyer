@@ -15,7 +15,7 @@ try {
 } catch {
     await fs.copyFile(path.resolve(".env.example"), path.resolve(".env"));
     console.log(
-        "Missing .env! The file is now copied from .env.example and make sure to configure it before re-run.",
+        "Missing .env! The file is now copied from .env.example and make sure to configure it before running.",
     );
 }
 const promises = [installBass(), installFfmpeg()];
