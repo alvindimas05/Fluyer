@@ -13,27 +13,29 @@ const FolderService = {
     PATH_SEPARATOR,
 
     initialize: async () => {
-        await FolderService.loadList();
+        FolderService.listenFolderEvents();
     },
 
-    loadList: async () => {
-        const currentFolder = folderStore.currentFolder;
-        let folders: FolderData[];
+    listenFolderEvents: () => {
+        $effect(() => void(async () => {
+            const currentFolder = folderStore.currentFolder;
+            let folders: FolderData[];
 
-        if (currentFolder) {
-            folders = await invoke(CommandRoutes.FOLDER_GET_ITEMS, {
-                path: currentFolder.path
-            });
-        } else {
-            const musicPaths = await PersistentStoreService.musicPath.get();
-            folders = musicPaths.map(path => ({ path } as FolderData));
-        }
+            if (currentFolder) {
+                folders = await invoke(CommandRoutes.FOLDER_GET_ITEMS, {
+                    path: currentFolder.path
+                });
+            } else {
+                const musicPaths = await PersistentStoreService.musicPath.get();
+                folders = musicPaths.map(path => ({ path } as FolderData));
+            }
 
-        folders.sort((a, b) =>
-            a.path.localeCompare(b.path, undefined, { sensitivity: 'base' })
-        );
+            folders.sort((a, b) =>
+                a.path.localeCompare(b.path, undefined, { sensitivity: 'base' })
+            );
 
-        folderStore.list = folders;
+            folderStore.list = folders;
+        })());
     },
 
     navigateToRoot: async () => {
@@ -66,9 +68,11 @@ const FolderService = {
             ? folder.path
             : `${folder.path}${PATH_SEPARATOR}`;
 
-        const remainingPath = music.path.startsWith(folderPathWithSlash)
-            ? music.path.substring(folderPathWithSlash.length)
-            : "";
+        // Music must start with folder path + separator
+        if (!music.path.startsWith(folderPathWithSlash)) return false;
+
+        const remainingPath = music.path.substring(folderPathWithSlash.length);
+        console.log(remainingPath);
 
         // Check if music is in immediate folder (no nested folders)
         return remainingPath !== "" && !remainingPath.includes(PATH_SEPARATOR);

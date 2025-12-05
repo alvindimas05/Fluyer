@@ -74,6 +74,7 @@ function toggleSort() {
 
 async function handleToggleChange(type: MusicListType){
     filterStore.album = null;
+    folderStore.currentFolder = null;
 
     // Set the current folder to the first music path if only one is set
     if(type === MusicListType.Folder) {
