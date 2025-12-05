@@ -38,18 +38,6 @@ const FolderService = {
         })());
     },
 
-    navigateToRoot: async () => {
-        const musicPaths = await PersistentStoreService.musicPath.get();
-
-        if (musicPaths.length === 1) {
-            folderStore.currentFolder = { path: musicPaths[0] };
-        } else {
-            folderStore.currentFolder = null;
-        }
-
-        await FolderService.loadList();
-    },
-
     navigateToParent: async (folder: FolderData | null) => {
         if (!folder) return;
 
