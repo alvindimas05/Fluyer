@@ -1,19 +1,19 @@
 <script lang="ts">
 import "../style.scss";
-import {onDestroy, onMount} from "svelte";
+import { onDestroy, onMount } from "svelte";
 import * as StackBlur from "stackblur-canvas";
 // @ts-ignore
 import ColorThief from "colorthief/dist/color-thief.mjs";
-import {SettingAnimatedBackgroundType} from "$lib/features/settings/animated_background/types";
-import {prominent} from "color.js";
-import {page} from "$app/state";
-import {PageRoutes} from "$lib/constants/PageRoutes";
-import {isLinux, isMobile} from "$lib/platform";
-import {afterNavigate} from "$app/navigation";
-import {MusicConfig} from "$lib/constants/MusicConfig";
+import { SettingAnimatedBackgroundType } from "$lib/features/settings/animated_background/types";
+import { prominent } from "color.js";
+import { page } from "$app/state";
+import { PageRoutes } from "$lib/constants/PageRoutes";
+import { isLinux, isMobile } from "$lib/platform";
+import { afterNavigate } from "$app/navigation";
+import { MusicConfig } from "$lib/constants/MusicConfig";
 import MetadataService from "$lib/services/MetadataService.svelte";
 import musicStore from "$lib/stores/music.svelte";
-import {CoverArtSize} from "$lib/services/CoverArtService.svelte";
+import { CoverArtSize } from "$lib/services/CoverArtService.svelte";
 import settingStore from "$lib/stores/setting.svelte";
 import LibraryService from "$lib/services/LibraryService.svelte";
 
@@ -30,15 +30,19 @@ let previousColors: string[] = [];
 let previousBackgroundColors: string[][] = [];
 let currentAlbumImage: string | null = null;
 
-// Transition queue management
-let pendingTransition: HTMLCanvasElement | null = null;
+// Transition management
+let targetCanvas: HTMLCanvasElement | null = null;
 let activeTransition: number | null = null;
+let transitionProgress: number = 0;
 
 // Performance optimization: reuse canvases
 const canvasPool: HTMLCanvasElement[] = [];
 const MAX_POOL_SIZE = 3;
 
-function getCanvasFromPool(width: number, height: number): HTMLCanvasElement {
+function getCanvasFromPool(
+    width: number,
+    height: number,
+): HTMLCanvasElement {
     let canvas = canvasPool.pop();
     if (!canvas) {
         canvas = document.createElement("canvas");
@@ -72,7 +76,7 @@ function balanceColor(hex: string): string {
     }
 
     // Ensure we stay within reasonable bounds
-    if(currentAlbumImage === MusicConfig.defaultAlbumImage){
+    if (currentAlbumImage === MusicConfig.defaultAlbumImage) {
         hsl.s = 0.6;
         hsl.l = 0.6;
     } else {
@@ -164,10 +168,7 @@ function rgbToHex(r: number, g: number, b: number): string {
 }
 
 async function getColors(force = false): Promise<string[] | null> {
-    currentAlbumImage = await MetadataService.getMusicCoverArt(
-        musicStore.currentMusic,
-        CoverArtSize.AnimatedBackground,
-    );
+    currentAlbumImage = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
     if (previousBackground === currentAlbumImage && !force) return null;
 
     let image = new Image();
@@ -183,7 +184,8 @@ async function getColors(force = false): Promise<string[] | null> {
 
     let colors: string[] = [];
     if (
-        settingStore.animatedBackground.type === SettingAnimatedBackgroundType.Prominent
+        settingStore.animatedBackground.type ===
+        SettingAnimatedBackgroundType.Prominent
     ) {
         // @ts-ignore
         colors = await prominent(image, {
@@ -227,7 +229,9 @@ async function createCanvas(
         for (let x = 0; x < cols; x++) {
             if (!previousBackgroundColors[y][x]) {
                 previousBackgroundColors[y][x] =
-                    previousColors[Math.floor(Math.random() * previousColors.length)];
+                    previousColors[
+                        Math.floor(Math.random() * previousColors.length)
+                    ];
             }
         }
     }
@@ -238,12 +242,24 @@ async function createCanvas(
     for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
             baseContext.fillStyle = previousBackgroundColors[y][x];
-            baseContext.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+            baseContext.fillRect(
+                x * blockSize,
+                y * blockSize,
+                blockSize,
+                blockSize,
+            );
         }
     }
 
     const blurRadius = Math.floor(CANVAS_BLUR_RADIUS * SCALE);
-    StackBlur.canvasRGBA(baseCanvas, 0, 0, scaledWidth, scaledHeight, blurRadius);
+    StackBlur.canvasRGBA(
+        baseCanvas,
+        0,
+        0,
+        scaledWidth,
+        scaledHeight,
+        blurRadius,
+    );
 
     return baseCanvas;
 }
@@ -252,12 +268,20 @@ async function initializeCanvas(reinitialize = false) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const newCanvas = await createCanvas({ usePreviousColors: reinitialize });
+    const newCanvas = await createCanvas({
+        usePreviousColors: reinitialize,
+    });
     if (!newCanvas) return;
 
     if (reinitialize) {
         canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-        canvasContext.drawImage(newCanvas, 0, 0, canvas.width, canvas.height);
+        canvasContext.drawImage(
+            newCanvas,
+            0,
+            0,
+            canvas.width,
+            canvas.height,
+        );
 
         // Clean up old canvas
         if (currentCanvas) {
@@ -302,38 +326,63 @@ async function afterInitializeCanvas() {
     LibraryService.initialize();
 }
 
-// New smooth transition function with interruption support
+// Smooth transition function with proper interruption support
 async function transitionToNewCanvas(force = false) {
     const now = performance.now();
 
     const _newCanvas = await createCanvas({ force });
     if (!_newCanvas) return;
 
-    // Cancel active transition and use its target as new starting point
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Handle interruption: capture current blended state
     if (activeTransition !== null) {
         cancelAnimationFrame(activeTransition);
         activeTransition = null;
 
-        // If there was a pending canvas, use it as current
-        if (pendingTransition) {
-            if (currentCanvas) {
-                returnCanvasToPool(currentCanvas);
-            }
-            currentCanvas = pendingTransition;
-            pendingTransition = null;
+        // Capture the current blended frame as the new starting point
+        const capturedCanvas = getCanvasFromPool(width, height);
+        const capturedContext = capturedCanvas.getContext("2d", {
+            alpha: false,
+        })!;
+
+        // Draw the current state (blend of currentCanvas and targetCanvas at current progress)
+        capturedContext.clearRect(0, 0, width, height);
+
+        if (currentCanvas) {
+            capturedContext.globalAlpha = 1;
+            capturedContext.drawImage(currentCanvas, 0, 0, width, height);
         }
+
+        if (targetCanvas && transitionProgress > 0) {
+            capturedContext.globalAlpha = transitionProgress;
+            capturedContext.drawImage(targetCanvas, 0, 0, width, height);
+        }
+
+        capturedContext.globalAlpha = 1;
+
+        // Clean up old canvases
+        if (currentCanvas) {
+            returnCanvasToPool(currentCanvas);
+        }
+        if (targetCanvas) {
+            returnCanvasToPool(targetCanvas);
+        }
+
+        // Use captured state as new starting point
+        currentCanvas = capturedCanvas;
+        targetCanvas = null;
+        transitionProgress = 0;
     }
 
-    // Set new pending canvas
-    if (pendingTransition) {
-        returnCanvasToPool(pendingTransition);
+    // Set new target canvas
+    if (targetCanvas) {
+        returnCanvasToPool(targetCanvas);
     }
-    pendingTransition = _newCanvas;
+    targetCanvas = _newCanvas;
 
-    const width = canvas.width;
-    const height = canvas.height;
-
-    // Reuse buffer canvas
+    // Reuse buffer canvas for rendering
     const buffer = getCanvasFromPool(width, height);
     const bufferContext = buffer.getContext("2d", { alpha: false })!;
 
@@ -346,6 +395,7 @@ async function transitionToNewCanvas(force = false) {
 
         // Linear progress
         const progress = Math.min(elapsed / CANVAS_TRANSITION_DURATION, 1);
+        transitionProgress = progress;
 
         // Only update if progress changed significantly (optimization)
         if (Math.abs(progress - lastProgress) < 0.01 && progress < 1) {
@@ -356,14 +406,17 @@ async function transitionToNewCanvas(force = false) {
 
         bufferContext.clearRect(0, 0, width, height);
 
+        // Draw current state
         bufferContext.globalAlpha = 1;
         if (currentCanvas) {
             bufferContext.drawImage(currentCanvas, 0, 0, width, height);
         }
 
+        // Blend in target state
         bufferContext.globalAlpha = progress;
-        bufferContext.drawImage(pendingTransition!, 0, 0, width, height);
+        bufferContext.drawImage(targetCanvas!, 0, 0, width, height);
 
+        // Draw to main canvas
         bufferContext.globalAlpha = 1;
         canvasContext.clearRect(0, 0, width, height);
         canvasContext.drawImage(buffer, 0, 0, width, height);
@@ -375,12 +428,15 @@ async function transitionToNewCanvas(force = false) {
             if (currentCanvas) {
                 returnCanvasToPool(currentCanvas);
             }
-            currentCanvas = pendingTransition;
-            pendingTransition = null;
+            currentCanvas = targetCanvas;
+            targetCanvas = null;
+            transitionProgress = 0;
             activeTransition = null;
             returnCanvasToPool(buffer);
 
-            console.log(`Animated Background transition took ${performance.now() - now} ms`);
+            console.log(
+                `Animated Background transition took ${performance.now() - now} ms`,
+            );
         }
     }
 
@@ -396,10 +452,11 @@ let isMounted = false;
 onMount(() => {
     initializeCanvas();
 
-    if(isLinux()) afterNavigate((navigation) => {
-        if(navigation.from?.route.id !== PageRoutes.VISUALIZER) return;
-        initializeCanvas(true);
-    });
+    if (isLinux())
+        afterNavigate((navigation) => {
+            if (navigation.from?.route.id !== PageRoutes.VISUALIZER) return;
+            initializeCanvas(true);
+        });
 
     $effect(() => {
         musicStore.currentIndex;
@@ -409,7 +466,7 @@ onMount(() => {
 
     $effect(() => {
         settingStore.animatedBackground.trigger;
-        if(isMounted) transitionToNewCanvas(true);
+        if (isMounted) transitionToNewCanvas(true);
         else isMounted = true;
     });
 });
@@ -422,7 +479,7 @@ onDestroy(() => {
 
     // Clean up canvases
     if (currentCanvas) returnCanvasToPool(currentCanvas);
-    if (pendingTransition) returnCanvasToPool(pendingTransition);
+    if (targetCanvas) returnCanvasToPool(targetCanvas);
 
     // Clear pool
     canvasPool.length = 0;
@@ -430,6 +487,8 @@ onDestroy(() => {
 </script>
 
 <svelte:window onresize={onWindowResize} />
-<canvas class="fixed rounded-windows"
-        class:hidden={page.url.pathname === PageRoutes.VISUALIZER}
-        bind:this={canvas}></canvas>
+<canvas
+    class="fixed rounded-windows"
+    class:hidden={page.url.pathname === PageRoutes.VISUALIZER}
+    bind:this={canvas}
+></canvas>
