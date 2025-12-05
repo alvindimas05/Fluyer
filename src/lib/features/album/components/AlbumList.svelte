@@ -19,7 +19,8 @@ const vm = useAlbumList();
                 class="scrollbar-hidden {vm.isHorizontal ? '' : 'overflow-y-clip'}"
                 horizontal={vm.isHorizontal}
                 style="padding-bottom: {vm.isHorizontal ? 0 : playerBarStore.height + filterStore.bar.height + mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
-                getKey={(_, i) => i}>
+                getKey={(_, i) => i}
+                bind:this={vm.virtualizerHandle}>
             {#snippet children(dataList, index)}
                 {#if vm.isHorizontal}
                     <div style="width: {vm.state.itemWidth}px;">

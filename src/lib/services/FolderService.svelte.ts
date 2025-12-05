@@ -60,7 +60,6 @@ const FolderService = {
         if (!music.path.startsWith(folderPathWithSlash)) return false;
 
         const remainingPath = music.path.substring(folderPathWithSlash.length);
-        console.log(remainingPath);
 
         // Check if music is in immediate folder (no nested folders)
         return remainingPath !== "" && !remainingPath.includes(PATH_SEPARATOR);
