@@ -7,6 +7,8 @@ edition = "2021"
 
 [dependencies]
 slint = "1.14.1"
+i-slint-backend-winit = "=1.14.1"
+winit = "0.30.12"
 
 [build-dependencies]
 slint-build = "1.14.1"
