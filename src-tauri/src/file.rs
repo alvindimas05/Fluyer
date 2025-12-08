@@ -3,11 +3,11 @@ use std::path::Path;
 #[cfg(target_os = "android")]
 use crate::commands::mobile::check_read_audio_permission;
 use crate::database::database::GLOBAL_DATABASE;
-use crate::{
-    commands::music::MUSIC_STORE_PATH_NAME, logger, music::metadata::MusicMetadata,
-    platform::is_ios
-};
 use crate::state::{app_handle, app_store};
+use crate::{
+    logger, music::commands::directory::MUSIC_STORE_PATH_NAME, music::metadata::MusicMetadata,
+    platform::is_ios,
+};
 use chrono::{DateTime, Utc};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rusqlite::{params, Connection};
@@ -90,9 +90,7 @@ pub fn get_all_music() -> Option<Vec<MusicMetadata>> {
     let mut dirs: Vec<Result<DirEntry, walkdir::Error>> = vec![];
 
     // Get store music paths
-    let dir = app_store()
-        .get(MUSIC_STORE_PATH_NAME)?
-        .to_string();
+    let dir = app_store().get(MUSIC_STORE_PATH_NAME)?.to_string();
     let dir_paths = dir.split(MUSIC_PATH_SEPARATOR);
 
     for d in dir_paths {
@@ -271,9 +269,12 @@ fn get_musics_from_db(conn: &mut Connection, options: GetMusicFromDbOptions) -> 
             path: path.clone(),
             duration: row.get::<_, Option<i64>>(1)?.map(|v| v as u128),
             title: row.get(2)?,
-            artist: row.get::<_, Option<String>>(3)?.map(|v| v.replace(
-                &MusicMetadata::artist_separator(), MusicMetadata::separator()
-            )),
+            artist: row.get::<_, Option<String>>(3)?.map(|v| {
+                v.replace(
+                    &MusicMetadata::artist_separator(),
+                    MusicMetadata::separator(),
+                )
+            }),
             album: row.get(4)?,
             album_artist: row.get(5)?,
             track_number: row.get(6)?,
@@ -340,7 +341,8 @@ fn delete_non_existing_paths(conn: &mut Connection, musics: Vec<String>) {
 }
 
 fn get_home_dir() -> String {
-    app_handle().path()
+    app_handle()
+        .path()
         .home_dir()
         .expect("Failed to get home dir on mobile.")
         .to_string_lossy()

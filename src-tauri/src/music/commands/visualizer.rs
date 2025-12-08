@@ -1,104 +1,19 @@
+use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 
-use tauri::path::BaseDirectory;
-#[cfg(desktop)]
-use tauri::Emitter;
-#[cfg(desktop)]
-use tauri_plugin_dialog::DialogExt;
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 
-use crate::state::{app_handle, app_store};
-
-use crate::music::player::MusicPlayer;
-use crate::{logger, music::metadata::MusicMetadata};
+use crate::logger;
 
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub static MUSIC_STORE_PATH_NAME: &str = "music-path";
-
-#[tauri::command]
-pub fn music_controller(command: String) {
-    MusicPlayer::send_command(command.clone());
-}
-
-#[tauri::command]
-pub fn music_position_set(position: u64) {
-    MusicPlayer::set_pos(position);
-}
-
-#[tauri::command]
-pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
-    crate::file::get_all_music()
-}
-
-#[tauri::command]
-pub fn music_playlist_add(playlist: Vec<MusicMetadata>) {
-    MusicPlayer::add_playlist(playlist);
-}
-
-#[cfg(desktop)]
-#[tauri::command]
-pub fn music_request_directory(app: AppHandle) {
-    app.dialog().file().pick_folder(|dir_path| {
-        let dir = dir_path
-            .unwrap()
-            .into_path()
-            .expect("Failed to get music dir path.")
-            .into_os_string()
-            .into_string()
-            .expect("Failed to get music dir path.");
-
-        app_store().set(MUSIC_STORE_PATH_NAME, dir);
-
-        app_handle()
-            .emit(crate::commands::route::MUSIC_REQUEST_DIRECTORY, ())
-            .unwrap_or_else(|_| {
-                eprintln!(
-                    "Failed to emit {}",
-                    crate::commands::route::MUSIC_REQUEST_DIRECTORY
-                )
-            })
-    });
-}
-
-#[tauri::command]
-pub fn music_playlist_remove(index: usize) {
-    MusicPlayer::remove_playlist(index);
-}
-
-#[tauri::command]
-pub fn music_set_volume(volume: f32) {
-    MusicPlayer::set_volume(volume);
-}
-
-#[tauri::command]
-pub fn music_playlist_goto(index: usize) {
-    MusicPlayer::goto_playlist(index);
-}
-
-#[tauri::command]
-pub fn music_playlist_moveto(from: usize, to: usize) {
-    MusicPlayer::moveto_playlist(from, to);
-}
-
-#[tauri::command]
-pub fn music_equalizer(values: Vec<f32>) {
-    MusicPlayer::equalizer(values);
-}
-
-#[tauri::command]
-pub fn music_equalizer_reset() {
-    MusicPlayer::reset_equalizer();
-}
-
-#[tauri::command]
-pub async fn music_get_image(path: String, size: Option<String>) -> Option<String> {
-    MusicMetadata::get_image_from_path_async(path, size).await
-}
-
+/// Get visualizer buffer data from an audio file
+///
+/// This command converts the audio file to a standardized format (mono, 44100Hz, 192kbps MP3)
+/// suitable for visualizer processing. The conversion is done using FFmpeg.
 #[tauri::command]
 pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) -> Option<Vec<u8>> {
     tokio::task::spawn_blocking(move || {
@@ -221,24 +136,4 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
     .await
     .ok()
     .flatten()
-}
-
-#[tauri::command]
-pub fn music_get_current_duration() -> Option<f64> {
-    Some(MusicPlayer::get_current_duration())
-}
-
-#[tauri::command]
-pub fn music_player_request_sync() {
-    MusicPlayer::request_sync();
-}
-
-#[tauri::command]
-pub fn music_get_lyrics(path: String) -> Option<String> {
-    MusicMetadata::get_lyrics_from_path(path)
-}
-
-#[tauri::command]
-pub fn music_toggle_bit_perfect(enable: bool) {
-    MusicPlayer::toggle_bit_perfect(enable);
 }
