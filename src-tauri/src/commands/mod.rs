@@ -1,8 +1,4 @@
-pub mod coverart;
 pub mod decorum;
-pub mod developer;
-pub mod folder;
-pub mod log;
 pub mod mobile;
 pub mod playlist;
 pub mod route;
@@ -11,7 +7,7 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     // Music commands
     crate::music::commands::music_controller,
     crate::music::commands::music_position_set,
-    crate::music::commands::music_get_all,
+    crate::folder::commands::music_get_all,
     crate::music::commands::music_playlist_add,
     crate::music::commands::music_playlist_remove,
     crate::music::commands::music_set_volume,
@@ -30,13 +26,16 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     #[cfg(desktop)]
     crate::music::commands::music_equalizer_reset,
     // Folder commands
-    folder::folder_get_items,
-    folder::folder_get_first_music_path,
-    // Log commands
-    log::log_error,
-    log::log_info,
+    crate::folder::commands::folder_get_items,
+    crate::folder::commands::folder_get_first_music_path,
+    // System/Log commands
+    crate::system::commands::log_error,
+    crate::system::commands::log_info,
     #[cfg(target_os = "android")]
-    log::toast,
+    crate::system::commands::toast,
+    // Developer commands
+    crate::system::commands::developer_save_log,
+    crate::system::commands::developer_save_mpv_log,
     // Mobile commands
     #[cfg(target_os = "android")]
     mobile::request_read_audio_permission,
@@ -49,11 +48,8 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     #[cfg(target_os = "android")]
     mobile::android_request_directory,
     // Cover art commands
-    coverart::cover_art_get,
+    crate::coverart::commands::cover_art_get,
     // Platform-specific commands
     #[cfg(windows)]
     decorum::decorum_show_snap_overlay,
-    // Developer commands
-    developer::developer_save_log,
-    developer::developer_save_mpv_log,
 ];

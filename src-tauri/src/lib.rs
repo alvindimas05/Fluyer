@@ -1,12 +1,14 @@
 // Core modules
 mod api;
 mod commands;
+mod coverart;
 mod database;
-mod file;
+mod folder;
+mod logger;
 mod music;
 mod playlist;
+mod system;
 mod utils;
-mod logger;
 
 // Application modules
 mod app_setup;
@@ -16,9 +18,9 @@ mod state;
 // Re-export platform module from main
 pub mod platform;
 
+use crate::commands::COMMAND_HANDLERS;
 use app_setup::setup_application;
 use events::handle_window_events;
-use crate::commands::COMMAND_HANDLERS;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
