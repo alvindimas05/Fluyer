@@ -1,9 +1,14 @@
 // Prevent console window in addition to Slint window in Windows release builds when, e.g., starting the app via file manager. Ignored on other platforms.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod window_utils;
+
 use std::error::Error;
 
+use i_slint_backend_winit::WinitWindowAccessor;
+use window_utils::set_traffic_lights_position;
 use winit::platform::macos::WindowAttributesExtMacOS;
+
 slint::include_modules!();
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -17,6 +22,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     slint::platform::set_platform(Box::new(backend))?;
 
     let ui = AppWindow::new()?;
+
+    slint::invoke_from_event_loop({
+        let ui_handle = ui.as_weak();
+        move || {
+            let ui = ui_handle.unwrap();
+            ui.window().with_winit_window(|window| {
+                set_traffic_lights_position(window, 12.0, 0.0);
+            });
+        }
+    })?;
 
     ui.window().set_maximized(true);
 
