@@ -4,7 +4,7 @@ import { IconType } from "$lib/ui/icon/types";
 import SettingMusicPaths from "$lib/features/settings/music_paths/SettingMusicPaths.svelte";
 import { isMobile } from "$lib/platform";
 import SettingAnimatedBackground from "$lib/features/settings/animated_background/SettingAnimatedBackground.svelte";
-import SettingUserInteface from "$lib/features/settings/user_interface/SettingUserInteface.svelte";
+import SettingUserInteface from "$lib/features/settings/user_interface/SettingUserInterface.svelte";
 import SettingDeveloper from "$lib/features/settings/developer/SettingDeveloper.svelte";
 import SettingIconTheme from "$lib/features/settings/icon_theme/SettingIconTheme.svelte";
 import SettingMusicPlayerConfiguration from "$lib/features/settings/music_player_configuration/SettingMusicPlayerConfiguration.svelte";

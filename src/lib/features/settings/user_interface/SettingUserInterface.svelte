@@ -25,7 +25,7 @@ function onUiPlayShowVolumeChange(
 		currentTarget: EventTarget & HTMLInputElement;
 	},
 ) {
-	settingStore.ui.play.showVolume.set(e.currentTarget.checked);
+	settingStore.ui.play.showVolume = e.currentTarget.checked;
 	PersistentStoreService.userInterface.play.showVolume.set(
 		e.currentTarget.checked,
 	);
@@ -39,7 +39,7 @@ function onUiShowRepeatButtonChange(
 		currentTarget: EventTarget & HTMLInputElement;
 	},
 ) {
-	settingStore.ui.showRepeatButton.set(e.currentTarget.checked);
+	settingStore.ui.showRepeatButton = e.currentTarget.checked;
 	PersistentStoreService.userInterface.showRepeatButton.set(
 		e.currentTarget.checked,
 	);
