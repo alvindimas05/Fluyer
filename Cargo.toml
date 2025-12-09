@@ -1,5 +1,5 @@
 [package]
-name = "slint-rust-template"
+name = "fluyer"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,11 +9,16 @@ edition = "2021"
 slint = "1.14.1"
 i-slint-backend-winit = "=1.14.1"
 winit = "0.30.12"
+image = "0.25.9"
+rand = "0.9.2"
+libblur = "0.21.0"
+simplelog = "0.12.2"
+log = "0.4.29"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-objc2 = "0.5"
-objc2-foundation = { version = "0.2", features = ["NSGeometry"] }
-objc2-app-kit = { version = "0.2", features = ["NSWindow", "NSView"] }
+objc2 = "0.6.3"
+objc2-foundation = { version = "0.3.2", features = ["NSGeometry"] }
+objc2-app-kit = { version = "0.3.2", features = ["NSWindow", "NSView"] }
 
 [build-dependencies]
 slint-build = "1.14.1"

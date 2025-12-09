@@ -1,17 +1,4 @@
-/// Utilities for window customization on macOS
-
 #[cfg(target_os = "macos")]
-/// Sets the position of macOS traffic light buttons (close, minimize, zoom).
-///
-/// # Arguments
-/// * `window` - The winit window reference
-/// * `x` - Horizontal position from the left edge of the window
-/// * `y` - Vertical position from the bottom of the window (AppKit uses bottom-left origin)
-///
-/// # Example
-/// ```
-/// set_traffic_lights_position(window, 12.0, 16.0);
-/// ```
 pub fn set_traffic_lights_position(window: &winit::window::Window, x: f64, y: f64) {
     use objc2_app_kit::{NSWindow, NSWindowButton};
     use winit::raw_window_handle::{HasWindowHandle, RawWindowHandle};
@@ -28,11 +15,11 @@ pub fn set_traffic_lights_position(window: &winit::window::Window, x: f64, y: f6
 
                 // Get the three traffic light buttons
                 let close_button =
-                    ns_window.standardWindowButton(NSWindowButton::NSWindowCloseButton);
+                    ns_window.standardWindowButton(NSWindowButton::CloseButton);
                 let miniaturize_button =
-                    ns_window.standardWindowButton(NSWindowButton::NSWindowMiniaturizeButton);
+                    ns_window.standardWindowButton(NSWindowButton::MiniaturizeButton);
                 let zoom_button =
-                    ns_window.standardWindowButton(NSWindowButton::NSWindowZoomButton);
+                    ns_window.standardWindowButton(NSWindowButton::ZoomButton);
 
                 // Set positions for each button
                 if let Some(button) = close_button {
