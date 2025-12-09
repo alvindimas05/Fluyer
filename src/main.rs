@@ -1,4 +1,4 @@
-// Prevent console window in addition to Slint window in Windows release builds when, e.g., starting the app via file manager. Ignored on other platforms.
+// Prevent console window in addition to Slint window in Windows release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod background_generator;
@@ -14,51 +14,39 @@ use winit::{event::WindowEvent, platform::macos::WindowAttributesExtMacOS};
 
 slint::include_modules!();
 
+/// Initialize logging configuration
 fn init_logging() {
     let mut config = ConfigBuilder::new();
     config.add_filter_ignore_str("symphonia_core");
     let config = config.build();
 
-    let mut logs: Vec<Box<dyn SharedLogger>> = vec![TermLogger::new(
+    let logs: Vec<Box<dyn SharedLogger>> = vec![TermLogger::new(
         simplelog::LevelFilter::Debug,
-        config.clone(),
+        config,
         simplelog::TerminalMode::Mixed,
         simplelog::ColorChoice::Auto,
     )];
 
-    // let log_file = File::create(log_path.clone());
-    // if log_file.is_ok() {
-    //     logs.push(WriteLogger::new(
-    //         LevelFilter::Debug,
-    //         config,
-    //         log_file.unwrap(),
-    //     ));
-    // }
-
-    CombinedLogger::init(logs).unwrap();
+    CombinedLogger::init(logs).expect("Failed to initialize logger");
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-    init_logging();
-
+/// Configure window backend with macOS-specific settings
+fn configure_backend() -> Result<i_slint_backend_winit::Backend, Box<dyn Error>> {
     let mut backend = i_slint_backend_winit::Backend::new()?;
     backend.window_attributes_hook = Some(Box::new(|attributes| {
         attributes
             .with_fullsize_content_view(true)
             .with_title_hidden(true)
             .with_titlebar_transparent(true)
+            .with_transparent(true)
     }));
-    slint::platform::set_platform(Box::new(backend))?;
+    Ok(backend)
+}
 
-    let ui = AppWindow::new()?;
-
-    ui.window().set_maximized(true);
-
-    // Set traffic lights position after window is ready
+/// Setup traffic light position adjustment on window redraw
+fn setup_traffic_lights(ui: &AppWindow) {
     let ui_weak = ui.as_weak();
     ui.window().on_winit_window_event(move |_, event| {
-        log::debug!("Received event in window event hook: {:?}", event);
-
         if event.eq(&WindowEvent::RedrawRequested) {
             if let Some(ui) = ui_weak.upgrade() {
                 ui.window().with_winit_window(|window| {
@@ -66,14 +54,16 @@ fn main() -> Result<(), Box<dyn Error>> {
                 });
             }
         }
-
         EventResult::Propagate
     });
+}
 
-    let ui_weak_background = ui.as_weak();
+/// Generate and set the background image
+fn setup_background(ui: &AppWindow) -> Result<(), Box<dyn Error>> {
+    let ui_weak = ui.as_weak();
     slint::invoke_from_event_loop(move || {
-        // Generate and set background image BEFORE showing/maximizing the window
-        let background_img = generate_blurred_background(1920, 1080, 0.1, 20);
+        let background_img = generate_blurred_background(1920, 1080, 0.1, 20)
+            .expect("Failed to generate background image");
 
         let width = background_img.width();
         let height = background_img.height();
@@ -83,10 +73,29 @@ fn main() -> Result<(), Box<dyn Error>> {
             &buffer, width, height,
         ));
 
-        if let Some(ui) = ui_weak_background.upgrade() {
+        if let Some(ui) = ui_weak.upgrade() {
             ui.set_background_image(slint_image);
         }
     })?;
+    Ok(())
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    init_logging();
+
+    // Configure and set the backend
+    let backend = configure_backend()?;
+    slint::platform::set_platform(Box::new(backend))?;
+
+    // Create and configure the UI
+    let ui = AppWindow::new()?;
+    ui.window().set_maximized(true);
+
+    // Setup window customizations
+    setup_traffic_lights(&ui);
+    setup_background(&ui)?;
+
+    // Run the application
     ui.run()?;
     Ok(())
 }
