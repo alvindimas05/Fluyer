@@ -4,15 +4,10 @@ use rand::Rng;
 
 const BACKGROUND_BLUR_RADIUS: u32 = 40;
 pub fn generate_blurred_background(
-    monitor_width: u32,
-    monitor_height: u32,
-    scale_factor: f32,
+    width: u32,
+    height: u32,
     square_size: u32,
 ) -> Result<RgbaImage, libblur::BlurError> {
-    // Calculate downscaled dimensions
-    let width = (monitor_width as f32 * scale_factor) as u32;
-    let height = (monitor_height as f32 * scale_factor) as u32;
-
     // Create the image buffer
     let mut img: RgbaImage = ImageBuffer::new(width, height);
     let mut rng = rand::rng();
@@ -56,5 +51,8 @@ fn blur_image(img: &mut RgbaImage, blur_radius: u32) -> Result<RgbaImage, libblu
         AnisotropicRadius::create(blur_radius, blur_radius),
         ThreadingPolicy::Adaptive,
     )?;
-    Ok(img.clone())
+
+    // Optimize: Return the mutated image directly instead of cloning
+    // The image is already modified in-place by stack_blur
+    Ok(std::mem::take(img))
 }

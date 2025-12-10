@@ -6,7 +6,10 @@ export component AppWindow inherits Window {
         height: 100%;
         source: root.background-image;
         image-fit: cover;
+        image-rendering: pixelated;
         opacity: root.background-image.width > 0 ? 1.0 : 0.0;
+        cache-rendering-hint: true;
+        
         animate opacity {
             duration: 1s;
             easing: linear;
