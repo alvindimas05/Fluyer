@@ -39,6 +39,7 @@ fn configure_backend() -> Result<i_slint_backend_winit::Backend, Box<dyn Error>>
             .with_title_hidden(true)
             .with_titlebar_transparent(true)
             .with_transparent(true)
+            .with_maximized(true)
     }));
     Ok(backend)
 }
@@ -62,10 +63,9 @@ fn setup_traffic_lights(ui: &AppWindow) {
 fn setup_background(ui: &AppWindow) -> Result<(), Box<dyn Error>> {
     let ui_weak = ui.as_weak();
     slint::invoke_from_event_loop(move || {
-        let background_img = generate_blurred_background(
-            (1920.0 * 0.1) as u32, (1080.0 * 0.1) as u32, 20,
-        )
-            .expect("Failed to generate background image");
+        let background_img =
+            generate_blurred_background((1920.0 * 0.1) as u32, (1080.0 * 0.1) as u32, 20)
+                .expect("Failed to generate background image");
 
         let width = background_img.width();
         let height = background_img.height();
@@ -93,11 +93,20 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Create and configure the UI
     let ui = AppWindow::new()?;
-    ui.window().set_maximized(true);
 
     // Setup window customizations
     setup_traffic_lights(&ui);
     setup_background(&ui)?;
+
+    // Maximize after event loop starts
+    let ui_weak = ui.as_weak();
+    slint::invoke_from_event_loop(move || {
+        if let Some(ui) = ui_weak.upgrade() {
+            ui.window().with_winit_window(|window| {
+                window.set_maximized(true);
+            });
+        }
+    })?;
 
     // Run the application
     ui.run()?;

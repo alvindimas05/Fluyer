@@ -1,18 +1,74 @@
+import { ScrollView } from "std-widgets.slint";
+
 export component AppWindow inherits Window {
     in property <image> background-image;
     background: transparent;
+    default-font-family: "-apple-system";
     Image {
         width: 100%;
         height: 100%;
         source: root.background-image;
         image-fit: cover;
-        image-rendering: pixelated;
         opacity: root.background-image.width > 0 ? 1.0 : 0.0;
         cache-rendering-hint: true;
-        
-        animate opacity {
-            duration: 1s;
-            easing: linear;
+        // animate opacity {
+        //     duration: 1s;
+        //     easing: linear;
+        // }
+    }
+
+    VerticalLayout {
+        width: 100%;
+        height: 100%;
+        alignment: start;
+
+        ScrollView {
+            width: 100%;
+            height: 300px;
+            viewport-height: 200px;
+            vertical-scrollbar-policy: always-off;
+            horizontal-scrollbar-policy: always-off;
+            HorizontalLayout {
+                padding: 12px;
+                spacing: 12px;
+                for i in 20: VerticalLayout {
+                    width: 200px;
+                    height: 250px;
+                    Rectangle {
+                        Image {
+                            width: 100%;
+                            height: 100%;
+                            source: @image-url("../placeholder/album.png");
+                        }
+
+                        border-radius: 8px;
+                        clip: true;
+                    }
+
+                    VerticalLayout {
+                        padding-top: 8px;
+
+                        Text {
+                            text: "Album Title";
+                            color: white;
+                            font-size: 18px;
+                            font-weight: 500;
+                            vertical-stretch: 0;
+                        }
+                    }
+
+                    VerticalLayout {
+                        padding-top: 4px;
+                        Text {
+                            text: "Album Artist";
+                            color: white;
+                            font-size: 16px;
+                            vertical-stretch: 0;
+                            opacity: 0.8;
+                        }
+                    }
+                }
+            }
         }
     }
 }
