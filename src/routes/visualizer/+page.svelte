@@ -2,13 +2,7 @@
 import { onDestroy, onMount } from "svelte";
 import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
 import View from "$lib/features/visualizers/vissonance/View";
-import ToastController from "$lib/controllers/ToastController";
-import MusicController from "$lib/controllers/MusicController";
-import PageController from "$lib/controllers/PageController";
-import { musicCurrentIndex } from "$lib/stores/music.svelte";
-import type { MusicData } from "$lib/home/music/types";
 import { isMobile } from "$lib/platform";
-import { mobileStatusBarHeight } from "$lib/stores/mobile.svelte";
 import Barred from "$lib/features/visualizers/vissonance/visualizers/Barred";
 import Fracture from "$lib/features/visualizers/vissonance/visualizers/Fracture";
 // import HillFog from "$lib/visualizers/vissonance/visualizers/HillFog";
@@ -17,9 +11,15 @@ import Silk from "$lib/features/visualizers/vissonance/visualizers/Silk";
 import Siphon from "$lib/features/visualizers/vissonance/visualizers/Siphon";
 import Tricentric from "$lib/features/visualizers/vissonance/visualizers/Tricentric";
 import type Visualizer from "$lib/features/visualizers/vissonance/visualizers/Visualizer";
-import { showThenFade } from "$lib/controllers/UIController";
+import musicStore from "$lib/stores/music.svelte";
+import type {MusicData} from "$lib/features/music/types";
+import TauriVisualizerAPI from "$lib/tauri/TauriVisualizerAPI";
+import mobileStore from "$lib/stores/mobile.svelte";
+import PageService from "$lib/services/PageService.svelte";
+import ToastService from "$lib/services/ToastService.svelte";
+import showThenFade from "$lib/actions/showThenFade";
 
-let marginTop = $derived((isMobile() ? $mobileStatusBarHeight : 0) + 40);
+let marginTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + 40);
 
 let container: HTMLDivElement;
 
@@ -75,12 +75,12 @@ async function setCurrentVisualizer(index: number) {
 }
 
 async function setAudio(music: MusicData | null = null) {
-	if (!MusicController.isPlaying) return;
+	if (!musicStore.isPlaying) return;
 
 	try {
 		let now = performance.now();
-		const buffer = await MusicController.getVisualizerBuffer(
-			music ? music.path : MusicController.currentMusic.path,
+		const buffer = await TauriVisualizerAPI.getMusicBuffer(
+			music ? music.path : musicStore.currentMusic!!.path,
 		);
 		if (buffer === null) return;
 		console.log(
@@ -96,24 +96,21 @@ async function setAudio(music: MusicData | null = null) {
 }
 
 function onKeyDown(e: KeyboardEvent) {
-	if (e.key === "Escape") PageController.back();
+	if (e.key === "Escape") PageService.back();
 }
 
 function toastError() {
-	ToastController.error("Your OS WebView does not support WebGL.");
+	ToastService.error("Your OS WebView does not support WebGL.");
 }
 
-let unlistenMusicCurrentIndex = musicCurrentIndex.subscribe(async (index) => {
-	if (currentVisualizerIndex === -1) return;
-	visualizers[currentVisualizerIndex].executeOnNewSong();
-	setAudio(MusicController.getMusicByIndex(index));
-});
-onMount(() => {
-	start();
+$effect(() => {
+    if(currentVisualizerIndex === -1) return;
+    visualizers[musicStore.currentIndex].executeOnNewSong();
+    setAudio(musicStore.currentMusic);
 });
 
+onMount(start);
 onDestroy(() => {
-	if (unlistenMusicCurrentIndex) unlistenMusicCurrentIndex();
 	try {
 		View.destroy();
 	} catch (e) {}
@@ -146,6 +143,6 @@ onDestroy(() => {
         {/each}
     </ul>
     <p class="mt-2 text-gray-400 hover:text-gray-300 cursor-pointer"
-        onclick={() => PageController.back()}>
+        onclick={PageService.back}>
         Back</p>
 </div>

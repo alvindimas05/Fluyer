@@ -1,5 +1,4 @@
-import MusicController from "$lib/controllers/MusicController";
-import sleep from "sleep-promise";
+import musicStore from "$lib/stores/music.svelte";
 
 interface AnalyserInterface {
 	audioContext: AudioContext;
@@ -50,7 +49,7 @@ const AudioAnalyser = {
 			AudioAnalyser.data.audioContext.destination,
 		);
 
-		let duration = await MusicController.getPlayerCurrentDuration();
+		let duration = musicStore.progressDuration;
 		if (duration === null) return;
 		duration = duration / 1000;
 
