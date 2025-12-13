@@ -1,0 +1,13 @@
+export component Background inherits Image {
+    in property <image> image;
+    width: 100%;
+    height: 100%;
+    source: root.image;
+    image-fit: cover;
+    opacity: root.image.width > 0 ? 1.0 : 0.0;
+    cache-rendering-hint: true;
+    // animate opacity {
+    //     duration: 1s;
+    //     easing: linear;
+    // }
+}

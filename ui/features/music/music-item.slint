@@ -1,0 +1,44 @@
+export component MusicItem inherits HorizontalLayout {
+    in property <image> cover-image;
+    in property <string> title;
+    in property <string> info;
+    in property <string> metadata;
+    spacing: 12px;
+    Rectangle {
+        width: 56px;
+        height: 56px;
+        border-radius: 4px;
+        clip: true;
+        Image {
+            width: 100%;
+            height: 100%;
+            source: root.cover-image;
+            image-fit: cover;
+        }
+    }
+
+    VerticalLayout {
+        alignment: start;
+        spacing: 4px;
+        Text {
+            text: root.title;
+            font-size: 14px;
+            font-weight: 500;
+            overflow: elide;
+        }
+
+        Text {
+            text: root.info;
+            font-size: 12px;
+            overflow: elide;
+            opacity: 0.9;
+        }
+
+        Text {
+            text: root.metadata;
+            font-size: 12px;
+            overflow: elide;
+            opacity: 0.9;
+        }
+    }
+}

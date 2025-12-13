@@ -1,0 +1,24 @@
+import { ScrollView } from "std-widgets.slint";
+import { MusicItem } from "./music-item.slint";
+
+export component MusicList inherits ScrollView {
+    width: 100%;
+    height: 500px;
+    vertical-scrollbar-policy: always-off;
+    horizontal-scrollbar-policy: always-off;
+    VerticalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        spacing: 16px;
+        for row in 20: HorizontalLayout {
+            spacing: 24px;
+            for col in 3: MusicItem {
+                width: 33.33%;
+                cover-image: @image-url("../../../placeholder/album.png");
+                title: "Song Title " + (row * 3 + col + 1);
+                info: "Album Name - Artist Name";
+                metadata: "16-bit/44.1 kHz 3:45";
+            }
+        }
+    }
+}

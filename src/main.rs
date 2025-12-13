@@ -9,6 +9,7 @@ use std::error::Error;
 use background_generator::generate_blurred_background;
 use i_slint_backend_winit::{EventResult, WinitWindowAccessor};
 use simplelog::{CombinedLogger, ConfigBuilder, SharedLogger, TermLogger};
+use slint::EventLoopError;
 use window_utils::set_traffic_lights_position;
 use winit::{event::WindowEvent, platform::macos::WindowAttributesExtMacOS};
 
@@ -84,20 +85,7 @@ fn setup_background(ui: &AppWindow) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-    init_logging();
-
-    // Configure and set the backend
-    let backend = configure_backend()?;
-    slint::platform::set_platform(Box::new(backend))?;
-
-    // Create and configure the UI
-    let ui = AppWindow::new()?;
-
-    // Setup window customizations
-    setup_traffic_lights(&ui);
-    setup_background(&ui)?;
-
+fn setup_maximize(ui: &AppWindow) -> Result<(), EventLoopError> {
     // Maximize after event loop starts
     let ui_weak = ui.as_weak();
     slint::invoke_from_event_loop(move || {
@@ -106,9 +94,21 @@ fn main() -> Result<(), Box<dyn Error>> {
                 window.set_maximized(true);
             });
         }
-    })?;
+    })
+}
 
-    // Run the application
+fn main() -> Result<(), Box<dyn Error>> {
+    init_logging();
+
+    let backend = configure_backend()?;
+    slint::platform::set_platform(Box::new(backend))?;
+
+    let ui = AppWindow::new()?;
+
+    setup_traffic_lights(&ui);
+    setup_background(&ui)?;
+    setup_maximize(&ui)?;
+    
     ui.run()?;
     Ok(())
 }
