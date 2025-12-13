@@ -2,10 +2,10 @@ import { ScrollView } from "std-widgets.slint";
 import { AlbumItem } from "./album-item.slint";
 
 export component AlbumList inherits ScrollView {
-    in property <length> album-item-width: 200px;
-    in property <length> album-item-height: 250px;
+    in property <length> item-width;
+    in property <length> item-height;
     width: 100%;
-    height: 300px;
+    height: item-height;
     vertical-scrollbar-policy: always-off;
     horizontal-scrollbar-policy: always-off;
     HorizontalLayout {
@@ -13,8 +13,8 @@ export component AlbumList inherits ScrollView {
         padding-right: 12px;
         spacing: 24px;
         for i in 20: AlbumItem {
-            width: root.album-item-width;
-            height: root.album-item-height;
+            width: root.item-width;
+            height: root.item-height;
         }
     }
 }

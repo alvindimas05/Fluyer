@@ -25,6 +25,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     window_utils::setup_traffic_lights(&ui);
     ui_setup::setup_background(&ui)?;
     ui_setup::setup_maximize(&ui)?;
+    ui_setup::listen_for_resize(&ui);
 
     // Run the application
     ui.run()?;
