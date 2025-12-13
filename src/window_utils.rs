@@ -14,12 +14,10 @@ pub fn set_traffic_lights_position(window: &winit::window::Window, x: f64, y: f6
                 let ns_window = &*ns_window;
 
                 // Get the three traffic light buttons
-                let close_button =
-                    ns_window.standardWindowButton(NSWindowButton::CloseButton);
+                let close_button = ns_window.standardWindowButton(NSWindowButton::CloseButton);
                 let miniaturize_button =
                     ns_window.standardWindowButton(NSWindowButton::MiniaturizeButton);
-                let zoom_button =
-                    ns_window.standardWindowButton(NSWindowButton::ZoomButton);
+                let zoom_button = ns_window.standardWindowButton(NSWindowButton::ZoomButton);
 
                 // Set positions for each button
                 if let Some(button) = close_button {
@@ -50,5 +48,30 @@ pub fn set_traffic_lights_position(window: &winit::window::Window, x: f64, y: f6
 #[cfg(not(target_os = "macos"))]
 /// No-op implementation for non-macOS platforms
 pub fn set_traffic_lights_position(_window: &winit::window::Window, _x: f64, _y: f64) {
+    // No-op on non-macOS platforms
+}
+
+#[cfg(target_os = "macos")]
+/// Setup traffic light position adjustment on window redraw
+pub fn setup_traffic_lights<T: slint::ComponentHandle + 'static>(ui: &T) {
+    use i_slint_backend_winit::{EventResult, WinitWindowAccessor};
+    use winit::event::WindowEvent;
+
+    let ui_weak = ui.as_weak();
+    ui.window().on_winit_window_event(move |_, event| {
+        if event.eq(&WindowEvent::RedrawRequested) {
+            if let Some(ui) = ui_weak.upgrade() {
+                ui.window().with_winit_window(|window| {
+                    set_traffic_lights_position(window, 12.0, 0.0);
+                });
+            }
+        }
+        EventResult::Propagate
+    });
+}
+
+#[cfg(not(target_os = "macos"))]
+/// No-op implementation for non-macOS platforms
+pub fn setup_traffic_lights<T: slint::ComponentHandle>(_ui: &T) {
     // No-op on non-macOS platforms
 }

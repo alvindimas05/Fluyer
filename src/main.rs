@@ -1,114 +1,32 @@
 // Prevent console window in addition to Slint window in Windows release builds
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod backend;
 mod background_generator;
+mod logging;
+mod ui_setup;
 mod window_utils;
 
+use slint::ComponentHandle;
 use std::error::Error;
 
-use background_generator::generate_blurred_background;
-use i_slint_backend_winit::{EventResult, WinitWindowAccessor};
-use simplelog::{CombinedLogger, ConfigBuilder, SharedLogger, TermLogger};
-use slint::EventLoopError;
-use window_utils::set_traffic_lights_position;
-use winit::{event::WindowEvent, platform::macos::WindowAttributesExtMacOS};
-
-slint::include_modules!();
-
-/// Initialize logging configuration
-fn init_logging() {
-    let mut config = ConfigBuilder::new();
-    config.add_filter_ignore_str("symphonia_core");
-    let config = config.build();
-
-    let logs: Vec<Box<dyn SharedLogger>> = vec![TermLogger::new(
-        simplelog::LevelFilter::Debug,
-        config,
-        simplelog::TerminalMode::Mixed,
-        simplelog::ColorChoice::Auto,
-    )];
-
-    CombinedLogger::init(logs).expect("Failed to initialize logger");
-}
-
-/// Configure window backend with macOS-specific settings
-fn configure_backend() -> Result<i_slint_backend_winit::Backend, Box<dyn Error>> {
-    let mut backend = i_slint_backend_winit::Backend::new()?;
-    backend.window_attributes_hook = Some(Box::new(|attributes| {
-        attributes
-            .with_fullsize_content_view(true)
-            .with_title_hidden(true)
-            .with_titlebar_transparent(true)
-            .with_transparent(true)
-            .with_maximized(true)
-    }));
-    Ok(backend)
-}
-
-/// Setup traffic light position adjustment on window redraw
-fn setup_traffic_lights(ui: &AppWindow) {
-    let ui_weak = ui.as_weak();
-    ui.window().on_winit_window_event(move |_, event| {
-        if event.eq(&WindowEvent::RedrawRequested) {
-            if let Some(ui) = ui_weak.upgrade() {
-                ui.window().with_winit_window(|window| {
-                    set_traffic_lights_position(window, 12.0, 0.0);
-                });
-            }
-        }
-        EventResult::Propagate
-    });
-}
-
-/// Generate and set the background image
-fn setup_background(ui: &AppWindow) -> Result<(), Box<dyn Error>> {
-    let ui_weak = ui.as_weak();
-    slint::invoke_from_event_loop(move || {
-        let background_img =
-            generate_blurred_background((1920.0 * 0.1) as u32, (1080.0 * 0.1) as u32, 20)
-                .expect("Failed to generate background image");
-
-        let width = background_img.width();
-        let height = background_img.height();
-
-        // Optimize: Move buffer directly into SharedPixelBuffer without intermediate clone
-        let buffer = background_img.into_raw();
-        let pixel_buffer = slint::SharedPixelBuffer::clone_from_slice(&buffer, width, height);
-
-        // Create image from the shared buffer
-        let slint_image = slint::Image::from_rgba8(pixel_buffer);
-
-        if let Some(ui) = ui_weak.upgrade() {
-            ui.set_background_image(slint_image);
-        }
-    })?;
-    Ok(())
-}
-
-fn setup_maximize(ui: &AppWindow) -> Result<(), EventLoopError> {
-    // Maximize after event loop starts
-    let ui_weak = ui.as_weak();
-    slint::invoke_from_event_loop(move || {
-        if let Some(ui) = ui_weak.upgrade() {
-            ui.window().with_winit_window(|window| {
-                window.set_maximized(true);
-            });
-        }
-    })
-}
-
 fn main() -> Result<(), Box<dyn Error>> {
-    init_logging();
+    // Initialize logging
+    logging::init_logging();
 
-    let backend = configure_backend()?;
+    // Configure and set the backend
+    let backend = backend::configure_backend()?;
     slint::platform::set_platform(Box::new(backend))?;
 
-    let ui = AppWindow::new()?;
+    // Create the UI
+    let ui = ui_setup::AppWindow::new()?;
 
-    setup_traffic_lights(&ui);
-    setup_background(&ui)?;
-    setup_maximize(&ui)?;
-    
+    // Setup window customizations
+    window_utils::setup_traffic_lights(&ui);
+    ui_setup::setup_background(&ui)?;
+    ui_setup::setup_maximize(&ui)?;
+
+    // Run the application
     ui.run()?;
     Ok(())
 }
