@@ -1,22 +1,23 @@
-import { ScrollView } from "std-widgets.slint";
+import { ListView, VerticalBox } from "std-widgets.slint";
 import { MusicItem } from "./music-item.slint";
 
-export component MusicList inherits ScrollView {
-    in property <length> item-width;
-    in property <int> column: 1;
+export component MusicList inherits VerticalBox {
+    in property <percent> item-width;
+    in property <int> column;
+
     width: 100%;
     height: 500px;
-    vertical-scrollbar-policy: always-off;
-    horizontal-scrollbar-policy: always-off;
-    VerticalLayout {
-        padding-left: 12px;
-        padding-right: 12px;
-        spacing: 16px;
+    padding-left: 12px;
+    padding-right: 12px;
+    ListView {
+        vertical-scrollbar-policy: always-off;
+        horizontal-scrollbar-policy: always-off;
         for row in 20: HorizontalLayout {
             spacing: 24px;
             for col in column: MusicItem {
-                // width: 33.33%;
                 width: root.item-width;
+                padding-bottom: 16px;
+
                 cover-image: @image-url("../../../placeholder/500x500.png");
                 title: "Song Title " + (row * 3 + col + 1);
                 info: "Album Name - Artist Name";

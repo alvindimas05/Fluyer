@@ -36,7 +36,7 @@ pub fn setup_background(ui: &AppWindow) -> Result<(), EventLoopError> {
     })
 }
 
-pub fn listen_for_resize(ui: &AppWindow) {
+pub fn listen_resize(ui: &AppWindow) {
     let ui_weak = ui.as_weak();
     ui.window().on_winit_window_event(move |_window, event| {
         if let winit::event::WindowEvent::Resized(_) = event {
@@ -73,15 +73,14 @@ fn refresh_sizing(ui: &AppWindow) -> Result<(), EventLoopError> {
                 let album_width = (width as f32 * album_column_percentage as f32).floor() - 24.5;
                 ui.set_album_width(album_width);
 
-                // Extra text and padding: 8 + 17 + 4 + 15 + 15 = 59px
-                let album_height = album_width + 59.0;
+                // Extra text and padding: 8 + 17 + 4 + 15 = 44px
+                // 15px is for extra height to prevent vertical scrollbar
+                let album_height = album_width + 44.0 + 15.0;
                 ui.set_album_height(album_height);
 
                 let music_column_percentage = 1.0 / ((column_count / 2) as f32);
-                // Spacing 24px between columns. 0.5 is just extra unknown pixel
-
                 ui.set_music_list_column((column_count as f32 / 2.0).floor() as i32);
-                ui.set_music_width((width as f32 * music_column_percentage).floor() - 24.5);
+                ui.set_music_width(music_column_percentage * 100.0);
                 ui.set_music_list_height(size.height as f32 - album_height);
             });
         }

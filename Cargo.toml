@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-slint = "1.14.1"
+slint = { version = "1.14.1", default-features = false, features = ["compat-1-2", "backend-winit", "renderer-skia"] }
 i-slint-backend-winit = "=1.14.1"
 winit = "0.30.12"
 image = "0.25.9"

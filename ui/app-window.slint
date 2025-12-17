@@ -7,17 +7,20 @@ import "../fonts/Inter-Medium.ttf";
 export component AppWindow inherits Window {
     in property <image> background-image;
 
-    in property <length> album-width;
-    in property <length> album-height;
-    
-    in property <length> music-width;
-    in property <length> music-list-height;
+    in property <length> album-width: 200px;
+    in property <length> album-height: 250px;
+
+    in property <percent> music-width: 100%;
+    in property <length> music-list-height: 500px;
     in property <int> music-list-column: 1;
+
+    in property <bool> is-visible: false;
 
     background: transparent;
     default-font-family: "Inter";
 
     Background {
+        visible: root.is-visible;
         image: root.background-image;
     }
 
@@ -25,6 +28,7 @@ export component AppWindow inherits Window {
         width: 100%;
         height: 100%;
         alignment: start;
+        visible: root.is-visible;
 
         AlbumList {
             item-width: root.album-width;

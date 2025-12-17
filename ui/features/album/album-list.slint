@@ -6,6 +6,7 @@ export component AlbumList inherits ScrollView {
     in property <length> item-height;
     width: 100%;
     height: item-height;
+    viewport-height: item-height - 15px;
     vertical-scrollbar-policy: always-off;
     horizontal-scrollbar-policy: always-off;
     HorizontalLayout {
