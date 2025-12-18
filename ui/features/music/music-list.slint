@@ -21,9 +21,6 @@ export component MusicList inherits VerticalBox {
     // Internal viewport tracking
     property <length> current-viewport-y: 0;
     property <length> item-height: 72px; // 56px item + 16px padding
-    property <int> items-per-page: max(1, floor(root.height / item-height));
-    property <int> buffer-items: 5;
-    property <int> first-visible-row: max(0, floor(-root.current-viewport-y / root.item-height));
     width: 100%;
     height: 500px;
     padding-left: 12px;
@@ -67,14 +64,10 @@ export component MusicList inherits VerticalBox {
         if (items.length == 0) {
             return;
         }
-        
-        // Calculate start and end indices with buffer using the property
-        root.visible-start-index = max(0, (root.first-visible-row - root.buffer-items) * column);
-        root.visible-end-index = min(items.length - 1,
-            root.visible-start-index + (root.items-per-page + root.buffer-items * 2) * column);
-        
-        // Notify backend to load images for this range (debounced in Rust)
-        root.request-images(root.visible-start-index, root.visible-end-index);
+        let start-index = max(0, floor(-root.current-viewport-y / root.item-height) * column);
+        let end-index = min(items.length - 1, start-index + (root.height / root.item-height) * column) + 1;
+
+        root.request-images(start-index, end-index);
     }
     
     // Initialize visible range on component load

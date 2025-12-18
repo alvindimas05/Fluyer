@@ -88,6 +88,8 @@ fn refresh_sizing(ui: &AppWindow) -> Result<(), EventLoopError> {
                 ui.set_music_list_column((column_count as f32 / 2.0).floor() as i32);
                 ui.set_music_width(music_column_percentage * 100.0);
                 ui.set_music_list_height(size.height as f32 - album_height);
+
+                info!("Music List Height set to: {}", ui.get_music_list_height());
             });
         }
     })
@@ -236,11 +238,11 @@ fn setup_progressive_loading(
 
         std::thread::spawn(move || {
             // Wait for 200ms debounce
-            std::thread::sleep(Duration::from_millis(200));
+            std::thread::sleep(Duration::from_millis(50));
 
             // Check if this is still the latest request
             let elapsed = last_request_time.lock().unwrap().elapsed();
-            if elapsed < Duration::from_millis(200) {
+            if elapsed < Duration::from_millis(50) {
                 return; // A newer request came in, abort this one
             }
 
@@ -260,8 +262,6 @@ fn load_images_for_range(
     start_idx: i32,
     end_idx: i32,
 ) {
-    info!("Loading images for range {} to {}", start_idx, end_idx);
-
     // First, check which images need to be loaded (must be done in event loop)
     let ui_weak_clone = ui_weak.clone();
     let music_list_clone = Arc::clone(&music_list);
@@ -304,12 +304,6 @@ fn load_images_for_range(
                     }
                 }
             }
-
-            info!(
-                "Need to load {} images out of {} in range",
-                indices_to_load.len(),
-                end - start + 1
-            );
 
             // Now extract cover images in background thread
             if !indices_to_load.is_empty() {
@@ -376,13 +370,6 @@ fn load_images_for_range(
                             }
                         }
                     }
-
-                    info!(
-                        "Loaded {} cover images for range {} to {}",
-                        loaded_images.len(),
-                        start_idx,
-                        end_idx
-                    );
 
                     // Update UI with loaded images
                     slint::invoke_from_event_loop(move || {
