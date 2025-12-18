@@ -15,8 +15,6 @@ pub struct MusicMetadata {
     pub duration: String,
     pub bit_depth: String,
     pub sample_rate: String,
-    #[allow(dead_code)]
-    pub cover_path: Option<String>,
 }
 
 impl Default for MusicMetadata {
@@ -29,7 +27,6 @@ impl Default for MusicMetadata {
             duration: String::from("0:00"),
             bit_depth: String::from("16-bit"),
             sample_rate: String::from("44.1 kHz"),
-            cover_path: None,
         }
     }
 }
@@ -262,6 +259,81 @@ impl MusicScanner {
         } else {
             format!("{}:{:02}", minutes, secs)
         }
+    }
+
+    /// Extract cover art directly to memory as JPEG/PNG/BMP bytes
+    pub fn extract_cover_to_memory(&self, file_path: &str) -> Result<Vec<u8>, String> {
+        // First check if the file has any video stream (cover art)
+        let probe_output = Command::new(&self.ffprobe_path)
+            .args(&[
+                "-v",
+                "quiet",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=codec_type",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                file_path,
+            ])
+            .output()
+            .map_err(|e| format!("Failed to probe for cover art: {}", e))?;
+
+        // If no video stream found, return error early
+        if probe_output.stdout.is_empty() || !probe_output.status.success() {
+            return Err("No cover art found in file".to_string());
+        }
+
+        // Try to copy the embedded image without re-encoding (fastest)
+        let output = Command::new(&self.ffmpeg_path)
+            .args(&[
+                "-i",
+                file_path,
+                "-an", // Disable audio
+                "-c:v",
+                "copy", // Copy video codec (don't re-encode)
+                "-vframes",
+                "1", // Extract only first frame
+                "-f",
+                "image2pipe", // Output to pipe
+                "-",
+            ])
+            .output()
+            .map_err(|e| format!("Failed to execute ffmpeg: {}", e))?;
+
+        if output.status.success() && !output.stdout.is_empty() {
+            return Ok(output.stdout);
+        }
+
+        // If copy fails, try BMP encoder as fallback
+        let output = Command::new(&self.ffmpeg_path)
+            .args(&[
+                "-i",
+                file_path,
+                "-an", // Disable audio
+                "-c:v",
+                "bmp", // Use BMP encoder (built-in, no external deps)
+                "-vframes",
+                "1", // Extract only first frame
+                "-f",
+                "image2pipe", // Output to pipe
+                "-",
+            ])
+            .output()
+            .map_err(|e| format!("Failed to execute ffmpeg: {}", e))?;
+
+        if !output.status.success() {
+            return Err(format!(
+                "ffmpeg failed: {}",
+                String::from_utf8_lossy(&output.stderr)
+            ));
+        }
+
+        if output.stdout.is_empty() {
+            return Err("No cover art found in file".to_string());
+        }
+
+        Ok(output.stdout)
     }
 
     /// Extract cover art to a temporary file (optional enhancement)

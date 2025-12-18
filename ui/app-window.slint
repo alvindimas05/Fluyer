@@ -16,6 +16,9 @@ export component AppWindow inherits Window {
     in property <[MusicItemData]> music-items: [];
 
     in property <bool> is-visible: false;
+    
+    // Progressive loading callback
+    callback request-images(int, int);
 
     background: transparent;
     default-font-family: "Inter";
@@ -41,6 +44,9 @@ export component AppWindow inherits Window {
             height: root.music-list-height;
             column: root.music-list-column;
             items: root.music-items;
+            request-images(start, end) => {
+                root.request-images(start, end);
+            }
         }
     }
 }

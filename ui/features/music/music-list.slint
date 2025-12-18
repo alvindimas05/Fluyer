@@ -12,7 +12,18 @@ export component MusicList inherits VerticalBox {
     in property <percent> item-width;
     in property <int> column;
     in property <[MusicItemData]> items: [];
-
+    
+    // Progressive loading properties
+    in-out property <int> visible-start-index: 0;
+    in-out property <int> visible-end-index: 0;
+    callback request-images(int, int); // Request images for range
+    
+    // Internal viewport tracking
+    property <length> current-viewport-y: 0;
+    property <length> item-height: 72px; // 56px item + 16px padding
+    property <int> items-per-page: max(1, floor(root.height / item-height));
+    property <int> buffer-items: 5;
+    property <int> first-visible-row: max(0, floor(-root.current-viewport-y / root.item-height));
     width: 100%;
     height: 500px;
     padding-left: 12px;
@@ -26,13 +37,20 @@ export component MusicList inherits VerticalBox {
             opacity: 0.7;
         }
     }
-    if items.length > 0: ListView {
+    if items.length > 0: list-view := ListView {
         vertical-scrollbar-policy: always-off;
         horizontal-scrollbar-policy: always-off;
+        
+        // Track viewport changes
+        changed viewport-y => {
+            root.current-viewport-y = self.viewport-y;
+            root.calculate-visible-range();
+        }
         for row-index in ceil(items.length / column): HorizontalLayout {
             spacing: 24px;
             for col-index in column: MusicItem {
                 property <int> index: row-index * column + col-index;
+                property <bool> is-visible: index >= root.visible-start-index && index <= root.visible-end-index;
                 width: root.item-width;
                 padding-bottom: 16px;
 
@@ -42,5 +60,25 @@ export component MusicList inherits VerticalBox {
                 metadata: items[index].metadata;
             }
         }
+    }
+    
+    // Calculate visible range based on scroll position
+    function calculate-visible-range() {
+        if (items.length == 0) {
+            return;
+        }
+        
+        // Calculate start and end indices with buffer using the property
+        root.visible-start-index = max(0, (root.first-visible-row - root.buffer-items) * column);
+        root.visible-end-index = min(items.length - 1,
+            root.visible-start-index + (root.items-per-page + root.buffer-items * 2) * column);
+        
+        // Notify backend to load images for this range (debounced in Rust)
+        root.request-images(root.visible-start-index, root.visible-end-index);
+    }
+    
+    // Initialize visible range on component load
+    init => {
+        root.calculate-visible-range();
     }
 }
