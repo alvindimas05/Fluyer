@@ -5,7 +5,9 @@ mod backend;
 mod background_generator;
 mod logging;
 mod music_scanner;
+mod services;
 mod ui_setup;
+mod viewmodel;
 mod window_utils;
 
 use slint::ComponentHandle;

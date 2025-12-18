@@ -1,14 +1,12 @@
 use crate::background_generator::generate_blurred_background;
-use crate::music_scanner::MusicScanner;
+use crate::viewmodel::AppViewModel;
 use i_slint_backend_winit::WinitWindowAccessor;
-use image::GenericImageView;
-use log::{error, info};
-use slint::{ComponentHandle, EventLoopError, Model, ModelRc, VecModel};
-use std::rc::Rc;
-use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant};
+use log::info;
+use slint::{ComponentHandle, EventLoopError};
+use std::time::Duration;
 
-slint::include_modules!();
+pub use crate::viewmodel::AppWindow;
+
 // Responsive rules: [min_width, column_count]
 const RESPONSIVE_RULES: [[f64; 2]; 5] = [
     [1536.0, 7.0],
@@ -17,6 +15,10 @@ const RESPONSIVE_RULES: [[f64; 2]; 5] = [
     [768.0, 4.0],
     [640.0, 3.0],
 ];
+
+// ============================================================================
+// WINDOW SETUP FUNCTIONS
+// ============================================================================
 
 /// Generate and set the background image
 pub fn setup_background(ui: &AppWindow) -> Result<(), EventLoopError> {
@@ -95,311 +97,12 @@ fn refresh_sizing(ui: &AppWindow) -> Result<(), EventLoopError> {
     })
 }
 
-/// Load music library from a specific directory
+/// Load music library from a specific directory using the viewmodel
 pub fn load_music_library(ui: &AppWindow, music_dir: &str) {
     info!("Loading music library from: {}", music_dir);
 
-    let music_dir = music_dir.to_string();
-    let ui_weak = ui.as_weak();
-
-    // Scan in background thread to avoid blocking UI
-    std::thread::spawn(move || {
-        let scanner = MusicScanner::new();
-        let music_list = scanner.scan_directory(&music_dir);
-
-        info!("Loaded {} songs from library", music_list.len());
-
-        // Group music by artist and album
-        let grouped = MusicScanner::group_by_album(&music_list);
-        info!("Found {} unique albums", grouped.albums.len());
-
-        // Store music metadata for progressive loading
-        let music_list = Arc::new(grouped.songs);
-        let music_list_clone = Arc::clone(&music_list);
-        let albums = grouped.albums;
-
-        // Update UI in event loop
-        slint::invoke_from_event_loop(move || {
-            if let Some(ui) = ui_weak.upgrade() {
-                // Create album items
-                let mut album_items = Vec::new();
-                let scanner = MusicScanner::new();
-
-                for album in albums {
-                    let cover_image = if let Some(cover_path) = album.cover_image_path {
-                        // Try to extract cover art
-                        match scanner.extract_cover_to_memory(&cover_path) {
-                            Ok(image_data) => {
-                                match image::load_from_memory(&image_data) {
-                                    Ok(img) => {
-                                        // Resize to reasonable thumbnail size
-                                        // const MAX_SIZE: u32 = 200;
-                                        // let (width, height) = img.dimensions();
-
-                                        // let resized_img = if width > MAX_SIZE || height > MAX_SIZE {
-                                        //     let scale = (MAX_SIZE as f32
-                                        //         / width.max(height) as f32)
-                                        //         .min(1.0);
-                                        //     let new_width = (width as f32 * scale) as u32;
-                                        //     let new_height = (height as f32 * scale) as u32;
-                                        //     img.resize(
-                                        //         new_width,
-                                        //         new_height,
-                                        //         image::imageops::FilterType::Triangle,
-                                        //     )
-                                        // } else {
-                                        //     img
-                                        // };
-
-                                        let rgba_img = img.to_rgba8();
-                                        let final_width = rgba_img.width();
-                                        let final_height = rgba_img.height();
-                                        let pixel_buffer =
-                                            slint::SharedPixelBuffer::clone_from_slice(
-                                                &rgba_img.into_raw(),
-                                                final_width,
-                                                final_height,
-                                            );
-                                        slint::Image::from_rgba8(pixel_buffer)
-                                    }
-                                    Err(_) => slint::Image::default(),
-                                }
-                            }
-                            Err(_) => slint::Image::default(),
-                        }
-                    } else {
-                        slint::Image::default()
-                    };
-
-                    album_items.push(AlbumItemData {
-                        cover_image,
-                        title: album.album.clone().into(),
-                        artist: album.artist.clone().into(),
-                    });
-                }
-
-                let album_model = Rc::new(VecModel::from(album_items));
-                ui.set_album_items(ModelRc::from(album_model));
-
-                // Initially create music items without images (for performance)
-                let items: Vec<MusicItemData> = music_list
-                    .iter()
-                    .map(|metadata| {
-                        let info = if let Some(album) = metadata.album.clone() {
-                            format!("{} - {}", album, metadata.artist)
-                        } else {
-                            metadata.artist.clone()
-                        };
-                        let metadata_str = format!(
-                            "{}/{} {}",
-                            metadata.bit_depth, metadata.sample_rate, metadata.duration
-                        );
-
-                        MusicItemData {
-                            cover_image: slint::Image::default(), // Will be loaded progressively
-                            title: metadata.title.clone().into(),
-                            info: info.into(),
-                            metadata: metadata_str.into(),
-                        }
-                    })
-                    .collect();
-
-                let model = Rc::new(VecModel::from(items));
-                ui.set_music_items(ModelRc::from(model));
-
-                // Setup progressive image loading
-                setup_progressive_loading(&ui, music_list_clone);
-            }
-        })
-        .ok();
-    });
-}
-
-/// Setup progressive loading with debouncing
-fn setup_progressive_loading(
-    ui: &AppWindow,
-    music_list: Arc<Vec<crate::music_scanner::MusicMetadata>>,
-) {
-    let last_request_time = Arc::new(Mutex::new(Instant::now()));
-    let pending_range = Arc::new(Mutex::new(Option::<(i32, i32)>::None));
-    let ui_weak = ui.as_weak();
-
-    // Handle image requests with debouncing
-    ui.on_request_images(move |start_idx, end_idx| {
-        // Update pending range
-        *pending_range.lock().unwrap() = Some((start_idx, end_idx));
-        *last_request_time.lock().unwrap() = Instant::now();
-
-        // Spawn debounce thread
-        let pending_range = Arc::clone(&pending_range);
-        let last_request_time = Arc::clone(&last_request_time);
-        let ui_weak = ui_weak.clone();
-        let music_list = Arc::clone(&music_list);
-
-        std::thread::spawn(move || {
-            // Wait for 200ms debounce
-            std::thread::sleep(Duration::from_millis(50));
-
-            // Check if this is still the latest request
-            let elapsed = last_request_time.lock().unwrap().elapsed();
-            if elapsed < Duration::from_millis(50) {
-                return; // A newer request came in, abort this one
-            }
-
-            // Get the pending range
-            let range = pending_range.lock().unwrap().take();
-            if let Some((start, end)) = range {
-                load_images_for_range(ui_weak.clone(), Arc::clone(&music_list), start, end);
-            }
-        });
-    });
-}
-
-/// Load images for a specific range of items
-fn load_images_for_range(
-    ui_weak: slint::Weak<AppWindow>,
-    music_list: Arc<Vec<crate::music_scanner::MusicMetadata>>,
-    start_idx: i32,
-    end_idx: i32,
-) {
-    // First, check which images need to be loaded (must be done in event loop)
-    let ui_weak_clone = ui_weak.clone();
-    let music_list_clone = Arc::clone(&music_list);
-
-    slint::invoke_from_event_loop(move || {
-        if let Some(ui) = ui_weak_clone.upgrade() {
-            let model = ui.get_music_items();
-            let start = start_idx.max(0) as usize;
-            let end = (end_idx as usize).min(music_list_clone.len().saturating_sub(1));
-
-            let mut indices_to_load = Vec::new();
-
-            // First pass: Unload images outside the visible range to free memory
-            for idx in 0..model.row_count() {
-                if idx < start || idx > end {
-                    if let Some(item) = model.row_data(idx) {
-                        // If image is loaded, unload it
-                        if item.cover_image.size().width > 0 {
-                            let mut updated_item = item;
-                            updated_item.cover_image = slint::Image::default();
-                            model.set_row_data(idx, updated_item);
-                        }
-                    }
-                }
-            }
-
-            // Second pass: Check which images in range need loading
-            for idx in start..=end {
-                if idx >= music_list_clone.len() {
-                    break;
-                }
-
-                // Check if the image is already loaded
-                if idx < model.row_count() {
-                    if let Some(item) = model.row_data(idx) {
-                        // Check if cover_image is empty/default
-                        if item.cover_image.size().width == 0 {
-                            indices_to_load.push(idx);
-                        }
-                    }
-                }
-            }
-
-            // Now extract cover images in background thread
-            if !indices_to_load.is_empty() {
-                let ui_weak_for_thread = ui_weak.clone();
-                let music_list_for_thread = Arc::clone(&music_list);
-
-                std::thread::spawn(move || {
-                    let scanner = crate::music_scanner::MusicScanner::new();
-                    let mut loaded_images = Vec::new();
-
-                    // Only extract cover art for items that need it
-                    for idx in indices_to_load {
-                        let metadata = &music_list_for_thread[idx];
-
-                        // Try to extract cover art
-                        match scanner.extract_cover_to_memory(&metadata.file_path) {
-                            Ok(image_data) => {
-                                // Load image data into image
-                                match image::load_from_memory(&image_data) {
-                                    Ok(img) => {
-                                        // Resize to reasonable thumbnail size (max 200px to save memory)
-                                        const MAX_SIZE: u32 = 200;
-                                        let (width, height) = img.dimensions();
-
-                                        let resized_img = if width > MAX_SIZE || height > MAX_SIZE {
-                                            // Calculate new dimensions maintaining aspect ratio
-                                            let scale = (MAX_SIZE as f32
-                                                / width.max(height) as f32)
-                                                .min(1.0);
-                                            let new_width = (width as f32 * scale) as u32;
-                                            let new_height = (height as f32 * scale) as u32;
-
-                                            img.resize(
-                                                new_width,
-                                                new_height,
-                                                image::imageops::FilterType::Triangle,
-                                            )
-                                        } else {
-                                            img
-                                        };
-
-                                        // Convert to RGBA8
-                                        let rgba_img = resized_img.to_rgba8();
-                                        let final_width = rgba_img.width();
-                                        let final_height = rgba_img.height();
-
-                                        loaded_images.push((
-                                            idx,
-                                            rgba_img.into_raw(),
-                                            final_width,
-                                            final_height,
-                                        ));
-                                    }
-                                    Err(e) => {
-                                        error!(
-                                            "Failed to load cover image for {}: {}",
-                                            metadata.title, e
-                                        );
-                                    }
-                                }
-                            }
-                            Err(_) => {
-                                // No cover art available or extraction failed - skip silently
-                            }
-                        }
-                    }
-
-                    // Update UI with loaded images
-                    slint::invoke_from_event_loop(move || {
-                        if let Some(ui) = ui_weak_for_thread.upgrade() {
-                            let model = ui.get_music_items();
-
-                            for (idx, image_data, width, height) in loaded_images {
-                                if idx < model.row_count() {
-                                    let mut item = model.row_data(idx).unwrap();
-
-                                    // Create Slint image from RGBA data
-                                    let pixel_buffer = slint::SharedPixelBuffer::clone_from_slice(
-                                        &image_data,
-                                        width,
-                                        height,
-                                    );
-                                    item.cover_image = slint::Image::from_rgba8(pixel_buffer);
-
-                                    // Update the model
-                                    model.set_row_data(idx, item);
-                                }
-                            }
-                        }
-                    })
-                    .ok();
-                });
-            }
-        }
-    })
-    .ok();
+    let viewmodel = AppViewModel::new();
+    viewmodel.load_music_library(ui, music_dir);
 }
 
 /// Maximize window after event loop starts
@@ -407,7 +110,7 @@ pub fn initialize(ui: &AppWindow) {
     std::thread::spawn({
         let ui = ui.as_weak();
         move || {
-            std::thread::sleep(std::time::Duration::from_millis(500));
+            std::thread::sleep(Duration::from_millis(500));
             ui.upgrade_in_event_loop(move |ui| {
                 ui.window().with_winit_window(|window| {
                     window.set_maximized(true);
