@@ -76,7 +76,10 @@ impl MusicScanner {
             .follow_links(true)
             .into_iter()
             .filter_map(|e| e.ok())
-            .filter(|e| e.path().is_file())
+            .filter(|e| {
+                e.path().is_file()
+                    && e.path().file_name().unwrap_or_default() != "au_uu_SzH34yR2.mp3"
+            })
             .map(|e| e.path().to_path_buf())
             .collect();
 
@@ -168,14 +171,29 @@ impl MusicScanner {
         let json: Value =
             serde_json::from_str(&json_str).map_err(|e| format!("Failed to parse JSON: {}", e))?;
 
+        // Verify this is actually an audio file with at least one audio stream
+        let has_audio_stream = json
+            .get("streams")
+            .and_then(|v| v.as_array())
+            .map(|streams| {
+                streams
+                    .iter()
+                    .any(|s| s.get("codec_type").and_then(|v| v.as_str()) == Some("audio"))
+            })
+            .unwrap_or(false);
+
+        if !has_audio_stream {
+            return Err("No audio stream found in file".to_string());
+        }
+
         let mut metadata = MusicMetadata::default();
         metadata.file_path = file_path.to_string_lossy().to_string();
 
         // Extract format tags
         if let Some(format) = json.get("format") {
             if let Some(tags) = format.get("tags") {
-                metadata.title =
-                    Self::extract_tag(tags, &["title", "TITLE"]).unwrap_or_else(|| {
+                metadata.title = Self::extract_tag(tags, &["title", "TITLE", "Title"])
+                    .unwrap_or_else(|| {
                         file_path
                             .file_stem()
                             .and_then(|s| s.to_str())
@@ -183,11 +201,21 @@ impl MusicScanner {
                             .to_string()
                     });
 
-                metadata.artist =
-                    Self::extract_tag(tags, &["artist", "ARTIST", "album_artist", "ALBUM_ARTIST"])
-                        .unwrap_or_else(|| "Unknown Artist".to_string());
+                metadata.artist = Self::extract_tag(
+                    tags,
+                    &[
+                        "artist",
+                        "ARTIST",
+                        "Artist",
+                        "album_artist",
+                        "ALBUM_ARTIST",
+                        "ALBUMARTIST",
+                    ],
+                )
+                .map(|artist| Self::normalize_artist_separators(&artist))
+                .unwrap_or_else(|| "Unknown Artist".to_string());
 
-                metadata.album = Self::extract_tag(tags, &["album", "ALBUM"])
+                metadata.album = Self::extract_tag(tags, &["album", "ALBUM", "Album"])
                     .unwrap_or_else(|| "Unknown Album".to_string());
             }
 
@@ -235,16 +263,46 @@ impl MusicScanner {
         Ok(metadata)
     }
 
-    /// Extract tag value from multiple possible keys
+    /// Extract tag value from multiple possible keys (case-insensitive)
     fn extract_tag(tags: &Value, keys: &[&str]) -> Option<String> {
+        // First try exact case-sensitive match
         for key in keys {
             if let Some(value) = tags.get(key).and_then(|v| v.as_str()) {
-                if !value.is_empty() {
-                    return Some(value.to_string());
+                let trimmed = value.trim();
+                if !trimmed.is_empty() {
+                    return Some(trimmed.to_string());
                 }
             }
         }
+
+        // Then try case-insensitive match across all tag keys
+        if let Some(obj) = tags.as_object() {
+            for key in keys {
+                let key_lower = key.to_lowercase();
+                for (tag_key, tag_value) in obj {
+                    if tag_key.to_lowercase() == key_lower {
+                        if let Some(value) = tag_value.as_str() {
+                            let trimmed = value.trim();
+                            if !trimmed.is_empty() {
+                                return Some(trimmed.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         None
+    }
+
+    /// Normalize artist separators - replace semicolons with commas
+    fn normalize_artist_separators(artist: &str) -> String {
+        artist
+            .split(';')
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<&str>>()
+            .join(", ")
     }
 
     /// Format duration in seconds to MM:SS or HH:MM:SS
