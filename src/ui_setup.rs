@@ -107,18 +107,87 @@ pub fn load_music_library(ui: &AppWindow, music_dir: &str) {
 
         info!("Loaded {} songs from library", music_list.len());
 
+        // Group music by artist and album
+        let grouped = MusicScanner::group_by_album(&music_list);
+        info!("Found {} unique albums", grouped.albums.len());
+
         // Store music metadata for progressive loading
-        let music_list = Arc::new(music_list);
+        let music_list = Arc::new(grouped.songs);
         let music_list_clone = Arc::clone(&music_list);
+        let albums = grouped.albums;
 
         // Update UI in event loop
         slint::invoke_from_event_loop(move || {
             if let Some(ui) = ui_weak.upgrade() {
-                // Initially create items without images (for performance)
+                // Create album items
+                let mut album_items = Vec::new();
+                let scanner = MusicScanner::new();
+
+                for album in albums {
+                    let cover_image = if let Some(cover_path) = album.cover_image_path {
+                        // Try to extract cover art
+                        match scanner.extract_cover_to_memory(&cover_path) {
+                            Ok(image_data) => {
+                                match image::load_from_memory(&image_data) {
+                                    Ok(img) => {
+                                        // Resize to reasonable thumbnail size
+                                        // const MAX_SIZE: u32 = 200;
+                                        // let (width, height) = img.dimensions();
+
+                                        // let resized_img = if width > MAX_SIZE || height > MAX_SIZE {
+                                        //     let scale = (MAX_SIZE as f32
+                                        //         / width.max(height) as f32)
+                                        //         .min(1.0);
+                                        //     let new_width = (width as f32 * scale) as u32;
+                                        //     let new_height = (height as f32 * scale) as u32;
+                                        //     img.resize(
+                                        //         new_width,
+                                        //         new_height,
+                                        //         image::imageops::FilterType::Triangle,
+                                        //     )
+                                        // } else {
+                                        //     img
+                                        // };
+
+                                        let rgba_img = img.to_rgba8();
+                                        let final_width = rgba_img.width();
+                                        let final_height = rgba_img.height();
+                                        let pixel_buffer =
+                                            slint::SharedPixelBuffer::clone_from_slice(
+                                                &rgba_img.into_raw(),
+                                                final_width,
+                                                final_height,
+                                            );
+                                        slint::Image::from_rgba8(pixel_buffer)
+                                    }
+                                    Err(_) => slint::Image::default(),
+                                }
+                            }
+                            Err(_) => slint::Image::default(),
+                        }
+                    } else {
+                        slint::Image::default()
+                    };
+
+                    album_items.push(AlbumItemData {
+                        cover_image,
+                        title: album.album.clone().into(),
+                        artist: album.artist.clone().into(),
+                    });
+                }
+
+                let album_model = Rc::new(VecModel::from(album_items));
+                ui.set_album_items(ModelRc::from(album_model));
+
+                // Initially create music items without images (for performance)
                 let items: Vec<MusicItemData> = music_list
                     .iter()
                     .map(|metadata| {
-                        let info = format!("{} - {}", metadata.album, metadata.artist);
+                        let info = if let Some(album) = metadata.album.clone() {
+                            format!("{} - {}", album, metadata.artist)
+                        } else {
+                            metadata.artist.clone()
+                        };
                         let metadata_str = format!(
                             "{}/{} {}",
                             metadata.bit_depth, metadata.sample_rate, metadata.duration

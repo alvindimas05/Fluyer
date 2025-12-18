@@ -1,4 +1,5 @@
 import { AlbumList } from "features/album/album-list.slint";
+import { AlbumItemData } from "features/album/album-item.slint";
 import { MusicList, MusicItemData } from "features/music/music-list.slint";
 import { Background } from "features/background/background.slint";
 
@@ -13,6 +14,7 @@ export component AppWindow inherits Window {
     in property <percent> music-width: 100%;
     in property <length> music-list-height: 500px;
     in property <int> music-list-column: 1;
+    in property <[AlbumItemData]> album-items: [];
     in property <[MusicItemData]> music-items: [];
 
     in property <bool> is-visible: false;
@@ -35,6 +37,7 @@ export component AppWindow inherits Window {
         AlbumList {
             item-width: root.album-width;
             item-height: root.album-height;
+            items: root.album-items;
         }
 
         MusicList {

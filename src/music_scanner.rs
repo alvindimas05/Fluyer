@@ -11,11 +11,27 @@ pub struct MusicMetadata {
     pub file_path: String,
     pub title: String,
     pub artist: String,
-    pub album: String,
+    pub album: Option<String>,
+    pub album_artist: Option<String>,
     pub duration: String,
     pub bit_depth: String,
     pub sample_rate: String,
     pub track_number: String, // Format: "4/11" or just "4"
+}
+
+#[allow(dead_code)]
+#[derive(Clone, Debug)]
+pub struct AlbumInfo {
+    pub artist: String,
+    pub album: String,
+    pub cover_image_path: Option<String>, // Path to first track for cover extraction
+}
+
+#[allow(dead_code)]
+#[derive(Clone, Debug)]
+pub struct GroupedMusic {
+    pub albums: Vec<AlbumInfo>,
+    pub songs: Vec<MusicMetadata>,
 }
 
 impl Default for MusicMetadata {
@@ -24,7 +40,8 @@ impl Default for MusicMetadata {
             file_path: String::new(),
             title: String::from("Unknown Title"),
             artist: String::from("Unknown Artist"),
-            album: String::from("Unknown Album"),
+            album: None,
+            album_artist: None,
             duration: String::from("0:00"),
             bit_depth: String::from("16-bit"),
             sample_rate: String::from("44.1 kHz"),
@@ -166,6 +183,57 @@ impl MusicScanner {
         all_metadata
     }
 
+    /// Group music by album only
+    pub fn group_by_album(music_list: &[MusicMetadata]) -> GroupedMusic {
+        use std::collections::BTreeMap;
+
+        // Use BTreeMap to maintain sorted order of albums
+        // Group by album only, not by artist
+        // Skip songs without a valid album (Unknown Album)
+        let mut albums_map: BTreeMap<String, Vec<&MusicMetadata>> = BTreeMap::new();
+        let mut ungrouped_songs = Vec::new();
+
+        // Group by album - only for valid albums
+        for metadata in music_list {
+            if let Some(album) = metadata.album.clone() {
+                albums_map
+                    .entry(album)
+                    .or_insert_with(Vec::new)
+                    .push(metadata);
+            } else {
+                ungrouped_songs.push(metadata);
+            }
+        }
+
+        // Convert to album list
+        let mut albums = Vec::new();
+        for (album, tracks) in albums_map.iter() {
+            // Use first track's file path for cover extraction
+            // Get the first track's artist for the album artist
+            if let Some(first_track) = tracks.first() {
+                let album_artist = first_track
+                    .album_artist
+                    .clone()
+                    .or_else(|| Some(first_track.artist.clone()))
+                    .unwrap_or_else(|| "Unknown Artist".to_string());
+
+                albums.push(AlbumInfo {
+                    artist: album_artist,
+                    album: album.clone(),
+                    cover_image_path: Some(first_track.file_path.clone()),
+                });
+            }
+        }
+
+        // Combine grouped and ungrouped songs, keeping sort order
+        let all_songs = music_list.to_vec();
+
+        GroupedMusic {
+            albums,
+            songs: all_songs,
+        }
+    }
+
     /// Extract metadata using ffprobe (static version for threading)
     fn extract_metadata_static(
         ffprobe_path: &Path,
@@ -222,22 +290,15 @@ impl MusicScanner {
                             .to_string()
                     });
 
-                metadata.artist = Self::extract_tag(
-                    tags,
-                    &[
-                        "artist",
-                        "ARTIST",
-                        "Artist",
-                        "album_artist",
-                        "ALBUM_ARTIST",
-                        "ALBUMARTIST",
-                    ],
-                )
-                .map(|artist| Self::normalize_artist_separators(&artist))
-                .unwrap_or_else(|| "Unknown Artist".to_string());
+                metadata.artist = Self::extract_tag(tags, &["artist", "ARTIST", "Artist"])
+                    .map(|artist| Self::normalize_artist_separators(&artist))
+                    .unwrap_or_else(|| "Unknown Artist".to_string());
 
-                metadata.album = Self::extract_tag(tags, &["album", "ALBUM", "Album"])
-                    .unwrap_or_else(|| "Unknown Album".to_string());
+                metadata.album_artist =
+                    Self::extract_tag(tags, &["album_artist", "ALBUM_ARTIST", "ALBUMARTIST"])
+                        .map(|album_artist| Self::normalize_artist_separators(&album_artist));
+
+                metadata.album = Self::extract_tag(tags, &["album", "ALBUM", "Album"]);
 
                 // Extract track number (format: "4/11" or just "4")
                 metadata.track_number = Self::extract_tag(tags, &["track", "TRACK", "TRACKNUMBER"])
