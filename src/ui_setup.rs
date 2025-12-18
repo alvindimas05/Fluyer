@@ -1,6 +1,7 @@
 use crate::background_generator::generate_blurred_background;
 use crate::music_scanner::MusicScanner;
 use i_slint_backend_winit::WinitWindowAccessor;
+use image::GenericImageView;
 use log::{error, info};
 use slint::{ComponentHandle, EventLoopError, Model, ModelRc, VecModel};
 use std::rc::Rc;
@@ -204,6 +205,21 @@ fn load_images_for_range(
 
             let mut indices_to_load = Vec::new();
 
+            // First pass: Unload images outside the visible range to free memory
+            for idx in 0..model.row_count() {
+                if idx < start || idx > end {
+                    if let Some(item) = model.row_data(idx) {
+                        // If image is loaded, unload it
+                        if item.cover_image.size().width > 0 {
+                            let mut updated_item = item;
+                            updated_item.cover_image = slint::Image::default();
+                            model.set_row_data(idx, updated_item);
+                        }
+                    }
+                }
+            }
+
+            // Second pass: Check which images in range need loading
             for idx in start..=end {
                 if idx >= music_list_clone.len() {
                     break;
@@ -245,16 +261,37 @@ fn load_images_for_range(
                                 // Load image data into image
                                 match image::load_from_memory(&image_data) {
                                     Ok(img) => {
+                                        // Resize to reasonable thumbnail size (max 200px to save memory)
+                                        const MAX_SIZE: u32 = 200;
+                                        let (width, height) = img.dimensions();
+
+                                        let resized_img = if width > MAX_SIZE || height > MAX_SIZE {
+                                            // Calculate new dimensions maintaining aspect ratio
+                                            let scale = (MAX_SIZE as f32
+                                                / width.max(height) as f32)
+                                                .min(1.0);
+                                            let new_width = (width as f32 * scale) as u32;
+                                            let new_height = (height as f32 * scale) as u32;
+
+                                            img.resize(
+                                                new_width,
+                                                new_height,
+                                                image::imageops::FilterType::Triangle,
+                                            )
+                                        } else {
+                                            img
+                                        };
+
                                         // Convert to RGBA8
-                                        let rgba_img = img.to_rgba8();
-                                        let width = rgba_img.width();
-                                        let height = rgba_img.height();
+                                        let rgba_img = resized_img.to_rgba8();
+                                        let final_width = rgba_img.width();
+                                        let final_height = rgba_img.height();
 
                                         loaded_images.push((
                                             idx,
                                             rgba_img.into_raw(),
-                                            width,
-                                            height,
+                                            final_width,
+                                            final_height,
                                         ));
                                     }
                                     Err(e) => {
