@@ -1286,13 +1286,16 @@ dependencies = [
  "image",
  "libblur",
  "log",
+ "num_cpus",
  "objc2 0.6.3",
  "objc2-app-kit 0.3.2",
  "objc2-foundation 0.3.2",
  "rand",
+ "serde_json",
  "simplelog",
  "slint",
  "slint-build",
+ "walkdir",
  "winit",
 ]
 

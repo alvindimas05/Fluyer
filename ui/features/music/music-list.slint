@@ -1,27 +1,45 @@
 import { ListView, VerticalBox } from "std-widgets.slint";
 import { MusicItem } from "./music-item.slint";
 
+export struct MusicItemData {
+    cover-image: image,
+    title: string,
+    info: string,
+    metadata: string,
+}
+
 export component MusicList inherits VerticalBox {
     in property <percent> item-width;
     in property <int> column;
+    in property <[MusicItemData]> items: [];
 
     width: 100%;
     height: 500px;
     padding-left: 12px;
     padding-right: 12px;
-    ListView {
+    if items.length == 0: VerticalLayout {
+        alignment: center;
+        Text {
+            text: "Loading music library...";
+            font-size: 16px;
+            horizontal-alignment: center;
+            opacity: 0.7;
+        }
+    }
+    if items.length > 0: ListView {
         vertical-scrollbar-policy: always-off;
         horizontal-scrollbar-policy: always-off;
-        for row in 20: HorizontalLayout {
+        for row-index in ceil(items.length / column): HorizontalLayout {
             spacing: 24px;
-            for col in column: MusicItem {
+            for col-index in column: MusicItem {
+                property <int> index: row-index * column + col-index;
                 width: root.item-width;
                 padding-bottom: 16px;
 
-                cover-image: @image-url("../../../placeholder/500x500.png");
-                title: "Song Title " + (row * 3 + col + 1);
-                info: "Album Name - Artist Name";
-                metadata: "16-bit/44.1 kHz 3:45";
+                cover-image: items[index].cover-image;
+                title: items[index].title;
+                info: items[index].info;
+                metadata: items[index].metadata;
             }
         }
     }

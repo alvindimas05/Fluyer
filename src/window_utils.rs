@@ -45,12 +45,6 @@ pub fn set_traffic_lights_position(window: &winit::window::Window, x: f64, y: f6
     }
 }
 
-#[cfg(not(target_os = "macos"))]
-/// No-op implementation for non-macOS platforms
-pub fn set_traffic_lights_position(_window: &winit::window::Window, _x: f64, _y: f64) {
-    // No-op on non-macOS platforms
-}
-
 #[cfg(target_os = "macos")]
 /// Setup traffic light position adjustment on window redraw
 pub fn setup_traffic_lights<T: slint::ComponentHandle + 'static>(ui: &T) {

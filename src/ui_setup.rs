@@ -1,6 +1,9 @@
 use crate::background_generator::generate_blurred_background;
+use crate::music_scanner::MusicScanner;
 use i_slint_backend_winit::WinitWindowAccessor;
-use slint::{ComponentHandle, EventLoopError};
+use log::info;
+use slint::{ComponentHandle, EventLoopError, ModelRc, VecModel};
+use std::rc::Rc;
 
 slint::include_modules!();
 // Responsive rules: [min_width, column_count]
@@ -87,14 +90,63 @@ fn refresh_sizing(ui: &AppWindow) -> Result<(), EventLoopError> {
     })
 }
 
-/// Maximize window after event loop starts
-pub fn setup_maximize(ui: &AppWindow) -> Result<(), EventLoopError> {
+/// Load music library from a specific directory
+pub fn load_music_library(ui: &AppWindow, music_dir: &str) {
+    info!("Loading music library from: {}", music_dir);
+
+    let music_dir = music_dir.to_string();
     let ui_weak = ui.as_weak();
-    slint::invoke_from_event_loop(move || {
-        if let Some(ui) = ui_weak.upgrade() {
-            ui.window().with_winit_window(|window| {
-                window.set_maximized(true);
-            });
+
+    // Scan in background thread to avoid blocking UI
+    std::thread::spawn(move || {
+        let scanner = MusicScanner::new();
+        let music_list = scanner.scan_directory(&music_dir);
+
+        info!("Loaded {} songs from library", music_list.len());
+
+        // Update UI in event loop
+        slint::invoke_from_event_loop(move || {
+            if let Some(ui) = ui_weak.upgrade() {
+                // Convert to Slint model inside event loop (Image is not Send)
+                let items: Vec<MusicItemData> = music_list
+                    .iter()
+                    .map(|metadata| {
+                        let info = format!("{} - {}", metadata.album, metadata.artist);
+                        let metadata_str = format!(
+                            "{}/{} {}",
+                            metadata.bit_depth, metadata.sample_rate, metadata.duration
+                        );
+
+                        MusicItemData {
+                            cover_image: slint::Image::default(),
+                            title: metadata.title.clone().into(),
+                            info: info.into(),
+                            metadata: metadata_str.into(),
+                        }
+                    })
+                    .collect();
+
+                let model = Rc::new(VecModel::from(items));
+                ui.set_music_items(ModelRc::from(model));
+            }
+        })
+        .ok();
+    });
+}
+
+/// Maximize window after event loop starts
+pub fn initialize(ui: &AppWindow) {
+    std::thread::spawn({
+        let ui = ui.as_weak();
+        move || {
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            ui.upgrade_in_event_loop(move |ui| {
+                ui.window().with_winit_window(|window| {
+                    window.set_maximized(true);
+                    ui.set_is_visible(true);
+                });
+            })
+            .ok();
         }
-    })
+    });
 }

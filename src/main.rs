@@ -4,10 +4,10 @@
 mod backend;
 mod background_generator;
 mod logging;
+mod music_scanner;
 mod ui_setup;
 mod window_utils;
 
-use i_slint_backend_winit::WinitWindowAccessor;
 use slint::ComponentHandle;
 use std::error::Error;
 
@@ -19,23 +19,15 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let ui = ui_setup::AppWindow::new()?;
 
+    #[cfg(target_os = "macos")]
     window_utils::setup_traffic_lights(&ui);
     ui_setup::setup_background(&ui)?;
     ui_setup::listen_resize(&ui);
 
-    std::thread::spawn({
-        let ui = ui.as_weak();
-        move || {
-            std::thread::sleep(std::time::Duration::from_millis(500));
-            ui.upgrade_in_event_loop(move |ui| {
-                ui.window().with_winit_window(|window| {
-                    window.set_maximized(true);
-                    ui.set_is_visible(true);
-                });
-            })
-            .ok();
-        }
-    });
+    ui_setup::initialize(&ui);
+
+    // Load music library
+    ui_setup::load_music_library(&ui, "/Users/alvindimas05/Music/The Meaning of Life");
 
     // Run the application
     ui.run()?;
