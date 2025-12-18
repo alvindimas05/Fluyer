@@ -1,9 +1,6 @@
 use crate::music_scanner::MusicScanner;
 use image::GenericImageView;
 
-/// Image processing constants
-pub const THUMBNAIL_MAX_SIZE: u32 = 200;
-
 /// ImageService handles all image-related operations
 pub struct ImageService;
 
@@ -13,26 +10,12 @@ impl ImageService {
         Self
     }
 
-    /// Load image from bytes and convert to Slint Image
-    pub fn load_from_bytes(&self, image_data: &[u8]) -> slint::Image {
-        match image::load_from_memory(image_data) {
-            Ok(img) => {
-                let rgba_img = img.to_rgba8();
-                let (width, height) = (rgba_img.width(), rgba_img.height());
-                let pixel_buffer =
-                    slint::SharedPixelBuffer::clone_from_slice(&rgba_img.into_raw(), width, height);
-                slint::Image::from_rgba8(pixel_buffer)
-            }
-            Err(_) => slint::Image::default(),
-        }
-    }
-
     /// Resize image if it exceeds max size, maintaining aspect ratio
-    pub fn resize(&self, img: image::DynamicImage) -> image::DynamicImage {
+    pub fn resize(&self, img: image::DynamicImage, max_size: u32) -> image::DynamicImage {
         let (width, height) = img.dimensions();
 
-        if width > THUMBNAIL_MAX_SIZE || height > THUMBNAIL_MAX_SIZE {
-            let scale = (THUMBNAIL_MAX_SIZE as f32 / width.max(height) as f32).min(1.0);
+        if width > max_size || height > max_size {
+            let scale = (max_size as f32 / width.max(height) as f32).min(1.0);
             let new_width = (width as f32 * scale) as u32;
             let new_height = (height as f32 * scale) as u32;
 
@@ -43,10 +26,10 @@ impl ImageService {
     }
 
     /// Load and resize image from bytes
-    pub fn load_and_resize(&self, image_data: &[u8]) -> Option<(Vec<u8>, u32, u32)> {
+    pub fn load_and_resize(&self, image_data: &[u8], max_size: u32) -> Option<(Vec<u8>, u32, u32)> {
         match image::load_from_memory(image_data) {
             Ok(img) => {
-                let resized_img = self.resize(img);
+                let resized_img = self.resize(img, max_size);
                 let rgba_img = resized_img.to_rgba8();
                 let width = rgba_img.width();
                 let height = rgba_img.height();
@@ -62,27 +45,34 @@ impl ImageService {
         scanner.extract_cover_to_memory(file_path)
     }
 
-    /// Load cover image from file path, returning resized Slint Image
-    pub fn load_cover_from_file(&self, file_path: &str) -> slint::Image {
-        match self.extract_cover(file_path) {
-            Ok(image_data) => self.load_from_bytes(&image_data),
-            Err(_) => slint::Image::default(),
-        }
-    }
-
     /// Load cover image and resize it
-    pub fn load_cover_resized(&self, file_path: &str) -> Option<(Vec<u8>, u32, u32)> {
+    pub fn load_cover_resized(
+        &self,
+        file_path: &str,
+        max_size: u32,
+    ) -> Option<(Vec<u8>, u32, u32)> {
         match self.extract_cover(file_path) {
-            Ok(image_data) => self.load_and_resize(&image_data),
+            Ok(image_data) => self.load_and_resize(&image_data, max_size),
             Err(_) => None,
         }
     }
 
-    /// Create Slint Image from raw RGBA data
-    pub fn create_from_raw(&self, data: Vec<u8>, width: u32, height: u32) -> slint::Image {
-        let pixel_buffer = slint::SharedPixelBuffer::clone_from_slice(&data, width, height);
-        slint::Image::from_rgba8(pixel_buffer)
+    pub fn load_cover_as_slint_image(&self, file_path: &str, max_size: u32) -> slint::Image {
+        match self.load_cover_resized(file_path, max_size) {
+            Some((image_data, width, height)) => {
+                let pixel_buffer =
+                    slint::SharedPixelBuffer::clone_from_slice(&image_data, width, height);
+                slint::Image::from_rgba8(pixel_buffer)
+            }
+            None => slint::Image::default(),
+        }
     }
+
+    // Create Slint Image from raw RGBA data
+    // pub fn create_from_raw(&self, data: Vec<u8>, width: u32, height: u32) -> slint::Image {
+    //     let pixel_buffer = slint::SharedPixelBuffer::clone_from_slice(&data, width, height);
+    //     slint::Image::from_rgba8(pixel_buffer)
+    // }
 }
 
 impl Default for ImageService {

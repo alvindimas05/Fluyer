@@ -9,6 +9,8 @@ slint::include_modules!();
 
 /// Constants for image loading
 pub const DEBOUNCE_DELAY_MS: u64 = 50;
+const THUMBNAIL_MUSIC_MAX_SIZE: u32 = 100;
+const THUMBNAIL_ALBUM_MAX_SIZE: u32 = 500;
 
 /// ViewModel handles view logic and state management
 /// This is a generic viewmodel that works with AppWindow from the Slint UI
@@ -61,7 +63,7 @@ impl AppViewModel {
 
         for album in albums {
             let cover_image = if let Some(cover_path) = &album.cover_image_path {
-                image_service.load_cover_from_file(cover_path)
+                image_service.load_cover_as_slint_image(cover_path, THUMBNAIL_ALBUM_MAX_SIZE)
             } else {
                 slint::Image::default()
             };
@@ -189,7 +191,7 @@ impl AppViewModel {
                             let metadata = &music_list_for_thread[idx];
 
                             if let Some((image_data, width, height)) =
-                                image_service.load_cover_resized(&metadata.file_path)
+                                image_service.load_cover_resized(&metadata.file_path, THUMBNAIL_MUSIC_MAX_SIZE)
                             {
                                 loaded_images.push((idx, image_data, width, height));
                             }
