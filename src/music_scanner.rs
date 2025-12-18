@@ -15,6 +15,7 @@ pub struct MusicMetadata {
     pub duration: String,
     pub bit_depth: String,
     pub sample_rate: String,
+    pub track_number: String, // Format: "4/11" or just "4"
 }
 
 impl Default for MusicMetadata {
@@ -27,6 +28,7 @@ impl Default for MusicMetadata {
             duration: String::from("0:00"),
             bit_depth: String::from("16-bit"),
             sample_rate: String::from("44.1 kHz"),
+            track_number: String::new(),
         }
     }
 }
@@ -126,12 +128,31 @@ impl MusicScanner {
         let mut all_metadata = results.lock().unwrap().clone();
         let unsupported = *unsupported_count.lock().unwrap();
 
-        // Sort by artist, then album, then title
+        // Sort using Schwartzian transform to avoid re-computing values in the sort callback
+        // Sort order: artist -> album -> track number -> filename
         all_metadata.sort_by(|a, b| {
-            a.artist
-                .cmp(&b.artist)
-                .then(a.album.cmp(&b.album))
-                .then(a.title.cmp(&b.title))
+            // First, compare by artist
+            match a.artist.cmp(&b.artist) {
+                std::cmp::Ordering::Equal => {
+                    // Same artist, compare by album
+                    match a.album.cmp(&b.album) {
+                        std::cmp::Ordering::Equal => {
+                            // Same album, compare by track number
+                            let a_track = Self::parse_track_number(&a.track_number);
+                            let b_track = Self::parse_track_number(&b.track_number);
+                            match a_track.cmp(&b_track) {
+                                std::cmp::Ordering::Equal => {
+                                    // Same track number, compare by filename
+                                    a.file_path.cmp(&b.file_path)
+                                }
+                                other => other,
+                            }
+                        }
+                        other => other,
+                    }
+                }
+                other => other,
+            }
         });
 
         let elapsed = start_time.elapsed();
@@ -217,6 +238,10 @@ impl MusicScanner {
 
                 metadata.album = Self::extract_tag(tags, &["album", "ALBUM", "Album"])
                     .unwrap_or_else(|| "Unknown Album".to_string());
+
+                // Extract track number (format: "4/11" or just "4")
+                metadata.track_number = Self::extract_tag(tags, &["track", "TRACK", "TRACKNUMBER"])
+                    .unwrap_or_else(|| String::new());
             }
 
             // Extract duration
@@ -293,6 +318,22 @@ impl MusicScanner {
         }
 
         None
+    }
+
+    /// Parse track number from format "4/11" or "4" to integer
+    /// Returns the track number, or u32::MAX if invalid (sorts items without valid track number last)
+    fn parse_track_number(track_str: &str) -> u32 {
+        if track_str.is_empty() {
+            return u32::MAX; // No track number, sort last
+        }
+
+        // Handle format "4/11" by taking just the first part
+        let track_part = track_str.split('/').next().unwrap_or("");
+
+        match track_part.trim().parse::<u32>() {
+            Ok(num) => num,
+            Err(_) => u32::MAX, // Invalid format, sort last
+        }
     }
 
     /// Normalize artist separators - replace semicolons with commas
