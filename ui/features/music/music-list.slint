@@ -16,7 +16,7 @@ export component MusicList inherits VerticalBox {
     // Progressive loading properties
     in-out property <int> visible-start-index: 0;
     in-out property <int> visible-end-index: 0;
-    callback request-images(int, int); // Request images for range
+    callback request-images(string, int, int); // Request images for range (type, start, end)
     
     // Internal viewport tracking
     property <length> current-viewport-y: 0;
@@ -67,7 +67,7 @@ export component MusicList inherits VerticalBox {
         let start-index = max(0, floor(-root.current-viewport-y / root.item-height) * column);
         let end-index = min(items.length - 1, start-index + (root.height / root.item-height) * column) + 1;
 
-        root.request-images(start-index, end-index);
+        root.request-images("music", start-index, end-index);
     }
     
     // Initialize visible range on component load

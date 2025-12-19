@@ -5,19 +5,50 @@ export component AlbumList inherits ScrollView {
     in property <length> item-width;
     in property <length> item-height;
     in property <[AlbumItemData]> items: [];
+    
+    // Progressive loading properties
+    in-out property <int> visible-start-index: 0;
+    in-out property <int> visible-end-index: 0;
+    callback request-images(string, int, int); // Request images for range (type, start, end)
+    
+    // Internal viewport tracking
+    property <length> current-viewport-x: 0;
     width: 100%;
     height: item-height;
     viewport-height: item-height - 15px;
     vertical-scrollbar-policy: always-off;
     horizontal-scrollbar-policy: always-off;
+    
+    // Track viewport changes
+    changed viewport-x => {
+        root.current-viewport-x = self.viewport-x;
+        root.calculate-visible-range();
+    }
     HorizontalLayout {
         padding-left: 12px;
         padding-right: 12px;
         spacing: 24px;
-        for album in root.items: AlbumItem {
+        for index in root.items.length: AlbumItem {
+            property <bool> is-visible: index >= root.visible-start-index && index <= root.visible-end-index;
             width: root.item-width;
             height: root.item-height;
-            data: album;
+            data: root.items[index];
         }
+    }
+    
+    // Calculate visible range based on scroll position
+    function calculate-visible-range() {
+        if (items.length == 0) {
+            return;
+        }
+        let start-index = max(0, floor(-root.current-viewport-x / (root.item-width + 24px)));
+        let end-index = min(items.length - 1, start-index + ceil(root.width / (root.item-width + 24px))) + 1;
+
+        root.request-images("album", start-index, end-index);
+    }
+    
+    // Initialize visible range on component load
+    init => {
+        root.calculate-visible-range();
     }
 }

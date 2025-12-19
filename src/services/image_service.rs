@@ -56,23 +56,6 @@ impl ImageService {
             Err(_) => None,
         }
     }
-
-    pub fn load_cover_as_slint_image(&self, file_path: &str, max_size: u32) -> slint::Image {
-        match self.load_cover_resized(file_path, max_size) {
-            Some((image_data, width, height)) => {
-                let pixel_buffer =
-                    slint::SharedPixelBuffer::clone_from_slice(&image_data, width, height);
-                slint::Image::from_rgba8(pixel_buffer)
-            }
-            None => slint::Image::default(),
-        }
-    }
-
-    // Create Slint Image from raw RGBA data
-    // pub fn create_from_raw(&self, data: Vec<u8>, width: u32, height: u32) -> slint::Image {
-    //     let pixel_buffer = slint::SharedPixelBuffer::clone_from_slice(&data, width, height);
-    //     slint::Image::from_rgba8(pixel_buffer)
-    // }
 }
 
 impl Default for ImageService {

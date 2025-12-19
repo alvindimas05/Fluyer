@@ -20,7 +20,7 @@ export component AppWindow inherits Window {
     in property <bool> is-visible: false;
     
     // Progressive loading callback
-    callback request-images(int, int);
+    callback request-images(string, int, int);
 
     background: transparent;
     default-font-family: "Inter";
@@ -38,6 +38,9 @@ export component AppWindow inherits Window {
             item-width: root.album-width;
             item-height: root.album-height;
             items: root.album-items;
+            request-images(request-type, start, end) => {
+                root.request-images(request-type, start, end);
+            }
         }
 
         MusicList {
@@ -45,8 +48,8 @@ export component AppWindow inherits Window {
             height: root.music-list-height;
             column: root.music-list-column;
             items: root.music-items;
-            request-images(start, end) => {
-                root.request-images(start, end);
+            request-images(request-type, start, end) => {
+                root.request-images(request-type, start, end);
             }
         }
     }

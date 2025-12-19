@@ -1,7 +1,6 @@
 use crate::background_generator::generate_blurred_background;
 use crate::viewmodel::AppViewModel;
 use i_slint_backend_winit::WinitWindowAccessor;
-use log::info;
 use slint::{ComponentHandle, EventLoopError};
 use std::time::Duration;
 
@@ -90,8 +89,6 @@ fn refresh_sizing(ui: &AppWindow) -> Result<(), EventLoopError> {
                 ui.set_music_list_column((column_count as f32 / 2.0).floor() as i32);
                 ui.set_music_width(music_column_percentage * 100.0);
                 ui.set_music_list_height(size.height as f32 - album_height);
-
-                info!("Music List Height set to: {}", ui.get_music_list_height());
             });
         }
     })
@@ -99,8 +96,6 @@ fn refresh_sizing(ui: &AppWindow) -> Result<(), EventLoopError> {
 
 /// Load music library from a specific directory using the viewmodel
 pub fn load_music_library(ui: &AppWindow, music_dir: &str) {
-    info!("Loading music library from: {}", music_dir);
-
     let viewmodel = AppViewModel::new();
     viewmodel.load_music_library(ui, music_dir);
 }

@@ -1,4 +1,3 @@
-use log::{info, warn};
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -88,7 +87,7 @@ impl MusicScanner {
         use std::time::Instant;
         let start_time = Instant::now();
 
-        info!("Starting music scan in: {}", path);
+        log::info!("Starting music scan in: {}", path);
 
         // Collect all files (no extension filtering - let ffmpeg decide)
         let files: Vec<PathBuf> = WalkDir::new(path)
@@ -102,7 +101,7 @@ impl MusicScanner {
             .map(|e| e.path().to_path_buf())
             .collect();
 
-        info!("Found {} files to scan", files.len());
+        log::info!("Found {} files to scan", files.len());
 
         // Process files in parallel
         let results = Arc::new(Mutex::new(Vec::new()));
@@ -124,7 +123,7 @@ impl MusicScanner {
                         }
                         Err(e) => {
                             // Log unsupported files at debug level to avoid spam
-                            warn!(
+                            log::warn!(
                                 "Unsupported or unreadable file: {:?} - {}",
                                 file.display(),
                                 e
@@ -173,7 +172,7 @@ impl MusicScanner {
         });
 
         let elapsed = start_time.elapsed();
-        info!(
+        log::info!(
             "Successfully processed {} music files ({} unsupported/unreadable) in {:.2}s",
             all_metadata.len(),
             unsupported,

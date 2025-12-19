@@ -1,4 +1,4 @@
-use crate::music_scanner::MusicMetadata;
+use crate::music_scanner::{AlbumInfo, MusicMetadata};
 use crate::services::{ImageService, MetadataService, MusicService};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use std::rc::Rc;
@@ -42,14 +42,16 @@ impl AppViewModel {
 
             let music_list = Arc::new(grouped.songs.clone());
             let music_list_clone = Arc::clone(&music_list);
-            let albums = grouped.albums;
+            let albums = Arc::new(grouped.albums);
+            let albums_clone = Arc::clone(&albums);
 
             // Update UI in event loop
             slint::invoke_from_event_loop(move || {
                 if let Some(ui) = ui_weak.upgrade() {
-                    Self::process_albums(&ui, albums);
+                    Self::process_albums(&ui, (*albums_clone).clone());
                     Self::process_music_items(&ui, &music_list_clone);
-                    Self::setup_progressive_loading(&ui, music_list_clone);
+
+                    Self::setup_progressive_loading(&ui, music_list_clone, albums_clone);
                 }
             })
             .ok();
@@ -58,18 +60,11 @@ impl AppViewModel {
 
     /// Process albums and update UI
     fn process_albums(ui: &AppWindow, albums: Vec<crate::music_scanner::AlbumInfo>) {
-        let image_service = ImageService::new();
         let mut album_items = Vec::new();
 
         for album in albums {
-            let cover_image = if let Some(cover_path) = &album.cover_image_path {
-                image_service.load_cover_as_slint_image(cover_path, THUMBNAIL_ALBUM_MAX_SIZE)
-            } else {
-                slint::Image::default()
-            };
-
             album_items.push(AlbumItemData {
-                cover_image,
+                cover_image: slint::Image::default(),
                 title: album.album.clone().into(),
                 artist: album.artist.clone().into(),
             });
@@ -99,19 +94,42 @@ impl AppViewModel {
     }
 
     /// Setup progressive image loading with debouncing
-    fn setup_progressive_loading(ui: &AppWindow, music_list: Arc<Vec<MusicMetadata>>) {
-        let last_request_time = Arc::new(Mutex::new(Instant::now()));
-        let pending_range = Arc::new(Mutex::new(Option::<(i32, i32)>::None));
+    fn setup_progressive_loading(
+        ui: &AppWindow,
+        music_list: Arc<Vec<MusicMetadata>>,
+        albums: Arc<Vec<AlbumInfo>>,
+    ) {
         let ui_weak = ui.as_weak();
 
-        ui.on_request_images(move |start_idx, end_idx| {
-            *pending_range.lock().unwrap() = Some((start_idx, end_idx));
-            *last_request_time.lock().unwrap() = Instant::now();
+        let music_last_request_type = Arc::new(Mutex::new(Instant::now()));
+        let music_pending_range = Arc::new(Mutex::new(Option::<(i32, i32)>::None));
 
-            let pending_range = Arc::clone(&pending_range);
-            let last_request_time = Arc::clone(&last_request_time);
+        let album_last_request_time = Arc::new(Mutex::new(Instant::now()));
+        let album_pending_range = Arc::new(Mutex::new(Option::<(i32, i32)>::None));
+
+        ui.on_request_images(move |request_type, start_idx, end_idx| {
+            if request_type == "music" {
+                *music_pending_range.lock().unwrap() = Some((start_idx, end_idx));
+                *music_last_request_type.lock().unwrap() = Instant::now();
+            } else if request_type == "album" {
+                *album_pending_range.lock().unwrap() = Some((start_idx, end_idx));
+                *album_last_request_time.lock().unwrap() = Instant::now();
+            }
+
+            let pending_range = if request_type == "music" {
+                Arc::clone(&music_pending_range)
+            } else {
+                Arc::clone(&album_pending_range)
+            };
+            let last_request_time = if request_type == "music" {
+                Arc::clone(&music_last_request_type)
+            } else {
+                Arc::clone(&album_last_request_time)
+            };
             let ui_weak = ui_weak.clone();
             let music_list = Arc::clone(&music_list);
+            let albums = Arc::clone(&albums);
+            let request_type_clone = request_type.clone();
 
             std::thread::spawn(move || {
                 std::thread::sleep(Duration::from_millis(DEBOUNCE_DELAY_MS));
@@ -122,19 +140,28 @@ impl AppViewModel {
                 }
 
                 if let Some((start, end)) = pending_range.lock().unwrap().take() {
-                    Self::load_images_for_range(
-                        ui_weak.clone(),
-                        Arc::clone(&music_list),
-                        start,
-                        end,
-                    );
+                    if request_type_clone == "music" {
+                        Self::load_music_images_for_range(
+                            ui_weak.clone(),
+                            Arc::clone(&music_list),
+                            start,
+                            end,
+                        );
+                    } else if request_type_clone == "album" {
+                        Self::load_album_images_for_range(
+                            ui_weak.clone(),
+                            Arc::clone(&albums),
+                            start,
+                            end,
+                        );
+                    }
                 }
             });
         });
     }
 
-    /// Load images for a specific range of items
-    fn load_images_for_range(
+    /// Load music images for a specific range of items
+    fn load_music_images_for_range(
         ui_weak: slint::Weak<AppWindow>,
         music_list: Arc<Vec<MusicMetadata>>,
         start_idx: i32,
@@ -190,8 +217,8 @@ impl AppViewModel {
                         for idx in indices_to_load {
                             let metadata = &music_list_for_thread[idx];
 
-                            if let Some((image_data, width, height)) =
-                                image_service.load_cover_resized(&metadata.file_path, THUMBNAIL_MUSIC_MAX_SIZE)
+                            if let Some((image_data, width, height)) = image_service
+                                .load_cover_resized(&metadata.file_path, THUMBNAIL_MUSIC_MAX_SIZE)
                             {
                                 loaded_images.push((idx, image_data, width, height));
                             }
@@ -201,6 +228,102 @@ impl AppViewModel {
                         slint::invoke_from_event_loop(move || {
                             if let Some(ui) = ui_weak_for_thread.upgrade() {
                                 let model = ui.get_music_items();
+
+                                for (idx, image_data, width, height) in loaded_images {
+                                    if idx < model.row_count() {
+                                        if let Some(mut item) = model.row_data(idx) {
+                                            let pixel_buffer =
+                                                slint::SharedPixelBuffer::clone_from_slice(
+                                                    &image_data,
+                                                    width,
+                                                    height,
+                                                );
+                                            item.cover_image =
+                                                slint::Image::from_rgba8(pixel_buffer);
+                                            model.set_row_data(idx, item);
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                        .ok();
+                    });
+                }
+            }
+        })
+        .ok();
+    }
+
+    /// Load album images for a specific range of items
+    fn load_album_images_for_range(
+        ui_weak: slint::Weak<AppWindow>,
+        albums: Arc<Vec<AlbumInfo>>,
+        start_idx: i32,
+        end_idx: i32,
+    ) {
+        let ui_weak_clone = ui_weak.clone();
+        let albums_clone = Arc::clone(&albums);
+
+        slint::invoke_from_event_loop(move || {
+            if let Some(ui) = ui_weak_clone.upgrade() {
+                let model = ui.get_album_items();
+                let start = start_idx.max(0) as usize;
+                let end = (end_idx as usize).min(albums_clone.len().saturating_sub(1));
+
+                // Unload images outside visible range to free memory
+                for idx in 0..model.row_count() {
+                    if idx < start || idx > end {
+                        if let Some(item) = model.row_data(idx) {
+                            if item.cover_image.size().width > 0 {
+                                let mut updated_item = item;
+                                updated_item.cover_image = slint::Image::default();
+                                model.set_row_data(idx, updated_item);
+                            }
+                        }
+                    }
+                }
+
+                // Collect indices that need loading
+                let mut indices_to_load = Vec::new();
+                for idx in start..=end {
+                    if idx >= albums_clone.len() {
+                        break;
+                    }
+
+                    if idx < model.row_count() {
+                        if let Some(item) = model.row_data(idx) {
+                            if item.cover_image.size().width == 0 {
+                                indices_to_load.push(idx);
+                            }
+                        }
+                    }
+                }
+
+                // Extract cover images in background thread
+                if !indices_to_load.is_empty() {
+                    let ui_weak_for_thread = ui_weak.clone();
+                    let albums_for_thread = Arc::clone(&albums);
+
+                    std::thread::spawn(move || {
+                        let image_service = ImageService::new();
+                        let mut loaded_images = Vec::new();
+
+                        for idx in indices_to_load {
+                            let album = &albums_for_thread[idx];
+
+                            if let Some(cover_path) = &album.cover_image_path {
+                                if let Some((image_data, width, height)) = image_service
+                                    .load_cover_resized(cover_path, THUMBNAIL_ALBUM_MAX_SIZE)
+                                {
+                                    loaded_images.push((idx, image_data, width, height));
+                                }
+                            }
+                        }
+
+                        // Update UI with loaded images
+                        slint::invoke_from_event_loop(move || {
+                            if let Some(ui) = ui_weak_for_thread.upgrade() {
+                                let model = ui.get_album_items();
 
                                 for (idx, image_data, width, height) in loaded_images {
                                     if idx < model.row_count() {
