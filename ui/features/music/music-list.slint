@@ -47,7 +47,6 @@ export component MusicList inherits VerticalBox {
             spacing: 24px;
             for col-index in column: MusicItem {
                 property <int> index: row-index * column + col-index;
-                property <bool> is-visible: index >= root.visible-start-index && index <= root.visible-end-index;
                 width: root.item-width;
                 padding-bottom: 16px;
 

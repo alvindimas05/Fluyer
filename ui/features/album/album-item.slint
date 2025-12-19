@@ -1,15 +1,7 @@
-export struct AlbumItemData {
-    cover-image: image,
-    title: string,
-    artist: string,
-}
-
 export component AlbumItem inherits VerticalLayout {
-    in property <AlbumItemData> data: {
-        cover-image: @image-url(""),
-        title: "Unknown Album",
-        artist: "Unknown Artist",
-    };
+    in property <image> cover-image;
+    in property <string> title;
+    in property <string> artist;
     padding-bottom: 15px;
     Rectangle {
         width: root.width;
@@ -17,7 +9,7 @@ export component AlbumItem inherits VerticalLayout {
         Image {
             width: 100%;
             height: 100%;
-            source: root.data.cover-image;
+            source: root.cover-image.width > 0 ? root.cover-image : @image-url("../../../placeholder/500x500.png");
             image-fit: cover;
         }
 
@@ -29,7 +21,7 @@ export component AlbumItem inherits VerticalLayout {
         padding-top: 8px;
 
         Text {
-            text: root.data.title;
+            text: root.title;
             color: white;
             font-size: 17px;
             font-weight: 500;
@@ -41,7 +33,7 @@ export component AlbumItem inherits VerticalLayout {
     VerticalLayout {
         padding-top: 4px;
         Text {
-            text: root.data.artist;
+            text: root.artist;
             color: white;
             font-size: 15px;
             vertical-stretch: 0;

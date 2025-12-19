@@ -9,10 +9,10 @@ export component MusicItem inherits HorizontalLayout {
         height: 56px;
         border-radius: 4px;
         clip: true;
-        Image {
+        if !root.title.is-empty: Image {
             width: 100%;
             height: 100%;
-            source: root.cover-image;
+            source: root.cover-image.width > 0 ? root.cover-image : @image-url("../../../placeholder/500x500.png");
             image-fit: cover;
         }
     }

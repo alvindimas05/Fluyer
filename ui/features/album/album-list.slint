@@ -1,5 +1,11 @@
 import { ScrollView } from "std-widgets.slint";
-import { AlbumItem, AlbumItemData } from "./album-item.slint";
+import { AlbumItem } from "./album-item.slint";
+
+export struct AlbumItemData {
+    cover-image: image,
+    title: string,
+    artist: string,
+}
 
 export component AlbumList inherits ScrollView {
     in property <length> item-width;
@@ -32,7 +38,10 @@ export component AlbumList inherits ScrollView {
             property <bool> is-visible: index >= root.visible-start-index && index <= root.visible-end-index;
             width: root.item-width;
             height: root.item-height;
-            data: root.items[index];
+
+            cover-image: root.items[index].cover-image;
+            title: root.items[index].title;
+            artist: root.items[index].artist;
         }
     }
     
