@@ -63,9 +63,3 @@ pub fn setup_traffic_lights<T: slint::ComponentHandle + 'static>(ui: &T) {
         EventResult::Propagate
     });
 }
-
-#[cfg(not(target_os = "macos"))]
-/// No-op implementation for non-macOS platforms
-pub fn setup_traffic_lights<T: slint::ComponentHandle>(_ui: &T) {
-    // No-op on non-macOS platforms
-}
