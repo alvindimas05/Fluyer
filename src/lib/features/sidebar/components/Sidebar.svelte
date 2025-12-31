@@ -76,6 +76,7 @@ async function onMouseMove(e: MouseEvent) {
         isMouseInsideArea = true;
         isShowing = true;
         sidebarStore.showType = type;
+        console.log("Showing sidebar:", type);
     }
 }
 
@@ -151,7 +152,7 @@ onMount(() => {
         top: {paddingTop}px;"
     onmouseleave={onMouseLeave}>
     <View glassEnableBlur={true}
-          class="bg-gray-400/35 pointer-events-auto h-full p-3 rounded-lg
+          class="pointer-events-auto h-full p-3 rounded-lg
 			animate__animated
 			{isShowing
 				? (type === SidebarType.Right

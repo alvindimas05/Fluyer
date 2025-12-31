@@ -84,7 +84,7 @@ async function setAudio(music: MusicData | null = null) {
 		);
 		if (buffer === null) return;
 		console.log(
-			"MusicController.getVisualizerBuffer took",
+			"Visualizer get music buffer took",
 			performance.now() - now,
 			"ms",
 		);

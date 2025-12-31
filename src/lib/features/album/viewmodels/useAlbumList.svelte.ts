@@ -88,6 +88,7 @@ function onMouseWheel(e: WheelEvent & { currentTarget: EventTarget & HTMLDivElem
         e.preventDefault();
         e.currentTarget.scrollLeft += e.deltaY;
     }
+    musicStore.albumListUi.scrollLeft = e.currentTarget.scrollLeft;
 }
 
 function scrollTo(index: number) {
@@ -101,8 +102,8 @@ export function useAlbumList(){
     });
 
     $effect(() => {
-        scrollTo(musicStore.albumListScrollIndex);
-        musicStore.albumListScrollIndex = -1;
+        scrollTo(musicStore.albumListUi.scrollIndex);
+        musicStore.albumListUi.scrollIndex = -1;
     });
 
     onMount(updateItemWidth);

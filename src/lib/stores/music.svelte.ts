@@ -24,7 +24,10 @@ const musicStore = $state({
 
     // UI State
     reset: false,
-    albumListScrollIndex: -1,
+    albumListUi: {
+        scrollIndex: -1,
+        scrollLeft: -1,
+    },
 
     get currentMusic(): MusicData | undefined {
         return this.queue[this.currentIndex] ?? undefined;

@@ -25,7 +25,7 @@ export function useAlbumItem(musicList: MusicData[], index: number){
             ),
             musicList,
         } as AlbumData;
-        if(isAlbumType) setTimeout(() => musicStore.albumListScrollIndex = index, 500);
+        if(isAlbumType) setTimeout(() => musicStore.albumListUi.scrollIndex = index, 500);
     }
 
     return {

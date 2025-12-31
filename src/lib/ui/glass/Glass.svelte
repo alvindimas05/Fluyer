@@ -25,8 +25,9 @@ let {
 }: Props = $props();
 
 const getBlurClass = () => {
-	if (!enableBlur) return "";
-	return isAndroid() ? "backdrop-blur-xs" : "backdrop-blur-md";
+	// if (!enableBlur) return "";
+	// return isAndroid() ? "backdrop-blur-xs" : "backdrop-blur-md";
+	return "";
 };
 
 const getHoverClasses = () => {

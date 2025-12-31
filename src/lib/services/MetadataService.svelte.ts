@@ -11,7 +11,6 @@ const MetadataService = {
     ) => {
         if (!music) return MusicConfig.defaultAlbumImage;
         try {
-            console.log(`Fetching cover art for ${music.path}`);
             const image = await TauriMetadataAPI.getMusicCoverArt(music.path, size);
             if (image !== null) return MetadataService.withBase64(image);
         } catch (e) {}
