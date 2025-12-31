@@ -39,15 +39,34 @@ if [[ "$os" == "android" ]]; then
     export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
     export ANDROID_STANDALONE_TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
     export ANDROID_NDK_BIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+    
+    # Set up toolchain binaries
     export RANLIB=$ANDROID_NDK_BIN/llvm-ranlib
     export AR=$ANDROID_NDK_BIN/llvm-ar
     export STRIP=$ANDROID_NDK_BIN/llvm-strip
     export LD=$ANDROID_NDK_BIN/ld
     export CC=$ANDROID_NDK_BIN/clang
+    export CXX=$ANDROID_NDK_BIN/clang++
+    
+    # Set target-specific compilers for different architectures
+    case "$ANDROID_ARCH" in
+        armv7)
+            export CXX_aarch64_linux_android=$ANDROID_NDK_BIN/armv7a-linux-androideabi24-clang++
+            ;;
+        aarch64)
+            export CXX_aarch64_linux_android=$ANDROID_NDK_BIN/aarch64-linux-android24-clang++
+            ;;
+        i686)
+            export CXX_i686_linux_android=$ANDROID_NDK_BIN/i686-linux-android24-clang++
+            ;;
+        x86_64)
+            export CXX_x86_64_linux_android=$ANDROID_NDK_BIN/x86_64-linux-android24-clang++
+            ;;
+    esac
     
     # Install required build tools for CMake
     sudo apt-get update
-    sudo apt-get install -y build-essential cmake make
+    sudo apt-get install -y build-essential cmake make ninja-build
     
     cd src-tauri/gen/android
     echo "keyAlias=$ANDROID_KEY_ALIAS" > keystore.properties
