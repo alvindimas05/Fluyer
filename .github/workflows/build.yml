@@ -68,7 +68,7 @@ jobs:
           #   artifact_name: windows-arm64
           #   bun_url: https://github.com/oven-sh/bun/releases/latest/download/bun-windows-x64-baseline.zip
           - platform: macos-intel
-            os: macos-13
+            os: macos-15-intel
             rust_target: x86_64-apple-darwin
             artifact_path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_x64.dmg
             artifact_name: macos-intel
@@ -188,7 +188,7 @@ jobs:
 
       - name: Build (Desktop)
         if: "!startsWith(matrix.platform, 'android') && matrix.platform != 'ios'"
-        run: bun tauri:build
+        run: bun tauri build
 
       # Android-specific build steps
       - name: Rename Android APK

@@ -19,6 +19,7 @@ fi
 bun i
 
 if [[ "$os" == "windows" ]]; then
+    bun run init
     if [[ "$arch" == "arm64" ]]; then
         bun i @tauri-apps/cli-win32-arm64-msvc
     fi
@@ -44,20 +45,21 @@ if [[ "$os" == "android" ]]; then
     base64 -d <<< "$ANDROID_KEY_BASE64" > $RUNNER_TEMP/keystore.jks
     echo "storeFile=$RUNNER_TEMP/keystore.jks" >> keystore.properties
     cd ../../../
-    bun android:configure
+    bun android:init
     bun tauri android build -v --target $ANDROID_ARCH
     # Note: It's not executed in the workflow for some reason. So we need to add it manually in the workflow.
     # mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_$APP_VERSION_$ANDROID_ARCH.apk
 fi
 
 # Build iOS
-if [[ "$os" == "ios" ]]; then
-    bun tauri ios build -v
-    mkdir -p ipas
-    mv "./src-tauri/gen/apple/build/arm64/Fluyer.ipa" "./ipas/Fluyer.ipa"
-fi
+# if [[ "$os" == "ios" ]]; then
+#     bun tauri ios build -v
+#     mkdir -p ipas
+#     mv "./src-tauri/gen/apple/build/arm64/Fluyer.ipa" "./ipas/Fluyer.ipa"
+# fi
 
 # Build Desktop
 if [[ "$os" == "linux" ]] || [[ "$os" == "macos" ]]; then
-    bun tauri:build
+    bun run init
+    bun tauri build
 fi
