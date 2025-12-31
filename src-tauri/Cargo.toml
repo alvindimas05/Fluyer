@@ -18,20 +18,20 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.4.1", features = [] }
 
 [dependencies]
-tauri = { version = "2.9.2", features = [] }
+tauri = { version = "2.9.5", features = [] }
 serde = { version = "1", features = ["derive"] }
 symphonia = { version = "0.5.4", features = ["all", "opt-simd"] }
-log = "0.4.22"
+log = "0.4.29"
 walkdir = "2.5.0"
 tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-os = "2"
-tauri-plugin-prevent-default = "3"
+tauri-plugin-prevent-default = "4"
 tauri-plugin-fluyer = { path = "./tauri-plugin-fluyer" }
 regex = "1.11.1"
 tauri-plugin-decorum = "1.1.1"
-image = "0.25.5"
-reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
+image = "0.25.9"
+reqwest = { version = "0.13.1", default-features = false, features = ["json", "rustls"] }
 lazy_static = "1.5.0"
 dotenvy = "0.15.7"
 dotenvy_macro = "0.15.7"
@@ -42,11 +42,11 @@ rusqlite = { version = "0.37.0", features = ["bundled"] }
 chrono = "0.4.41"
 rusqlite_migration = "2.3.0"
 tokio = "1.47.1"
-fast_image_resize = { version = "5.3.0", features = ["rayon", "image"] }
+# fast_image_resize = { version = "5.3.0", features = ["rayon", "image"] }
 state = "0.6.0"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-enigo = "0.5.0"
+enigo = "0.6.1"
 
 [profile.dev]
 debug = 0

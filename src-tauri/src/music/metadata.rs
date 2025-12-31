@@ -228,7 +228,7 @@ impl MusicMetadata {
 
         if let Some(rev) = format.metadata().current() {
             for visual in rev.visuals() {
-                return ImageHandler::resize_image_to_base64(&visual.data, size)
+                return ImageHandler::encode_to_base64(&visual.data)
             }
         }
         None

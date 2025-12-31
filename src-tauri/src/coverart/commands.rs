@@ -85,7 +85,7 @@ async fn get_from_path(file_path: String, size: Option<String>) -> Option<String
 
         // If it's already PNG or JPEG, don't re-encode
         if ext == "png" || ext == "jpg" || ext == "jpeg" {
-            return ImageHandler::resize_image_to_base64(data.as_slice(), size);
+            return ImageHandler::encode_to_base64(data.as_slice());
         }
 
         let reader = ImageReader::new(Cursor::new(data)).with_guessed_format();
@@ -97,7 +97,7 @@ async fn get_from_path(file_path: String, size: Option<String>) -> Option<String
                 .write_to(&mut buf, image::ImageFormat::Png)
                 .is_ok()
             {
-                return ImageHandler::resize_image_to_base64(buf.get_ref(), size);
+                return ImageHandler::encode_to_base64(buf.get_ref());
             }
         }
     }
