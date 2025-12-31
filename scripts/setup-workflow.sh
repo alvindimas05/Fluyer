@@ -35,7 +35,9 @@ fi
 # Setup Android
 if [[ "$os" == "android" ]]; then
     export ANDROID_NDK_HOME=$NDK_HOME
+    export ANDROID_NDK=$NDK_HOME
     export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
+    export ANDROID_STANDALONE_TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
     export ANDROID_NDK_BIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
     export RANLIB=$ANDROID_NDK_BIN/llvm-ranlib
     export AR=$ANDROID_NDK_BIN/llvm-ar
