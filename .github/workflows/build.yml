@@ -188,7 +188,7 @@ jobs:
 
       - name: Build (Desktop)
         if: "!startsWith(matrix.platform, 'android') && matrix.platform != 'ios'"
-        run: bun tauri build
+        run: NO_STRIP=true bun tauri build
 
       # Android-specific build steps
       - name: Rename Android APK

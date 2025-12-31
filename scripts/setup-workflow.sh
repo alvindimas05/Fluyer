@@ -18,11 +18,13 @@ fi
 # Install NPM Packages
 bun i
 
-if [[ "$os" == "windows" ]]; then
+if [[ "$os" == "windows" ]] && [[ "$arch" == "arm64" ]]; then
+    bun i @tauri-apps/cli-win32-arm64-msvc
+fi
+
+
+if [[ "$os" == "windows" ]] || [[ "$os" == "linux" ]] || [[ "$os" == "macos" ]]; then
     bun run init
-    if [[ "$arch" == "arm64" ]]; then
-        bun i @tauri-apps/cli-win32-arm64-msvc
-    fi
 fi
 
 if [[ "$os" == "macos" ]]; then
@@ -57,9 +59,3 @@ fi
 #     mkdir -p ipas
 #     mv "./src-tauri/gen/apple/build/arm64/Fluyer.ipa" "./ipas/Fluyer.ipa"
 # fi
-
-# Build Desktop
-if [[ "$os" == "linux" ]] || [[ "$os" == "macos" ]]; then
-    bun run init
-    bun tauri build
-fi
