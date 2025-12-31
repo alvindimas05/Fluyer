@@ -186,10 +186,6 @@ jobs:
           RUNNER_TEMP: ${{ runner.temp }}
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/28.0.13004108
 
-      - name: Build (Desktop)
-        if: "!startsWith(matrix.platform, 'android') && matrix.platform != 'ios'"
-        run: NO_STRIP=true bun tauri build
-
       # Android-specific build steps
       - name: Rename Android APK
         if: startsWith(matrix.platform, 'android')

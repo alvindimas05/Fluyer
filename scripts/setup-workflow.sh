@@ -65,3 +65,11 @@ fi
 #     mkdir -p ipas
 #     mv "./src-tauri/gen/apple/build/arm64/Fluyer.ipa" "./ipas/Fluyer.ipa"
 # fi
+
+# Build Desktop
+if [[ "$os" == "windows" ]] || [[ "$os" == "linux" ]] || [[ "$os" == "macos" ]]; then
+    if [[ "$os" == "linux" ]]; then
+        export NO_STRIP=true
+    fi
+    bun tauri build
+fi
