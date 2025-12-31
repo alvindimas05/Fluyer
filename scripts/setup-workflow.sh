@@ -35,17 +35,17 @@ fi
 # Setup Android
 if [[ "$os" == "android" ]]; then
     export ANDROID_NDK_HOME=$NDK_HOME
-    export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+    export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
     export ANDROID_NDK_BIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
-    export RANLIB=$ANDROID_NDK_ROOT/llvm-ranlib
-    export AR=$ANDROID_NDK_ROOT/llvm-ar
-    export STRIP=$ANDROID_NDK_ROOT/llvm-strip
-    export LD=$ANDROID_NDK_ROOT/ld
+    export RANLIB=$ANDROID_NDK_BIN/llvm-ranlib
+    export AR=$ANDROID_NDK_BIN/llvm-ar
+    export STRIP=$ANDROID_NDK_BIN/llvm-strip
+    export LD=$ANDROID_NDK_BIN/ld
     export CC=$ANDROID_NDK_BIN/clang
     
     # Install required build tools for CMake
     sudo apt-get update
-    sudo apt-get install -y build-essential cmake
+    sudo apt-get install -y build-essential cmake make
     
     cd src-tauri/gen/android
     echo "keyAlias=$ANDROID_KEY_ALIAS" > keystore.properties
