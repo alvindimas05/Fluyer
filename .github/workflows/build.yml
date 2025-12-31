@@ -80,7 +80,7 @@ jobs:
           - platform: linux
             os: ubuntu-latest
             rust_target: x86_64-unknown-linux-gnu
-            artifact_path: ./src-tauri/target/release/bundle/deb/Fluyer_*_amd64.deb,./src-tauri/target/release/bundle/appimage/Fluyer_*_amd64.AppImage
+            artifact_path: ./src-tauri/target/release/bundle/deb/Fluyer_*_amd64.deb
             artifact_name: linux
           # Mobile platforms
           - platform: android-armv7
