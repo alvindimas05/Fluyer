@@ -1,13 +1,14 @@
-use simplelog::{
-    ColorChoice, CombinedLogger, ConfigBuilder, LevelFilter, SharedLogger, TermLogger,
-    TerminalMode, WriteLogger,
-};
-use std::fs::File;
 use std::env::temp_dir;
 
 /// Initialize logging system for the application
 #[cfg(desktop)]
 pub fn init() {
+    use simplelog::{
+        ColorChoice, CombinedLogger, ConfigBuilder, LevelFilter, SharedLogger, TermLogger,
+        TerminalMode, WriteLogger,
+    };
+    use std::fs::File;
+    
     let log_path = get_log_path();
 
     let config = ConfigBuilder::new()

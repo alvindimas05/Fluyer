@@ -1,6 +1,4 @@
 #[cfg(mobile)]
-use crate::state::GLOBAL_APP_HANDLE;
-#[cfg(mobile)]
 use tauri::Emitter;
 #[cfg(mobile)]
 use tauri_plugin_fluyer::FluyerExt;
@@ -26,11 +24,13 @@ pub fn check_read_audio_permission() -> bool {
 pub fn request_read_audio_permission() -> bool {
     use tauri::plugin::PermissionState;
     use tauri_plugin_fluyer::models::PermissionType;
+    use crate::state::app_handle;
 
     if !check_read_audio_permission() {
+
         let permissions = app_handle().fluyer()
             .request_permissions(Some(vec![
-                if app.fluyer().get_sdk_version().unwrap().value >= 33 {
+                if app_handle().fluyer().get_sdk_version().unwrap().value >= 33 {
                     PermissionType::Audio
                 } else {
                     PermissionType::Storage
@@ -64,10 +64,12 @@ pub fn set_navigation_bar_visibility(visible: bool) {
 #[cfg(target_os = "android")]
 #[tauri::command]
 pub fn android_request_directory() {
+    use crate::state::app_handle;
+    
     app_handle().fluyer()
         .android_pick_folder(|payload| {
             if let Some(dir) = payload.value {
-                app_handle
+                app_handle()
                     .emit(crate::commands::route::ANDROID_REQUEST_DIRECTORY, dir)
                     .unwrap();
             }
