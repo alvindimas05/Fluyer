@@ -8,7 +8,7 @@ export const MusicConfig = {
     separator: "•",
     separatorAlbum: "-",
     separatorAudio: "/",
-    artistSeparator: "||",
+    artistSeparator: ";",
     defaultTitle: import.meta.env.VITE_DEFAULT_MUSIC_TITLE,
     defaultArtist: import.meta.env.VITE_DEFAULT_MUSIC_ARTIST,
     defaultAlbumImage: "/icons/default/default-album-cover.png",

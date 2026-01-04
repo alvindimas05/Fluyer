@@ -6,7 +6,7 @@ use std::path::Path;
 
 /// Get cover art for an album or track
 #[tauri::command]
-pub async fn cover_art_get(query: CoverArtQuery, size: Option<String>) -> CoverArtResponse {
+pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
     if query.album.is_none() && query.title.is_none() {
         return CoverArtResponse {
             name: String::from(""),
@@ -30,7 +30,7 @@ pub async fn cover_art_get(query: CoverArtQuery, size: Option<String>) -> CoverA
     let queue_item = queue::get_queue(name.clone());
 
     if queue_item.is_none() {
-        if let Some(image) = get_from_path(file_path.clone(), size.clone()).await {
+        if let Some(image) = get_from_path(file_path.clone()).await {
             queue::set_status(name.clone(), CoverArtRequestStatus::Loaded);
 
             return CoverArtResponse {
@@ -40,7 +40,7 @@ pub async fn cover_art_get(query: CoverArtQuery, size: Option<String>) -> CoverA
             };
         }
 
-        let cover_art = request::request_cover_art(query, size).await;
+        let cover_art = request::request_cover_art(query).await;
 
         if cover_art.is_none() {
             queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
@@ -59,7 +59,7 @@ pub async fn cover_art_get(query: CoverArtQuery, size: Option<String>) -> CoverA
     }
 
     if queue_item.unwrap().status == CoverArtRequestStatus::Loaded {
-        if let Some(image) = get_from_path(file_path.clone(), size).await {
+        if let Some(image) = get_from_path(file_path.clone()).await {
             return CoverArtResponse {
                 name,
                 status: CoverArtRequestStatus::Loaded,
@@ -75,7 +75,7 @@ pub async fn cover_art_get(query: CoverArtQuery, size: Option<String>) -> CoverA
     }
 }
 
-async fn get_from_path(file_path: String, size: Option<String>) -> Option<String> {
+async fn get_from_path(file_path: String) -> Option<String> {
     if let Ok(data) = std::fs::read(&file_path) {
         let ext = Path::new(&file_path)
             .extension()

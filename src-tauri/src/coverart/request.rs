@@ -5,7 +5,7 @@ use std::io::copy;
 use std::io::Cursor;
 
 /// Request cover art from external API and cache it
-pub async fn request_cover_art(query: CoverArtQuery, _size: Option<String>) -> Option<String> {
+pub async fn request_cover_art(query: CoverArtQuery) -> Option<String> {
     let url = MusicBrainz::get_cover_art(query.clone()).await;
 
     if url.is_none() {

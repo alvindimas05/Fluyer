@@ -77,6 +77,7 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
         initialize_globals(app_handle);
 
         crate::database::database::initialize_database();
+        crate::music::metadata::MusicMetadata::initialize_ffmpeg_paths();
 
         log_directory_paths(app_handle);
     }

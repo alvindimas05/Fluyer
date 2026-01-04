@@ -4,7 +4,7 @@ import type {CoverArtSize} from "$lib/services/CoverArtService.svelte";
 
 const TauriMetadataAPI = {
     getMusicCoverArt: (path: string, size?: CoverArtSize) => {
-        return invoke<string>(CommandRoutes.MUSIC_GET_IMAGE, {
+        return invoke<ArrayBuffer>(CommandRoutes.MUSIC_GET_IMAGE, {
             path,
             size,
         });

@@ -41,9 +41,11 @@ base64-simd = "0.8.0"
 rusqlite = { version = "0.37.0", features = ["bundled"] }
 chrono = "0.4.41"
 rusqlite_migration = "2.3.0"
-tokio = "1.47.1"
+tokio = { version = "1.49.0", features = ["process"] }
 # fast_image_resize = { version = "5.3.0", features = ["rayon", "image"] }
 state = "0.6.0"
+serde_json = "1.0.148"
+futures = "0.3.31"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 enigo = "0.6.1"

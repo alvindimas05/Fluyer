@@ -25,7 +25,7 @@ pub fn folder_get_first_music_path(path: String, size: Option<String>) -> Option
 
 /// Get all music files from the library
 #[tauri::command]
-pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
+pub async fn music_get_all() -> Option<Vec<MusicMetadata>> {
     #[cfg(target_os = "android")]
     if !check_read_audio_permission() {
         return None;
@@ -49,20 +49,14 @@ pub fn music_get_all() -> Option<Vec<MusicMetadata>> {
     }
 
     // Scan directories for music files
-    let musics = scanner::scan_directories(search_dirs);
+    let paths = scanner::scan_directories(search_dirs);
 
-    let mut conn_guard = GLOBAL_DATABASE.lock().ok()?;
-    let conn = conn_guard.as_mut()?;
-
-    database::windows_fix_music_paths_older_version(conn);
+    // database::windows_fix_music_paths_older_version(conn);
 
     // Process files and update database
-    scanner::process_music_files(conn, &musics);
+    scanner::process_supported_files(&paths).await;
 
-    database::delete_non_existing_paths(conn, musics);
+    database::delete_non_existing_paths(paths);
 
-    Some(database::get_musics_from_db(
-        conn,
-        database::GetMusicFromDbOptions { path: None },
-    ))
+    Some(database::get_all_music_from_db())
 }

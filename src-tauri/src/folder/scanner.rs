@@ -1,9 +1,12 @@
+use std::path::PathBuf;
+
+use crate::database::database::GLOBAL_DATABASE;
 use crate::folder::types::FolderItem;
-use crate::folder::utils::{is_not_hidden, is_supported_audio_file, normalize_path};
+use crate::folder::utils::{is_not_hidden, normalize_path};
 use crate::{logger, music::metadata::MusicMetadata};
 use chrono::{DateTime, Utc};
+use futures::StreamExt;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use rusqlite::Connection;
 use walkdir::{DirEntry, WalkDir};
 
 /// Get all subdirectories in a given path
@@ -24,7 +27,7 @@ pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
 }
 
 /// Scan directories for audio files
-pub fn scan_directories(search_dirs: Vec<String>) -> Vec<String> {
+pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
     let mut dirs: Vec<Result<DirEntry, walkdir::Error>> = vec![];
 
     for dir in search_dirs {
@@ -36,7 +39,6 @@ pub fn scan_directories(search_dirs: Vec<String>) -> Vec<String> {
         );
     }
 
-    // Get all audio paths
     dirs.into_par_iter()
         .filter_map(|e| {
             if let Err(err) = &e {
@@ -47,20 +49,9 @@ pub fn scan_directories(search_dirs: Vec<String>) -> Vec<String> {
         })
         .filter(|e| {
             e.path().is_file()
-                && !e
-                    .path()
-                    .file_name()
-                    .unwrap()
-                    .to_os_string()
-                    .into_string()
-                    .unwrap()
-                    .contains("au_uu_SzH34yR2")
-                && is_supported_audio_file(e)
+                && e.path().file_name().unwrap_or_default() != "au_uu_SzH34yR2.mp3"
         })
-        .filter_map(|entry| {
-            let path_str = entry.path().to_str()?;
-            Some(normalize_path(path_str.to_string()))
-        })
+        .map(|entry| entry.path().to_path_buf())
         .collect()
 }
 
@@ -78,64 +69,56 @@ pub fn get_home_dir() -> String {
 }
 
 /// Process music files and update database
-pub fn process_music_files(conn: &mut Connection, musics: &[String]) {
-    let tx = conn.transaction().unwrap();
+pub async fn process_supported_files(paths: &[PathBuf]) {
+    let metadata_results: Vec<_> = futures::stream::iter(paths.to_vec()) // or paths.iter().cloned()
+        .map(|path| async move {
+            let path_str = path.display().to_string();
+            let modified = get_modified_time(&path);
+            let metadata = MusicMetadata::get(path_str.clone()).await;
+            (path_str, modified, metadata)
+        })
+        .buffer_unordered(10)
+        .collect()
+        .await;
+    logger::info!(
+        "Processed metadata for {} files.",
+        metadata_results.len()
+    );
 
-    for path in musics {
-        let modified_at = std::fs::metadata(path)
-            .ok()
-            .and_then(|m| m.modified().ok())
-            .map(|mtime| DateTime::<Utc>::from(mtime).to_rfc3339())
-            .unwrap_or_else(|| "".to_string());
-
-        // Check if exists
-        let mut stmt = tx
-            .prepare("SELECT modified_at FROM musics WHERE path = ?1")
-            .ok()
-            .unwrap();
-        let result: Result<String, _> = stmt.query_row(rusqlite::params![path], |row| row.get(0));
-
-        match result {
-            Err(rusqlite::Error::QueryReturnedNoRows) => {
-                // Doesn't exist, insert
-                let metadata = MusicMetadata::new(path.to_string()).get();
-                let res = tx.execute(
-                    "INSERT INTO musics (
-                        path, duration, title, artist, album, album_artist,
-                        track_number, genre, date, bits_per_sample, sample_rate, modified_at
-                    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
-                    rusqlite::params![
-                        metadata.path,
-                        metadata.duration.map(|d| d as i64),
-                        metadata.title,
-                        metadata.artist,
-                        metadata.album,
-                        metadata.album_artist,
-                        metadata.track_number,
-                        metadata.genre,
-                        metadata.date,
-                        metadata.bits_per_sample.map(|b| b as i64),
-                        metadata.sample_rate.map(|s| s as i64),
-                        modified_at
-                    ],
+    // Then do one blocking DB transaction
+    tokio::task::spawn_blocking(move || {
+        let mut conn_guard = GLOBAL_DATABASE.lock().ok()?;
+        let conn = conn_guard.as_mut()?;
+        let tx = conn.transaction().ok()?;
+        
+        for (path, modified_at, metadata) in metadata_results {
+            if metadata.is_err() {
+                logger::error!(
+                    "Failed to read metadata for file: {}",
+                    path
                 );
-
-                if res.is_err() {
-                    logger::error!("Insert music to table error: {}", res.unwrap_err());
-                }
+                continue;
             }
-            Ok(existing_modified_at) => {
-                if existing_modified_at != modified_at {
-                    // Exists but modified, update
-                    let metadata = MusicMetadata::new(path.to_string());
+            let metadata = metadata.unwrap();
+            let path_string = path.to_string();
+            let modified_at = modified_at.unwrap_or_default();
+
+            // Check if exists
+            let mut stmt = tx
+                .prepare("SELECT modified_at FROM musics WHERE path = ?1")
+                .ok()
+                .unwrap();
+            let result: Result<String, _> = stmt.query_row(rusqlite::params![path_string], |row| row.get(0));
+
+            match result {
+                Err(rusqlite::Error::QueryReturnedNoRows) => {
                     let res = tx.execute(
-                        "UPDATE musics SET
-                                duration = ?1, title = ?2, artist = ?3,
-                                album = ?4, album_artist = ?5, track_number = ?6,
-                                genre = ?7, bits_per_sample = ?8, sample_rate = ?9,
-                                modified_at = ?10, date = ?11
-                            WHERE path = ?12",
+                        "INSERT INTO musics (
+                            path, duration, title, artist, album, album_artist,
+                            track_number, genre, date, bits_per_sample, sample_rate, modified_at
+                        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
                         rusqlite::params![
+                            metadata.path,
                             metadata.duration.map(|d| d as i64),
                             metadata.title,
                             metadata.artist,
@@ -143,24 +126,62 @@ pub fn process_music_files(conn: &mut Connection, musics: &[String]) {
                             metadata.album_artist,
                             metadata.track_number,
                             metadata.genre,
+                            metadata.date,
                             metadata.bits_per_sample.map(|b| b as i64),
                             metadata.sample_rate.map(|s| s as i64),
-                            modified_at,
-                            metadata.date,
-                            metadata.path
+                            modified_at
                         ],
                     );
 
                     if res.is_err() {
-                        logger::error!("Update music to table error: {}", res.unwrap_err());
+                        logger::error!("Insert music to table error: {}", res.unwrap_err());
                     }
                 }
-            }
-            Err(e) => {
-                logger::error!("Database error: {:?}", e);
+                Ok(existing_modified_at) => {
+                    if existing_modified_at != modified_at {
+                        let res = tx.execute(
+                            "UPDATE musics SET
+                                    duration = ?1, title = ?2, artist = ?3,
+                                    album = ?4, album_artist = ?5, track_number = ?6,
+                                    genre = ?7, bits_per_sample = ?8, sample_rate = ?9,
+                                    modified_at = ?10, date = ?11
+                                WHERE path = ?12",
+                            rusqlite::params![
+                                metadata.duration.map(|d| d as i64),
+                                metadata.title,
+                                metadata.artist,
+                                metadata.album,
+                                metadata.album_artist,
+                                metadata.track_number,
+                                metadata.genre,
+                                metadata.bits_per_sample.map(|b| b as i64),
+                                metadata.sample_rate.map(|s| s as i64),
+                                modified_at,
+                                metadata.date,
+                                metadata.path
+                            ],
+                        );
+
+                        if res.is_err() {
+                            logger::error!("Update music to table error: {}", res.unwrap_err());
+                        }
+                    }
+                }
+                Err(e) => {
+                    logger::error!("Database error: {:?}", e);
+                }
             }
         }
-    }
+        
+       tx.commit().ok()
+    })
+    .await
+    .ok();
+}
 
-    tx.commit().unwrap();
+fn get_modified_time(path: &PathBuf) -> Option<String> {
+    std::fs::metadata(path)
+        .ok()
+        .and_then(|m| m.modified().ok())
+        .map(|mtime| DateTime::<Utc>::from(mtime).to_rfc3339())
 }

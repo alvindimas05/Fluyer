@@ -91,11 +91,11 @@ pub struct MusicPlayerSync {
 }
 
 #[cfg(desktop)]
-static mut GLOBAL_BASS_MIXER: u32 = 0;
+static mut BASS_MIXER: u32 = 0;
 #[cfg(desktop)]
 static mut CURRENT_STREAM: u32 = 0;
 #[cfg(desktop)]
-static GLOBAL_PLAYER_STATE: OnceLock<Mutex<PlayerState>> = OnceLock::new();
+static PLAYER_STATE: OnceLock<Mutex<PlayerState>> = OnceLock::new();
 
 #[cfg(desktop)]
 #[derive(Debug, Clone)]
@@ -112,7 +112,7 @@ impl MusicPlayer {
         #[cfg(desktop)]
         {
             // Initialize global player state
-            GLOBAL_PLAYER_STATE.get_or_init(|| {
+            PLAYER_STATE.get_or_init(|| {
                 Mutex::new(PlayerState {
                     playlist: Vec::new(),
                     current_index: None,
@@ -150,8 +150,8 @@ impl MusicPlayer {
                     }
                 }
 
-                GLOBAL_BASS_MIXER = BASS_Mixer_StreamCreate(44100, 2, BASS_SAMPLE_FLOAT);
-                if GLOBAL_BASS_MIXER == 0 {
+                BASS_MIXER = BASS_Mixer_StreamCreate(44100, 2, BASS_SAMPLE_FLOAT);
+                if BASS_MIXER == 0 {
                     logger::error!("Failed to create BASS mixer stream, error: {}", BASS_ErrorGetCode());
                 } else {
                     logger::info!("BASS mixer created successfully");
@@ -225,7 +225,7 @@ impl MusicPlayer {
 
             #[cfg(desktop)]
             {
-                if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+                if let Some(state_lock) = PLAYER_STATE.get() {
                     if let Ok(mut state) = state_lock.lock() {
                         state.repeat_mode = match _command {
                             MusicCommand::Repeat => RepeatMode::All,
@@ -253,9 +253,9 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         unsafe {
-            if CURRENT_STREAM != 0 && GLOBAL_BASS_MIXER != 0 {
+            if CURRENT_STREAM != 0 && BASS_MIXER != 0 {
                 // Pause the mixer to prevent delay from buffered data
-                BASS_ChannelPause(GLOBAL_BASS_MIXER);
+                BASS_ChannelPause(BASS_MIXER);
 
                 // Set the new position on the source stream
                 let seconds = position as f64 / 1000.0;
@@ -265,7 +265,7 @@ impl MusicPlayer {
                 }
 
                 // Restart the mixer with restart=true to clear the buffer
-                BASS_ChannelPlay(GLOBAL_BASS_MIXER, 1);
+                BASS_ChannelPlay(BASS_MIXER, 1);
             }
         }
     }
@@ -321,15 +321,15 @@ impl MusicPlayer {
 
             let is_playing = if is_reset {
                 true
-            } else if GLOBAL_BASS_MIXER == 0 {
+            } else if BASS_MIXER == 0 {
                 false
             } else {
-                let state = BASS_ChannelIsActive(GLOBAL_BASS_MIXER);
+                let state = BASS_ChannelIsActive(BASS_MIXER);
                 state == BASS_ACTIVE_PLAYING
             };
 
             // Get current index from global state
-            let index = GLOBAL_PLAYER_STATE
+            let index = PLAYER_STATE
                 .get()
                 .and_then(|state| state.lock().ok())
                 .and_then(|state| state.current_index)
@@ -347,7 +347,7 @@ impl MusicPlayer {
     pub fn add_playlist(playlist: Vec<MusicMetadata>) {
         #[cfg(desktop)]
         {
-            if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+            if let Some(state_lock) = PLAYER_STATE.get() {
                 if let Ok(mut state) = state_lock.lock() {
                     let was_empty = state.playlist.is_empty();
 
@@ -397,7 +397,7 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         {
-            if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+            if let Some(state_lock) = PLAYER_STATE.get() {
                 if let Ok(mut state) = state_lock.lock() {
                     if index >= state.playlist.len() {
                         return;
@@ -442,7 +442,7 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         {
-            if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+            if let Some(state_lock) = PLAYER_STATE.get() {
                 let music = {
                     let state = state_lock.lock().unwrap();
                     if index >= state.playlist.len() {
@@ -474,8 +474,8 @@ impl MusicPlayer {
                 CURRENT_STREAM = 0;
             }
             // Also clear the mixer buffer
-            if GLOBAL_BASS_MIXER != 0 {
-                BASS_ChannelSetPosition(GLOBAL_BASS_MIXER, 0, BASS_POS_BYTE);
+            if BASS_MIXER != 0 {
+                BASS_ChannelSetPosition(BASS_MIXER, 0, BASS_POS_BYTE);
             }
         }
     }
@@ -484,13 +484,13 @@ impl MusicPlayer {
     fn clear_playlist() {
         unsafe {
             // Completely stop and clear the mixer
-            if GLOBAL_BASS_MIXER != 0 {
-                BASS_ChannelStop(GLOBAL_BASS_MIXER);
-                BASS_ChannelSetPosition(GLOBAL_BASS_MIXER, 0, BASS_POS_BYTE);
+            if BASS_MIXER != 0 {
+                BASS_ChannelStop(BASS_MIXER);
+                BASS_ChannelSetPosition(BASS_MIXER, 0, BASS_POS_BYTE);
             }
         }
         Self::stop_current_stream();
-        if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+        if let Some(state_lock) = PLAYER_STATE.get() {
             if let Ok(mut state) = state_lock.lock() {
                 state.playlist.clear();
                 state.current_index = None;
@@ -500,7 +500,7 @@ impl MusicPlayer {
 
     #[cfg(desktop)]
     fn play_next() {
-        if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+        if let Some(state_lock) = PLAYER_STATE.get() {
             let next_index = {
                 let state = state_lock.lock().unwrap();
                 match (state.current_index, state.repeat_mode) {
@@ -559,7 +559,7 @@ impl MusicPlayer {
                 return false;
             }
 
-            let ok = BASS_Mixer_StreamAddChannel(GLOBAL_BASS_MIXER, stream, BASS_MIXER_NORAMPIN);
+            let ok = BASS_Mixer_StreamAddChannel(BASS_MIXER, stream, BASS_MIXER_NORAMPIN);
             if ok == 0 {
                 logger::error!("Failed to add channel to mixer: {}, error: {}", music.path, BASS_ErrorGetCode());
                 BASS_StreamFree(stream);
@@ -581,7 +581,7 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         {
-            if let Some(state_lock) = GLOBAL_PLAYER_STATE.get() {
+            if let Some(state_lock) = PLAYER_STATE.get() {
                 if let Ok(mut state) = state_lock.lock() {
                     if from >= state.playlist.len() || to >= state.playlist.len() {
                         return;
@@ -622,9 +622,9 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         unsafe {
-            if GLOBAL_BASS_MIXER != 0 {
+            if BASS_MIXER != 0 {
                 let clamped_volume = volume.max(0.0).min(1.0);
-                if BASS_ChannelSetAttribute(GLOBAL_BASS_MIXER, BASS_ATTRIB_VOL, clamped_volume) == 0 {
+                if BASS_ChannelSetAttribute(BASS_MIXER, BASS_ATTRIB_VOL, clamped_volume) == 0 {
                     logger::error!("Failed to set volume, error: {}", BASS_ErrorGetCode());
                 }
             }
@@ -644,16 +644,16 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         unsafe {
-            if GLOBAL_BASS_MIXER == 0 {
+            if BASS_MIXER == 0 {
                 return;
             }
 
             if play {
-                if BASS_ChannelPlay(GLOBAL_BASS_MIXER, 0) == 0 {
+                if BASS_ChannelPlay(BASS_MIXER, 0) == 0 {
                     logger::error!("Failed to play, error: {}", BASS_ErrorGetCode());
                 }
             } else {
-                if BASS_ChannelPause(GLOBAL_BASS_MIXER) == 0 {
+                if BASS_ChannelPause(BASS_MIXER) == 0 {
                     logger::error!("Failed to pause, error: {}", BASS_ErrorGetCode());
                 }
             }
@@ -751,9 +751,9 @@ impl Drop for MusicPlayer {
         #[cfg(desktop)]
         unsafe {
             Self::stop_current_stream();
-            if GLOBAL_BASS_MIXER != 0 {
-                BASS_StreamFree(GLOBAL_BASS_MIXER);
-                GLOBAL_BASS_MIXER = 0;
+            if BASS_MIXER != 0 {
+                BASS_StreamFree(BASS_MIXER);
+                BASS_MIXER = 0;
             }
             BASS_Free();
             logger::info!("BASS cleaned up");

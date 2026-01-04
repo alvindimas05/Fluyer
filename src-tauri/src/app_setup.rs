@@ -1,4 +1,4 @@
-use crate::state::{initialize_store, set_main_window};
+use crate::{state::{initialize_store, set_main_window}};
 use tauri::{App, Manager};
 
 #[cfg(target_os = "macos")]

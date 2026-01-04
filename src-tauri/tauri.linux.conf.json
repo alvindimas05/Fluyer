@@ -5,6 +5,7 @@
             "deb": {
                 "files": {
                     "/usr/lib/fluyer/ffmpeg": "./libs/ffmpeg/bin/ffmpeg",
+                    "/usr/lib/fluyer/ffprobe": "./libs/ffmpeg/bin/ffprobe",
                     "/usr/lib/fluyer/libbass.so": "./libs/libbass.so",
                     "/usr/lib/fluyer/libbassflac.so": "./libs/libbassflac.so",
                     "/usr/lib/fluyer/libbassmix.so": "./libs/libbassmix.so"

@@ -1,10 +1,6 @@
-use crate::music::metadata::MusicMetadata;
+use crate::{database::database::GLOBAL_DATABASE, music::metadata::MusicMetadata};
 use rusqlite::{params, Connection};
-use std::path::Path;
-
-pub struct GetMusicFromDbOptions {
-    pub path: Option<String>,
-}
+use std::path::{Path, PathBuf};
 
 /// Get first music file path from a folder
 pub fn get_folder_first_music_path(
@@ -24,28 +20,18 @@ pub fn get_folder_first_music_path(
 }
 
 /// Retrieve music metadata from database
-pub fn get_musics_from_db(
-    conn: &mut Connection,
-    options: GetMusicFromDbOptions,
-) -> Vec<MusicMetadata> {
-    let mut query = "
+pub fn get_all_music_from_db() -> Vec<MusicMetadata> {
+    let query = "
         SELECT path, duration, title, artist, album, album_artist, track_number,
         genre, bits_per_sample, sample_rate, date, id FROM musics
     "
     .to_string();
 
-    if options.path.is_some() {
-        query.push_str(" WHERE path LIKE ?1");
-    }
-
+    let conn_guard = GLOBAL_DATABASE.lock().ok().unwrap();
+    let conn = conn_guard.as_ref().unwrap();
     let mut stmt = conn.prepare(&query).ok().unwrap();
-    let params = if let Some(path) = options.path {
-        params![format!("{}%", path)]
-    } else {
-        params![]
-    };
 
-    stmt.query_map(params, |row| {
+    stmt.query_map(params![], |row| {
         let path: String = row.get(0)?;
         let filename = Path::new(&path)
             .file_name()
@@ -81,19 +67,10 @@ pub fn get_musics_from_db(
     .collect()
 }
 
-/// Fix Windows paths for older versions (removes double backslashes)
-pub fn windows_fix_music_paths_older_version(conn: &mut Connection) {
-    let tx = conn.transaction().unwrap();
-    tx.execute(
-        "UPDATE musics SET path = REPLACE(path, ':\\\\', ':\\')",
-        params![],
-    )
-    .unwrap();
-    tx.commit().unwrap();
-}
-
 /// Delete paths from database that no longer exist on filesystem
-pub fn delete_non_existing_paths(conn: &mut Connection, musics: Vec<String>) {
+pub fn delete_non_existing_paths(musics: Vec<PathBuf>) {
+    let mut conn_guard = GLOBAL_DATABASE.lock().ok().unwrap();
+    let conn = conn_guard.as_mut().unwrap();
     let tx = conn.transaction().unwrap();
 
     // Create temporary table to hold all current paths
@@ -111,7 +88,7 @@ pub fn delete_non_existing_paths(conn: &mut Connection, musics: Vec<String>) {
             .prepare("INSERT INTO temp_existing_paths (path) VALUES (?)")
             .unwrap();
         for path in &musics {
-            stmt.execute(params![path]).unwrap();
+            stmt.execute(params![path.display().to_string()]).unwrap();
         }
     }
 
