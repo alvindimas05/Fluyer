@@ -59,7 +59,7 @@ pub fn initialize_store(app: &mut App) {
     let store = app.store(STORE_NAME).expect("Failed to initialize store.");
 
     if APP_STORE.set(store).is_err() {
-        log::error!("Failed to set APP_STORE");
+        crate::error!("Failed to set APP_STORE");
     }
 }
 
@@ -77,17 +77,17 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
 
 /// Log application directory paths for debugging
 fn log_directory_paths(app_handle: &AppHandle) {
-    log::debug!(
+    crate::debug!(
         "The app data dir is located at: {}",
         app_handle.path().app_data_dir().unwrap().display()
     );
 
-    log::debug!(
+    crate::debug!(
         "The app config dir is located at: {}",
         app_handle.path().app_config_dir().unwrap().display()
     );
 
-    log::debug!(
+    crate::debug!(
         "The app cache dir is located at: {}",
         app_handle.path().app_cache_dir().unwrap().display()
     );

@@ -4,6 +4,13 @@ import PersistentStoreService from "$lib/services/PersistentStoreService.svelte"
 import ToastService from "$lib/services/ToastService.svelte";
 import { listen } from "@tauri-apps/api/event";
 
+enum Level {
+    Error = 1,
+    Warn = 2,
+    Info = 3,
+    Debug = 4,
+    Trace = 5,
+}
 const LogService = {
     initialize: async () => {
         LogService.listenLog();
@@ -14,6 +21,11 @@ const LogService = {
         console.log = new Proxy(console.log, {
             apply(target, thisArg, args) {
                 return Reflect.apply(target, thisArg, ["[LOG]", ...args]);
+            }
+        });
+        console.trace = new Proxy(console.trace, {
+            apply(target, thisArg, args) {
+                return Reflect.apply(target, thisArg, ["[TRACE]", ...args]);
             }
         });
         console.debug = new Proxy(console.debug, {
@@ -38,17 +50,23 @@ const LogService = {
         });
     },
     listenBackendLog: () => {
-        listen<string>(CommandRoutes.LOG, (event) => {
-            if (event.payload.startsWith("[ERROR]")) {
-                console.error(event.payload);
-            } else if (event.payload.startsWith("[WARN]")) {
-                console.warn(event.payload);
-            } else if (event.payload.startsWith("[INFO]")) {
-                console.info(event.payload);
-            } else if (event.payload.startsWith("[DEBUG]")) {
-                console.debug(event.payload);
-            } else {
-                console.log(event.payload);
+        listen<string[]>(CommandRoutes.LOG, (event) => {
+            switch (parseInt(event.payload[0])) {
+                case Level.Error:
+                    console.error(event.payload[1]);
+                    break;
+                case Level.Warn:
+                    console.warn(event.payload[1]);
+                    break;
+                case Level.Info:
+                    console.info(event.payload[1]);
+                    break;
+                case Level.Debug:
+                    console.debug(event.payload[1]);
+                    break;
+                case Level.Trace:
+                    console.trace(event.payload[1]);
+                    break;
             }
         });
     },

@@ -7,7 +7,7 @@ use crate::music::metadata::MusicMetadata;
 pub async fn music_get_image(path: String, _size: Option<String>) -> Response {
     let image = MusicMetadata::get_image_from_path(path).await;
     if image.is_err() {
-        log::warn!("{}", image.err().unwrap());
+        crate::warn!("{}", image.err().unwrap());
         return Response::new(Vec::new());
     }
     Response::new(image.unwrap())

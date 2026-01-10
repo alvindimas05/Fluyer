@@ -1274,7 +1274,6 @@ dependencies = [
  "futures",
  "image",
  "lazy_static",
- "log",
  "rayon",
  "regex",
  "reqwest 0.13.1",

@@ -1,66 +1,117 @@
 use std::env::temp_dir;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 use crate::state::app_handle;
-use log::{Log, Metadata, Record};
 use tauri::Emitter;
 
-struct PrintLogger;
+/// Log levels for custom logger
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Level {
+    Error = 1,
+    Warn = 2,
+    Info = 3,
+    Debug = 4,
+    Trace = 5,
+}
+
+impl Level {
+    fn as_str(&self) -> &'static str {
+        match self {
+            Level::Error => "ERROR",
+            Level::Warn => "WARN",
+            Level::Info => "INFO",
+            Level::Debug => "DEBUG",
+            Level::Trace => "TRACE",
+        }
+    }
+}
 
 /// Get ANSI color code for log level
-fn level_color(level: log::Level) -> &'static str {
+fn level_color(level: Level) -> &'static str {
     match level {
-        log::Level::Error => "\x1b[31m", // Red
-        log::Level::Warn => "\x1b[33m",  // Yellow
-        log::Level::Info => "\x1b[32m",  // Green
-        log::Level::Debug => "\x1b[36m", // Cyan
-        log::Level::Trace => "\x1b[37m", // White
+        Level::Error => "\x1b[31m", // Red
+        Level::Warn => "\x1b[33m",  // Yellow
+        Level::Info => "\x1b[32m",  // Green
+        Level::Debug => "\x1b[36m", // Cyan
+        Level::Trace => "\x1b[37m", // White
     }
 }
 
 const RESET: &str = "\x1b[0m";
 
-impl Log for PrintLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= log::LevelFilter::Debug
-    }
-
-    fn log(&self, record: &Record) {
-        if !self.enabled(record.metadata()) {
-            return;
-        }
-
-        let color = level_color(record.level());
-        println!(
-            "{}[{}]{} {} - {}",
-            color,
-            record.level(),
-            RESET,
-            record.target(),
-            record.args()
-        );
-        app_handle()
-            .emit(
-                crate::commands::route::LOG,
-                format!(
-                    "[{}] {} - {}",
-                    record.level(),
-                    record.target(),
-                    record.args()
-                ),
-            )
-            .expect(format!("Failed to emit {}", crate::commands::route::LOG).as_str());
-    }
-
-    fn flush(&self) {}
-}
-
-static LOGGER: PrintLogger = PrintLogger;
+// Global max level filter (4 = Debug by default)
+static MAX_LEVEL: AtomicU8 = AtomicU8::new(4);
 
 /// Initialize logging system for the application
 pub fn init() {
-    log::set_logger(&LOGGER)
-        .map(|()| log::set_max_level(log::LevelFilter::Debug))
-        .expect("Failed to set logger");
+    // Set max level to Debug
+    MAX_LEVEL.store(4, Ordering::Relaxed);
+}
+
+/// Internal logging function
+#[doc(hidden)]
+pub fn _log(level: Level, target: &str, args: std::fmt::Arguments) {
+    // Check if this level is enabled
+    if (level as u8) > MAX_LEVEL.load(Ordering::Relaxed) {
+        return;
+    }
+
+    let color = level_color(level);
+    let message = format!("{}", args);
+
+    println!(
+        "{}[{}]{} {} - {}",
+        color,
+        level.as_str(),
+        RESET,
+        target,
+        message
+    );
+
+    let _ = app_handle().emit(
+        crate::commands::route::LOG,
+        [level.as_str(), format!("{} - {}", target, message).as_str()],
+    );
+}
+
+/// Log an error message
+#[macro_export]
+macro_rules! error {
+    ($($arg:tt)*) => {
+        $crate::logger::_log($crate::logger::Level::Error, module_path!(), format_args!($($arg)*))
+    };
+}
+
+/// Log a warning message
+#[macro_export]
+macro_rules! warn {
+    ($($arg:tt)*) => {
+        $crate::logger::_log($crate::logger::Level::Warn, module_path!(), format_args!($($arg)*))
+    };
+}
+
+/// Log an info message
+#[macro_export]
+macro_rules! info {
+    ($($arg:tt)*) => {
+        $crate::logger::_log($crate::logger::Level::Info, module_path!(), format_args!($($arg)*))
+    };
+}
+
+/// Log a debug message
+#[macro_export]
+macro_rules! debug {
+    ($($arg:tt)*) => {
+        $crate::logger::_log($crate::logger::Level::Debug, module_path!(), format_args!($($arg)*))
+    };
+}
+
+/// Log a trace message
+#[macro_export]
+macro_rules! trace {
+    ($($arg:tt)*) => {
+        $crate::logger::_log($crate::logger::Level::Trace, module_path!(), format_args!($($arg)*))
+    };
 }
 
 #[allow(dead_code)]

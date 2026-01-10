@@ -91,7 +91,7 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
                     let mut permissions = metadata.permissions();
                     permissions.set_mode(0o755);
                     if let Err(e) = std::fs::set_permissions(&ffmpeg_path, permissions) {
-                        log::error!("Failed to set ffmpeg permissions: {}", e);
+                        crate::error!("Failed to set ffmpeg permissions: {}", e);
                     }
                 }
             }
@@ -112,7 +112,7 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
             };
 
             if ffmpeg_status.is_err() {
-                log::error!(
+                crate::error!(
                     "Failed to convert audio to mp3: {}",
                     ffmpeg_status.unwrap_err()
                 );
@@ -120,7 +120,7 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
             }
 
             if !tmp_file.exists() {
-                log::error!("Failed to convert audio to mp3");
+                crate::error!("Failed to convert audio to mp3");
                 return std::fs::read(path).ok();
             }
 

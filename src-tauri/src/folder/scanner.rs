@@ -42,7 +42,7 @@ pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
     dirs.into_par_iter()
         .filter_map(|e| {
             if let Err(err) = &e {
-                log::error!("Error reading entry: {}", err);
+                crate::error!("Error reading entry: {}", err);
                 return None;
             }
             e.ok()
@@ -79,7 +79,7 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
         .buffer_unordered(10)
         .collect()
         .await;
-    log::info!("Processed metadata for {} files.", metadata_results.len());
+    crate::info!("Processed metadata for {} files.", metadata_results.len());
 
     // Then do one blocking DB transaction
     tokio::task::spawn_blocking(move || {
@@ -89,7 +89,7 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
 
         for (path, modified_at, metadata) in metadata_results {
             if metadata.is_err() {
-                log::error!("Failed to read metadata for file: {}", path);
+                crate::error!("Failed to read metadata for file: {}", path);
                 continue;
             }
             let metadata = metadata.unwrap();
@@ -128,7 +128,7 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
                     );
 
                     if res.is_err() {
-                        log::error!("Insert music to table error: {}", res.unwrap_err());
+                        crate::error!("Insert music to table error: {}", res.unwrap_err());
                     }
                 }
                 Ok(existing_modified_at) => {
@@ -157,12 +157,12 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
                         );
 
                         if res.is_err() {
-                            log::error!("Update music to table error: {}", res.unwrap_err());
+                            crate::error!("Update music to table error: {}", res.unwrap_err());
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!("Database error: {:?}", e);
+                    crate::error!("Database error: {:?}", e);
                 }
             }
         }

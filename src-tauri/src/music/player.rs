@@ -133,9 +133,9 @@ impl MusicPlayer {
 
             unsafe {
                 if BASS_Init(-1, 44100, 0, ptr::null_mut(), ptr::null_mut()) == 0 {
-                    log::error!("Failed to initialize BASS, error: {}", BASS_ErrorGetCode());
+                    crate::error!("Failed to initialize BASS, error: {}", BASS_ErrorGetCode());
                 } else {
-                    log::info!("BASS initialized successfully");
+                    crate::info!("BASS initialized successfully");
                 }
 
                 // Load plugins based on platform
@@ -155,24 +155,24 @@ impl MusicPlayer {
                     let handle = BASS_PluginLoad(c_path.as_ptr(), 0);
 
                     if handle == 0 {
-                        log::warn!(
+                        crate::warn!(
                             "Failed to load plugin: {}, error: {}",
                             plugin,
                             BASS_ErrorGetCode()
                         );
                     } else {
-                        log::info!("Loaded plugin: {}", plugin);
+                        crate::info!("Loaded plugin: {}", plugin);
                     }
                 }
 
                 BASS_MIXER = BASS_Mixer_StreamCreate(44100, 2, BASS_SAMPLE_FLOAT);
                 if BASS_MIXER == 0 {
-                    log::error!(
+                    crate::error!(
                         "Failed to create BASS mixer stream, error: {}",
                         BASS_ErrorGetCode()
                     );
                 } else {
-                    log::info!("BASS mixer created successfully");
+                    crate::info!("BASS mixer created successfully");
                 }
             }
         }
@@ -273,7 +273,7 @@ impl MusicPlayer {
                 let seconds = position as f64 / 1000.0;
                 let byte_pos = BASS_ChannelSeconds2Bytes(CURRENT_STREAM, seconds);
                 if BASS_ChannelSetPosition(CURRENT_STREAM, byte_pos, BASS_POS_BYTE) == 0 {
-                    log::error!("Failed to set position, error: {}", BASS_ErrorGetCode());
+                    crate::error!("Failed to set position, error: {}", BASS_ErrorGetCode());
                 }
 
                 // Restart the mixer with restart=true to clear the buffer
@@ -552,7 +552,7 @@ impl MusicPlayer {
                 BASS_StreamCreateFile(false, path.as_ptr() as *const _, 0, 0, BASS_STREAM_DECODE);
 
             if stream == 0 {
-                log::error!(
+                crate::error!(
                     "Failed to load BASS music: {}, error: {}",
                     music.path,
                     BASS_ErrorGetCode()
@@ -562,7 +562,7 @@ impl MusicPlayer {
 
             let ok = BASS_Mixer_StreamAddChannel(BASS_MIXER, stream, BASS_MIXER_NORAMPIN);
             if ok == 0 {
-                log::error!(
+                crate::error!(
                     "Failed to add channel to mixer: {}, error: {}",
                     music.path,
                     BASS_ErrorGetCode()
@@ -572,7 +572,7 @@ impl MusicPlayer {
             }
 
             CURRENT_STREAM = stream;
-            log::info!("Successfully loaded: {}", music.path);
+            crate::info!("Successfully loaded: {}", music.path);
             true
         }
     }
@@ -622,7 +622,7 @@ impl MusicPlayer {
             if BASS_MIXER != 0 {
                 let clamped_volume = volume.max(0.0).min(1.0);
                 if BASS_ChannelSetAttribute(BASS_MIXER, BASS_ATTRIB_VOL, clamped_volume) == 0 {
-                    log::error!("Failed to set volume, error: {}", BASS_ErrorGetCode());
+                    crate::error!("Failed to set volume, error: {}", BASS_ErrorGetCode());
                 }
             }
         }
@@ -647,11 +647,11 @@ impl MusicPlayer {
 
             if play {
                 if BASS_ChannelPlay(BASS_MIXER, 0) == 0 {
-                    log::error!("Failed to play, error: {}", BASS_ErrorGetCode());
+                    crate::error!("Failed to play, error: {}", BASS_ErrorGetCode());
                 }
             } else {
                 if BASS_ChannelPause(BASS_MIXER) == 0 {
-                    log::error!("Failed to pause, error: {}", BASS_ErrorGetCode());
+                    crate::error!("Failed to pause, error: {}", BASS_ErrorGetCode());
                 }
             }
         }
@@ -662,7 +662,7 @@ impl MusicPlayer {
         // and DSP effects setup. This is a placeholder for future implementation.
         #[cfg(desktop)]
         {
-            log::info!(
+            crate::info!(
                 "Equalizer called with {} bands (not yet implemented)",
                 values.len()
             );
@@ -673,7 +673,7 @@ impl MusicPlayer {
     pub fn reset_equalizer() {
         #[cfg(desktop)]
         {
-            log::info!("Reset equalizer (not yet implemented)");
+            crate::info!("Reset equalizer (not yet implemented)");
             // TODO: Clear BASS_FX equalizer DSP chain
         }
     }
@@ -681,7 +681,7 @@ impl MusicPlayer {
     pub fn toggle_bit_perfect(enable: bool) {
         #[cfg(desktop)]
         {
-            log::info!(
+            crate::info!(
                 "Bit-perfect mode toggle (not yet implemented for BASS): {}",
                 enable
             );
@@ -716,7 +716,7 @@ impl MusicPlayer {
                             let state = BASS_ChannelIsActive(CURRENT_STREAM);
                             if state == BASS_ACTIVE_STOPPED {
                                 // Track ended, trigger next
-                                log::info!("Track ended, playing next");
+                                crate::info!("Track ended, playing next");
                                 Self::play_next();
                             }
                         }
@@ -758,7 +758,7 @@ impl Drop for MusicPlayer {
                 BASS_MIXER = 0;
             }
             BASS_Free();
-            log::info!("BASS cleaned up");
+            crate::info!("BASS cleaned up");
         }
     }
 }

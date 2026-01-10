@@ -6,13 +6,13 @@ use tauri::Manager;
 /// Log an error message
 #[tauri::command]
 pub fn log_error(message: String) {
-    log::error!("{}", message);
+    crate::error!("{}", message);
 }
 
 /// Log an info message
 #[tauri::command]
 pub fn log_info(message: String) {
-    log::info!("{}", message);
+    crate::info!("{}", message);
 }
 
 /// Show a toast message (Android only)

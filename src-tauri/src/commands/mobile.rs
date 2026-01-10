@@ -1,9 +1,9 @@
 #[cfg(mobile)]
+use crate::state::app_handle;
+#[cfg(mobile)]
 use tauri::Emitter;
 #[cfg(mobile)]
 use tauri_plugin_fluyer::FluyerExt;
-#[cfg(mobile)]
-use crate::state::app_handle;
 
 #[cfg(target_os = "android")]
 #[tauri::command]
@@ -22,13 +22,14 @@ pub fn check_read_audio_permission() -> bool {
 #[cfg(target_os = "android")]
 #[tauri::command]
 pub fn request_read_audio_permission() -> bool {
+    use crate::state::app_handle;
     use tauri::plugin::PermissionState;
     use tauri_plugin_fluyer::models::PermissionType;
-    use crate::state::app_handle;
 
     if !check_read_audio_permission() {
-
-        let permissions = app_handle().fluyer()
+        crate::info!("Requesting permissions");
+        let permissions = app_handle()
+            .fluyer()
             .request_permissions(Some(vec![
                 if app_handle().fluyer().get_sdk_version().unwrap().value >= 33 {
                     PermissionType::Audio
@@ -37,6 +38,7 @@ pub fn request_read_audio_permission() -> bool {
                 },
             ]))
             .unwrap();
+        crate::info!("Requesting permissions result: {:?}", permissions);
         return permissions.audio == PermissionState::Granted
             || permissions.storage == PermissionState::Granted;
     }
@@ -46,7 +48,11 @@ pub fn request_read_audio_permission() -> bool {
 #[cfg(mobile)]
 #[tauri::command]
 pub fn get_navigation_bar_height() -> u8 {
-    app_handle().fluyer().get_navigation_bar_height().unwrap().value
+    app_handle()
+        .fluyer()
+        .get_navigation_bar_height()
+        .unwrap()
+        .value
 }
 
 #[cfg(mobile)]
@@ -58,15 +64,19 @@ pub fn get_status_bar_height() -> u8 {
 #[cfg(mobile)]
 #[tauri::command]
 pub fn set_navigation_bar_visibility(visible: bool) {
-    app_handle().fluyer().set_navigation_bar_visibility(visible).unwrap();
+    app_handle()
+        .fluyer()
+        .set_navigation_bar_visibility(visible)
+        .unwrap();
 }
 
 #[cfg(target_os = "android")]
 #[tauri::command]
 pub fn android_request_directory() {
     use crate::state::app_handle;
-    
-    app_handle().fluyer()
+
+    app_handle()
+        .fluyer()
         .android_pick_folder(|payload| {
             if let Some(dir) = payload.value {
                 app_handle()
