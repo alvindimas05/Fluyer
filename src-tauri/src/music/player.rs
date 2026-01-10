@@ -1,12 +1,11 @@
-use std::ffi::CString;
-use std::ptr;
-use std::sync::{OnceLock, Mutex};
-use std::thread;
-use serde::{Deserialize, Serialize};
-use tauri::Emitter;
-use crate::logger;
 use crate::music::metadata::MusicMetadata;
 use crate::state::{app_handle, main_window};
+use serde::{Deserialize, Serialize};
+use std::ffi::CString;
+use std::ptr;
+use std::sync::{Mutex, OnceLock};
+use std::thread;
+use tauri::Emitter;
 
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::models::PlaylistAddMusic;
@@ -30,10 +29,22 @@ const BASS_ATTRIB_VOL: u32 = 2;
 #[link(name = "bass")]
 #[link(name = "bassmix")]
 extern "C" {
-    fn BASS_Init(device: i32, freq: u32, flags: u32, win: *mut std::ffi::c_void, clsid: *mut std::ffi::c_void) -> i32;
+    fn BASS_Init(
+        device: i32,
+        freq: u32,
+        flags: u32,
+        win: *mut std::ffi::c_void,
+        clsid: *mut std::ffi::c_void,
+    ) -> i32;
     fn BASS_PluginLoad(file: *const std::ffi::c_char, flags: u32) -> u32;
     fn BASS_PluginFree(handle: u32) -> i32;
-    fn BASS_StreamCreateFile(mem: bool, file: *const std::ffi::c_void, offset: u64, length: u64, flags: u32) -> u32;
+    fn BASS_StreamCreateFile(
+        mem: bool,
+        file: *const std::ffi::c_void,
+        offset: u64,
+        length: u64,
+        flags: u32,
+    ) -> u32;
     fn BASS_Mixer_StreamCreate(freq: u32, chans: u32, flags: u32) -> u32;
     fn BASS_Mixer_StreamAddChannel(handle: u32, channel: u32, flags: u32) -> i32;
     fn BASS_Mixer_ChannelRemove(handle: u32) -> u32;
@@ -122,9 +133,9 @@ impl MusicPlayer {
 
             unsafe {
                 if BASS_Init(-1, 44100, 0, ptr::null_mut(), ptr::null_mut()) == 0 {
-                    logger::error!("Failed to initialize BASS, error: {}", BASS_ErrorGetCode());
+                    log::error!("Failed to initialize BASS, error: {}", BASS_ErrorGetCode());
                 } else {
-                    logger::info!("BASS initialized successfully");
+                    log::info!("BASS initialized successfully");
                 }
 
                 // Load plugins based on platform
@@ -144,17 +155,24 @@ impl MusicPlayer {
                     let handle = BASS_PluginLoad(c_path.as_ptr(), 0);
 
                     if handle == 0 {
-                        logger::warn!("Failed to load plugin: {}, error: {}", plugin, BASS_ErrorGetCode());
+                        log::warn!(
+                            "Failed to load plugin: {}, error: {}",
+                            plugin,
+                            BASS_ErrorGetCode()
+                        );
                     } else {
-                        logger::info!("Loaded plugin: {}", plugin);
+                        log::info!("Loaded plugin: {}", plugin);
                     }
                 }
 
                 BASS_MIXER = BASS_Mixer_StreamCreate(44100, 2, BASS_SAMPLE_FLOAT);
                 if BASS_MIXER == 0 {
-                    logger::error!("Failed to create BASS mixer stream, error: {}", BASS_ErrorGetCode());
+                    log::error!(
+                        "Failed to create BASS mixer stream, error: {}",
+                        BASS_ErrorGetCode()
+                    );
                 } else {
-                    logger::info!("BASS mixer created successfully");
+                    log::info!("BASS mixer created successfully");
                 }
             }
         }
@@ -217,10 +235,7 @@ impl MusicPlayer {
                     MusicCommand::RepeatNone => PlayerCommand::RepeatNone,
                     _ => return,
                 });
-                app_handle()
-                    .fluyer()
-                    .player_run_command(args)
-                    .ok();
+                app_handle().fluyer().player_run_command(args).ok();
             }
 
             #[cfg(desktop)]
@@ -245,10 +260,7 @@ impl MusicPlayer {
         {
             let mut args = PlayerCommandArguments::new(PlayerCommand::Seek);
             args.seek_position = Some(position);
-            app_handle()
-                .fluyer()
-                .player_run_command(args)
-                .ok();
+            app_handle().fluyer().player_run_command(args).ok();
         }
 
         #[cfg(desktop)]
@@ -261,7 +273,7 @@ impl MusicPlayer {
                 let seconds = position as f64 / 1000.0;
                 let byte_pos = BASS_ChannelSeconds2Bytes(CURRENT_STREAM, seconds);
                 if BASS_ChannelSetPosition(CURRENT_STREAM, byte_pos, BASS_POS_BYTE) == 0 {
-                    logger::error!("Failed to set position, error: {}", BASS_ErrorGetCode());
+                    log::error!("Failed to set position, error: {}", BASS_ErrorGetCode());
                 }
 
                 // Restart the mixer with restart=true to clear the buffer
@@ -273,10 +285,7 @@ impl MusicPlayer {
     pub fn get_current_duration() -> f64 {
         #[cfg(target_os = "android")]
         {
-            let info = app_handle()
-                .fluyer()
-                .player_get_info()
-                .unwrap();
+            let info = app_handle().fluyer().player_get_info().unwrap();
             info.current_position as f64
         }
 
@@ -294,10 +303,7 @@ impl MusicPlayer {
     pub fn get_sync_info(is_reset: bool) -> MusicPlayerSync {
         #[cfg(target_os = "android")]
         {
-            let info = app_handle()
-                .fluyer()
-                .player_get_info()
-                .unwrap();
+            let info = app_handle().fluyer().player_get_info().unwrap();
             MusicPlayerSync {
                 index: info.index,
                 current_position: if is_reset {
@@ -352,9 +358,7 @@ impl MusicPlayer {
                     let was_empty = state.playlist.is_empty();
 
                     for music in playlist {
-                        state.playlist.push(PlaylistItem {
-                            metadata: music,
-                        });
+                        state.playlist.push(PlaylistItem { metadata: music });
                     }
 
                     // Auto-play first track if nothing is playing
@@ -372,8 +376,12 @@ impl MusicPlayer {
                 .into_iter()
                 .map(|music| PlaylistAddMusic {
                     file_path: music.path,
-                    title: music.title.unwrap_or(MusicMetadata::default_title().to_string()),
-                    artist: music.artist.unwrap_or(MusicMetadata::default_artist().to_string()),
+                    title: music
+                        .title
+                        .unwrap_or(MusicMetadata::default_title().to_string()),
+                    artist: music
+                        .artist
+                        .unwrap_or(MusicMetadata::default_artist().to_string()),
                     image: None,
                 })
                 .collect::<Vec<_>>();
@@ -389,10 +397,7 @@ impl MusicPlayer {
         {
             let mut args = PlayerCommandArguments::new(PlayerCommand::RemovePlaylist);
             args.playlist_remove_index = Some(index);
-            app_handle()
-                .fluyer()
-                .player_run_command(args)
-                .unwrap();
+            app_handle().fluyer().player_run_command(args).unwrap();
         }
 
         #[cfg(desktop)]
@@ -434,10 +439,7 @@ impl MusicPlayer {
         {
             let mut args = PlayerCommandArguments::new(PlayerCommand::GotoPlaylist);
             args.playlist_goto_index = Some(index);
-            app_handle()
-                .fluyer()
-                .player_run_command(args)
-                .ok();
+            app_handle().fluyer().player_run_command(args).ok();
         }
 
         #[cfg(desktop)]
@@ -546,38 +548,38 @@ impl MusicPlayer {
     fn load_music(music: MusicMetadata) -> bool {
         unsafe {
             let path = CString::new(music.path.clone()).unwrap();
-            let stream = BASS_StreamCreateFile(
-                false,
-                path.as_ptr() as *const _,
-                0,
-                0,
-                BASS_STREAM_DECODE,
-            );
+            let stream =
+                BASS_StreamCreateFile(false, path.as_ptr() as *const _, 0, 0, BASS_STREAM_DECODE);
 
             if stream == 0 {
-                logger::error!("Failed to load BASS music: {}, error: {}", music.path, BASS_ErrorGetCode());
+                log::error!(
+                    "Failed to load BASS music: {}, error: {}",
+                    music.path,
+                    BASS_ErrorGetCode()
+                );
                 return false;
             }
 
             let ok = BASS_Mixer_StreamAddChannel(BASS_MIXER, stream, BASS_MIXER_NORAMPIN);
             if ok == 0 {
-                logger::error!("Failed to add channel to mixer: {}, error: {}", music.path, BASS_ErrorGetCode());
+                log::error!(
+                    "Failed to add channel to mixer: {}, error: {}",
+                    music.path,
+                    BASS_ErrorGetCode()
+                );
                 BASS_StreamFree(stream);
                 return false;
             }
 
             CURRENT_STREAM = stream;
-            logger::info!("Successfully loaded: {}", music.path);
+            log::info!("Successfully loaded: {}", music.path);
             true
         }
     }
 
     pub fn moveto_playlist(from: usize, to: usize) {
         #[cfg(target_os = "android")]
-        app_handle()
-            .fluyer()
-            .player_playlist_move_to(from, to)
-            .ok();
+        app_handle().fluyer().player_playlist_move_to(from, to).ok();
 
         #[cfg(desktop)]
         {
@@ -592,17 +594,15 @@ impl MusicPlayer {
 
                     // Adjust current index
                     if let Some(current) = state.current_index {
-                        state.current_index = Some(
-                            if current == from {
-                                to
-                            } else if from < current && to >= current {
-                                current - 1
-                            } else if from > current && to <= current {
-                                current + 1
-                            } else {
-                                current
-                            }
-                        );
+                        state.current_index = Some(if current == from {
+                            to
+                        } else if from < current && to >= current {
+                            current - 1
+                        } else if from > current && to <= current {
+                            current + 1
+                        } else {
+                            current
+                        });
                     }
                 }
             }
@@ -614,10 +614,7 @@ impl MusicPlayer {
         {
             let mut args = PlayerCommandArguments::new(PlayerCommand::Volume);
             args.volume = Some(volume);
-            app_handle()
-                .fluyer()
-                .player_run_command(args)
-                .ok();
+            app_handle().fluyer().player_run_command(args).ok();
         }
 
         #[cfg(desktop)]
@@ -625,7 +622,7 @@ impl MusicPlayer {
             if BASS_MIXER != 0 {
                 let clamped_volume = volume.max(0.0).min(1.0);
                 if BASS_ChannelSetAttribute(BASS_MIXER, BASS_ATTRIB_VOL, clamped_volume) == 0 {
-                    logger::error!("Failed to set volume, error: {}", BASS_ErrorGetCode());
+                    log::error!("Failed to set volume, error: {}", BASS_ErrorGetCode());
                 }
             }
         }
@@ -650,11 +647,11 @@ impl MusicPlayer {
 
             if play {
                 if BASS_ChannelPlay(BASS_MIXER, 0) == 0 {
-                    logger::error!("Failed to play, error: {}", BASS_ErrorGetCode());
+                    log::error!("Failed to play, error: {}", BASS_ErrorGetCode());
                 }
             } else {
                 if BASS_ChannelPause(BASS_MIXER) == 0 {
-                    logger::error!("Failed to pause, error: {}", BASS_ErrorGetCode());
+                    log::error!("Failed to pause, error: {}", BASS_ErrorGetCode());
                 }
             }
         }
@@ -665,7 +662,10 @@ impl MusicPlayer {
         // and DSP effects setup. This is a placeholder for future implementation.
         #[cfg(desktop)]
         {
-            logger::info!("Equalizer called with {} bands (not yet implemented)", values.len());
+            log::info!(
+                "Equalizer called with {} bands (not yet implemented)",
+                values.len()
+            );
             // TODO: Implement BASS_FX equalizer with proper DSP chain
         }
     }
@@ -673,7 +673,7 @@ impl MusicPlayer {
     pub fn reset_equalizer() {
         #[cfg(desktop)]
         {
-            logger::info!("Reset equalizer (not yet implemented)");
+            log::info!("Reset equalizer (not yet implemented)");
             // TODO: Clear BASS_FX equalizer DSP chain
         }
     }
@@ -681,7 +681,10 @@ impl MusicPlayer {
     pub fn toggle_bit_perfect(enable: bool) {
         #[cfg(desktop)]
         {
-            logger::info!("Bit-perfect mode toggle (not yet implemented for BASS): {}", enable);
+            log::info!(
+                "Bit-perfect mode toggle (not yet implemented for BASS): {}",
+                enable
+            );
             // TODO: Configure BASS for bit-perfect playback if supported
             // This may require specific device initialization flags
         }
@@ -713,7 +716,7 @@ impl MusicPlayer {
                             let state = BASS_ChannelIsActive(CURRENT_STREAM);
                             if state == BASS_ACTIVE_STOPPED {
                                 // Track ended, trigger next
-                                logger::info!("Track ended, playing next");
+                                log::info!("Track ended, playing next");
                                 Self::play_next();
                             }
                         }
@@ -739,10 +742,9 @@ impl MusicPlayer {
     fn start_focus_listener() {
         use tauri::Listener;
 
-        main_window()
-            .listen("tauri://focus", move |_| {
-                MusicPlayer::emit_sync(false);
-            });
+        main_window().listen("tauri://focus", move |_| {
+            MusicPlayer::emit_sync(false);
+        });
     }
 }
 
@@ -756,7 +758,7 @@ impl Drop for MusicPlayer {
                 BASS_MIXER = 0;
             }
             BASS_Free();
-            logger::info!("BASS cleaned up");
+            log::info!("BASS cleaned up");
         }
     }
 }

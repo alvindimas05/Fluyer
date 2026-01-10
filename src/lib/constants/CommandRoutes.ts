@@ -1,7 +1,7 @@
 export const CommandRoutes = {
 	MUSIC_CONTROLLER: "music_controller",
-    MUSIC_PLAYER_SYNC: "music_player_sync",
-    MUSIC_PLAYER_REQUEST_SYNC: "music_player_request_sync",
+	MUSIC_PLAYER_SYNC: "music_player_sync",
+	MUSIC_PLAYER_REQUEST_SYNC: "music_player_request_sync",
 	MUSIC_PLAYER_NEXT: "music_player_next",
 	MUSIC_GET_ALL: "music_get_all",
 	MUSIC_GET_INFO: "music_get_info",
@@ -13,15 +13,15 @@ export const CommandRoutes = {
 	MUSIC_PLAYLIST_GOTO: "music_playlist_goto",
 	MUSIC_PLAYLIST_MOVETO: "music_playlist_moveto",
 	MUSIC_SET_VOLUME: "music_set_volume",
-    MUSIC_EQUALIZER: "music_equalizer",
+	MUSIC_EQUALIZER: "music_equalizer",
 	MUSIC_EQUALIZER_RESET: "music_equalizer_reset",
 	MUSIC_GET_IMAGE: "music_get_image",
 	MUSIC_GET_VISUALIZER_BUFFER: "music_get_visualizer_buffer",
 	MUSIC_GET_CURRENT_DURATION: "music_get_current_duration",
-    MUSIC_GET_LYRICS: "music_get_lyrics",
-    MUSIC_TOGGLE_BIT_PERFECT: "music_toggle_bit_perfect",
+	MUSIC_GET_LYRICS: "music_get_lyrics",
+	MUSIC_TOGGLE_BIT_PERFECT: "music_toggle_bit_perfect",
 
-    PLAYLIST_GET_ALL: "playlist_get_all",
+	PLAYLIST_GET_ALL: "playlist_get_all",
 
 	FOLDER_GET_ITEMS: "folder_get_items",
 	FOLDER_GET_FIRST_MUSIC_PATH: "folder_get_first_music_path",
@@ -34,8 +34,7 @@ export const CommandRoutes = {
 	SET_NAVIGATION_BAR_VISIBILITY: "set_navigation_bar_visibility",
 	ANDROID_REQUEST_DIRECTORY: "android_request_directory",
 
-    LOG_INFO: "log_info",
-    LOG_ERROR: "log_error",
+	LOG: "log",
 
 	COVER_ART_GET: "cover_art_get",
 

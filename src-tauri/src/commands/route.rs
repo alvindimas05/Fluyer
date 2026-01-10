@@ -8,3 +8,4 @@ pub const MUSIC_REQUEST_DIRECTORY: &str = "music_request_directory";
 // pub const MUSIC_PLAYLIST_REMOVE: &str = "music_playlist_remove";
 #[cfg(target_os = "android")]
 pub const ANDROID_REQUEST_DIRECTORY: &str = "android_request_directory";
+pub const LOG: &str = "log";

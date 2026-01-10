@@ -2,7 +2,6 @@ use crate::music::player::MusicPlayer;
 use std::sync::{Arc, Mutex, OnceLock};
 use tauri::{App, AppHandle, Manager, RunEvent, WebviewWindow, Wry};
 use tauri_plugin_store::{Store, StoreExt};
-use crate::logger;
 
 /// Global application state
 pub struct AppState {
@@ -31,16 +30,12 @@ static APP_STORE: OnceLock<Arc<Store<Wry>>> = OnceLock::new();
 
 /// Get the global application handle
 pub fn app_handle() -> &'static AppHandle {
-    APP_HANDLE
-        .get()
-        .expect("APP_HANDLE not initialized")
+    APP_HANDLE.get().expect("APP_HANDLE not initialized")
 }
 
 /// Get the global main window
 pub fn main_window() -> &'static WebviewWindow {
-    MAIN_WINDOW
-        .get()
-        .expect("MAIN_WINDOW not initialized")
+    MAIN_WINDOW.get().expect("MAIN_WINDOW not initialized")
 }
 
 pub fn set_main_window(window: WebviewWindow) {
@@ -48,9 +43,7 @@ pub fn set_main_window(window: WebviewWindow) {
 }
 
 pub fn app_store() -> &'static Arc<Store<Wry>> {
-    APP_STORE
-        .get()
-        .expect("APP_STORE not initialized")
+    APP_STORE.get().expect("APP_STORE not initialized")
 }
 
 /// Initialize global state with app handle
@@ -62,12 +55,11 @@ pub fn initialize_globals(app_handle: &AppHandle) {
     app_handle.manage(Mutex::new(AppState::default()));
 }
 
-pub fn initialize_store(app: &mut App){
-    let store = app.store(STORE_NAME)
-        .expect("Failed to initialize store.");
+pub fn initialize_store(app: &mut App) {
+    let store = app.store(STORE_NAME).expect("Failed to initialize store.");
 
     if APP_STORE.set(store).is_err() {
-        logger::error!("Failed to set APP_STORE");
+        log::error!("Failed to set APP_STORE");
     }
 }
 
@@ -85,17 +77,17 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
 
 /// Log application directory paths for debugging
 fn log_directory_paths(app_handle: &AppHandle) {
-    logger::debug!(
+    log::debug!(
         "The app data dir is located at: {}",
         app_handle.path().app_data_dir().unwrap().display()
     );
 
-    logger::debug!(
+    log::debug!(
         "The app config dir is located at: {}",
         app_handle.path().app_config_dir().unwrap().display()
     );
 
-    logger::debug!(
+    log::debug!(
         "The app cache dir is located at: {}",
         app_handle.path().app_cache_dir().unwrap().display()
     );

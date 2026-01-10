@@ -1,10 +1,10 @@
 // Core modules
 mod api;
-mod commands;
+pub(crate) mod commands;
 mod coverart;
 mod database;
 mod folder;
-mod logger;
+pub mod logger;
 mod music;
 mod playlist;
 mod system;
@@ -13,7 +13,7 @@ mod utils;
 // Application modules
 mod app_setup;
 mod events;
-mod state;
+pub(crate) mod state;
 
 // Re-export platform module from main
 pub mod platform;

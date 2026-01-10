@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use crate::database::database::GLOBAL_DATABASE;
 use crate::folder::types::FolderItem;
 use crate::folder::utils::{is_not_hidden, normalize_path};
-use crate::{logger, music::metadata::MusicMetadata};
+use crate::music::metadata::MusicMetadata;
 use chrono::{DateTime, Utc};
 use futures::StreamExt;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -42,14 +42,13 @@ pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
     dirs.into_par_iter()
         .filter_map(|e| {
             if let Err(err) = &e {
-                logger::error!("Error reading entry: {}", err);
+                log::error!("Error reading entry: {}", err);
                 return None;
             }
             e.ok()
         })
         .filter(|e| {
-            e.path().is_file()
-                && e.path().file_name().unwrap_or_default() != "au_uu_SzH34yR2.mp3"
+            e.path().is_file() && e.path().file_name().unwrap_or_default() != "au_uu_SzH34yR2.mp3"
         })
         .map(|entry| entry.path().to_path_buf())
         .collect()
@@ -80,23 +79,17 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
         .buffer_unordered(10)
         .collect()
         .await;
-    logger::info!(
-        "Processed metadata for {} files.",
-        metadata_results.len()
-    );
+    log::info!("Processed metadata for {} files.", metadata_results.len());
 
     // Then do one blocking DB transaction
     tokio::task::spawn_blocking(move || {
         let mut conn_guard = GLOBAL_DATABASE.lock().ok()?;
         let conn = conn_guard.as_mut()?;
         let tx = conn.transaction().ok()?;
-        
+
         for (path, modified_at, metadata) in metadata_results {
             if metadata.is_err() {
-                logger::error!(
-                    "Failed to read metadata for file: {}",
-                    path
-                );
+                log::error!("Failed to read metadata for file: {}", path);
                 continue;
             }
             let metadata = metadata.unwrap();
@@ -108,7 +101,8 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
                 .prepare("SELECT modified_at FROM musics WHERE path = ?1")
                 .ok()
                 .unwrap();
-            let result: Result<String, _> = stmt.query_row(rusqlite::params![path_string], |row| row.get(0));
+            let result: Result<String, _> =
+                stmt.query_row(rusqlite::params![path_string], |row| row.get(0));
 
             match result {
                 Err(rusqlite::Error::QueryReturnedNoRows) => {
@@ -134,7 +128,7 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
                     );
 
                     if res.is_err() {
-                        logger::error!("Insert music to table error: {}", res.unwrap_err());
+                        log::error!("Insert music to table error: {}", res.unwrap_err());
                     }
                 }
                 Ok(existing_modified_at) => {
@@ -163,17 +157,17 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
                         );
 
                         if res.is_err() {
-                            logger::error!("Update music to table error: {}", res.unwrap_err());
+                            log::error!("Update music to table error: {}", res.unwrap_err());
                         }
                     }
                 }
                 Err(e) => {
-                    logger::error!("Database error: {:?}", e);
+                    log::error!("Database error: {:?}", e);
                 }
             }
         }
-        
-       tx.commit().ok()
+
+        tx.commit().ok()
     })
     .await
     .ok();

@@ -4,8 +4,6 @@ use tauri::{AppHandle, Manager};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 
-use crate::logger;
-
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -93,7 +91,7 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
                     let mut permissions = metadata.permissions();
                     permissions.set_mode(0o755);
                     if let Err(e) = std::fs::set_permissions(&ffmpeg_path, permissions) {
-                        logger::error!("Failed to set ffmpeg permissions: {}", e);
+                        log::error!("Failed to set ffmpeg permissions: {}", e);
                     }
                 }
             }
@@ -114,7 +112,7 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
             };
 
             if ffmpeg_status.is_err() {
-                logger::error!(
+                log::error!(
                     "Failed to convert audio to mp3: {}",
                     ffmpeg_status.unwrap_err()
                 );
@@ -122,7 +120,7 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
             }
 
             if !tmp_file.exists() {
-                logger::error!("Failed to convert audio to mp3");
+                log::error!("Failed to convert audio to mp3");
                 return std::fs::read(path).ok();
             }
 

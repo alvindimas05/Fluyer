@@ -3,12 +3,12 @@ use dotenvy_macro::dotenv;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tauri::Manager;
-use tokio::process::Command;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
-use crate::logger;
+use tauri::Manager;
+use tokio::process::Command;
+
 use crate::state::app_handle;
 
 static FFMPEG_PATH: OnceLock<PathBuf> = OnceLock::new();
@@ -83,18 +83,13 @@ impl MusicMetadata {
             }
         };
 
-        #[cfg(any(target_os = "macos", target_os = "linux"))]{
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
+        {
             use std::os::unix::fs::PermissionsExt;
-            std::fs::set_permissions(
-                &ffmpeg_path,
-                std::fs::Permissions::from_mode(0o755),
-            )
-            .expect("Failed to set ffmpeg permissions");
-            std::fs::set_permissions(
-                &ffprobe_path,
-                std::fs::Permissions::from_mode(0o755),
-            )
-            .expect("Failed to set ffprobe permissions");
+            std::fs::set_permissions(&ffmpeg_path, std::fs::Permissions::from_mode(0o755))
+                .expect("Failed to set ffmpeg permissions");
+            std::fs::set_permissions(&ffprobe_path, std::fs::Permissions::from_mode(0o755))
+                .expect("Failed to set ffprobe permissions");
         }
 
         FFMPEG_PATH.set(ffmpeg_path).unwrap();
@@ -146,7 +141,8 @@ impl MusicMetadata {
             if let Some(tags) = format.get("tags") {
                 metadata.title = Self::extract_tag(tags, &["title", "TITLE", "Title"]);
                 metadata.artist = Self::extract_tag(tags, &["artist", "ARTIST", "Artist"]);
-                metadata.album_artist = Self::extract_tag(tags, &["album_artist", "ALBUM_ARTIST", "ALBUMARTIST"]);
+                metadata.album_artist =
+                    Self::extract_tag(tags, &["album_artist", "ALBUM_ARTIST", "ALBUMARTIST"]);
                 metadata.album = Self::extract_tag(tags, &["album", "ALBUM", "Album"]);
                 metadata.track_number = Self::extract_tag(tags, &["track", "TRACK", "TRACKNUMBER"]);
             }
@@ -243,7 +239,8 @@ impl MusicMetadata {
                 &path,
             ])
             .output()
-            .await.map_err(|e| format!("Failed to probe for cover art: {}", e))?;
+            .await
+            .map_err(|e| format!("Failed to probe for cover art: {}", e))?;
 
         // If no video stream found, return error early
         if probe_output.stdout.is_empty() || !probe_output.status.success() {
@@ -303,7 +300,6 @@ impl MusicMetadata {
 
         Ok(output.stdout)
     }
-
 
     fn get_artist_title_from_file_name(file_name: &str) -> Option<(String, String)> {
         let without_extension = file_name
