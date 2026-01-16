@@ -12,8 +12,8 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "tauri": "tauri",
-    "init": "bun scripts/tauri-initialize.ts",
-    "android:init": "bun scripts/tauri-android-initialize.ts"
+    "init": "bun scripts/tauri-init.ts",
+    "android:init": "bun scripts/tauri-init-android.ts"
   },
   "license": "MIT",
   "dependencies": {

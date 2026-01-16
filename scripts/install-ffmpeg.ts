@@ -33,9 +33,9 @@ function getDownloadUrl(): string {
 async function main() {
 	try {
 		await fs.access(outputDir);
-        console.log("Ffmpeg is already installed");
-		return;
-	} catch {}
+		console.log("FFmpeg is already installed. Reinstalling...");
+		await fs.rm(outputDir, { recursive: true, force: true });
+	} catch { }
 	try {
 		console.log("Installing ffmpeg...");
 		const url = getDownloadUrl();
@@ -45,7 +45,7 @@ async function main() {
 		await downloadFile(url, destPath);
 		await extractTarGz(destPath, downloadOutputDir);
 
- 		await fs.rename(path.resolve(downloadOutputDir, getLibName()), outputDir);
+		await fs.rename(path.resolve(downloadOutputDir, getLibName()), outputDir);
 	} catch (err) {
 		console.error("Failed:", err);
 	}

@@ -2,12 +2,12 @@ import path from "path";
 import { spawn } from "promisify-child-process";
 import fs from "fs/promises";
 
-async function installFfmpeg() {
-	await spawn("bun", ["scripts/install-ffmpeg.ts"], { stdio: "inherit" });
+async function installFFmpeg() {
+    await spawn("bun", ["scripts/install-ffmpeg.ts"], { stdio: "inherit" });
 }
 
 async function installBass() {
-	await spawn("bun", ["scripts/install-bass.ts"], { stdio: "inherit" });
+    await spawn("bun", ["scripts/install-bass.ts"], { stdio: "inherit" });
 }
 
 try {
@@ -18,5 +18,5 @@ try {
         "Missing .env! The file is now copied from .env.example and make sure to configure it before running.",
     );
 }
-const promises = [installBass(), installFfmpeg()];
+const promises = [installBass(), installFFmpeg()];
 await Promise.all(promises);

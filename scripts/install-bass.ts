@@ -1,5 +1,5 @@
 import path from "path";
-import {downloadFile, extractZip} from "./install-helpers";
+import { downloadFile, extractZip } from "./install-helpers";
 import * as fs from "fs/promises";
 import * as os from "os";
 import * as crypto from "crypto";
@@ -17,7 +17,7 @@ async function installLib(name: string) {
     let platform = "";
 
     let libPath = "";
-    switch(os.platform()){
+    switch (os.platform()) {
         case "win32":
             platform = "";
             libPath = path.join(extractPath, "x64", `${name}.dll`);
@@ -29,7 +29,7 @@ async function installLib(name: string) {
         case "linux":
             platform = "-linux";
             let archFolder = "";
-            switch(os.arch()) {
+            switch (os.arch()) {
                 case "x64":
                     archFolder = "x86_64";
                     break;
@@ -53,9 +53,9 @@ async function installLib(name: string) {
 
     try {
         await fs.access(destLibPath);
-        console.log(`${name} is already installed`);
-        return;
-    } catch(e) {}
+        console.log(`${name} is already installed. Reinstalling...`);
+        await fs.rm(destLibPath);
+    } catch (e) { }
 
     console.log(`Installing ${name}...`);
 
@@ -64,21 +64,21 @@ async function installLib(name: string) {
 
     await fs.copyFile(libPath, destLibPath);
 
-    if(os.platform() === "win32"){
+    if (os.platform() === "win32") {
         const destLibWindowsPath = path.join(destPath, path.basename(libWindowsPath));
         await fs.copyFile(libWindowsPath, destLibWindowsPath);
     }
 
     try {
         await fs.rm(downloadPath);
-    } catch(e) {}
+    } catch (e) { }
     try {
-        await fs.rm(extractPath, {recursive: true, force: true});
-    } catch(e) {}
+        await fs.rm(extractPath, { recursive: true, force: true });
+    } catch (e) { }
 }
 
-async function main(){
-    await fs.mkdir(destPath, {recursive: true});
+async function main() {
+    await fs.mkdir(destPath, { recursive: true });
 
     const promises: Promise<void>[] = [];
     for (const lib of libs) {
