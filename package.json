@@ -12,8 +12,8 @@
 		"tauri": "tauri",
 		"init": "bun scripts/tauri-init.ts",
 		"android:init": "bun scripts/tauri-init-android.ts",
-		"format": "prettier --write . --ignore-path .prettierignore && cargo fmt --manifest-path src-tauri/Cargo.toml",
-		"format:check": "prettier --check . --ignore-path .prettierignore && cargo fmt --manifest-path src-tauri/Cargo.toml -- --check"
+		"format": "PRETTIER_EXPERIMENTAL_CLI=1 prettier --write . --ignore-path .prettierignore && cargo fmt --manifest-path src-tauri/Cargo.toml",
+		"format:check": "PRETTIER_EXPERIMENTAL_CLI=1 prettier --check . --ignore-path .prettierignore && cargo fmt --manifest-path src-tauri/Cargo.toml -- --check"
 	},
 	"license": "MIT",
 	"dependencies": {
@@ -46,6 +46,7 @@
 		"web-animations-js": "^2.3.2"
 	},
 	"devDependencies": {
+		"@prettier/plugin-oxc": "^0.1.3",
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.20.8",
 		"@sveltejs/vite-plugin-svelte": "5.0.3",
