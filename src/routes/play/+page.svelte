@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { isAndroid, isMacos, isMobile } from "$lib/platform";
+    import { isAndroid, isDesktop, isMacos, isMobile } from "$lib/platform";
     import Icon from "$lib/ui/icon/Icon.svelte";
     import { IconType } from "$lib/ui/icon/types";
     import View from "$lib/ui/components/View.svelte";
@@ -32,6 +32,7 @@
     let volumePercentage = $state(musicStore.volume);
 
     let updateProgressText = $state(true);
+    let shouldAnimate = isDesktop() && !isMobile();
 
     function handleButtonPlayPause() {
         if (musicStore.isPlaying) {
@@ -194,7 +195,8 @@
                 <div class="w-full aspect-square"></div>
             {:then image}
                 <img
-                    class="w-full rounded-lg object-cover aspect-square shadow-lg animate__animated animate__fadeIn animate__faster"
+                    class="w-full rounded-lg object-cover aspect-square shadow-lg {shouldAnimate &&
+                        'animate__animated animate__fadeIn'}"
                     src={image}
                     alt="Music Album"
                 />
