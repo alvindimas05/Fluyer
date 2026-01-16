@@ -87,9 +87,15 @@ impl<R: Runtime> Fluyer<R> {
         self.watch_playlist_change_inner(channel)
     }
 
-    pub(crate) fn watch_playlist_change_inner(&self, channel: Channel) -> crate::Result<WatchPlaylistChangeResponse> {
+    pub(crate) fn watch_playlist_change_inner(
+        &self,
+        channel: Channel,
+    ) -> crate::Result<WatchPlaylistChangeResponse> {
         self.0
-            .run_mobile_plugin("watchPlaylistChange", WatchPlaylistChangePayload { channel })
+            .run_mobile_plugin(
+                "watchPlaylistChange",
+                WatchPlaylistChangePayload { channel },
+            )
             .map_err(Into::into)
     }
 
@@ -104,43 +110,37 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("playerRunCommand", args)
             .map_err(Into::into)
     }
-    
+
     pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
         self.0
             .run_mobile_plugin("playerGetInfo", ())
             .map_err(Into::into)
     }
-    
-    pub fn player_playlist_add(
-        &self,
-        playlist: Vec<PlaylistAddMusic>
-    ) -> crate::Result<()> {
-        self.0.run_mobile_plugin("playerPlaylistAdd", PlayerPlaylistAdd { playlist })
+
+    pub fn player_playlist_add(&self, playlist: Vec<PlaylistAddMusic>) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("playerPlaylistAdd", PlayerPlaylistAdd { playlist })
             .map_err(Into::into)
     }
 
-    pub fn player_playlist_move_to(
-        &self,
-        from: usize,
-        to: usize,
-    ) -> crate::Result<()> {
+    pub fn player_playlist_move_to(&self, from: usize, to: usize) -> crate::Result<()> {
         self.0
             .run_mobile_plugin("playerPlaylistMoveTo", PlaylistMoveTo { from, to })
             .map_err(Into::into)
     }
-    
+
     pub fn get_sdk_version(&self) -> crate::Result<SdkVersion> {
         self.0
             .run_mobile_plugin("getSdkVersion", ())
             .map_err(Into::into)
     }
 
-    pub fn set_navigation_bar_visibility(
-        &self,
-        visible: bool,
-    ) -> crate::Result<()> {
+    pub fn set_navigation_bar_visibility(&self, visible: bool) -> crate::Result<()> {
         self.0
-            .run_mobile_plugin("setNavigationBarVisibility", NavigationBarVisibility { value: visible })
+            .run_mobile_plugin(
+                "setNavigationBarVisibility",
+                NavigationBarVisibility { value: visible },
+            )
             .map_err(Into::into)
     }
 
@@ -163,15 +163,30 @@ impl<R: Runtime> Fluyer<R> {
         self.android_pick_folder_inner(channel)
     }
 
-    pub(crate) fn android_pick_folder_inner(&self, channel: Channel) -> crate::Result<WatchPickFolderResponse> {
+    pub(crate) fn android_pick_folder_inner(
+        &self,
+        channel: Channel,
+    ) -> crate::Result<WatchPickFolderResponse> {
         self.0
             .run_mobile_plugin("requestPickFolder", WatchPickFolderPayload { channel })
             .map_err(Into::into)
     }
-    
+
     pub fn visualizer_get_buffer(&self, args: String) -> crate::Result<VisualizerGetBuffer> {
         self.0
             .run_mobile_plugin("visualizerGetBuffer", VisualizerGetBufferArgs { args })
+            .map_err(Into::into)
+    }
+
+    pub fn metadata_get(&self, path: String) -> crate::Result<MetadataGetResponse> {
+        self.0
+            .run_mobile_plugin("metadataGet", MetadataGetArgs { path })
+            .map_err(Into::into)
+    }
+
+    pub fn metadata_get_image(&self, path: String) -> crate::Result<MetadataGetImageResponse> {
+        self.0
+            .run_mobile_plugin("metadataGetImage", MetadataGetArgs { path })
             .map_err(Into::into)
     }
 }

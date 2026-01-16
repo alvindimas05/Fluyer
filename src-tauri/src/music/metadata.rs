@@ -9,6 +9,9 @@ use std::sync::OnceLock;
 use tauri::Manager;
 use tokio::process::Command;
 
+#[cfg(target_os = "android")]
+use tauri_plugin_fluyer::FluyerExt;
+
 use crate::state::app_handle;
 
 static FFMPEG_PATH: OnceLock<PathBuf> = OnceLock::new();
@@ -118,6 +121,10 @@ impl MusicMetadata {
         let json: Value =
             serde_json::from_str(&json_str).map_err(|e| format!("Failed to parse JSON: {}", e))?;
 
+        Self::parse_json_metadata(json, path)
+    }
+
+    fn parse_json_metadata(json: Value, path: String) -> Result<MusicMetadata, String> {
         // Verify this is actually an audio file with at least one audio stream
         let has_audio_stream = json
             .get("streams")
@@ -134,7 +141,7 @@ impl MusicMetadata {
         }
 
         let mut metadata = MusicMetadata::default();
-        metadata.path = path.clone();
+        metadata.path = path;
 
         // Extract format tags
         if let Some(format) = json.get("format") {
@@ -240,11 +247,11 @@ impl MusicMetadata {
             ])
             .output()
             .await
-            .map_err(|e| format!("Failed to probe for cover art: {}", e))?;
+            .map_err(|e| format!("Failed to probe for cover art {} : {}", path, e))?;
 
         // If no video stream found, return error early
         if probe_output.stdout.is_empty() || !probe_output.status.success() {
-            return Err(format!("No cover art in file: {}", path));
+            return Err(format!("No cover art in file {}", path));
         }
 
         // Try to copy the embedded image without re-encoding (fastest)
@@ -263,7 +270,7 @@ impl MusicMetadata {
             ])
             .output()
             .await
-            .map_err(|e| format!("Failed to execute ffmpeg: {}", e))?;
+            .map_err(|e| format!("Failed to execute ffmpeg {} : {}", path, e))?;
 
         if output.status.success() && !output.stdout.is_empty() {
             return Ok(output.stdout);
@@ -285,11 +292,12 @@ impl MusicMetadata {
             ])
             .output()
             .await
-            .map_err(|e| format!("Failed to execute ffmpeg: {}", e))?;
+            .map_err(|e| format!("Failed to execute ffmpeg {} : {}", path, e))?;
 
         if !output.status.success() {
             return Err(format!(
-                "Failed to extract cover art: {}",
+                "Failed to extract cover art {} : {}",
+                path,
                 String::from_utf8_lossy(&output.stderr)
             ));
         }
@@ -299,6 +307,55 @@ impl MusicMetadata {
         }
 
         Ok(output.stdout)
+    }
+
+    /// Get metadata using FFprobeKit on Android
+    #[cfg(target_os = "android")]
+    pub async fn get_android(path: String) -> Result<Self, String> {
+        let path_clone = path.clone();
+        tokio::task::spawn_blocking(move || {
+            let result = app_handle()
+                .fluyer()
+                .metadata_get(path_clone.clone())
+                .map_err(|e| format!("Failed to get metadata: {}", e))?;
+
+            match result.value {
+                Some(json_str) => {
+                    let json: Value = serde_json::from_str(&json_str)
+                        .map_err(|e| format!("Failed to parse JSON from Android: {}", e))?;
+                    Self::parse_json_metadata(json, path_clone)
+                }
+                None => Err("No metadata returned from Android".to_string()),
+            }
+        })
+        .await
+        .map_err(|e| format!("Task join error: {}", e))?
+    }
+
+    /// Extract cover art using FFmpegKit on Android
+    #[cfg(target_os = "android")]
+    pub async fn get_image_from_path_android(
+        path: String,
+    ) -> Result<Vec<u8>, String> {
+        tokio::task::spawn_blocking(move || {
+            let result = app_handle()
+                .fluyer()
+                .metadata_get_image(path.clone())
+                .map_err(|e| format!("Failed to get image: {}", e))?;
+
+            match result.path {
+                Some(temp_path) => {
+                    let bytes = std::fs::read(&temp_path)
+                        .map_err(|e| format!("Failed to read image file: {}", e))?;
+                    // Clean up temp file
+                    let _ = std::fs::remove_file(&temp_path);
+                    Ok(bytes)
+                }
+                None => Err(format!("No cover art in file: {}", path)),
+            }
+        })
+        .await
+        .map_err(|e| format!("Task join error: {}", e))?
     }
 
     fn get_artist_title_from_file_name(file_name: &str) -> Option<(String, String)> {

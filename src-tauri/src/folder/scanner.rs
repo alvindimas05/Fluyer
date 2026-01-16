@@ -73,7 +73,13 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
         .map(|path| async move {
             let path_str = path.display().to_string();
             let modified = get_modified_time(&path);
+
+            #[cfg(target_os = "android")]
+            let metadata = MusicMetadata::get_android(path_str.clone()).await;
+
+            #[cfg(not(target_os = "android"))]
             let metadata = MusicMetadata::get(path_str.clone()).await;
+
             (path_str, modified, metadata)
         })
         .buffer_unordered(10)
@@ -89,7 +95,11 @@ pub async fn process_supported_files(paths: &[PathBuf]) {
 
         for (path, modified_at, metadata) in metadata_results {
             if metadata.is_err() {
-                crate::error!("Failed to read metadata for file: {}", path);
+                crate::warn!(
+                    "Failed to read metadata for file {}: {:?}",
+                    path,
+                    metadata.unwrap_err()
+                );
                 continue;
             }
             let metadata = metadata.unwrap();

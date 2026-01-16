@@ -9,6 +9,7 @@ const MetadataService = {
         if (!music) return MusicConfig.defaultAlbumImage;
         try {
             const arrayBuffer = await TauriMetadataAPI.getMusicCoverArt(music.path);
+            console.log(`Cover art for ${music.path} ${arrayBuffer.byteLength}`)
             if (arrayBuffer !== null) {
                 const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
                 return URL.createObjectURL(blob);

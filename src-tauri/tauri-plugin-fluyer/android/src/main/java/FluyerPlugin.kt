@@ -46,6 +46,11 @@ class VisualizerGetBufferArgs {
     lateinit var args: String
 }
 
+@InvokeArg
+class MetadataArgs {
+    lateinit var path: String
+}
+
 private const val ALIAS_READ_AUDIO: String = "audio"
 private const val ALIAS_EXTERNAL_STORAGE: String = "storage"
 const val LOG_TAG = "Fluyer"
@@ -66,6 +71,7 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
 
     override fun load(webView: WebView) {
         player.initialize()
+        FluyerMetadata.initialize(activity)
         super.load(webView)
     }
 
@@ -220,6 +226,32 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
             Log.e(LOG_TAG, err.message.toString())
             invoke.resolve(JSObject().put("value", false))
             return false
+        }
+    }
+    
+    @Command
+    fun metadataGet(invoke: Invoke) {
+        try {
+            val args = invoke.parseArgs(MetadataArgs::class.java)
+            val result = FluyerMetadata.getMetadata(args.path)
+            val response = JSObject()
+            response.put("value", result)
+            invoke.resolve(response)
+        } catch (err: Exception) {
+            Log.e(LOG_TAG, "metadataGet error: ${err.message}")
+            invoke.resolve(JSObject())
+        }
+    }
+    
+    @Command
+    fun metadataGetImage(invoke: Invoke) {
+        try {
+            val args = invoke.parseArgs(MetadataArgs::class.java)
+            val result = FluyerMetadata.getImage(args.path)
+            invoke.resolve(JSObject().put("path", result))
+        } catch (err: Exception) {
+            Log.e(LOG_TAG, "metadataGetImage error: ${err.message}")
+            invoke.resolve(JSObject().put("path", null))
         }
     }
 }

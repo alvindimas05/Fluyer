@@ -37,7 +37,8 @@ pub struct PermissionStatus {
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum PermissionType {
-    Audio, Storage
+    Audio,
+    Storage,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -159,4 +160,22 @@ pub struct VisualizerGetBufferArgs {
 #[serde(rename_all = "camelCase")]
 pub struct VisualizerGetBuffer {
     pub value: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct MetadataGetArgs {
+    pub path: String,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct MetadataGetResponse {
+    pub value: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct MetadataGetImageResponse {
+    pub path: Option<String>,
 }
