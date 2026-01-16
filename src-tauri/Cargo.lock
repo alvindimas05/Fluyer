@@ -1274,6 +1274,7 @@ dependencies = [
  "futures",
  "image",
  "lazy_static",
+ "libloading 0.8.9",
  "rayon",
  "regex",
  "reqwest 0.13.1",

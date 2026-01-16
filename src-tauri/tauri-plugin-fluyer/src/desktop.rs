@@ -41,36 +41,7 @@ impl<R: Runtime> Fluyer<R> {
         Ok(PermissionStatus::default())
     }
 
-    pub fn watch_playlist_change<F: Fn(WatcherPlaylistChange) + Send + Sync + 'static>(
-        &self,
-        _callback: F,
-    ) -> crate::Result<WatchPlaylistChangeResponse> {
-        Ok(WatchPlaylistChangeResponse { value: false })
-    }
-
     pub fn restart_app(&self) -> crate::Result<()> {
-        Ok(())
-    }
-    
-    pub fn player_run_command(&self, _args: PlayerCommandArguments) -> crate::Result<()> {
-        Ok(())
-    }
-    
-    pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
-        Ok(PlayerGetInfo::default())
-    }
-
-    pub fn player_playlist_add(
-        &self,
-        _: Vec<PlaylistAddMusic>
-    ) -> crate::Result<()> {
-        Ok(())
-    }
-
-    pub fn player_playlist_move_to(
-        &self,
-        _: PlaylistMoveTo,
-    ) -> crate::Result<()> {
         Ok(())
     }
 
@@ -78,20 +49,17 @@ impl<R: Runtime> Fluyer<R> {
         Ok(SdkVersion::default())
     }
 
-    pub fn set_navigation_bar_visibility(
-        &self,
-        _: bool,
-    ) -> crate::Result<()> {
+    pub fn set_navigation_bar_visibility(&self, _: bool) -> crate::Result<()> {
         Ok(())
     }
-    
+
     pub fn android_pick_folder<F: Fn(WatcherPickFolder) + Send + Sync + 'static>(
         &self,
         _callback: F,
     ) -> crate::Result<WatchPickFolderResponse> {
         Ok(WatchPickFolderResponse { value: false })
     }
-    
+
     pub fn visualizer_get_buffer(&self, _args: String) -> crate::Result<VisualizerGetBuffer> {
         Ok(VisualizerGetBuffer { value: false })
     }

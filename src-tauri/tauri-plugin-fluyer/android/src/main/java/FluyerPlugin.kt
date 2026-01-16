@@ -27,11 +27,6 @@ class ToastArgs {
 }
 
 @InvokeArg
-class PlaylistChangeWatcherArgs {
-    lateinit var channel: Channel
-}
-
-@InvokeArg
 class PickFolderWatcherArgs {
     lateinit var channel: Channel
 }
@@ -66,11 +61,9 @@ const val LOG_TAG = "Fluyer"
 )
 class FluyerPlugin(val activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
-    private val player = FluyerPlayer(activity)
     private var pickFolderChannel: Channel? = null
 
     override fun load(webView: WebView) {
-        player.initialize()
         FluyerMetadata.initialize(activity)
         super.load(webView)
     }
@@ -92,15 +85,6 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
     fun getStatusBarHeight(invoke: Invoke){
         val obj = JSObject().put("value", implementation.getStatusBarHeight())
         invoke.resolve(obj)
-    }
-
-    @Command
-    fun watchPlaylistChange(invoke: Invoke) {
-        val args = invoke.parseArgs(PlaylistChangeWatcherArgs::class.java)
-        player.listenPlaylistChange {
-            args.channel.send(JSObject().put("isNext", it))
-        }
-        invoke.resolve(JSObject().put("value", true))
     }
     
     @Command
@@ -129,54 +113,6 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
                 activity.window.decorView.systemUiVisibility =
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
             }
-        }
-        invoke.resolve()
-    }
-    
-    @Command
-    fun playerRunCommand(invoke: Invoke) {
-        try {
-            val args = invoke.parseArgs(PlayerCommandArgs::class.java)
-            player.sendCommand(args)
-        } catch (err: Exception){
-            Log.e(LOG_TAG, err.toString())
-        }
-        invoke.resolve()
-    }
-
-    @Command
-    fun playerGetInfo(invoke: Invoke){
-        try {
-            val info = player.getInfo()
-            invoke.resolve(JSObject()
-                .put("currentPosition", info.currentPosition)
-                .put("isEmpty", info.isEmpty)
-                .put("isPlaying", info.isPlaying)
-                .put("index", info.index)
-            )
-        } catch (err: Exception){
-            Log.e(LOG_TAG, err.toString())
-        }
-    }
-
-    @Command
-    fun playerPlaylistAdd(invoke: Invoke) {
-        try {
-            val args = invoke.parseArgs(PlayerPlaylistAddArgs::class.java)
-            player.addPlaylist(args.playlist)
-        } catch (err: Exception){
-            Log.e(LOG_TAG, err.toString())
-        }
-        invoke.resolve()
-    }
-
-    @Command
-    fun playerPlaylistMoveTo(invoke: Invoke) {
-        try {
-            val args = invoke.parseArgs(PlayerPlaylistMoveToArgs::class.java)
-            player.playlistMoveTo(args.from, args.to)
-        } catch (err: Exception){
-            Log.e(LOG_TAG, err.toString())
         }
         invoke.resolve()
     }

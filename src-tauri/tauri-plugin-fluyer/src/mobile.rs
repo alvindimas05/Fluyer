@@ -68,64 +68,9 @@ impl<R: Runtime> Fluyer<R> {
             .map_err(Into::into)
     }
 
-    pub fn watch_playlist_change<F: Fn(WatcherPlaylistChange) + Send + Sync + 'static>(
-        &self,
-        callback: F,
-    ) -> crate::Result<WatchPlaylistChangeResponse> {
-        let channel = Channel::new(move |event| {
-            let payload = match event {
-                InvokeResponseBody::Json(payload) => {
-                    serde_json::from_str::<WatcherPlaylistChange>(&payload).unwrap()
-                }
-                _ => panic!("Failed to parse WatcherPlaylistChange payload"),
-            };
-
-            callback(payload);
-
-            Ok(())
-        });
-        self.watch_playlist_change_inner(channel)
-    }
-
-    pub(crate) fn watch_playlist_change_inner(
-        &self,
-        channel: Channel,
-    ) -> crate::Result<WatchPlaylistChangeResponse> {
-        self.0
-            .run_mobile_plugin(
-                "watchPlaylistChange",
-                WatchPlaylistChangePayload { channel },
-            )
-            .map_err(Into::into)
-    }
-
     pub fn restart_app(&self) -> crate::Result<()> {
         self.0
             .run_mobile_plugin("restartApp", ())
-            .map_err(Into::into)
-    }
-
-    pub fn player_run_command(&self, args: PlayerCommandArguments) -> crate::Result<()> {
-        self.0
-            .run_mobile_plugin("playerRunCommand", args)
-            .map_err(Into::into)
-    }
-
-    pub fn player_get_info(&self) -> crate::Result<PlayerGetInfo> {
-        self.0
-            .run_mobile_plugin("playerGetInfo", ())
-            .map_err(Into::into)
-    }
-
-    pub fn player_playlist_add(&self, playlist: Vec<PlaylistAddMusic>) -> crate::Result<()> {
-        self.0
-            .run_mobile_plugin("playerPlaylistAdd", PlayerPlaylistAdd { playlist })
-            .map_err(Into::into)
-    }
-
-    pub fn player_playlist_move_to(&self, from: usize, to: usize) -> crate::Result<()> {
-        self.0
-            .run_mobile_plugin("playerPlaylistMoveTo", PlaylistMoveTo { from, to })
             .map_err(Into::into)
     }
 
@@ -189,11 +134,6 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("metadataGetImage", MetadataGetArgs { path })
             .map_err(Into::into)
     }
-}
-
-#[derive(Serialize)]
-struct WatchPlaylistChangePayload {
-    pub channel: Channel,
 }
 
 #[derive(Serialize)]
