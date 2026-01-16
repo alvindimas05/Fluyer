@@ -1,1 +1,1 @@
-export type GlassShineSize = "sm" | "md";
+export type GlassShineSize = 'sm' | 'md';

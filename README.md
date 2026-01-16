@@ -39,15 +39,19 @@
 > Supported Platforms: <b>Windows, macOS, Android, Ubuntu/Debian, Arch Linux.</b>
 
 Download and install the latest version by clicking the button below.
+
 ### [Go to Latest Release](https://github.com/alvindimas05/Fluyer/releases/latest)
 
 ### Arch Linux
 
 If you have `yay` installed, You can install from the AUR with the following command:
+
 ```bash
 yay -S fluyer
 ```
+
 If you don't have `yay` installed, you can install from the [Fluyer AUR Page](https://aur.archlinux.org/packages/fluyer/) and run the following command:
+
 ```bash
 git clone https://aur.archlinux.org/fluyer.git
 cd fluyer
@@ -64,11 +68,13 @@ makepkg -si
 > 🔐 The app is **not notarized** due to Apple Developer fees. macOS will warn that Fluyer “cannot be verified.” This is expected and harmless.
 
 #### macOS 14 (Sonoma) and below:
+
 1. Right-click `Fluyer.app`
 2. Select **Open**
 3. Confirm again in the dialog
 
 #### macOS 15 (Sequoia) and above:
+
 1. Open the app — it will be blocked
 2. Go to `System Settings > Privacy & Security`
 3. Scroll down and click **Open Anyway**

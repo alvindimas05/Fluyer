@@ -23,7 +23,8 @@ pub fn is_mobile() -> bool {
 }
 
 pub fn init() {
-    #[cfg(target_os = "linux")]{
+    #[cfg(target_os = "linux")]
+    {
         // Set chromium as the webview backend
         std::env::set_var("WRY_WEBVIEW_BACKEND", "chromium");
         std::env::set_var("TAURI_WEBVIEW_BACKEND", "chromium");
@@ -34,7 +35,10 @@ pub fn init() {
         std::env::set_var("WEBKIT_FORCE_HARDWARE_ACCELERATION", "1");
 
         // Chromium detection flags
-        std::env::set_var("CHROME_DEVEL_SANDBOX", "/usr/lib/chromium-browser/chrome-sandbox");
+        std::env::set_var(
+            "CHROME_DEVEL_SANDBOX",
+            "/usr/lib/chromium-browser/chrome-sandbox",
+        );
         std::env::set_var("CHROME_WRAPPER", "/usr/bin/chromium-browser");
     }
 }

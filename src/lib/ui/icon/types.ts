@@ -1,7 +1,7 @@
 export enum IconThemeType {
-	Phosphor = "Phosphor",
-	Lucide = "Lucide",
-	Material = "Material",
+	Phosphor = 'Phosphor',
+	Lucide = 'Lucide',
+	Material = 'Material'
 }
 
 export enum IconType {
@@ -39,8 +39,8 @@ export enum IconType {
 	Folder,
 	SortAsc,
 	SortDesc,
-    MusicListTypeAll,
-    MusicListTypeAlbum,
-    MusicListTypeMusic,
-    MusicListTypeFolder,
+	MusicListTypeAll,
+	MusicListTypeAlbum,
+	MusicListTypeMusic,
+	MusicListTypeFolder
 }

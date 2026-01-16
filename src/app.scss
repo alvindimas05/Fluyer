@@ -2,14 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "lib/scss/scrollbar";
-@import "lib/scss/text-opacity-background";
-@import "lib/scss/backdrop";
-@import "lib/scss/toast";
-@import "lib/scss/show-then-fade";
+@import 'lib/scss/scrollbar';
+@import 'lib/scss/text-opacity-background';
+@import 'lib/scss/backdrop';
+@import 'lib/scss/toast';
+@import 'lib/scss/show-then-fade';
 
 * {
-    -webkit-user-select: none;
-    user-select: none;
-    @apply text-white;
+	-webkit-user-select: none;
+	user-select: none;
+	@apply text-white;
 }

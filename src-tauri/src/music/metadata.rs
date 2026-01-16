@@ -334,9 +334,7 @@ impl MusicMetadata {
 
     /// Extract cover art using FFmpegKit on Android
     #[cfg(target_os = "android")]
-    pub async fn get_image_from_path_android(
-        path: String,
-    ) -> Result<Vec<u8>, String> {
+    pub async fn get_image_from_path_android(path: String) -> Result<Vec<u8>, String> {
         tokio::task::spawn_blocking(move || {
             let result = app_handle()
                 .fluyer()

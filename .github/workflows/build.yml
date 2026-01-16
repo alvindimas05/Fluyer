@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       platforms:
-        description: "Select platforms to build"
+        description: 'Select platforms to build'
         required: true
         type: choice
         options:
@@ -18,8 +18,8 @@ on:
           # - "android-i686"
           # - "android-x86_64"
           # - "ios"
-          - "all"
-        default: "all"
+          - 'all'
+        default: 'all'
 
 env:
   RUST_BACKTRACE: 1

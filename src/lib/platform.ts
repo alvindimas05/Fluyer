@@ -1,11 +1,11 @@
-import { platform } from "@tauri-apps/plugin-os";
+import { platform } from '@tauri-apps/plugin-os';
 
 export function isAndroid(): boolean {
-	return platform() == "android";
+	return platform() == 'android';
 }
 
 export function isIos(): boolean {
-	return platform() == "ios";
+	return platform() == 'ios';
 }
 
 export function isMobile(): boolean {
@@ -17,13 +17,13 @@ export function isDesktop(): boolean {
 }
 
 export function isMacos(): boolean {
-	return platform() == "macos";
+	return platform() == 'macos';
 }
 
 export function isWindows(): boolean {
-	return platform() == "windows";
+	return platform() == 'windows';
 }
 
 export function isLinux(): boolean {
-	return platform() == "linux";
+	return platform() == 'linux';
 }

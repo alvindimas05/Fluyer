@@ -1,11 +1,11 @@
-import * as THREE from "three";
-import View from "$lib/features/visualizers/vissonance/View";
-import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
-import Spectrum from "$lib/features/visualizers/vissonance/Spectrum";
-import Visualizer from "$lib/features/visualizers/vissonance/visualizers/Visualizer";
+import * as THREE from 'three';
+import View from '$lib/features/visualizers/vissonance/View';
+import AudioAnalyser from '$lib/features/visualizers/vissonance/AudioAnalyser';
+import Spectrum from '$lib/features/visualizers/vissonance/Spectrum';
+import Visualizer from '$lib/features/visualizers/vissonance/visualizers/Visualizer';
 
 class Silk extends Visualizer {
-	name = "Silk";
+	name = 'Silk';
 	// @ts-ignore
 	group2: THREE.Object3D;
 	// @ts-ignore
@@ -22,21 +22,19 @@ class Silk extends Visualizer {
 
 	barGap = 0.12;
 	vertexShader = [
-		"void main() {",
-		"gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-		"}",
-	].join("\n");
+		'void main() {',
+		'gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+		'}'
+	].join('\n');
 	fragmentShader = [
-		"uniform vec3 col;",
-		"void main() {",
-		"gl_FragColor = vec4( col.r, col.g, col.b, 1.0 );",
-		"}",
-	].join("\n");
-	bgfragmentShader = [
-		"void main() {",
-		"gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );",
-		"}",
-	].join("\n");
+		'uniform vec3 col;',
+		'void main() {',
+		'gl_FragColor = vec4( col.r, col.g, col.b, 1.0 );',
+		'}'
+	].join('\n');
+	bgfragmentShader = ['void main() {', 'gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );', '}'].join(
+		'\n'
+	);
 
 	async make() {
 		await super.make();
@@ -54,7 +52,7 @@ class Silk extends Visualizer {
 
 		View.data.renderer = new THREE.WebGLRenderer({
 			alpha: true,
-			preserveDrawingBuffer: true,
+			preserveDrawingBuffer: true
 		});
 		View.data.renderer.setPixelRatio(window.devicePixelRatio);
 		View.data.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -69,13 +67,13 @@ class Silk extends Visualizer {
 		for (let i = 0; i < this.numBars; i++) {
 			this.geometry = new THREE.CircleGeometry(10, 6);
 			this.uniforms = {
-				col: { type: "c", value: new THREE.Color("hsl(240, 100%, 50%)") },
+				col: { type: 'c', value: new THREE.Color('hsl(240, 100%, 50%)') }
 			};
 			const material = new THREE.ShaderMaterial({
 				uniforms: this.uniforms,
 				vertexShader: this.vertexShader,
 				fragmentShader: this.fragmentShader,
-				side: THREE.DoubleSide,
+				side: THREE.DoubleSide
 			});
 
 			//material = new THREE.MeshBasicMaterial( {wireframe: true} );
@@ -126,7 +124,7 @@ class Silk extends Visualizer {
 			vertexShader: this.vertexShader,
 			fragmentShader: this.bgfragmentShader,
 			transparent: true,
-			depthWrite: false,
+			depthWrite: false
 		});
 
 		//material = new THREE.MeshBasicMaterial( {wireframe: true} );
@@ -178,12 +176,7 @@ class Silk extends Visualizer {
 	}
 	render() {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);
-		let visualArray = Spectrum.getVisualBins(
-			this.dataArray,
-			this.numBars,
-			6,
-			1300,
-		);
+		let visualArray = Spectrum.getVisualBins(this.dataArray, this.numBars, 6, 1300);
 		//visualArray.reverse();
 		let loudness = this.getLoudness(this.dataArray);
 		//smooth loudness
@@ -191,61 +184,37 @@ class Silk extends Visualizer {
 		if (!this.group) return;
 		for (let i = 0; i < visualArray.length; i++) {
 			this.group.children[i].children[0].scale.x =
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 			this.group.children[i].children[0].scale.y =
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 
 			this.group2.children[i].children[0].scale.x =
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 			this.group2.children[i].children[0].scale.y =
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 
 			this.group3.children[i].children[0].scale.x =
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 			this.group3.children[i].children[0].scale.y =
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 
 			this.group4.children[i].children[0].scale.x =
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 			this.group4.children[i].children[0].scale.y =
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 			//
 
 			this.group.children[i].position.y +=
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 
 			this.group2.children[i].position.y +=
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 
 			this.group3.children[i].position.y -=
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 
 			this.group4.children[i].position.y -=
-				visualArray[i] <= 1
-					? 0.0001
-					: 4 * Math.log10(1 + visualArray[i] / 255 / 7);
+				visualArray[i] <= 1 ? 0.0001 : 4 * Math.log10(1 + visualArray[i] / 255 / 7);
 
 			//
 			if (this.group.children[i].position.y > 30 || loudness <= 1) {
@@ -271,10 +240,9 @@ class Silk extends Visualizer {
 	setUniformColor(groupI: number, loudness: number) {
 		const h = this.modn(250 - loudness * 0.9, 360);
 		//Just once since they share materials
-		this.group.children[groupI].children[0].material.uniforms.col.value =
-			new THREE.Color(
-				"hsl(" + h + ", 90%, " + (100 - Math.min(40, loudness)) + "%)",
-			);
+		this.group.children[groupI].children[0].material.uniforms.col.value = new THREE.Color(
+			'hsl(' + h + ', 90%, ' + (100 - Math.min(40, loudness)) + '%)'
+		);
 	}
 }
 

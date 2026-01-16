@@ -1,50 +1,50 @@
 export interface MusicData {
-    id: number;
-    path: string;
-    filename: string;
-    duration: number;
+	id: number;
+	path: string;
+	filename: string;
+	duration: number;
 
-    title?: string;
-    artist?: string;
-    album?: string;
-    albumArtist?: string;
-    trackNumber?: string;
-    image?: string;
-    bitsPerSample?: number;
-    sampleRate?: number;
-    genre?: string;
-    date?: string;
+	title?: string;
+	artist?: string;
+	album?: string;
+	albumArtist?: string;
+	trackNumber?: string;
+	image?: string;
+	bitsPerSample?: number;
+	sampleRate?: number;
+	genre?: string;
+	date?: string;
 }
 
 export interface AlbumData {
-    name: string;
-    artist: string;
-    year: string;
-    duration: string;
-    musicList: MusicData[];
+	name: string;
+	artist: string;
+	year: string;
+	duration: string;
+	musicList: MusicData[];
 }
 
 export interface FolderData {
-    path: string;
+	path: string;
 }
 
 export interface MusicPlayerSync {
-    index: number;
-    currentPosition: number;
-    isPlaying: boolean;
-    duration: number;
+	index: number;
+	currentPosition: number;
+	isPlaying: boolean;
+	duration: number;
 }
 
 export enum RepeatMode {
-    None = "repeatNone",
-    One = "repeatOne",
-    All = "repeat",
+	None = 'repeatNone',
+	One = 'repeatOne',
+	All = 'repeat'
 }
 
 export enum MusicListType {
-    All = "all",
-    Folder = "folder",
-    Album = "album",
-    Music = "music",
-    Playlist = "playlist",
+	All = 'all',
+	Folder = 'folder',
+	Album = 'album',
+	Music = 'music',
+	Playlist = 'playlist'
 }

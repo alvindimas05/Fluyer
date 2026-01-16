@@ -12,7 +12,10 @@
 		"import": "./dist-js/index.js",
 		"require": "./dist-js/index.cjs"
 	},
-	"files": ["dist-js", "README.md"],
+	"files": [
+		"dist-js",
+		"README.md"
+	],
 	"scripts": {
 		"build": "rollup -c",
 		"prepublishOnly": "bun build",

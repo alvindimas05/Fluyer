@@ -1,5 +1,3 @@
-const TauriFolderAPI = {
-
-};
+const TauriFolderAPI = {};
 
 export default TauriFolderAPI;

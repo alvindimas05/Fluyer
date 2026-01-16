@@ -1,10 +1,10 @@
 {
-    "bundle": {
-        "resources": {
-            "./libs/ffmpeg/bin/": "",
-            "./libs/bass.dll": "bass.dll",
-            "./libs/bassflac.dll": "bassflac.dll",
-            "./libs/bassmix.dll": "bassmix.dll"
-        }
-    }
+	"bundle": {
+		"resources": {
+			"./libs/ffmpeg/bin/": "",
+			"./libs/bass.dll": "bass.dll",
+			"./libs/bassflac.dll": "bassflac.dll",
+			"./libs/bassmix.dll": "bassmix.dll"
+		}
+	}
 }

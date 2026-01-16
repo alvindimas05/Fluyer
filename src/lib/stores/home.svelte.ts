@@ -1,6 +1,6 @@
 const homeStore = $state({
-    showLibrary: true,
-    showSettings: false,
+	showLibrary: true,
+	showSettings: false
 });
 
 export default homeStore;

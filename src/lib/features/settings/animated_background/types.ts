@@ -1,4 +1,4 @@
 export enum SettingAnimatedBackgroundType {
-	Pallete = "Pallete",
-	Prominent = "Prominent",
+	Pallete = 'Pallete',
+	Prominent = 'Prominent'
 }

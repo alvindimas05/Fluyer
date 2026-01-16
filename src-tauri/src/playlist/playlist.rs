@@ -1,6 +1,6 @@
+use crate::database::database::GLOBAL_DATABASE;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
-use crate::database::database::GLOBAL_DATABASE;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -15,9 +15,7 @@ impl Playlist {
         let conn = conn_guard.as_mut().unwrap();
         let tx = conn.transaction().unwrap();
 
-        let mut stmt = tx
-            .prepare("SELECT id, name FROM playlists")
-            .unwrap();
+        let mut stmt = tx.prepare("SELECT id, name FROM playlists").unwrap();
 
         let playlist_rows = stmt
             .query_map(params![], |row| {
@@ -35,7 +33,7 @@ impl Playlist {
                     "SELECT music_id, position 
                      FROM playlist_musics 
                      WHERE playlist_id = ?1 
-                     ORDER BY position ASC"
+                     ORDER BY position ASC",
                 )
                 .unwrap();
 
@@ -43,7 +41,7 @@ impl Playlist {
                 .query_map(params![playlist_id], |row| {
                     Ok((
                         row.get::<_, i64>(0)?, // music_id
-                        row.get::<_, i64>(1)?  // position
+                        row.get::<_, i64>(1)?, // position
                     ))
                 })
                 .unwrap()

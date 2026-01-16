@@ -1,7 +1,7 @@
 export const PageRoutes = {
-	HOME: "/",
-	HOME_PRODUCTION: "",
-	PLAY: "/play",
-	SETTINGS: "/settings",
-	VISUALIZER: "/visualizer",
+	HOME: '/',
+	HOME_PRODUCTION: '',
+	PLAY: '/play',
+	SETTINGS: '/settings',
+	VISUALIZER: '/visualizer'
 };

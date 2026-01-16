@@ -1,9 +1,9 @@
-import * as THREE from "three";
-import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
-import View from "$lib/features/visualizers/vissonance/View";
+import * as THREE from 'three';
+import AudioAnalyser from '$lib/features/visualizers/vissonance/AudioAnalyser';
+import View from '$lib/features/visualizers/vissonance/View';
 
 class Visualizer {
-	name = "Visualizer";
+	name = 'Visualizer';
 	// @ts-ignore
 	group: THREE.Object3D;
 	// @ts-ignore
@@ -12,8 +12,8 @@ class Visualizer {
 	numBands = 64;
 	barLen = 150;
 	barGap = 10;
-	vertexShader = "";
-	fragmentShader = "";
+	vertexShader = '';
+	fragmentShader = '';
 	lastLoudness = 0;
 
 	async make() {
@@ -23,7 +23,7 @@ class Visualizer {
 		AudioAnalyser.data.analyser.fftSize = 4096;
 
 		View.data.renderer.autoClearColor = true;
-		View.data.renderer.setClearColor(new THREE.Color("hsl( 0, 0%, 0%)"), 1);
+		View.data.renderer.setClearColor(new THREE.Color('hsl( 0, 0%, 0%)'), 1);
 	}
 	destroy() {}
 	render() {}
@@ -39,7 +39,7 @@ class Visualizer {
 
 		const textureLoader = new THREE.TextureLoader(manager);
 		try {
-			textureLoader.load("/textures/placeholder.jpg");
+			textureLoader.load('/textures/placeholder.jpg');
 		} catch (e) {}
 		return onLoad;
 	}
@@ -47,7 +47,7 @@ class Visualizer {
 	setUniformColor(groupI: number, loudness: number) {
 		let h = this.modn(250 - loudness * 2.2, 360);
 		this.group.children[groupI].material.uniforms.col.value = new THREE.Color(
-			`hsl(${h}, 100%, 50%)`,
+			`hsl(${h}, 100%, 50%)`
 		);
 	}
 

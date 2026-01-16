@@ -1,21 +1,21 @@
-import * as THREE from "three";
-import View from "$lib/features/visualizers/vissonance/View";
-import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
-import Spectrum from "$lib/features/visualizers/vissonance/Spectrum";
-import Visualizer from "$lib/features/visualizers/vissonance/visualizers/Visualizer";
+import * as THREE from 'three';
+import View from '$lib/features/visualizers/vissonance/View';
+import AudioAnalyser from '$lib/features/visualizers/vissonance/AudioAnalyser';
+import Spectrum from '$lib/features/visualizers/vissonance/Spectrum';
+import Visualizer from '$lib/features/visualizers/vissonance/visualizers/Visualizer';
 
 class Barred extends Visualizer {
-	name = "Barred";
+	name = 'Barred';
 	vertexShader = [
-		"void main() {",
-		"gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-		"}",
-	].join("\n");
+		'void main() {',
+		'gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+		'}'
+	].join('\n');
 	fragmentShader = [
-		"void main() {",
-		"gl_FragColor = vec4( gl_FragCoord.y/500.0, 0, gl_FragCoord.y/1000.0, 1.0 );",
-		"}",
-	].join("\n");
+		'void main() {',
+		'gl_FragColor = vec4( gl_FragCoord.y/500.0, 0, gl_FragCoord.y/1000.0, 1.0 );',
+		'}'
+	].join('\n');
 
 	async make() {
 		super.make();
@@ -30,7 +30,7 @@ class Barred extends Visualizer {
 			let material = new THREE.ShaderMaterial({
 				uniforms: uniforms,
 				vertexShader: this.vertexShader,
-				fragmentShader: this.fragmentShader,
+				fragmentShader: this.fragmentShader
 			});
 			let plane = new THREE.Mesh(geometry, material);
 			plane.position.x = positionX;
@@ -48,18 +48,11 @@ class Barred extends Visualizer {
 	}
 	render() {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);
-		const visualArray = Spectrum.getVisualBins(
-			this.dataArray,
-			this.numBars,
-			4,
-			1300,
-		);
+		const visualArray = Spectrum.getVisualBins(this.dataArray, this.numBars, 4, 1300);
 		if (!this.group) return;
 		for (var i = 0; i < visualArray.length; i++) {
-			this.group.children[i].geometry.attributes.position.array[1] =
-				visualArray[i];
-			this.group.children[i].geometry.attributes.position.array[4] =
-				visualArray[i];
+			this.group.children[i].geometry.attributes.position.array[1] = visualArray[i];
+			this.group.children[i].geometry.attributes.position.array[4] = visualArray[i];
 			this.group.children[i].geometry.attributes.position.needsUpdate = true;
 		}
 	}

@@ -1,4 +1,4 @@
-import { IconType } from "$lib/ui/icon/types";
+import { IconType } from '$lib/ui/icon/types';
 import {
 	Undo2,
 	BrushCleaning,
@@ -27,8 +27,10 @@ import {
 	ChartNoAxesColumn,
 	Folder,
 	ChevronDown,
-	ChevronUp, Grid2x2Icon, DiscAlbum
-} from "@lucide/svelte";
+	ChevronUp,
+	Grid2x2Icon,
+	DiscAlbum
+} from '@lucide/svelte';
 
 const iconRegistryLucide = {
 	[IconType.Unknown]: HelpCircle,
@@ -67,7 +69,7 @@ const iconRegistryLucide = {
 	[IconType.MusicListTypeAll]: Grid2x2Icon,
 	[IconType.MusicListTypeAlbum]: DiscAlbum,
 	[IconType.MusicListTypeMusic]: Music2,
-	[IconType.MusicListTypeFolder]: Folder,
+	[IconType.MusicListTypeFolder]: Folder
 };
 
 export default iconRegistryLucide;

@@ -1,6 +1,6 @@
-import type { MusicData } from "$lib/features/music/types";
-import axios from "axios";
-import {MusicConfig} from "$lib/constants/MusicConfig";
+import type { MusicData } from '$lib/features/music/types';
+import axios from 'axios';
+import { MusicConfig } from '$lib/constants/MusicConfig';
 
 interface LrcLibResult {
 	name: string;
@@ -16,8 +16,8 @@ const LrcLib = {
 	normalizeString: (str: string): string => {
 		return str
 			.toLowerCase()
-			.replace(/[^\w\s]/g, "") // Remove punctuation
-			.replace(/\s+/g, " ") // Normalize whitespace
+			.replace(/[^\w\s]/g, '') // Remove punctuation
+			.replace(/\s+/g, ' ') // Normalize whitespace
 			.trim();
 	},
 
@@ -46,7 +46,7 @@ const LrcLib = {
 				matrix[j][i] = Math.min(
 					matrix[j][i - 1] + 1, // deletion
 					matrix[j - 1][i] + 1, // insertion
-					matrix[j - 1][i - 1] + indicator, // substitution
+					matrix[j - 1][i - 1] + indicator // substitution
 				);
 			}
 		}
@@ -61,7 +61,7 @@ const LrcLib = {
 		// Title matching (weight: 0.4)
 		const titleSimilarity = LrcLib.calculateSimilarity(
 			LrcLib.normalizeString(result.name),
-			LrcLib.normalizeString(music.title || ""),
+			LrcLib.normalizeString(music.title || '')
 		);
 		score += titleSimilarity * 0.4;
 
@@ -69,18 +69,14 @@ const LrcLib = {
 		if (music.artist && result.artistName) {
 			const artistSimilarity = LrcLib.calculateSimilarity(
 				LrcLib.normalizeString(result.artistName),
-				LrcLib.normalizeString(
-					music.artist.split(MusicConfig.artistSeparator)[0],
-				),
+				LrcLib.normalizeString(music.artist.split(MusicConfig.artistSeparator)[0])
 			);
 			score += artistSimilarity * 0.3;
 		}
 
 		// STRICT Duration matching (weight: 0.3)
 		if (music.duration && result.duration) {
-			const durationDiff = Math.abs(
-				result.duration - Math.floor(music.duration / 1000),
-			);
+			const durationDiff = Math.abs(result.duration - Math.floor(music.duration / 1000));
 
 			// Only allow ±5 seconds tolerance
 			if (durationDiff <= 5) {
@@ -99,9 +95,7 @@ const LrcLib = {
 	scoreResultUltraStrict: (result: LrcLibResult, music: MusicData): number => {
 		// First check: duration must be within ±3 seconds or reject immediately
 		if (music.duration && result.duration) {
-			const durationDiff = Math.abs(
-				result.duration - Math.floor(music.duration / 1000),
-			);
+			const durationDiff = Math.abs(result.duration - Math.floor(music.duration / 1000));
 			if (durationDiff > 3) {
 				return 0; // Reject immediately if duration is off by more than 3 seconds
 			}
@@ -112,7 +106,7 @@ const LrcLib = {
 		// Title matching (weight: 0.4)
 		const titleSimilarity = LrcLib.calculateSimilarity(
 			LrcLib.normalizeString(result.name),
-			LrcLib.normalizeString(music.title || ""),
+			LrcLib.normalizeString(music.title || '')
 		);
 		score += titleSimilarity * 0.4;
 
@@ -120,18 +114,14 @@ const LrcLib = {
 		if (music.artist && result.artistName) {
 			const artistSimilarity = LrcLib.calculateSimilarity(
 				LrcLib.normalizeString(result.artistName),
-				LrcLib.normalizeString(
-					music.artist.split(MusicConfig.artistSeparator)[0],
-				),
+				LrcLib.normalizeString(music.artist.split(MusicConfig.artistSeparator)[0])
 			);
 			score += artistSimilarity * 0.3;
 		}
 
 		// Duration matching (weight: 0.3) - only for fine-tuning since we already filtered
 		if (music.duration && result.duration) {
-			const durationDiff = Math.abs(
-				result.duration - Math.floor(music.duration / 1000),
-			);
+			const durationDiff = Math.abs(result.duration - Math.floor(music.duration / 1000));
 			const durationSimilarity = 1 - durationDiff / 3; // Perfect match = 1, 3s diff = 0
 			score += durationSimilarity * 0.3;
 		}
@@ -140,16 +130,13 @@ const LrcLib = {
 	},
 
 	// Option 3: Exponential penalty for duration differences
-	scoreResultExponentialPenalty: (
-		result: LrcLibResult,
-		music: MusicData,
-	): number => {
+	scoreResultExponentialPenalty: (result: LrcLibResult, music: MusicData): number => {
 		let score = 0;
 
 		// Title matching (weight: 0.4)
 		const titleSimilarity = LrcLib.calculateSimilarity(
 			LrcLib.normalizeString(result.name),
-			LrcLib.normalizeString(music.title || ""),
+			LrcLib.normalizeString(music.title || '')
 		);
 		score += titleSimilarity * 0.4;
 
@@ -157,18 +144,14 @@ const LrcLib = {
 		if (music.artist && result.artistName) {
 			const artistSimilarity = LrcLib.calculateSimilarity(
 				LrcLib.normalizeString(result.artistName),
-				LrcLib.normalizeString(
-					music.artist.split(MusicConfig.artistSeparator)[0],
-				),
+				LrcLib.normalizeString(music.artist.split(MusicConfig.artistSeparator)[0])
 			);
 			score += artistSimilarity * 0.3;
 		}
 
 		// EXPONENTIAL Duration penalty (weight: 0.3)
 		if (music.duration && result.duration) {
-			const durationDiff = Math.abs(
-				result.duration - Math.floor(music.duration / 1000),
-			);
+			const durationDiff = Math.abs(result.duration - Math.floor(music.duration / 1000));
 
 			// Exponential decay: perfect match = 1, each second reduces score exponentially
 			const durationSimilarity = Math.exp(-durationDiff / 3); // e^(-diff/3)
@@ -190,13 +173,13 @@ const LrcLib = {
 			// Prepare search queries - try multiple approaches
 			const searchQueries = [
 				// Primary query: title + primary artist
-				`${music.title} ${music.artist ? music.artist.split(MusicConfig.artistSeparator)[0] : ""}`.trim(),
+				`${music.title} ${music.artist ? music.artist.split(MusicConfig.artistSeparator)[0] : ''}`.trim(),
 				// Fallback: just title
 				music.title,
 				// If artist has multiple parts, try with full artist name
 				...(music.artist && music.artist.includes(MusicConfig.artistSeparator)
 					? [`${music.title} ${music.artist}`]
-					: []),
+					: [])
 			];
 
 			let bestResults: LrcLibResult[] = [];
@@ -204,8 +187,8 @@ const LrcLib = {
 			// Try each search query
 			for (const query of searchQueries) {
 				try {
-					const url = new URL("https://lrclib.net/api/search");
-					url.searchParams.append("q", query);
+					const url = new URL('https://lrclib.net/api/search');
+					url.searchParams.append('q', query);
 
 					const res = await axios.get<LrcLibResult[]>(url.toString());
 
@@ -228,52 +211,49 @@ const LrcLib = {
 					self.findIndex(
 						(r) =>
 							r.name.toLowerCase() === result.name.toLowerCase() &&
-							r.artistName.toLowerCase() === result.artistName.toLowerCase(),
-					),
+							r.artistName.toLowerCase() === result.artistName.toLowerCase()
+					)
 			);
 
 			// Score and sort results
 			const scoredResults = uniqueResults
 				.map((result) => ({
 					result,
-					score: LrcLib.scoreResultUltraStrict(result, music),
+					score: LrcLib.scoreResultUltraStrict(result, music)
 				}))
 				.filter(
 					({ score, result }) =>
 						score > 0.4 && // Minimum similarity threshold
-						result.syncedLyrics, // Must have synced lyrics
+						result.syncedLyrics // Must have synced lyrics
 				)
 				.sort((a, b) => b.score - a.score);
 
 			// Return the best match
 			if (scoredResults.length > 0) {
-				console.log(
-					`Found lyrics with confidence score: ${scoredResults[0].score.toFixed(2)}`,
-				);
+				console.log(`Found lyrics with confidence score: ${scoredResults[0].score.toFixed(2)}`);
 				return scoredResults[0].result.syncedLyrics;
 			}
 
 			return null;
 		} catch (err) {
-			console.error("Error fetching lyrics:", err);
+			console.error('Error fetching lyrics:', err);
 			return null;
 		}
 	},
 
 	// Alternative method for exact search when you have precise metadata
-    getExactLyrics: async (
+	getExactLyrics: async (
 		title: string,
 		artist: string,
 		album?: string,
-		duration?: number,
+		duration?: number
 	): Promise<string | null> => {
 		try {
-			const url = new URL("https://lrclib.net/api/get");
-			url.searchParams.append("artist_name", artist);
-			url.searchParams.append("track_name", title);
-			if (album) url.searchParams.append("album_name", album);
-			if (duration)
-				url.searchParams.append("duration", Math.floor(duration).toString());
+			const url = new URL('https://lrclib.net/api/get');
+			url.searchParams.append('artist_name', artist);
+			url.searchParams.append('track_name', title);
+			if (album) url.searchParams.append('album_name', album);
+			if (duration) url.searchParams.append('duration', Math.floor(duration).toString());
 
 			const res = await axios.get<LrcLibResult>(url.toString());
 			return res.data?.syncedLyrics || null;
@@ -281,7 +261,7 @@ const LrcLib = {
 			// Fallback to search if exact match fails
 			return null;
 		}
-	},
+	}
 };
 
 export default LrcLib;

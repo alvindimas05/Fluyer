@@ -1,7 +1,8 @@
 use rusqlite_migration::{Migrations, M};
 
 pub const MIGRATIONS_SLICE: &[M<'_>] = &[
-    M::up("
+    M::up(
+        "
     CREATE TABLE musics (
         id INTEGER PRIMARY KEY,
         path TEXT NOT NULL,
@@ -17,9 +18,10 @@ pub const MIGRATIONS_SLICE: &[M<'_>] = &[
         bits_per_sample INTEGER,
         sample_rate INTEGER,
         modified_at TEXT NOT NULL
-    )"),
-
-    M::up("
+    )",
+    ),
+    M::up(
+        "
     CREATE TABLE playlists (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
@@ -41,6 +43,7 @@ pub const MIGRATIONS_SLICE: &[M<'_>] = &[
         FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
         FOREIGN KEY (music_id) REFERENCES musics(id) ON DELETE CASCADE
     );
-    ")
+    ",
+    ),
 ];
 pub const DATABASE_MIGRATIONS: Migrations<'_> = Migrations::from_slice(MIGRATIONS_SLICE);

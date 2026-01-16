@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 interface ViewDataInterface {
 	camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
@@ -13,15 +13,15 @@ const View = {
 	data: {} as ViewDataInterface,
 	initialize: (container: HTMLElement) => {
 		View.data.container = container;
-		View.data.container.style.width = "100%";
-		View.data.container.style.height = "100%";
+		View.data.container.style.width = '100%';
+		View.data.container.style.height = '100%';
 		View.data.camera = new THREE.OrthographicCamera(
 			window.innerWidth / -2,
 			window.innerWidth / 2,
 			window.innerHeight / 2,
 			window.innerHeight / -2,
 			1,
-			1000,
+			1000
 		);
 		View.data.camera.position.y = 150;
 		View.data.camera.position.z = 500;
@@ -35,7 +35,7 @@ const View = {
 		// Plane
 		View.data.renderer = new THREE.WebGLRenderer({
 			alpha: true,
-			preserveDrawingBuffer: true,
+			preserveDrawingBuffer: true
 		});
 		View.data.renderer.setPixelRatio(window.devicePixelRatio);
 		View.data.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -46,7 +46,7 @@ const View = {
 			70,
 			window.innerWidth / window.innerHeight,
 			0.01,
-			2000,
+			2000
 		);
 		View.data.camera.position.y = 150;
 		View.data.camera.position.z = 500;
@@ -58,7 +58,7 @@ const View = {
 			window.innerHeight / 2,
 			window.innerHeight / -2,
 			1,
-			1000,
+			1000
 		);
 		View.data.camera.position.y = 150;
 		View.data.camera.position.z = 500;
@@ -85,7 +85,7 @@ const View = {
 	clear: () => {
 		View.data.scene = new THREE.Scene();
 		View.data.renderer.clear();
-	},
+	}
 };
 
 export default View;

@@ -1,6 +1,6 @@
+use crate::state::app_handle;
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
-use crate::state::app_handle;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,7 +20,14 @@ pub struct Toast {}
 
 impl Toast {
     pub fn show(message: String, toast_type: ToastType) {
-        app_handle().emit("toast",
-    ToastData { message, toast_type }).ok();
+        app_handle()
+            .emit(
+                "toast",
+                ToastData {
+                    message,
+                    toast_type,
+                },
+            )
+            .ok();
     }
 }

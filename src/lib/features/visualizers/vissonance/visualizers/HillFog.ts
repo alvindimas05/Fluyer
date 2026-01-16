@@ -1,25 +1,25 @@
-import * as THREE from "three";
-import View from "$lib/features/visualizers/vissonance/View";
-import AudioAnalyser from "$lib/features/visualizers/vissonance/AudioAnalyser";
-import Spectrum from "$lib/features/visualizers/vissonance/Spectrum";
-import Visualizer from "$lib/features/visualizers/vissonance/visualizers/Visualizer";
+import * as THREE from 'three';
+import View from '$lib/features/visualizers/vissonance/View';
+import AudioAnalyser from '$lib/features/visualizers/vissonance/AudioAnalyser';
+import Spectrum from '$lib/features/visualizers/vissonance/Spectrum';
+import Visualizer from '$lib/features/visualizers/vissonance/visualizers/Visualizer';
 
 class HillFog extends Visualizer {
-	name = "Hill Fog";
+	name = 'Hill Fog';
 	// @ts-ignore
 	geometry: THREE.PlaneGeometry;
 	// @ts-ignore
 	plane: THREE.Mesh;
 	vertexShader = [
-		"void main() {",
-		"gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-		"}",
-	].join("\n");
+		'void main() {',
+		'gl_Position = gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+		'}'
+	].join('\n');
 	fragmentShader = [
-		"void main() {",
-		"gl_FragColor = vec4( gl_FragCoord.y/500.0, 0, gl_FragCoord.y/1000.0, 1.0 );",
-		"}",
-	].join("\n");
+		'void main() {',
+		'gl_FragColor = vec4( gl_FragCoord.y/500.0, 0, gl_FragCoord.y/1000.0, 1.0 );',
+		'}'
+	].join('\n');
 
 	async make() {
 		await super.make();
@@ -29,7 +29,7 @@ class HillFog extends Visualizer {
 		this.geometry = new THREE.PlaneGeometry(900, 40, 127);
 		const material = new THREE.ShaderMaterial({
 			vertexShader: this.vertexShader,
-			fragmentShader: this.fragmentShader,
+			fragmentShader: this.fragmentShader
 		});
 		this.plane = new THREE.Mesh(this.geometry, material);
 		View.data.scene.add(this.plane);

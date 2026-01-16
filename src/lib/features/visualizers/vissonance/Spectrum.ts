@@ -7,7 +7,7 @@ const Spectrum = {
 		dataArray: Uint8Array,
 		numElements: number,
 		SpectrumStart: number,
-		SpectrumEnd: number,
+		SpectrumEnd: number
 	) => {
 		const SpectrumBarCount = numElements;
 		let SamplePoints = [];
@@ -15,8 +15,7 @@ const Spectrum = {
 		let LastSpot = 0;
 		for (let i = 0; i < SpectrumBarCount; i++) {
 			let Bin = Math.round(
-				Spectrum.ease(i / SpectrumBarCount) * (SpectrumEnd - SpectrumStart) +
-					SpectrumStart,
+				Spectrum.ease(i / SpectrumBarCount) * (SpectrumEnd - SpectrumStart) + SpectrumStart
 			);
 			if (Bin <= LastSpot) {
 				Bin = LastSpot + 1;
@@ -67,15 +66,11 @@ const Spectrum = {
 		let newArr = [];
 		for (let i = 0; i < array.length; i++) {
 			const exp =
-				spectrumMaxExponent +
-				(spectrumMinExponent - spectrumMaxExponent) * (i / array.length);
-			newArr[i] = Math.max(
-				Math.pow(array[i] / spectrumHeight, exp) * spectrumHeight,
-				1,
-			);
+				spectrumMaxExponent + (spectrumMinExponent - spectrumMaxExponent) * (i / array.length);
+			newArr[i] = Math.max(Math.pow(array[i] / spectrumHeight, exp) * spectrumHeight, 1);
 		}
 		return newArr;
-	},
+	}
 };
 
 export default Spectrum;

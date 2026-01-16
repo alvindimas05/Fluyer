@@ -8,10 +8,7 @@ pub const DATABASE_NAME: &str = "fluyer.db";
 pub static GLOBAL_DATABASE: Mutex<Option<Connection>> = Mutex::new(None);
 
 pub fn initialize_database() {
-    let app_data_dir = app_handle()
-        .path()
-        .app_data_dir()
-        .unwrap();
+    let app_data_dir = app_handle().path().app_data_dir().unwrap();
 
     // Create the directory if it doesn't exist
     std::fs::create_dir_all(&app_data_dir).unwrap();
