@@ -9,12 +9,12 @@ exclude = ["/node_modules"]
 links = "tauri-plugin-fluyer"
 
 [dependencies]
-tauri = { version = "2.5.0", features = ["specta"] }
-serde = "1.0"
+tauri = { version = "2.9.5", features = ["specta"] }
+serde = "1"
 thiserror = "2"
-serde_json = "1.0.133"
-specta = "=2.0.0-rc.20"
+serde_json = "1.0.149"
+specta = "=2.0.0-rc.22"
 
 [build-dependencies]
-tauri-plugin = { version = "2.2.0", features = ["build"] }
-tauri-build = "2.2.0"
+tauri-plugin = { version = "2.5.2", features = ["build"] }
+tauri-build = "2.5.3"
