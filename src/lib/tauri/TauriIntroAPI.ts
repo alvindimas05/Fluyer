@@ -5,7 +5,7 @@ import {listen} from "@tauri-apps/api/event";
 
 const TauriIntroAPI = {
     requestReadAudioPermission: async () => {
-        if(isAndroid()) return false;
+        if(!isAndroid()) return false;
         return await invoke<boolean>(
             CommandRoutes.REQUEST_READ_AUDIO_PERMISSION,
         );

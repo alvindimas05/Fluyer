@@ -27,7 +27,6 @@ pub fn request_read_audio_permission() -> bool {
     use tauri_plugin_fluyer::models::PermissionType;
 
     if !check_read_audio_permission() {
-        crate::info!("Requesting permissions");
         let permissions = app_handle()
             .fluyer()
             .request_permissions(Some(vec![
@@ -38,7 +37,6 @@ pub fn request_read_audio_permission() -> bool {
                 },
             ]))
             .unwrap();
-        crate::info!("Requesting permissions result: {:?}", permissions);
         return permissions.audio == PermissionState::Granted
             || permissions.storage == PermissionState::Granted;
     }
