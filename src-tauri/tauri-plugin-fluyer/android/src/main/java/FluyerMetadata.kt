@@ -31,43 +31,34 @@ object FluyerMetadata {
     
     fun getImage(path: String): String? {
         try {
-            // First check if the file has a video stream (cover art)
-            val probeSession = FFprobeKit.getMediaInformation(path)
-            val info = probeSession.mediaInformation ?: return null
-            
-            var hasVideoStream = false
-            for (stream in info.streams) {
-                if (stream.type == "video") {
-                    hasVideoStream = true
-                    break
-                }
-            }
-            
-            if (!hasVideoStream) {
-                return null
-            }
-            
-            // Create temp file for cover art
             val tempFile = File(cacheDir, "cover_${System.currentTimeMillis()}.jpg")
+            val result = java.util.concurrent.atomic.AtomicReference<String?>(null)
+            val latch = java.util.concurrent.CountDownLatch(1)
             
-            // Try to copy embedded image directly first
+            // Try to copy embedded image directly first (async)
             val copyArgs = "-i \"$path\" -an -c:v copy -vframes 1 -y \"${tempFile.absolutePath}\""
-            var session = FFmpegKit.execute(copyArgs)
-            
-            if (session.returnCode.value != ReturnCode.SUCCESS || !tempFile.exists() || tempFile.length() == 0L) {
-                // Fallback: re-encode as JPEG
-                tempFile.delete()
-                val encodeArgs = "-i \"$path\" -an -c:v mjpeg -vframes 1 -y \"${tempFile.absolutePath}\""
-                session = FFmpegKit.execute(encodeArgs)
-                
-                if (session.returnCode.value != ReturnCode.SUCCESS || !tempFile.exists() || tempFile.length() == 0L) {
+            FFmpegKit.executeAsync(copyArgs) { session ->
+                if (session.returnCode.value == ReturnCode.SUCCESS && tempFile.exists() && tempFile.length() > 0L) {
+                    result.set(tempFile.absolutePath)
+                    latch.countDown()
+                } else {
+                    // Fallback: re-encode as JPEG (async)
                     tempFile.delete()
-                    return null
+                    val encodeArgs = "-i \"$path\" -an -c:v mjpeg -vframes 1 -y \"${tempFile.absolutePath}\""
+                    FFmpegKit.executeAsync(encodeArgs) { fallbackSession ->
+                        if (fallbackSession.returnCode.value == ReturnCode.SUCCESS && tempFile.exists() && tempFile.length() > 0L) {
+                            result.set(tempFile.absolutePath)
+                        } else {
+                            tempFile.delete()
+                        }
+                        latch.countDown()
+                    }
                 }
             }
             
-            // Return the temp file path - Rust will read and clean it up
-            return tempFile.absolutePath
+            // Wait for async operation to complete (with timeout)
+            latch.await(10, java.util.concurrent.TimeUnit.SECONDS)
+            return result.get()
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Failed to get image: ${e.message}")
             return null
