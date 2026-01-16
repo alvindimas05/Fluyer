@@ -69,22 +69,67 @@ pub fn get_home_dir() -> String {
 
 /// Process music files and update database
 pub async fn process_supported_files(paths: &[PathBuf]) {
-    let metadata_results: Vec<_> = futures::stream::iter(paths.to_vec()) // or paths.iter().cloned()
-        .map(|path| async move {
-            let path_str = path.display().to_string();
-            let modified = get_modified_time(&path);
+    // Optimization: Pre-fetch existing records to skip unmodified files
+    let existing_records = tokio::task::spawn_blocking(|| {
+        let conn_guard = GLOBAL_DATABASE.lock().ok()?;
+        let conn = conn_guard.as_ref()?;
+        let mut stmt = conn.prepare("SELECT path, modified_at FROM musics").ok()?;
 
-            #[cfg(target_os = "android")]
-            let metadata = MusicMetadata::get_android(path_str.clone()).await;
+        let mut map = std::collections::HashMap::new();
+        let rows = stmt
+            .query_map([], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?))
+            })
+            .ok()?;
 
-            #[cfg(not(target_os = "android"))]
-            let metadata = MusicMetadata::get(path_str.clone()).await;
+        for row in rows {
+            if let Ok((path, modified)) = row {
+                map.insert(path, modified.unwrap_or_default());
+            }
+        }
+        Some(map)
+    })
+    .await
+    .ok()
+    .flatten()
+    .unwrap_or_default();
 
-            (path_str, modified, metadata)
+    let existing_records = std::sync::Arc::new(existing_records);
+
+    let metadata_results: Vec<_> = futures::stream::iter(paths.to_vec())
+        .map(|path| {
+            let existing_records = existing_records.clone();
+            async move {
+                let path_str = path.display().to_string();
+                let modified = get_modified_time(&path);
+
+                // Check if file is unmodified in DB
+                if let Some(db_modified) = existing_records.get(&path_str) {
+                    if let Some(curr_modified) = &modified {
+                        if db_modified == curr_modified {
+                            return None;
+                        }
+                    }
+                }
+
+                #[cfg(target_os = "android")]
+                let metadata = MusicMetadata::get_android(path_str.clone()).await;
+
+                #[cfg(not(target_os = "android"))]
+                let metadata = MusicMetadata::get(path_str.clone()).await;
+
+                Some((path_str, modified, metadata))
+            }
         })
         .buffer_unordered(10)
+        .filter_map(|res| async { res })
         .collect()
         .await;
+
+    if metadata_results.is_empty() {
+        crate::info!("No new or modified files to process.");
+        return;
+    }
     crate::info!("Processed metadata for {} files.", metadata_results.len());
 
     // Then do one blocking DB transaction
