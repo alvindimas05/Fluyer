@@ -2,15 +2,26 @@ import { type MusicData } from "$lib/features/music/types";
 import { MusicConfig } from "$lib/constants/MusicConfig";
 import musicStore from "$lib/stores/music.svelte";
 import TauriMetadataAPI from "$lib/tauri/TauriMetadataAPI";
-import CoverArtService, { CoverArtSize } from "$lib/services/CoverArtService.svelte";
+
+// Fast magic bytes validation - O(1) check
+const isValidImageBuffer = (buffer: ArrayBuffer): boolean => {
+    if (buffer.byteLength < 4) return false;
+    const bytes = new Uint8Array(buffer);
+    // JPEG: FF D8 FF
+    if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return true;
+    // PNG: 89 50 4E 47
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return true;
+    // BMP: 42 4D
+    if (bytes[0] === 0x42 && bytes[1] === 0x4D) return true;
+    return false;
+};
 
 const MetadataService = {
     getMusicCoverArt: async (music?: MusicData) => {
         if (!music) return MusicConfig.defaultAlbumImage;
         try {
             const arrayBuffer = await TauriMetadataAPI.getMusicCoverArt(music.path);
-            console.log(`Cover art for ${music.path} ${arrayBuffer.byteLength}`)
-            if (arrayBuffer !== null) {
+            if (arrayBuffer !== null && isValidImageBuffer(arrayBuffer)) {
                 const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
                 return URL.createObjectURL(blob);
             }

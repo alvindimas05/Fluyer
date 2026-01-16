@@ -3,17 +3,30 @@ import MetadataService from "$lib/services/MetadataService.svelte";
 import folderStore from "$lib/stores/folder.svelte";
 import FolderService from "$lib/services/FolderService.svelte";
 import musicStore from "$lib/stores/music.svelte";
-import {MusicConfig} from "$lib/constants/MusicConfig";
+import { MusicConfig } from "$lib/constants/MusicConfig";
 import ProgressService from "$lib/services/ProgressService.svelte";
 import QueueService from "$lib/services/QueueService.svelte";
 import MusicPlayerService from "$lib/services/MusicPlayerService.svelte";
 import ToastService from "$lib/services/ToastService.svelte";
+import { COVER_ART_DEBOUNCE_DELAY } from "$lib/services/CoverArtService.svelte";
 
 export function useMusicItem(music: MusicData, folder?: FolderData) {
-    const albumImage = $derived.by(async () => {
-        return folder
-            ? await MetadataService.getFolderCoverArt(folder.path)
-            : await MetadataService.getMusicCoverArt(music);
+    let albumImage = $state<Promise<string | null> | null>(null);
+
+    // Use $effect with cleanup to cancel pending requests when component unmounts
+    $effect(() => {
+        let cancelled = false;
+        const timeoutId = setTimeout(async () => {
+            if (cancelled) return;
+            albumImage = folder
+                ? MetadataService.getFolderCoverArt(folder.path)
+                : MetadataService.getMusicCoverArt(music);
+        }, COVER_ART_DEBOUNCE_DELAY);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timeoutId);
+        };
     });
 
     const titleLabel = $derived.by(() => {

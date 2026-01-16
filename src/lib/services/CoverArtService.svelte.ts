@@ -1,4 +1,5 @@
 import { CommandRoutes } from "$lib/constants/CommandRoutes";
+import { isAndroid } from "$lib/platform";
 import { invoke } from "@tauri-apps/api/core";
 
 export enum CoverArtStatus {
@@ -18,12 +19,13 @@ export interface CoverArtCacheQuery {
     title?: string;
 }
 
-
 export enum CoverArtSize {
     Music = 100,
     Album = 400,
     AnimatedBackground = 50,
 }
+
+export const COVER_ART_DEBOUNCE_DELAY = isAndroid() ? 1000 : 500;
 
 const CoverArtService = {
     getByQuery: async (
