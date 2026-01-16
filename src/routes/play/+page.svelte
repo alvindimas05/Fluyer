@@ -1,172 +1,187 @@
 <script lang="ts">
-import { isAndroid, isMacos, isMobile } from "$lib/platform";
-import Icon from "$lib/ui/icon/Icon.svelte";
-import { IconType } from "$lib/ui/icon/types";
-import View from "$lib/ui/components/View.svelte";
-import ProgressBar from "$lib/ui/components/ProgressBar.svelte";
-import musicStore from "$lib/stores/music.svelte";
-import ProgressService from "$lib/services/ProgressService.svelte";
-import {MusicConfig} from "$lib/constants/MusicConfig";
-import MetadataService from "$lib/services/MetadataService.svelte";
-import MusicPlayerService from "$lib/services/MusicPlayerService.svelte";
-import PageService from "$lib/services/PageService.svelte";
-import settingStore from "$lib/stores/setting.svelte";
-import showThenFade from "$lib/actions/showThenFade";
-import {RepeatMode} from "$lib/features/music/types";
-import QueueService from "$lib/services/QueueService.svelte";
-import LibraryService from "$lib/services/LibraryService.svelte";
-import LyricService, {type MusicLyric} from "$lib/services/LyricService.svelte";
+    import { isAndroid, isMacos, isMobile } from "$lib/platform";
+    import Icon from "$lib/ui/icon/Icon.svelte";
+    import { IconType } from "$lib/ui/icon/types";
+    import View from "$lib/ui/components/View.svelte";
+    import ProgressBar from "$lib/ui/components/ProgressBar.svelte";
+    import musicStore from "$lib/stores/music.svelte";
+    import ProgressService from "$lib/services/ProgressService.svelte";
+    import { MusicConfig } from "$lib/constants/MusicConfig";
+    import MetadataService from "$lib/services/MetadataService.svelte";
+    import MusicPlayerService from "$lib/services/MusicPlayerService.svelte";
+    import PageService from "$lib/services/PageService.svelte";
+    import settingStore from "$lib/stores/setting.svelte";
+    import showThenFade from "$lib/actions/showThenFade";
+    import { RepeatMode } from "$lib/features/music/types";
+    import QueueService from "$lib/services/QueueService.svelte";
+    import LibraryService from "$lib/services/LibraryService.svelte";
+    import LyricService, {
+        type MusicLyric,
+    } from "$lib/services/LyricService.svelte";
 
-let music = $derived(musicStore.currentMusic);
-let progressPercentage = $derived(0);
-let progressDurationText = $derived('');
-let progressDurationNegativeText = $derived('');
-let albumImage = $derived(MetadataService.getMusicCoverArt(musicStore.currentMusic));
+    let music = $derived(musicStore.currentMusic);
+    let progressPercentage = $derived(0);
+    let progressDurationText = $derived("");
+    let progressDurationNegativeText = $derived("");
+    let albumImage = $derived(
+        MetadataService.getMusicCoverArt(musicStore.currentMusic),
+    );
 
-let lyrics: MusicLyric[] = $state([]);
-let selectedLyricIndex = $state(0);
-let volumePercentage = $state(musicStore.volume);
+    let lyrics: MusicLyric[] = $state([]);
+    let selectedLyricIndex = $state(0);
+    let volumePercentage = $state(musicStore.volume);
 
-let updateProgressText = $state(true);
+    let updateProgressText = $state(true);
 
-function handleButtonPlayPause() {
-	if (musicStore.isPlaying) {
-		MusicPlayerService.pause();
-	} else {
-        MusicPlayerService.play();
+    function handleButtonPlayPause() {
+        if (musicStore.isPlaying) {
+            MusicPlayerService.pause();
+        } else {
+            MusicPlayerService.play();
+        }
     }
-}
 
-function handleButtonPrevious() {
-	MusicPlayerService.previous();
-}
+    function handleButtonPrevious() {
+        MusicPlayerService.previous();
+    }
 
-function handleButtonNext() {
-	MusicPlayerService.next();
-}
+    function handleButtonNext() {
+        MusicPlayerService.next();
+    }
 
-function handleButtonBack() {
-	PageService.back();
-}
+    function handleButtonBack() {
+        PageService.back();
+    }
 
-async function handleButtonShuffle() {
-    await MusicPlayerService.pause();
+    async function handleButtonShuffle() {
+        await MusicPlayerService.pause();
 
-    await QueueService.resetAndAddList(
-        await LibraryService.shuffleMusicList(musicStore.queue)
-    );
+        await QueueService.resetAndAddList(
+            await LibraryService.shuffleMusicList(musicStore.queue),
+        );
 
-    await MusicPlayerService.play();
-}
-async function onKeyDown(
-	e: KeyboardEvent & {
-		currentTarget: EventTarget & Document;
-	},
-) {
-	if (e.key === "Escape") handleButtonBack();
-}
+        await MusicPlayerService.play();
+    }
+    async function onKeyDown(
+        e: KeyboardEvent & {
+            currentTarget: EventTarget & Document;
+        },
+    ) {
+        if (e.key === "Escape") handleButtonBack();
+    }
 
-async function resetLyrics() {
-	selectedLyricIndex = 0;
-    lyrics = [];
+    async function resetLyrics() {
+        selectedLyricIndex = 0;
+        lyrics = [];
 
-	if (!musicStore.currentMusic) return;
-	const resLyrics = await LyricService.get(music);
-	if (resLyrics == null) {
-		lyrics = [];
-		return;
-	}
-	lyrics = resLyrics;
-}
+        if (!musicStore.currentMusic) return;
+        const resLyrics = await LyricService.get(music);
+        if (resLyrics == null) {
+            lyrics = [];
+            return;
+        }
+        lyrics = resLyrics;
+    }
 
-function resetSelectedLyricIndex() {
-	if (lyrics.length < 1) return;
+    function resetSelectedLyricIndex() {
+        if (lyrics.length < 1) return;
 
-    const duration = musicStore.progressDuration / 1000;
-	if (duration < lyrics[0].duration) {
-		scrollToSelectedLyric();
-		return;
-	}
-	for (let i = 0; i < lyrics.length; i++) {
-		if (duration < lyrics[i].duration) {
-			selectedLyricIndex = i - 1;
-			scrollToSelectedLyric();
-			return;
-		}
-	}
-	selectedLyricIndex = lyrics.length - 1;
-	scrollToSelectedLyric();
-}
+        const duration = musicStore.progressDuration / 1000;
+        if (duration < lyrics[0].duration) {
+            scrollToSelectedLyric();
+            return;
+        }
+        for (let i = 0; i < lyrics.length; i++) {
+            if (duration < lyrics[i].duration) {
+                selectedLyricIndex = i - 1;
+                scrollToSelectedLyric();
+                return;
+            }
+        }
+        selectedLyricIndex = lyrics.length - 1;
+        scrollToSelectedLyric();
+    }
 
-function refreshProgressText() {
-    if (!updateProgressText) return;
-    progressDurationText = ProgressService.formatDuration(musicStore.progressDuration);
-    progressDurationNegativeText = '-' + ProgressService.formatDuration(
-        (musicStore.currentMusic?.duration ?? 0) - musicStore.progressDuration
-    );
-}
+    function refreshProgressText() {
+        if (!updateProgressText) return;
+        progressDurationText = ProgressService.formatDuration(
+            musicStore.progressDuration,
+        );
+        progressDurationNegativeText =
+            "-" +
+            ProgressService.formatDuration(
+                (musicStore.currentMusic?.duration ?? 0) -
+                    musicStore.progressDuration,
+            );
+    }
 
-function handleProgressClick(percentage: number) {
-    MusicPlayerService.seekByPercentage(percentage);
-}
+    function handleProgressClick(percentage: number) {
+        MusicPlayerService.seekByPercentage(percentage);
+    }
 
-function handleProgressEnter(){
-    updateProgressText = false;
-}
+    function handleProgressEnter() {
+        updateProgressText = false;
+    }
 
-function handleProgressMove(percentage: number) {
-    updateProgressText = false;
-    progressDurationText = ProgressService.formatDuration(
-        (musicStore.currentMusic?.duration ?? 0) * (percentage / 100)
-    );
-    progressDurationNegativeText = '-' + ProgressService.formatDuration(
-        (musicStore.currentMusic?.duration ?? 0) * ((100 - percentage) / 100)
-    );
-}
+    function handleProgressMove(percentage: number) {
+        updateProgressText = false;
+        progressDurationText = ProgressService.formatDuration(
+            (musicStore.currentMusic?.duration ?? 0) * (percentage / 100),
+        );
+        progressDurationNegativeText =
+            "-" +
+            ProgressService.formatDuration(
+                (musicStore.currentMusic?.duration ?? 0) *
+                    ((100 - percentage) / 100),
+            );
+    }
 
-function handleProgressLeave(){
-    updateProgressText = true;
-    refreshProgressText();
-}
+    function handleProgressLeave() {
+        updateProgressText = true;
+        refreshProgressText();
+    }
 
-function handleVolumeProgressClick(percentage: number) {
-    musicStore.volume = percentage / 100;
-}
+    function handleVolumeProgressClick(percentage: number) {
+        musicStore.volume = percentage / 100;
+    }
 
-function scrollToSelectedLyric() {
-	document.getElementById("selected-lyric")?.scrollIntoView({
-		block: window.innerWidth > 768 ? "center" : "start",
-		behavior: "smooth",
-	});
-}
+    function scrollToSelectedLyric() {
+        document.getElementById("selected-lyric")?.scrollIntoView({
+            block: window.innerWidth > 768 ? "center" : "start",
+            behavior: "smooth",
+        });
+    }
 
+    $effect(() => {
+        progressPercentage = musicStore.progressPercentage;
+        refreshProgressText();
+        resetSelectedLyricIndex();
+    });
 
-$effect(() => {
-    progressPercentage = musicStore.progressPercentage;
-    refreshProgressText();
-    resetSelectedLyricIndex();
-});
+    $effect(() => {
+        musicStore.currentIndex;
+        albumImage = MetadataService.getMusicCoverArt(musicStore.currentMusic);
+        resetLyrics();
+    });
 
-$effect(() => {
-    musicStore.currentIndex;
-    albumImage = MetadataService.getMusicCoverArt(musicStore.currentMusic);
-    resetLyrics();
-});
-
-$effect(() => {
-    volumePercentage = musicStore.volumePercentage;
-})
+    $effect(() => {
+        volumePercentage = musicStore.volumePercentage;
+    });
 </script>
 
 <svelte:document onkeydown={onKeyDown} />
 
 <div
     class="w-full h-full grid mx-auto max-w-[35rem] md:max-w-none md:gap-y-0 md:pt-0
-    {lyrics.length > 1 ? 'md:grid-cols-[40%_55%]' : 'md:grid-cols-[50%] justify-center root-nolyrics'}
+    {lyrics.length > 1
+        ? 'md:grid-cols-[40%_55%]'
+        : 'md:grid-cols-[50%] justify-center root-nolyrics'}
     {isMacos() && 'pt-6'}"
 >
     <div
-        class="md:row-[1] md:col-[1] ${isMobile() ? 'p-5' : 'p-4'} md:p-0 flex items-end
+        class="md:row-[1] md:col-[1] {isMobile()
+            ? 'p-5'
+            : 'p-4'} md:p-0 flex items-end
         {lyrics.length > 1 ? 'justify-end' : 'justify-center'}"
     >
         <div
@@ -187,14 +202,20 @@ $effect(() => {
         </div>
     </div>
     <div
-        class="md:row-[2] md:col-[1] order-last md:order-2 {isMobile() ? 'px-5' : 'px-4'} pb-5 pt-2 {isMobile() && 'mb-5'}
-        md:p-0 md:pb-0 flex {lyrics.length > 0 ? 'justify-end' : 'justify-center'}"
+        class="md:row-[2] md:col-[1] order-last md:order-2 {isMobile()
+            ? 'px-5'
+            : 'px-4'} pb-5 pt-2 {isMobile() && 'mb-5'}
+        md:p-0 md:pb-0 flex {lyrics.length > 0
+            ? 'justify-end'
+            : 'justify-center'}"
     >
-        <View class="w-full h-fit md:mt-4 rounded-xl
+        <View
+            class="w-full h-fit md:mt-4 rounded-xl
             px-4 py-5 hover:py-7 hover:px-5
             md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
             md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%]
-            md-xhdpi:w-[80%] lg-xhdpi:w-[70%]">
+            md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
+        >
             <div class="w-full grid grid-cols-[auto,1fr,auto]">
                 <div class="text-xs lg-mdpi:text-sm flex w-12">
                     <span class="self-end opacity-75"
@@ -225,21 +246,22 @@ $effect(() => {
             </div>
             <div class="w-full pt-4 pb-2">
                 <ProgressBar
-                        bind:value={musicStore.progressValue}
-                        min={MusicConfig.min}
-                        max={MusicConfig.max}
-                        step={MusicConfig.step}
-                        progressPercentage={progressPercentage}
-                        onProgressClick={handleProgressClick}
-                        onProgressEnter={handleProgressEnter}
-                        onProgressMove={handleProgressMove}
-                        onProgressLeave={handleProgressLeave}
-                        size="md"
+                    bind:value={musicStore.progressValue}
+                    min={MusicConfig.min}
+                    max={MusicConfig.max}
+                    step={MusicConfig.step}
+                    {progressPercentage}
+                    onProgressClick={handleProgressClick}
+                    onProgressEnter={handleProgressEnter}
+                    onProgressMove={handleProgressMove}
+                    onProgressLeave={handleProgressLeave}
+                    size="md"
                 />
             </div>
             <div
                 class="w-full grid items-center gap-2 mt-4
-                {isAndroid() || !settingStore.ui.play.showBackButton ? 'grid-cols-[1fr_auto_auto_auto_1fr]'
+                {isAndroid() || !settingStore.ui.play.showBackButton
+                    ? 'grid-cols-[1fr_auto_auto_auto_1fr]'
                     : 'grid-cols-7'}"
             >
                 {#if !isAndroid() && settingStore.ui.play.showBackButton}
@@ -256,7 +278,10 @@ $effect(() => {
                 <div class="flex justify-end">
                     {#if settingStore.ui.showRepeatButton}
                         <button
-                            class="w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2 {musicStore.repeatMode === RepeatMode.None ? 'opacity-80' : ''}"
+                            class="w-7 md-mdpi:w-8 md-hdpi:w-8 mx-2 {musicStore.repeatMode ===
+                            RepeatMode.None
+                                ? 'opacity-80'
+                                : ''}"
                             onclick={MusicPlayerService.toggleRepeatMode}
                         >
                             {#if musicStore.repeatMode === RepeatMode.All}
@@ -308,28 +333,30 @@ $effect(() => {
             </div>
             {#if settingStore.ui.play.showVolume && !settingStore.bitPerfectMode}
                 <div id="volume-bar" class="mt-5">
-                    <div class="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+                    <div
+                        class="grid grid-cols-[auto_1fr_auto] items-center gap-3"
+                    >
                         <button
-                                class="w-5"
-                                onclick={() => musicStore.volume = 0}
+                            class="w-5"
+                            onclick={() => (musicStore.volume = 0)}
                         >
                             <Icon type={IconType.Mute} />
                         </button>
                         <div class="relative">
                             <ProgressBar
-                                    bind:value={musicStore.volume}
-                                    progressPercentage={volumePercentage}
-                                    onProgressClick={handleVolumeProgressClick}
-                                    min={MusicConfig.vmin}
-                                    max={MusicConfig.vmax}
-                                    step={MusicConfig.vstep}
-                                    showTooltip={false}
-                                    size="sm"
+                                bind:value={musicStore.volume}
+                                progressPercentage={volumePercentage}
+                                onProgressClick={handleVolumeProgressClick}
+                                min={MusicConfig.vmin}
+                                max={MusicConfig.vmax}
+                                step={MusicConfig.vstep}
+                                showTooltip={false}
+                                size="sm"
                             />
                         </div>
                         <button
-                                class="w-5"
-                                onclick={() => musicStore.volume = 1}
+                            class="w-5"
+                            onclick={() => (musicStore.volume = 1)}
                         >
                             <Icon type={IconType.Speaker} />
                         </button>
@@ -343,7 +370,9 @@ $effect(() => {
             class="w-full md:h-screen md:row-[1/span_2] md:col-[2] md:px-20 overflow-y-auto overflow-x-hidden
             scrollbar-hidden [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
             md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))]
-            animate__animated animate__faster animate__fadeInUp ${isMobile() ? 'px-5' : 'px-4'}"
+            animate__animated animate__faster animate__fadeInUp {isMobile()
+                ? 'px-5'
+                : 'px-4'}"
         >
             <div class="flex">
                 <div
@@ -370,11 +399,9 @@ $effect(() => {
                                 {lyric.value}
                             {:else}
                                 <div
-                                    class={
-                                        selectedLyricIndex === i
-                                            ? "w-[1.4rem] md:w-[1.9rem] lg:w-[2.25rem]"
-                                            : "w-[1.25rem] md:w-[1.75rem] lg:w-[2.15rem]"
-                                    }
+                                    class={selectedLyricIndex === i
+                                        ? "w-[1.4rem] md:w-[1.9rem] lg:w-[2.25rem]"
+                                        : "w-[1.25rem] md:w-[1.75rem] lg:w-[2.15rem]"}
                                 >
                                     <Icon type={IconType.Note} />
                                 </div>
