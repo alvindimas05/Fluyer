@@ -9,3 +9,6 @@ bun.lockb
 
 src-tauri/tauri-plugin-fluyer/target
 src-tauri/tauri-plugin-fluyer/permissions
+src-tauri/tauri-plugin-fluyer/android/.gradle
+src-tauri/tauri-plugin-fluyer/android/build
+src-tauri/tauri-plugin-fluyer/android/gradle
