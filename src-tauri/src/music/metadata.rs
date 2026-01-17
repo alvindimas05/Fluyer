@@ -4,8 +4,13 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
+use symphonia::core::formats::FormatOptions;
+use symphonia::core::io::MediaSourceStream;
+use symphonia::core::meta::{MetadataOptions, StandardTagKey, StandardVisualKey};
+use symphonia::core::probe::Hint;
 use tauri::Manager;
 use tokio::process::Command;
 
@@ -99,7 +104,96 @@ impl MusicMetadata {
         FFPROBE_PATH.set(ffprobe_path).unwrap();
     }
 
+    /// Get metadata, trying Symphonia first for performance, falling back to FFmpeg
     pub async fn get(path: String) -> Result<Self, String> {
+        // Try Symphonia first (fast, pure Rust)
+        match Self::get_with_symphonia(&path) {
+            Ok(metadata) => Ok(metadata),
+            Err(_) => {
+                // Fallback to FFmpeg for unsupported formats
+                Self::get_with_ffmpeg(path).await
+            }
+        }
+    }
+
+    /// Extract metadata using Symphonia (pure Rust, fast)
+    fn get_with_symphonia(path: &str) -> Result<Self, String> {
+        let file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
+        let mss = MediaSourceStream::new(Box::new(file), Default::default());
+
+        // Create a hint to help the probe
+        let mut hint = Hint::new();
+        if let Some(ext) = Path::new(path).extension().and_then(|e| e.to_str()) {
+            hint.with_extension(ext);
+        }
+
+        let format_opts = FormatOptions::default();
+        let metadata_opts = MetadataOptions::default();
+
+        let mut probed = symphonia::default::get_probe()
+            .format(&hint, mss, &format_opts, &metadata_opts)
+            .map_err(|e| format!("Symphonia probe failed: {}", e))?;
+
+        let mut format = probed.format;
+        let mut metadata = MusicMetadata::default();
+        metadata.path = path.to_string();
+
+        // Find first audio track and extract codec parameters
+        let track = format
+            .tracks()
+            .iter()
+            .find(|t| t.codec_params.codec != symphonia::core::codecs::CODEC_TYPE_NULL)
+            .ok_or_else(|| "No audio track found".to_string())?;
+
+        // Extract duration
+        if let Some(n_frames) = track.codec_params.n_frames {
+            if let Some(sample_rate) = track.codec_params.sample_rate {
+                let duration_secs = n_frames as f64 / sample_rate as f64;
+                metadata.duration = Some((duration_secs * 1000.0) as u128);
+            }
+        }
+
+        // Extract sample rate and bits per sample
+        metadata.sample_rate = track.codec_params.sample_rate;
+        metadata.bits_per_sample = track.codec_params.bits_per_sample;
+
+        // Extract metadata tags from format metadata
+        let extract_tags = |meta: &symphonia::core::meta::MetadataRevision,
+                            metadata: &mut MusicMetadata| {
+            for tag in meta.tags() {
+                if let Some(std_key) = tag.std_key {
+                    let value = tag.value.to_string();
+                    match std_key {
+                        StandardTagKey::TrackTitle => metadata.title = Some(value),
+                        StandardTagKey::Artist => metadata.artist = Some(value),
+                        StandardTagKey::Album => metadata.album = Some(value),
+                        StandardTagKey::AlbumArtist => metadata.album_artist = Some(value),
+                        StandardTagKey::TrackNumber => metadata.track_number = Some(value),
+                        StandardTagKey::Genre => metadata.genre = Some(value),
+                        StandardTagKey::Date => metadata.date = Some(value),
+                        _ => {}
+                    }
+                }
+            }
+        };
+
+        // Try probed metadata first
+        if let Some(probe_meta) = probed.metadata.get() {
+            if let Some(rev) = probe_meta.current() {
+                extract_tags(rev, &mut metadata);
+            }
+        }
+
+        // Then try format metadata (may have more tags)
+        if let Some(rev) = format.metadata().current() {
+            extract_tags(rev, &mut metadata);
+        }
+
+        Ok(metadata)
+    }
+
+    /// Fallback metadata extraction using FFmpeg
+    async fn get_with_ffmpeg(path: String) -> Result<Self, String> {
         let output = Command::new(FFPROBE_PATH.get().unwrap())
             .args(&[
                 "-v",
@@ -230,8 +324,70 @@ impl MusicMetadata {
         None
     }
 
-    /// Extract cover art directly to memory as JPEG/PNG/BMP bytes
+    /// Extract cover art, trying Symphonia first for performance, falling back to FFmpeg
     pub async fn get_image_from_path(path: String) -> Result<Vec<u8>, String> {
+        // Try Symphonia first (fast, pure Rust)
+        match Self::get_image_with_symphonia(&path) {
+            Ok(image) => Ok(image),
+            Err(_) => {
+                // Fallback to FFmpeg for unsupported formats (e.g., MP4 container artwork)
+                Self::get_image_with_ffmpeg(path).await
+            }
+        }
+    }
+
+    /// Extract cover art using Symphonia (pure Rust, fast)
+    fn get_image_with_symphonia(path: &str) -> Result<Vec<u8>, String> {
+        let file = File::open(path).map_err(|e| format!("Failed to open file: {}", e))?;
+        let mss = MediaSourceStream::new(Box::new(file), Default::default());
+
+        let mut hint = Hint::new();
+        if let Some(ext) = Path::new(path).extension().and_then(|e| e.to_str()) {
+            hint.with_extension(ext);
+        }
+
+        let format_opts = FormatOptions::default();
+        let metadata_opts = MetadataOptions::default();
+
+        let mut probed = symphonia::default::get_probe()
+            .format(&hint, mss, &format_opts, &metadata_opts)
+            .map_err(|e| format!("Symphonia probe failed: {}", e))?;
+
+        let mut format = probed.format;
+
+        // Helper to extract front cover from metadata revision
+        let extract_cover = |meta: &symphonia::core::meta::MetadataRevision| -> Option<Vec<u8>> {
+            for visual in meta.visuals() {
+                // Prefer front cover, but accept any visual
+                if visual.usage == Some(StandardVisualKey::FrontCover) || visual.usage.is_none() {
+                    return Some(visual.data.to_vec());
+                }
+            }
+            // If no front cover found, return first visual
+            meta.visuals().first().map(|v| v.data.to_vec())
+        };
+
+        // Try probed metadata first (ID3v2, Vorbis comments, etc.)
+        if let Some(probe_meta) = probed.metadata.get() {
+            if let Some(rev) = probe_meta.current() {
+                if let Some(cover) = extract_cover(rev) {
+                    return Ok(cover);
+                }
+            }
+        }
+
+        // Then try format metadata
+        if let Some(rev) = format.metadata().current() {
+            if let Some(cover) = extract_cover(rev) {
+                return Ok(cover);
+            }
+        }
+
+        Err(format!("No cover art found in file: {}", path))
+    }
+
+    /// Fallback cover art extraction using FFmpeg
+    async fn get_image_with_ffmpeg(path: String) -> Result<Vec<u8>, String> {
         // First check if the file has any video stream (cover art)
         let probe_output = Command::new(FFPROBE_PATH.get().unwrap())
             .args(&[
