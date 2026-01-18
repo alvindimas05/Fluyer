@@ -1,5 +1,4 @@
 import musicStore from '$lib/stores/music.svelte';
-import musicSvelte from '$lib/stores/music.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
 import TauriMusicAPI, { TauriMusicCommand } from '$lib/tauri/TauriMusicAPI';
 import QueueService from '$lib/services/QueueService.svelte';
@@ -40,11 +39,23 @@ const MusicPlayerService = {
 		await TauriMusicAPI.sendCommand(TauriMusicCommand.Pause);
 		ProgressService.stop();
 	},
-	next: () => {
+	next: async () => {
+		if (musicStore.currentIndex === musicStore.queue.length - 1) {
+			await MusicPlayerService.seekByPercentage(0);
+			await MusicPlayerService.pause();
+			ProgressService.reset();
+			return;
+		}
 		return TauriMusicAPI.sendCommand(TauriMusicCommand.Next);
 	},
-	previous: () => {
-		return QueueService.goTo(musicSvelte.currentIndex - 1);
+	previous: async () => {
+		if (musicStore.currentIndex === 0) {
+			await MusicPlayerService.seekByPercentage(0);
+			await MusicPlayerService.pause();
+			ProgressService.reset();
+			return;
+		}
+		return QueueService.goTo(musicStore.currentIndex - 1);
 	},
 	seekByPercentage: async (percentage: number) => {
 		const clamped = Math.min(100, Math.max(0, percentage));
