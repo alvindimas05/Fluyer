@@ -32,7 +32,12 @@
 
 <svelte:window onresize={vm.updateSize} />
 
-<div class="h-full px-3">
+<div
+	class="relative h-full px-3"
+	style="-webkit-mask-image: linear-gradient(to bottom, black calc(100% - {playerBarStore.height *
+		2}px), transparent 100%); mask-image: linear-gradient(to bottom, black calc(100% - {playerBarStore.height *
+		2}px), transparent 100%);"
+>
 	{#if chunkedData.length > 0 && vm.state.columnCount}
 		{#key chunkedData}
 			<VList
