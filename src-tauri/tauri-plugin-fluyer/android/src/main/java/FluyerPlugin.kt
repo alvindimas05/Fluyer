@@ -190,4 +190,16 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
             invoke.resolve(JSObject().put("path", null))
         }
     }
+    
+    @Command
+    fun audioConvertToWav(invoke: Invoke) {
+        try {
+            val args = invoke.parseArgs(MetadataArgs::class.java)
+            val result = FluyerMetadata.convertToPcmWav(args.path)
+            invoke.resolve(JSObject().put("path", result))
+        } catch (err: Exception) {
+            Log.e(LOG_TAG, "audioConvertToWav error: ${err.message}")
+            invoke.resolve(JSObject().put("path", null))
+        }
+    }
 }

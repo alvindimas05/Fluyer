@@ -2,10 +2,14 @@ use crate::music::metadata::MusicMetadata;
 use crate::state::{app_handle, main_window};
 use serde::{Deserialize, Serialize};
 use std::ffi::CString;
+use std::path::PathBuf;
 use std::ptr;
 use std::sync::{Mutex, OnceLock};
 use std::thread;
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
+
+#[cfg(target_os = "android")]
+use tauri_plugin_fluyer::FluyerExt;
 
 const BASS_PLUGINS: [&str; 1] = ["bassflac"];
 
@@ -258,6 +262,8 @@ pub struct MusicPlayerSync {
 static mut BASS_MIXER: u32 = 0;
 static mut CURRENT_STREAM: u32 = 0;
 static PLAYER_STATE: OnceLock<Mutex<PlayerState>> = OnceLock::new();
+// Track temporary WAV file created by FFmpeg conversion for cleanup
+static TEMP_WAV_PATH: OnceLock<Mutex<Option<PathBuf>>> = OnceLock::new();
 
 #[derive(Debug, Clone)]
 struct PlayerState {
@@ -278,6 +284,9 @@ impl MusicPlayer {
                 repeat_mode: RepeatMode::None,
             })
         });
+
+        // Initialize temp WAV path tracker
+        TEMP_WAV_PATH.get_or_init(|| Mutex::new(None));
 
         #[cfg(desktop)]
         {
@@ -642,6 +651,9 @@ impl MusicPlayer {
     }
 
     fn stop_current_stream() {
+        // Clean up temp WAV file if it exists
+        Self::cleanup_temp_wav();
+
         #[cfg(desktop)]
         unsafe {
             if CURRENT_STREAM != 0 {
@@ -668,6 +680,23 @@ impl MusicPlayer {
                     }
                     if BASS_MIXER != 0 {
                         (bass.bass_channel_set_position)(BASS_MIXER, 0, BASS_POS_BYTE);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Clean up temporary WAV file created by FFmpeg conversion
+    fn cleanup_temp_wav() {
+        if let Some(temp_path_lock) = TEMP_WAV_PATH.get() {
+            if let Ok(mut temp_path) = temp_path_lock.lock() {
+                if let Some(path) = temp_path.take() {
+                    if path.exists() {
+                        if let Err(e) = std::fs::remove_file(&path) {
+                            crate::warn!("Failed to remove temp WAV file: {}", e);
+                        } else {
+                            crate::info!("Cleaned up temp WAV file: {}", path.display());
+                        }
                     }
                 }
             }
@@ -770,10 +799,62 @@ impl MusicPlayer {
                 BASS_StreamCreateFile(false, path.as_ptr() as *const _, 0, 0, BASS_STREAM_DECODE);
 
             if stream == 0 {
-                crate::error!(
-                    "Failed to load BASS music: {}, error: {}",
+                let bass_error = BASS_ErrorGetCode();
+                crate::warn!(
+                    "BASS failed to load: {}, error: {}. Trying FFmpeg fallback...",
                     music.path,
-                    BASS_ErrorGetCode()
+                    bass_error
+                );
+
+                // Try FFmpeg fallback - convert to PCM WAV
+                if let Some(wav_path) = Self::convert_to_pcm_wav(&music.path) {
+                    let wav_cstring = CString::new(wav_path.to_string_lossy().as_ref()).unwrap();
+                    let wav_stream = BASS_StreamCreateFile(
+                        false,
+                        wav_cstring.as_ptr() as *const _,
+                        0,
+                        0,
+                        BASS_STREAM_DECODE,
+                    );
+
+                    if wav_stream != 0 {
+                        let ok = BASS_Mixer_StreamAddChannel(
+                            BASS_MIXER,
+                            wav_stream,
+                            BASS_MIXER_NORAMPIN,
+                        );
+                        if ok != 0 {
+                            CURRENT_STREAM = wav_stream;
+                            // Store the temp WAV path for cleanup
+                            if let Some(temp_path_lock) = TEMP_WAV_PATH.get() {
+                                if let Ok(mut temp_path) = temp_path_lock.lock() {
+                                    *temp_path = Some(wav_path.clone());
+                                }
+                            }
+                            crate::info!("Successfully loaded via FFmpeg: {}", music.path);
+                            return true;
+                        } else {
+                            crate::error!(
+                                "Failed to add FFmpeg-converted channel to mixer: {}, error: {}",
+                                music.path,
+                                BASS_ErrorGetCode()
+                            );
+                            BASS_StreamFree(wav_stream);
+                        }
+                    } else {
+                        crate::error!(
+                            "BASS failed to load FFmpeg-converted WAV: {}, error: {}",
+                            wav_path.display(),
+                            BASS_ErrorGetCode()
+                        );
+                    }
+                    // Clean up the temp file if loading failed
+                    let _ = std::fs::remove_file(&wav_path);
+                }
+
+                crate::error!(
+                    "Failed to load music (both BASS and FFmpeg failed): {}",
+                    music.path
                 );
                 return false;
             }
@@ -808,10 +889,62 @@ impl MusicPlayer {
                     );
 
                     if stream == 0 {
-                        crate::error!(
-                            "Failed to load BASS music: {}, error: {}",
+                        let bass_error = (bass.bass_error_get_code)();
+                        crate::warn!(
+                            "BASS failed to load: {}, error: {}. Trying FFmpeg fallback...",
                             music.path,
-                            (bass.bass_error_get_code)()
+                            bass_error
+                        );
+
+                        // Try FFmpeg fallback - convert to PCM WAV using FluyerPlugin
+                        if let Some(wav_path) = Self::convert_to_pcm_wav_android(&music.path) {
+                            let wav_cstring = CString::new(wav_path.as_str()).unwrap();
+                            let wav_stream = (bass.bass_stream_create_file)(
+                                false,
+                                wav_cstring.as_ptr() as *const _,
+                                0,
+                                0,
+                                BASS_STREAM_DECODE,
+                            );
+
+                            if wav_stream != 0 {
+                                let ok = (bass.bass_mixer_stream_add_channel)(
+                                    BASS_MIXER,
+                                    wav_stream,
+                                    BASS_MIXER_NORAMPIN,
+                                );
+                                if ok != 0 {
+                                    CURRENT_STREAM = wav_stream;
+                                    // Store the temp WAV path for cleanup
+                                    if let Some(temp_path_lock) = TEMP_WAV_PATH.get() {
+                                        if let Ok(mut temp_path) = temp_path_lock.lock() {
+                                            *temp_path = Some(PathBuf::from(&wav_path));
+                                        }
+                                    }
+                                    crate::info!("Successfully loaded via FFmpeg: {}", music.path);
+                                    return true;
+                                } else {
+                                    crate::error!(
+                                        "Failed to add FFmpeg-converted channel to mixer: {}, error: {}",
+                                        music.path,
+                                        (bass.bass_error_get_code)()
+                                    );
+                                    (bass.bass_stream_free)(wav_stream);
+                                }
+                            } else {
+                                crate::error!(
+                                    "BASS failed to load FFmpeg-converted WAV: {}, error: {}",
+                                    wav_path,
+                                    (bass.bass_error_get_code)()
+                                );
+                            }
+                            // Clean up the temp file if loading failed
+                            let _ = std::fs::remove_file(&wav_path);
+                        }
+
+                        crate::error!(
+                            "Failed to load music (both BASS and FFmpeg failed): {}",
+                            music.path
                         );
                         return false;
                     }
@@ -837,6 +970,111 @@ impl MusicPlayer {
                 }
             }
             false
+        }
+    }
+
+    /// Convert audio file to PCM WAV using FFmpegKit on Android
+    #[cfg(target_os = "android")]
+    fn convert_to_pcm_wav_android(source_path: &str) -> Option<String> {
+        crate::info!("Converting {} to PCM WAV via FFmpegKit...", source_path);
+
+        match app_handle()
+            .fluyer()
+            .audio_convert_to_wav(source_path.to_string())
+        {
+            Ok(response) => {
+                if let Some(path) = response.path {
+                    crate::info!("Successfully converted to PCM WAV: {}", path);
+                    Some(path)
+                } else {
+                    crate::error!("FFmpegKit conversion returned no path");
+                    None
+                }
+            }
+            Err(e) => {
+                crate::error!("FFmpegKit conversion failed: {}", e);
+                None
+            }
+        }
+    }
+
+    /// Convert audio file to PCM WAV using FFmpeg for BASS compatibility
+    #[cfg(desktop)]
+    fn convert_to_pcm_wav(source_path: &str) -> Option<PathBuf> {
+        use std::process::Command;
+
+        // Get FFmpeg path from resources
+        let ffmpeg_path = {
+            #[cfg(target_os = "linux")]
+            {
+                PathBuf::from("/usr/lib/fluyer/ffmpeg")
+            }
+            #[cfg(not(target_os = "linux"))]
+            {
+                app_handle()
+                    .path()
+                    .resource_dir()
+                    .ok()?
+                    .join("libs/ffmpeg/bin/ffmpeg")
+            }
+        };
+
+        // Generate temp output path in app data directory
+        let app_data_dir = app_handle().path().app_data_dir().ok()?;
+        let temp_dir = app_data_dir.join("temp");
+        std::fs::create_dir_all(&temp_dir).ok()?;
+
+        // Create a unique filename based on the source file
+        let source_file_name = std::path::Path::new(source_path)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("audio");
+        let output_path = temp_dir.join(format!("{}_converted.wav", source_file_name));
+
+        // Remove existing file if any
+        let _ = std::fs::remove_file(&output_path);
+
+        crate::info!("Converting {} to PCM WAV...", source_path);
+
+        // Convert to PCM WAV (signed 16-bit little-endian, which BASS supports well)
+        // Using pcm_s16le codec for fastest conversion
+        let status = Command::new(&ffmpeg_path)
+            .args(&[
+                "-y", // Overwrite output
+                "-i",
+                source_path, // Input file
+                "-vn",       // No video
+                "-acodec",
+                "pcm_s16le", // PCM signed 16-bit little-endian
+                "-ar",
+                "44100", // 44.1kHz sample rate (match BASS mixer)
+                "-ac",
+                "2", // Stereo
+                "-f",
+                "wav", // WAV format
+            ])
+            .arg(&output_path)
+            .output();
+
+        match status {
+            Ok(output) if output.status.success() => {
+                crate::info!(
+                    "Successfully converted to PCM WAV: {}",
+                    output_path.display()
+                );
+                Some(output_path)
+            }
+            Ok(output) => {
+                crate::error!(
+                    "FFmpeg conversion failed: {}",
+                    String::from_utf8_lossy(&output.stderr)
+                );
+                None
+            }
+            Err(e) => {
+                crate::error!("Failed to run FFmpeg: {}", e);
+                None
+            }
         }
     }
 

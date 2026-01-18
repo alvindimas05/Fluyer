@@ -64,4 +64,50 @@ object FluyerMetadata {
             return null
         }
     }
+    
+    /**
+     * Convert audio file to PCM WAV format for BASS compatibility.
+     * Uses pcm_s16le codec for fastest conversion.
+     * @param sourcePath Path to the source audio file
+     * @return Path to the converted WAV file, or null if conversion failed
+     */
+    fun convertToPcmWav(sourcePath: String): String? {
+        try {
+            // Generate unique output filename
+            val sourceFile = File(sourcePath)
+            val outputFile = File(cacheDir, "${sourceFile.nameWithoutExtension}_converted.wav")
+            
+            // Remove existing file if any
+            if (outputFile.exists()) {
+                outputFile.delete()
+            }
+            
+            Log.i(LOG_TAG, "Converting $sourcePath to PCM WAV...")
+            
+            // Convert to PCM WAV (signed 16-bit little-endian)
+            // Using pcm_s16le codec for fastest conversion
+            val args = "-y -i \"$sourcePath\" -vn -acodec pcm_s16le -ar 44100 -ac 2 -f wav \"${outputFile.absolutePath}\""
+            
+            val result = java.util.concurrent.atomic.AtomicReference<String?>(null)
+            val latch = java.util.concurrent.CountDownLatch(1)
+            
+            FFmpegKit.executeAsync(args) { session ->
+                if (session.returnCode.value == ReturnCode.SUCCESS && outputFile.exists() && outputFile.length() > 0L) {
+                    Log.i(LOG_TAG, "Successfully converted to PCM WAV: ${outputFile.absolutePath}")
+                    result.set(outputFile.absolutePath)
+                } else {
+                    Log.e(LOG_TAG, "FFmpeg conversion failed: ${session.output}")
+                    outputFile.delete()
+                }
+                latch.countDown()
+            }
+            
+            // Wait for async operation to complete (with timeout of 60 seconds for conversion)
+            latch.await(60, java.util.concurrent.TimeUnit.SECONDS)
+            return result.get()
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "Failed to convert to PCM WAV: ${e.message}")
+            return null
+        }
+    }
 }

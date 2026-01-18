@@ -134,6 +134,12 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("metadataGetImage", MetadataGetArgs { path })
             .map_err(Into::into)
     }
+
+    pub fn audio_convert_to_wav(&self, path: String) -> crate::Result<AudioConvertResponse> {
+        self.0
+            .run_mobile_plugin("audioConvertToWav", MetadataGetArgs { path })
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]

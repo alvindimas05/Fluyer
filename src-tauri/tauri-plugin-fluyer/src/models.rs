@@ -94,3 +94,9 @@ pub struct MetadataGetResponse {
 pub struct MetadataGetImageResponse {
     pub path: Option<String>,
 }
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct AudioConvertResponse {
+    pub path: Option<String>,
+}
