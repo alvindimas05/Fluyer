@@ -28,7 +28,8 @@ const RESPONSIVE_RULES = [
 let virtualizerHandle: VirtualizerHandle;
 let state = $state({
 	columnCount: 2,
-	itemWidth: window.innerWidth * 0.5
+	itemWidth: window.innerWidth * 0.5,
+	scrollLeft: 0
 });
 
 let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height);
@@ -86,6 +87,7 @@ function onMouseWheel(e: WheelEvent & { currentTarget: EventTarget & HTMLDivElem
 		e.preventDefault();
 		e.currentTarget.scrollLeft += e.deltaY;
 	}
+	state.scrollLeft = e.currentTarget.scrollLeft;
 	musicStore.albumListUi.scrollLeft = e.currentTarget.scrollLeft;
 }
 

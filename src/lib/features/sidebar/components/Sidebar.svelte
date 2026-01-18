@@ -149,7 +149,6 @@
 	onmouseleave={onMouseLeave}
 >
 	<View
-		glassEnableBlur={true}
 		class="animate__animated pointer-events-auto h-full rounded-lg
 			p-3
 			{isShowing
