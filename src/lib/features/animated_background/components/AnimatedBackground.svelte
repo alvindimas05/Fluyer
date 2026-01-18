@@ -13,7 +13,6 @@
 	import { MusicConfig } from '$lib/constants/MusicConfig';
 	import MetadataService from '$lib/services/MetadataService.svelte';
 	import musicStore from '$lib/stores/music.svelte';
-	import { CoverArtSize } from '$lib/services/CoverArtService.svelte';
 	import settingStore from '$lib/stores/setting.svelte';
 	import LibraryService from '$lib/services/LibraryService.svelte';
 

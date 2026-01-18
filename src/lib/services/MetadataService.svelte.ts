@@ -3,6 +3,7 @@ import { MusicConfig } from '$lib/constants/MusicConfig';
 import musicStore from '$lib/stores/music.svelte';
 import TauriMetadataAPI from '$lib/tauri/TauriMetadataAPI';
 import FolderService from './FolderService.svelte';
+import CoverArtService from './CoverArtService.svelte';
 
 // Fast magic bytes validation - O(1) check
 const isValidImageBuffer = (buffer: ArrayBuffer): boolean => {
@@ -27,16 +28,14 @@ const MetadataService = {
 				return URL.createObjectURL(blob);
 			}
 		} catch (e) { }
-		// if (music.title == null || music.artist == null)
-		return MusicConfig.defaultAlbumImage;
-		// const coverArt = await CoverArtService.getByQuery({
-		//     artist: music.artist!,
-		//     title: music.album ? undefined : music.title!,
-		//     album: music.album ?? undefined,
-		// }, size);
-		// return coverArt
-		//     ? MetadataService.withBase64(coverArt)
-		//     : MusicConfig.defaultAlbumImage;
+		if (music.title == null || music.artist == null)
+			return MusicConfig.defaultAlbumImage;
+		const coverArt = await CoverArtService.getByQuery({
+			artist: music.artist!,
+			title: music.album ? undefined : music.title!,
+			album: music.album ?? undefined,
+		});
+		return coverArt ?? MusicConfig.defaultAlbumImage;
 	},
 	getFolderCoverArt: async (folderPath: string) => {
 		const path = await TauriMetadataAPI.getFolderCoverArtPath(FolderService.normalizePath(folderPath));

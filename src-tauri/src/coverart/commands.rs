@@ -1,18 +1,11 @@
 use crate::coverart::{cache, queue, request, types::*};
-use crate::music::image::ImageHandler;
-use image::ImageReader;
-use std::io::Cursor;
-use std::path::Path;
+use std::fs;
 
-/// Get cover art for an album or track
+/// Get cover art for an album or track - returns raw image bytes
 #[tauri::command]
-pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
+pub async fn cover_art_get(query: CoverArtQuery) -> Result<Vec<u8>, String> {
     if query.album.is_none() && query.title.is_none() {
-        return CoverArtResponse {
-            name: String::from(""),
-            status: CoverArtRequestStatus::Failed,
-            image: None,
-        };
+        return Err("No album or title provided".to_string());
     }
 
     let mut name = String::from("");
@@ -30,77 +23,37 @@ pub async fn cover_art_get(query: CoverArtQuery) -> CoverArtResponse {
     let queue_item = queue::get_queue(name.clone());
 
     if queue_item.is_none() {
-        if let Some(image) = get_from_path(file_path.clone()).await {
+        // Try to get from cache first
+        if let Some(image) = get_image_bytes(&file_path) {
             queue::set_status(name.clone(), CoverArtRequestStatus::Loaded);
-
-            return CoverArtResponse {
-                name,
-                status: CoverArtRequestStatus::Loaded,
-                image: Some(image),
-            };
+            return Ok(image);
         }
 
+        // Request from API
         let cover_art = request::request_cover_art(query).await;
 
         if cover_art.is_none() {
             queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
-            return CoverArtResponse {
-                name,
-                status: CoverArtRequestStatus::Failed,
-                image: None,
-            };
+            return Err(format!("Failed to get cover art for: {}", name));
         }
 
-        return CoverArtResponse {
-            name,
-            status: CoverArtRequestStatus::Loaded,
-            image: cover_art,
-        };
+        // Read the saved file
+        if let Some(image) = get_image_bytes(&file_path) {
+            return Ok(image);
+        }
+
+        return Err(format!("Cover art file not found: {}", name));
     }
 
     if queue_item.unwrap().status == CoverArtRequestStatus::Loaded {
-        if let Some(image) = get_from_path(file_path.clone()).await {
-            return CoverArtResponse {
-                name,
-                status: CoverArtRequestStatus::Loaded,
-                image: Some(image),
-            };
+        if let Some(image) = get_image_bytes(&file_path) {
+            return Ok(image);
         }
     }
 
-    CoverArtResponse {
-        name,
-        status: CoverArtRequestStatus::Failed,
-        image: None,
-    }
+    Err(format!("Cover art not available: {}", name))
 }
 
-async fn get_from_path(file_path: String) -> Option<String> {
-    if let Ok(data) = std::fs::read(&file_path) {
-        let ext = Path::new(&file_path)
-            .extension()
-            .and_then(|e| e.to_str())
-            .unwrap_or("")
-            .to_lowercase();
-
-        // If it's already PNG or JPEG, don't re-encode
-        if ext == "png" || ext == "jpg" || ext == "jpeg" {
-            return ImageHandler::encode_to_base64(data.as_slice());
-        }
-
-        let reader = ImageReader::new(Cursor::new(data)).with_guessed_format();
-        if let Ok(reader) = reader {
-            let mut buf = Cursor::new(Vec::new());
-            if reader
-                .decode()
-                .unwrap()
-                .write_to(&mut buf, image::ImageFormat::Png)
-                .is_ok()
-            {
-                return ImageHandler::encode_to_base64(buf.get_ref());
-            }
-        }
-    }
-
-    None
+fn get_image_bytes(file_path: &str) -> Option<Vec<u8>> {
+    fs::read(file_path).ok()
 }

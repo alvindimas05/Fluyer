@@ -2,42 +2,32 @@ import { CommandRoutes } from '$lib/constants/CommandRoutes';
 import { isAndroid } from '$lib/platform';
 import { invoke } from '@tauri-apps/api/core';
 
-export enum CoverArtStatus {
-	Loaded = 'loaded',
-	Loading = 'loading',
-	Failed = 'failed'
-}
-export interface CoverArtResponse {
-	name: string;
-	status: CoverArtStatus;
-	image: string | null;
-}
-
 export interface CoverArtCacheQuery {
 	artist: string;
 	album?: string;
 	title?: string;
 }
 
-export enum CoverArtSize {
-	Music = 100,
-	Album = 400,
-	AnimatedBackground = 50
-}
-
 export const COVER_ART_DEBOUNCE_DELAY = isAndroid() ? 1000 : 500;
 
 const CoverArtService = {
-	getByQuery: async (query: CoverArtCacheQuery, size?: CoverArtSize) => {
+	getByQuery: async (query: CoverArtCacheQuery): Promise<string | null> => {
 		try {
-			return (
-				await invoke<CoverArtResponse>(CommandRoutes.COVER_ART_GET, {
-					query,
-					size: size?.toString()
-				})
-			).image;
+			// Returns Uint8Array (Vec<u8> from Rust)
+			const bytes = await invoke<number[]>(CommandRoutes.COVER_ART_GET, {
+				query
+			});
+
+			if (!bytes || bytes.length === 0) {
+				return null;
+			}
+
+			// Convert to blob URL
+			const arrayBuffer = new Uint8Array(bytes).buffer;
+			const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
+			return URL.createObjectURL(blob);
 		} catch (err) {
-			console.error(err);
+			// Cover art not found is expected, don't log error
 			return null;
 		}
 	}
