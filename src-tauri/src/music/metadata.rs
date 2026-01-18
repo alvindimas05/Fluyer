@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs::File;
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 use symphonia::core::formats::FormatOptions;
@@ -65,6 +67,13 @@ impl MusicMetadata {
         " • "
     }
 
+    fn create_command(program: &Path) -> Command {
+        let mut cmd = Command::new(program);
+        #[cfg(target_os = "windows")]
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+        cmd
+    }
+
     pub fn initialize_ffmpeg_paths() {
         let (ffmpeg_path, ffprobe_path) = {
             #[cfg(target_os = "linux")]
@@ -109,8 +118,9 @@ impl MusicMetadata {
         // Try Symphonia first (fast, pure Rust)
         match Self::get_with_symphonia(&path) {
             Ok(metadata) => Ok(metadata),
-            Err(_) => {
+            Err(error) => {
                 // Fallback to FFmpeg for unsupported formats
+                crate::warn!("{}", error);
                 Self::get_with_ffmpeg(path).await
             }
         }
@@ -132,7 +142,7 @@ impl MusicMetadata {
 
         let mut probed = symphonia::default::get_probe()
             .format(&hint, mss, &format_opts, &metadata_opts)
-            .map_err(|e| format!("Symphonia probe failed: {}", e))?;
+            .map_err(|e| format!("Symphonia probe failed {} : {}", path, e))?;
 
         let mut format = probed.format;
         let mut metadata = MusicMetadata::default();
@@ -194,7 +204,7 @@ impl MusicMetadata {
 
     /// Fallback metadata extraction using FFmpeg
     async fn get_with_ffmpeg(path: String) -> Result<Self, String> {
-        let output = Command::new(FFPROBE_PATH.get().unwrap())
+        let output = Self::create_command(FFPROBE_PATH.get().unwrap())
             .args(&[
                 "-v",
                 "quiet",
@@ -389,7 +399,7 @@ impl MusicMetadata {
     /// Fallback cover art extraction using FFmpeg
     async fn get_image_with_ffmpeg(path: String) -> Result<Vec<u8>, String> {
         // First check if the file has any video stream (cover art)
-        let probe_output = Command::new(FFPROBE_PATH.get().unwrap())
+        let probe_output = Self::create_command(FFPROBE_PATH.get().unwrap())
             .args(&[
                 "-v",
                 "quiet",
@@ -411,7 +421,7 @@ impl MusicMetadata {
         }
 
         // Try to copy the embedded image without re-encoding (fastest)
-        let output = Command::new(FFMPEG_PATH.get().unwrap())
+        let output = Self::create_command(FFMPEG_PATH.get().unwrap())
             .args(&[
                 "-i",
                 &path,
@@ -433,7 +443,7 @@ impl MusicMetadata {
         }
 
         // If copy fails, try BMP encoder as fallback
-        let output = Command::new(FFMPEG_PATH.get().unwrap())
+        let output = Self::create_command(FFMPEG_PATH.get().unwrap())
             .args(&[
                 "-i",
                 &path,

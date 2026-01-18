@@ -3,11 +3,7 @@ use rusqlite::{params, Connection};
 use std::path::{Path, PathBuf};
 
 /// Get first music file path from a folder
-pub fn get_folder_first_music_path(
-    conn: &mut Connection,
-    path: &str,
-    _size: Option<String>,
-) -> Option<String> {
+pub fn get_folder_first_music_path(conn: &mut Connection, path: &str) -> Option<String> {
     let mut stmt = conn
         .prepare("SELECT path FROM musics WHERE path LIKE ? ORDER BY path LIMIT 1")
         .expect("Failed to prepare statement");

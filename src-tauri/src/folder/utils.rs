@@ -8,8 +8,3 @@ pub fn is_not_hidden(entry: &DirEntry) -> bool {
         .map(|s| !s.starts_with('.'))
         .unwrap_or(false)
 }
-
-/// Normalize Windows paths by fixing double backslashes
-pub fn normalize_path(path: String) -> String {
-    path.replace(":\\\\", ":\\")
-}

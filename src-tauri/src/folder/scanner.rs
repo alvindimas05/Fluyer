@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::database::database::GLOBAL_DATABASE;
 use crate::folder::types::FolderItem;
-use crate::folder::utils::{is_not_hidden, normalize_path};
+use crate::folder::utils::is_not_hidden;
 use crate::music::metadata::MusicMetadata;
 use chrono::{DateTime, Utc};
 use futures::StreamExt;
@@ -21,7 +21,7 @@ pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
                 && is_not_hidden(e)
         })
         .map(|entry| FolderItem {
-            path: normalize_path(entry.path().to_str().unwrap_or_default().to_string()),
+            path: entry.path().to_str().unwrap_or_default().to_string(),
         })
         .collect()
 }

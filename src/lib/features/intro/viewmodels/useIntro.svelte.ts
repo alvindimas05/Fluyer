@@ -27,7 +27,9 @@ export function useIntro() {
 	}
 
 	return {
-		animatedClasses,
+		get animatedClasses() {
+			return animatedClasses;
+		},
 		requestAction,
 		onAnimationEnd
 	};

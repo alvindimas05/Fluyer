@@ -17,10 +17,10 @@ pub fn folder_get_items(path: String) -> Vec<FolderItem> {
 
 /// Get the first music file path from a folder
 #[tauri::command]
-pub fn folder_get_first_music_path(path: String, size: Option<String>) -> Option<String> {
+pub fn folder_get_first_music_path(path: String) -> Option<String> {
     let mut conn_guard = GLOBAL_DATABASE.lock().ok()?;
     let conn = conn_guard.as_mut()?;
-    database::get_folder_first_music_path(conn, path.as_str(), size)
+    database::get_folder_first_music_path(conn, path.as_str())
 }
 
 /// Get all music files from the library
