@@ -120,7 +120,7 @@
 <svelte:window onresize={updatePlayerBarHeight} />
 
 <div
-	class="animate__animated animate__slideInUp absolute bottom-0 w-full px-3 pt-3"
+	class="animate__animated animate__slideInUp w-full px-3 pt-3"
 	style="padding-bottom: {mobileStore.navigationBarHeight > 12
 		? mobileStore.navigationBarHeight
 		: 12}px;"

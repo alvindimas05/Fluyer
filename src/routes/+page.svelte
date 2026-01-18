@@ -19,11 +19,13 @@
 	let gridClass = $derived.by(() => {
 		switch (musicStore.listType) {
 			case MusicListType.All:
-				return 'grid-rows-[min-content_min-content_auto]';
+				return 'grid-rows-[min-content_min-content_auto_min-content]';
 			case MusicListType.Music:
-				return '';
+				return 'grid-rows-[auto_min-content]';
+			case MusicListType.Folder:
+				return 'grid-rows-[min-content_auto_min-content]';
 			default:
-				return 'grid-rows-[min-content_auto]';
+				return 'grid-rows-[auto_min-content]';
 		}
 	});
 </script>
@@ -46,6 +48,6 @@
 		{#if [MusicListType.All, MusicListType.Music, MusicListType.Folder, MusicListType.Playlist].includes(musicStore.listType)}
 			<MusicList />
 		{/if}
+		<PlayerBar />
 	</div>
-	<PlayerBar />
 {/if}

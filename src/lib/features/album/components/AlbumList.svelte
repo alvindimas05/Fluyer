@@ -46,7 +46,12 @@
 
 <svelte:window onresize={vm.updateItemWidth} />
 
-<div class="w-full" style="height: {vm.isHorizontal ? vm.itemHeight : window.innerHeight}px;">
+<div
+	class="w-full"
+	style="height: {vm.isHorizontal
+		? vm.itemHeight
+		: window.innerHeight - filterStore.bar.height - playerBarStore.height}px;"
+>
 	{#key vm.isHorizontal}
 		<VList
 			onwheel={vm.isHorizontal ? vm.onMouseWheel : undefined}
@@ -55,10 +60,7 @@
 			horizontal={vm.isHorizontal}
 			style="padding-bottom: {vm.isHorizontal
 				? 0
-				: playerBarStore.height +
-					filterStore.bar.height +
-					mobileStore.navigationBarHeight +
-					mobileStore.statusBarHeight}px;"
+				: mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
 			getKey={(_, i) => i}
 			bind:this={vm.virtualizerHandle}
 		>
