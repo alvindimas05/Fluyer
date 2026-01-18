@@ -14,6 +14,7 @@
 	// Calculate sidebar width (2 columns)
 	let sidebarWidth = $derived(vm.state.itemWidth * sidebarStore.hiddenColumnCount);
 
+	const extraToleranceWidth = 10;
 	function shouldHideHorizontalItem(index: number): boolean {
 		if (!sidebarStore.showType) return false;
 
@@ -24,11 +25,11 @@
 
 		if (sidebarStore.showType === SidebarType.Left) {
 			// Hide if item overlaps with left sidebar area
-			return itemLeft < sidebarWidth;
+			return itemLeft < sidebarWidth - extraToleranceWidth;
 		}
 		if (sidebarStore.showType === SidebarType.Right) {
 			// Hide if item overlaps with right sidebar area
-			return itemRight > viewportWidth - sidebarWidth;
+			return itemRight > viewportWidth - sidebarWidth + extraToleranceWidth;
 		}
 		return false;
 	}
