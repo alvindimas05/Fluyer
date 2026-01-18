@@ -52,23 +52,22 @@
 						style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
 					>
 						{#each list as item, indexInRow}
-							{#if !shouldHideItem(indexInRow)}
-								<div
-									class="animate__animated animate__fadeIn"
-									style="animation-duration: {isLinux() ? '350ms' : '500ms'};"
-								>
-									{#if 'duration' in item}
-										<MusicItem music={item} />
-									{:else}
-										<MusicItem folder={item} />
-									{/if}
-								</div>
-							{:else}
-								<div
-									class="animate__animated animate__fadeOut"
-									style="animation-duration: 300ms;"
-								></div>
-							{/if}
+							<div
+								class="animate__animated {shouldHideItem(indexInRow)
+									? 'animate__fadeOut'
+									: 'animate__fadeIn'}"
+								style="animation-duration: {isLinux() ? '350ms' : '500ms'}; {shouldHideItem(
+									indexInRow
+								)
+									? 'pointer-events: none;'
+									: ''}"
+							>
+								{#if 'duration' in item}
+									<MusicItem music={item} />
+								{:else}
+									<MusicItem folder={item} />
+								{/if}
+							</div>
 						{/each}
 					</div>
 				{/snippet}

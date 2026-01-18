@@ -64,35 +64,29 @@
 		>
 			{#snippet children(dataList, index)}
 				{#if vm.isHorizontal}
-					{#if !shouldHideHorizontalItem(index)}
-						<div
-							class="animate__animated animate__fadeIn"
-							style="width: {vm.state.itemWidth}px; animation-duration: {isLinux() ? '350ms' : '500ms'};"
-						>
-							<AlbumItem musicList={dataList} {index} />
-						</div>
-					{:else}
-						<div
-							class="animate__animated animate__fadeOut"
-							style="width: {vm.state.itemWidth}px; animation-duration: {isLinux() ? '350ms' : '500ms'};"
-						></div>
-					{/if}
+					<div
+						class="animate__animated {shouldHideHorizontalItem(index)
+							? 'animate__fadeOut'
+							: 'animate__fadeIn'}"
+						style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
+							? '350ms'
+							: '500ms'}; {shouldHideHorizontalItem(index) ? 'pointer-events: none;' : ''}"
+					>
+						<AlbumItem musicList={dataList} {index} />
+					</div>
 				{:else}
 					<div class="flex">
 						{#each dataList as musicList, dataIndex}
-							{#if !shouldHideGridItem(dataIndex)}
-								<div
-									class="animate__animated animate__fadeIn"
-									style="width: {vm.state.itemWidth}px; animation-duration: 300ms;"
-								>
-									<AlbumItem {musicList} index={index * vm.state.columnCount + dataIndex} />
-								</div>
-							{:else}
-								<div
-									class="animate__animated animate__fadeOut"
-									style="width: {vm.state.itemWidth}px; animation-duration: 300ms;"
-								></div>
-							{/if}
+							<div
+								class="animate__animated {shouldHideGridItem(dataIndex)
+									? 'animate__fadeOut'
+									: 'animate__fadeIn'}"
+								style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
+									? '350ms'
+									: '500ms'}; {shouldHideGridItem(dataIndex) ? 'pointer-events: none;' : ''}"
+							>
+								<AlbumItem {musicList} index={index * vm.state.columnCount + dataIndex} />
+							</div>
 						{/each}
 					</div>
 				{/if}
