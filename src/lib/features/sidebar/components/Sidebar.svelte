@@ -153,11 +153,11 @@
 			p-3
 			{isShowing
 			? type === SidebarType.Right
-				? 'animate__slideInRight'
-				: 'animate__slideInLeft'
+				? 'animate__fadeInRight'
+				: 'animate__fadeInLeft'
 			: type === SidebarType.Right
-				? 'animate__slideOutRight'
-				: 'animate__slideOutLeft'}
+				? 'animate__fadeOutRight'
+				: 'animate__fadeOutLeft'}
             {props.class}
 		"
 		style="
