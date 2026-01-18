@@ -5,6 +5,7 @@ import filterStore from '$lib/stores/filter.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { type MusicData, MusicListType } from '$lib/features/music/types';
 import sidebarStore from '$lib/stores/sidebar.svelte';
+import scrollStore from '$lib/stores/scroll.svelte';
 import { onMount } from 'svelte';
 
 const RESPONSIVE_RULES = [
@@ -96,6 +97,10 @@ function scrollTo(index: number) {
 	virtualizerHandle.scrollToIndex(index, { align: 'nearest', smooth: true });
 }
 
+function saveScrollOffset(offset: number) {
+	scrollStore.albumList = offset;
+}
+
 export function useAlbumList() {
 	$effect(() => {
 		sidebarStore.swipeMinimumTop = paddingTop + itemHeight;
@@ -106,7 +111,13 @@ export function useAlbumList() {
 		musicStore.albumListUi.scrollIndex = -1;
 	});
 
-	onMount(updateItemWidth);
+	onMount(() => {
+		updateItemWidth();
+		// Restore scroll position after component mounts
+		if (scrollStore.albumList > 0 && virtualizerHandle) {
+			virtualizerHandle.scrollTo(scrollStore.albumList);
+		}
+	});
 
 	return {
 		state,
@@ -132,6 +143,7 @@ export function useAlbumList() {
 		},
 
 		onMouseWheel,
-		updateItemWidth
+		updateItemWidth,
+		saveScrollOffset
 	};
 }

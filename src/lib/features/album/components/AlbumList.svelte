@@ -64,6 +64,7 @@
 				: mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
 			getKey={(_, i) => i}
 			bind:this={vm.virtualizerHandle}
+			onscroll={(offset: number) => vm.saveScrollOffset(offset)}
 		>
 			{#snippet children(dataList, index)}
 				{#if vm.isHorizontal}

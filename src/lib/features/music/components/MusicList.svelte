@@ -35,7 +35,13 @@
 <div class="relative h-full px-3">
 	{#if chunkedData.length > 0 && vm.state.columnCount}
 		{#key chunkedData}
-			<VList class="scrollbar-hidden" data={chunkedData} getKey={(_, i) => i}>
+			<VList
+			class="scrollbar-hidden"
+			data={chunkedData}
+			getKey={(_, i) => i}
+			bind:this={vm.virtualizerHandle}
+			onscroll={(offset: number) => vm.saveScrollOffset(offset)}
+		>
 				{#snippet children(list)}
 					<div
 						class="grid gap-x-6"
