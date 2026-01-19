@@ -45,6 +45,24 @@
 		return matchesSearch && matchesAlbum;
 	}
 
+	// Calculate visual indices for items that are visible references
+	const visualIndices = $derived.by(() => {
+		const map = new Map<number, number>();
+		let count = 0;
+		// Reactively depend on filter properties
+		const search = filterStore.search;
+		const album = filterStore.album;
+
+		if (vm.data) {
+			vm.data.forEach((item, index) => {
+				if (isVisible(item)) {
+					map.set(index, count++);
+				}
+			});
+		}
+		return map;
+	});
+
 	function observeElement(node: HTMLElement, key: string) {
 		if (!observer) {
 			observer = new IntersectionObserver(
@@ -76,7 +94,11 @@
 	}
 
 	function shouldHideItem(index: number): boolean {
-		const indexInRow = index % vm.state.columnCount;
+		if (!visualIndices.has(index)) return true; // Should be hidden anyway if not in visual map
+
+		const visualIndex = visualIndices.get(index)!;
+		const indexInRow = visualIndex % vm.state.columnCount;
+
 		if (sidebarStore.showType === SidebarType.Left) {
 			return indexInRow < sidebarStore.hiddenColumnCount / 2;
 		}
