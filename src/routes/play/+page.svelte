@@ -23,9 +23,12 @@
 	}
 
 	function scrollToSelectedLyric() {
-		document.getElementById('selected-lyric')?.scrollIntoView({
-			block: window.innerWidth > 768 ? 'center' : 'start',
-			behavior: 'smooth'
+		// Wait for the next frame so the selected lyric's size has updated
+		requestAnimationFrame(() => {
+			document.getElementById('selected-lyric')?.scrollIntoView({
+				block: window.innerWidth > 768 ? 'center' : 'start',
+				behavior: 'smooth'
+			});
 		});
 	}
 
