@@ -8,11 +8,43 @@
 	import { SidebarType } from '$lib/features/sidebar/types';
 	import { isLinux } from '$lib/platform';
 
+	import { type MusicData } from '$lib/features/music/types';
+
 	const vm = useAlbumList();
 
 	// Track visibility of items using IntersectionObserver
 	let visibleItems = $state<Set<number>>(new Set());
 	let observer: IntersectionObserver | null = null;
+
+	function isVisible(musicList: MusicData[]) {
+		const search = filterStore.search.toLowerCase();
+		const firstItem = musicList[0];
+
+		if (!filterStore.search && !filterStore.album) return true;
+
+		return (
+			(filterStore.album && firstItem.album === filterStore.album.name) ||
+			firstItem.album?.toLowerCase().includes(search) ||
+			firstItem.albumArtist?.toLowerCase().includes(search)
+		);
+	}
+
+	const visualIndices = $derived.by(() => {
+		const map = new Map<number, number>();
+		let count = 0;
+		// Reactively depend on filter properties
+		const search = filterStore.search;
+		const album = filterStore.album;
+
+		if (vm.data) {
+			vm.data.forEach((item, index) => {
+				if (isVisible(item)) {
+					map.set(index, count++);
+				}
+			});
+		}
+		return map;
+	});
 
 	function observeElement(node: HTMLElement, index: number) {
 		if (!observer) {
@@ -47,9 +79,12 @@
 	const extraToleranceWidth = 10;
 	function shouldHideHorizontalItem(index: number): boolean {
 		if (!sidebarStore.showType) return false;
+		if (!visualIndices.has(index)) return true;
 
-		// Calculate item's position relative to viewport
-		const itemLeft = index * vm.state.itemWidth - vm.state.scrollLeft;
+		const visualIndex = visualIndices.get(index)!;
+
+		// Calculate item's position relative to viewport using visual index
+		const itemLeft = visualIndex * vm.state.itemWidth - vm.state.scrollLeft;
 		const itemRight = itemLeft + vm.state.itemWidth;
 		const viewportWidth = window.innerWidth;
 
@@ -65,7 +100,11 @@
 	}
 
 	function shouldHideGridItem(index: number): boolean {
-		const indexInRow = index % vm.state.columnCount;
+		if (!visualIndices.has(index)) return true;
+
+		const visualIndex = visualIndices.get(index)!;
+		const indexInRow = visualIndex % vm.state.columnCount;
+
 		if (sidebarStore.showType === SidebarType.Left) {
 			return indexInRow < sidebarStore.hiddenColumnCount;
 		}
@@ -75,7 +114,7 @@
 		return false;
 	}
 
-	let scrollContainer: HTMLDivElement;
+	let scrollContainer = $state<HTMLDivElement>();
 
 	function handleScroll(e: Event) {
 		const target = e.target as HTMLDivElement;
@@ -85,7 +124,7 @@
 	function handleWheel(e: WheelEvent) {
 		if (vm.isHorizontal && e.deltaX === 0) {
 			e.preventDefault();
-			scrollContainer.scrollLeft += e.deltaY;
+			if (scrollContainer) scrollContainer.scrollLeft += e.deltaY;
 		}
 	}
 </script>
@@ -102,7 +141,7 @@
 		<!-- Horizontal layout -->
 		<div
 			bind:this={scrollContainer}
-			class="flex h-full overflow-x-auto scrollbar-hidden"
+			class="scrollbar-hidden flex h-full overflow-x-auto"
 			onscroll={handleScroll}
 			onwheel={handleWheel}
 			style="padding-bottom: 0;"
@@ -110,12 +149,13 @@
 			{#each vm.data as musicList, index}
 				<div
 					use:observeElement={index}
-					class="flex-shrink-0 animate__animated {shouldHideHorizontalItem(index)
+					class="animate__animated flex-shrink-0 {shouldHideHorizontalItem(index)
 						? 'animate__fadeOut'
 						: 'animate__fadeIn'}"
 					style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
 						? '350ms'
 						: '500ms'}; {shouldHideHorizontalItem(index) ? 'pointer-events: none;' : ''}"
+					style:display={isVisible(musicList) ? undefined : 'none'}
 				>
 					<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
 				</div>
@@ -124,7 +164,7 @@
 	{:else}
 		<!-- Grid layout -->
 		<div
-			class="h-full overflow-y-auto scrollbar-hidden"
+			class="scrollbar-hidden h-full overflow-y-auto"
 			style="padding-bottom: {mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
 		>
 			<div
@@ -140,6 +180,7 @@
 						style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
 							? '350ms'
 							: '500ms'}; {shouldHideGridItem(index) ? 'pointer-events: none;' : ''}"
+						style:display={isVisible(musicList) ? undefined : 'none'}
 					>
 						<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
 					</div>

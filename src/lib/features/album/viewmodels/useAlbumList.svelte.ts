@@ -55,17 +55,8 @@ let data: MusicData[][] = $derived.by(() => {
 	const search = filterStore.search.toLowerCase();
 	let list = musicStore.albumList;
 
-	if (search || filterStore.album) {
-		list = list.filter((musicList) => {
-			const firstItem = musicList[0];
-			return (
-				(filterStore.album && firstItem.album === filterStore.album.name) ||
-				firstItem.album?.toLowerCase().includes(search) ||
-				firstItem.albumArtist?.toLowerCase().includes(search)
-			);
-		});
-	}
-
+	// We return the full list and handle visibility via CSS to prevent component recycling issues
+	// when filtering (search or album selection).
 	if (!filterStore.bar.sortAsc) list = list.toReversed();
 
 	return list;
