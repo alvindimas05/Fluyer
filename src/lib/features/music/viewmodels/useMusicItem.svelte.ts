@@ -10,21 +10,25 @@ import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 import ToastService from '$lib/services/ToastService.svelte';
 import { COVER_ART_DEBOUNCE_DELAY } from '$lib/services/CoverArtService.svelte';
 
-export function useMusicItem(music: MusicData, folder?: FolderData) {
+export function useMusicItem(music?: MusicData, folder?: FolderData, getVisible: () => boolean = () => true) {
 	let albumImage = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
 
 	// Use $effect with cleanup to cancel pending requests when component unmounts
 	$effect(() => {
+		// Only fetch image when visible
+		const isVisible = getVisible();
+		if (!isVisible) return;
+
 		let cancelled = false;
 		const timeoutId = setTimeout(async () => {
 			if (cancelled) return;
 			const imagePromise = folder
 				? MetadataService.getFolderCoverArt(folder.path)
-				: MetadataService.getMusicCoverArt(music);
-			
+				: music ? MetadataService.getMusicCoverArt(music) : Promise.resolve(null);
+
 			albumImage = imagePromise;
-			
+
 			// Track the blob URL for cleanup
 			const url = await imagePromise;
 			if (!cancelled && url) {
@@ -53,14 +57,14 @@ export function useMusicItem(music: MusicData, folder?: FolderData) {
 				? folder.path.split(FolderService.PATH_SEPARATOR).pop()
 				: folder.path;
 		}
-		return musicStore.listType === MusicListType.Folder ? music.filename : music.title;
+		return musicStore.listType === MusicListType.Folder ? music?.filename : music?.title;
 	});
 
 	const mediumLabel = $derived.by(() => {
 		if (folder) return 'Folder';
 
-		const album = music.album ? `${music.album} ${MusicConfig.separatorAlbum} ` : '';
-		const artist = music.artist ?? MusicConfig.defaultArtist;
+		const album = music?.album ? `${music.album} ${MusicConfig.separatorAlbum} ` : '';
+		const artist = music?.artist ?? MusicConfig.defaultArtist;
 		return `${album}${artist}`;
 	});
 
@@ -72,10 +76,10 @@ export function useMusicItem(music: MusicData, folder?: FolderData) {
 			return `${folderMusic.length} ${MusicConfig.separator} ${durationText}`;
 		}
 
-		const duration = ProgressService.formatDuration(music.duration);
+		const duration = ProgressService.formatDuration(music?.duration ?? 0);
 		const resolution = [
-			music.bitsPerSample && `${music.bitsPerSample}-bit`,
-			MetadataService.formatSampleRate(music.sampleRate)
+			music?.bitsPerSample && `${music.bitsPerSample}-bit`,
+			MetadataService.formatSampleRate(music?.sampleRate)
 		].filter(Boolean);
 
 		if (!resolution.length) return duration;
@@ -102,8 +106,8 @@ export function useMusicItem(music: MusicData, folder?: FolderData) {
 			await QueueService.resetAndAddList(musicList);
 		}
 
-		const title = music.title ?? music.filename ?? MusicConfig.defaultTitle;
-		const artist = music.artist ?? MusicConfig.defaultArtist;
+		const title = music?.title ?? music?.filename ?? MusicConfig.defaultTitle;
+		const artist = music?.artist ?? MusicConfig.defaultArtist;
 		ToastService.info(`Added music to queue: ${title} ${MusicConfig.separatorAlbum} ${artist}`);
 	}
 

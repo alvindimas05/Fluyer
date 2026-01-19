@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { VList } from 'virtua/svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import filterStore from '$lib/stores/filter.svelte';
 	import playerBarStore from '$lib/stores/playerbar.svelte';
@@ -10,6 +9,37 @@
 	import { isLinux } from '$lib/platform';
 
 	const vm = useAlbumList();
+
+	// Track visibility of items using IntersectionObserver
+	let visibleItems = $state<Set<number>>(new Set());
+	let observer: IntersectionObserver | null = null;
+
+	function observeElement(node: HTMLElement, index: number) {
+		if (!observer) {
+			observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						const itemIndex = entry.target.getAttribute('data-item-index');
+						if (itemIndex !== null) {
+							if (entry.isIntersecting) {
+								visibleItems = new Set([...visibleItems, parseInt(itemIndex)]);
+							}
+						}
+					});
+				},
+				{ threshold: 0 }
+			);
+		}
+
+		node.setAttribute('data-item-index', index.toString());
+		observer.observe(node);
+
+		return {
+			destroy() {
+				observer?.unobserve(node);
+			}
+		};
+	}
 
 	// Calculate sidebar width (2 columns)
 	let sidebarWidth = $derived(vm.state.itemWidth * sidebarStore.hiddenColumnCount);
@@ -34,7 +64,8 @@
 		return false;
 	}
 
-	function shouldHideGridItem(indexInRow: number): boolean {
+	function shouldHideGridItem(index: number): boolean {
+		const indexInRow = index % vm.state.columnCount;
 		if (sidebarStore.showType === SidebarType.Left) {
 			return indexInRow < sidebarStore.hiddenColumnCount;
 		}
@@ -43,58 +74,77 @@
 		}
 		return false;
 	}
+
+	let scrollContainer: HTMLDivElement;
+
+	function handleScroll(e: Event) {
+		const target = e.target as HTMLDivElement;
+		vm.state.scrollLeft = target.scrollLeft;
+	}
+
+	function handleWheel(e: WheelEvent) {
+		if (vm.isHorizontal && e.deltaX === 0) {
+			e.preventDefault();
+			scrollContainer.scrollLeft += e.deltaY;
+		}
+	}
 </script>
 
 <svelte:window onresize={vm.updateItemWidth} />
 
 <div
-	class="w-full"
+	class="w-screen"
 	style="height: {vm.isHorizontal
 		? vm.itemHeight
 		: window.innerHeight - filterStore.bar.height - playerBarStore.height}px;"
 >
-	{#key vm.isHorizontal}
-		<VList
-			onwheel={vm.isHorizontal ? vm.onMouseWheel : undefined}
-			data={vm.data}
-			class="scrollbar-hidden {vm.isHorizontal ? '' : 'overflow-y-clip'}"
-			horizontal={vm.isHorizontal}
-			style="padding-bottom: {vm.isHorizontal
-				? 0
-				: mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
-			getKey={(_, i) => i}
-			bind:this={vm.virtualizerHandle}
-			onscroll={(offset: number) => vm.saveScrollOffset(offset)}
+	{#if vm.isHorizontal}
+		<!-- Horizontal layout -->
+		<div
+			bind:this={scrollContainer}
+			class="flex h-full overflow-x-auto scrollbar-hidden"
+			onscroll={handleScroll}
+			onwheel={handleWheel}
+			style="padding-bottom: 0;"
 		>
-			{#snippet children(dataList, index)}
-				{#if vm.isHorizontal}
+			{#each vm.data as musicList, index}
+				<div
+					use:observeElement={index}
+					class="flex-shrink-0 animate__animated {shouldHideHorizontalItem(index)
+						? 'animate__fadeOut'
+						: 'animate__fadeIn'}"
+					style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
+						? '350ms'
+						: '500ms'}; {shouldHideHorizontalItem(index) ? 'pointer-events: none;' : ''}"
+				>
+					<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
+				</div>
+			{/each}
+		</div>
+	{:else}
+		<!-- Grid layout -->
+		<div
+			class="h-full overflow-y-auto scrollbar-hidden"
+			style="padding-bottom: {mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
+		>
+			<div
+				class="grid"
+				style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
+			>
+				{#each vm.data as musicList, index}
 					<div
-						class="animate__animated {shouldHideHorizontalItem(index)
+						use:observeElement={index}
+						class="animate__animated {shouldHideGridItem(index)
 							? 'animate__fadeOut'
 							: 'animate__fadeIn'}"
 						style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
 							? '350ms'
-							: '500ms'}; {shouldHideHorizontalItem(index) ? 'pointer-events: none;' : ''}"
+							: '500ms'}; {shouldHideGridItem(index) ? 'pointer-events: none;' : ''}"
 					>
-						<AlbumItem musicList={dataList} {index} />
+						<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
 					</div>
-				{:else}
-					<div class="flex">
-						{#each dataList as musicList, dataIndex}
-							<div
-								class="animate__animated {shouldHideGridItem(dataIndex)
-									? 'animate__fadeOut'
-									: 'animate__fadeIn'}"
-								style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
-									? '350ms'
-									: '500ms'}; {shouldHideGridItem(dataIndex) ? 'pointer-events: none;' : ''}"
-							>
-								<AlbumItem {musicList} index={index * vm.state.columnCount + dataIndex} />
-							</div>
-						{/each}
-					</div>
-				{/if}
-			{/snippet}
-		</VList>
-	{/key}
+				{/each}
+			</div>
+		</div>
+	{/if}
 </div>

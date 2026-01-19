@@ -38,7 +38,7 @@
 	<!--{/if}-->
 	<MusicQueueList />
 	<Menu />
-	<div class="grid h-full {gridClass}" style="padding-top: {paddingTop}px;">
+	<div class="grid w-full h-full {gridClass}" style="padding-top: {paddingTop}px;">
 		{#if [MusicListType.All, MusicListType.Album, MusicListType.Playlist].includes(musicStore.listType)}
 			<AlbumList />
 		{/if}

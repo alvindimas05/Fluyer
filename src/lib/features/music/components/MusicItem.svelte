@@ -7,17 +7,18 @@
 	import { MusicConfig } from '$lib/constants/MusicConfig';
 
 	interface Props {
-		music: MusicData;
+		music?: MusicData;
 		folder?: FolderData;
+		visible?: boolean;
 	}
 
-	let { music, folder }: Props = $props();
+	let { music, folder, visible = true }: Props = $props();
 
-	const vm = useMusicItem(music, folder);
+	const vm = useMusicItem(music, folder, () => visible);
 	const shouldAnimate = isDesktop() && !isLinux();
 </script>
 
-<div class="relative text-sm md:text-base">
+<div class="w-full relative text-sm md:text-base">
 	<div class="grid grid-cols-[max-content_auto_max-content] py-2">
 		{#await vm.albumImage}
 			<div class="relative aspect-square h-12 w-12 md:h-14 md:w-14"></div>

@@ -5,7 +5,7 @@ import { type AlbumData, type MusicData, MusicListType } from '$lib/features/mus
 import ProgressService from '$lib/services/ProgressService.svelte';
 import { COVER_ART_DEBOUNCE_DELAY } from '$lib/services/CoverArtService.svelte';
 
-export function useAlbumItem(musicList: MusicData[], index: number) {
+export function useAlbumItem(musicList: MusicData[], index: number, getVisible: () => boolean = () => true) {
 	let music = $derived(musicList[0]);
 
 	let isValidFilterAlbum = $derived(
@@ -17,6 +17,10 @@ export function useAlbumItem(musicList: MusicData[], index: number) {
 
 	// Use $effect with cleanup to cancel pending requests when component unmounts
 	$effect(() => {
+		// Only fetch image when visible
+		const isVisible = getVisible();
+		if (!isVisible) return;
+
 		let cancelled = false;
 		const timeoutId = setTimeout(async () => {
 			if (cancelled) return;

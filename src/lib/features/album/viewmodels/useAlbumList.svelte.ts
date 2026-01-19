@@ -1,12 +1,9 @@
-import type { VirtualizerHandle } from 'virtua/svelte';
 import { isMobile } from '$lib/platform';
 import mobileStore from '$lib/stores/mobile.svelte';
 import filterStore from '$lib/stores/filter.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { type MusicData, MusicListType } from '$lib/features/music/types';
 import sidebarStore from '$lib/stores/sidebar.svelte';
-import scrollStore from '$lib/stores/scroll.svelte';
-import { onMount } from 'svelte';
 
 const RESPONSIVE_RULES = [
 	[1536, 2.01, 0.125], // xhdpi 2xl → 12.5%
@@ -26,7 +23,6 @@ const RESPONSIVE_RULES = [
 	[640, 0, 0.33334] // sm → 33.3334%
 ];
 
-let virtualizerHandle: VirtualizerHandle;
 let state = $state({
 	columnCount: 2,
 	itemWidth: window.innerWidth * 0.5,
@@ -53,15 +49,7 @@ function updateItemWidth() {
 	state.itemWidth = 0.5 * width;
 }
 
-function chunkArray(array: MusicData[][], size: number) {
-	const chunks: MusicData[][][] = [];
-	for (let i = 0; i < array.length; i += size) {
-		chunks.push(array.slice(i, i + size));
-	}
-	return chunks;
-}
-
-let data: any[] = $derived.by(() => {
+let data: MusicData[][] = $derived.by(() => {
 	if (!Array.isArray(musicStore.albumList)) return [];
 
 	const search = filterStore.search.toLowerCase();
@@ -80,26 +68,8 @@ let data: any[] = $derived.by(() => {
 
 	if (!filterStore.bar.sortAsc) list = list.toReversed();
 
-	return musicStore.listType === MusicListType.Album ? chunkArray(list, state.columnCount) : list;
+	return list;
 });
-
-function onMouseWheel(e: WheelEvent & { currentTarget: EventTarget & HTMLDivElement }) {
-	if (e.deltaX === 0) {
-		e.preventDefault();
-		e.currentTarget.scrollLeft += e.deltaY;
-	}
-	state.scrollLeft = e.currentTarget.scrollLeft;
-	musicStore.albumListUi.scrollLeft = e.currentTarget.scrollLeft;
-}
-
-function scrollTo(index: number) {
-	if (index < 0 || !virtualizerHandle) return;
-	virtualizerHandle.scrollToIndex(index, { align: 'nearest', smooth: true });
-}
-
-function saveScrollOffset(offset: number) {
-	scrollStore.albumList = offset;
-}
 
 export function useAlbumList() {
 	$effect(() => {
@@ -107,27 +77,11 @@ export function useAlbumList() {
 	});
 
 	$effect(() => {
-		scrollTo(musicStore.albumListUi.scrollIndex);
-		musicStore.albumListUi.scrollIndex = -1;
-	});
-
-	onMount(() => {
 		updateItemWidth();
-		// Restore scroll position after component mounts
-		if (scrollStore.albumList > 0 && virtualizerHandle) {
-			virtualizerHandle.scrollTo(scrollStore.albumList);
-		}
 	});
 
 	return {
 		state,
-
-		get virtualizerHandle() {
-			return virtualizerHandle;
-		},
-		set virtualizerHandle(value: VirtualizerHandle) {
-			virtualizerHandle = value;
-		},
 
 		get isHorizontal() {
 			return isHorizontal;
@@ -142,8 +96,6 @@ export function useAlbumList() {
 			return data;
 		},
 
-		onMouseWheel,
-		updateItemWidth,
-		saveScrollOffset
+		updateItemWidth
 	};
 }

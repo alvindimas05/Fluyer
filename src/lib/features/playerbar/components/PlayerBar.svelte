@@ -29,11 +29,11 @@
 	$effect(() => {
 		musicStore.currentMusic;
 		let cancelled = false;
-		
+
 		(async () => {
 			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
 			albumImage = imagePromise;
-			
+
 			const url = await imagePromise;
 			if (!cancelled && url && url.startsWith('blob:')) {
 				if (currentBlobUrl) {

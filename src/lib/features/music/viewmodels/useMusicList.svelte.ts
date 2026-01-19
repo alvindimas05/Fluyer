@@ -1,14 +1,9 @@
-import type { VirtualizerHandle } from 'virtua/svelte';
 import { MusicListType } from '$lib/features/music/types';
 import musicStore from '$lib/stores/music.svelte';
 import filterStore from '$lib/stores/filter.svelte';
 import folderStore from '$lib/stores/folder.svelte';
-import scrollStore from '$lib/stores/scroll.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
 import FolderService from '$lib/services/FolderService.svelte';
-import { onMount } from 'svelte';
-
-let virtualizerHandle: VirtualizerHandle;
 
 const RESPONSIVE_RULES = [
 	[1280, 2.01, 4],
@@ -87,38 +82,20 @@ const data = $derived.by(() => {
 	return finalList;
 });
 
-function saveScrollOffset(offset: number) {
-	scrollStore.musicList = offset;
-}
-
 export function useMusicList() {
 	$effect(() => {
 		musicStore.listType;
 		updateSize();
 	});
 
-	onMount(() => {
-		// Restore scroll position after component mounts
-		if (scrollStore.musicList > 0 && virtualizerHandle) {
-			virtualizerHandle.scrollTo(scrollStore.musicList);
-		}
-	});
-
 	return {
 		state,
-
-		get virtualizerHandle() {
-			return virtualizerHandle;
-		},
-		set virtualizerHandle(value: VirtualizerHandle) {
-			virtualizerHandle = value;
-		},
 
 		get data() {
 			return data;
 		},
 
-		updateSize,
-		saveScrollOffset
+		updateSize
 	};
 }
+
