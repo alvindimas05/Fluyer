@@ -1,36 +1,34 @@
 import { IconType } from '$lib/ui/icon/types';
-import {
-	Undo2,
-	BrushCleaning,
-	GripVertical,
-	FileText,
-	Expand,
-	Settings,
-	Lock,
-	Search,
-	Music2,
-	Pause,
-	Play,
-	HelpCircle,
-	ListPlus,
-	Repeat,
-	Repeat1,
-	Shuffle,
-	SkipBack,
-	SkipForward,
-	Volume2,
-	VolumeX,
-	Trash2,
-	XCircle,
-	KeyboardMusic,
-	CircleX,
-	ChartNoAxesColumn,
-	Folder,
-	ChevronDown,
-	ChevronUp,
-	Grid2x2Icon,
-	DiscAlbum
-} from '@lucide/svelte';
+import Undo2 from '@lucide/svelte/icons/undo-2';
+import BrushCleaning from '@lucide/svelte/icons/brush-cleaning';
+import GripVertical from '@lucide/svelte/icons/grip-vertical';
+import FileText from '@lucide/svelte/icons/file-text';
+import Expand from '@lucide/svelte/icons/expand';
+import Settings from '@lucide/svelte/icons/settings';
+import Lock from '@lucide/svelte/icons/lock';
+import Search from '@lucide/svelte/icons/search';
+import Music2 from '@lucide/svelte/icons/music-2';
+import Pause from '@lucide/svelte/icons/pause';
+import Play from '@lucide/svelte/icons/play';
+import HelpCircle from '@lucide/svelte/icons/help-circle';
+import ListPlus from '@lucide/svelte/icons/list-plus';
+import Repeat from '@lucide/svelte/icons/repeat';
+import Repeat1 from '@lucide/svelte/icons/repeat-1';
+import Shuffle from '@lucide/svelte/icons/shuffle';
+import SkipBack from '@lucide/svelte/icons/skip-back';
+import SkipForward from '@lucide/svelte/icons/skip-forward';
+import Volume2 from '@lucide/svelte/icons/volume-2';
+import VolumeX from '@lucide/svelte/icons/volume-x';
+import Trash2 from '@lucide/svelte/icons/trash-2';
+import XCircle from '@lucide/svelte/icons/x-circle';
+import KeyboardMusic from '@lucide/svelte/icons/keyboard-music';
+import CircleX from '@lucide/svelte/icons/circle-x';
+import ChartNoAxesColumn from '@lucide/svelte/icons/chart-no-axes-column';
+import Folder from '@lucide/svelte/icons/folder';
+import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import ChevronUp from '@lucide/svelte/icons/chevron-up';
+import Grid2x2Icon from '@lucide/svelte/icons/grid-2x2';
+import DiscAlbum from '@lucide/svelte/icons/disc-album';
 
 const iconRegistryLucide = {
 	[IconType.Unknown]: HelpCircle,
