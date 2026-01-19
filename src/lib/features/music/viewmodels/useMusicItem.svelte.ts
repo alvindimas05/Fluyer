@@ -12,20 +12,38 @@ import { COVER_ART_DEBOUNCE_DELAY } from '$lib/services/CoverArtService.svelte';
 
 export function useMusicItem(music: MusicData, folder?: FolderData) {
 	let albumImage = $state<Promise<string | null> | null>(null);
+	let currentBlobUrl: string | null = null;
 
 	// Use $effect with cleanup to cancel pending requests when component unmounts
 	$effect(() => {
 		let cancelled = false;
 		const timeoutId = setTimeout(async () => {
 			if (cancelled) return;
-			albumImage = folder
+			const imagePromise = folder
 				? MetadataService.getFolderCoverArt(folder.path)
 				: MetadataService.getMusicCoverArt(music);
+			
+			albumImage = imagePromise;
+			
+			// Track the blob URL for cleanup
+			const url = await imagePromise;
+			if (!cancelled && url) {
+				// Revoke previous blob URL if exists
+				if (currentBlobUrl) {
+					URL.revokeObjectURL(currentBlobUrl);
+				}
+				currentBlobUrl = url;
+			}
 		}, COVER_ART_DEBOUNCE_DELAY);
 
 		return () => {
 			cancelled = true;
 			clearTimeout(timeoutId);
+			// Revoke blob URL on cleanup
+			if (currentBlobUrl) {
+				URL.revokeObjectURL(currentBlobUrl);
+				currentBlobUrl = null;
+			}
 		};
 	});
 
