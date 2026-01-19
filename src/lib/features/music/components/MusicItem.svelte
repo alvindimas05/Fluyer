@@ -4,7 +4,6 @@
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';
 	import { isDesktop, isLinux } from '$lib/platform';
-	import { MusicConfig } from '$lib/constants/MusicConfig';
 
 	interface Props {
 		music?: MusicData;
@@ -14,11 +13,15 @@
 
 	let { music, folder, visible = true }: Props = $props();
 
-	const vm = useMusicItem(music, folder, () => visible);
+	const vm = useMusicItem(
+		() => music,
+		() => folder,
+		() => visible
+	);
 	const shouldAnimate = isDesktop() && !isLinux();
 </script>
 
-<div class="w-full relative text-sm md:text-base">
+<div class="relative w-full text-sm md:text-base">
 	<div class="grid grid-cols-[max-content_auto_max-content] py-2">
 		{#await vm.albumImage}
 			<div class="relative aspect-square h-12 w-12 md:h-14 md:w-14"></div>
@@ -38,7 +41,7 @@
 					</div>
 					<div class="absolute inset-0 flex items-center justify-center">
 						<img
-							class="h-4 w-4 rounded-sm object-cover shadow-md md:h-5 md:w-5 mt-2 {shouldAnimate &&
+							class="mt-2 h-4 w-4 rounded-sm object-cover shadow-md md:h-5 md:w-5 {shouldAnimate &&
 								'animate__animated animate__fadeIn'}"
 							src={image}
 							alt="Album"

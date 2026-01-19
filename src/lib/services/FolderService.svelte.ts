@@ -57,7 +57,6 @@ const FolderService = {
 
 		const musicPath = FolderService.normalizePath(music.path);
 		const folderPath = FolderService.normalizePath(folder.path);
-		console.log(musicPath, folderPath);
 
 		if (!musicPath.startsWith(folderPath)) return false;
 

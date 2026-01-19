@@ -11,7 +11,11 @@
 
 	let { musicList, index, visible = true }: Props = $props();
 
-	const vm = useAlbumItem(musicList, index, () => visible);
+	const vm = useAlbumItem(
+		() => musicList,
+		() => index,
+		() => visible
+	);
 </script>
 
 <div class="col-auto row-[1] h-fit px-3 pb-3">

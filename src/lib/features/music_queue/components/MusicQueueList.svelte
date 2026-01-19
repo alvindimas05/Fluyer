@@ -163,6 +163,10 @@
 	onMount(() => {
 		initMuuri();
 		$effect(refreshGrid);
+
+		return () => {
+			if (muuri) muuri.destroy(true);
+		};
 	});
 
 	// Reactively update draggable state when dependencies change

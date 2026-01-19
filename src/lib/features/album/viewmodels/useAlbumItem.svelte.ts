@@ -5,7 +5,13 @@ import { type AlbumData, type MusicData, MusicListType } from '$lib/features/mus
 import ProgressService from '$lib/services/ProgressService.svelte';
 import { COVER_ART_DEBOUNCE_DELAY } from '$lib/services/CoverArtService.svelte';
 
-export function useAlbumItem(musicList: MusicData[], index: number, getVisible: () => boolean = () => true) {
+export function useAlbumItem(
+	getMusicList: () => MusicData[],
+	getIndex: () => number,
+	getVisible: () => boolean = () => true
+) {
+	const musicList = $derived(getMusicList());
+	const index = $derived(getIndex());
 	let music = $derived(musicList[0]);
 
 	let isValidFilterAlbum = $derived(

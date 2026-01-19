@@ -1,4 +1,5 @@
 import { type FolderData, type MusicData, MusicListType } from '../types';
+import filterStore from '$lib/stores/filter.svelte';
 import MetadataService from '$lib/services/MetadataService.svelte';
 import folderStore from '$lib/stores/folder.svelte';
 import FolderService from '$lib/services/FolderService.svelte';
@@ -10,9 +11,16 @@ import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 import ToastService from '$lib/services/ToastService.svelte';
 import { COVER_ART_DEBOUNCE_DELAY } from '$lib/services/CoverArtService.svelte';
 
-export function useMusicItem(music?: MusicData, folder?: FolderData, getVisible: () => boolean = () => true) {
+export function useMusicItem(
+	getMusic: () => MusicData | undefined,
+	getFolder: () => FolderData | undefined,
+	getVisible: () => boolean = () => true
+) {
 	let albumImage = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
+
+	const music = $derived(getMusic());
+	const folder = $derived(getFolder());
 
 	// Use $effect with cleanup to cancel pending requests when component unmounts
 	$effect(() => {
@@ -115,7 +123,33 @@ export function useMusicItem(music?: MusicData, folder?: FolderData, getVisible:
 		if (folder) folderStore.currentFolder = folder;
 	}
 
+	const isVisible = $derived.by(() => {
+		const search = filterStore.search.toLowerCase();
+
+		if (folder) {
+			return folder.path.toLowerCase().includes(search);
+		}
+
+		if (!music) return false;
+
+		const album = filterStore.album;
+		const hasSearch = search.length > 0;
+		const matchesSearch =
+			!hasSearch ||
+			[music.album, music.title, music.artist, music.albumArtist].some((v) =>
+				v?.toLowerCase().includes(search)
+			);
+
+		const hasAlbum = !!album;
+		const matchesAlbum = !hasAlbum || album.name === music.album;
+
+		return matchesSearch && matchesAlbum;
+	});
+
 	return {
+		get isVisible() {
+			return isVisible;
+		},
 		get albumImage() {
 			return albumImage;
 		},

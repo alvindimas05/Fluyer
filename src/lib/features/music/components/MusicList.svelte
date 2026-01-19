@@ -5,6 +5,8 @@
 	import { SidebarType } from '$lib/features/sidebar/types';
 	import { isLinux } from '$lib/platform';
 
+	import filterStore from '$lib/stores/filter.svelte';
+
 	const vm = useMusicList();
 
 	// Track visibility of items using IntersectionObserver
@@ -16,6 +18,31 @@
 			return `music-${item.path}`;
 		}
 		return `folder-${item.path}`;
+	}
+
+	function isVisible(item: any): boolean {
+		const search = filterStore.search.toLowerCase();
+
+		// Folder check
+		if (!('duration' in item)) {
+			// Folder
+			return item.path.toLowerCase().includes(search);
+		}
+
+		// Music check
+		const music = item;
+		const album = filterStore.album;
+		const hasSearch = search.length > 0;
+		const matchesSearch =
+			!hasSearch ||
+			[music.album, music.title, music.artist, music.albumArtist].some((v) =>
+				v?.toLowerCase().includes(search)
+			);
+
+		const hasAlbum = !!album;
+		const matchesAlbum = !hasAlbum || album.name === music.album;
+
+		return matchesSearch && matchesAlbum;
 	}
 
 	function observeElement(node: HTMLElement, key: string) {
@@ -39,6 +66,9 @@
 		observer.observe(node);
 
 		return {
+			update(newKey: string) {
+				node.setAttribute('data-item-key', newKey);
+			},
 			destroy() {
 				observer?.unobserve(node);
 			}
@@ -59,7 +89,7 @@
 
 <svelte:window onresize={vm.updateSize} />
 
-<div class="relative w-full h-full px-3 overflow-y-auto scrollbar-hidden">
+<div class="scrollbar-hidden relative h-full w-full overflow-y-auto px-3">
 	{#if vm.data && vm.data.length > 0 && vm.state.columnCount}
 		<div
 			class="grid gap-x-6"
@@ -73,6 +103,7 @@
 					style="animation-duration: {isLinux() ? '350ms' : '500ms'}; {shouldHideItem(index)
 						? 'pointer-events: none;'
 						: ''}"
+					style:display={isVisible(item) ? undefined : 'none'}
 				>
 					{#if 'duration' in item}
 						<MusicItem music={item} visible={visibleItems.has(itemKey)} />
