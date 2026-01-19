@@ -11,13 +11,45 @@
 	import musicStore from '$lib/stores/music.svelte';
 	import MetadataService from '$lib/services/MetadataService.svelte';
 	import QueueService from '$lib/services/QueueService.svelte';
+	import { onDestroy } from 'svelte';
 
 	let { music, uuid }: Props = $props();
 
 	let index = $derived(musicStore.listIds.indexOf(uuid));
 	let isPlaying = $derived(musicStore.currentIndex === index);
 	let isPrevious = $derived(index < musicStore.currentIndex);
-	let albumImage = $derived(MetadataService.getMusicCoverArt(music));
+	let albumImage = $state<Promise<string | null> | null>(null);
+	let currentBlobUrl: string | null = null;
+
+	// Fetch album image with blob URL cleanup
+	$effect(() => {
+		music;
+		let cancelled = false;
+		
+		(async () => {
+			const imagePromise = MetadataService.getMusicCoverArt(music);
+			albumImage = imagePromise;
+			
+			const url = await imagePromise;
+			if (!cancelled && url && url.startsWith('blob:')) {
+				if (currentBlobUrl) {
+					URL.revokeObjectURL(currentBlobUrl);
+				}
+				currentBlobUrl = url;
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	onDestroy(() => {
+		if (currentBlobUrl) {
+			URL.revokeObjectURL(currentBlobUrl);
+			currentBlobUrl = null;
+		}
+	});
 
 	function removePlaylist() {
 		QueueService.remove(index);

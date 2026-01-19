@@ -28,6 +28,7 @@
 	let previousColors: string[] = [];
 	let previousBackgroundColors: string[][] = [];
 	let currentAlbumImage: string | null = null;
+	let currentAlbumBlobUrl: string | null = null;
 
 	// Transition management
 	let targetCanvas: HTMLCanvasElement | null = null;
@@ -156,7 +157,21 @@
 	}
 
 	async function getColors(force = false): Promise<string[] | null> {
-		currentAlbumImage = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
+		const newAlbumImage = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
+
+		// Revoke old blob URL before storing new one
+		if (currentAlbumBlobUrl && newAlbumImage !== currentAlbumImage) {
+			URL.revokeObjectURL(currentAlbumBlobUrl);
+			currentAlbumBlobUrl = null;
+		}
+
+		currentAlbumImage = newAlbumImage;
+
+		// Track new blob URL
+		if (currentAlbumImage && currentAlbumImage.startsWith('blob:')) {
+			currentAlbumBlobUrl = currentAlbumImage;
+		}
+
 		if (previousBackground === currentAlbumImage && !force) return null;
 
 		let image = new Image();
@@ -440,6 +455,12 @@
 
 		// Clear pool
 		canvasPool.length = 0;
+
+		// Revoke blob URL
+		if (currentAlbumBlobUrl) {
+			URL.revokeObjectURL(currentAlbumBlobUrl);
+			currentAlbumBlobUrl = null;
+		}
 	});
 </script>
 

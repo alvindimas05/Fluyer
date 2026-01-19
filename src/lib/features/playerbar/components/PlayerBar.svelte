@@ -14,7 +14,7 @@
 	import ProgressBar from '$lib/ui/components/ProgressBar.svelte';
 	import View from '$lib/ui/components/View.svelte';
 	import Icon from '$lib/ui/icon/Icon.svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import QueueService from '$lib/services/QueueService.svelte';
 	import LibraryService from '$lib/services/LibraryService.svelte';
 
@@ -22,7 +22,38 @@
 	let oldMusic: MusicData | undefined = $state(undefined);
 	let title = $state(MusicConfig.defaultTitle);
 	let artist = $state(MusicConfig.defaultArtist);
-	let albumImage = $derived(MetadataService.getMusicCoverArt(musicStore.currentMusic));
+	let albumImage = $state<Promise<string | null> | null>(null);
+	let currentBlobUrl: string | null = null;
+
+	// Fetch album image with blob URL cleanup
+	$effect(() => {
+		musicStore.currentMusic;
+		let cancelled = false;
+		
+		(async () => {
+			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
+			albumImage = imagePromise;
+			
+			const url = await imagePromise;
+			if (!cancelled && url && url.startsWith('blob:')) {
+				if (currentBlobUrl) {
+					URL.revokeObjectURL(currentBlobUrl);
+				}
+				currentBlobUrl = url;
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	});
+
+	onDestroy(() => {
+		if (currentBlobUrl) {
+			URL.revokeObjectURL(currentBlobUrl);
+			currentBlobUrl = null;
+		}
+	});
 
 	let isPlaying = $derived(musicStore.isPlaying);
 	let progressPercentage = $state(0);

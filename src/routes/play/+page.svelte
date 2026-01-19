@@ -16,12 +16,14 @@
 	import QueueService from '$lib/services/QueueService.svelte';
 	import LibraryService from '$lib/services/LibraryService.svelte';
 	import LyricService, { type MusicLyric } from '$lib/services/LyricService.svelte';
+	import { onDestroy } from 'svelte';
 
 	let music = $derived(musicStore.currentMusic);
 	let progressPercentage = $derived(0);
 	let progressDurationText = $derived('');
 	let progressDurationNegativeText = $derived('');
-	let albumImage = $derived(MetadataService.getMusicCoverArt(musicStore.currentMusic));
+	let albumImage = $state<Promise<string | null> | null>(null);
+	let currentBlobUrl: string | null = null;
 
 	let lyrics: MusicLyric[] = $state([]);
 	let selectedLyricIndex = $state(0);
@@ -149,14 +151,40 @@
 		resetSelectedLyricIndex();
 	});
 
+	// Fetch album image with blob URL cleanup
 	$effect(() => {
 		musicStore.currentIndex;
-		albumImage = MetadataService.getMusicCoverArt(musicStore.currentMusic);
+		let cancelled = false;
+
+		(async () => {
+			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
+			albumImage = imagePromise;
+
+			const url = await imagePromise;
+			if (!cancelled && url && url.startsWith('blob:')) {
+				if (currentBlobUrl) {
+					URL.revokeObjectURL(currentBlobUrl);
+				}
+				currentBlobUrl = url;
+			}
+		})();
+
 		resetLyrics();
+
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	$effect(() => {
 		volumePercentage = musicStore.volumePercentage;
+	});
+
+	onDestroy(() => {
+		if (currentBlobUrl) {
+			URL.revokeObjectURL(currentBlobUrl);
+			currentBlobUrl = null;
+		}
 	});
 </script>
 
