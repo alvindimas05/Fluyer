@@ -1,166 +1,33 @@
 <script lang="ts">
-	import { PageRoutes } from '$lib/constants/PageRoutes';
 	import { IconType } from '$lib/ui/icon/types';
 	import { MusicConfig } from '$lib/constants/MusicConfig';
-	import { type MusicData, RepeatMode } from '$lib/features/music/types';
-	import MetadataService from '$lib/services/MetadataService.svelte';
+	import { RepeatMode } from '$lib/features/music/types';
 	import musicStore from '$lib/stores/music.svelte';
 	import settingStore from '$lib/stores/setting.svelte';
 	import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 	import ProgressService from '$lib/services/ProgressService.svelte';
-	import PageService from '$lib/services/PageService.svelte';
-	import playerBarStore from '$lib/stores/playerbar.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import ProgressBar from '$lib/ui/components/ProgressBar.svelte';
 	import View from '$lib/ui/components/View.svelte';
 	import Icon from '$lib/ui/icon/Icon.svelte';
-	import { onDestroy, onMount } from 'svelte';
-	import QueueService from '$lib/services/QueueService.svelte';
-	import LibraryService from '$lib/services/LibraryService.svelte';
+	import { usePlayerBar } from '../viewmodels/usePlayerBar.svelte';
 
-	let element: HTMLDivElement;
-	let oldMusic: MusicData | undefined = $state(undefined);
-	let title = $state(MusicConfig.defaultTitle);
-	let artist = $state(MusicConfig.defaultArtist);
-	let albumImage = $state<Promise<string | null> | null>(null);
-	let currentBlobUrl: string | null = null;
-
-	// Fetch album image with blob URL cleanup
-	$effect(() => {
-		musicStore.currentMusic;
-		let cancelled = false;
-
-		(async () => {
-			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
-			albumImage = imagePromise;
-
-			const url = await imagePromise;
-			if (!cancelled && url && url.startsWith('blob:')) {
-				if (currentBlobUrl) {
-					URL.revokeObjectURL(currentBlobUrl);
-				}
-				currentBlobUrl = url;
-			}
-		})();
-
-		return () => {
-			cancelled = true;
-		};
-	});
-
-	onDestroy(() => {
-		if (currentBlobUrl) {
-			URL.revokeObjectURL(currentBlobUrl);
-			currentBlobUrl = null;
-		}
-	});
-
-	let isPlaying = $derived(musicStore.isPlaying);
-	let progressPercentage = $state(0);
-	let volumePercentage = $state(0);
-
-	const gridRight = (() => {
-		if (settingStore.ui.showRepeatButton && settingStore.ui.showShuffleButton)
-			return 'grid-cols-[repeat(5,auto)]';
-		if (settingStore.ui.showRepeatButton && settingStore.ui.showShuffleButton)
-			return 'grid-cols-[repeat(4,auto)]';
-		return 'grid-cols-[repeat(3,auto)]';
-	})();
-
-	function handleButtonPlayPause() {
-		if (musicStore.isPlaying) {
-			musicStore.isPlaying = false;
-			MusicPlayerService.pause();
-		} else {
-			MusicPlayerService.play();
-		}
-	}
-
-	function handleButtonPrevious() {
-		MusicPlayerService.previous();
-	}
-
-	function handleButtonNext() {
-		MusicPlayerService.next();
-	}
-
-	async function handleButtonShuffle() {
-		await MusicPlayerService.pause();
-
-		await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(musicStore.queue));
-
-		await MusicPlayerService.play();
-		ProgressService.start();
-	}
-
-	function redirectToPlay() {
-		PageService.goTo(PageRoutes.PLAY);
-	}
-
-	function handleVolumeButton() {
-		musicStore.volume = musicStore.volume > 0 ? 0 : 1;
-	}
-
-	function refresh() {
-		let music = musicStore.currentMusic;
-
-		if (!music) {
-			title = MusicConfig.defaultTitle;
-			artist = MusicConfig.defaultArtist;
-			return;
-		}
-
-		if (oldMusic && oldMusic.path === music.path) return;
-
-		oldMusic = music;
-		title = music.title!;
-		artist = music.artist;
-	}
-
-	function handleProgressClick(percentage: number) {
-		MusicPlayerService.seekByPercentage(percentage);
-	}
-
-	function handleVolumeProgressClick(percentage: number) {
-		musicStore.volume = percentage / 100;
-	}
-
-	function updatePlayerBarHeight() {
-		playerBarStore.height = element.offsetHeight;
-	}
-
-	$effect(() => {
-		progressPercentage = musicStore.progressPercentage;
-	});
-
-	$effect(() => {
-		volumePercentage = musicStore.volumePercentage;
-	});
-
-	$effect(() => {
-		musicStore.currentIndex;
-		musicStore.list;
-		refresh();
-	});
-
-	onMount(() => {
-		updatePlayerBarHeight();
-	});
+	const vm = usePlayerBar();
 </script>
 
-<svelte:window onresize={updatePlayerBarHeight} />
+<svelte:window onresize={vm.updatePlayerBarHeight} />
 
 <div
 	class="animate__animated animate__slideInUp w-full px-3 pt-3"
 	style="padding-bottom: {mobileStore.navigationBarHeight > 12
 		? mobileStore.navigationBarHeight
 		: 12}px;"
-	bind:this={element}
+	bind:this={vm.element}
 >
 	<ProgressBar
 		bind:value={musicStore.progressValue}
-		{progressPercentage}
-		onProgressClick={handleProgressClick}
+		progressPercentage={vm.progressPercentage}
+		onProgressClick={vm.handleProgressClick}
 		min={MusicConfig.min}
 		max={MusicConfig.max}
 		step={MusicConfig.step}
@@ -174,17 +41,17 @@
 	<View class="rounded-full px-3 py-2 hover:px-4 hover:py-3">
 		<div class="grid w-full grid-cols-[auto_min-content] py-1 md:grid-cols-3">
 			<div class="flex items-center ps-1 sm:gap-x-1">
-				<button class="hidden w-10 sm:block md:w-12 lg:w-12" onclick={handleButtonPrevious}
+				<button class="hidden w-10 sm:block md:w-12 lg:w-12" onclick={vm.handleButtonPrevious}
 					><Icon type={IconType.Previous} /></button
 				>
-				<button class="w-10 md:w-12 lg:w-12" onclick={handleButtonPlayPause}>
-					{#if isPlaying}
+				<button class="w-10 md:w-12 lg:w-12" onclick={vm.handleButtonPlayPause}>
+					{#if vm.isPlaying}
 						<Icon type={IconType.Pause} />
 					{:else}
 						<Icon type={IconType.Play} />
 					{/if}
 				</button>
-				<button class="hidden w-10 sm:block md:w-12 lg:w-12" onclick={handleButtonNext}
+				<button class="hidden w-10 sm:block md:w-12 lg:w-12" onclick={vm.handleButtonNext}
 					><Icon type={IconType.Next} /></button
 				>
 			</div>
@@ -194,8 +61,8 @@
                 md:flex md:text-[15px]"
 			>
 				<div class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]">
-					<button onclick={redirectToPlay}>
-						{#await albumImage}
+					<button onclick={vm.redirectToPlay}>
+						{#await vm.albumImage}
 							<div class="aspect-square w-full"></div>
 						{:then image}
 							<img
@@ -209,18 +76,18 @@
 						<!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
 						<p class="animate-scroll-overflow-text"></p>
 						<p class="animate-scroll-overflow-text overflow-x-hidden whitespace-nowrap font-medium">
-							{title}
+							{vm.title}
 						</p>
 						<p
 							class="animate-scroll-overflow-text overflow-x-hidden whitespace-nowrap text-opacity-80"
 						>
-							{artist}
+							{vm.artist}
 						</p>
 					</div>
 				</div>
 			</div>
 			<div class="hidden justify-end md:grid">
-				<div class="grid items-center gap-3 {gridRight}">
+				<div class="grid items-center gap-3 {vm.gridRight}">
 					{#if settingStore.ui.showRepeatButton}
 						<button
 							class="w-6 {musicStore.repeatMode === RepeatMode.None ? 'opacity-60' : ''}"
@@ -236,15 +103,15 @@
 						</button>
 					{/if}
 					{#if settingStore.ui.showShuffleButton}
-						<button class="w-6" onclick={handleButtonShuffle}>
+						<button class="w-6" onclick={vm.handleButtonShuffle}>
 							<Icon type={IconType.Shuffle} />
 						</button>
 					{/if}
 					<button
 						class="w-6 {settingStore.bitPerfectMode ? 'pointer-events-none' : ''}"
-						onclick={handleVolumeButton}
+						onclick={vm.handleVolumeButton}
 					>
-						{#if volumePercentage > 0}
+						{#if vm.volumePercentage > 0}
 							<Icon type={IconType.Speaker} />
 						{:else}
 							<Icon type={IconType.Mute} />
@@ -253,8 +120,8 @@
 					<div class="relative w-24 {settingStore.bitPerfectMode ? 'pointer-events-none' : ''}">
 						<ProgressBar
 							bind:value={musicStore.volume}
-							progressPercentage={volumePercentage}
-							onProgressClick={handleVolumeProgressClick}
+							progressPercentage={vm.volumePercentage}
+							onProgressClick={vm.handleVolumeProgressClick}
 							min={MusicConfig.vmin}
 							max={MusicConfig.vmax}
 							step={MusicConfig.vstep}
