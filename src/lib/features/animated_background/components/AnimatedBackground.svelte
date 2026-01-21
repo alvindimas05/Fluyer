@@ -77,7 +77,7 @@
 			hsl.s = 0.6;
 			hsl.l = 0.6;
 		} else {
-			hsl.l = Math.max(0.1, Math.min(0.7, hsl.l));
+			// hsl.l = Math.max(0.1, Math.min(0.7, hsl.l));
 		}
 
 		const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
