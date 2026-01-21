@@ -61,8 +61,7 @@
 				<div class="aspect-square w-full"></div>
 			{:then image}
 				<img
-					class="aspect-square w-full rounded-lg object-cover shadow-lg {vm.shouldAnimate &&
-						'animate__animated animate__fadeIn'}"
+					class="aspect-square w-full rounded-lg object-cover shadow-lg animate__animated animate__fadeIn"
 					src={image}
 					alt="Music Album"
 				/>
