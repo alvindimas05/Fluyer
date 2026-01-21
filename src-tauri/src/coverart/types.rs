@@ -10,6 +10,7 @@ pub struct CoverArtRequest {
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum CoverArtRequestStatus {
+    Pending,
     Loaded,
     Failed,
 }
