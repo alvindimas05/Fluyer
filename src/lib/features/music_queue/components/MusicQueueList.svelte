@@ -14,6 +14,10 @@
 	let draggingEnabled = $state(!isMobile());
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
+	let dragOffsetY = $state(0);
+	let currentY = $state(0);
+	let itemRefs: HTMLElement[] = [];
+	let scrollContainer: HTMLDivElement;
 
 	// Track visibility of items using IntersectionObserver
 	let visibleItems = $state<Set<string>>(new Set());
@@ -65,56 +69,109 @@
 		};
 	}
 
-	// Drag and drop handlers
-	function handleDragStart(e: DragEvent, index: number) {
-		if (!draggingEnabled || index === musicStore.currentIndex) {
-			e.preventDefault();
-			return;
-		}
+	// Register item ref
+	function registerItem(node: HTMLElement, index: number) {
+		itemRefs[index] = node;
+		return {
+			update(newIndex: number) {
+				itemRefs[newIndex] = node;
+			},
+			destroy() {
+				// Clean up reference
+			}
+		};
+	}
+
+	// Pointer-based drag handlers
+	function handlePointerDown(e: PointerEvent, index: number) {
+		if (!draggingEnabled || index === musicStore.currentIndex) return;
+
+		const target = e.currentTarget as HTMLElement;
+		target.setPointerCapture(e.pointerId);
+
 		draggedIndex = index;
-		if (e.dataTransfer) {
-			e.dataTransfer.effectAllowed = 'move';
-			e.dataTransfer.setData('text/plain', index.toString());
+		const rect = target.getBoundingClientRect();
+		dragOffsetY = e.clientY - rect.top;
+		currentY = e.clientY;
+	}
+
+	function handlePointerMove(e: PointerEvent) {
+		if (draggedIndex === null) return;
+
+		currentY = e.clientY;
+
+		// Calculate which item we're over
+		const containerRect = scrollContainer.getBoundingClientRect();
+		const relativeY = e.clientY - containerRect.top + scrollContainer.scrollTop;
+
+		let newOverIndex = null;
+		for (let i = 0; i < itemRefs.length; i++) {
+			const item = itemRefs[i];
+			if (!item) continue;
+			const rect = item.getBoundingClientRect();
+			const itemTop = rect.top - containerRect.top + scrollContainer.scrollTop;
+			const itemMiddle = itemTop + rect.height / 2;
+
+			if (relativeY < itemMiddle) {
+				newOverIndex = i;
+				break;
+			}
+			newOverIndex = i + 1;
+		}
+
+		if (newOverIndex !== null && newOverIndex !== draggedIndex) {
+			dragOverIndex = Math.min(newOverIndex, musicStore.queue.length - 1);
 		}
 	}
 
-	function handleDragOver(e: DragEvent, index: number) {
-		e.preventDefault();
-		if (e.dataTransfer) {
-			e.dataTransfer.dropEffect = 'move';
-		}
-		dragOverIndex = index;
-	}
+	async function handlePointerUp(e: PointerEvent) {
+		if (draggedIndex === null) return;
 
-	function handleDragLeave() {
-		dragOverIndex = null;
-	}
-
-	async function handleDrop(e: DragEvent, toIndex: number) {
-		e.preventDefault();
-		dragOverIndex = null;
-
-		if (draggedIndex === null || draggedIndex === toIndex) {
-			draggedIndex = null;
-			return;
-		}
+		const target = e.currentTarget as HTMLElement;
+		target.releasePointerCapture(e.pointerId);
 
 		const fromIndex = draggedIndex;
-		draggedIndex = null;
+		const toIndex = dragOverIndex ?? draggedIndex;
 
-		// Update queueIds to match new order
-		let queueIds = [...musicStore.queueIds];
-		const uuid = queueIds[fromIndex];
-		queueIds.splice(fromIndex, 1);
-		queueIds.splice(toIndex, 0, uuid);
-		musicStore.queueIds = queueIds;
-
-		await QueueService.moveTo(fromIndex, toIndex);
-	}
-
-	function handleDragEnd() {
 		draggedIndex = null;
 		dragOverIndex = null;
+
+		if (fromIndex !== toIndex) {
+			// Update queueIds to match new order
+			let queueIds = [...musicStore.queueIds];
+			const uuid = queueIds[fromIndex];
+			queueIds.splice(fromIndex, 1);
+			queueIds.splice(toIndex, 0, uuid);
+			musicStore.queueIds = queueIds;
+
+			await QueueService.moveTo(fromIndex, toIndex);
+		}
+	}
+
+	function handlePointerCancel() {
+		draggedIndex = null;
+		dragOverIndex = null;
+	}
+
+	// Calculate transform for dragged item
+	function getDragTransform(index: number): string {
+		if (draggedIndex !== index) return '';
+
+		const item = itemRefs[index];
+		if (!item) return '';
+
+		// Use offsetParent (the relative container) to calculate stable layout position
+		// ignoring the current transform
+		const parent = item.offsetParent as HTMLElement;
+		if (!parent) return '';
+
+		const parentRect = parent.getBoundingClientRect();
+		// Layout top relative to viewport = parent viewport top + item offset top
+		const currentLayoutTop = parentRect.top + item.offsetTop;
+
+		const targetY = currentY - dragOffsetY;
+
+		return `translateY(${targetY - currentLayoutTop}px)`;
 	}
 </script>
 
@@ -134,28 +191,37 @@
 			</button>
 		{/if}
 	</div>
-	<div class="scrollbar-hidden w-full flex-1 overflow-auto">
+	<div bind:this={scrollContainer} class="scrollbar-hidden w-full flex-1 overflow-auto">
 		<div class="relative w-full">
 			{#each musicStore.queue as music, index (musicStore.queueIds[index])}
 				{@const uuid = musicStore.queueIds[index]}
 				{@const isPlaying = index === musicStore.currentIndex}
-				{@const isDragOver = dragOverIndex === index}
+				{@const isDragging = draggedIndex === index}
+				{@const showDropIndicator =
+					dragOverIndex === index && draggedIndex !== null && draggedIndex !== index}
 				<div
 					use:observeElement={uuid}
+					use:registerItem={index}
 					role="listitem"
-					class="w-full transition-transform duration-150"
-					class:opacity-50={draggedIndex === index}
-					class:border-t-2={isDragOver && draggedIndex !== null && draggedIndex < index}
-					class:border-b-2={isDragOver && draggedIndex !== null && draggedIndex > index}
-					class:border-blue-500={isDragOver}
-					draggable={draggingEnabled && !isPlaying}
-					ondragstart={(e) => handleDragStart(e, index)}
-					ondragover={(e) => handleDragOver(e, index)}
-					ondragleave={handleDragLeave}
-					ondrop={(e) => handleDrop(e, index)}
-					ondragend={handleDragEnd}
+					class="w-full select-none"
+					class:z-50={isDragging}
+					class:shadow-lg={isDragging}
+					class:cursor-grabbing={isDragging}
+					class:cursor-grab={draggingEnabled && !isPlaying && !isDragging}
+					style:transform={getDragTransform(index)}
+					style:transition={isDragging ? 'none' : 'transform 150ms ease'}
+					onpointerdown={(e) => handlePointerDown(e, index)}
+					onpointermove={handlePointerMove}
+					onpointerup={handlePointerUp}
+					onpointercancel={handlePointerCancel}
 				>
+					{#if showDropIndicator && draggedIndex !== null && draggedIndex > index}
+						<div class="h-1 w-full bg-white bg-opacity-20"></div>
+					{/if}
 					<MusicQueueItem {music} {uuid} visible={isSidebarVisible && visibleItems.has(uuid)} />
+					{#if showDropIndicator && draggedIndex !== null && draggedIndex < index}
+						<div class="h-1 w-full bg-white bg-opacity-20"></div>
+					{/if}
 				</div>
 			{/each}
 		</div>
