@@ -23,7 +23,6 @@ const musicStore = $state({
 	volume: 1,
 
 	// UI State
-	reset: false,
 	albumListUi: {
 		scrollIndex: -1,
 		scrollLeft: -1

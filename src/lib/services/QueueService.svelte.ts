@@ -62,6 +62,9 @@ const QueueService = {
 	addList: async (list: MusicData[]) => {
 		await TauriQueueAPI.add(list);
 		musicStore.queue.push(...list);
+		// Generate new UUIDs for added items
+		const newIds = list.map(() => crypto.randomUUID());
+		musicStore.queueIds.push(...newIds);
 	},
 	resetAndAdd: (music: MusicData) => {
 		return QueueService.resetAndAddList([music]);
@@ -69,10 +72,11 @@ const QueueService = {
 	resetAndAddList: async (list: MusicData[]) => {
 		await TauriMusicAPI.sendCommand(TauriMusicCommand.Clear);
 
-		musicStore.reset = true;
+		// Generate new UUIDs for all items
+		const newIds = list.map(() => crypto.randomUUID());
+		musicStore.queueIds = newIds;
 		musicStore.queue = list;
 		await TauriQueueAPI.add(list);
-		musicStore.reset = false;
 	},
 	goTo: (index: number) => {
 		return TauriQueueAPI.goTo(index);

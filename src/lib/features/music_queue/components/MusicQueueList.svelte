@@ -16,7 +16,7 @@
 	let gridElement: HTMLDivElement;
 	let muuri: Muuri;
 	let dragging = $state(!isMobile());
-	let oldQueue: MusicData[] = [];
+	let oldQueueIds: string[] = [];
 	let fromIndex = $state(-1);
 
 	function cleanQueue() {
@@ -70,11 +70,12 @@
 
 			dragging = false;
 
-			let playlistIds = musicStore.listIds;
-			const uuid = playlistIds[fromIndex];
-			playlistIds.splice(fromIndex, 1);
-			playlistIds.splice(toIndex, 0, uuid);
-			musicStore.listIds = playlistIds;
+			// Update queueIds to match new order
+			let queueIds = [...musicStore.queueIds];
+			const uuid = queueIds[fromIndex];
+			queueIds.splice(fromIndex, 1);
+			queueIds.splice(toIndex, 0, uuid);
+			musicStore.queueIds = queueIds;
 
 			// Temporarily disable dragging during queue update
 			await QueueService.moveTo(fromIndex, toIndex);
@@ -112,18 +113,38 @@
 	}
 
 	function refreshGrid() {
-		const queue = musicStore.queue!!;
-		// Determine which items were removed from the queue
-		const removedIndices = musicStore.reset
-			? oldQueue.map((_, index) => index) // Reset: remove all items
-			: oldQueue
-					.map((music, index) => (!queue.includes(music) ? index : -1))
-					.filter((index) => index !== -1); // Keep only valid indices
+		const queue = musicStore.queue;
+		const queueIds = musicStore.queueIds;
+
+		if (!queue || queue.length === 0) {
+			// Clear all items if queue is empty
+			const items = muuri.getItems();
+			if (items.length > 0) {
+				for (const item of items) {
+					unmount(item.getElement()!!);
+				}
+				muuri.remove(items, { removeElements: true });
+			}
+			oldQueueIds = [];
+			return;
+		}
+
+		// Find removed IDs (in old but not in new)
+		const newIdSet = new Set(queueIds);
+		const oldIdSet = new Set(oldQueueIds);
+
+		const removedIds = oldQueueIds.filter((id) => !newIdSet.has(id));
+		const addedIds = queueIds.filter((id) => !oldIdSet.has(id));
 
 		// Remove items from Muuri grid
-		if (removedIndices.length > 0) {
+		if (removedIds.length > 0) {
 			const items = muuri.getItems();
-			const removedItems = removedIndices.map((i) => items[i]);
+			const removedItems = removedIds
+				.map((id) => {
+					const idx = oldQueueIds.indexOf(id);
+					return idx >= 0 && idx < items.length ? items[idx] : null;
+				})
+				.filter((item): item is Muuri.Item => item !== null);
 
 			// Unmount Svelte components before removing
 			for (const item of removedItems) {
@@ -133,31 +154,21 @@
 			muuri.remove(removedItems, { removeElements: true });
 		}
 
-		// Determine which items are new to the queue
-		const newItems = musicStore.reset
-			? queue.map((music, index) => ({ music, index })) // Reset: all items are new
-			: queue
-					.map((music, index) => (!oldQueue.includes(music) ? { music, index } : null))
-					.filter((item): item is { music: MusicData; index: number } => item !== null);
-
 		// Add new items to Muuri grid
-		if (newItems.length > 0) {
-			let listIds = musicStore.reset ? [] : musicStore.listIds;
-			muuri.add(
-				newItems.map(({ music }) => {
-					const uuid = crypto.randomUUID();
-					listIds.push(uuid);
-					return createItem(music, uuid);
-				})
-			);
-			musicStore.listIds = listIds;
+		if (addedIds.length > 0) {
+			const newElements = addedIds.map((id) => {
+				const idx = queueIds.indexOf(id);
+				const music = queue[idx];
+				return createItem(music, id);
+			});
+			muuri.add(newElements);
 		}
 
 		// Update touch behavior for all queue items
 		elementToggleDraggable();
 
-		// Store current queue state for next comparison
-		oldQueue = queue;
+		// Store current queue IDs for next comparison
+		oldQueueIds = [...queueIds];
 	}
 
 	onMount(() => {
