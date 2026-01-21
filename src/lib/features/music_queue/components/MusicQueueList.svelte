@@ -1,23 +1,26 @@
 <script lang="ts">
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';
-	import Muuri from 'muuri';
-	import { mount, onMount, unmount } from 'svelte';
 	import { isMobile } from '$lib/platform';
 	import Sidebar from '$lib/features/sidebar/components/Sidebar.svelte';
-	import type { MusicData } from '$lib/features/music/types';
 	import ProgressService from '$lib/services/ProgressService.svelte';
 	import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import { SidebarType } from '$lib/features/sidebar/types';
 	import QueueService from '$lib/services/QueueService.svelte';
 	import MusicQueueItem from '$lib/features/music_queue/components/MusicQueueItem.svelte';
+	import sidebarStore from '$lib/stores/sidebar.svelte';
 
-	let gridElement: HTMLDivElement;
-	let muuri: Muuri;
-	let dragging = $state(!isMobile());
-	let oldQueueIds: string[] = [];
-	let fromIndex = $state(-1);
+	let draggingEnabled = $state(!isMobile());
+	let draggedIndex = $state<number | null>(null);
+	let dragOverIndex = $state<number | null>(null);
+
+	// Track visibility of items using IntersectionObserver
+	let visibleItems = $state<Set<string>>(new Set());
+	let observer: IntersectionObserver | null = null;
+
+	// Track if sidebar is visible
+	let isSidebarVisible = $derived(sidebarStore.showType === SidebarType.Right);
 
 	function cleanQueue() {
 		MusicPlayerService.pause();
@@ -25,163 +28,94 @@
 	}
 
 	function dragToggle() {
-		dragging = !dragging;
+		draggingEnabled = !draggingEnabled;
 	}
 
-	// Initializes the Muuri grid library for drag-and-drop queue management
-	function initMuuri() {
-		muuri = new Muuri(gridElement, {
-			// Enable drag and drop functionality
-			dragEnabled: true,
+	function observeElement(node: HTMLElement, uuid: string) {
+		if (!observer) {
+			observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						const itemUuid = entry.target.getAttribute('data-uuid');
+						if (itemUuid) {
+							if (entry.isIntersecting) {
+								visibleItems = new Set([...visibleItems, itemUuid]);
+							} else {
+								const newSet = new Set(visibleItems);
+								newSet.delete(itemUuid);
+								visibleItems = newSet;
+							}
+						}
+					});
+				},
+				{ threshold: 0 }
+			);
+		}
 
-			// Configure drag behavior to move items rather than swap
-			dragSortPredicate: {
-				action: 'move'
+		node.setAttribute('data-uuid', uuid);
+		observer.observe(node);
+
+		return {
+			update(newUuid: string) {
+				node.setAttribute('data-uuid', newUuid);
 			},
-
-			// Determine whether an item can be dragged
-			dragStartPredicate: (item, e) => {
-				const itemIndex = muuri.getItems().indexOf(item);
-				const isCurrentlyPlaying = itemIndex === musicStore.currentIndex;
-				const isDraggableElement = e.target.classList.contains('muuri-draggable');
-
-				// Prevent dragging if:
-				// - Item is currently playing
-				// - Click target isn't a draggable element
-				// - Global dragging is disabled
-				return !(isCurrentlyPlaying || !isDraggableElement || !dragging);
+			destroy() {
+				observer?.unobserve(node);
 			}
-		});
-
-		// Store the starting position when drag begins
-		muuri.on('dragStart', (item, _) => {
-			if (!musicStore.list) return;
-			fromIndex = muuri.getItems().indexOf(item);
-		});
-
-		// Handle reordering when drag ends
-		muuri.on('dragEnd', async (item, _) => {
-			if (!muuri || !musicStore.list) return;
-
-			const toIndex = muuri.getItems().indexOf(item);
-
-			// No action needed if item wasn't moved
-			if (fromIndex === toIndex) return;
-
-			dragging = false;
-
-			// Update queueIds to match new order
-			let queueIds = [...musicStore.queueIds];
-			const uuid = queueIds[fromIndex];
-			queueIds.splice(fromIndex, 1);
-			queueIds.splice(toIndex, 0, uuid);
-			musicStore.queueIds = queueIds;
-
-			// Temporarily disable dragging during queue update
-			await QueueService.moveTo(fromIndex, toIndex);
-			dragging = true;
-		});
+		};
 	}
 
-	// Creates a DOM element for a queue item
-	function createItem(music: MusicData, uuid: string) {
-		const element = document.createElement('div');
-		element.className = 'queue-item absolute w-full h-fit';
-
-		// Mount the Svelte component to the element
-		mount(MusicQueueItem, { target: element, props: { music, uuid } });
-
-		return element;
-	}
-
-	// Toggles touch-action CSS property on queue items based on dragging state
-	// This enables/disables native touch scrolling during drag operations
-	function elementToggleDraggable() {
-		const elements = document.querySelectorAll('.queue-item');
-
-		if (dragging) {
-			// Disable native touch actions to allow dragging
-			elements.forEach((el) => {
-				(el as HTMLDivElement).style.touchAction = 'none';
-			});
-		} else {
-			// Re-enable native touch actions (e.g., scrolling)
-			elements.forEach((el) => {
-				(el as HTMLDivElement).style.touchAction = 'auto';
-			});
+	// Drag and drop handlers
+	function handleDragStart(e: DragEvent, index: number) {
+		if (!draggingEnabled || index === musicStore.currentIndex) {
+			e.preventDefault();
+			return;
+		}
+		draggedIndex = index;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/plain', index.toString());
 		}
 	}
 
-	function refreshGrid() {
-		const queue = musicStore.queue;
-		const queueIds = musicStore.queueIds;
+	function handleDragOver(e: DragEvent, index: number) {
+		e.preventDefault();
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'move';
+		}
+		dragOverIndex = index;
+	}
 
-		if (!queue || queue.length === 0) {
-			// Clear all items if queue is empty
-			const items = muuri.getItems();
-			if (items.length > 0) {
-				for (const item of items) {
-					unmount(item.getElement()!!);
-				}
-				muuri.remove(items, { removeElements: true });
-			}
-			oldQueueIds = [];
+	function handleDragLeave() {
+		dragOverIndex = null;
+	}
+
+	async function handleDrop(e: DragEvent, toIndex: number) {
+		e.preventDefault();
+		dragOverIndex = null;
+
+		if (draggedIndex === null || draggedIndex === toIndex) {
+			draggedIndex = null;
 			return;
 		}
 
-		// Find removed IDs (in old but not in new)
-		const newIdSet = new Set(queueIds);
-		const oldIdSet = new Set(oldQueueIds);
+		const fromIndex = draggedIndex;
+		draggedIndex = null;
 
-		const removedIds = oldQueueIds.filter((id) => !newIdSet.has(id));
-		const addedIds = queueIds.filter((id) => !oldIdSet.has(id));
+		// Update queueIds to match new order
+		let queueIds = [...musicStore.queueIds];
+		const uuid = queueIds[fromIndex];
+		queueIds.splice(fromIndex, 1);
+		queueIds.splice(toIndex, 0, uuid);
+		musicStore.queueIds = queueIds;
 
-		// Remove items from Muuri grid
-		if (removedIds.length > 0) {
-			const items = muuri.getItems();
-			const removedItems = removedIds
-				.map((id) => {
-					const idx = oldQueueIds.indexOf(id);
-					return idx >= 0 && idx < items.length ? items[idx] : null;
-				})
-				.filter((item): item is Muuri.Item => item !== null);
-
-			// Unmount Svelte components before removing
-			for (const item of removedItems) {
-				unmount(item.getElement()!!);
-			}
-
-			muuri.remove(removedItems, { removeElements: true });
-		}
-
-		// Add new items to Muuri grid
-		if (addedIds.length > 0) {
-			const newElements = addedIds.map((id) => {
-				const idx = queueIds.indexOf(id);
-				const music = queue[idx];
-				return createItem(music, id);
-			});
-			muuri.add(newElements);
-		}
-
-		// Update touch behavior for all queue items
-		elementToggleDraggable();
-
-		// Store current queue IDs for next comparison
-		oldQueueIds = [...queueIds];
+		await QueueService.moveTo(fromIndex, toIndex);
 	}
 
-	onMount(() => {
-		initMuuri();
-		$effect(refreshGrid);
-
-		return () => {
-			if (muuri) muuri.destroy(true);
-		};
-	});
-
-	// Reactively update draggable state when dependencies change
-	$effect(elementToggleDraggable);
+	function handleDragEnd() {
+		draggedIndex = null;
+		dragOverIndex = null;
+	}
 </script>
 
 <Sidebar type={SidebarType.Right} class="flex flex-col">
@@ -192,7 +126,7 @@
 		</button>
 		{#if isMobile()}
 			<button class="w-7" onclick={dragToggle}>
-				{#if dragging}
+				{#if draggingEnabled}
 					<Icon type={IconType.DragOff} />
 				{:else}
 					<Icon type={IconType.DragOn} />
@@ -201,6 +135,29 @@
 		{/if}
 	</div>
 	<div class="scrollbar-hidden w-full flex-1 overflow-auto">
-		<div class="relative w-full" bind:this={gridElement}></div>
+		<div class="relative w-full">
+			{#each musicStore.queue as music, index (musicStore.queueIds[index])}
+				{@const uuid = musicStore.queueIds[index]}
+				{@const isPlaying = index === musicStore.currentIndex}
+				{@const isDragOver = dragOverIndex === index}
+				<div
+					use:observeElement={uuid}
+					role="listitem"
+					class="w-full transition-transform duration-150"
+					class:opacity-50={draggedIndex === index}
+					class:border-t-2={isDragOver && draggedIndex !== null && draggedIndex < index}
+					class:border-b-2={isDragOver && draggedIndex !== null && draggedIndex > index}
+					class:border-blue-500={isDragOver}
+					draggable={draggingEnabled && !isPlaying}
+					ondragstart={(e) => handleDragStart(e, index)}
+					ondragover={(e) => handleDragOver(e, index)}
+					ondragleave={handleDragLeave}
+					ondrop={(e) => handleDrop(e, index)}
+					ondragend={handleDragEnd}
+				>
+					<MusicQueueItem {music} {uuid} visible={isSidebarVisible && visibleItems.has(uuid)} />
+				</div>
+			{/each}
+		</div>
 	</div>
 </Sidebar>

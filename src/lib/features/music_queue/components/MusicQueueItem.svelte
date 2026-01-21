@@ -4,6 +4,7 @@
 	interface Props {
 		music: MusicData;
 		uuid: string;
+		visible?: boolean;
 	}
 
 	import Icon from '$lib/ui/icon/Icon.svelte';
@@ -11,25 +12,29 @@
 	import musicStore from '$lib/stores/music.svelte';
 	import MetadataService from '$lib/services/MetadataService.svelte';
 	import QueueService from '$lib/services/QueueService.svelte';
-	import { onDestroy } from 'svelte';
 
-	let { music, uuid }: Props = $props();
+	let { music, uuid, visible = true }: Props = $props();
 
-	let index = $derived(musicStore.listIds.indexOf(uuid));
+	let index = $derived(musicStore.queueIds.indexOf(uuid));
 	let isPlaying = $derived(musicStore.currentIndex === index);
 	let isPrevious = $derived(index < musicStore.currentIndex);
 	let albumImage = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
 
-	// Fetch album image with blob URL cleanup
+	// Fetch album image only when visible, with blob URL cleanup
 	$effect(() => {
-		music;
+		// Track dependencies synchronously
+		const currentMusic = music;
+		const isVisible = visible;
+
+		if (!isVisible) return;
+
 		let cancelled = false;
-		
+
 		(async () => {
-			const imagePromise = MetadataService.getMusicCoverArt(music);
+			const imagePromise = MetadataService.getMusicCoverArt(currentMusic);
 			albumImage = imagePromise;
-			
+
 			const url = await imagePromise;
 			if (!cancelled && url && url.startsWith('blob:')) {
 				if (currentBlobUrl) {
@@ -41,14 +46,11 @@
 
 		return () => {
 			cancelled = true;
+			if (currentBlobUrl) {
+				URL.revokeObjectURL(currentBlobUrl);
+				currentBlobUrl = null;
+			}
 		};
-	});
-
-	onDestroy(() => {
-		if (currentBlobUrl) {
-			URL.revokeObjectURL(currentBlobUrl);
-			currentBlobUrl = null;
-		}
 	});
 
 	function removePlaylist() {
@@ -113,7 +115,7 @@
 					</div>
 				{/if}
 			</button>
-			<div class="muuri-draggable cursor-pointer"></div>
+			<div class="cursor-grab"></div>
 			<button
 				class="aspect-square h-11 w-11 md:h-12 md:w-12 lg:h-14 lg:w-14 lg:p-1 md-hdpi:h-11 md-hdpi:w-11 lg-hdpi:h-12 lg-hdpi:w-12"
 				onclick={removePlaylist}
