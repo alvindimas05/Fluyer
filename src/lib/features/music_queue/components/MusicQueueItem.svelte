@@ -104,6 +104,7 @@
 			<button
 				class="aspect-square h-11 w-11 md:h-12 md:w-12 lg:h-14 lg:w-14 md-hdpi:h-11 md-hdpi:w-11 lg-hdpi:h-12 lg-hdpi:w-12"
 				onclick={goToPlaylist}
+				onpointerdown={(e) => e.stopPropagation()}
 			>
 				{#if !isPlaying}
 					<div class="h-full w-full rounded bg-black bg-opacity-40 lg:p-1">
@@ -119,6 +120,7 @@
 			<button
 				class="aspect-square h-11 w-11 md:h-12 md:w-12 lg:h-14 lg:w-14 lg:p-1 md-hdpi:h-11 md-hdpi:w-11 lg-hdpi:h-12 lg-hdpi:w-12"
 				onclick={removePlaylist}
+				onpointerdown={(e) => e.stopPropagation()}
 			>
 				<Icon type={IconType.Remove} />
 			</button>
