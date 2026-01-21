@@ -60,3 +60,7 @@ lto = true
 codegen-units = 1
 strip = "symbols"
 panic = "abort"
+
+# FIXME: Temporary patch for Android
+[patch.crates-io]
+aws-lc-sys = { git = "https://github.com/zsdsys/aws-lc-rs", branch = "android-getentropy-fix" }
