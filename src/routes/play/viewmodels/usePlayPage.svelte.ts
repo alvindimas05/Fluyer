@@ -25,7 +25,6 @@ export function usePlayPage() {
 
     let volumePercentage = $state(musicStore.volume);
 
-    let shouldAnimate = isDesktop() && !isMobile();
 
     function handleButtonPlayPause() {
         if (musicStore.isPlaying) {
@@ -172,7 +171,6 @@ export function usePlayPage() {
         get lyrics() { return lyrics; },
         get selectedLyricIndex() { return selectedLyricIndex; },
         get volumePercentage() { return volumePercentage; },
-        get shouldAnimate() { return shouldAnimate; },
         set updateProgressText(val: boolean) { updateProgressText = val; },
 
         handleButtonPlayPause,

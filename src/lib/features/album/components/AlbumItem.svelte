@@ -37,9 +37,7 @@
 		{:then image}
 			{#if image}
 				<img
-					class="aspect-square w-full rounded-lg object-cover {isDesktop() &&
-						!isLinux() &&
-						'animate__animated animate__fadeIn'}"
+					class="aspect-square w-full rounded-lg object-cover animate__animated animate__fadeIn"
 					src={image}
 					alt="Album"
 				/>

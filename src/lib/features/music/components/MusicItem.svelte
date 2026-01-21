@@ -3,7 +3,6 @@
 	import { useMusicItem } from '../viewmodels/useMusicItem.svelte';
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';
-	import { isDesktop, isLinux } from '$lib/platform';
 
 	interface Props {
 		music?: MusicData;
@@ -18,7 +17,6 @@
 		() => folder,
 		() => visible
 	);
-	const shouldAnimate = isDesktop() && !isLinux();
 </script>
 
 <div class="relative w-full text-sm md:text-base">
@@ -28,8 +26,7 @@
 		{:then image}
 			{#if image && !folder}
 				<img
-					class="relative h-12 w-12 rounded object-cover md:h-14 md:w-14 {shouldAnimate &&
-						'animate__animated animate__fadeIn'}"
+					class="relative h-12 w-12 rounded object-cover md:h-14 md:w-14 animate__animated animate__fadeIn"
 					src={image}
 					alt="Album"
 				/>
@@ -41,8 +38,7 @@
 					</div>
 					<div class="absolute inset-0 flex items-center justify-center">
 						<img
-							class="mt-2 h-4 w-4 rounded-sm object-cover shadow-md md:h-5 md:w-5 {shouldAnimate &&
-								'animate__animated animate__fadeIn'}"
+							class="mt-2 h-4 w-4 rounded-sm object-cover shadow-md md:h-5 md:w-5 animate__animated animate__fadeIn"
 							src={image}
 							alt="Album"
 						/>
