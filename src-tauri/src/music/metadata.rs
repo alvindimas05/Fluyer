@@ -501,6 +501,11 @@ impl MusicMetadata {
     /// Extract cover art using FFmpegKit on Android
     #[cfg(target_os = "android")]
     pub async fn get_image_from_path_android(path: String) -> Result<Vec<u8>, String> {
+        // Try Symphonia first (fast, pure Rust)
+        if let Ok(image) = Self::get_image_with_symphonia(&path) {
+            return Ok(image);
+        }
+
         tokio::task::spawn_blocking(move || {
             let result = app_handle()
                 .fluyer()
