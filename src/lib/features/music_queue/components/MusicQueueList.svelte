@@ -137,7 +137,7 @@
 		dragOverIndex = null;
 
 		if (fromIndex !== toIndex) {
-			// Update queueIds to match new order
+			// Update queueIds to match new order (optimistic update needed for UI)
 			let queueIds = [...musicStore.queueIds];
 			const uuid = queueIds[fromIndex];
 			queueIds.splice(fromIndex, 1);
