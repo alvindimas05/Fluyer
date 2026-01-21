@@ -29,7 +29,6 @@ tauri-plugin-fluyer = { path = "./tauri-plugin-fluyer" }
 regex = "1.11.1"
 tauri-plugin-decorum = "1.1.1"
 image = "0.25.9"
-reqwest = { version = "0.13.1", default-features = false, features = ["json", "rustls"] }
 lazy_static = "1.5.0"
 dotenvy = "0.15.7"
 dotenvy_macro = "0.15.7"
@@ -45,8 +44,13 @@ serde_json = "1.0.148"
 futures = "0.3.31"
 symphonia = { version = "0.5.5", features = ["all", "opt-simd"] }
 
+[target.'cfg(not(target_os = "android"))'.dependencies]
+reqwest = { version = "0.13.1", default-features = false, features = ["json", "rustls"] }
+
 [target.'cfg(target_os = "android")'.dependencies]
 libloading = "0.8"
+# FIXME: Using reqwest 0.12.12 for Android as reqwest 0.13.1 has issues with Android
+reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 enigo = "0.6.1"
@@ -60,7 +64,3 @@ lto = true
 codegen-units = 1
 strip = "symbols"
 panic = "abort"
-
-# FIXME: Temporary patch for Android
-[patch.crates-io]
-aws-lc-sys = { git = "https://github.com/zsdsys/aws-lc-rs", branch = "android-getentropy-fix" }
