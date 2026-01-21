@@ -3,9 +3,10 @@ use std::fs;
 
 /// Get cover art for an album or track - returns raw image bytes
 #[tauri::command]
-pub async fn cover_art_get(query: CoverArtQuery) -> Result<Vec<u8>, String> {
+pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
     if query.album.is_none() && query.title.is_none() {
-        return Err("No album or title provided".to_string());
+        crate::warn!("No album or title provided");
+        return None;
     }
 
     let mut name = String::from("");
@@ -27,13 +28,15 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Result<Vec<u8>, String> {
             CoverArtRequestStatus::Loaded => {
                 // Already fetched, return from cache
                 if let Some(image) = get_image_bytes(&file_path) {
-                    return Ok(image);
+                    return Some(image);
                 }
-                return Err(format!("Cover art file not found: {}", name));
+                crate::warn!("Cover art file not found: {}", name);
+                return None;
             }
             CoverArtRequestStatus::Failed => {
                 // Previous attempt failed
-                return Err(format!("Cover art fetch previously failed: {}", name));
+                crate::warn!("Cover art fetch previously failed: {}", name);
+                return None;
             }
             CoverArtRequestStatus::Pending => {
                 // Another request is in progress, wait for it
@@ -41,12 +44,14 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Result<Vec<u8>, String> {
                 match status {
                     CoverArtRequestStatus::Loaded => {
                         if let Some(image) = get_image_bytes(&file_path) {
-                            return Ok(image);
+                            return Some(image);
                         }
-                        return Err(format!("Cover art file not found: {}", name));
+                        crate::warn!("Cover art file not found: {}", name);
+                        return None;
                     }
                     _ => {
-                        return Err(format!("Cover art fetch failed: {}", name));
+                        crate::warn!("Cover art fetch failed: {}", name);
+                        return None;
                     }
                 }
             }
@@ -57,7 +62,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Result<Vec<u8>, String> {
     // Try cache first
     if let Some(image) = get_image_bytes(&file_path) {
         queue::set_status(name.clone(), CoverArtRequestStatus::Loaded);
-        return Ok(image);
+        return Some(image);
     }
 
     // Mark as pending before starting the fetch
@@ -68,17 +73,19 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Result<Vec<u8>, String> {
 
     if cover_art.is_none() {
         queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
-        return Err(format!("Failed to get cover art for: {}", name));
+        crate::warn!("Failed to get cover art for: {}", name);
+        return None;
     }
 
     // Read the saved file
     if let Some(image) = get_image_bytes(&file_path) {
         queue::set_status(name.clone(), CoverArtRequestStatus::Loaded);
-        return Ok(image);
+        return Some(image);
     }
 
     queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
-    Err(format!("Cover art file not found: {}", name))
+    crate::warn!("Cover art file not found: {}", name);
+    None
 }
 
 fn get_image_bytes(file_path: &str) -> Option<Vec<u8>> {
