@@ -97,15 +97,15 @@
 			(type === SidebarType.Right && deltaX > SWIPE_RANGE) ||
 			(type === SidebarType.Left && deltaX < -SWIPE_RANGE);
 
-		if (swipeOpen && sidebarStore.swipeMinimumTop === null) {
+		if (swipeOpen && sidebarStore.showType === null) {
 			isMouseInsideArea = true;
 			isShowing = true;
-			sidebarStore.swipeMinimumTop = type;
-		} else if (swipeClose && sidebarStore.swipeMinimumTop === type) {
+			sidebarStore.showType = type;
+		} else if (swipeClose && sidebarStore.showType === type) {
 			setTimeout(() => {
 				isMouseInsideArea = false;
 				isShowing = false;
-				sidebarStore.swipeMinimumTop = 0;
+				sidebarStore.showType = null;
 			});
 		}
 	}
