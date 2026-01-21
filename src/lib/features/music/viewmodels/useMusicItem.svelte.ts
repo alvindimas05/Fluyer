@@ -26,14 +26,20 @@ export function useMusicItem(
 	$effect(() => {
 		// Only fetch image when visible
 		const isVisible = getVisible();
+		// Access dependencies synchronously to ensure tracking
+		const currentMusic = music;
+		const currentFolder = folder;
+
 		if (!isVisible) return;
 
 		let cancelled = false;
 		const timeoutId = setTimeout(async () => {
 			if (cancelled) return;
-			const imagePromise = folder
-				? MetadataService.getFolderCoverArt(folder.path)
-				: music ? MetadataService.getMusicCoverArt(music) : Promise.resolve(null);
+			const imagePromise = currentFolder
+				? MetadataService.getFolderCoverArt(currentFolder.path)
+				: currentMusic
+					? MetadataService.getMusicCoverArt(currentMusic)
+					: Promise.resolve(null);
 
 			albumImage = imagePromise;
 
