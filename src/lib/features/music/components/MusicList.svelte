@@ -107,11 +107,28 @@
 		}
 		return false;
 	}
+
+	let scrollContainer = $state<HTMLDivElement>();
+
+	function handleScroll(e: Event) {
+		const target = e.target as HTMLDivElement;
+		vm.state.scrollTop = target.scrollTop;
+	}
+
+	$effect(() => {
+		if (scrollContainer) {
+			scrollContainer.scrollTop = vm.state.scrollTop;
+		}
+	});
 </script>
 
 <svelte:window onresize={vm.updateSize} />
 
-<div class="scrollbar-hidden relative h-full w-full overflow-y-auto px-3">
+<div
+	bind:this={scrollContainer}
+	onscroll={handleScroll}
+	class="scrollbar-hidden relative h-full w-full overflow-y-auto px-3"
+>
 	{#if vm.data && vm.data.length > 0 && vm.state.columnCount}
 		<div
 			class="grid gap-x-6"

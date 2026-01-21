@@ -26,7 +26,8 @@ const RESPONSIVE_RULES = [
 let state = $state({
 	columnCount: 2,
 	itemWidth: window.innerWidth * 0.5,
-	scrollLeft: 0
+	scrollLeft: 0,
+	scrollTop: 0
 });
 
 let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height);

@@ -119,7 +119,15 @@
 	function handleScroll(e: Event) {
 		const target = e.target as HTMLDivElement;
 		vm.state.scrollLeft = target.scrollLeft;
+		vm.state.scrollTop = target.scrollTop;
 	}
+
+	$effect(() => {
+		if (scrollContainer) {
+			scrollContainer.scrollLeft = vm.state.scrollLeft;
+			scrollContainer.scrollTop = vm.state.scrollTop;
+		}
+	});
 
 	function handleWheel(e: WheelEvent) {
 		if (vm.isHorizontal && e.deltaX === 0) {
@@ -164,6 +172,8 @@
 	{:else}
 		<!-- Grid layout -->
 		<div
+			bind:this={scrollContainer}
+			onscroll={handleScroll}
 			class="scrollbar-hidden h-full overflow-y-auto"
 			style="padding-bottom: {mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
 		>

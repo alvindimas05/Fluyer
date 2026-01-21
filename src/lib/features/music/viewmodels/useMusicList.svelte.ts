@@ -18,7 +18,8 @@ const RESPONSIVE_RULES = [
 ];
 
 const state = $state({
-	columnCount: 1
+	columnCount: 1,
+	scrollTop: 0
 });
 
 function updateColumnCount() {
