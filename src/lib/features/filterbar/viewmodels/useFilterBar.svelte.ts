@@ -33,69 +33,69 @@ const musicListOptions = [
 	// { value: MusicListType.Playlist, icon: IconType.Unknown, label: 'Playlist' }
 ];
 
-let element: HTMLDivElement;
-let state = $state({
-	gridSize: ''
-});
-
-const iconSize = $derived.by(() => {
-	switch (iconStore.theme) {
-		case IconThemeType.Phosphor:
-			return 19;
-		case IconThemeType.Material:
-			return 18;
-		case IconThemeType.Lucide:
-			return 20;
-	}
-});
-
-function updateGridSizing() {
-	const w = window.innerWidth;
-	const dpi = window.devicePixelRatio;
-
-	for (const [minW, minDppx, width] of RESPONSIVE_RULES) {
-		if (w >= minW && dpi >= minDppx) {
-			const columnPercentage = width * window.innerWidth;
-			state.gridSize = isMacos()
-				? `${columnPercentage}px ${columnPercentage * 2}px`
-				: `${columnPercentage * 2}px ${columnPercentage}px`;
-			return;
-		}
-	}
-	state.gridSize = '';
-}
-
-function updateFilterBarHeight() {
-	if (!element) return;
-	filterStore.bar.height = element.offsetHeight + (window.innerWidth > 640 ? 8 : 16);
-}
-
-function toggleSort() {
-	filterStore.bar.sortAsc = !filterStore.bar.sortAsc;
-}
-
-async function handleToggleChange(type: MusicListType) {
-	filterStore.album = null;
-	folderStore.currentFolder = null;
-
-	// Set the current folder to the first music path if only one is set
-	if (type === MusicListType.Folder) {
-		const musicPaths = await PersistentStoreService.musicPath.get();
-		folderStore.currentFolder =
-			musicPaths.length === 1 ? ({ path: musicPaths[0] } as FolderData) : null;
-	}
-
-	musicStore.listType = type;
-
-	console.log('Music list type changed to:', type);
-}
-
-function updateSize() {
-	updateGridSizing();
-	setTimeout(updateFilterBarHeight);
-}
-
 export function useFilterBar() {
+	let element = $state<HTMLDivElement>();
+	let state = $state({
+		gridSize: ''
+	});
+
+	const iconSize = $derived.by(() => {
+		switch (iconStore.theme) {
+			case IconThemeType.Phosphor:
+				return 19;
+			case IconThemeType.Material:
+				return 18;
+			case IconThemeType.Lucide:
+				return 20;
+		}
+	});
+
+	function updateGridSizing() {
+		const w = window.innerWidth;
+		const dpi = window.devicePixelRatio;
+
+		for (const [minW, minDppx, width] of RESPONSIVE_RULES) {
+			if (w >= minW && dpi >= minDppx) {
+				const columnPercentage = width * window.innerWidth;
+				state.gridSize = isMacos()
+					? `${columnPercentage}px ${columnPercentage * 2}px`
+					: `${columnPercentage * 2}px ${columnPercentage}px`;
+				return;
+			}
+		}
+		state.gridSize = '';
+	}
+
+	function updateFilterBarHeight() {
+		if (!element) return;
+		filterStore.bar.height = element.offsetHeight + (window.innerWidth > 640 ? 8 : 16);
+	}
+
+	function toggleSort() {
+		filterStore.bar.sortAsc = !filterStore.bar.sortAsc;
+	}
+
+	async function handleToggleChange(type: MusicListType) {
+		filterStore.album = null;
+		folderStore.currentFolder = null;
+
+		// Set the current folder to the first music path if only one is set
+		if (type === MusicListType.Folder) {
+			const musicPaths = await PersistentStoreService.musicPath.get();
+			folderStore.currentFolder =
+				musicPaths.length === 1 ? ({ path: musicPaths[0] } as FolderData) : null;
+		}
+
+		musicStore.listType = type;
+
+		console.log('Music list type changed to:', type);
+	}
+
+	function updateSize() {
+		updateGridSizing();
+		setTimeout(updateFilterBarHeight);
+	}
+
 	return {
 		state,
 
