@@ -22,9 +22,7 @@
         px-4 py-2 hover:px-5
         hover:py-3 md:grid
 		{isSidebarVisible ? 'animate__fadeOut' : 'animate__fadeIn'}"
-		style="animation-duration: {isLinux() ? '350ms' : '500ms'}; {isSidebarVisible
-			? 'visibility: hidden;'
-			: ''}"
+		style="animation-duration: {isLinux() ? '350ms' : '500ms'};"
 	>
 		<div class="grid items-center">
 			<div class="overflow-hidden text-sm font-medium md:text-base">
