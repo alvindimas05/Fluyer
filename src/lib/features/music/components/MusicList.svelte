@@ -86,6 +86,8 @@
 		return {
 			update(newKey: string) {
 				node.setAttribute('data-item-key', newKey);
+				observer?.unobserve(node);
+				observer?.observe(node);
 			},
 			destroy() {
 				observer?.unobserve(node);
