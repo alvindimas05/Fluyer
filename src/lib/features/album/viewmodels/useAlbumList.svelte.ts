@@ -69,6 +69,19 @@ export function useAlbumList() {
 	});
 
 	$effect(() => {
+		const index = musicStore.albumListUi.scrollIndex;
+		if (index >= 0) {
+			if (isHorizontal) {
+				state.scrollLeft = index * state.itemWidth;
+			} else {
+				const rowIndex = Math.floor(index / state.columnCount);
+				state.scrollTop = rowIndex * itemHeight;
+			}
+			musicStore.albumListUi.scrollIndex = -1;
+		}
+	});
+
+	$effect(() => {
 		updateItemWidth();
 	});
 
