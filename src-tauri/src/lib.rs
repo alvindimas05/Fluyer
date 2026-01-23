@@ -5,6 +5,7 @@ mod coverart;
 mod database;
 mod folder;
 pub mod logger;
+mod lyric;
 mod music;
 mod playlist;
 mod system;

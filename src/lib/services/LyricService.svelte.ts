@@ -1,6 +1,5 @@
 import type { MusicData } from '$lib/features/music/types';
 import TauriLyricAPI from '$lib/tauri/TauriLyricAPI';
-import LrcLib from '$lib/api/LrcLib';
 
 const LYRIC_THRESHOLD_DURATION = 5;
 export class MusicLyric {
@@ -22,6 +21,7 @@ const LyricService = {
 	get: async (music: MusicData | undefined) => {
 		if (!music) return null;
 
+		// Try local .lrc file first
 		const lyricPath = music.path.replace(/\.[^/.]+$/, '.lrc');
 		try {
 			const lyricText = await TauriLyricAPI.get(lyricPath);
@@ -30,10 +30,22 @@ const LyricService = {
 			console.error(e);
 		}
 
-		const lrcText = await LrcLib.getLyrics(music);
-		if (!lrcText) return null;
+		// Fall back to online search via Rust backend
+		if (!music.title) return null;
 
-		return LyricService.parse(lrcText);
+		try {
+			const lrcText = await TauriLyricAPI.search({
+				title: music.title,
+				artist: music.artist || '',
+				album: music.album,
+				duration: music.duration
+			});
+			if (lrcText) return LyricService.parse(lrcText);
+		} catch (e) {
+			console.error('Failed to fetch lyrics:', e);
+		}
+
+		return null;
 	},
 	parse: (text: string) => {
 		const rawLyrics = text.split('\n');

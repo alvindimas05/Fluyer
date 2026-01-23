@@ -49,6 +49,8 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     mobile::android_request_directory,
     // Cover art commands
     crate::coverart::commands::cover_art_get,
+    // Lyric commands
+    crate::lyric::commands::lyric_get,
     // Platform-specific commands
     #[cfg(windows)]
     decorum::decorum_show_snap_overlay,
