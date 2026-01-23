@@ -137,13 +137,7 @@
 		dragOverIndex = null;
 
 		if (fromIndex !== toIndex) {
-			// Update queueIds to match new order (optimistic update needed for UI)
-			let queueIds = [...musicStore.queueIds];
-			const uuid = queueIds[fromIndex];
-			queueIds.splice(fromIndex, 1);
-			queueIds.splice(toIndex, 0, uuid);
-			musicStore.queueIds = queueIds;
-
+			// Let QueueService.moveTo handle all state updates to avoid race condition
 			await QueueService.moveTo(fromIndex, toIndex);
 		}
 	}

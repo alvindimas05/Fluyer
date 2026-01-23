@@ -1102,6 +1102,8 @@ impl MusicPlayer {
                 }
             }
         }
+        // Emit sync event to notify frontend of the final backend state
+        Self::emit_sync(false);
     }
 
     pub fn set_volume(volume: f32) {
