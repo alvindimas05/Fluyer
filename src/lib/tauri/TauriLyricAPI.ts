@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { CommandRoutes } from '$lib/constants/CommandRoutes';
 
 interface LyricQuery {
+	path: string;
 	title: string;
 	artist: string;
 	album?: string;

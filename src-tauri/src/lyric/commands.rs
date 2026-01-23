@@ -1,7 +1,10 @@
 use crate::lyric::{cache, queue, request, types::*};
+use crate::music::metadata::MusicMetadata;
 use std::fs;
+use std::path::Path;
 
 /// Get lyrics for a track - returns synced lyrics text
+/// Priority: .lrc file → embedded metadata → cached → LrcLib API
 #[tauri::command]
 pub async fn lyric_get(query: LyricQuery) -> Option<String> {
     if query.title.is_empty() {
@@ -9,6 +12,20 @@ pub async fn lyric_get(query: LyricQuery) -> Option<String> {
         return None;
     }
 
+    // 1. Try .lrc file first (highest priority)
+    let lrc_path = Path::new(&query.path).with_extension("lrc");
+    if let Ok(lyrics) = fs::read_to_string(&lrc_path) {
+        crate::info!("Loaded lyrics from .lrc file: {:?}", lrc_path);
+        return Some(lyrics);
+    }
+
+    // 2. Try embedded lyrics from audio file metadata
+    if let Some(lyrics) = MusicMetadata::get_embedded_lyrics_from_path(&query.path) {
+        crate::info!("Loaded embedded lyrics from: {}", query.path);
+        return Some(lyrics);
+    }
+
+    // 3. Try cache/API with queue system
     let cache_key = request::generate_cache_key(&query);
     let cache_path = format!("{}/{}", cache::get_cache_directory(), cache_key);
 

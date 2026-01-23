@@ -578,4 +578,66 @@ impl MusicMetadata {
         }
         None
     }
+
+    /// Extract embedded lyrics from audio file metadata using Symphonia
+    pub fn get_embedded_lyrics_from_path(path: &str) -> Option<String> {
+        let file = File::open(path).ok()?;
+        let mss = MediaSourceStream::new(Box::new(file), Default::default());
+
+        let mut hint = Hint::new();
+        if let Some(ext) = Path::new(path).extension().and_then(|e| e.to_str()) {
+            hint.with_extension(ext);
+        }
+
+        let format_opts = FormatOptions::default();
+        let metadata_opts = MetadataOptions::default();
+
+        let mut probed = symphonia::default::get_probe()
+            .format(&hint, mss, &format_opts, &metadata_opts)
+            .ok()?;
+
+        let mut format = probed.format;
+
+        // Helper to extract lyrics from metadata revision
+        let extract_lyrics = |meta: &symphonia::core::meta::MetadataRevision| -> Option<String> {
+            for tag in meta.tags() {
+                // Check for standard lyrics key
+                if let Some(std_key) = tag.std_key {
+                    if std_key == StandardTagKey::Lyrics {
+                        let value = tag.value.to_string();
+                        if !value.is_empty() {
+                            return Some(value);
+                        }
+                    }
+                }
+                // Also check by tag name for various lyrics tag formats
+                let tag_key_lower = tag.key.to_lowercase();
+                if tag_key_lower.contains("lyrics") || tag_key_lower.contains("unsyncedlyrics") {
+                    let value = tag.value.to_string();
+                    if !value.is_empty() {
+                        return Some(value);
+                    }
+                }
+            }
+            None
+        };
+
+        // Try probed metadata first
+        if let Some(probe_meta) = probed.metadata.get() {
+            if let Some(rev) = probe_meta.current() {
+                if let Some(lyrics) = extract_lyrics(rev) {
+                    return Some(lyrics);
+                }
+            }
+        }
+
+        // Then try format metadata
+        if let Some(rev) = format.metadata().current() {
+            if let Some(lyrics) = extract_lyrics(rev) {
+                return Some(lyrics);
+            }
+        }
+
+        None
+    }
 }

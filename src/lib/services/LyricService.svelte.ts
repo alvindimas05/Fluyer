@@ -19,22 +19,12 @@ export class MusicLyric {
 
 const LyricService = {
 	get: async (music: MusicData | undefined) => {
-		if (!music) return null;
-
-		// Try local .lrc file first
-		const lyricPath = music.path.replace(/\.[^/.]+$/, '.lrc');
-		try {
-			const lyricText = await TauriLyricAPI.get(lyricPath);
-			if (lyricText) return LyricService.parse(lyricText);
-		} catch (e) {
-			console.error(e);
-		}
-
-		// Fall back to online search via Rust backend
-		if (!music.title) return null;
+		if (!music || !music.title) return null;
 
 		try {
+			// Rust backend handles priority: .lrc file → embedded → cache → LrcLib API
 			const lrcText = await TauriLyricAPI.search({
+				path: music.path,
 				title: music.title,
 				artist: music.artist || '',
 				album: music.album,

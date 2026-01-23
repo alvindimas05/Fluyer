@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 /// Query parameters for lyric search
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LyricQuery {
+    pub path: String, // music file path for embedded lyrics
     pub title: String,
     pub artist: String,
     pub album: Option<String>,
