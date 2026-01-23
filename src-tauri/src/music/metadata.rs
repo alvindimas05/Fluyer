@@ -114,16 +114,49 @@ impl MusicMetadata {
     }
 
     /// Get metadata, trying Symphonia first for performance, falling back to FFmpeg
+
     pub async fn get(path: String) -> Result<Self, String> {
         // Try Symphonia first (fast, pure Rust)
-        match Self::get_with_symphonia(&path) {
-            Ok(metadata) => Ok(metadata),
+        let mut metadata = match Self::get_with_symphonia(&path) {
+            Ok(metadata) => metadata,
             Err(error) => {
                 // Fallback to FFmpeg for unsupported formats
                 crate::warn!("{}", error);
-                Self::get_with_ffmpeg(path).await
+                Self::get_with_ffmpeg(path).await?
+            }
+        };
+
+        // Check if artist or title is missing
+        let title_missing = metadata
+            .title
+            .as_ref()
+            .map_or(true, |t| t.trim().is_empty());
+        let artist_missing = metadata
+            .artist
+            .as_ref()
+            .map_or(true, |a| a.trim().is_empty());
+
+        if title_missing || artist_missing {
+            if let Some(file_name) = Path::new(&metadata.path)
+                .file_name()
+                .and_then(|n| n.to_str())
+            {
+                let (parsed_artist, parsed_title) =
+                    Self::get_artist_title_from_file_name(file_name);
+
+                if title_missing {
+                    metadata.title = Some(parsed_title);
+                }
+
+                if artist_missing {
+                    if let Some(artist) = parsed_artist {
+                        metadata.artist = Some(artist);
+                    }
+                }
             }
         }
+
+        Ok(metadata)
     }
 
     /// Extract metadata using Symphonia (pure Rust, fast)
@@ -527,48 +560,107 @@ impl MusicMetadata {
         .map_err(|e| format!("Task join error: {}", e))?
     }
 
-    fn get_artist_title_from_file_name(file_name: &str) -> Option<(String, String)> {
+    /// Parses artist and title from a filename.
+    /// Returns (Option<artist>, title) - artist may be None if only title could be extracted.
+    fn get_artist_title_from_file_name(file_name: &str) -> (Option<String>, String) {
         let without_extension = file_name
             .rsplit_once('.')
             .map(|(name, _)| name)
             .unwrap_or(file_name);
 
-        let patterns = vec![
-            Regex::new(r"^(.*)\s-\s(.*)$").unwrap(),  // "Artist - Title"
-            Regex::new(r"^(.*)\sby\s(.*)$").unwrap(), // "Title by Artist"
-            Regex::new(r"^(.*)_(.*)$").unwrap(),      // "Artist_Title"
-            Regex::new(r"^(.*)\s-\s(.*)\s\(.*\)$").unwrap(), // "Artist - Title (Remix)"
-            Regex::new(r"^(.*)\s-\s(.*)\[.*\]$").unwrap(), // "Artist - Title [Remastered]"
+        // Pre-cleanup: Remove common suffixes that don't affect parsing
+        let cleanup_suffixes =
+            Regex::new(r"(?i)\s*[\[\(](?:official\s*(?:video|audio|music\s*video|lyric\s*video)?|lyrics?|hd|hq|4k|1080p|720p|audio|video|mv|m/v)[\]\)]\s*$").unwrap();
+        let youtube_id_re = Regex::new(r"\s*[\[\(]?[a-zA-Z0-9_-]{11}[\]\)]?\s*$").unwrap();
+
+        let mut cleaned = cleanup_suffixes
+            .replace_all(without_extension, "")
+            .to_string();
+        // Remove YouTube video IDs (11 character alphanumeric at end)
+        cleaned = youtube_id_re.replace_all(&cleaned, "").trim().to_string();
+
+        // Patterns ordered from most specific to least specific
+        let patterns: Vec<(Regex, bool)> = vec![
+            // Track number prefixed: "01 - Artist - Title" or "01. Artist - Title"
+            (
+                Regex::new(r"^\d+[\.\-\s]+(.+?)\s+[-–—]\s+(.+)$").unwrap(),
+                false,
+            ),
+            // "Artist - Title (feat. Someone)" or "Artist - Title (Remix)"
+            (
+                Regex::new(r"^(.+?)\s+[-–—]\s+(.+?)(?:\s+[\(\[].*[\)\]])*$").unwrap(),
+                false,
+            ),
+            // "Artist – Title" (en-dash) or "Artist — Title" (em-dash)
+            (Regex::new(r"^(.+?)\s+[–—]\s+(.+)$").unwrap(), false),
+            // "Artist - Title"
+            (Regex::new(r"^(.+?)\s+-\s+(.+)$").unwrap(), false),
+            // "Title by Artist" (reverse order)
+            (Regex::new(r"(?i)^(.+?)\s+by\s+(.+)$").unwrap(), true),
+            // "Title ft. Artist" or "Title feat. Artist" or "Title featuring Artist"
+            (
+                Regex::new(r"(?i)^(.+?)\s+(?:ft\.?|feat\.?|featuring)\s+(.+)$").unwrap(),
+                true,
+            ),
+            // "Artist_Title" (underscore separator)
+            (Regex::new(r"^([^_]+)_([^_]+)$").unwrap(), false),
+            // "Artist ~ Title" (tilde separator, sometimes used)
+            (Regex::new(r"^(.+?)\s*~\s*(.+)$").unwrap(), false),
         ];
 
-        let cleanup_re = Regex::new(r"(?:\s+\([^)]*\)|\s+\[[^]]*\])$").unwrap();
+        // Regex to clean up trailing metadata from both artist and title
+        let metadata_cleanup =
+            Regex::new(r"(?i)(?:\s*[\[\(](?:official|lyrics?|hd|hq|audio|video|mv|m/v|remaster(?:ed)?|remix|live|acoustic|cover|instrumental|extended|edit|version|ver\.?|mix)(?:\s+\w+)*[\]\)])+\s*$").unwrap();
+        // Clean up leading track numbers from title
+        let leading_track_re = Regex::new(r"^\d+[\.\-\s]+").unwrap();
 
-        for pattern in patterns {
-            if let Some(captures) = pattern.captures(without_extension) {
-                let mut artist = captures
-                    .get(1)
-                    .map_or("", |m| m.as_str())
-                    .trim()
-                    .to_string();
-                let mut title = captures
-                    .get(2)
-                    .map_or("", |m| m.as_str())
-                    .trim()
-                    .to_string();
+        for (pattern, is_reversed) in patterns {
+            if let Some(captures) = pattern.captures(&cleaned) {
+                let (first, second) = (
+                    captures.get(1).map_or("", |m| m.as_str()).trim(),
+                    captures.get(2).map_or("", |m| m.as_str()).trim(),
+                );
 
-                // Clean up both artist and title
-                artist = cleanup_re.replace_all(&artist, "").trim().to_string();
-                title = cleanup_re.replace_all(&title, "").trim().to_string();
-
-                if pattern.as_str().contains("by") {
-                    return Some((title, artist));
+                if first.is_empty() || second.is_empty() {
+                    continue;
                 }
 
-                return Some((artist, title));
+                let (mut artist, mut title) = if is_reversed {
+                    (second.to_string(), first.to_string())
+                } else {
+                    (first.to_string(), second.to_string())
+                };
+
+                // Clean up metadata from both
+                artist = metadata_cleanup.replace_all(&artist, "").trim().to_string();
+                title = metadata_cleanup.replace_all(&title, "").trim().to_string();
+                title = leading_track_re.replace(&title, "").trim().to_string();
+
+                // Validate we still have meaningful content
+                if !artist.is_empty() && !title.is_empty() {
+                    return (Some(artist), title);
+                }
             }
         }
 
-        None
+        // Fallback: just use the cleaned filename as title
+        let fallback_title = if cleaned.is_empty() {
+            without_extension.trim().to_string()
+        } else {
+            // Final cleanup for standalone title
+            let title = metadata_cleanup
+                .replace_all(&cleaned, "")
+                .trim()
+                .to_string();
+            let title = leading_track_re.replace(&title, "").trim().to_string();
+            if title.is_empty() {
+                without_extension.trim().to_string()
+            } else {
+                title
+            }
+        };
+
+        (None, fallback_title)
     }
 
     pub fn get_lyrics_from_path(path: String) -> Option<String> {
