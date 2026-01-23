@@ -39,10 +39,18 @@ pub fn get_all_music_from_db() -> Vec<MusicMetadata> {
             duration: row.get::<_, Option<i64>>(1)?.map(|v| v as u128),
             title: row.get(2)?,
             artist: row.get::<_, Option<String>>(3)?.map(|v| {
-                v.replace(
-                    &MusicMetadata::artist_separator(),
-                    MusicMetadata::separator(),
-                )
+                let separator = MusicMetadata::separator();
+                let artist_separator = MusicMetadata::artist_separator();
+                let mut artists = Vec::new();
+
+                for s in v.split(artist_separator) {
+                    let s = s.trim();
+                    if !s.is_empty() && !artists.contains(&s) {
+                        artists.push(s);
+                    }
+                }
+
+                artists.join(separator)
             }),
             album: row.get(4)?,
             album_artist: row.get(5)?,
