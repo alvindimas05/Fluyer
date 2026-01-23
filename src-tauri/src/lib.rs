@@ -10,6 +10,7 @@ mod music;
 mod playlist;
 mod system;
 mod utils;
+mod wgpu_renderer;
 
 // Application modules
 mod app_setup;

@@ -423,7 +423,8 @@
 	let isMounted = false;
 
 	onMount(() => {
-		initializeCanvas();
+		// initializeCanvas();
+		afterInitializeCanvas();
 
 		if (isLinux())
 			afterNavigate((navigation) => {

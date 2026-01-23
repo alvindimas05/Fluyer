@@ -65,13 +65,26 @@ pub fn initialize_store(app: &mut App) {
 
 /// Handle application runtime events
 pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
-    if let RunEvent::Ready = event {
-        initialize_globals(app_handle);
+    match event {
+        RunEvent::Ready => {
+            initialize_globals(app_handle);
 
-        crate::database::database::initialize_database();
-        crate::music::metadata::MusicMetadata::initialize_ffmpeg_paths();
+            crate::database::database::initialize_database();
+            crate::music::metadata::MusicMetadata::initialize_ffmpeg_paths();
 
-        log_directory_paths(app_handle);
+            log_directory_paths(app_handle);
+        }
+        RunEvent::WindowEvent {
+            label: _,
+            event: tauri::WindowEvent::Resized(size),
+            ..
+        } => {
+            crate::wgpu_renderer::handle_wgpu_resize(app_handle, size.width, size.height);
+        }
+        RunEvent::MainEventsCleared => {
+            crate::wgpu_renderer::render_frame(app_handle);
+        }
+        _ => {}
     }
 }
 

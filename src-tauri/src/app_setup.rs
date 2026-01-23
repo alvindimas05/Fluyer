@@ -18,6 +18,9 @@ pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>
 
     initialize_store(app);
 
+    // Initialize WGPU renderer
+    crate::wgpu_renderer::setup_wgpu(app)?;
+
     Ok(())
 }
 
