@@ -1,10 +1,22 @@
 use crate::lyric::{cache, queue, request, types::*};
 use crate::music::metadata::MusicMetadata;
+use regex::Regex;
 use std::fs;
 use std::path::Path;
 
+/// Check if lyrics contain synced timestamps (LRC format: [MM:SS.xx] or [MM:SS])
+fn has_synced_timestamps(lyrics: &str) -> bool {
+    // Match patterns like [00:12.34] or [00:12] at the start of lines
+    let timestamp_regex = Regex::new(r"^\[\d{1,2}:\d{2}(?:\.\d{1,3})?\]").unwrap();
+
+    // Check if any line starts with a timestamp (more than just metadata like [ar:Artist])
+    lyrics
+        .lines()
+        .any(|line| timestamp_regex.is_match(line.trim()))
+}
+
 /// Get lyrics for a track - returns synced lyrics text
-/// Priority: .lrc file → embedded metadata → cached → LrcLib API
+/// Priority: .lrc file (synced) → embedded metadata (synced) → cached → LrcLib API
 #[tauri::command]
 pub async fn lyric_get(query: LyricQuery) -> Option<String> {
     if query.title.is_empty() {
@@ -12,17 +24,23 @@ pub async fn lyric_get(query: LyricQuery) -> Option<String> {
         return None;
     }
 
-    // 1. Try .lrc file first (highest priority)
+    // 1. Try .lrc file first (highest priority) - only if synced
     let lrc_path = Path::new(&query.path).with_extension("lrc");
     if let Ok(lyrics) = fs::read_to_string(&lrc_path) {
-        crate::info!("Loaded lyrics from .lrc file: {:?}", lrc_path);
-        return Some(lyrics);
+        if has_synced_timestamps(&lyrics) {
+            crate::info!("Loaded synced lyrics from .lrc file: {:?}", lrc_path);
+            return Some(lyrics);
+        }
+        crate::info!("Skipping .lrc file (no timestamps): {:?}", lrc_path);
     }
 
-    // 2. Try embedded lyrics from audio file metadata
+    // 2. Try embedded lyrics from audio file metadata - only if synced
     if let Some(lyrics) = MusicMetadata::get_embedded_lyrics_from_path(&query.path) {
-        crate::info!("Loaded embedded lyrics from: {}", query.path);
-        return Some(lyrics);
+        if has_synced_timestamps(&lyrics) {
+            crate::info!("Loaded synced embedded lyrics from: {}", query.path);
+            return Some(lyrics);
+        }
+        crate::info!("Skipping embedded lyrics (no timestamps): {}", query.path);
     }
 
     // 3. Try cache/API with queue system
