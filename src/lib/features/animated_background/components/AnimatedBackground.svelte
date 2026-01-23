@@ -68,8 +68,9 @@
 		const hsl = rgbToHsl(r, g, b);
 
 		// Balance lightness for better visibility
-		if (hsl.l > 0.7) {
-			hsl.l = 0.45 + (hsl.l - 0.7) * 0.3;
+		if (hsl.l > 0.65) {
+			// hsl.l = 0.45 + (hsl.l - 0.7) * 0.3;
+			hsl.l = 0.65;
 		}
 
 		// Ensure we stay within reasonable bounds
