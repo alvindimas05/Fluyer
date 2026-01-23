@@ -19,6 +19,11 @@
 	let itemRefs: HTMLElement[] = [];
 	let scrollContainer: HTMLDivElement;
 
+	// Auto-scroll configuration
+	const EDGE_THRESHOLD = 50; // pixels from edge to trigger scroll
+	const SCROLL_SPEED = 8; // pixels per frame
+	let autoScrollAnimationId: number | null = null;
+
 	// Track visibility of items using IntersectionObserver
 	let visibleItems = $state<Set<string>>(new Set());
 	let observer: IntersectionObserver | null = null;
@@ -82,6 +87,44 @@
 		};
 	}
 
+	// Auto-scroll when dragging near edges
+	function startAutoScroll(clientY: number) {
+		if (!scrollContainer) return;
+
+		const containerRect = scrollContainer.getBoundingClientRect();
+		const distanceFromTop = clientY - containerRect.top;
+		const distanceFromBottom = containerRect.bottom - clientY;
+
+		let scrollDelta = 0;
+
+		if (distanceFromTop < EDGE_THRESHOLD && scrollContainer.scrollTop > 0) {
+			// Near top edge - scroll up
+			scrollDelta = -SCROLL_SPEED * (1 - distanceFromTop / EDGE_THRESHOLD);
+		} else if (
+			distanceFromBottom < EDGE_THRESHOLD &&
+			scrollContainer.scrollTop < scrollContainer.scrollHeight - scrollContainer.clientHeight
+		) {
+			// Near bottom edge - scroll down
+			scrollDelta = SCROLL_SPEED * (1 - distanceFromBottom / EDGE_THRESHOLD);
+		}
+
+		if (scrollDelta !== 0) {
+			scrollContainer.scrollTop += scrollDelta;
+
+			// Continue auto-scroll animation
+			autoScrollAnimationId = requestAnimationFrame(() => startAutoScroll(clientY));
+		} else {
+			stopAutoScroll();
+		}
+	}
+
+	function stopAutoScroll() {
+		if (autoScrollAnimationId !== null) {
+			cancelAnimationFrame(autoScrollAnimationId);
+			autoScrollAnimationId = null;
+		}
+	}
+
 	// Pointer-based drag handlers
 	function handlePointerDown(e: PointerEvent, index: number) {
 		if (!draggingEnabled || index === musicStore.currentIndex) return;
@@ -99,6 +142,10 @@
 		if (draggedIndex === null) return;
 
 		currentY = e.clientY;
+
+		// Handle auto-scroll when near edges
+		stopAutoScroll();
+		startAutoScroll(e.clientY);
 
 		// Calculate which item we're over
 		const containerRect = scrollContainer.getBoundingClientRect();
@@ -127,6 +174,8 @@
 	async function handlePointerUp(e: PointerEvent) {
 		if (draggedIndex === null) return;
 
+		stopAutoScroll();
+
 		const target = e.currentTarget as HTMLElement;
 		target.releasePointerCapture(e.pointerId);
 
@@ -143,6 +192,7 @@
 	}
 
 	function handlePointerCancel() {
+		stopAutoScroll();
 		draggedIndex = null;
 		dragOverIndex = null;
 	}
@@ -204,6 +254,7 @@
 					class:cursor-grab={draggingEnabled && !isPlaying && !isDragging}
 					style:transform={getDragTransform(index)}
 					style:transition={isDragging ? 'none' : 'transform 150ms ease'}
+					style:touch-action={draggingEnabled && !isPlaying ? 'none' : 'auto'}
 					onpointerdown={(e) => handlePointerDown(e, index)}
 					onpointermove={handlePointerMove}
 					onpointerup={handlePointerUp}
