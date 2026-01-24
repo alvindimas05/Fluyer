@@ -1376,8 +1376,12 @@ dependencies = [
  "enigo 0.6.1",
  "futures",
  "image",
+ "jni",
  "lazy_static",
  "libloading 0.8.9",
+ "ndk 0.8.0",
+ "ndk-context",
+ "raw-window-handle",
  "rayon",
  "regex",
  "reqwest 0.12.24",
@@ -2945,6 +2949,21 @@ dependencies = [
  "termcolor",
  "thiserror 2.0.17",
  "unicode-xid",
+]
+
+[[package]]
+name = "ndk"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2076a31b7010b17a38c01907c45b945e8f11495ee4dd588309718901b1f7a5b7"
+dependencies = [
+ "bitflags 2.10.0",
+ "jni-sys",
+ "log",
+ "ndk-sys 0.5.0+25.2.9519653",
+ "num_enum",
+ "raw-window-handle",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -5458,7 +5477,7 @@ dependencies = [
  "lazy_static",
  "libc",
  "log",
- "ndk",
+ "ndk 0.9.0",
  "ndk-context",
  "ndk-sys 0.6.0+11769913",
  "objc2 0.6.3",
@@ -7545,7 +7564,7 @@ dependencies = [
  "jni",
  "kuchikiki",
  "libc",
- "ndk",
+ "ndk 0.9.0",
  "objc2 0.6.3",
  "objc2-app-kit",
  "objc2-core-foundation",

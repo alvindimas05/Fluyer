@@ -33,6 +33,10 @@ pub fn app_handle() -> &'static AppHandle {
     APP_HANDLE.get().expect("APP_HANDLE not initialized")
 }
 
+pub fn try_app_handle() -> Option<&'static AppHandle> {
+    APP_HANDLE.get()
+}
+
 /// Get the global main window
 pub fn main_window() -> &'static WebviewWindow {
     MAIN_WINDOW.get().expect("MAIN_WINDOW not initialized")
@@ -74,7 +78,6 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
 
             log_directory_paths(app_handle);
         }
-        #[cfg(not(any(target_os = "android", target_os = "ios")))]
         RunEvent::WindowEvent {
             label: _,
             event: tauri::WindowEvent::Resized(size),
@@ -82,7 +85,6 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
         } => {
             crate::wgpu_renderer::handle_wgpu_resize(app_handle, size.width, size.height);
         }
-        #[cfg(not(any(target_os = "android", target_os = "ios")))]
         RunEvent::MainEventsCleared => {
             crate::wgpu_renderer::render_frame(app_handle);
         }

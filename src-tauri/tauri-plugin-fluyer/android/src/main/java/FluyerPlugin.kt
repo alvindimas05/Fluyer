@@ -63,10 +63,7 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
     private var pickFolderChannel: Channel? = null
 
-    override fun load(webView: WebView) {
-        FluyerMetadata.initialize(activity)
-        super.load(webView)
-    }
+
 
     @Command
     fun toast(invoke: Invoke) {
@@ -191,6 +188,7 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
         }
     }
     
+
     @Command
     fun audioConvertToWav(invoke: Invoke) {
         try {
@@ -201,5 +199,54 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
             Log.e(LOG_TAG, "audioConvertToWav error: ${err.message}")
             invoke.resolve(JSObject().put("path", null))
         }
+    }
+
+    // WGPU Integration
+    private var surfaceView: android.view.SurfaceView? = null
+
+    companion object {
+        var surface: android.view.Surface? = null
+    }
+
+    override fun load(webView: WebView) {
+        super.load(webView)
+        
+        // Make WebView transparent
+        webView.setBackgroundColor(0)
+        
+        // Create and inject SurfaceView
+        surfaceView = android.view.SurfaceView(activity)
+        surfaceView?.holder?.addCallback(object : android.view.SurfaceHolder.Callback {
+            override fun surfaceCreated(holder: android.view.SurfaceHolder) {
+                surface = holder.surface
+                Log.d(LOG_TAG, "WGPU Surface created")
+            }
+
+            override fun surfaceChanged(
+                holder: android.view.SurfaceHolder,
+                format: Int,
+                width: Int,
+                height: Int
+            ) {
+                Log.d(LOG_TAG, "WGPU Surface changed: ${width}x${height}")
+            }
+
+            override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
+                surface = null
+                Log.d(LOG_TAG, "WGPU Surface destroyed")
+            }
+        })
+
+        // Add SurfaceView behind WebView
+        val parent = webView.parent as? android.view.ViewGroup
+        if (parent != null) {
+            // Index 0 puts it behind everything else
+            parent.addView(surfaceView, 0, android.view.ViewGroup.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            ))
+        }
+        
+        FluyerMetadata.initialize(activity)
     }
 }

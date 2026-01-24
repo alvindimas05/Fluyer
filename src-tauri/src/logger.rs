@@ -1,7 +1,6 @@
 use std::env::temp_dir;
 use std::sync::atomic::{AtomicU8, Ordering};
 
-use crate::state::app_handle;
 use tauri::Emitter;
 
 /// Log levels for custom logger
@@ -68,10 +67,12 @@ pub fn _log(level: Level, target: &str, args: std::fmt::Arguments) {
         message
     );
 
-    let _ = app_handle().emit(
-        crate::commands::route::LOG,
-        [level.as_str(), format!("{} - {}", target, message).as_str()],
-    );
+    if let Some(handle) = crate::state::try_app_handle() {
+        let _ = handle.emit(
+            crate::commands::route::LOG,
+            [level.as_str(), format!("{} - {}", target, message).as_str()],
+        );
+    }
 }
 
 /// Log an error message

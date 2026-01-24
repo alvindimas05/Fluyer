@@ -68,7 +68,7 @@ impl MusicMetadata {
     }
 
     fn create_command(program: &Path) -> Command {
-        let mut cmd = Command::new(program);
+        let cmd = Command::new(program);
         #[cfg(target_os = "windows")]
         cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
         cmd
