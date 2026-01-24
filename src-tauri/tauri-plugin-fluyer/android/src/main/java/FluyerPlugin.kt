@@ -211,11 +211,15 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
     override fun load(webView: WebView) {
         super.load(webView)
         
-        // Make WebView transparent
-        webView.setBackgroundColor(0)
+        // Make WebView transparent and ensure hardware acceleration
+        webView.setBackgroundColor(0) // Color.TRANSPARENT
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         
         // Create and inject SurfaceView
         surfaceView = android.view.SurfaceView(activity)
+        surfaceView?.setZOrderOnTop(false) // Ensure it's behind the window
+        // surfaceView?.setZOrderMediaOverlay(false) // Optional: ensure it's not a media overlay
+        
         surfaceView?.holder?.addCallback(object : android.view.SurfaceHolder.Callback {
             override fun surfaceCreated(holder: android.view.SurfaceHolder) {
                 surface = holder.surface
@@ -240,6 +244,9 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
         // Add SurfaceView behind WebView
         val parent = webView.parent as? android.view.ViewGroup
         if (parent != null) {
+            // Log types of views for debugging
+            Log.d(LOG_TAG, "WebView parent has ${parent.childCount} children before adding SurfaceView")
+            
             // Index 0 puts it behind everything else
             parent.addView(surfaceView, 0, android.view.ViewGroup.LayoutParams(
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT,
