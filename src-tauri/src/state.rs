@@ -74,6 +74,7 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
 
             log_directory_paths(app_handle);
         }
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
         RunEvent::WindowEvent {
             label: _,
             event: tauri::WindowEvent::Resized(size),
@@ -81,6 +82,7 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
         } => {
             crate::wgpu_renderer::handle_wgpu_resize(app_handle, size.width, size.height);
         }
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
         RunEvent::MainEventsCleared => {
             crate::wgpu_renderer::render_frame(app_handle);
         }

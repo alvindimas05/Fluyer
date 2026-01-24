@@ -3,15 +3,21 @@
 use std::borrow::Cow;
 use std::sync::Mutex;
 use tauri::{async_runtime::block_on, Manager};
-use wgpu::{Backend, BackendOptions, Backends, InstanceDescriptor, InstanceFlags};
+use wgpu::{BackendOptions, Backends, InstanceDescriptor, InstanceFlags};
 
 /// Initialize WGPU rendering for a window
 pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let window = app.get_webview_window("main").unwrap();
     let size = window.inner_size()?;
 
+    // Use OpenGL ES on Android (more stable with window handles), PRIMARY elsewhere
+    #[cfg(target_os = "android")]
+    let backends = Backends::GL;
+    #[cfg(not(target_os = "android"))]
+    let backends = Backends::PRIMARY;
+
     let instance = wgpu::Instance::new(&InstanceDescriptor {
-        backends: Backends::DX12,
+        backends,
         flags: InstanceFlags::default(),
         backend_options: BackendOptions::default(),
     });

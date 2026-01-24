@@ -18,7 +18,8 @@ pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>
 
     initialize_store(app);
 
-    // Initialize WGPU renderer
+    // Initialize WGPU renderer (desktop only - wgpu surface creation crashes on mobile)
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
     crate::wgpu_renderer::setup_wgpu(app)?;
 
     Ok(())
