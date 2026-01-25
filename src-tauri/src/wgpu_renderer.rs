@@ -399,7 +399,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
-        format: wgpu::TextureFormat::Rgba8Unorm,
+        format: wgpu::TextureFormat::Rgba8UnormSrgb,
         usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
         label: Some("Default Black Texture"),
         view_formats: &[],
@@ -466,7 +466,7 @@ pub fn update_background(app_handle: &tauri::AppHandle, img: RgbaImage) {
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8Unorm, // Use linear format - sRGB conversion happens at surface output
+            format: wgpu::TextureFormat::Rgba8UnormSrgb, // Use sRGB format to let wgpu linearize it
             usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
             label: Some("Background Texture"),
             view_formats: &[],

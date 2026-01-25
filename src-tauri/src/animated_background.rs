@@ -25,14 +25,15 @@ pub fn generate_animated_background(
     for color in &mut palette {
         let (h, mut s, mut l) = rgb_to_hsl(color.r, color.g, color.b);
 
-        if l > 0.5 {
-            // Map lightness from [0.5, 1.0] to [0.25, 0.45] to keep it dark but preserve relative brightness
-            l = 0.25 + (l - 0.5) * 0.4;
+        if l > 0.65 {
+            // // Map lightness from [0.5, 1.0] to [0.25, 0.45] to keep it dark but preserve relative brightness
+            // l = 0.25 + (l - 0.5) * 0.4;
 
-            // Boost saturation significantly for vibrance, but respect greyscale
-            if s > 0.05 {
-                s = (s.max(0.4) * 1.1).min(0.9);
-            }
+            // // Boost saturation significantly for vibrance, but respect greyscale
+            // if s > 0.05 {
+            //     s = (s.max(0.4) * 1.1).min(0.9);
+            // }
+            l = 0.65;
 
             let (r, g, b) = hsl_to_rgb(h, s, l);
             color.r = r;
