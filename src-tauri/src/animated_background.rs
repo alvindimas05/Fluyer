@@ -1,6 +1,8 @@
+use image::ImageReader;
 use image::{DynamicImage, Rgba, RgbaImage};
 use rand::seq::IndexedRandom;
 use std::cmp::max;
+use std::io::Cursor;
 use tauri::async_runtime::block_on;
 
 const SCALE: f32 = 0.05;
@@ -90,6 +92,7 @@ pub async fn update_animated_background(
 ) -> Result<(), String> {
     let app_handle_clone = app_handle.clone();
     let _ = tauri::async_runtime::spawn_blocking(move || {
+        let start = std::time::Instant::now();
         let bytes = if let Some(path) = audio_path {
             crate::debug!("Loading image from path: {}", path);
             let image_result = {
@@ -108,9 +111,26 @@ pub async fn update_animated_background(
             crate::music::metadata::MusicMetadata::get_default_cover_art()
                 .map_err(|e| e.to_string())
         }?;
+        crate::debug!("Cover art received in {}ms", start.elapsed().as_millis());
 
         let start = std::time::Instant::now();
-        if let Ok(img) = image::load_from_memory(&bytes) {
+        // Use format hint to speed up decoding - avoid auto-detection overhead
+        let img_result = match image::guess_format(&bytes) {
+            Ok(format) => {
+                let mut reader = ImageReader::new(Cursor::new(&bytes));
+                reader.set_format(format);
+                reader.decode()
+            }
+            Err(_) => {
+                // Fallback to auto-detection if format guess fails
+                ImageReader::new(Cursor::new(&bytes))
+                    .with_guessed_format()
+                    .map_err(|e| e.to_string())?
+                    .decode()
+            }
+        };
+
+        if let Ok(img) = img_result {
             crate::debug!("Image loaded in {}ms", start.elapsed().as_millis());
             if let Ok(bg) = generate_animated_background(&img, 1920, 1080) {
                 crate::wgpu_renderer::update_background(&app_handle_clone, bg);

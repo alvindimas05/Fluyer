@@ -374,8 +374,42 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         ..Default::default()
     });
 
-    // Initial dummy texture logic to prevent crashes if render is called before first bg
-    // (In reality, we will check `current_texture.is_some()` in render)
+    // Create initial 1x1 black texture so we can fade in from it
+    let texture_size = wgpu::Extent3d {
+        width: 1,
+        height: 1,
+        depth_or_array_layers: 1,
+    };
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        size: texture_size,
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Rgba8Unorm,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        label: Some("Default Black Texture"),
+        view_formats: &[],
+    });
+
+    // Write black pixel
+    queue.write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture: &texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+            aspect: wgpu::TextureAspect::All,
+        },
+        &[0, 0, 0, 0], // Fully transparent
+        wgpu::TexelCopyBufferLayout {
+            offset: 0,
+            bytes_per_row: Some(4),
+            rows_per_image: Some(1),
+        },
+        texture_size,
+    );
+
+    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+    let initial_texture_state = TextureState { texture, view };
 
     app.manage(Arc::new(Mutex::new(RendererState {
         surface,
@@ -386,7 +420,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         uniform_buffer,
         bind_group_layout,
         sampler,
-        current_texture: None,
+        current_texture: Some(initial_texture_state), // Start with black texture
         next_texture: None,
         transition_start_time: None,
     })));
@@ -491,45 +525,6 @@ pub fn render_frame(app_handle: &tauri::AppHandle) {
         state
             .queue
             .write_buffer(&state.uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
-
-        // Ensure we have textures to bind
-        if state.current_texture.is_none() {
-            // Log once properly (throttled) in real app, but for now just fallback clear
-            let frame = match state.surface.get_current_texture() {
-                Ok(frame) => frame,
-                Err(_) => return,
-            };
-            let view = frame
-                .texture
-                .create_view(&wgpu::TextureViewDescriptor::default());
-            let mut encoder = state
-                .device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-            {
-                let _rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                    label: Some("Clear Pass"),
-                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                        view: &view,
-                        resolve_target: None,
-                        ops: wgpu::Operations {
-                            load: wgpu::LoadOp::Clear(wgpu::Color {
-                                r: 0.0,
-                                g: 0.0,
-                                b: 0.0,
-                                a: 0.0,
-                            }),
-                            store: wgpu::StoreOp::Store,
-                        },
-                    })],
-                    depth_stencil_attachment: None,
-                    timestamp_writes: None,
-                    occlusion_query_set: None,
-                });
-            }
-            state.queue.submit(Some(encoder.finish()));
-            frame.present();
-            return;
-        }
 
         // Get generic view for missing next texture (reuse current)
         let current_view = &state.current_texture.as_ref().unwrap().view;
