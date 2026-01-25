@@ -351,13 +351,27 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         cache: None,
     });
 
+    // Prefer PostMultiplied or PreMultiplied for transparency
+    let alpha_mode = swapchain_capabilities
+        .alpha_modes
+        .iter()
+        .find(|&&mode| mode == wgpu::CompositeAlphaMode::PostMultiplied)
+        .or_else(|| {
+            swapchain_capabilities
+                .alpha_modes
+                .iter()
+                .find(|&&mode| mode == wgpu::CompositeAlphaMode::PreMultiplied)
+        })
+        .copied()
+        .unwrap_or(swapchain_capabilities.alpha_modes[0]);
+
     let config = wgpu::SurfaceConfiguration {
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
         format: swapchain_format,
         width: size.width,
         height: size.height,
         present_mode: wgpu::PresentMode::Fifo,
-        alpha_mode: swapchain_capabilities.alpha_modes[0],
+        alpha_mode,
         view_formats: vec![],
         desired_maximum_frame_latency: 2,
     };
@@ -409,7 +423,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     );
 
     let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-    let initial_texture_state = TextureState { texture, view };
+    let _initial_texture_state = TextureState { texture, view };
 
     app.manage(Arc::new(Mutex::new(RendererState {
         surface,
@@ -420,7 +434,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         uniform_buffer,
         bind_group_layout,
         sampler,
-        current_texture: Some(initial_texture_state), // Start with black texture
+        current_texture: Some(_initial_texture_state), // Start with black texture
         next_texture: None,
         transition_start_time: None,
     })));
@@ -587,7 +601,12 @@ pub fn render_frame(app_handle: &tauri::AppHandle) {
                     view: &view,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK), // Clear to black
+                        load: wgpu::LoadOp::Clear(wgpu::Color {
+                            r: 0.0,
+                            g: 0.0,
+                            b: 0.0,
+                            a: 0.0, // Fully transparent
+                        }),
                         store: wgpu::StoreOp::Store,
                     },
                 })],
