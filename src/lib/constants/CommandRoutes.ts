@@ -39,6 +39,7 @@ export const CommandRoutes = {
 
 	COVER_ART_GET: 'cover_art_get',
 	LYRIC_GET: 'lyric_get',
+	UPDATE_ANIMATED_BACKGROUND: 'update_animated_background',
 
 	DEVELOPER_SAVE_LOG: 'developer_save_log',
 	DEVELOPER_SAVE_MPV_LOG: 'developer_save_mpv_log'

@@ -8,6 +8,8 @@ use wgpu::{BackendOptions, Backends, InstanceDescriptor, InstanceFlags};
 
 use image::RgbaImage;
 
+use crate::state::app_handle;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 struct Uniforms {
@@ -451,8 +453,8 @@ pub fn handle_wgpu_resize(app_handle: &tauri::AppHandle, width: u32, height: u32
     }
 }
 
-pub fn update_background(app_handle: &tauri::AppHandle, img: RgbaImage) {
-    if let Some(state) = app_handle.try_state::<Arc<Mutex<RendererState>>>() {
+pub fn update_background(img: RgbaImage) {
+    if let Some(state) = app_handle().try_state::<Arc<Mutex<RendererState>>>() {
         let mut state = state.lock().unwrap();
 
         let texture_size = wgpu::Extent3d {

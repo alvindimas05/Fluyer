@@ -30,6 +30,8 @@
 		"animate.css": "^4.1.1",
 		"axios": "^1.13.2",
 		"caniuse-lite": "^1.0.30001754",
+		"color.js": "^1.2.0",
+		"colorthief": "^2.6.0",
 		"fluidscroll": "^2.0.0",
 		"sass": "^1.88.0",
 		"sleep-promise": "^9.1.0",

@@ -26,6 +26,7 @@ const MetadataService = {
 		const blob = new Blob([await TauriMetadataAPI.getDefaultCoverArt()], { type: 'image/png' });
 		defaultAlbumImage = URL.createObjectURL(blob);
 	},
+	isDefaultAlbumImage: (image: string | null) => image === defaultAlbumImage,
 	getMusicCoverArt: async (music?: MusicData) => {
 		if (!music) return defaultAlbumImage;
 		try {
