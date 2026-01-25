@@ -1,8 +1,15 @@
 {
 	"bundle": {
-		"resources": ["./libs/ffmpeg/bin/*"],
+		"resources": [
+			"resources/",
+			"./libs/ffmpeg/bin/*"
+		],
 		"macOS": {
-			"frameworks": ["./libs/libbass.dylib", "./libs/libbassflac.dylib", "./libs/libbassmix.dylib"]
+			"frameworks": [
+				"./libs/libbass.dylib",
+				"./libs/libbassflac.dylib",
+				"./libs/libbassmix.dylib"
+			]
 		}
 	}
 }
