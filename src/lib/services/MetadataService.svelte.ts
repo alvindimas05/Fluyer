@@ -5,6 +5,8 @@ import TauriMetadataAPI from '$lib/tauri/TauriMetadataAPI';
 import FolderService from './FolderService.svelte';
 import CoverArtService from './CoverArtService.svelte';
 
+let defaultAlbumImage: string | null = null;
+
 // Fast magic bytes validation - O(1) check
 const isValidImageBuffer = (buffer: ArrayBuffer): boolean => {
 	if (buffer.byteLength < 4) return false;
@@ -19,8 +21,13 @@ const isValidImageBuffer = (buffer: ArrayBuffer): boolean => {
 };
 
 const MetadataService = {
+	initialize: async () => {
+		if (defaultAlbumImage) return;
+		const blob = new Blob([await TauriMetadataAPI.getDefaultCoverArt()], { type: 'image/png' });
+		defaultAlbumImage = URL.createObjectURL(blob);
+	},
 	getMusicCoverArt: async (music?: MusicData) => {
-		if (!music) return MusicConfig.defaultAlbumImage;
+		if (!music) return defaultAlbumImage;
 		try {
 			const arrayBuffer = await TauriMetadataAPI.getMusicCoverArt(music.path);
 			if (arrayBuffer !== null && isValidImageBuffer(arrayBuffer)) {
@@ -29,7 +36,7 @@ const MetadataService = {
 			}
 		} catch (e) { }
 		if (music.title == null || music.artist == null)
-			return MusicConfig.defaultAlbumImage;
+			return defaultAlbumImage;
 		const coverArt = await CoverArtService.getByQuery({
 			artist: music.artist!,
 			title: music.album ? undefined : music.title!,

@@ -23,6 +23,7 @@
 	import Font from '$lib/ui/font/Font.svelte';
 	import FilterBar from '$lib/features/filterbar/components/FilterBar.svelte';
 	import TitleBar from '$lib/features/titlebar/components/TitleBar.svelte';
+	import MetadataService from '$lib/services/MetadataService.svelte';
 
 	if (isWindows() || isLinux()) {
 		import('$lib/scss/rounded-windows.scss');
@@ -48,7 +49,8 @@
 			MusicPlayerService.initialize(),
 			UIInteractionService.initialize(),
 			MobileService.initialize(),
-			FolderService.initialize()
+			FolderService.initialize(),
+			MetadataService.initialize(),
 		]);
 
 		if (isDesktop()) {

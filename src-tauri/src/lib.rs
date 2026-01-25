@@ -1,4 +1,5 @@
 // Core modules
+pub mod animated_background;
 mod api;
 pub(crate) mod commands;
 mod coverart;

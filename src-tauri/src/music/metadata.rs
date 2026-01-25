@@ -367,6 +367,19 @@ impl MusicMetadata {
         None
     }
 
+    pub fn get_default_cover_art_path() -> String {
+        let resource_dir = app_handle()
+            .path()
+            .resource_dir()
+            .expect("Failed to get resource directory");
+        let default_cover_art_path = resource_dir.join("resources/images/default-cover-art.png");
+        default_cover_art_path.to_str().unwrap().to_string()
+    }
+
+    pub fn get_default_cover_art() -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(Self::get_default_cover_art_path())
+    }
+
     /// Extract cover art, trying Symphonia first for performance, falling back to FFmpeg
     pub async fn get_image_from_path(path: String) -> Result<Vec<u8>, String> {
         // Try Symphonia first (fast, pure Rust)

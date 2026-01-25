@@ -15,6 +15,7 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     crate::music::commands::music_playlist_moveto,
     crate::music::commands::music_get_visualizer_buffer,
     crate::music::commands::music_get_image,
+    crate::music::commands::music_get_default_cover_art,
     crate::music::commands::music_get_current_duration,
     crate::music::commands::music_player_request_sync,
     crate::music::commands::music_get_lyrics,
@@ -54,4 +55,6 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     // Platform-specific commands
     #[cfg(windows)]
     decorum::decorum_show_snap_overlay,
+    // Animated Background
+    crate::animated_background::update_animated_background,
 ];

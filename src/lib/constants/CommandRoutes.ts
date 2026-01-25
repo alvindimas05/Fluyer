@@ -16,6 +16,7 @@ export const CommandRoutes = {
 	MUSIC_EQUALIZER: 'music_equalizer',
 	MUSIC_EQUALIZER_RESET: 'music_equalizer_reset',
 	MUSIC_GET_IMAGE: 'music_get_image',
+	MUSIC_GET_DEFAULT_COVER_ART: 'music_get_default_cover_art',
 	MUSIC_GET_VISUALIZER_BUFFER: 'music_get_visualizer_buffer',
 	MUSIC_GET_CURRENT_DURATION: 'music_get_current_duration',
 	MUSIC_GET_LYRICS: 'music_get_lyrics',

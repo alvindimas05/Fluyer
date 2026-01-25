@@ -108,6 +108,7 @@ const QueueService = {
 		if (currentPath) {
 			const newIndex = queue.findIndex((m) => m.path === currentPath);
 			if (newIndex !== -1) {
+				console.log('Moving to index:', newIndex);
 				musicStore.currentIndex = newIndex;
 			}
 		}

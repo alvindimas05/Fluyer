@@ -1,9 +1,45 @@
 // WGPU Renderer module for rendering behind webview
 
 use std::borrow::Cow;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tauri::{async_runtime::block_on, Manager};
+use wgpu::util::DeviceExt;
 use wgpu::{BackendOptions, Backends, InstanceDescriptor, InstanceFlags};
+
+use image::RgbaImage;
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+struct Uniforms {
+    mix_ratio: f32,
+    _padding: [f32; 3],
+}
+
+struct TextureState {
+    texture: wgpu::Texture,
+    view: wgpu::TextureView,
+}
+
+pub struct RendererState {
+    surface: wgpu::Surface<'static>,
+    device: wgpu::Device,
+    queue: wgpu::Queue,
+    config: wgpu::SurfaceConfiguration,
+    render_pipeline: wgpu::RenderPipeline,
+
+    // Background resources
+    uniform_buffer: wgpu::Buffer,
+    bind_group_layout: wgpu::BindGroupLayout,
+    sampler: wgpu::Sampler,
+
+    current_texture: Option<TextureState>,
+    next_texture: Option<TextureState>,
+
+    transition_start_time: Option<std::time::Instant>,
+}
+
+unsafe impl Send for RendererState {}
+unsafe impl Sync for RendererState {}
 
 // Initialize WGPU rendering for a window
 pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
@@ -26,7 +62,6 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         flags: InstanceFlags::default(),
         backend_options: BackendOptions::default(),
     });
-    crate::debug!("setup_wgpu: Instance created");
 
     #[cfg(target_os = "android")]
     let surface = {
@@ -42,7 +77,6 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         let mut env = vm.attach_current_thread()?;
 
         // Get the application context and class loader
-        // Note: ctx.context() returns *mut c_void, which is a jobject reference to the Context/Activity
         let context = unsafe { JObject::from_raw(ctx.context() as jni::sys::jobject) };
 
         let class_context = env.find_class("android/content/Context")?;
@@ -72,7 +106,6 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
 
         // Wait loop for surface creation
         for _ in 0..50 {
-            // Try to load the class
             let fluyer_plugin_class_value = unsafe {
                 env.call_method_unchecked(
                     &class_loader,
@@ -84,10 +117,8 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
 
             if let Ok(val) = fluyer_plugin_class_value {
                 let fluyer_plugin_class_obj = val.l()?;
-                // Convert JObject to JClass
                 let fluyer_plugin_class: JClass = fluyer_plugin_class_obj.into();
 
-                // Now get the static field from the class object we found
                 let field_id = env.get_static_field_id(
                     &fluyer_plugin_class,
                     "surface",
@@ -117,7 +148,6 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
             return Err("Timed out waiting for Android Surface".into());
         }
 
-        // Get the native window from the surface
         let native_window = unsafe {
             ndk::native_window::NativeWindow::from_surface(
                 env.get_native_interface(),
@@ -128,12 +158,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
 
         let _native_window_ref = native_window.ptr().as_ptr();
 
-        // Create raw window handle
-        // FIXME: This is slightly risky as we're creating a handle for a window we don't own the lifecycle of perfectly
-        // But for this purpose it should work if the surface stays valid.
-        // We leak the native window to keep the reference valid for wgpu
-        // Note: ndk::native_window::NativeWindow calls ANativeWindow_release on drop.
-        // We need to keep it alive.
+        // Leak native window
         std::mem::forget(native_window);
 
         let handle = AndroidNdkWindowHandle::new(
@@ -155,20 +180,20 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     #[cfg(not(target_os = "android"))]
     let surface = instance.create_surface(window.clone())?;
 
+    // Surface must be 'static for our struct
+    let surface: wgpu::Surface<'static> = unsafe { std::mem::transmute(surface) };
+
     let adapter = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
         power_preference: wgpu::PowerPreference::default(),
         force_fallback_adapter: false,
-        // Request an adapter which can render to our surface
         compatible_surface: Some(&surface),
     }))
     .expect("Failed to find an appropriate adapter");
 
-    // Create the logical device and command queue
     let (device, queue) = block_on(adapter.request_device(
         &wgpu::DeviceDescriptor {
             label: None,
             required_features: wgpu::Features::empty(),
-            // Make sure we use the texture resolution limits from the adapter, so we can support images the size of the swapchain.
             required_limits:
                 wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits()),
             memory_hints: wgpu::MemoryHints::default(),
@@ -177,29 +202,120 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     ))
     .expect("Failed to create device");
 
-    // Load the shaders from disk
+    // Shader
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
-        label: None,
+        label: Some("Shader"),
         source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(
             r#"
-@vertex
-fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
-    let x = f32(i32(in_vertex_index) - 1);
-    let y = f32(i32(in_vertex_index & 1u) * 2 - 1);
-    return vec4<f32>(x, y, 0.0, 1.0);
-}
+            struct VertexOutput {
+                @builtin(position) position: vec4<f32>,
+                @location(0) tex_coords: vec2<f32>,
+            };
 
-@fragment
-fn fs_main() -> @location(0) vec4<f32> {
-    return vec4<f32>(1.0, 0.0, 0.0, 1.0);
-}
-"#,
+            @vertex
+            fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> VertexOutput {
+                var pos = array<vec2<f32>, 4>(
+                    vec2<f32>(-1.0, -1.0),
+                    vec2<f32>( 1.0, -1.0),
+                    vec2<f32>(-1.0,  1.0),
+                    vec2<f32>( 1.0,  1.0)
+                );
+                
+                var tex = array<vec2<f32>, 4>(
+                    vec2<f32>(0.0, 1.0),
+                    vec2<f32>(1.0, 1.0),
+                    vec2<f32>(0.0, 0.0),
+                    vec2<f32>(1.0, 0.0)
+                );
+
+                var out: VertexOutput;
+                out.position = vec4<f32>(pos[in_vertex_index], 0.0, 1.0);
+                out.tex_coords = tex[in_vertex_index];
+                return out;
+            }
+
+            @group(0) @binding(0) var t_current: texture_2d<f32>;
+            @group(0) @binding(1) var s_current: sampler;
+            @group(0) @binding(2) var t_next: texture_2d<f32>;
+            @group(0) @binding(3) var s_next: sampler;
+            @group(0) @binding(4) var<uniform> uniforms: Uniforms;
+
+            struct Uniforms {
+                mix_ratio: f32,
+            };
+
+            @fragment
+            fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
+                let color_current = textureSample(t_current, s_current, in.tex_coords);
+                let color_next = textureSample(t_next, s_next, in.tex_coords);
+                return mix(color_current, color_next, uniforms.mix_ratio);
+            }
+        "#,
         )),
     });
 
+    // Uniforms
+    let uniforms = Uniforms {
+        mix_ratio: 0.0,
+        _padding: [0.0; 3],
+    };
+    let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("Uniform Buffer"),
+        contents: bytemuck::cast_slice(&[uniforms]),
+        usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+    });
+
+    let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        entries: &[
+            wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    multisampled: false,
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 1,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 2,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture {
+                    multisampled: false,
+                    view_dimension: wgpu::TextureViewDimension::D2,
+                    sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 3,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 4,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            },
+        ],
+        label: Some("Bind Group Layout"),
+    });
+
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-        label: None,
-        bind_group_layouts: &[],
+        label: Some("Pipeline Layout"),
+        bind_group_layouts: &[&bind_group_layout],
         push_constant_ranges: &[],
     });
 
@@ -207,7 +323,7 @@ fn fs_main() -> @location(0) vec4<f32> {
     let swapchain_format = swapchain_capabilities.formats[0];
 
     let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-        label: None,
+        label: Some("Render Pipeline"),
         layout: Some(&pipeline_layout),
         vertex: wgpu::VertexState {
             module: &shader,
@@ -218,10 +334,17 @@ fn fs_main() -> @location(0) vec4<f32> {
         fragment: Some(wgpu::FragmentState {
             module: &shader,
             entry_point: Some("fs_main"),
-            targets: &[Some(swapchain_format.into())],
+            targets: &[Some(wgpu::ColorTargetState {
+                format: swapchain_format,
+                blend: Some(wgpu::BlendState::REPLACE),
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
             compilation_options: Default::default(),
         }),
-        primitive: wgpu::PrimitiveState::default(),
+        primitive: wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleStrip,
+            ..Default::default()
+        },
         depth_stencil: None,
         multisample: wgpu::MultisampleState::default(),
         multiview: None,
@@ -241,80 +364,248 @@ fn fs_main() -> @location(0) vec4<f32> {
 
     surface.configure(&device, &config);
 
-    app.manage(WgpuSurface(surface));
-    app.manage(render_pipeline);
-    app.manage(device);
-    app.manage(queue);
-    app.manage(Mutex::new(config));
+    let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+        address_mode_u: wgpu::AddressMode::ClampToEdge,
+        address_mode_v: wgpu::AddressMode::ClampToEdge,
+        address_mode_w: wgpu::AddressMode::ClampToEdge,
+        mag_filter: wgpu::FilterMode::Linear,
+        min_filter: wgpu::FilterMode::Linear,
+        mipmap_filter: wgpu::FilterMode::Nearest,
+        ..Default::default()
+    });
 
-    // On Android we also need to keep the NativeWindow alive, possibly
-    #[cfg(target_os = "android")]
-    {
-        // TODO: Store this in state if needed to prevent drop
-        // For now, relies on the surface handle being valid
-    }
+    // Initial dummy texture logic to prevent crashes if render is called before first bg
+    // (In reality, we will check `current_texture.is_some()` in render)
+
+    app.manage(Arc::new(Mutex::new(RendererState {
+        surface,
+        device,
+        queue,
+        config,
+        render_pipeline,
+        uniform_buffer,
+        bind_group_layout,
+        sampler,
+        current_texture: None,
+        next_texture: None,
+        transition_start_time: None,
+    })));
 
     Ok(())
 }
 
-/// Wrapper for wgpu::Surface to make it Send + Sync
-pub struct WgpuSurface<'a>(pub wgpu::Surface<'a>);
-
-// SAFETY: The surface is only accessed from the main thread in Tauri
-unsafe impl Send for WgpuSurface<'_> {}
-unsafe impl Sync for WgpuSurface<'_> {}
-
-/// Handle window resize for WGPU
 pub fn handle_wgpu_resize(app_handle: &tauri::AppHandle, width: u32, height: u32) {
-    let config = app_handle.state::<Mutex<wgpu::SurfaceConfiguration>>();
-    let surface = app_handle.state::<WgpuSurface>();
-    let device = app_handle.state::<wgpu::Device>();
-
-    let mut config = config.lock().unwrap();
-    config.width = if width > 0 { width } else { 1 };
-    config.height = if height > 0 { height } else { 1 };
-    surface.0.configure(&device, &config);
+    if let Some(state) = app_handle.try_state::<Arc<Mutex<RendererState>>>() {
+        let mut state = state.lock().unwrap();
+        state.config.width = if width > 0 { width } else { 1 };
+        state.config.height = if height > 0 { height } else { 1 };
+        state.surface.configure(&state.device, &state.config);
+    }
 }
 
-/// Render a frame using WGPU
-pub fn render_frame(app_handle: &tauri::AppHandle) {
-    let surface = app_handle.state::<WgpuSurface>();
-    let render_pipeline = app_handle.state::<wgpu::RenderPipeline>();
-    let device = app_handle.state::<wgpu::Device>();
-    let queue = app_handle.state::<wgpu::Queue>();
+pub fn update_background(app_handle: &tauri::AppHandle, img: RgbaImage) {
+    if let Some(state) = app_handle.try_state::<Arc<Mutex<RendererState>>>() {
+        let mut state = state.lock().unwrap();
 
-    let frame = match surface.0.get_current_texture() {
-        Ok(frame) => frame,
-        Err(e) => {
-            crate::debug!("Failed to acquire next swap chain texture: {:?}", e);
+        let texture_size = wgpu::Extent3d {
+            width: img.width(),
+            height: img.height(),
+            depth_or_array_layers: 1,
+        };
+
+        let texture = state.device.create_texture(&wgpu::TextureDescriptor {
+            size: texture_size,
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8Unorm, // Use linear format - sRGB conversion happens at surface output
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            label: Some("Background Texture"),
+            view_formats: &[],
+        });
+
+        state.queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            &img,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(4 * img.width()),
+                rows_per_image: Some(img.height()),
+            },
+            texture_size,
+        );
+
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+        let new_texture_state = TextureState {
+            texture, // kept alive by this struct
+            view,
+        };
+
+        // Logic:
+        // If no current, set current = new.
+        // If current exists, set next = new, start transition.
+
+        if state.current_texture.is_none() {
+            state.current_texture = Some(new_texture_state);
+        } else {
+            state.next_texture = Some(new_texture_state);
+            state.transition_start_time = Some(std::time::Instant::now());
+        }
+    }
+}
+
+pub fn render_frame(app_handle: &tauri::AppHandle) {
+    if let Some(state) = app_handle.try_state::<Arc<Mutex<RendererState>>>() {
+        let mut state = state.lock().unwrap();
+
+        // Update transition logic
+        let mut mix_ratio = 0.0;
+        let mut done_transition = false;
+
+        if let Some(start_time) = state.transition_start_time {
+            let elapsed = start_time.elapsed().as_secs_f32();
+            mix_ratio = (elapsed / 0.75).min(1.0); // 750ms duration
+
+            if mix_ratio >= 1.0 {
+                done_transition = true;
+            }
+        }
+
+        if done_transition {
+            state.current_texture = state.next_texture.take();
+            state.transition_start_time = None;
+            mix_ratio = 0.0;
+        }
+
+        // Update uniform
+        let uniforms = Uniforms {
+            mix_ratio,
+            _padding: [0.0; 3],
+        };
+        state
+            .queue
+            .write_buffer(&state.uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
+
+        // Ensure we have textures to bind
+        if state.current_texture.is_none() {
+            // Log once properly (throttled) in real app, but for now just fallback clear
+            let frame = match state.surface.get_current_texture() {
+                Ok(frame) => frame,
+                Err(_) => return,
+            };
+            let view = frame
+                .texture
+                .create_view(&wgpu::TextureViewDescriptor::default());
+            let mut encoder = state
+                .device
+                .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+            {
+                let _rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    label: Some("Clear Pass"),
+                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        view: &view,
+                        resolve_target: None,
+                        ops: wgpu::Operations {
+                            load: wgpu::LoadOp::Clear(wgpu::Color {
+                                r: 0.0,
+                                g: 0.0,
+                                b: 0.0,
+                                a: 0.0,
+                            }),
+                            store: wgpu::StoreOp::Store,
+                        },
+                    })],
+                    depth_stencil_attachment: None,
+                    timestamp_writes: None,
+                    occlusion_query_set: None,
+                });
+            }
+            state.queue.submit(Some(encoder.finish()));
+            frame.present();
             return;
         }
-    };
 
-    let view = frame
-        .texture
-        .create_view(&wgpu::TextureViewDescriptor::default());
-    let mut encoder =
-        device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-    {
-        let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: None,
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &view,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
-                    store: wgpu::StoreOp::Store,
+        // Get generic view for missing next texture (reuse current)
+        let current_view = &state.current_texture.as_ref().unwrap().view;
+        let next_view = if let Some(next) = &state.next_texture {
+            &next.view
+        } else {
+            current_view
+        };
+
+        let bind_group = state.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &state.bind_group_layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(current_view),
                 },
-            })],
-            depth_stencil_attachment: None,
-            timestamp_writes: None,
-            occlusion_query_set: None,
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&state.sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::TextureView(next_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wgpu::BindingResource::Sampler(&state.sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                        buffer: &state.uniform_buffer,
+                        offset: 0,
+                        size: None,
+                    }),
+                },
+            ],
+            label: Some("Frame Bind Group"),
         });
-        rpass.set_pipeline(&render_pipeline);
-        rpass.draw(0..3, 0..1);
-    }
 
-    queue.submit(Some(encoder.finish()));
-    frame.present();
+        let frame = match state.surface.get_current_texture() {
+            Ok(frame) => frame,
+            Err(e) => {
+                crate::warn!("Failed to get current texture: {e}");
+                return;
+            }
+        };
+
+        let view = frame
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
+
+        let mut encoder = state
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: None,
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK), // Clear to black
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
+            });
+            rpass.set_pipeline(&state.render_pipeline);
+            rpass.set_bind_group(0, &bind_group, &[]);
+            rpass.draw(0..4, 0..1);
+        }
+
+        state.queue.submit(Some(encoder.finish()));
+        frame.present();
+    }
 }

@@ -629,6 +629,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "color-thief"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e6460d760cf38ce67c9e0318f896538820acc54f2d0a3bfc5b2c557211066c98"
+dependencies = [
+ "rgb",
+]
+
+[[package]]
 name = "color_quant"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1370,7 +1379,9 @@ name = "fluyer"
 version = "1.2.0"
 dependencies = [
  "base64-simd",
+ "bytemuck",
  "chrono",
+ "color-thief",
  "dotenvy",
  "dotenvy_macro",
  "enigo 0.6.1",
@@ -1381,6 +1392,7 @@ dependencies = [
  "libloading 0.8.9",
  "ndk 0.8.0",
  "ndk-context",
+ "rand 0.9.2",
  "raw-window-handle",
  "rayon",
  "regex",
@@ -4418,6 +4430,9 @@ name = "rgb"
 version = "0.8.52"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
+dependencies = [
+ "bytemuck",
+]
 
 [[package]]
 name = "ring"
