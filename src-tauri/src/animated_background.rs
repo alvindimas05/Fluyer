@@ -5,7 +5,7 @@ use std::cmp::max;
 use std::io::Cursor;
 use tauri::async_runtime::block_on;
 
-const SCALE: f32 = 1.0;
+const SCALE: f32 = 0.05;
 const CANVAS_BLOCK_SIZE: u32 = 200; // Avg of 100 and 150
 const CANVAS_BLUR_RADIUS: u32 = 300;
 
