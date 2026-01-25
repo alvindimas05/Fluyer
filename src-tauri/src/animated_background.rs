@@ -5,9 +5,9 @@ use std::cmp::max;
 use std::io::Cursor;
 use tauri::async_runtime::block_on;
 
-const SCALE: f32 = 0.05;
+const SCALE: f32 = 1.0;
 const CANVAS_BLOCK_SIZE: u32 = 200; // Avg of 100 and 150
-const CANVAS_BLUR_RADIUS: u32 = 125;
+const CANVAS_BLUR_RADIUS: u32 = 300;
 
 pub fn generate_animated_background(
     img: &DynamicImage,
@@ -19,6 +19,8 @@ pub fn generate_animated_background(
 
     let mut palette = color_thief::get_palette(&img_buffer, color_thief::ColorFormat::Rgba, 10, 10)
         .expect("Failed to get palette");
+
+    crate::debug!("Palette: {:?}", palette);
 
     for color in &mut palette {
         let (h, mut s, mut l) = rgb_to_hsl(color.r, color.g, color.b);
@@ -38,6 +40,7 @@ pub fn generate_animated_background(
             color.b = b;
         }
     }
+    crate::debug!("Processed palette: {:?}", palette);
 
     // 2. Generate Grid
     let scaled_width = (target_width as f32 * SCALE) as u32;
@@ -78,9 +81,24 @@ pub fn generate_animated_background(
     }
 
     // 3. Blur
-    let blur_radius = CANVAS_BLUR_RADIUS as f32 * SCALE;
-    // Using image crate's gaussian blur for simplicity and quality
-    let blurred = image::imageops::blur(&canvas, blur_radius);
+    let blur_radius = (CANVAS_BLUR_RADIUS as f32 * SCALE) as u32;
+
+    let dyn_img = DynamicImage::ImageRgba8(canvas);
+    let kernel_size = (blur_radius * 2) + 1;
+    let blurred_dyn = libblur::gaussian_blur_image(
+        dyn_img,
+        libblur::GaussianBlurParams {
+            x_kernel: kernel_size,
+            x_sigma: 0.0,
+            y_kernel: kernel_size,
+            y_sigma: 0.0,
+        },
+        libblur::EdgeMode2D::new(libblur::EdgeMode::Clamp),
+        libblur::ConvolutionMode::FixedPoint,
+        libblur::ThreadingPolicy::Adaptive,
+    )
+    .expect("Failed to blur");
+    let blurred = blurred_dyn.to_rgba8();
 
     Ok(blurred)
 }
