@@ -27,7 +27,7 @@ pub fn generate_animated_background(
 
             // Boost saturation significantly for vibrance, but respect greyscale
             if s > 0.05 {
-                s = (s.max(0.6) * 1.3).min(1.0);
+                s = (s.max(0.4) * 1.1).min(0.9);
             }
 
             let (r, g, b) = hsl_to_rgb(h, s, l);
