@@ -37,7 +37,7 @@ pub fn generate_animated_background(
 
     for y in 0..rows {
         for x in 0..cols {
-            let color = pallete.choose(&mut rng).unwrap();
+            let color = palette.choose(&mut rng).unwrap();
 
             let x_start = x * block_size;
             let y_start = y * block_size;
