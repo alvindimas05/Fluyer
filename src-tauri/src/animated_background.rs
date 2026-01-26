@@ -6,9 +6,6 @@ const SCALE: f32 = 0.05;
 const CANVAS_BLOCK_SIZE: u32 = 200; // Avg of 100 and 150
 const CANVAS_BLUR_RADIUS: u32 = 300;
 
-const TARGET_WIDTH: u32 = 1920;
-const TARGET_HEIGHT: u32 = 1080;
-
 #[derive(serde::Deserialize)]
 pub struct Color {
     r: u8,
@@ -17,10 +14,14 @@ pub struct Color {
 }
 
 #[tauri::command]
-pub async fn update_animated_background(colors: Vec<Color>) -> Result<(), String> {
+pub async fn update_animated_background(
+    colors: Vec<Color>,
+    width: u32,
+    height: u32,
+) -> Result<(), String> {
     // Generate Grid
-    let scaled_width = (TARGET_WIDTH as f32 * SCALE) as u32;
-    let scaled_height = (TARGET_HEIGHT as f32 * SCALE) as u32;
+    let scaled_width = (width as f32 * SCALE) as u32;
+    let scaled_height = (height as f32 * SCALE) as u32;
     let block_size = (CANVAS_BLOCK_SIZE as f32 * SCALE) as u32;
 
     // Ensure minimum dimensions

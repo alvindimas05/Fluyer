@@ -20,10 +20,13 @@
 		b: number;
 	}
 
-    let isInitialized = false;
+	let isInitialized = false;
 	let previousBackground: string | null = null;
 	let currentAlbumImage: string | null = null;
 	let currentAlbumBlobUrl: string | null = null;
+    
+    let lastRenderedWidth = 0;
+    let lastRenderedHeight = 0;
 
 	function hexToRgb(hex: string): Color {
 		const bigint = parseInt(hex.slice(1), 16);
@@ -175,10 +178,20 @@
 	async function updateBackground(force = false) {
 		const newAlbumImage = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
 
+        const currentWidth = window.innerWidth;
+        const currentHeight = window.innerHeight;
+
 		if (currentAlbumImage === newAlbumImage && !force) return;
 		currentAlbumImage = newAlbumImage;
         
-		await invoke(CommandRoutes.UPDATE_ANIMATED_BACKGROUND, { colors: await getColors() });
+		await invoke(CommandRoutes.UPDATE_ANIMATED_BACKGROUND, {
+            colors: await getColors(),
+            width: currentWidth,
+            height: currentHeight
+        });
+        
+        lastRenderedWidth = currentWidth;
+        lastRenderedHeight = currentHeight;
         
         if (!isInitialized) {
              isInitialized = true;
@@ -191,7 +204,23 @@
 	}
 
 	function onWindowResize() {
-		// WGPU handles resize via Rust event
+		// Calculate percentage difference
+        // The user want to re-render when the window is resized 25% difference
+        // Detects from either width or height
+        
+        if (lastRenderedWidth === 0 || lastRenderedHeight === 0) {
+            lastRenderedWidth = window.innerWidth;
+            lastRenderedHeight = window.innerHeight;
+            return;
+        }
+        
+        const widthDiff = Math.abs(window.innerWidth - lastRenderedWidth) / lastRenderedWidth;
+        const heightDiff = Math.abs(window.innerHeight - lastRenderedHeight) / lastRenderedHeight;
+        
+        if (widthDiff >= 0.25 || heightDiff >= 0.25) {
+             console.log('Resized by 25%, updating background');
+             updateBackground(true);
+        }
 	}
 
 	onMount(() => {
