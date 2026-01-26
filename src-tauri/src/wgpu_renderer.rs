@@ -54,8 +54,12 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     // Use OpenGL ES on Android (more stable with window handles), PRIMARY elsewhere
     #[cfg(target_os = "android")]
     let backends = Backends::GL;
-    #[cfg(not(target_os = "android"))]
-    let backends = Backends::PRIMARY;
+    #[cfg(target_os = "windows")]
+    let backends = Backends::DX12;
+    #[cfg(target_os = "linux")]
+    let backends = Backends::VULKAN;
+    #[cfg(target_os = "macos")]
+    let backends = Backends::METAL;
 
     crate::debug!("setup_wgpu: Using backends {:?}", backends);
 

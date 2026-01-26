@@ -1,7 +1,7 @@
 {
 	"bundle": {
 		"resources": [
-			"resources/",
+			"./resources",
 			"./libs/ffmpeg/bin/*"
 		],
 		"macOS": {

@@ -5,8 +5,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs::File;
-#[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 use symphonia::core::formats::FormatOptions;
@@ -68,7 +66,7 @@ impl MusicMetadata {
     }
 
     fn create_command(program: &Path) -> Command {
-        let cmd = Command::new(program);
+        let mut cmd = Command::new(program);
         #[cfg(target_os = "windows")]
         cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
         cmd

@@ -1,8 +1,8 @@
 {
 	"bundle": {
 		"resources": {
-			"resources/": "",
-			"./libs/ffmpeg/bin/": "",
+			"./resources": "resources",
+			"./libs/ffmpeg/bin": "libs/ffmpeg/bin",
 			"./libs/bass.dll": "bass.dll",
 			"./libs/bassflac.dll": "bassflac.dll",
 			"./libs/bassmix.dll": "bassmix.dll"
