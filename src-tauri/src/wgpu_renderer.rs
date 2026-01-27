@@ -3,6 +3,7 @@
 use std::borrow::Cow;
 use std::sync::{Arc, Condvar, Mutex};
 use tauri::{async_runtime::block_on, Manager};
+use tauri_plugin_device_info::DeviceInfoExt;
 use wgpu::util::DeviceExt;
 use wgpu::{BackendOptions, Backends, InstanceDescriptor, InstanceFlags};
 
@@ -529,6 +530,13 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
             }
         };
 
+        let refresh_rate = app_handle
+            .device_info()
+            .get_display_info()
+            .unwrap()
+            .refresh_rate
+            .unwrap();
+
         loop {
             let mut state = shared.state.lock().unwrap();
 
@@ -654,8 +662,7 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
             // Drop lock before sleeping to let other threads (resize/update) access it
             drop(state);
 
-            // 60 FPS cap
-            std::thread::sleep(std::time::Duration::from_millis(16));
+            std::thread::sleep(std::time::Duration::from_millis((1000.0 / refresh_rate) as u64));
         }
     });
 }
