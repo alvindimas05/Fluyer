@@ -21,6 +21,7 @@
 	}
 
 	let isInitialized = false;
+	let canUpdate = true;
 	let currentCoverArt: string | null = null;
     
     let lastRenderedWidth = 0;
@@ -157,6 +158,12 @@
 	}
 
 	async function updateBackground(force = false) {
+		if(!canUpdate) return;
+		if(!isInitialized){
+			console.log('AnimatedBackground is initializing...');
+			canUpdate = false;
+		}
+		
 		const newCoverArt = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
 
         const currentWidth = window.innerWidth;
@@ -182,6 +189,10 @@
         
         if (!isInitialized) {
              isInitialized = true;
+			 // Note: Why? To prevent updateBackground from being called multiple times
+			 // Since the effects references multiple stores
+			 setTimeout(() => canUpdate = true, 1000);
+
              // Signal to other components? 
              // "Wait for wgpu background to initialize first them show svelte components"
              // Maybe set a global store value?
@@ -210,31 +221,26 @@
         }
 	}
 
-	onMount(() => {
-		updateBackground(true);
 
-		if (isLinux())
-			afterNavigate((navigation) => {
-				if (navigation.from?.route.id !== PageRoutes.VISUALIZER) return;
-				updateBackground(true);
-			});
-
-		$effect(() => {
-			musicStore.currentIndex;
-			musicStore.list;
-			console.log('Updating background from effect');
-			updateBackground();
+	if (isLinux())
+		afterNavigate((navigation) => {
+			if (navigation.from?.route.id !== PageRoutes.VISUALIZER) return;
+			updateBackground(true);
 		});
 
-		// $effect(() => {
-		// 	settingStore.animatedBackground.trigger;
-		// 	console.log('Updating background from trigger');
-		// 	updateBackground(true);
-		// });
+	onMount(() => updateBackground(true));
+
+	$effect(() => {
+		musicStore.currentIndex;
+		musicStore.list;
+		console.log('Updating background from effect');
+		updateBackground();
 	});
 
-	onDestroy(() => {
-	
+	$effect(() => {
+		settingStore.animatedBackground.trigger;
+		console.log('Updating background from trigger');
+		updateBackground(true);
 	});
 </script>
 
