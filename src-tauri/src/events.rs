@@ -1,4 +1,4 @@
-use tauri::{RunEvent, Window, WindowEvent};
+use tauri::{AppHandle, RunEvent, Window, WindowEvent};
 
 #[cfg(target_os = "macos")]
 use crate::platform::{TRAFFIC_LIGHTS_INSET_X, TRAFFIC_LIGHTS_INSET_Y};
@@ -27,6 +27,7 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
     match event {
         RunEvent::Ready => {
             crate::state::initialize_on_ready(app_handle);
+            crate::wgpu_renderer::start_render_loop(app_handle.clone());
         }
         RunEvent::WindowEvent {
             label: _,
@@ -35,11 +36,6 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
         } => {
             crate::wgpu_renderer::handle_wgpu_resize(app_handle, size.width, size.height);
         }
-        RunEvent::MainEventsCleared => {
-            crate::wgpu_renderer::render_frame(app_handle);
-        }
-        _ => {
-            crate::debug!("Unknown event: {:?}", event);
-        }
+        _ => {}
     }
 }

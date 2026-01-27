@@ -1,7 +1,7 @@
 // WGPU Renderer module for rendering behind webview
 
 use std::borrow::Cow;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Condvar, Mutex};
 use tauri::{async_runtime::block_on, Manager};
 use wgpu::util::DeviceExt;
 use wgpu::{BackendOptions, Backends, InstanceDescriptor, InstanceFlags};
@@ -38,6 +38,11 @@ pub struct RendererState {
     next_texture: Option<TextureState>,
 
     transition_start_time: Option<std::time::Instant>,
+}
+
+pub struct SharedRenderer {
+    pub state: Mutex<RendererState>,
+    pub cond: Condvar,
 }
 
 unsafe impl Send for RendererState {}
@@ -427,26 +432,29 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
     let _initial_texture_state = TextureState { texture, view };
 
-    app.manage(Arc::new(Mutex::new(RendererState {
-        surface,
-        device,
-        queue,
-        config,
-        render_pipeline,
-        uniform_buffer,
-        bind_group_layout,
-        sampler,
-        current_texture: Some(_initial_texture_state), // Start with black texture
-        next_texture: None,
-        transition_start_time: None,
-    })));
+    app.manage(Arc::new(SharedRenderer {
+        state: Mutex::new(RendererState {
+            surface,
+            device,
+            queue,
+            config,
+            render_pipeline,
+            uniform_buffer,
+            bind_group_layout,
+            sampler,
+            current_texture: Some(_initial_texture_state), // Start with black texture
+            next_texture: None,
+            transition_start_time: None,
+        }),
+        cond: Condvar::new(),
+    }));
 
     Ok(())
 }
 
 pub fn handle_wgpu_resize(app_handle: &tauri::AppHandle, width: u32, height: u32) {
-    if let Some(state) = app_handle.try_state::<Arc<Mutex<RendererState>>>() {
-        let mut state = state.lock().unwrap();
+    if let Some(shared) = app_handle.try_state::<Arc<SharedRenderer>>() {
+        let mut state = shared.state.lock().unwrap();
         state.config.width = if width > 0 { width } else { 1 };
         state.config.height = if height > 0 { height } else { 1 };
         state.surface.configure(&state.device, &state.config);
@@ -454,8 +462,8 @@ pub fn handle_wgpu_resize(app_handle: &tauri::AppHandle, width: u32, height: u32
 }
 
 pub fn update_background(img: RgbaImage) {
-    if let Some(state) = app_handle().try_state::<Arc<Mutex<RendererState>>>() {
-        let mut state = state.lock().unwrap();
+    if let Some(shared) = app_handle().try_state::<Arc<SharedRenderer>>() {
+        let mut state = shared.state.lock().unwrap();
 
         let texture_size = wgpu::Extent3d {
             width: img.width(),
@@ -506,133 +514,148 @@ pub fn update_background(img: RgbaImage) {
         } else {
             state.next_texture = Some(new_texture_state);
             state.transition_start_time = Some(std::time::Instant::now());
+            shared.cond.notify_one();
         }
     }
 }
 
-pub fn render_frame(app_handle: &tauri::AppHandle) {
-    if let Some(state) = app_handle.try_state::<Arc<Mutex<RendererState>>>() {
-        let mut state = state.lock().unwrap();
-
-        // Update transition logic
-        let mut mix_ratio = 0.0;
-        let mut done_transition = false;
-
-        if let Some(start_time) = state.transition_start_time {
-            let elapsed = start_time.elapsed().as_secs_f32();
-            mix_ratio = (elapsed / 0.75).min(1.0); // 750ms duration
-
-            if mix_ratio >= 1.0 {
-                done_transition = true;
-            }
-        }
-
-        if done_transition {
-            state.current_texture = state.next_texture.take();
-            state.transition_start_time = None;
-            mix_ratio = 0.0;
-        }
-
-        // Update uniform
-        let uniforms = Uniforms {
-            mix_ratio,
-            _padding: [0.0; 3],
-        };
-        state
-            .queue
-            .write_buffer(&state.uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
-
-        // Get generic view for missing next texture (reuse current)
-        let current_view = &state.current_texture.as_ref().unwrap().view;
-        let next_view = if let Some(next) = &state.next_texture {
-            &next.view
-        } else {
-            current_view
-        };
-
-        let bind_group = state.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: &state.bind_group_layout,
-            entries: &[
-                wgpu::BindGroupEntry {
-                    binding: 0,
-                    resource: wgpu::BindingResource::TextureView(current_view),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 1,
-                    resource: wgpu::BindingResource::Sampler(&state.sampler),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 2,
-                    resource: wgpu::BindingResource::TextureView(next_view),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 3,
-                    resource: wgpu::BindingResource::Sampler(&state.sampler),
-                },
-                wgpu::BindGroupEntry {
-                    binding: 4,
-                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                        buffer: &state.uniform_buffer,
-                        offset: 0,
-                        size: None,
-                    }),
-                },
-            ],
-            label: Some("Frame Bind Group"),
-        });
-
-        let frame = match state.surface.get_current_texture() {
-            Ok(frame) => frame,
-            Err(e) => {
-                crate::warn!("Failed to get current texture: {e}");
+pub fn start_render_loop(app_handle: tauri::AppHandle) {
+    std::thread::spawn(move || {
+        let shared = match app_handle.try_state::<Arc<SharedRenderer>>() {
+            Some(s) => s,
+            None => {
+                crate::error!("start_render_loop: RendererState not found");
                 return;
             }
         };
 
-        let view = frame
-            .texture
-            .create_view(&wgpu::TextureViewDescriptor::default());
+        loop {
+            let mut state = shared.state.lock().unwrap();
 
-        let mut encoder = state
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-        {
-            let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: None,
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &view,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.0,
-                            g: 0.0,
-                            b: 0.0,
-                            a: 0.0, // Fully transparent
-                        }),
-                        store: wgpu::StoreOp::Store,
+            // Wait until we have a transition active
+            while state.transition_start_time.is_none() {
+                state = shared.cond.wait(state).unwrap();
+            }
+
+            // Render and update logic
+            // Update transition logic
+            let mut mix_ratio = 0.0;
+            let mut done_transition = false;
+
+            if let Some(start_time) = state.transition_start_time {
+                let elapsed = start_time.elapsed().as_secs_f32();
+                mix_ratio = (elapsed / 0.75).min(1.0); // 750ms duration
+
+                if mix_ratio >= 1.0 {
+                    done_transition = true;
+                }
+            }
+
+            if done_transition {
+                state.current_texture = state.next_texture.take();
+                state.transition_start_time = None;
+                mix_ratio = 0.0;
+            }
+
+            // Update uniform
+            let uniforms = Uniforms {
+                mix_ratio,
+                _padding: [0.0; 3],
+            };
+            state
+                .queue
+                .write_buffer(&state.uniform_buffer, 0, bytemuck::cast_slice(&[uniforms]));
+
+            // Get generic view for missing next texture (reuse current)
+            let current_view = &state.current_texture.as_ref().unwrap().view;
+            let next_view = if let Some(next) = &state.next_texture {
+                &next.view
+            } else {
+                current_view
+            };
+
+            let bind_group = state.device.create_bind_group(&wgpu::BindGroupDescriptor {
+                layout: &state.bind_group_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: wgpu::BindingResource::TextureView(current_view),
                     },
-                })],
-                depth_stencil_attachment: None,
-                timestamp_writes: None,
-                occlusion_query_set: None,
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::Sampler(&state.sampler),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 2,
+                        resource: wgpu::BindingResource::TextureView(next_view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 3,
+                        resource: wgpu::BindingResource::Sampler(&state.sampler),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 4,
+                        resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                            buffer: &state.uniform_buffer,
+                            offset: 0,
+                            size: None,
+                        }),
+                    },
+                ],
+                label: Some("Frame Bind Group"),
             });
-            rpass.set_pipeline(&state.render_pipeline);
-            rpass.set_bind_group(0, &bind_group, &[]);
-            rpass.draw(0..4, 0..1);
-        }
 
-        state.queue.submit(Some(encoder.finish()));
-        frame.present();
+            let frame = match state.surface.get_current_texture() {
+                Ok(frame) => frame,
+                Err(e) => {
+                    crate::warn!("Failed to get current texture: {e}");
+                    // Drop lock before sleeping
+                    drop(state);
+                    std::thread::sleep(std::time::Duration::from_millis(1000));
+                    continue;
+                }
+            };
 
-        // Log every 60 frames roughly to avoid spam
-        static FRAME_COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
-        let count = FRAME_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        if count % 120 == 0 {
-            crate::debug!(
-                "render_frame: Frame {} presented, mix_ratio: {:.2}",
-                count,
-                mix_ratio
-            );
+            let view = frame
+                .texture
+                .create_view(&wgpu::TextureViewDescriptor::default());
+
+            let mut encoder = state
+                .device
+                .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+            {
+                let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    label: None,
+                    color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                        view: &view,
+                        resolve_target: None,
+                        ops: wgpu::Operations {
+                            load: wgpu::LoadOp::Clear(wgpu::Color {
+                                r: 0.0,
+                                g: 0.0,
+                                b: 0.0,
+                                a: 0.0, // Fully transparent
+                            }),
+                            store: wgpu::StoreOp::Store,
+                        },
+                    })],
+                    depth_stencil_attachment: None,
+                    timestamp_writes: None,
+                    occlusion_query_set: None,
+                });
+                rpass.set_pipeline(&state.render_pipeline);
+                rpass.set_bind_group(0, &bind_group, &[]);
+                rpass.draw(0..4, 0..1);
+            }
+
+            state.queue.submit(Some(encoder.finish()));
+            frame.present();
+
+            // Drop lock before sleeping to let other threads (resize/update) access it
+            drop(state);
+
+            // 60 FPS cap
+            std::thread::sleep(std::time::Duration::from_millis(16));
         }
-    }
+    });
 }
