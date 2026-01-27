@@ -11,11 +11,18 @@ use image::RgbaImage;
 
 use crate::state::app_handle;
 
+#[cfg(any(target_os = "windows", target_os = "linux"))]
+const CORNER_RADIUS: f32 = 8.0;
+#[cfg(not(any(target_os = "windows", target_os = "linux")))]
+const CORNER_RADIUS: f32 = 0.0;
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 struct Uniforms {
     mix_ratio: f32,
-    _padding: [f32; 3],
+    width: f32,
+    height: f32,
+    radius: f32,
 }
 
 struct TextureState {
@@ -253,13 +260,35 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
 
             struct Uniforms {
                 mix_ratio: f32,
+                width: f32,
+                height: f32,
+                radius: f32,
             };
+
+            fn sd_rounded_box(p: vec2<f32>, b: vec2<f32>, r: f32) -> f32 {
+                let q = abs(p) - b + vec2<f32>(r, r);
+                return min(max(q.x, q.y), 0.0) + length(max(q, vec2<f32>(0.0, 0.0))) - r;
+            }
 
             @fragment
             fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                 let color_current = textureSample(t_current, s_current, in.tex_coords);
                 let color_next = textureSample(t_next, s_next, in.tex_coords);
-                return mix(color_current, color_next, uniforms.mix_ratio);
+                let mixed_color = mix(color_current, color_next, uniforms.mix_ratio);
+
+                let resolution = vec2<f32>(uniforms.width, uniforms.height);
+                let p = (in.tex_coords - 0.5) * resolution;
+                let b = resolution * 0.5;
+                let radius = uniforms.radius;
+
+                let dist = sd_rounded_box(p, b, radius);
+                let alpha = 1.0 - smoothstep(-0.5, 0.5, dist);
+                let final_alpha = mixed_color.a * alpha;
+
+                // Multiply RGB by alpha to ensure fully transparent pixels are (0,0,0,0)
+                // This is safe for PreMultiplied alpha and prevents artifacts if the 
+                // compositor expects it.
+                return vec4<f32>(mixed_color.rgb * alpha, final_alpha);
             }
         "#,
         )),
@@ -268,7 +297,9 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     // Uniforms
     let uniforms = Uniforms {
         mix_ratio: 0.0,
-        _padding: [0.0; 3],
+        width: size.width as f32,
+        height: size.height as f32,
+        radius: CORNER_RADIUS,
     };
     let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Uniform Buffer"),
@@ -585,7 +616,9 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
             // Update uniform
             let uniforms = Uniforms {
                 mix_ratio,
-                _padding: [0.0; 3],
+                width: state.config.width as f32,
+                height: state.config.height as f32,
+                radius: CORNER_RADIUS,
             };
             state
                 .queue
