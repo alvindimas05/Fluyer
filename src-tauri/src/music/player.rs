@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::ffi::CString;
 use std::path::PathBuf;
 use std::ptr;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::thread;
 use tauri::{Emitter, Manager};
@@ -260,7 +261,7 @@ pub struct MusicPlayerSync {
 }
 
 static mut BASS_MIXER: u32 = 0;
-static mut CURRENT_STREAM: u32 = 0;
+static CURRENT_STREAM: AtomicU32 = AtomicU32::new(0);
 static PLAYER_STATE: OnceLock<Mutex<PlayerState>> = OnceLock::new();
 // Track temporary WAV file created by FFmpeg conversion for cleanup
 static TEMP_WAV_PATH: OnceLock<Mutex<Option<PathBuf>>> = OnceLock::new();
@@ -432,14 +433,16 @@ impl MusicPlayer {
     pub fn set_pos(position: u64) {
         #[cfg(desktop)]
         unsafe {
-            if CURRENT_STREAM != 0 && BASS_MIXER != 0 {
+            let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+            if current_stream != 0 && BASS_MIXER != 0 {
                 // Pause the mixer to prevent delay from buffered data
                 BASS_ChannelPause(BASS_MIXER);
 
                 // Set the new position on the source stream
+                let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
                 let seconds = position as f64 / 1000.0;
-                let byte_pos = BASS_ChannelSeconds2Bytes(CURRENT_STREAM, seconds);
-                if BASS_ChannelSetPosition(CURRENT_STREAM, byte_pos, BASS_POS_BYTE) == 0 {
+                let byte_pos = BASS_ChannelSeconds2Bytes(current_stream, seconds);
+                if BASS_ChannelSetPosition(current_stream, byte_pos, BASS_POS_BYTE) == 0 {
                     crate::error!("Failed to set position, error: {}", BASS_ErrorGetCode());
                 }
 
@@ -452,11 +455,13 @@ impl MusicPlayer {
         {
             if let Some(bass) = bass_android::get_bass() {
                 unsafe {
-                    if CURRENT_STREAM != 0 && BASS_MIXER != 0 {
+                    let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                    if current_stream != 0 && BASS_MIXER != 0 {
                         (bass.bass_channel_pause)(BASS_MIXER);
+                        let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
                         let seconds = position as f64 / 1000.0;
-                        let byte_pos = (bass.bass_channel_seconds2bytes)(CURRENT_STREAM, seconds);
-                        if (bass.bass_channel_set_position)(CURRENT_STREAM, byte_pos, BASS_POS_BYTE)
+                        let byte_pos = (bass.bass_channel_seconds2bytes)(current_stream, seconds);
+                        if (bass.bass_channel_set_position)(current_stream, byte_pos, BASS_POS_BYTE)
                             == 0
                         {
                             crate::error!(
@@ -474,11 +479,12 @@ impl MusicPlayer {
     pub fn get_current_duration() -> f64 {
         #[cfg(desktop)]
         unsafe {
-            if CURRENT_STREAM == 0 {
+            let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+            if current_stream == 0 {
                 return 0.0;
             }
-            let byte_pos = BASS_ChannelGetPosition(CURRENT_STREAM, BASS_POS_BYTE);
-            let seconds = BASS_ChannelBytes2Seconds(CURRENT_STREAM, byte_pos);
+            let byte_pos = BASS_ChannelGetPosition(current_stream, BASS_POS_BYTE);
+            let seconds = BASS_ChannelBytes2Seconds(current_stream, byte_pos);
             return seconds * 1000.0;
         }
 
@@ -486,11 +492,12 @@ impl MusicPlayer {
         {
             if let Some(bass) = bass_android::get_bass() {
                 unsafe {
-                    if CURRENT_STREAM == 0 {
+                    let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                    if current_stream == 0 {
                         return 0.0;
                     }
-                    let byte_pos = (bass.bass_channel_get_position)(CURRENT_STREAM, BASS_POS_BYTE);
-                    let seconds = (bass.bass_channel_bytes2seconds)(CURRENT_STREAM, byte_pos);
+                    let byte_pos = (bass.bass_channel_get_position)(current_stream, BASS_POS_BYTE);
+                    let seconds = (bass.bass_channel_bytes2seconds)(current_stream, byte_pos);
                     return seconds * 1000.0;
                 }
             }
@@ -501,11 +508,12 @@ impl MusicPlayer {
     pub fn get_sync_info(is_reset: bool) -> MusicPlayerSync {
         #[cfg(desktop)]
         unsafe {
-            let current_position = if is_reset || CURRENT_STREAM == 0 {
+            let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+            let current_position = if is_reset || current_stream == 0 {
                 Some(0.0)
             } else {
-                let byte_pos = BASS_ChannelGetPosition(CURRENT_STREAM, BASS_POS_BYTE);
-                let seconds = BASS_ChannelBytes2Seconds(CURRENT_STREAM, byte_pos);
+                let byte_pos = BASS_ChannelGetPosition(current_stream, BASS_POS_BYTE);
+                let seconds = BASS_ChannelBytes2Seconds(current_stream, byte_pos);
                 Some(seconds * 1000.0)
             };
 
@@ -537,12 +545,13 @@ impl MusicPlayer {
         {
             if let Some(bass) = bass_android::get_bass() {
                 unsafe {
-                    let current_position = if is_reset || CURRENT_STREAM == 0 {
+                    let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                    let current_position = if is_reset || current_stream == 0 {
                         Some(0.0)
                     } else {
                         let byte_pos =
-                            (bass.bass_channel_get_position)(CURRENT_STREAM, BASS_POS_BYTE);
-                        let seconds = (bass.bass_channel_bytes2seconds)(CURRENT_STREAM, byte_pos);
+                            (bass.bass_channel_get_position)(current_stream, BASS_POS_BYTE);
+                        let seconds = (bass.bass_channel_bytes2seconds)(current_stream, byte_pos);
                         Some(seconds * 1000.0)
                     };
 
@@ -629,25 +638,33 @@ impl MusicPlayer {
     }
 
     pub fn goto_playlist(index: usize) {
-        if let Some(state_lock) = PLAYER_STATE.get() {
-            let music = {
-                let state = state_lock.lock().unwrap();
-                if index >= state.playlist.len() {
-                    return;
-                }
-                state.playlist[index].metadata.clone()
-            };
+        tauri::async_runtime::spawn_blocking(move || {
+            if let Some(state_lock) = PLAYER_STATE.get() {
+                let music = {
+                    let state = match state_lock.lock() {
+                        Ok(s) => s,
+                        Err(e) => {
+                            crate::error!("Failed to lock player state: {}", e);
+                            return;
+                        }
+                    };
+                    if index >= state.playlist.len() {
+                        return;
+                    }
+                    state.playlist[index].metadata.clone()
+                };
 
-            Self::stop_current_stream();
+                Self::stop_current_stream();
 
-            if Self::load_music(music) {
-                if let Ok(mut state) = state_lock.lock() {
-                    state.current_index = Some(index);
+                if Self::load_music(music) {
+                    if let Ok(mut state) = state_lock.lock() {
+                        state.current_index = Some(index);
+                    }
+                    Self::play_pause(true);
+                    Self::emit_sync(true);
                 }
-                Self::play_pause(true);
-                Self::emit_sync(true);
             }
-        }
+        });
     }
 
     fn stop_current_stream() {
@@ -656,11 +673,12 @@ impl MusicPlayer {
 
         #[cfg(desktop)]
         unsafe {
-            if CURRENT_STREAM != 0 {
-                BASS_ChannelStop(CURRENT_STREAM);
-                BASS_Mixer_ChannelRemove(CURRENT_STREAM);
-                BASS_StreamFree(CURRENT_STREAM);
-                CURRENT_STREAM = 0;
+            let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+            if current_stream != 0 {
+                BASS_ChannelStop(current_stream);
+                BASS_Mixer_ChannelRemove(current_stream);
+                BASS_StreamFree(current_stream);
+                CURRENT_STREAM.store(0, Ordering::SeqCst);
             }
             // Also clear the mixer buffer
             if BASS_MIXER != 0 {
@@ -672,11 +690,12 @@ impl MusicPlayer {
         {
             if let Some(bass) = bass_android::get_bass() {
                 unsafe {
-                    if CURRENT_STREAM != 0 {
-                        (bass.bass_channel_stop)(CURRENT_STREAM);
-                        (bass.bass_mixer_channel_remove)(CURRENT_STREAM);
-                        (bass.bass_stream_free)(CURRENT_STREAM);
-                        CURRENT_STREAM = 0;
+                    let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                    if current_stream != 0 {
+                        (bass.bass_channel_stop)(current_stream);
+                        (bass.bass_mixer_channel_remove)(current_stream);
+                        (bass.bass_stream_free)(current_stream);
+                        CURRENT_STREAM.store(0, Ordering::SeqCst);
                     }
                     if BASS_MIXER != 0 {
                         (bass.bass_channel_set_position)(BASS_MIXER, 0, BASS_POS_BYTE);
@@ -735,60 +754,78 @@ impl MusicPlayer {
     }
 
     fn play_next() {
-        if let Some(state_lock) = PLAYER_STATE.get() {
-            let next_index = {
-                let state = state_lock.lock().unwrap();
-                match (state.current_index, state.repeat_mode) {
-                    (Some(current), RepeatMode::One) => Some(current),
-                    (Some(current), _) if current + 1 < state.playlist.len() => Some(current + 1),
-                    (Some(_), RepeatMode::All) => Some(0),
-                    _ => None,
-                }
-            };
-
-            if let Some(index) = next_index {
-                // Get the next music metadata
-                let music = {
-                    let state = state_lock.lock().unwrap();
-                    state.playlist[index].metadata.clone()
+        tauri::async_runtime::spawn_blocking(|| {
+            if let Some(state_lock) = PLAYER_STATE.get() {
+                let next_index = {
+                    let state = match state_lock.lock() {
+                        Ok(s) => s,
+                        Err(e) => {
+                            crate::error!("Failed to lock player state: {}", e);
+                            return;
+                        }
+                    };
+                    match (state.current_index, state.repeat_mode) {
+                        (Some(current), RepeatMode::One) => Some(current),
+                        (Some(current), _) if current + 1 < state.playlist.len() => {
+                            Some(current + 1)
+                        }
+                        (Some(_), RepeatMode::All) => Some(0),
+                        _ => None,
+                    }
                 };
 
-                // For gapless playback, remove the old stream and load the new one without stopping the mixer
-                #[cfg(desktop)]
-                unsafe {
-                    if CURRENT_STREAM != 0 {
-                        BASS_Mixer_ChannelRemove(CURRENT_STREAM);
-                        BASS_StreamFree(CURRENT_STREAM);
-                        CURRENT_STREAM = 0;
-                    }
-                }
+                if let Some(index) = next_index {
+                    // Get the next music metadata
+                    let music = {
+                        let state = match state_lock.lock() {
+                            Ok(s) => s,
+                            Err(e) => {
+                                crate::error!("Failed to lock player state: {}", e);
+                                return;
+                            }
+                        };
+                        state.playlist[index].metadata.clone()
+                    };
 
-                #[cfg(target_os = "android")]
-                {
-                    if let Some(bass) = bass_android::get_bass() {
-                        unsafe {
-                            if CURRENT_STREAM != 0 {
-                                (bass.bass_mixer_channel_remove)(CURRENT_STREAM);
-                                (bass.bass_stream_free)(CURRENT_STREAM);
-                                CURRENT_STREAM = 0;
+                    // For gapless playback, remove the old stream and load the new one without stopping the mixer
+                    #[cfg(desktop)]
+                    unsafe {
+                        let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                        if current_stream != 0 {
+                            BASS_Mixer_ChannelRemove(current_stream);
+                            BASS_StreamFree(current_stream);
+                            CURRENT_STREAM.store(0, Ordering::SeqCst);
+                        }
+                    }
+
+                    #[cfg(target_os = "android")]
+                    {
+                        if let Some(bass) = bass_android::get_bass() {
+                            unsafe {
+                                let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                                if current_stream != 0 {
+                                    (bass.bass_mixer_channel_remove)(current_stream);
+                                    (bass.bass_stream_free)(current_stream);
+                                    CURRENT_STREAM.store(0, Ordering::SeqCst);
+                                }
                             }
                         }
                     }
-                }
 
-                if Self::load_music(music) {
-                    if let Ok(mut state) = state_lock.lock() {
-                        state.current_index = Some(index);
+                    if Self::load_music(music) {
+                        if let Ok(mut state) = state_lock.lock() {
+                            state.current_index = Some(index);
+                        }
+                        Self::emit_sync(true);
                     }
-                    Self::emit_sync(true);
-                }
-            } else {
-                Self::stop_current_stream();
-                if let Ok(mut state) = state_lock.lock() {
-                    state.current_index = None;
+                } else {
+                    Self::stop_current_stream();
+                    if let Ok(mut state) = state_lock.lock() {
+                        state.current_index = None;
+                    }
                 }
             }
-        }
+        });
     }
 
     fn load_music(music: MusicMetadata) -> bool {
@@ -824,7 +861,7 @@ impl MusicPlayer {
                             BASS_MIXER_NORAMPIN,
                         );
                         if ok != 0 {
-                            CURRENT_STREAM = wav_stream;
+                            CURRENT_STREAM.store(wav_stream, Ordering::SeqCst);
                             // Store the temp WAV path for cleanup
                             if let Some(temp_path_lock) = TEMP_WAV_PATH.get() {
                                 if let Ok(mut temp_path) = temp_path_lock.lock() {
@@ -870,7 +907,7 @@ impl MusicPlayer {
                 return false;
             }
 
-            CURRENT_STREAM = stream;
+            CURRENT_STREAM.store(stream, Ordering::SeqCst);
             crate::info!("Successfully loaded: {}", music.path);
             return true;
         }
@@ -914,7 +951,7 @@ impl MusicPlayer {
                                     BASS_MIXER_NORAMPIN,
                                 );
                                 if ok != 0 {
-                                    CURRENT_STREAM = wav_stream;
+                                    CURRENT_STREAM.store(wav_stream, Ordering::SeqCst);
                                     // Store the temp WAV path for cleanup
                                     if let Some(temp_path_lock) = TEMP_WAV_PATH.get() {
                                         if let Ok(mut temp_path) = temp_path_lock.lock() {
@@ -964,7 +1001,7 @@ impl MusicPlayer {
                         return false;
                     }
 
-                    CURRENT_STREAM = stream;
+                    CURRENT_STREAM.store(stream, Ordering::SeqCst);
                     crate::info!("Successfully loaded: {}", music.path);
                     return true;
                 }
@@ -1231,8 +1268,9 @@ impl MusicPlayer {
 
                 #[cfg(desktop)]
                 unsafe {
-                    if CURRENT_STREAM != 0 {
-                        let state = BASS_ChannelIsActive(CURRENT_STREAM);
+                    let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                    if current_stream != 0 {
+                        let state = BASS_ChannelIsActive(current_stream);
                         if state == BASS_ACTIVE_STOPPED {
                             // Track ended, trigger next
                             crate::info!("Track ended, playing next");
@@ -1245,8 +1283,9 @@ impl MusicPlayer {
                 {
                     if let Some(bass) = bass_android::get_bass() {
                         unsafe {
-                            if CURRENT_STREAM != 0 {
-                                let state = (bass.bass_channel_is_active)(CURRENT_STREAM);
+                            let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                            if current_stream != 0 {
+                                let state = (bass.bass_channel_is_active)(current_stream);
                                 if state == BASS_ACTIVE_STOPPED {
                                     crate::info!("Track ended, playing next");
                                     Self::play_next();

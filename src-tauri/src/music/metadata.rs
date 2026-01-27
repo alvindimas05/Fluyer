@@ -114,15 +114,27 @@ impl MusicMetadata {
     /// Get metadata, trying Symphonia first for performance, falling back to FFmpeg
 
     pub async fn get(path: String) -> Result<Self, String> {
-        // Try Symphonia first (fast, pure Rust)
-        let mut metadata = match Self::get_with_symphonia(&path) {
-            Ok(metadata) => metadata,
-            Err(error) => {
-                // Fallback to FFmpeg for unsupported formats
-                crate::warn!("{}", error);
-                Self::get_with_ffmpeg(path).await?
+        let path_clone = path.clone();
+
+        let mut metadata = tokio::task::spawn_blocking(move || {
+            // Try Symphonia first (fast, pure Rust)
+            match Self::get_with_symphonia(&path_clone).map_err(|e| (e, path_clone.clone())) {
+                Ok(metadata) => Ok(metadata),
+                Err(e) => Err(e),
             }
-        };
+        })
+        .await
+        .map_err(|e| format!("Task join error: {}", e))?;
+
+        // Handle fallback if Symphonia failed
+        if let Err((error, path)) = metadata {
+            crate::warn!("{}", error);
+            metadata = Self::get_with_ffmpeg(path.clone())
+                .await
+                .map_err(|e| (e, path));
+        }
+
+        let mut metadata = metadata.map_err(|(e, _)| e)?;
 
         // Check if artist or title is missing
         let title_missing = metadata
@@ -383,8 +395,16 @@ impl MusicMetadata {
 
     /// Extract cover art, trying Symphonia first for performance, falling back to FFmpeg
     pub async fn get_image_from_path(path: String) -> Result<Vec<u8>, String> {
-        // Try Symphonia first (fast, pure Rust)
-        match Self::get_image_with_symphonia(&path) {
+        let path_clone = path.clone();
+
+        let result = tokio::task::spawn_blocking(move || {
+            // Try Symphonia first (fast, pure Rust)
+            Self::get_image_with_symphonia(&path_clone)
+        })
+        .await
+        .map_err(|e| format!("Task join error: {}", e))?;
+
+        match result {
             Ok(image) => Ok(image),
             Err(_) => {
                 // Fallback to FFmpeg for unsupported formats (e.g., MP4 container artwork)
