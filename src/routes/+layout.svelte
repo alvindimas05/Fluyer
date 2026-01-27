@@ -25,10 +25,6 @@
 	import TitleBar from '$lib/features/titlebar/components/TitleBar.svelte';
 	import MetadataService from '$lib/services/MetadataService.svelte';
 
-	if (isWindows() || isLinux()) {
-		import('$lib/scss/rounded-windows.scss');
-	}
-
 	if (isLinux()) {
 		import('$lib/scss/text-linux.scss');
 	}
@@ -68,7 +64,7 @@
 {#if isAppReady}
 	<AnimatedBackground />
 {/if}
-<div class="scrollbar-hidden rounded-windows fixed h-screen w-screen">
+<div class="scrollbar-hidden fixed h-screen w-screen">
 	{@render children?.()}
 </div>
 <div class="fixed left-0 top-0 z-[99999] grid h-12 w-full grid-cols-[1fr_auto]">
