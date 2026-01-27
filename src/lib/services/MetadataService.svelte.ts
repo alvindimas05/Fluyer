@@ -4,8 +4,9 @@ import musicStore from '$lib/stores/music.svelte';
 import TauriMetadataAPI from '$lib/tauri/TauriMetadataAPI';
 import FolderService from './FolderService.svelte';
 import CoverArtService from './CoverArtService.svelte';
+import { isAndroid } from '$lib/platform';
 
-let defaultAlbumImage: string | null = null;
+let defaultCoverArt: string | null = null;
 
 // Fast magic bytes validation - O(1) check
 const isValidImageBuffer = (buffer: ArrayBuffer): boolean => {
@@ -22,13 +23,19 @@ const isValidImageBuffer = (buffer: ArrayBuffer): boolean => {
 
 const MetadataService = {
 	initialize: async () => {
-		if (defaultAlbumImage) return;
-		const blob = new Blob([await TauriMetadataAPI.getDefaultCoverArt()], { type: 'image/png' });
-		defaultAlbumImage = URL.createObjectURL(blob);
+		if (defaultCoverArt) return;
+		defaultCoverArt = MusicConfig.defaultCoverArt;
+		// if (isAndroid()) {
+		// 	defaultCoverArt = MusicConfig.defaultCoverArt;
+		// } else {
+		// 	const buffer = await TauriMetadataAPI.getDefaultCoverArt();
+		// 	const blob = new Blob([buffer], { type: 'image/png' });
+		// 	defaultCoverArt = URL.createObjectURL(blob);
+		// }
 	},
-	isDefaultAlbumImage: (image: string | null) => image === defaultAlbumImage,
+	isDefaultCoverArt: (image: string | null) => image === defaultCoverArt,
 	getMusicCoverArt: async (music?: MusicData) => {
-		if (!music) return defaultAlbumImage;
+		if (!music) return defaultCoverArt;
 		try {
 			const arrayBuffer = await TauriMetadataAPI.getMusicCoverArt(music.path);
 			if (arrayBuffer !== null && isValidImageBuffer(arrayBuffer)) {
@@ -37,20 +44,20 @@ const MetadataService = {
 			}
 		} catch (e) { }
 		if (music.title == null || music.artist == null)
-			return defaultAlbumImage;
+			return defaultCoverArt;
 		const coverArt = await CoverArtService.getByQuery({
 			artist: music.artist!,
 			title: music.album ? undefined : music.title!,
 			album: music.album ?? undefined,
 		});
-		return coverArt ?? MusicConfig.defaultAlbumImage;
+		return coverArt ?? defaultCoverArt;
 	},
 	getFolderCoverArt: async (folderPath: string) => {
 		const path = await TauriMetadataAPI.getFolderCoverArtPath(FolderService.normalizePath(folderPath));
-		if (!path) return MusicConfig.defaultAlbumImage;
+		if (!path) return defaultCoverArt;
 
 		const music = musicStore.list?.find((m) => m.path === path);
-		if (!music) return MusicConfig.defaultAlbumImage;
+		if (!music) return defaultCoverArt;
 
 		return MetadataService.getMusicCoverArt(music);
 	},

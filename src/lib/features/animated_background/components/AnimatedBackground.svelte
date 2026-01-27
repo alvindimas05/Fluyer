@@ -21,9 +21,7 @@
 	}
 
 	let isInitialized = false;
-	let previousBackground: string | null = null;
-	let currentAlbumImage: string | null = null;
-	let currentAlbumBlobUrl: string | null = null;
+	let currentCoverArt: string | null = null;
     
     let lastRenderedWidth = 0;
     let lastRenderedHeight = 0;
@@ -47,7 +45,7 @@
 		}
 
 		// Ensure we stay within reasonable bounds
-		if (MetadataService.isDefaultAlbumImage(currentAlbumImage)) {
+		if (MetadataService.isDefaultCoverArt(currentCoverArt)) {
 			hsl.s = 0.6;
 			hsl.l = 0.6;
 		} else {
@@ -129,27 +127,10 @@
 		);
 	}
 
-	async function getColors(force = false): Promise<Color[] | null> {
-		const newAlbumImage = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
-
-		// Revoke old blob URL before storing new one
-		if (currentAlbumBlobUrl && newAlbumImage !== currentAlbumImage) {
-			URL.revokeObjectURL(currentAlbumBlobUrl);
-			currentAlbumBlobUrl = null;
-		}
-
-		currentAlbumImage = newAlbumImage;
-
-		// Track new blob URL
-		if (currentAlbumImage && currentAlbumImage.startsWith('blob:')) {
-			currentAlbumBlobUrl = currentAlbumImage;
-		}
-
-		if (previousBackground === currentAlbumImage && !force) return null;
-
+	async function getColors(): Promise<Color[] | null> {
 		let image = new Image();
 		image.crossOrigin = 'anonymous';
-		image.src = previousBackground = currentAlbumImage;
+		image.src = currentCoverArt;
 
 		if (!image.complete) {
 			await new Promise((resolve, reject) => {
@@ -176,20 +157,26 @@
 	}
 
 	async function updateBackground(force = false) {
-		const newAlbumImage = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
+		const newCoverArt = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
 
         const currentWidth = window.innerWidth;
         const currentHeight = window.innerHeight;
 
-		if (currentAlbumImage === newAlbumImage && !force) return;
-		currentAlbumImage = newAlbumImage;
+		if (currentCoverArt === newCoverArt && !force) return;
+
+		if (currentCoverArt !== null && !MetadataService.isDefaultCoverArt(currentCoverArt)){
+			URL.revokeObjectURL(currentCoverArt);
+            currentCoverArt = null;
+        }
+
+		currentCoverArt = newCoverArt;
         
 		await invoke(CommandRoutes.UPDATE_ANIMATED_BACKGROUND, {
             colors: await getColors(),
             width: currentWidth,
             height: currentHeight
         });
-        
+
         lastRenderedWidth = currentWidth;
         lastRenderedHeight = currentHeight;
         

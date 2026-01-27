@@ -27,9 +27,6 @@
 		}
 	},
 	"bundle": {
-		"resources": [
-			"./resources"
-		],
 		"macOS": {
 			"signingIdentity": "-",
 			"hardenedRuntime": false

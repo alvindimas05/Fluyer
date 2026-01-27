@@ -11,4 +11,5 @@ export const MusicConfig = {
 	artistSeparator: ';',
 	defaultTitle: import.meta.env.VITE_DEFAULT_MUSIC_TITLE,
 	defaultArtist: import.meta.env.VITE_DEFAULT_MUSIC_ARTIST,
+	defaultCoverArt: '/images/default-cover-art.png'
 };

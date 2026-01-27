@@ -17,10 +17,10 @@ pub async fn music_get_image(path: String, _size: Option<String>) -> Response {
     Response::new(image.unwrap())
 }
 
-#[tauri::command]
-pub fn music_get_default_cover_art() -> Response {
-    Response::new(MusicMetadata::get_default_cover_art().unwrap())
-}
+// #[tauri::command]
+// pub fn music_get_default_cover_art() -> Response {
+//     Response::new(MusicMetadata::get_default_cover_art().unwrap())
+// }
 
 /// Get lyrics from a music file
 #[tauri::command]

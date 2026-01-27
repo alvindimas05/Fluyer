@@ -1421,6 +1421,7 @@ dependencies = [
  "tauri-plugin-decorum",
  "tauri-plugin-dialog",
  "tauri-plugin-fluyer",
+ "tauri-plugin-fs",
  "tauri-plugin-os",
  "tauri-plugin-prevent-default",
  "tauri-plugin-store",

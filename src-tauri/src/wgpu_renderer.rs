@@ -109,6 +109,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         let class_name_str = env.new_string("org.alvindimas05.fluyerplugin.FluyerPlugin")?;
 
         let mut android_surface_obj: JObject = JObject::null();
+        crate::debug!("setup_wgpu: Waiting for surface class load...");
 
         // Wait loop for surface creation
         for _ in 0..50 {
@@ -146,7 +147,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
                 }
             }
 
-            crate::debug!("setup_wgpu: Waiting for surface...");
+            crate::debug!("setup_wgpu: Waiting for surface check iteration...");
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
 
@@ -627,5 +628,16 @@ pub fn render_frame(app_handle: &tauri::AppHandle) {
 
         state.queue.submit(Some(encoder.finish()));
         frame.present();
+
+        // Log every 60 frames roughly to avoid spam
+        static FRAME_COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+        let count = FRAME_COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        if count % 120 == 0 {
+            crate::debug!(
+                "render_frame: Frame {} presented, mix_ratio: {:.2}",
+                count,
+                mix_ratio
+            );
+        }
     }
 }

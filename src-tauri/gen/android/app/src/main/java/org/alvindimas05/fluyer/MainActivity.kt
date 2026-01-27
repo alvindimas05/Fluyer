@@ -41,6 +41,6 @@ class MainActivity : TauriActivity() {
     // Make status bar white
     insetsController.isAppearanceLightStatusBars = false
 
-    window.decorView.setBackgroundColor(Color.BLACK)
+    window.decorView.setBackgroundColor(Color.TRANSPARENT)
   }
 }
