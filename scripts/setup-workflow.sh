@@ -5,6 +5,16 @@ cp .env.example .env
 #APP_VERSION=$(bun -p "require('./package.json').version")
 #echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
 
+# Install Linux Dependencies
+if [[ "$os" == "linux" ]]; then
+    sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
+    deb http://apt.fruit.je/debian trixie mpv
+    sudo apt-get update
+    sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf librust-alsa-sys-dev
+    sudo apt-get install -y libmpv-dev
+    sudo apt-get install -y lld
+fi
+
 # Install NPM Packages
 bun i
 
@@ -15,6 +25,11 @@ fi
 
 if [[ "$os" == "windows" ]] || [[ "$os" == "linux" ]] || [[ "$os" == "macos" ]]; then
     bun run init
+fi
+
+if [[ "$os" == "macos" ]]; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  brew install lld
 fi
 
 # Setup Android
