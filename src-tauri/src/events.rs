@@ -18,6 +18,14 @@ pub fn handle_window_events(_: &Window, event: &WindowEvent) {
                     .unwrap();
             }
         }
+        WindowEvent::Focused(focused) => {
+            if *focused {
+                crate::wgpu_renderer::trigger_redraw();
+            }
+        }
+        WindowEvent::ThemeChanged(_) => {
+            crate::wgpu_renderer::trigger_redraw();
+        }
         _ => {}
     }
 }

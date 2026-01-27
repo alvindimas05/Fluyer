@@ -39,6 +39,9 @@ pub struct RendererState {
     next_texture: Option<TextureState>,
 
     transition_start_time: Option<std::time::Instant>,
+
+    // Redraw flag
+    needs_redraw: bool,
 }
 
 pub struct SharedRenderer {
@@ -446,6 +449,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
             current_texture: Some(_initial_texture_state), // Start with black texture
             next_texture: None,
             transition_start_time: None,
+            needs_redraw: false,
         }),
         cond: Condvar::new(),
     }));
@@ -520,6 +524,14 @@ pub fn update_background(img: RgbaImage) {
     }
 }
 
+pub fn trigger_redraw() {
+    if let Some(shared) = app_handle().try_state::<Arc<SharedRenderer>>() {
+        let mut state = shared.state.lock().unwrap();
+        state.needs_redraw = true;
+        shared.cond.notify_one();
+    }
+}
+
 pub fn start_render_loop(app_handle: tauri::AppHandle) {
     std::thread::spawn(move || {
         let shared = match app_handle.try_state::<Arc<SharedRenderer>>() {
@@ -540,9 +552,14 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
         loop {
             let mut state = shared.state.lock().unwrap();
 
-            // Wait until we have a transition active
-            while state.transition_start_time.is_none() {
+            // Wait until we have a transition active OR a redraw is requested
+            while state.transition_start_time.is_none() && !state.needs_redraw {
                 state = shared.cond.wait(state).unwrap();
+            }
+
+            // Consume redraw flag
+            if state.needs_redraw {
+                state.needs_redraw = false;
             }
 
             // Render and update logic
@@ -662,7 +679,9 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
             // Drop lock before sleeping to let other threads (resize/update) access it
             drop(state);
 
-            std::thread::sleep(std::time::Duration::from_millis((1000.0 / refresh_rate) as u64));
+            std::thread::sleep(std::time::Duration::from_millis(
+                (1000.0 / refresh_rate) as u64,
+            ));
         }
     });
 }
