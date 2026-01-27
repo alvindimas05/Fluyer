@@ -67,29 +67,13 @@ pub fn initialize_store(app: &mut App) {
     }
 }
 
-/// Handle application runtime events
-pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
-    match event {
-        RunEvent::Ready => {
-            initialize_globals(app_handle);
+pub fn initialize_on_ready(app_handle: &AppHandle) {
+    initialize_globals(app_handle);
 
-            crate::database::database::initialize_database();
-            crate::music::metadata::MusicMetadata::initialize_ffmpeg_paths();
+    crate::database::database::initialize_database();
+    crate::music::metadata::MusicMetadata::initialize_ffmpeg_paths();
 
-            log_directory_paths(app_handle);
-        }
-        RunEvent::WindowEvent {
-            label: _,
-            event: tauri::WindowEvent::Resized(size),
-            ..
-        } => {
-            crate::wgpu_renderer::handle_wgpu_resize(app_handle, size.width, size.height);
-        }
-        RunEvent::MainEventsCleared => {
-            crate::wgpu_renderer::render_frame(app_handle);
-        }
-        _ => {}
-    }
+    log_directory_paths(app_handle);
 }
 
 /// Log application directory paths for debugging

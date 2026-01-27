@@ -51,13 +51,8 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     let size = window.inner_size()?;
     crate::debug!("setup_wgpu: Window size {}x{}", size.width, size.height);
 
-    // Use OpenGL ES on Android (more stable with window handles), PRIMARY elsewhere
-    #[cfg(target_os = "android")]
+    #[cfg(not(target_os = "macos"))]
     let backends = Backends::GL;
-    #[cfg(target_os = "windows")]
-    let backends = Backends::DX12;
-    #[cfg(target_os = "linux")]
-    let backends = Backends::VULKAN;
     #[cfg(target_os = "macos")]
     let backends = Backends::METAL;
 
