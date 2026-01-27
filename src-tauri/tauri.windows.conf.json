@@ -4,7 +4,12 @@
 			"./libs/ffmpeg/bin": "libs/ffmpeg/bin",
 			"./libs/bass.dll": "bass.dll",
 			"./libs/bassflac.dll": "bassflac.dll",
-			"./libs/bassmix.dll": "bassmix.dll"
+			"./libs/bassmix.dll": "bassmix.dll",
+			"./libs/bassopus.dll": "bassopus.dll",
+			"./libs/bassape.dll": "bassape.dll",
+			"./libs/bassalac.dll": "bassalac.dll",
+			"./libs/basswv.dll": "basswv.dll",
+			"./libs/bass_aac.dll": "bass_aac.dll"
 		}
 	}
 }

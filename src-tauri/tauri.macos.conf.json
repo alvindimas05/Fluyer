@@ -7,7 +7,10 @@
 			"frameworks": [
 				"./libs/libbass.dylib",
 				"./libs/libbassflac.dylib",
-				"./libs/libbassmix.dylib"
+				"./libs/libbassmix.dylib",
+				"./libs/libbassopus.dylib",
+				"./libs/libbassape.dylib",
+				"./libs/libbasswv.dylib"
 			]
 		}
 	}
