@@ -1,6 +1,7 @@
 import * as path from 'path';
 import fs from 'fs/promises';
-import { downloadFile, extractZip } from './install-helpers';
+import { downloadFile } from './install-helpers';
+import { installBass } from './install-bass';
 
 // Parse CLI arguments
 const VALID_ARCHS = ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'] as const;
@@ -64,56 +65,14 @@ const destDir = path.resolve('src-tauri', 'tauri-plugin-fluyer', 'android', 'lib
 const ffmpegDestPath = path.resolve(destDir, filename);
 const downloadUrl = `https://github.com/alvindimas05/ffmpeg-kit/releases/download/v${version}/${filename}`;
 
-const VERSION = 24;
 const bassDestPath = path.resolve('src-tauri', 'gen', 'android', 'app', 'src', 'main', 'jniLibs');
-const libs = ['bass', 'bassmix', 'bassflac'];
-
-async function installLib(name: string) {
-	const downloadName = crypto.randomUUID();
-	const downloadPath = path.join(bassDestPath, `${downloadName}.zip`);
-	const extractPath = path.join(bassDestPath, downloadName);
-
-	const libPath = path.join(extractPath, 'libs', ARCH, `lib${name}.so`);
-	const destLibPath = path.join(bassDestPath, ARCH, path.basename(libPath));
-
-	try {
-		await fs.access(destLibPath);
-		console.log(`${name} is already installed. Reinstalling...`);
-		await fs.rm(destLibPath);
-	} catch (e) {}
-
-	console.log(`Installing ${name}...`);
-
-	await downloadFile(`https://www.un4seen.com/files/${name}${VERSION}-android.zip`, downloadPath);
-	await extractZip(downloadPath, extractPath);
-
-	await fs.mkdir(path.join(bassDestPath, ARCH), { recursive: true });
-	await fs.copyFile(libPath, destLibPath);
-
-	try {
-		await fs.rm(downloadPath);
-	} catch (e) {}
-	try {
-		await fs.rm(extractPath, { recursive: true, force: true });
-	} catch (e) {}
-}
-
-async function installBass() {
-	await fs.mkdir(bassDestPath, { recursive: true });
-
-	const promises: Promise<void>[] = [];
-	for (const lib of libs) {
-		promises.push(installLib(lib));
-	}
-	await Promise.all(promises);
-}
 
 async function installFFmpeg() {
 	try {
 		await fs.access(ffmpegDestPath);
 		console.log('FFmpeg for Android is already installed. Reinstalling...');
 		await fs.rm(ffmpegDestPath);
-	} catch {}
+	} catch { }
 	try {
 		console.log('Installing FFmpeg for Android...');
 		await fs.mkdir(destDir, { recursive: true });
@@ -123,4 +82,12 @@ async function installFFmpeg() {
 	}
 }
 
-Promise.all([installBass(), installFFmpeg()]);
+async function runBASSInstall() {
+	await installBass({
+		platform: 'android',
+		arch: ARCH,
+		destDir: bassDestPath
+	});
+}
+
+Promise.all([runBASSInstall(), installFFmpeg()]);

@@ -12,7 +12,9 @@ use tauri::{Emitter, Manager};
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
 
-const BASS_PLUGINS: [&str; 1] = ["bassflac"];
+const BASS_PLUGINS: [&str; 6] = [
+    "bassflac", "bassopus", "bassape", "bassalac", "basswv", "bass_aac",
+];
 
 const BASS_SAMPLE_FLOAT: u32 = 0x100;
 const BASS_STREAM_DECODE: u32 = 0x200000;
@@ -355,16 +357,20 @@ impl MusicPlayer {
                             crate::info!("BASS initialized successfully");
                         }
 
-                        // Load FLAC plugin
-                        let c_path = CString::new("libbassflac.so").unwrap();
-                        let handle = (bass.bass_plugin_load)(c_path.as_ptr() as *const i8, 0);
-                        if handle == 0 {
-                            crate::warn!(
-                                "Failed to load bassflac plugin, error: {}",
-                                (bass.bass_error_get_code)()
-                            );
-                        } else {
-                            crate::info!("Loaded bassflac plugin");
+                        // Load plugins
+                        for plugin in BASS_PLUGINS {
+                            let lib_name = format!("lib{}.so", plugin);
+                            let c_path = CString::new(lib_name).unwrap();
+                            let handle = (bass.bass_plugin_load)(c_path.as_ptr() as *const i8, 0);
+                            if handle == 0 {
+                                crate::warn!(
+                                    "Failed to load {} plugin, error: {}",
+                                    plugin,
+                                    (bass.bass_error_get_code)()
+                                );
+                            } else {
+                                crate::info!("Loaded {} plugin", plugin);
+                            }
                         }
 
                         BASS_MIXER = (bass.bass_mixer_stream_create)(44100, 2, BASS_SAMPLE_FLOAT);

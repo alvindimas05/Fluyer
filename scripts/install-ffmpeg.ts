@@ -27,12 +27,12 @@ function getDownloadUrl(): string {
 	return `https://github.com/alvindimas05/ffmpeg-build/releases/download/v${version}/${getLibName()}.tar.gz`;
 }
 
-async function main() {
+export async function installFFmpeg() {
 	try {
 		await fs.access(outputDir);
 		console.log('FFmpeg is already installed. Reinstalling...');
 		await fs.rm(outputDir, { recursive: true, force: true });
-	} catch {}
+	} catch { }
 	try {
 		console.log('Installing ffmpeg...');
 		const url = getDownloadUrl();
@@ -48,4 +48,7 @@ async function main() {
 	}
 }
 
-main();
+// @ts-ignore
+if (import.meta.main) {
+	installFFmpeg().catch(console.error);
+}
