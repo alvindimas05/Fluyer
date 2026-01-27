@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep FluyerPlugin and its members (specifically 'surface') as they are accessed via JNI
+-keep class org.alvindimas05.fluyerplugin.FluyerPlugin {
+    *;
+}
