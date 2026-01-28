@@ -26,12 +26,15 @@ struct Uniforms {
 }
 
 struct TextureState {
+    #[allow(dead_code)]
     texture: wgpu::Texture,
     view: wgpu::TextureView,
 }
 
 pub struct RendererState {
-    surface: wgpu::Surface<'static>,
+    #[allow(dead_code)]
+    instance: wgpu::Instance,
+    surface: Option<wgpu::Surface<'static>>,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
@@ -47,6 +50,9 @@ pub struct RendererState {
 
     transition_start_time: Option<std::time::Instant>,
 
+    // Cached image for restoration on Android resume
+    cached_image: Option<RgbaImage>,
+
     // Redraw flag
     needs_redraw: bool,
 }
@@ -59,27 +65,11 @@ pub struct SharedRenderer {
 unsafe impl Send for RendererState {}
 unsafe impl Sync for RendererState {}
 
-// Initialize WGPU rendering for a window
-pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    crate::debug!("setup_wgpu: Starting WGPU initialization");
-
-    let window = app.get_webview_window("main").unwrap();
-    let size = window.inner_size()?;
-    crate::debug!("setup_wgpu: Window size {}x{}", size.width, size.height);
-
-    #[cfg(not(target_os = "macos"))]
-    let backends = Backends::GL;
-    #[cfg(target_os = "macos")]
-    let backends = Backends::METAL;
-
-    crate::debug!("setup_wgpu: Using backends {:?}", backends);
-
-    let instance = wgpu::Instance::new(&InstanceDescriptor {
-        backends,
-        flags: InstanceFlags::default(),
-        backend_options: BackendOptions::default(),
-    });
-
+// Helper to create surface
+pub fn create_surface(
+    instance: &wgpu::Instance,
+    app_handle: &tauri::AppHandle,
+) -> Result<wgpu::Surface<'static>, Box<dyn std::error::Error>> {
     #[cfg(target_os = "android")]
     let surface = {
         use jni::objects::{JClass, JObject, JValue};
@@ -120,7 +110,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         let class_name_str = env.new_string("org.alvindimas05.fluyerplugin.FluyerPlugin")?;
 
         let mut android_surface_obj: JObject = JObject::null();
-        crate::debug!("setup_wgpu: Waiting for surface class load...");
+        crate::debug!("create_surface: Waiting for surface class load...");
 
         // Wait loop for surface creation
         for _ in 0..50 {
@@ -151,14 +141,14 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
                 if let Ok(obj_val) = surface_obj_res {
                     let obj = obj_val.l()?;
                     if !obj.is_null() {
-                        crate::debug!("setup_wgpu: Found valid surface object");
+                        crate::debug!("create_surface: Found valid surface object");
                         android_surface_obj = obj;
                         break;
                     }
                 }
             }
 
-            crate::debug!("setup_wgpu: Waiting for surface check iteration...");
+            crate::debug!("create_surface: Waiting for surface check iteration...");
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
 
@@ -196,10 +186,84 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     };
 
     #[cfg(not(target_os = "android"))]
-    let surface = instance.create_surface(window.clone())?;
+    let surface = {
+        let window = app_handle.get_webview_window("main").unwrap();
+        instance.create_surface(window.clone())?
+    };
 
-    // Surface must be 'static for our struct
     let surface: wgpu::Surface<'static> = unsafe { std::mem::transmute(surface) };
+    Ok(surface)
+}
+
+fn create_texture_from_image(
+    device: &wgpu::Device,
+    queue: &wgpu::Queue,
+    img: &RgbaImage,
+) -> TextureState {
+    let texture_size = wgpu::Extent3d {
+        width: img.width(),
+        height: img.height(),
+        depth_or_array_layers: 1,
+    };
+
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        size: texture_size,
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Rgba8UnormSrgb,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        label: Some("Background Texture"),
+        view_formats: &[],
+    });
+
+    queue.write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture: &texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+            aspect: wgpu::TextureAspect::All,
+        },
+        img,
+        wgpu::TexelCopyBufferLayout {
+            offset: 0,
+            bytes_per_row: Some(4 * img.width()),
+            rows_per_image: Some(img.height()),
+        },
+        texture_size,
+    );
+
+    let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+    TextureState { texture, view }
+}
+
+// Initialize WGPU rendering for a window
+pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    crate::debug!("setup_wgpu: Starting WGPU initialization");
+
+    let window = app.get_webview_window("main").unwrap();
+    let size = window.inner_size()?;
+    crate::debug!("setup_wgpu: Window size {}x{}", size.width, size.height);
+
+    #[cfg(not(target_os = "macos"))]
+    let backends = Backends::GL;
+    #[cfg(target_os = "macos")]
+    let backends = Backends::METAL;
+
+    crate::debug!("setup_wgpu: Using backends {:?}", backends);
+
+    let instance = wgpu::Instance::new(&InstanceDescriptor {
+        backends,
+        flags: InstanceFlags::default(),
+        backend_options: BackendOptions::default(),
+    });
+
+    #[cfg(target_os = "android")]
+    let surface = create_surface(&instance, &app.handle().clone())?;
+
+    #[cfg(not(target_os = "android"))]
+    let surface = create_surface(&instance, &app.handle().clone())?;
 
     let adapter = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
         power_preference: wgpu::PowerPreference::default(),
@@ -469,7 +533,8 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
 
     app.manage(Arc::new(SharedRenderer {
         state: Mutex::new(RendererState {
-            surface,
+            instance,
+            surface: Some(surface),
             device,
             queue,
             config,
@@ -480,6 +545,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
             current_texture: Some(_initial_texture_state), // Start with black texture
             next_texture: None,
             transition_start_time: None,
+            cached_image: None,
             needs_redraw: false,
         }),
         cond: Condvar::new(),
@@ -493,7 +559,72 @@ pub fn handle_wgpu_resize(app_handle: &tauri::AppHandle, width: u32, height: u32
         let mut state = shared.state.lock().unwrap();
         state.config.width = if width > 0 { width } else { 1 };
         state.config.height = if height > 0 { height } else { 1 };
-        state.surface.configure(&state.device, &state.config);
+        if let Some(surface) = &state.surface {
+            surface.configure(&state.device, &state.config);
+        }
+    }
+}
+
+#[allow(unused_variables)]
+pub fn suspend_wgpu(app_handle: &tauri::AppHandle) {
+    #[cfg(target_os = "android")]
+    {
+        crate::debug!("Suspending WGPU");
+        if let Some(shared) = app_handle.try_state::<Arc<SharedRenderer>>() {
+            let mut state = shared.state.lock().unwrap();
+            state.surface = None;
+        }
+    }
+}
+
+#[allow(unused_variables)]
+pub fn resume_wgpu(app_handle: &tauri::AppHandle) {
+    #[cfg(target_os = "android")]
+    {
+        crate::debug!("Resuming WGPU logic");
+        std::thread::spawn({
+            let app_handle = app_handle.clone();
+            move || {
+                if let Some(shared) = app_handle.try_state::<Arc<SharedRenderer>>() {
+                    // Lock just to check
+                    let has_surface = {
+                        let state = shared.state.lock().unwrap();
+                        state.surface.is_some()
+                    };
+
+                    if !has_surface {
+                        crate::debug!("Resuming WGPU: Recreating surface");
+                        // We need to create surface without holding the lock if it takes time?
+                        // But create_surface uses JNI which is fast enough?
+                        // Wait, create_surface has a loop up to 5s. We SHOULD NOT hold the lock.
+
+                        // We need the instance from state.
+                        let instance = {
+                            let state = shared.state.lock().unwrap();
+                            state.instance.clone() // Instance is cloneable (Arc internally usually)
+                        };
+                        // Actually wgpu::Instance is not Clone?
+                        // wgpu::Instance is not Clone in 0.19? It usually is.
+                        // Let's check docs or source. wgpu::Instance is a wrapper around `Arc<Context>`.
+                        // Yes it is Clone.
+
+                        match create_surface(&instance, &app_handle) {
+                            Ok(surface) => {
+                                let mut state = shared.state.lock().unwrap();
+                                surface.configure(&state.device, &state.config);
+                                state.surface = Some(surface);
+
+                                crate::debug!("Resuming WGPU: Surface recreated and configured");
+                                shared.cond.notify_one();
+                            }
+                            Err(e) => {
+                                crate::error!("Failed to recreate surface on resume: {}", e);
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 }
 
@@ -501,45 +632,11 @@ pub fn update_background(img: RgbaImage) {
     if let Some(shared) = app_handle().try_state::<Arc<SharedRenderer>>() {
         let mut state = shared.state.lock().unwrap();
 
-        let texture_size = wgpu::Extent3d {
-            width: img.width(),
-            height: img.height(),
-            depth_or_array_layers: 1,
-        };
+        // Cache the image for restoration
+        state.cached_image = Some(img);
+        let img = state.cached_image.as_ref().unwrap();
 
-        let texture = state.device.create_texture(&wgpu::TextureDescriptor {
-            size: texture_size,
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Rgba8UnormSrgb, // Use sRGB format to let wgpu linearize it
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-            label: Some("Background Texture"),
-            view_formats: &[],
-        });
-
-        state.queue.write_texture(
-            wgpu::TexelCopyTextureInfo {
-                texture: &texture,
-                mip_level: 0,
-                origin: wgpu::Origin3d::ZERO,
-                aspect: wgpu::TextureAspect::All,
-            },
-            &img,
-            wgpu::TexelCopyBufferLayout {
-                offset: 0,
-                bytes_per_row: Some(4 * img.width()),
-                rows_per_image: Some(img.height()),
-            },
-            texture_size,
-        );
-
-        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-
-        let new_texture_state = TextureState {
-            texture, // kept alive by this struct
-            view,
-        };
+        let new_texture_state = create_texture_from_image(&state.device, &state.queue, img);
 
         // Logic:
         // If no current, set current = new.
@@ -663,24 +760,33 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
                 label: Some("Frame Bind Group"),
             });
 
-            let frame = match state.surface.get_current_texture() {
-                Ok(frame) => frame,
-                Err(e) => {
-                    crate::warn!("Failed to get current texture: {e}");
-                    // Drop lock before sleeping
+            let frame = match state.surface.as_ref() {
+                Some(surface) => match surface.get_current_texture() {
+                    Ok(frame) => frame,
+                    Err(e) => {
+                        crate::warn!("Failed to get current texture: {e}");
+                        // Drop lock before sleeping
+                        drop(state);
+                        std::thread::sleep(std::time::Duration::from_millis(1000));
+                        continue;
+                    }
+                },
+                None => {
+                    // No surface, wait for resume
                     drop(state);
-                    std::thread::sleep(std::time::Duration::from_millis(1000));
+                    std::thread::sleep(std::time::Duration::from_millis(100));
                     continue;
                 }
             };
+
+            let mut encoder = state
+                .device
+                .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
             let view = frame
                 .texture
                 .create_view(&wgpu::TextureViewDescriptor::default());
 
-            let mut encoder = state
-                .device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
             {
                 let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: None,

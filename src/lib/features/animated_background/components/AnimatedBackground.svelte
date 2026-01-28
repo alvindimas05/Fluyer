@@ -2,7 +2,7 @@
 	import '../style.scss';
 	import { onDestroy, onMount } from 'svelte';
 	import { PageRoutes } from '$lib/constants/PageRoutes';
-	import { isLinux } from '$lib/platform';
+	import { isAndroid, isLinux } from '$lib/platform';
 	import { afterNavigate } from '$app/navigation';
 	import MetadataService from '$lib/services/MetadataService.svelte';
 	import musicStore from '$lib/stores/music.svelte';
@@ -13,6 +13,8 @@
 	import ColorThief from 'colorthief/dist/color-thief.mjs';
 	import { prominent } from 'color.js';
 	import { CommandRoutes } from '$lib/constants/CommandRoutes';
+	import { listen } from '@tauri-apps/api/event';
+	import type { Unsubscriber } from 'svelte/store';
 
 	interface Color {
 		r: number;
@@ -26,6 +28,8 @@
     
     let lastRenderedWidth = 0;
     let lastRenderedHeight = 0;
+
+	let unlistenFocus: Unsubscriber;
 
 	function hexToRgb(hex: string): Color {
 		const bigint = parseInt(hex.slice(1), 16);
@@ -228,8 +232,6 @@
 			updateBackground(true);
 		});
 
-	onMount(() => updateBackground(true));
-
 	$effect(() => {
 		musicStore.currentIndex;
 		musicStore.list;
@@ -242,6 +244,12 @@
 		console.log('Updating background from trigger');
 		updateBackground(true);
 	});
+
+	onMount(async () => {
+		updateBackground(true);
+		if(isAndroid()) unlistenFocus = await listen('tauri://focus', () => updateBackground(true));
+	});
+	onDestroy(() => unlistenFocus && unlistenFocus());
 </script>
 
 <svelte:window onresize={onWindowResize} />

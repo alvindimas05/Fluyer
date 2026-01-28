@@ -1,4 +1,4 @@
-use tauri::{AppHandle, RunEvent, Window, WindowEvent};
+use tauri::{AppHandle, Manager, RunEvent, Window, WindowEvent};
 
 #[cfg(target_os = "macos")]
 use crate::platform::{TRAFFIC_LIGHTS_INSET_X, TRAFFIC_LIGHTS_INSET_Y};
@@ -8,7 +8,7 @@ use crate::state::main_window;
 use tauri_plugin_decorum::WebviewWindowExt;
 
 /// Handle window events
-pub fn handle_window_events(_: &Window, event: &WindowEvent) {
+pub fn handle_window_events(window: &Window, event: &WindowEvent) {
     match event {
         WindowEvent::Resized(_) => {
             #[cfg(target_os = "macos")]
@@ -20,7 +20,10 @@ pub fn handle_window_events(_: &Window, event: &WindowEvent) {
         }
         WindowEvent::Focused(focused) => {
             if *focused {
+                crate::wgpu_renderer::resume_wgpu(window.app_handle());
                 crate::wgpu_renderer::trigger_redraw();
+            } else {
+                crate::wgpu_renderer::suspend_wgpu(window.app_handle());
             }
         }
         WindowEvent::ThemeChanged(_) => {
@@ -43,6 +46,9 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
             ..
         } => {
             crate::wgpu_renderer::handle_wgpu_resize(app_handle, size.width, size.height);
+        }
+        RunEvent::Resumed => {
+            crate::wgpu_renderer::resume_wgpu(app_handle);
         }
         _ => {}
     }
