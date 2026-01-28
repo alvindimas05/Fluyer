@@ -57,4 +57,5 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     decorum::decorum_show_snap_overlay,
     // Animated Background
     crate::animated_background::update_animated_background,
+    crate::animated_background::restore_animated_background,
 ];

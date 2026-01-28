@@ -245,9 +245,14 @@
 		updateBackground(true);
 	});
 
+	async function restoreBackground() {
+		if (!isInitialized) return;
+		await invoke(CommandRoutes.RESTORE_ANIMATED_BACKGROUND);
+	}
+
 	onMount(async () => {
 		updateBackground(true);
-		if(isAndroid()) unlistenFocus = await listen('tauri://focus', () => updateBackground(true));
+		if (isAndroid()) unlistenFocus = await listen('tauri://focus', restoreBackground);
 	});
 	onDestroy(() => unlistenFocus && unlistenFocus());
 </script>

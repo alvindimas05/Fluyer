@@ -81,3 +81,9 @@ pub async fn update_animated_background(
 
     Ok(())
 }
+
+#[tauri::command]
+pub async fn restore_animated_background() -> Result<(), String> {
+    crate::wgpu_renderer::restore_background();
+    Ok(())
+}

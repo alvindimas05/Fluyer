@@ -628,6 +628,30 @@ pub fn resume_wgpu(app_handle: &tauri::AppHandle) {
     }
 }
 
+pub fn restore_background() {
+    if let Some(shared) = app_handle().try_state::<Arc<SharedRenderer>>() {
+        let mut state = shared.state.lock().unwrap();
+
+        if state.cached_image.is_some() {
+            // We need to temporarily release the borrow on state fields to call create_texture_from_image
+            // But we need state to be mutable later.
+            // Split borrow works for fields, but create_texture_from_image calls usually aren't that simple with mutex guards.
+            // Actually, simply block-limiting the borrow of fields should work if the method signature allows it.
+
+            let new_texture_state = {
+                let img = state.cached_image.as_ref().unwrap();
+                create_texture_from_image(&state.device, &state.queue, img)
+            };
+
+            state.current_texture = Some(new_texture_state);
+            state.next_texture = None;
+            state.transition_start_time = None;
+            state.needs_redraw = true;
+            shared.cond.notify_one();
+        }
+    }
+}
+
 pub fn update_background(img: RgbaImage) {
     if let Some(shared) = app_handle().try_state::<Arc<SharedRenderer>>() {
         let mut state = shared.state.lock().unwrap();
