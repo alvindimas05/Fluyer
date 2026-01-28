@@ -26,6 +26,33 @@ const BASS_ACTIVE_PAUSED: u32 = 3;
 const BASS_POS_BYTE: u32 = 0;
 const BASS_ATTRIB_VOL: u32 = 2;
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct BASS_DEVICEINFO {
+    pub name: *const std::ffi::c_char,
+    pub driver: *const std::ffi::c_char,
+    pub flags: u32,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct BASS_INFO {
+    pub flags: u32,
+    pub hwsize: u32,
+    pub hwfree: u32,
+    pub freesam: u32,
+    pub free3d: u32,
+    pub minrate: u32,
+    pub maxrate: u32,
+    pub eax: u32,
+    pub minbuf: u32,
+    pub dsver: u32,
+    pub latency: u32,
+    pub initflags: u32,
+    pub speakers: u32,
+    pub freq: u32,
+}
+
 #[cfg(desktop)]
 #[link(name = "bass")]
 #[link(name = "bassmix")]
@@ -37,6 +64,8 @@ extern "C" {
         win: *mut std::ffi::c_void,
         clsid: *mut std::ffi::c_void,
     ) -> i32;
+    fn BASS_GetDeviceInfo(device: u32, info: *mut BASS_DEVICEINFO) -> u32;
+    fn BASS_GetInfo(info: *mut BASS_INFO) -> u32;
     fn BASS_PluginLoad(file: *const std::ffi::c_char, flags: u32) -> u32;
     #[allow(dead_code)]
     fn BASS_PluginFree(handle: u32) -> i32;
@@ -294,10 +323,50 @@ impl MusicPlayer {
         #[cfg(desktop)]
         {
             unsafe {
-                if BASS_Init(-1, 44100, 0, ptr::null_mut(), ptr::null_mut()) == 0 {
+                // List available devices
+                let mut i = 0;
+                let mut info = std::mem::zeroed::<BASS_DEVICEINFO>();
+                while BASS_GetDeviceInfo(i, &mut info) != 0 {
+                    let name = if info.name.is_null() {
+                        "Unknown".to_string()
+                    } else {
+                        std::ffi::CStr::from_ptr(info.name)
+                            .to_string_lossy()
+                            .into_owned()
+                    };
+                    let driver = if info.driver.is_null() {
+                        "Unknown".to_string()
+                    } else {
+                        std::ffi::CStr::from_ptr(info.driver)
+                            .to_string_lossy()
+                            .into_owned()
+                    };
+
+                    if (info.flags & 2) != 0 {
+                        // BASS_DEVICE_DEFAULT
+                        crate::info!("Default Audio Device: {} ({})", name, driver);
+                    } else if (info.flags & 1) != 0 {
+                        // BASS_DEVICE_ENABLED
+                        crate::debug!("Available Audio Device {}: {} ({})", i, name, driver);
+                    }
+                    i += 1;
+                }
+
+                // Initialize with 0 for freq to use the device's output rate
+                if BASS_Init(-1, 192000, 0, ptr::null_mut(), ptr::null_mut()) == 0 {
                     crate::error!("Failed to initialize BASS, error: {}", BASS_ErrorGetCode());
                 } else {
-                    crate::info!("BASS initialized successfully");
+                    let mut info = std::mem::zeroed::<BASS_INFO>();
+                    if BASS_GetInfo(&mut info) != 0 {
+                        crate::info!(
+                            "BASS initialized successfully at {} Hz, Latency: {}ms, MinBuf: {}msle",
+                            info.freq,
+                            info.latency,
+                            info.minbuf
+                        );
+                    } else {
+                        crate::info!("BASS initialized successfully");
+                    }
                 }
 
                 // Load plugins based on platform
