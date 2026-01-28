@@ -2,7 +2,6 @@
 	import 'animate.css';
 	import AnimatedBackground from '$lib/features/animated_background/components/AnimatedBackground.svelte';
 	import '../app.scss';
-	import 'toastify-js/src/toastify.css';
 	import { isDesktop, isLinux, isMobile, isWindows } from '$lib/platform';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { onMount } from 'svelte';
@@ -24,6 +23,7 @@
 	import FilterBar from '$lib/features/filterbar/components/FilterBar.svelte';
 	import TitleBar from '$lib/features/titlebar/components/TitleBar.svelte';
 	import MetadataService from '$lib/services/MetadataService.svelte';
+	import ToastContainer from '$lib/ui/toast/ToastContainer.svelte';
 
 	if (isLinux()) {
 		import('$lib/scss/text-linux.scss');
@@ -61,6 +61,7 @@
 </script>
 
 <Font />
+<ToastContainer />
 {#if isAppReady}
 	<AnimatedBackground />
 {/if}
