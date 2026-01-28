@@ -140,9 +140,71 @@ impl<R: Runtime> Fluyer<R> {
             .run_mobile_plugin("audioConvertToWav", MetadataGetArgs { path })
             .map_err(Into::into)
     }
+
+    pub fn init_media_control<F: Fn(MediaControlEvent) + Send + Sync + 'static>(
+        &self,
+        callback: F,
+    ) -> crate::Result<()> {
+        let channel = Channel::new(move |event| {
+            let payload = match event {
+                InvokeResponseBody::Json(payload) => {
+                    serde_json::from_str::<MediaControlEvent>(&payload).unwrap()
+                }
+                _ => panic!("Failed to parse MediaControlEvent payload"),
+            };
+
+            callback(payload);
+
+            Ok(())
+        });
+        self.0
+            .run_mobile_plugin("initMediaControl", MediaControlInitPayload { channel })
+            .map_err(Into::into)
+    }
+
+    pub fn update_media_control(
+        &self,
+        title: String,
+        artist: String,
+        album: String,
+        duration: u64,
+        artwork_path: Option<String>,
+        is_playing: bool,
+    ) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin(
+                "updateMediaControl",
+                MediaControlUpdateArgs {
+                    title,
+                    artist,
+                    album,
+                    duration,
+                    artwork_path,
+                    is_playing,
+                },
+            )
+            .map_err(Into::into)
+    }
+
+    pub fn set_media_control_state(&self, is_playing: bool, position: u64) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin(
+                "setMediaControlState",
+                MediaControlSetStateArgs {
+                    is_playing,
+                    position,
+                },
+            )
+            .map_err(Into::into)
+    }
 }
 
 #[derive(Serialize)]
 struct WatchPickFolderPayload {
+    pub channel: Channel,
+}
+
+#[derive(Serialize)]
+struct MediaControlInitPayload {
     pub channel: Channel,
 }

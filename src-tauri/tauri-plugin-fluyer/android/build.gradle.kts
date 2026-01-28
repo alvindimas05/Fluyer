@@ -42,5 +42,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    implementation("androidx.media:media:1.7.1")
     implementation(project(":tauri-android"))
 }

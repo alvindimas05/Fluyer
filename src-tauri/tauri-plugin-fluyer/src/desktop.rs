@@ -63,6 +63,28 @@ impl<R: Runtime> Fluyer<R> {
     pub fn visualizer_get_buffer(&self, _args: String) -> crate::Result<VisualizerGetBuffer> {
         Ok(VisualizerGetBuffer { value: false })
     }
+
+    pub fn init_media_control<F: Fn(MediaControlEvent) + Send + Sync + 'static>(
+        &self,
+        _callback: F,
+    ) -> crate::Result<()> {
+        Ok(())
+    }
+
+    pub fn update_media_control(
+        &self,
+        _title: String,
+        _artist: String,
+        _album: String,
+        _duration: u64,
+        _artwork_path: Option<String>,
+    ) -> crate::Result<()> {
+        Ok(())
+    }
+
+    pub fn set_media_control_state(&self, _is_playing: bool, _position: u64) -> crate::Result<()> {
+        Ok(())
+    }
 }
 
 impl<R: Runtime> Fluyer<R> {}

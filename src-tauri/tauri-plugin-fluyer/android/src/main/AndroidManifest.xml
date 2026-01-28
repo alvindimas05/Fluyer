@@ -1,3 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <receiver
+            android:name=".MediaControlReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.alvindimas05.fluyerplugin.ACTION_PLAY" />
+                <action android:name="org.alvindimas05.fluyerplugin.ACTION_PAUSE" />
+                <action android:name="org.alvindimas05.fluyerplugin.ACTION_PREVIOUS" />
+                <action android:name="org.alvindimas05.fluyerplugin.ACTION_NEXT" />
+                <action android:name="org.alvindimals05.fluyerplugin.ACTION_STOP" />
+            </intent-filter>
+        </receiver>
+    </application>
 </manifest>

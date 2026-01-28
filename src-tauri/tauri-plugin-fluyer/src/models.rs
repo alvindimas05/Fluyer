@@ -100,3 +100,27 @@ pub struct MetadataGetImageResponse {
 pub struct AudioConvertResponse {
     pub path: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaControlUpdateArgs {
+    pub title: String,
+    pub artist: String,
+    pub album: String,
+    pub duration: u64,
+    pub artwork_path: Option<String>,
+    pub is_playing: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaControlSetStateArgs {
+    pub is_playing: bool,
+    pub position: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaControlEvent {
+    pub action: String,
+}

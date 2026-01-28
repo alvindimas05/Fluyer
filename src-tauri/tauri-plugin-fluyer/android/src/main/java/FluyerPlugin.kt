@@ -46,6 +46,27 @@ class MetadataArgs {
     lateinit var path: String
 }
 
+@InvokeArg
+class MediaControlInitArgs {
+    lateinit var channel: Channel
+}
+
+@InvokeArg
+class MediaControlUpdateArgs {
+    lateinit var title: String
+    lateinit var artist: String
+    lateinit var album: String
+    var duration: Long = 0
+    var artworkPath: String? = null
+    var isPlaying: Boolean = false
+}
+
+@InvokeArg
+class MediaControlSetStateArgs {
+    var isPlaying by Delegates.notNull<Boolean>()
+    var position: Long = 0
+}
+
 private const val ALIAS_READ_AUDIO: String = "audio"
 private const val ALIAS_EXTERNAL_STORAGE: String = "storage"
 const val LOG_TAG = "Fluyer"
@@ -62,8 +83,9 @@ const val LOG_TAG = "Fluyer"
 class FluyerPlugin(val activity: Activity): Plugin(activity) {
     private val implementation = FluyerMain(activity)
     private var pickFolderChannel: Channel? = null
-
-
+    
+    private var mediaControl: FluyerMediaControl? = null
+    private var mediaControlChannel: Channel? = null
 
     @Command
     fun toast(invoke: Invoke) {
@@ -198,6 +220,37 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
         } catch (err: Exception) {
             Log.e(LOG_TAG, "audioConvertToWav error: ${err.message}")
             invoke.resolve(JSObject().put("path", null))
+        }
+    }
+
+    @Command
+    fun initMediaControl(invoke: Invoke) {
+        val args = invoke.parseArgs(MediaControlInitArgs::class.java)
+        mediaControlChannel = args.channel
+        
+        activity.runOnUiThread {
+            mediaControl = FluyerMediaControl(activity) { action ->
+                 mediaControlChannel?.send(JSObject().put("action", action))
+            }
+            invoke.resolve()
+        }
+    }
+
+    @Command
+    fun updateMediaControl(invoke: Invoke) {
+        val args = invoke.parseArgs(MediaControlUpdateArgs::class.java)
+        activity.runOnUiThread {
+             mediaControl?.updateMetadata(args.title, args.artist, args.album, args.duration, args.artworkPath, args.isPlaying)
+             invoke.resolve()
+        }
+    }
+    
+    @Command
+    fun setMediaControlState(invoke: Invoke) {
+        val args = invoke.parseArgs(MediaControlSetStateArgs::class.java)
+        activity.runOnUiThread {
+            mediaControl?.updateState(args.isPlaying, args.position)
+            invoke.resolve()
         }
     }
 

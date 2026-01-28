@@ -394,6 +394,25 @@ impl MusicPlayer {
 
         Self::start_listener();
 
+        #[cfg(target_os = "android")]
+        {
+            crate::info!("Initializing Android Media Control");
+            let _ = app_handle().fluyer().init_media_control(|event| {
+                crate::info!("Media Control Action: {}", event.action);
+                if event.action.starts_with("seek:") {
+                    if let Ok(pos) = event.action[5..].parse::<u64>() {
+                        std::thread::spawn(move || {
+                            Self::set_pos(pos);
+                        });
+                    }
+                } else {
+                    std::thread::spawn(move || {
+                        Self::send_command(event.action);
+                    });
+                }
+            });
+        }
+
         Self {}
     }
 
@@ -482,6 +501,10 @@ impl MusicPlayer {
                         }
                         (bass.bass_channel_play)(BASS_MIXER, 1);
                     }
+
+                    let _ = app_handle()
+                        .fluyer()
+                        .set_media_control_state(Self::get_sync_info(false).is_playing, position);
                 }
             }
         }
@@ -920,6 +943,29 @@ impl MusicPlayer {
 
             CURRENT_STREAM.store(stream, Ordering::SeqCst);
             crate::info!("Successfully loaded: {}", music.path);
+
+            #[cfg(target_os = "android")]
+            {
+                let music_clone = music.clone();
+                tauri::async_runtime::spawn(async move {
+                    let handle = app_handle();
+                    let image_path =
+                        match handle.fluyer().metadata_get_image(music_clone.path.clone()) {
+                            Ok(res) => res.path,
+                            Err(_) => None,
+                        };
+
+                    let _ = handle.fluyer().update_media_control(
+                        music_clone.title.unwrap_or("Unknown".to_string()),
+                        music_clone.artist.unwrap_or("Unknown".to_string()),
+                        music_clone.album.unwrap_or("Unknown".to_string()),
+                        music_clone.duration.unwrap_or(0) as u64,
+                        image_path,
+                        true,
+                    );
+                });
+            }
+
             return true;
         }
 
@@ -1014,6 +1060,31 @@ impl MusicPlayer {
 
                     CURRENT_STREAM.store(stream, Ordering::SeqCst);
                     crate::info!("Successfully loaded: {}", music.path);
+
+                    #[cfg(target_os = "android")]
+                    {
+                        let music_clone = music.clone();
+                        tauri::async_runtime::spawn(async move {
+                            let handle = app_handle();
+                            let image_path = match handle
+                                .fluyer()
+                                .metadata_get_image(music_clone.path.clone())
+                            {
+                                Ok(res) => res.path,
+                                Err(_) => None,
+                            };
+
+                            let _ = handle.fluyer().update_media_control(
+                                music_clone.title.unwrap_or("Unknown".to_string()),
+                                music_clone.artist.unwrap_or("Unknown".to_string()),
+                                music_clone.album.unwrap_or("Unknown".to_string()),
+                                music_clone.duration.unwrap_or(0) as u64,
+                                image_path,
+                                true,
+                            );
+                        });
+                    }
+
                     return true;
                 }
             }
@@ -1220,12 +1291,21 @@ impl MusicPlayer {
                                 "Failed to play, error: {}",
                                 (bass.bass_error_get_code)()
                             );
+                        } else {
+                            let _ = app_handle()
+                                .fluyer()
+                                .set_media_control_state(true, Self::get_current_duration() as u64);
                         }
                     } else {
                         if (bass.bass_channel_pause)(BASS_MIXER) == 0 {
                             crate::error!(
                                 "Failed to pause, error: {}",
                                 (bass.bass_error_get_code)()
+                            );
+                        } else {
+                            let _ = app_handle().fluyer().set_media_control_state(
+                                false,
+                                Self::get_current_duration() as u64,
                             );
                         }
                     }
