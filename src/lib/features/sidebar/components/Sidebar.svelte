@@ -21,6 +21,9 @@
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import filterStore from '$lib/stores/filter.svelte';
 
+	import { MusicListType } from '$lib/features/music/types';
+	import musicStore from '$lib/stores/music.svelte';
+
 	const rules = [
 		// xhdpi (DPR > 2.0)
 		[1536, 2.01, 0.125], // 2xl → 12.5%
@@ -87,7 +90,18 @@
 
 	function onSwipe(e: CustomEvent<SwipeEventData>) {
 		const { initial, deltaX } = e.detail;
-		if (initial[1] < sidebarStore.swipeMinimumTop) return;
+
+		let minTop = sidebarStore.swipeMinimumTop;
+
+		if (
+			musicStore.listType === MusicListType.Album ||
+			musicStore.listType === MusicListType.Music ||
+			musicStore.listType === MusicListType.Folder
+		) {
+			minTop = (isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height;
+		}
+
+		if (initial[1] < minTop) return;
 
 		const swipeOpen =
 			(type === SidebarType.Right && deltaX < -SWIPE_RANGE) ||
