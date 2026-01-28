@@ -5,7 +5,16 @@ import * as os from 'os';
 import * as crypto from 'crypto';
 
 const VERSION = 24;
-const DEFAULT_LIBS = ['bass', 'bassmix', 'bassflac', 'bassopus', 'bassape', 'bassalac', 'basswv', 'bass_aac'];
+const DEFAULT_LIBS = [
+	'bass',
+	'bassmix',
+	'bassflac',
+	'bassopus',
+	'bassape',
+	'bassalac',
+	'basswv',
+	'bass_aac'
+];
 
 export interface InstallOptions {
 	platform?: 'android' | NodeJS.Platform;
@@ -100,9 +109,11 @@ export async function installBassLib(name: string, options: InstallOptions = {})
 			await fs.access(libDestPath);
 			console.log(`${name} is already installed. Reinstalling...`);
 			await fs.rm(libDestPath);
-		} catch (e) { }
+		} catch (e) {}
 
-		console.log(`Installing ${name} for ${platform}${platform === 'android' ? ` (${arch})` : ''}...`);
+		console.log(
+			`Installing ${name} for ${platform}${platform === 'android' ? ` (${arch})` : ''}...`
+		);
 
 		await downloadFile(downloadUrl, downloadPath);
 		await extractZip(downloadPath, extractPath);
@@ -115,10 +126,10 @@ export async function installBassLib(name: string, options: InstallOptions = {})
 	} finally {
 		try {
 			await fs.rm(downloadPath);
-		} catch (e) { }
+		} catch (e) {}
 		try {
 			await fs.rm(extractPath, { recursive: true, force: true });
-		} catch (e) { }
+		} catch (e) {}
 	}
 }
 

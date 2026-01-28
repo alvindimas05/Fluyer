@@ -46,7 +46,7 @@
 			UIInteractionService.initialize(),
 			MobileService.initialize(),
 			FolderService.initialize(),
-			MetadataService.initialize(),
+			MetadataService.initialize()
 		]);
 
 		if (isDesktop()) {

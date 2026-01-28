@@ -24,157 +24,157 @@ let volumePercentage = $state(0);
 let isPlaying = $derived(musicStore.isPlaying);
 
 const gridRight = $derived.by(() => {
-    if (settingStore.ui.showRepeatButton && settingStore.ui.showShuffleButton)
-        return 'grid-cols-[repeat(5,auto)]';
-    if (settingStore.ui.showRepeatButton && settingStore.ui.showShuffleButton)
-        return 'grid-cols-[repeat(4,auto)]';
-    return 'grid-cols-[repeat(3,auto)]';
+	if (settingStore.ui.showRepeatButton && settingStore.ui.showShuffleButton)
+		return 'grid-cols-[repeat(5,auto)]';
+	if (settingStore.ui.showRepeatButton && settingStore.ui.showShuffleButton)
+		return 'grid-cols-[repeat(4,auto)]';
+	return 'grid-cols-[repeat(3,auto)]';
 });
 
 function handleButtonPlayPause() {
-    if (musicStore.isPlaying) {
-        musicStore.isPlaying = false;
-        MusicPlayerService.pause();
-    } else {
-        MusicPlayerService.play();
-    }
+	if (musicStore.isPlaying) {
+		musicStore.isPlaying = false;
+		MusicPlayerService.pause();
+	} else {
+		MusicPlayerService.play();
+	}
 }
 
 function handleButtonPrevious() {
-    MusicPlayerService.previous();
+	MusicPlayerService.previous();
 }
 
 function handleButtonNext() {
-    MusicPlayerService.next();
+	MusicPlayerService.next();
 }
 
 async function handleButtonShuffle() {
-    await MusicPlayerService.pause();
+	await MusicPlayerService.pause();
 
-    await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(musicStore.queue));
+	await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(musicStore.queue));
 
-    await MusicPlayerService.play();
-    ProgressService.start();
+	await MusicPlayerService.play();
+	ProgressService.start();
 }
 
 function redirectToPlay() {
-    PageService.goTo(PageRoutes.PLAY);
+	PageService.goTo(PageRoutes.PLAY);
 }
 
 function handleVolumeButton() {
-    musicStore.volume = musicStore.volume > 0 ? 0 : 1;
+	musicStore.volume = musicStore.volume > 0 ? 0 : 1;
 }
 
 function refresh() {
-    let music = musicStore.currentMusic;
+	let music = musicStore.currentMusic;
 
-    if (!music) {
-        title = MusicConfig.defaultTitle;
-        artist = MusicConfig.defaultArtist;
-        return;
-    }
+	if (!music) {
+		title = MusicConfig.defaultTitle;
+		artist = MusicConfig.defaultArtist;
+		return;
+	}
 
-    if (oldMusic && oldMusic.path === music.path) return;
+	if (oldMusic && oldMusic.path === music.path) return;
 
-    oldMusic = music;
-    title = music.title!;
-    artist = music.artist;
+	oldMusic = music;
+	title = music.title!;
+	artist = music.artist;
 }
 
 function handleProgressClick(percentage: number) {
-    MusicPlayerService.seekByPercentage(percentage);
+	MusicPlayerService.seekByPercentage(percentage);
 }
 
 function handleVolumeProgressClick(percentage: number) {
-    musicStore.volume = percentage / 100;
+	musicStore.volume = percentage / 100;
 }
 
 function updatePlayerBarHeight() {
-    if (element) {
-        playerBarStore.height = element.offsetHeight;
-    }
+	if (element) {
+		playerBarStore.height = element.offsetHeight;
+	}
 }
 
 export function usePlayerBar() {
-    // Fetch album image with blob URL cleanup
-    $effect(() => {
-        musicStore.currentMusic;
-        let cancelled = false;
+	// Fetch album image with blob URL cleanup
+	$effect(() => {
+		musicStore.currentMusic;
+		let cancelled = false;
 
-        (async () => {
-            const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
-            albumImage = imagePromise;
+		(async () => {
+			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
+			albumImage = imagePromise;
 
-            const url = await imagePromise;
-            if (!cancelled && url && url.startsWith('blob:')) {
-                if (currentBlobUrl) {
-                    URL.revokeObjectURL(currentBlobUrl);
-                }
-                currentBlobUrl = url;
-            }
-        })();
+			const url = await imagePromise;
+			if (!cancelled && url && url.startsWith('blob:')) {
+				if (currentBlobUrl) {
+					URL.revokeObjectURL(currentBlobUrl);
+				}
+				currentBlobUrl = url;
+			}
+		})();
 
-        return () => {
-            cancelled = true;
-            if (currentBlobUrl) {
-                URL.revokeObjectURL(currentBlobUrl);
-                currentBlobUrl = null;
-            }
-        };
-    });
+		return () => {
+			cancelled = true;
+			if (currentBlobUrl) {
+				URL.revokeObjectURL(currentBlobUrl);
+				currentBlobUrl = null;
+			}
+		};
+	});
 
-    $effect(() => {
-        progressPercentage = musicStore.progressPercentage;
-    });
+	$effect(() => {
+		progressPercentage = musicStore.progressPercentage;
+	});
 
-    $effect(() => {
-        volumePercentage = musicStore.volumePercentage;
-    });
+	$effect(() => {
+		volumePercentage = musicStore.volumePercentage;
+	});
 
-    $effect(() => {
-        musicStore.currentIndex;
-        musicStore.list;
-        refresh();
-    });
+	$effect(() => {
+		musicStore.currentIndex;
+		musicStore.list;
+		refresh();
+	});
 
-    return {
-        get element() {
-            return element;
-        },
-        set element(value) {
-            element = value;
-            updatePlayerBarHeight();
-        },
-        get title() {
-            return title;
-        },
-        get artist() {
-            return artist;
-        },
-        get albumImage() {
-            return albumImage;
-        },
-        get isPlaying() {
-            return isPlaying;
-        },
-        get progressPercentage() {
-            return progressPercentage;
-        },
-        get volumePercentage() {
-            return volumePercentage;
-        },
-        get gridRight() {
-            return gridRight;
-        },
+	return {
+		get element() {
+			return element;
+		},
+		set element(value) {
+			element = value;
+			updatePlayerBarHeight();
+		},
+		get title() {
+			return title;
+		},
+		get artist() {
+			return artist;
+		},
+		get albumImage() {
+			return albumImage;
+		},
+		get isPlaying() {
+			return isPlaying;
+		},
+		get progressPercentage() {
+			return progressPercentage;
+		},
+		get volumePercentage() {
+			return volumePercentage;
+		},
+		get gridRight() {
+			return gridRight;
+		},
 
-        handleButtonPlayPause,
-        handleButtonPrevious,
-        handleButtonNext,
-        handleButtonShuffle,
-        redirectToPlay,
-        handleVolumeButton,
-        handleProgressClick,
-        handleVolumeProgressClick,
-        updatePlayerBarHeight
-    };
+		handleButtonPlayPause,
+		handleButtonPrevious,
+		handleButtonNext,
+		handleButtonShuffle,
+		redirectToPlay,
+		handleVolumeButton,
+		handleProgressClick,
+		handleVolumeProgressClick,
+		updatePlayerBarHeight
+	};
 }

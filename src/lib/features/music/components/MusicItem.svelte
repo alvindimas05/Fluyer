@@ -26,7 +26,7 @@
 		{:then image}
 			{#if image && !folder}
 				<img
-					class="relative h-12 w-12 rounded object-cover md:h-14 md:w-14 animate__animated animate__fadeIn"
+					class="animate__animated animate__fadeIn relative h-12 w-12 rounded object-cover md:h-14 md:w-14"
 					src={image}
 					alt="Album"
 				/>
@@ -38,7 +38,7 @@
 					</div>
 					<div class="absolute inset-0 flex items-center justify-center">
 						<img
-							class="mt-2 h-4 w-4 rounded-sm object-cover shadow-md md:h-5 md:w-5 animate__animated animate__fadeIn"
+							class="animate__animated animate__fadeIn mt-2 h-4 w-4 rounded-sm object-cover shadow-md md:h-5 md:w-5"
 							src={image}
 							alt="Album"
 						/>

@@ -72,7 +72,7 @@ async function installFFmpeg() {
 		await fs.access(ffmpegDestPath);
 		console.log('FFmpeg for Android is already installed. Reinstalling...');
 		await fs.rm(ffmpegDestPath);
-	} catch { }
+	} catch {}
 	try {
 		console.log('Installing FFmpeg for Android...');
 		await fs.mkdir(destDir, { recursive: true });

@@ -25,9 +25,9 @@
 	let isInitialized = false;
 	let canUpdate = true;
 	let currentCoverArt: string | null = null;
-    
-    let lastRenderedWidth = 0;
-    let lastRenderedHeight = 0;
+
+	let lastRenderedWidth = 0;
+	let lastRenderedHeight = 0;
 
 	let unlistenFocus: Unsubscriber;
 
@@ -162,69 +162,68 @@
 	}
 
 	async function updateBackground(force = false) {
-		if(!canUpdate) return;
-		if(!isInitialized){
+		if (!canUpdate) return;
+		if (!isInitialized) {
 			console.log('AnimatedBackground is initializing...');
 			canUpdate = false;
 		}
-		
+
 		const newCoverArt = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
 
-        const currentWidth = window.innerWidth;
-        const currentHeight = window.innerHeight;
+		const currentWidth = window.innerWidth;
+		const currentHeight = window.innerHeight;
 
 		if (currentCoverArt === newCoverArt && !force) return;
 
-		if (currentCoverArt !== null && !MetadataService.isDefaultCoverArt(currentCoverArt)){
+		if (currentCoverArt !== null && !MetadataService.isDefaultCoverArt(currentCoverArt)) {
 			URL.revokeObjectURL(currentCoverArt);
-            currentCoverArt = null;
-        }
+			currentCoverArt = null;
+		}
 
 		currentCoverArt = newCoverArt;
-        
+
 		await invoke(CommandRoutes.UPDATE_ANIMATED_BACKGROUND, {
-            colors: await getColors(),
-            width: currentWidth,
-            height: currentHeight
-        });
+			colors: await getColors(),
+			width: currentWidth,
+			height: currentHeight
+		});
 
-        lastRenderedWidth = currentWidth;
-        lastRenderedHeight = currentHeight;
-        
-        if (!isInitialized) {
-             isInitialized = true;
-			 // Note: Why? To prevent updateBackground from being called multiple times
-			 // Since the effects references multiple stores
-			 setTimeout(() => canUpdate = true, 1000);
+		lastRenderedWidth = currentWidth;
+		lastRenderedHeight = currentHeight;
 
-             // Signal to other components? 
-             // "Wait for wgpu background to initialize first them show svelte components"
-             // Maybe set a global store value?
-             LibraryService.initialize();
-             console.log('AnimatedBackground is initialized (WGPU)');
-        }
+		if (!isInitialized) {
+			isInitialized = true;
+			// Note: Why? To prevent updateBackground from being called multiple times
+			// Since the effects references multiple stores
+			setTimeout(() => (canUpdate = true), 1000);
+
+			// Signal to other components?
+			// "Wait for wgpu background to initialize first them show svelte components"
+			// Maybe set a global store value?
+			LibraryService.initialize();
+			console.log('AnimatedBackground is initialized (WGPU)');
+		}
 	}
 
 	function onWindowResize() {
 		// Calculate percentage difference
-        // The user want to re-render when the window is resized 25% difference
-        // Detects from either width or height
-        
-        if (lastRenderedWidth === 0 || lastRenderedHeight === 0) {
-            lastRenderedWidth = window.innerWidth;
-            lastRenderedHeight = window.innerHeight;
-            return;
-        }
-        
-        const widthDiff = Math.abs(window.innerWidth - lastRenderedWidth) / lastRenderedWidth;
-        const heightDiff = Math.abs(window.innerHeight - lastRenderedHeight) / lastRenderedHeight;
-        
-        if (widthDiff >= 0.25 || heightDiff >= 0.25) {
-             console.log('Resized by 25%, updating background');
-             updateBackground(true);
-        }
-	}
+		// The user want to re-render when the window is resized 25% difference
+		// Detects from either width or height
 
+		if (lastRenderedWidth === 0 || lastRenderedHeight === 0) {
+			lastRenderedWidth = window.innerWidth;
+			lastRenderedHeight = window.innerHeight;
+			return;
+		}
+
+		const widthDiff = Math.abs(window.innerWidth - lastRenderedWidth) / lastRenderedWidth;
+		const heightDiff = Math.abs(window.innerHeight - lastRenderedHeight) / lastRenderedHeight;
+
+		if (widthDiff >= 0.25 || heightDiff >= 0.25) {
+			console.log('Resized by 25%, updating background');
+			updateBackground(true);
+		}
+	}
 
 	if (isLinux())
 		afterNavigate((navigation) => {
@@ -260,4 +259,4 @@
 <svelte:window onresize={onWindowResize} />
 <!-- We don't need a canvas anymore, WGPU renders to the window surface -->
 <!-- But we might need a transparent container if we want to ensure pointer events pass through? -->
-<div class="fixed inset-0 -z-10 pointer-events-none"></div>
+<div class="pointer-events-none fixed inset-0 -z-10"></div>

@@ -37,7 +37,7 @@
 		{:then image}
 			{#if image}
 				<img
-					class="aspect-square w-full rounded-lg object-cover animate__animated animate__fadeIn"
+					class="animate__animated animate__fadeIn aspect-square w-full rounded-lg object-cover"
 					src={image}
 					alt="Album"
 				/>

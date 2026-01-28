@@ -42,18 +42,19 @@ const MetadataService = {
 				const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
 				return URL.createObjectURL(blob);
 			}
-		} catch (e) { }
-		if (music.title == null || music.artist == null)
-			return defaultCoverArt;
+		} catch (e) {}
+		if (music.title == null || music.artist == null) return defaultCoverArt;
 		const coverArt = await CoverArtService.getByQuery({
 			artist: music.artist!,
 			title: music.album ? undefined : music.title!,
-			album: music.album ?? undefined,
+			album: music.album ?? undefined
 		});
 		return coverArt ?? defaultCoverArt;
 	},
 	getFolderCoverArt: async (folderPath: string) => {
-		const path = await TauriMetadataAPI.getFolderCoverArtPath(FolderService.normalizePath(folderPath));
+		const path = await TauriMetadataAPI.getFolderCoverArtPath(
+			FolderService.normalizePath(folderPath)
+		);
 		if (!path) return defaultCoverArt;
 
 		const music = musicStore.list?.find((m) => m.path === path);

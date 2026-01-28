@@ -76,7 +76,9 @@ const FolderService = {
 	containsMusicRecursive: (music: MusicData, folder: FolderData | null): boolean => {
 		if (!folder) return false;
 		// Normalize paths (fixes double backslashes and case on Windows)
-		return FolderService.normalizePath(music.path).startsWith(FolderService.normalizePath(folder.path));
+		return FolderService.normalizePath(music.path).startsWith(
+			FolderService.normalizePath(folder.path)
+		);
 	},
 
 	getMusicList: (folder: FolderData | null): MusicData[] => {

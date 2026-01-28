@@ -32,7 +32,7 @@ export async function installFFmpeg() {
 		await fs.access(outputDir);
 		console.log('FFmpeg is already installed. Reinstalling...');
 		await fs.rm(outputDir, { recursive: true, force: true });
-	} catch { }
+	} catch {}
 	try {
 		console.log('Installing ffmpeg...');
 		const url = getDownloadUrl();
