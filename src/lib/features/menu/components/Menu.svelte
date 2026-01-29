@@ -18,11 +18,11 @@
 	<!--    <MenuItem label="Equalizer" icon={IconType.Equalizer}-->
 	<!--              onclick={() => UIController.toggleEqualizer(true)}/>-->
 	<!--{/if}-->
-	<MenuItem
+	<!-- <MenuItem
 		label="Visualizer"
 		icon={IconType.Visualizer}
 		onclick={() => PageService.goTo(PageRoutes.VISUALIZER)}
-	/>
+	/> -->
 	<MenuItem
 		label="Settings"
 		icon={IconType.Settings}
