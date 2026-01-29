@@ -32,7 +32,7 @@ class ToastServiceImpl {
 		});
 	}
 
-	create(message: string, type: ToastType, duration: number = 3000) {
+	create(message: string, type: ToastType, duration: number = 2000) {
 		const id = generateId();
 		const toast: IToast = {
 			id,
@@ -42,6 +42,11 @@ class ToastServiceImpl {
 		};
 
 		this.toasts.push(toast);
+
+		// Limit to 3 toasts
+		if (this.toasts.length > 3) {
+			this.toasts.shift();
+		}
 
 		if (duration > 0) {
 			setTimeout(() => {
@@ -55,6 +60,10 @@ class ToastServiceImpl {
 		if (index !== -1) {
 			this.toasts.splice(index, 1);
 		}
+	}
+
+	clear() {
+		this.toasts = [];
 	}
 
 	info(message: string, duration?: number) {

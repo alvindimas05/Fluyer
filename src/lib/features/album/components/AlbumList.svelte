@@ -7,6 +7,7 @@
 	import { useAlbumList } from '$lib/features/album/viewmodels/useAlbumList.svelte';
 	import { SidebarType } from '$lib/features/sidebar/types';
 	import { isLinux } from '$lib/platform';
+	import ToastService from '$lib/services/ToastService.svelte';
 
 	import { type MusicData } from '$lib/features/music/types';
 
@@ -75,10 +76,10 @@
 
 	// Calculate sidebar width (2 columns)
 	let sidebarWidth = $derived(vm.state.itemWidth * sidebarStore.hiddenColumnCount);
+	let toastWidth = $derived(vm.state.itemWidth * 2); // User requested 2 items hidden
 
 	const extraToleranceWidth = 10;
 	function shouldHideHorizontalItem(index: number): boolean {
-		if (!sidebarStore.showType) return false;
 		if (!visualIndices.has(index)) return true;
 
 		const visualIndex = visualIndices.get(index)!;
@@ -90,12 +91,19 @@
 
 		if (sidebarStore.showType === SidebarType.Left) {
 			// Hide if item overlaps with left sidebar area
-			return itemLeft < sidebarWidth - extraToleranceWidth;
+			if (itemLeft < sidebarWidth - extraToleranceWidth) return true;
 		}
+		
 		if (sidebarStore.showType === SidebarType.Right) {
 			// Hide if item overlaps with right sidebar area
-			return itemRight > viewportWidth - sidebarWidth + extraToleranceWidth;
+			if (itemRight > viewportWidth - sidebarWidth + extraToleranceWidth) return true;
 		}
+		
+		// Hide items for Toasts (Right side)
+		if (ToastService.toasts.length > 0 && vm.state.columnCount > 2) {
+			if (itemRight > viewportWidth - toastWidth + extraToleranceWidth) return true;
+		}
+
 		return false;
 	}
 
@@ -106,11 +114,17 @@
 		const indexInRow = visualIndex % vm.state.columnCount;
 
 		if (sidebarStore.showType === SidebarType.Left) {
-			return indexInRow < sidebarStore.hiddenColumnCount;
+			if (indexInRow < sidebarStore.hiddenColumnCount) return true;
 		}
 		if (sidebarStore.showType === SidebarType.Right) {
-			return indexInRow >= vm.state.columnCount - sidebarStore.hiddenColumnCount;
+			if (indexInRow >= vm.state.columnCount - sidebarStore.hiddenColumnCount) return true;
 		}
+
+		// Hide items for Toasts (Right side)
+		if (ToastService.toasts.length > 0 && vm.state.columnCount > 2) {
+			if (indexInRow >= vm.state.columnCount - 2) return true; // User requested 2 items
+		}
+
 		return false;
 	}
 
