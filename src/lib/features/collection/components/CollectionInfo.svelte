@@ -7,7 +7,7 @@
 	import folderStore from '$lib/stores/folder.svelte';
 	import useCollectionInfo from '$lib/features/collection/viewmodels/useCollectionInfo.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
-	import { isLinux } from '$lib/platform';
+	import { isLinux, isMobile } from '$lib/platform';
 
 	const vm = useCollectionInfo();
 	let shouldShow = $derived(
@@ -19,8 +19,8 @@
 {#if shouldShow}
 	<View
 		class="animate__animated mx-3 mb-2 box-border grid-cols-[auto_max-content] rounded-lg
-        px-4 py-2 hover:px-5
-        hover:py-3 md:grid
+        px-4 py-2 md:grid
+		{isMobile() ? '' : 'hover:px-5 hover:py-3'}
 		{isSidebarVisible ? 'animate__fadeOut' : 'animate__fadeIn'}"
 		style="animation-duration: {isLinux() ? '350ms' : '500ms'};"
 	>

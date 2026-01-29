@@ -11,6 +11,7 @@
 	import View from '$lib/ui/components/View.svelte';
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { usePlayerBar } from '../viewmodels/usePlayerBar.svelte';
+	import { isMobile } from '$lib/platform';
 
 	const vm = usePlayerBar();
 </script>
@@ -38,7 +39,7 @@
 		size="lg"
 	/>
 
-	<View class="rounded-full px-3 py-2 hover:px-4 hover:py-3">
+	<View class="rounded-full px-3 py-2 {isMobile() ? '' : 'hover:px-4 hover:py-3'}">
 		<div class="grid w-full grid-cols-[auto_min-content] py-1 md:grid-cols-3">
 			<div class="flex items-center ps-1 sm:gap-x-1">
 				<button class="hidden w-10 sm:block md:w-12 lg:w-12" onclick={vm.handleButtonPrevious}
