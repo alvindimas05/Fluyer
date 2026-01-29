@@ -18,7 +18,7 @@
 	class="pointer-events-none grid w-full gap-y-2 px-3 sm:px-0 sm:pb-3
         {isMacos() ? 'sm:justify-end' : ''}
         {isMacos() ? 'right-0' : 'left-0'}
-        animate__animated animate__fadeIn animate__slow"
+        animate__animated animate__slideInDown"
 	style="margin-top: {isMobile() ? mobileStore.statusBarHeight : 8}px;
         grid-template-columns: {vm.state.gridSize};"
 	bind:this={vm.element}
