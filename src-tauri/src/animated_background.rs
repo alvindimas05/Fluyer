@@ -15,6 +15,7 @@ pub struct Color {
 
 #[tauri::command]
 pub async fn update_animated_background(
+    app: tauri::AppHandle,
     colors: Vec<Color>,
     width: u32,
     height: u32,
@@ -77,6 +78,27 @@ pub async fn update_animated_background(
     .expect("Failed to blur");
     let blurred = blurred_dyn.to_rgba8();
 
+    #[cfg(target_os = "linux")]
+    {
+        use tauri::Emitter;
+        #[derive(Clone, serde::Serialize)]
+        struct BackgroundUpdatePayload {
+            width: u32,
+            height: u32,
+            data: Vec<u8>,
+        }
+
+        let payload = BackgroundUpdatePayload {
+            width: blurred.width(),
+            height: blurred.height(),
+            data: blurred.into_raw(),
+        };
+
+        app.emit("animated_background_update", payload)
+            .map_err(|e| e.to_string())?;
+    }
+
+    #[cfg(not(target_os = "linux"))]
     crate::wgpu_renderer::update_background(blurred);
 
     Ok(())
@@ -84,6 +106,7 @@ pub async fn update_animated_background(
 
 #[tauri::command]
 pub async fn restore_animated_background() -> Result<(), String> {
+    #[cfg(not(target_os = "linux"))]
     crate::wgpu_renderer::restore_background();
     Ok(())
 }

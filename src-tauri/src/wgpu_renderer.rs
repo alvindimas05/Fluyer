@@ -565,7 +565,6 @@ pub fn handle_wgpu_resize(app_handle: &tauri::AppHandle, width: u32, height: u32
     }
 }
 
-#[allow(unused_variables)]
 pub fn suspend_wgpu(app_handle: &tauri::AppHandle) {
     #[cfg(target_os = "android")]
     {
@@ -577,7 +576,6 @@ pub fn suspend_wgpu(app_handle: &tauri::AppHandle) {
     }
 }
 
-#[allow(unused_variables)]
 pub fn resume_wgpu(app_handle: &tauri::AppHandle) {
     #[cfg(target_os = "android")]
     {

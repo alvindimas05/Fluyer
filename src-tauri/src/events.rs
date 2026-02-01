@@ -38,6 +38,7 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
     match event {
         RunEvent::Ready => {
             crate::state::initialize_on_ready(app_handle);
+            #[cfg(not(target_os = "linux"))]
             crate::wgpu_renderer::start_render_loop(app_handle.clone());
         }
         RunEvent::WindowEvent {
@@ -45,6 +46,7 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
             event: tauri::WindowEvent::Resized(size),
             ..
         } => {
+            #[cfg(not(target_os = "linux"))]
             crate::wgpu_renderer::handle_wgpu_resize(app_handle, size.width, size.height);
         }
         RunEvent::Resumed => {

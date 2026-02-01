@@ -19,10 +19,13 @@ pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>
     initialize_store(app);
 
     // Initialize WGPU renderer
-    crate::debug!("setup_application: About to call setup_wgpu");
-    match crate::wgpu_renderer::setup_wgpu(app) {
-        Ok(_) => crate::debug!("setup_application: WGPU initialized successfully"),
-        Err(e) => crate::error!("setup_application: WGPU initialization failed: {:?}", e),
+    #[cfg(not(target_os = "linux"))]
+    {
+        crate::debug!("setup_application: About to call setup_wgpu");
+        match crate::wgpu_renderer::setup_wgpu(app) {
+            Ok(_) => crate::debug!("setup_application: WGPU initialized successfully"),
+            Err(e) => crate::error!("setup_application: WGPU initialization failed: {:?}", e),
+        }
     }
 
     Ok(())

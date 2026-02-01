@@ -10,6 +10,7 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import settingStore from '$lib/stores/setting.svelte';
 	import { SettingAnimatedBackgroundType } from '$lib/features/settings/animated_background/types';
+	// @ts-ignore
 	import ColorThief from 'colorthief/dist/color-thief.mjs';
 	import { prominent } from 'color.js';
 	import { CommandRoutes } from '$lib/constants/CommandRoutes';
@@ -133,6 +134,7 @@
 	}
 
 	async function getColors(): Promise<Color[] | null> {
+		if (!currentCoverArt) return null;
 		let image = new Image();
 		image.crossOrigin = 'anonymous';
 		image.src = currentCoverArt;
@@ -249,14 +251,173 @@
 		await invoke(CommandRoutes.RESTORE_ANIMATED_BACKGROUND);
 	}
 
+	// WebGL State
+	let canvas = $state<HTMLCanvasElement>();
+	let gl: WebGLRenderingContext | null = null;
+	let texture: WebGLTexture | null = null;
+	let program: WebGLProgram | null = null;
+	let unlistenLinuxUpdate: Unsubscriber;
+
+	function setupWebGL() {
+		if (!canvas) return;
+		gl = canvas.getContext('webgl');
+		if (!gl) {
+			console.error('WebGL not supported');
+			return;
+		}
+
+		const vsSource = `
+			attribute vec2 position;
+			attribute vec2 texCoord;
+			varying vec2 vTexCoord;
+			void main() {
+				gl_Position = vec4(position, 0.0, 1.0);
+				vTexCoord = texCoord;
+			}
+		`;
+
+		const fsSource = `
+			precision mediump float;
+			uniform sampler2D uImage;
+			varying vec2 vTexCoord;
+			void main() {
+				gl_FragColor = texture2D(uImage, vTexCoord);
+			}
+		`;
+
+		const createShader = (gl: WebGLRenderingContext, type: number, source: string) => {
+			const shader = gl.createShader(type);
+			if (!shader) return null;
+			gl.shaderSource(shader, source);
+			gl.compileShader(shader);
+			if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+				console.error(gl.getShaderInfoLog(shader));
+				gl.deleteShader(shader);
+				return null;
+			}
+			return shader;
+		};
+
+		const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
+		const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+		if (!vs || !fs) return;
+
+		program = gl.createProgram();
+		if (!program) return;
+		gl.attachShader(program, vs);
+		gl.attachShader(program, fs);
+		gl.linkProgram(program);
+
+		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+			console.error(gl.getProgramInfoLog(program));
+			return;
+		}
+
+		gl.useProgram(program);
+
+		// Buffers
+		const positionBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+		gl.bufferData(
+			gl.ARRAY_BUFFER,
+			new Float32Array([-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0]),
+			gl.STATIC_DRAW
+		);
+
+		const positionLoc = gl.getAttribLocation(program, 'position');
+		gl.enableVertexAttribArray(positionLoc);
+		gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+		const texCoordBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+		gl.bufferData(
+			gl.ARRAY_BUFFER,
+			new Float32Array([0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0]),
+			gl.STATIC_DRAW
+		);
+
+		const texCoordLoc = gl.getAttribLocation(program, 'texCoord');
+		gl.enableVertexAttribArray(texCoordLoc);
+		gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, false, 0, 0);
+	}
+
+	interface BackgroundUpdatePayload {
+		width: number;
+		height: number;
+		data: number[];
+	}
+
+	function updateWebGL(payload: BackgroundUpdatePayload) {
+		if (!gl || !program || !canvas) return;
+
+		if (canvas.width !== payload.width || canvas.height !== payload.height) {
+			canvas.width = payload.width;
+			canvas.height = payload.height;
+			gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+		}
+
+		if (!texture) {
+			texture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		} else {
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+		}
+
+		const data = new Uint8Array(payload.data);
+		gl.texImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.RGBA,
+			payload.width,
+			payload.height,
+			0,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			data
+		);
+
+		gl.drawArrays(gl.TRIANGLES, 0, 6);
+	}
+
 	onMount(async () => {
 		updateBackground(true);
 		if (isAndroid()) unlistenFocus = await listen('tauri://focus', restoreBackground);
+
+		if (isLinux()) {
+			// Initialize WebGL
+			// Wait for canvas binding
+			setTimeout(async () => {
+				setupWebGL();
+				unlistenLinuxUpdate = await listen<BackgroundUpdatePayload>(
+					'animated_background_update',
+					(event) => {
+						console.log(
+							'Received Linux background update',
+							event.payload.width,
+							event.payload.height
+						);
+						updateWebGL(event.payload);
+					}
+				);
+			}, 0);
+		}
 	});
-	onDestroy(() => unlistenFocus && unlistenFocus());
+
+	onDestroy(() => {
+		if (unlistenFocus) unlistenFocus();
+		if (unlistenLinuxUpdate) unlistenLinuxUpdate();
+	});
 </script>
 
 <svelte:window onresize={onWindowResize} />
-<!-- We don't need a canvas anymore, WGPU renders to the window surface -->
-<!-- But we might need a transparent container if we want to ensure pointer events pass through? -->
-<div class="pointer-events-none fixed inset-0 -z-10"></div>
+{#if isLinux()}
+	<canvas bind:this={canvas} class="pointer-events-none fixed inset-0 -z-10 h-full w-full"></canvas>
+{:else}
+	<!-- We don't need a canvas anymore, WGPU renders to the window surface -->
+	<!-- But we might need a transparent container if we want to ensure pointer events pass through? -->
+	<div class="pointer-events-none fixed inset-0 -z-10"></div>
+{/if}
