@@ -138,12 +138,13 @@
 		>
 			{#each vm.data as item, index}
 				{@const itemKey = getItemKey(item)}
+				<!-- FIXME: Animation is stuttering because of reactive and re-rendering on Sidebar change -->
 				<div
 					use:observeElement={itemKey}
-					class="animate__animated {shouldHideItem(index) ? 'animate__fadeOut' : 'animate__fadeIn'}"
-					style="animation-duration: {isLinux() ? '350ms' : '500ms'}; {shouldHideItem(index)
-						? 'pointer-events: none;'
-						: ''}"
+					class="{isLinux() ? '' : 'animate__animated'}
+					{!isLinux() && shouldHideItem(index) ? 'animate__fadeOut' : 'animate__fadeIn'}
+					{isLinux() && shouldHideItem(index) ? 'invisible' : ''}"
+					style="animation-duration: 500ms; {shouldHideItem(index) ? 'pointer-events: none;' : ''}"
 					style:display={isVisible(item) ? undefined : 'none'}
 				>
 					{#if 'duration' in item}

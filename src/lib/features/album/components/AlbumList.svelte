@@ -93,12 +93,12 @@
 			// Hide if item overlaps with left sidebar area
 			if (itemLeft < sidebarWidth - extraToleranceWidth) return true;
 		}
-		
+
 		if (sidebarStore.showType === SidebarType.Right) {
 			// Hide if item overlaps with right sidebar area
 			if (itemRight > viewportWidth - sidebarWidth + extraToleranceWidth) return true;
 		}
-		
+
 		// Hide items for Toasts (Right side)
 		if (ToastService.toasts.length > 0 && vm.state.columnCount > 2) {
 			if (itemRight > viewportWidth - toastWidth + extraToleranceWidth) return true;
@@ -169,14 +169,18 @@
 			style="padding-bottom: 0;"
 		>
 			{#each vm.data as musicList, index}
+				<!-- FIXME: Animation is stuttering because of reactive and re-rendering on Sidebar change -->
 				<div
 					use:observeElement={index}
-					class="animate__animated flex-shrink-0 {shouldHideHorizontalItem(index)
-						? 'animate__fadeOut'
-						: 'animate__fadeIn'}"
-					style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
-						? '350ms'
-						: '500ms'}; {shouldHideHorizontalItem(index) ? 'pointer-events: none;' : ''}"
+					class="flex-shrink-0 {isLinux()
+						? ''
+						: 'animate__animated ' +
+							(shouldHideHorizontalItem(index) ? 'animate__fadeOut' : 'animate__fadeIn')}"
+					style="width: {vm.state.itemWidth}px; {isLinux()
+						? ''
+						: 'animation-duration: 500ms;'} {shouldHideHorizontalItem(index)
+						? 'pointer-events: none; opacity: 0;'
+						: 'opacity: 1;'}"
 					style:display={isVisible(musicList) ? undefined : 'none'}
 				>
 					<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
@@ -198,12 +202,15 @@
 				{#each vm.data as musicList, index}
 					<div
 						use:observeElement={index}
-						class="animate__animated {shouldHideGridItem(index)
-							? 'animate__fadeOut'
-							: 'animate__fadeIn'}"
-						style="width: {vm.state.itemWidth}px; animation-duration: {isLinux()
-							? '350ms'
-							: '500ms'}; {shouldHideGridItem(index) ? 'pointer-events: none;' : ''}"
+						class={isLinux()
+							? ''
+							: 'animate__animated ' +
+								(shouldHideGridItem(index) ? 'animate__fadeOut' : 'animate__fadeIn')}
+						style="width: {vm.state.itemWidth}px; {isLinux()
+							? ''
+							: 'animation-duration: 500ms;'} {shouldHideGridItem(index)
+							? 'pointer-events: none; opacity: 0;'
+							: 'opacity: 1;'}"
 						style:display={isVisible(musicList) ? undefined : 'none'}
 					>
 						<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />

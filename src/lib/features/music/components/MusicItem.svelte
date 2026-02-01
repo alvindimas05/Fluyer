@@ -3,6 +3,7 @@
 	import { useMusicItem } from '../viewmodels/useMusicItem.svelte';
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';
+	import { isLinux } from '$lib/platform';
 
 	interface Props {
 		music?: MusicData;
@@ -94,9 +95,13 @@
 		opacity: 0;
 
 		&:hover {
-			animation-name: fadeIn;
-			animation-duration: 0.5s;
-			animation-fill-mode: forwards;
+			@if not isLinux() {
+				animation-name: fadeIn;
+				animation-duration: 0.5s;
+				animation-fill-mode: forwards;
+			} @else {
+				opacity: 1;
+			}
 		}
 	}
 </style>

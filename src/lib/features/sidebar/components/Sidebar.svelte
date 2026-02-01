@@ -162,16 +162,20 @@
         top: {paddingTop}px;"
 	onmouseleave={onMouseLeave}
 >
+	<!-- FIXME: Enable Sidebar animation on Linux. Probably won't happen -->
 	<View
-		class="animate__animated pointer-events-auto h-full rounded-lg
+		class="pointer-events-auto h-full rounded-lg
 			p-3
-			{isShowing
-			? type === SidebarType.Right
-				? 'animate__fadeInRight'
-				: 'animate__fadeInLeft'
-			: type === SidebarType.Right
-				? 'animate__fadeOutRight'
-				: 'animate__fadeOutLeft'}
+			{isLinux() ? '' : 'animate__animated'}
+			{!isLinux() &&
+			(isShowing
+				? type === SidebarType.Right
+					? 'animate__fadeInRight'
+					: 'animate__fadeInLeft'
+				: type === SidebarType.Right
+					? 'animate__fadeOutRight'
+					: 'animate__fadeOutLeft')}
+			{isLinux() && (isShowing ? '' : 'hidden')}
             {props.class}
 		"
 		style="

@@ -29,7 +29,7 @@
 			{#await vm.albumImage}
 				<div class="aspect-square w-full"></div>
 			{:then image}
-				<img class="aspect-square w-full rounded" src={image} alt="Album" />
+				<img class="animate__animated animate__fadeIn aspect-square w-full rounded" src={image} alt="Album" />
 			{/await}
 		</div>
 		<div class="ms-3 text-sm md:text-base">
