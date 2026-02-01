@@ -474,6 +474,10 @@ impl MusicPlayer {
                             Self::set_pos(pos);
                         });
                     }
+                } else if event.action == "previous" {
+                    std::thread::spawn(move || {
+                        Self::play_previous();
+                    });
                 } else {
                     std::thread::spawn(move || {
                         Self::send_command(event.action);
@@ -490,6 +494,7 @@ impl MusicPlayer {
             "play" => MusicCommand::Play,
             "pause" | "stop" => MusicCommand::Pause,
             "next" => MusicCommand::Next,
+            "previous" => MusicCommand::None, // Handled separately usually, but mapped to None here if passed directly
             "clear" => MusicCommand::Clear,
             "repeat" => MusicCommand::Repeat,
             "repeatOne" => MusicCommand::RepeatOne,
@@ -508,7 +513,13 @@ impl MusicPlayer {
         }
 
         if _command == MusicCommand::Next {
-            Self::play_next();
+            Self::play_next(true);
+            return;
+        }
+
+        // Previous is handled via direct call usually, but if it came through here (though "previous" maps to None above):
+        if command == "previous" {
+            Self::play_previous();
             return;
         }
 
@@ -712,6 +723,15 @@ impl MusicPlayer {
                 if was_empty && !state.playlist.is_empty() && state.current_index.is_none() {
                     drop(state); // Release lock before calling goto_playlist
                     Self::goto_playlist(0);
+                } else {
+                    // Update Android media control boundaries since queue changed
+                    #[cfg(target_os = "android")]
+                    {
+                        let current_index = state.current_index;
+                        let total_count = state.playlist.len();
+                        drop(state);
+                        Self::update_android_media_boundaries(current_index, total_count);
+                    }
                 }
             }
         }
@@ -745,6 +765,15 @@ impl MusicPlayer {
                         state.current_index = Some(current - 1);
                     }
                 }
+
+                // Update Android media control boundaries since queue changed
+                #[cfg(target_os = "android")]
+                {
+                    let current_index = state.current_index;
+                    let total_count = state.playlist.len();
+                    drop(state);
+                    Self::update_android_media_boundaries(current_index, total_count);
+                }
             }
         }
     }
@@ -752,7 +781,7 @@ impl MusicPlayer {
     pub fn goto_playlist(index: usize) {
         tauri::async_runtime::spawn_blocking(move || {
             if let Some(state_lock) = PLAYER_STATE.get() {
-                let music = {
+                let (music, total_count) = {
                     let state = match state_lock.lock() {
                         Ok(s) => s,
                         Err(e) => {
@@ -763,12 +792,12 @@ impl MusicPlayer {
                     if index >= state.playlist.len() {
                         return;
                     }
-                    state.playlist[index].metadata.clone()
+                    (state.playlist[index].metadata.clone(), state.playlist.len())
                 };
 
                 Self::stop_current_stream();
 
-                if Self::load_music(music) {
+                if Self::load_music(music, index, total_count) {
                     if let Ok(mut state) = state_lock.lock() {
                         state.current_index = Some(index);
                     }
@@ -834,6 +863,49 @@ impl MusicPlayer {
         }
     }
 
+    /// Update Android media control with current boundary state (is_first, is_last)
+    /// Called when playlist changes to keep notification buttons in sync
+    #[cfg(target_os = "android")]
+    fn update_android_media_boundaries(current_index: Option<usize>, total_count: usize) {
+        if let Some(index) = current_index {
+            if total_count > 0 {
+                let is_first = index == 0;
+                let is_last = index == total_count - 1;
+
+                // We need to get current metadata to update the media control
+                if let Some(state_lock) = PLAYER_STATE.get() {
+                    if let Ok(state) = state_lock.lock() {
+                        if index < state.playlist.len() {
+                            let music = state.playlist[index].metadata.clone();
+                            let is_playing = CURRENT_STREAM.load(Ordering::SeqCst) != 0;
+                            drop(state);
+
+                            tauri::async_runtime::spawn(async move {
+                                let handle = app_handle();
+                                let image_path =
+                                    match handle.fluyer().metadata_get_image(music.path.clone()) {
+                                        Ok(res) => res.path,
+                                        Err(_) => None,
+                                    };
+
+                                let _ = handle.fluyer().update_media_control(
+                                    music.title.unwrap_or("Unknown".to_string()),
+                                    music.artist.unwrap_or("Unknown".to_string()),
+                                    music.album.unwrap_or("Unknown".to_string()),
+                                    music.duration.unwrap_or(0) as u64,
+                                    image_path,
+                                    is_playing,
+                                    is_first,
+                                    is_last,
+                                );
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fn clear_playlist() {
         #[cfg(desktop)]
         unsafe {
@@ -865,8 +937,8 @@ impl MusicPlayer {
         }
     }
 
-    fn play_next() {
-        tauri::async_runtime::spawn_blocking(|| {
+    fn play_next(from_user: bool) {
+        tauri::async_runtime::spawn_blocking(move || {
             if let Some(state_lock) = PLAYER_STATE.get() {
                 let next_index = {
                     let state = match state_lock.lock() {
@@ -876,8 +948,13 @@ impl MusicPlayer {
                             return;
                         }
                     };
+
+                    // If from user, ignore verify RepeatOne (force change) - usually Next button skips even if RepeatOne
+                    // But if RepeatOne is set, usually Next goes to next track, Auto-advance repeats.
+                    // Assuming RepeatOne applies only to auto-advance.
+
                     match (state.current_index, state.repeat_mode) {
-                        (Some(current), RepeatMode::One) => Some(current),
+                        (Some(current), RepeatMode::One) if !from_user => Some(current),
                         (Some(current), _) if current + 1 < state.playlist.len() => {
                             Some(current + 1)
                         }
@@ -888,7 +965,7 @@ impl MusicPlayer {
 
                 if let Some(index) = next_index {
                     // Get the next music metadata
-                    let music = {
+                    let (music, total_count) = {
                         let state = match state_lock.lock() {
                             Ok(s) => s,
                             Err(e) => {
@@ -896,7 +973,7 @@ impl MusicPlayer {
                                 return;
                             }
                         };
-                        state.playlist[index].metadata.clone()
+                        (state.playlist[index].metadata.clone(), state.playlist.len())
                     };
 
                     // For gapless playback, remove the old stream and load the new one without stopping the mixer
@@ -924,23 +1001,72 @@ impl MusicPlayer {
                         }
                     }
 
-                    if Self::load_music(music) {
+                    if Self::load_music(music, index, total_count) {
                         if let Ok(mut state) = state_lock.lock() {
                             state.current_index = Some(index);
                         }
                         Self::emit_sync(true);
                     }
-                } else {
+                } else if !from_user {
+                    // Only stop if auto-advance and end of playlist
                     Self::stop_current_stream();
                     if let Ok(mut state) = state_lock.lock() {
                         state.current_index = None;
                     }
                 }
+                // If from_user and None, do nothing (don't stop)
             }
         });
     }
 
-    fn load_music(music: MusicMetadata) -> bool {
+    fn play_previous() {
+        tauri::async_runtime::spawn_blocking(|| {
+            if let Some(state_lock) = PLAYER_STATE.get() {
+                let prev_index = {
+                    let state = match state_lock.lock() {
+                        Ok(s) => s,
+                        Err(e) => {
+                            crate::error!("Failed to lock player state: {}", e);
+                            return;
+                        }
+                    };
+
+                    match (state.current_index, state.repeat_mode) {
+                        (Some(current), _) if current > 0 => Some(current - 1),
+                        (Some(_), RepeatMode::All) => Some(state.playlist.len() - 1),
+                        _ => None,
+                    }
+                };
+
+                if let Some(index) = prev_index {
+                    // Get the next music metadata
+                    let (music, total_count) = {
+                        let state = match state_lock.lock() {
+                            Ok(s) => s,
+                            Err(e) => {
+                                crate::error!("Failed to lock player state: {}", e);
+                                return;
+                            }
+                        };
+                        (state.playlist[index].metadata.clone(), state.playlist.len())
+                    };
+
+                    Self::stop_current_stream();
+
+                    if Self::load_music(music, index, total_count) {
+                        if let Ok(mut state) = state_lock.lock() {
+                            state.current_index = Some(index);
+                        }
+                        Self::play_pause(true);
+                        Self::emit_sync(true);
+                    }
+                }
+                // If None (start of playlist and !RepeatAll), do nothing
+            }
+        });
+    }
+
+    fn load_music(music: MusicMetadata, index: usize, total_count: usize) -> bool {
         #[cfg(desktop)]
         unsafe {
             let path = CString::new(music.path.clone()).unwrap();
@@ -1159,6 +1285,8 @@ impl MusicPlayer {
                                 music_clone.duration.unwrap_or(0) as u64,
                                 image_path,
                                 true,
+                                index == 0,
+                                index == total_count - 1,
                             );
                         });
                     }
@@ -1443,7 +1571,7 @@ impl MusicPlayer {
                         if state == BASS_ACTIVE_STOPPED {
                             // Track ended, trigger next
                             crate::info!("Track ended, playing next");
-                            Self::play_next();
+                            Self::play_next(false);
                         }
                     }
                 }
@@ -1457,7 +1585,7 @@ impl MusicPlayer {
                                 let state = (bass.bass_channel_is_active)(current_stream);
                                 if state == BASS_ACTIVE_STOPPED {
                                     crate::info!("Track ended, playing next");
-                                    Self::play_next();
+                                    Self::play_next(false);
                                 }
                             }
                         }

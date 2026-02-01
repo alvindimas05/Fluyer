@@ -170,6 +170,8 @@ impl<R: Runtime> Fluyer<R> {
         duration: u64,
         artwork_path: Option<String>,
         is_playing: bool,
+        is_first: bool,
+        is_last: bool,
     ) -> crate::Result<()> {
         self.0
             .run_mobile_plugin(
@@ -181,6 +183,8 @@ impl<R: Runtime> Fluyer<R> {
                     duration,
                     artwork_path,
                     is_playing,
+                    is_first,
+                    is_last,
                 },
             )
             .map_err(Into::into)

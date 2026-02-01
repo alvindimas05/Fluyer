@@ -59,6 +59,8 @@ class MediaControlUpdateArgs {
     var duration: Long = 0
     var artworkPath: String? = null
     var isPlaying: Boolean = false
+    var isFirst: Boolean = false
+    var isLast: Boolean = false
 }
 
 @InvokeArg
@@ -240,7 +242,7 @@ class FluyerPlugin(val activity: Activity): Plugin(activity) {
     fun updateMediaControl(invoke: Invoke) {
         val args = invoke.parseArgs(MediaControlUpdateArgs::class.java)
         activity.runOnUiThread {
-             mediaControl?.updateMetadata(args.title, args.artist, args.album, args.duration, args.artworkPath, args.isPlaying)
+             mediaControl?.updateMetadata(args.title, args.artist, args.album, args.duration, args.artworkPath, args.isPlaying, args.isFirst, args.isLast)
              invoke.resolve()
         }
     }

@@ -110,6 +110,8 @@ pub struct MediaControlUpdateArgs {
     pub duration: u64,
     pub artwork_path: Option<String>,
     pub is_playing: bool,
+    pub is_first: bool,
+    pub is_last: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]

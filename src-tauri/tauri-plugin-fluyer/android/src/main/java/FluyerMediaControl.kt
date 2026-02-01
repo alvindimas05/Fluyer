@@ -21,6 +21,8 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val channelId = "fluyer_media_control"
     private val handler = Handler(Looper.getMainLooper())
+    private var isFirst = false
+    private var isLast = false
 
     init {
         createNotificationChannel()
@@ -96,8 +98,8 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
             .setActions(
                 PlaybackStateCompat.ACTION_PLAY or
                 PlaybackStateCompat.ACTION_PAUSE or
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                (if (isLast) 0 else PlaybackStateCompat.ACTION_SKIP_TO_NEXT) or
+                (if (isFirst) 0 else PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) or
                 PlaybackStateCompat.ACTION_SEEK_TO
             )
             .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
@@ -105,7 +107,7 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
         mediaSession.setPlaybackState(playbackState)
     }
 
-    fun updateMetadata(title: String, artist: String, album: String, duration: Long, artworkPath: String?, isPlaying: Boolean) {
+    fun updateMetadata(title: String, artist: String, album: String, duration: Long, artworkPath: String?, isPlaying: Boolean, isFirst: Boolean, isLast: Boolean) {
         val builder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
@@ -122,6 +124,9 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
                 // Ignore error loading artwork
             }
         }
+
+        this.isFirst = isFirst
+        this.isLast = isLast
 
         mediaSession.setMetadata(builder.build())
         
@@ -162,8 +167,8 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
             .setActions(
                 PlaybackStateCompat.ACTION_PLAY or
                 PlaybackStateCompat.ACTION_PAUSE or
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                (if (isLast) 0 else PlaybackStateCompat.ACTION_SKIP_TO_NEXT) or
+                (if (isFirst) 0 else PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) or
                 PlaybackStateCompat.ACTION_SEEK_TO
             )
             .setState(state, position, 1.0f, android.os.SystemClock.elapsedRealtime())
@@ -201,10 +206,12 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
             .setOngoing(isPlaying)
 
         // Actions
-        builder.addAction(NotificationCompat.Action(
-            android.R.drawable.ic_media_previous, "Previous",
-            createPendingIntent(MediaControlReceiver.ACTION_PREVIOUS)
-        ))
+        if (!isFirst) {
+            builder.addAction(NotificationCompat.Action(
+                android.R.drawable.ic_media_previous, "Previous",
+                createPendingIntent(MediaControlReceiver.ACTION_PREVIOUS)
+            ))
+        }
 
         if (isPlaying) {
              builder.addAction(NotificationCompat.Action(
@@ -218,10 +225,12 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
             ))
         }
 
-        builder.addAction(NotificationCompat.Action(
-            android.R.drawable.ic_media_next, "Next",
-            createPendingIntent(MediaControlReceiver.ACTION_NEXT)
-        ))
+        if (!isLast) {
+            builder.addAction(NotificationCompat.Action(
+                android.R.drawable.ic_media_next, "Next",
+                createPendingIntent(MediaControlReceiver.ACTION_NEXT)
+            ))
+        }
 
         // Large Icon (Artwork)
         if (artworkPath != null) {
