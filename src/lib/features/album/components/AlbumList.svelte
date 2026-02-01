@@ -157,7 +157,7 @@
 	class="w-screen"
 	style="height: {vm.isHorizontal
 		? vm.itemHeight
-		: window.innerHeight - filterStore.bar.height - playerBarStore.height}px;"
+		: window.innerHeight - filterStore.bar.height - playerBarStore.height - mobileStore.navigationBarHeight - mobileStore.statusBarHeight}px;"
 >
 	{#if vm.isHorizontal}
 		<!-- Horizontal layout -->
