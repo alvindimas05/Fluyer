@@ -156,6 +156,8 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
     fun updateState(isPlaying: Boolean, position: Long) {
          val state = if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
 
+         Log.d(LOG_TAG, "updateState called: isPlaying=$isPlaying, position=$position")
+
          val playbackState = PlaybackStateCompat.Builder()
             .setActions(
                 PlaybackStateCompat.ACTION_PLAY or
@@ -164,11 +166,13 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
                 PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
                 PlaybackStateCompat.ACTION_SEEK_TO
             )
-            .setState(state, position, 1.0f)
+            .setState(state, position, 1.0f, android.os.SystemClock.elapsedRealtime())
             .build()
         mediaSession.setPlaybackState(playbackState)
 
-        // Re-show notification to update play/pause icon
+        // Cancel and recreate notification to force refresh
+        notificationManager.cancel(1)
+        
         val metadata = mediaSession.controller.metadata
         if (metadata != null) {
              val title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: ""

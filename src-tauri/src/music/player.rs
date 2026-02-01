@@ -571,9 +571,18 @@ impl MusicPlayer {
                         (bass.bass_channel_play)(BASS_MIXER, 1);
                     }
 
-                    let _ = app_handle()
+                    let sync_info = Self::get_sync_info(false);
+                    crate::debug!(
+                        "Updating media control state after seek: is_playing={}, position={}ms",
+                        sync_info.is_playing,
+                        position
+                    );
+                    if let Err(e) = app_handle()
                         .fluyer()
-                        .set_media_control_state(Self::get_sync_info(false).is_playing, position);
+                        .set_media_control_state(sync_info.is_playing, position)
+                    {
+                        crate::error!("Failed to update media control state: {:?}", e);
+                    }
                 }
             }
         }

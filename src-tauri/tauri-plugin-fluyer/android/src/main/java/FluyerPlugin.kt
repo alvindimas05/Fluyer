@@ -63,7 +63,7 @@ class MediaControlUpdateArgs {
 
 @InvokeArg
 class MediaControlSetStateArgs {
-    var isPlaying by Delegates.notNull<Boolean>()
+    var isPlaying: Boolean = false
     var position: Long = 0
 }
 
