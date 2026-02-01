@@ -91,7 +91,7 @@
 			{/if}
 		</button>
 		<button
-			class="tb-button {isWindows() && 'win-button'} ${isLinux() && 'linux-button'}"
+			class="tb-button {isWindows() && 'win-button'} {isLinux() && 'linux-button'}"
 			onclick={() => window.close()}
 		>
 			{#if isWindows()}
