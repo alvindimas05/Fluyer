@@ -175,9 +175,7 @@ class FluyerMediaControl(private val context: Context, private val onAction: (St
             .build()
         mediaSession.setPlaybackState(playbackState)
 
-        // Cancel and recreate notification to force refresh
-        notificationManager.cancel(1)
-        
+        // Update notification in-place (no cancel needed, notify with same ID updates smoothly)
         val metadata = mediaSession.controller.metadata
         if (metadata != null) {
              val title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: ""
