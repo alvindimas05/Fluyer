@@ -32,13 +32,13 @@
 				/>
 			{:else if image && folder}
 				<!-- Folder with album art: folder icon behind, album image centered on top -->
-				<div class="relative aspect-square h-12 w-12 md:h-14 md:w-14">
+				<div class="animate__animated animate__fadeIn relative aspect-square h-12 w-12 md:h-14 md:w-14">
 					<div class="absolute inset-0 opacity-75">
 						<Icon type={IconType.Folder} />
 					</div>
 					<div class="absolute inset-0 flex items-center justify-center">
 						<img
-							class="animate__animated animate__fadeIn mt-2 h-4 w-4 rounded-sm object-cover shadow-md md:h-5 md:w-5"
+							class="mt-2 h-4 w-4 rounded-sm object-cover shadow-md md:h-5 md:w-5"
 							src={image}
 							alt="Album"
 						/>
