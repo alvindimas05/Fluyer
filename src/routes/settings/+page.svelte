@@ -34,7 +34,7 @@
 		>
 			<p class="mx-5 mb-4 text-2xl font-semibold">Settings</p>
 			<div class="scrollbar-hidden mb-3 w-full overflow-auto">
-				<SettingMusicPlayerConfiguration />
+				<!-- <SettingMusicPlayerConfiguration /> -->
 				<SettingMusicPaths />
 				<SettingAnimatedBackground />
 				<SettingIconTheme />
