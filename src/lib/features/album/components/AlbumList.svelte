@@ -221,7 +221,7 @@
 		<!-- Horizontal layout -->
 		<div
 			bind:this={scrollContainer}
-			class="scrollbar-hidden flex h-full overflow-x-auto"
+			class="linux-hardware-accelerate scrollbar-hidden flex h-full overflow-x-auto"
 			onscroll={handleScroll}
 			onwheel={handleWheel}
 			style="padding-bottom: 0;"

@@ -178,7 +178,7 @@
 <div
 	bind:this={scrollContainer}
 	onscroll={handleScroll}
-	class="scrollbar-hidden relative h-full w-full overflow-y-auto px-3"
+	class="linux-hardware-accelerate scrollbar-hidden relative h-full w-full overflow-y-auto px-3"
 >
 	{#if vm.data && vm.data.length > 0 && vm.state.columnCount}
 		<div
