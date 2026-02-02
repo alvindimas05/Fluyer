@@ -205,6 +205,7 @@
 	}
 </script>
 
+<!-- FIXME: Flicker on Linux when filter type is album -->
 <svelte:window onresize={vm.updateItemWidth} />
 
 <div
