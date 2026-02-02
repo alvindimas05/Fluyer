@@ -193,10 +193,10 @@
 				{@const shouldRender = shouldRenderItem(itemKey, index, item)}
 				<div
 					use:observeElement={itemKey}
-					class="linux-prevent-flicker min-h-[64px] md:min-h-[72px] {hiddenBySidebar &&
-					inViewport &&
-					visibleByFilter
-						? 'animate__animated animate__fadeOut'
+					class="linux-prevent-flicker min-h-[64px] md:min-h-[72px] {inViewport
+						? hiddenBySidebar
+							? 'animate__animated animate__fadeOut'
+							: 'animate__animated animate__fadeIn'
 						: ''}"
 					style="animation-duration: 500ms; {hiddenBySidebar ? 'pointer-events: none;' : ''}"
 					style:display={visibleByFilter ? undefined : 'none'}

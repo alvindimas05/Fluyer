@@ -233,10 +233,10 @@
 				{@const shouldRender = shouldRenderHorizontalItem(index, musicList)}
 				<div
 					use:observeElement={index}
-					class="linux-prevent-flicker flex-shrink-0 {hiddenBySidebar &&
-					inViewport &&
-					visibleByFilter
-						? 'animate__animated animate__fadeOut'
+					class="linux-prevent-flicker flex-shrink-0 {inViewport
+						? hiddenBySidebar
+							? 'animate__animated animate__fadeOut'
+							: 'animate__animated animate__fadeIn'
 						: ''}"
 					style="width: {vm.state.itemWidth}px; animation-duration: 500ms; {hiddenBySidebar
 						? 'pointer-events: none; opacity: 0;'
@@ -271,8 +271,10 @@
 						use:observeElement={index}
 						class={isLinux()
 							? ''
-							: hiddenBySidebar && inViewport && visibleByFilter
-								? 'animate__animated animate__fadeOut'
+							: inViewport
+								? hiddenBySidebar
+									? 'animate__animated animate__fadeOut'
+									: 'animate__animated animate__fadeIn'
 								: ''}
 						style="width: {vm.state.itemWidth}px; {isLinux()
 							? ''
