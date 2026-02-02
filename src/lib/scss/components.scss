@@ -1,0 +1,19 @@
+input[type="radio"] {
+    @apply bg-transparent border-2 border-white/50 outline-transparent accent-transparent shadow-none rounded-full;
+    appearance: none;
+    -webkit-appearance: none;
+
+    &:checked {
+        @apply border-0 bg-white;
+    }
+}
+
+input[type="checkbox"] {
+    @apply bg-transparent border-2 border-white/50 outline-transparent accent-transparent shadow-none rounded;
+    appearance: none;
+    -webkit-appearance: none;
+
+    &:checked {
+        @apply border-0 bg-white;
+    }
+}

@@ -25,7 +25,7 @@
 		<input
 			type="radio"
 			name="iconTheme"
-			class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+			class="h-4 w-4"
 			value={IconThemeType.Phosphor}
 			checked={iconStore.theme === IconThemeType.Phosphor}
 			onchange={onMethodChange}
@@ -40,7 +40,7 @@
 		<input
 			type="radio"
 			name="iconTheme"
-			class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+			class="h-4 w-4"
 			value={IconThemeType.Material}
 			checked={iconStore.theme === IconThemeType.Material}
 			onchange={onMethodChange}
@@ -55,7 +55,7 @@
 		<input
 			type="radio"
 			name="iconTheme"
-			class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+			class="h-4 w-4"
 			value={IconThemeType.Lucide}
 			checked={iconStore.theme === IconThemeType.Lucide}
 			onchange={onMethodChange}

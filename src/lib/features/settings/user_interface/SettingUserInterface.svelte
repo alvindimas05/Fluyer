@@ -56,7 +56,7 @@
 	<label class="grid cursor-pointer grid-cols-[min-content_auto] items-center gap-3 px-3 py-2">
 		<input
 			type="checkbox"
-			class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+			class="h-4 w-4"
 			checked={settingStore.ui.showRepeatButton}
 			onchange={onUiShowRepeatButtonChange}
 		/>
@@ -67,7 +67,7 @@
 	<label class="grid cursor-pointer grid-cols-[min-content_auto] items-center gap-3 px-3 py-2">
 		<input
 			type="checkbox"
-			class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+			class="h-4 w-4"
 			checked={settingStore.ui.showShuffleButton}
 			onchange={onUiShowShuffleButtonChange}
 		/>
@@ -80,7 +80,7 @@
 		<label class="grid cursor-pointer grid-cols-[min-content_auto] items-center gap-3 px-3 py-2">
 			<input
 				type="checkbox"
-				class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+				class="h-4 w-4"
 				checked={settingStore.ui.play.showBackButton}
 				onchange={onUiPlayShowBackButtonChange}
 			/>
@@ -91,7 +91,7 @@
 		<label class="grid cursor-pointer grid-cols-[min-content_auto] items-center gap-3 px-3 py-2">
 			<input
 				type="checkbox"
-				class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+				class="h-4 w-4"
 				checked={settingStore.ui.play.showVolume}
 				onchange={onUiPlayShowVolumeChange}
 			/>

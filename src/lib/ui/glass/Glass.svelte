@@ -34,7 +34,7 @@
 	};
 
 	const getShineSize = () => {
-		if (shineSize === 'sm') return 'border-[1px] border-[var(--shine-color)]';
+		// if (shineSize === 'sm') return 'border-[1px] border-[var(--shine-color)]';
 		return 'border-[2px] border-[var(--shine-color)]';
 		// Note: Disable for now because the performance is bad
 		// if (shineSize === 'sm')

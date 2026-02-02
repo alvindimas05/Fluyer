@@ -30,7 +30,7 @@
 		<input
 			type="radio"
 			name="animatedBackgroundMethod"
-			class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+			class="h-4 w-4"
 			value={SettingAnimatedBackgroundType.Prominent}
 			checked={settingStore.animatedBackground.type === SettingAnimatedBackgroundType.Prominent}
 			onchange={onMethodChange}
@@ -46,7 +46,7 @@
 		<input
 			type="radio"
 			name="animatedBackgroundMethod"
-			class="h-4 w-4 rounded border-white/40 bg-transparent accent-white transition focus:ring-2 focus:ring-white/30"
+			class="h-4 w-4"
 			value={SettingAnimatedBackgroundType.Pallete}
 			checked={settingStore.animatedBackground.type === SettingAnimatedBackgroundType.Pallete}
 			onchange={onMethodChange}
