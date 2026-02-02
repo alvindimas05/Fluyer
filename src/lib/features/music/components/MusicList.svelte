@@ -1,11 +1,8 @@
 <script lang="ts">
 	import MusicItem from './MusicItem.svelte';
-	import VirtualItem from '$lib/ui/components/VirtualItem.svelte';
 	import { useMusicList } from '../viewmodels/useMusicList.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
 	import { SidebarType } from '$lib/features/sidebar/types';
-	import { isLinux } from '$lib/platform';
-
 	import filterStore from '$lib/stores/filter.svelte';
 
 	const vm = useMusicList();
@@ -14,6 +11,9 @@
 	let visibleItems = $state<Set<string>>(new Set());
 	let observer: IntersectionObserver | null = null;
 
+	// Track items that are animating out (hidden by sidebar)
+	let animatingOutItems = $state<Set<string>>(new Set());
+
 	function getItemKey(item: any): string {
 		if ('duration' in item) {
 			return `music-${item.path}`;
@@ -21,7 +21,40 @@
 		return `folder-${item.path}`;
 	}
 
-	function isVisible(item: any): boolean {
+	// Handle sidebar fadeout animation completion
+	function handleAnimationEnd(itemKey: string, isHiddenBySidebar: boolean) {
+		if (isHiddenBySidebar) {
+			animatingOutItems = new Set([...animatingOutItems, itemKey]);
+		}
+	}
+
+	// Check if item should render based on all visibility conditions
+	function shouldRenderItem(itemKey: string, index: number, item: any): boolean {
+		// If not visible by filter, don't render
+		if (!isVisibleByFilter(item)) return false;
+
+		// If not in visibleItems (outside viewport), don't render
+		if (!visibleItems.has(itemKey)) return false;
+
+		// If hidden by sidebar and animation completed, don't render
+		if (isHiddenBySidebar(index) && animatingOutItems.has(itemKey)) return false;
+
+		return true;
+	}
+
+	// Reset animating out state when item becomes visible by sidebar
+	$effect(() => {
+		if (vm.data) {
+			vm.data.forEach((item, index) => {
+				const itemKey = getItemKey(item);
+				if (!isHiddenBySidebar(index) && animatingOutItems.has(itemKey)) {
+					animatingOutItems = new Set([...animatingOutItems].filter((k) => k !== itemKey));
+				}
+			});
+		}
+	});
+
+	function isVisibleByFilter(item: any): boolean {
 		const search = filterStore.search.toLowerCase();
 
 		// Folder check
@@ -48,15 +81,15 @@
 
 	// Calculate visual indices for items that are visible references
 	const visualIndices = $derived.by(() => {
+		filterStore.search;
+		filterStore.album;
+
 		const map = new Map<number, number>();
 		let count = 0;
-		// Reactively depend on filter properties
-		const search = filterStore.search;
-		const album = filterStore.album;
 
 		if (vm.data) {
 			vm.data.forEach((item, index) => {
-				if (isVisible(item)) {
+				if (isVisibleByFilter(item)) {
 					map.set(index, count++);
 				}
 			});
@@ -68,14 +101,29 @@
 		if (!observer) {
 			observer = new IntersectionObserver(
 				(entries) => {
+					let newVisible = new Set(visibleItems);
+					let changed = false;
+
 					entries.forEach((entry) => {
 						const itemKey = entry.target.getAttribute('data-item-key');
 						if (itemKey) {
 							if (entry.isIntersecting) {
-								visibleItems = new Set([...visibleItems, itemKey]);
+								if (!newVisible.has(itemKey)) {
+									newVisible.add(itemKey);
+									changed = true;
+								}
+							} else {
+								if (newVisible.has(itemKey)) {
+									newVisible.delete(itemKey);
+									changed = true;
+								}
 							}
 						}
 					});
+
+					if (changed) {
+						visibleItems = newVisible;
+					}
 				},
 				{ threshold: 0 }
 			);
@@ -96,7 +144,7 @@
 		};
 	}
 
-	function shouldHideItem(index: number): boolean {
+	function isHiddenBySidebar(index: number): boolean {
 		if (!visualIndices.has(index)) return true; // Should be hidden anyway if not in visual map
 
 		const visualIndex = visualIndices.get(index)!;
@@ -139,21 +187,28 @@
 		>
 			{#each vm.data as item, index}
 				{@const itemKey = getItemKey(item)}
+				{@const hiddenBySidebar = isHiddenBySidebar(index)}
+				{@const visibleByFilter = isVisibleByFilter(item)}
+				{@const inViewport = visibleItems.has(itemKey)}
+				{@const shouldRender = shouldRenderItem(itemKey, index, item)}
 				<div
 					use:observeElement={itemKey}
-					class="linux-prevent-flicker animate__animated {shouldHideItem(index)
-						? 'animate__fadeOut'
-						: 'animate__fadeIn'}"
-					style="animation-duration: 500ms; {shouldHideItem(index) ? 'pointer-events: none;' : ''}"
-					style:display={isVisible(item) ? undefined : 'none'}
+					class="linux-prevent-flicker min-h-[64px] md:min-h-[72px] {hiddenBySidebar &&
+					inViewport &&
+					visibleByFilter
+						? 'animate__animated animate__fadeOut'
+						: ''}"
+					style="animation-duration: 500ms; {hiddenBySidebar ? 'pointer-events: none;' : ''}"
+					style:display={visibleByFilter ? undefined : 'none'}
+					onanimationend={() => handleAnimationEnd(itemKey, hiddenBySidebar)}
 				>
-					<VirtualItem hide={shouldHideItem(index)}>
+					{#if shouldRender}
 						{#if 'duration' in item}
-							<MusicItem music={item} visible={visibleItems.has(itemKey)} />
+							<MusicItem music={item} visible={inViewport} />
 						{:else}
-							<MusicItem folder={item} visible={visibleItems.has(itemKey)} />
+							<MusicItem folder={item} visible={inViewport} />
 						{/if}
-					</VirtualItem>
+					{/if}
 				</div>
 			{/each}
 		</div>

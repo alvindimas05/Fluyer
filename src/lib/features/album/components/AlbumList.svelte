@@ -1,6 +1,6 @@
 <script lang="ts">
 	import mobileStore from '$lib/stores/mobile.svelte';
-	import VirtualItem from '$lib/ui/components/VirtualItem.svelte';
+
 	import filterStore from '$lib/stores/filter.svelte';
 	import playerBarStore from '$lib/stores/playerbar.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
@@ -18,7 +18,45 @@
 	let visibleItems = $state<Set<number>>(new Set());
 	let observer: IntersectionObserver | null = null;
 
-	function isVisible(musicList: MusicData[]) {
+	// Track items that are animating out (hidden by sidebar)
+	let animatingOutItems = $state<Set<number>>(new Set());
+
+	// Handle sidebar fadeout animation completion
+	function handleAnimationEnd(index: number, isHiddenBySidebar: boolean) {
+		if (isHiddenBySidebar) {
+			animatingOutItems = new Set([...animatingOutItems, index]);
+		}
+	}
+
+	// Check if item should render based on visibility conditions (horizontal)
+	function shouldRenderHorizontalItem(index: number, musicList: MusicData[]): boolean {
+		// If not visible by filter, don't render
+		if (!isVisibleByFilter(musicList)) return false;
+
+		// If not in visibleItems (outside viewport), don't render
+		if (!visibleItems.has(index)) return false;
+
+		// If hidden by sidebar and animation completed, don't render
+		if (shouldHideHorizontalItem(index) && animatingOutItems.has(index)) return false;
+
+		return true;
+	}
+
+	// Check if item should render based on visibility conditions (grid)
+	function shouldRenderGridItem(index: number, musicList: MusicData[]): boolean {
+		// If not visible by filter, don't render
+		if (!isVisibleByFilter(musicList)) return false;
+
+		// If not in visibleItems (outside viewport), don't render
+		if (!visibleItems.has(index)) return false;
+
+		// If hidden by sidebar and animation completed, don't render
+		if (shouldHideGridItem(index) && animatingOutItems.has(index)) return false;
+
+		return true;
+	}
+
+	function isVisibleByFilter(musicList: MusicData[]) {
 		const search = filterStore.search.toLowerCase();
 		const firstItem = musicList[0];
 
@@ -32,15 +70,16 @@
 	}
 
 	const visualIndices = $derived.by(() => {
+		// Reactively depend on filter properties
+		filterStore.search;
+		filterStore.album;
+
 		const map = new Map<number, number>();
 		let count = 0;
-		// Reactively depend on filter properties
-		const search = filterStore.search;
-		const album = filterStore.album;
 
 		if (vm.data) {
 			vm.data.forEach((item, index) => {
-				if (isVisible(item)) {
+				if (isVisibleByFilter(item)) {
 					map.set(index, count++);
 				}
 			});
@@ -129,6 +168,20 @@
 		return false;
 	}
 
+	// Reset animating out state when item becomes visible by sidebar
+	$effect(() => {
+		if (vm.data) {
+			vm.data.forEach((_, index) => {
+				const isHidden = vm.isHorizontal
+					? shouldHideHorizontalItem(index)
+					: shouldHideGridItem(index);
+				if (!isHidden && animatingOutItems.has(index)) {
+					animatingOutItems = new Set([...animatingOutItems].filter((i) => i !== index));
+				}
+			});
+		}
+	});
+
 	let scrollContainer = $state<HTMLDivElement>();
 
 	function handleScroll(e: Event) {
@@ -174,22 +227,26 @@
 			style="padding-bottom: 0;"
 		>
 			{#each vm.data as musicList, index}
+				{@const hiddenBySidebar = shouldHideHorizontalItem(index)}
+				{@const visibleByFilter = isVisibleByFilter(musicList)}
+				{@const inViewport = visibleItems.has(index)}
+				{@const shouldRender = shouldRenderHorizontalItem(index, musicList)}
 				<div
 					use:observeElement={index}
-					class="linux-prevent-flicker animate__animated flex-shrink-0 {shouldHideHorizontalItem(
-						index
-					)
-						? 'animate__fadeOut'
-						: 'animate__fadeIn'}"
-					style="width: {vm.state
-						.itemWidth}px; animation-duration: 500ms; {shouldHideHorizontalItem(index)
+					class="linux-prevent-flicker flex-shrink-0 {hiddenBySidebar &&
+					inViewport &&
+					visibleByFilter
+						? 'animate__animated animate__fadeOut'
+						: ''}"
+					style="width: {vm.state.itemWidth}px; animation-duration: 500ms; {hiddenBySidebar
 						? 'pointer-events: none; opacity: 0;'
 						: 'opacity: 1;'}"
-					style:display={isVisible(musicList) ? undefined : 'none'}
+					style:display={visibleByFilter ? undefined : 'none'}
+					onanimationend={() => handleAnimationEnd(index, hiddenBySidebar)}
 				>
-					<VirtualItem hide={shouldHideHorizontalItem(index)}>
-						<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
-					</VirtualItem>
+					{#if shouldRender}
+						<AlbumItem {musicList} {index} visible={inViewport} />
+					{/if}
 				</div>
 			{/each}
 		</div>
@@ -206,22 +263,28 @@
 				style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
 			>
 				{#each vm.data as musicList, index}
+					{@const hiddenBySidebar = shouldHideGridItem(index)}
+					{@const visibleByFilter = isVisibleByFilter(musicList)}
+					{@const inViewport = visibleItems.has(index)}
+					{@const shouldRender = shouldRenderGridItem(index, musicList)}
 					<div
 						use:observeElement={index}
 						class={isLinux()
 							? ''
-							: 'animate__animated ' +
-								(shouldHideGridItem(index) ? 'animate__fadeOut' : 'animate__fadeIn')}
+							: hiddenBySidebar && inViewport && visibleByFilter
+								? 'animate__animated animate__fadeOut'
+								: ''}
 						style="width: {vm.state.itemWidth}px; {isLinux()
 							? ''
-							: 'animation-duration: 500ms;'} {shouldHideGridItem(index)
+							: 'animation-duration: 500ms;'} {hiddenBySidebar
 							? 'pointer-events: none; opacity: 0;'
 							: 'opacity: 1;'}"
-						style:display={isVisible(musicList) ? undefined : 'none'}
+						style:display={visibleByFilter ? undefined : 'none'}
+						onanimationend={() => handleAnimationEnd(index, hiddenBySidebar)}
 					>
-						<VirtualItem hide={shouldHideGridItem(index)}>
-							<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
-						</VirtualItem>
+						{#if shouldRender}
+							<AlbumItem {musicList} {index} visible={inViewport} />
+						{/if}
 					</div>
 				{/each}
 			</div>
