@@ -7,16 +7,21 @@ import sidebarStore from '$lib/stores/sidebar.svelte';
 
 const RESPONSIVE_RULES = [
 	[1536, 2.01, 0.125], // xhdpi 2xl → 12.5%
+	[1440, 2.01, 0.142857], // xhdpi 1440 → 14.2857%
 	[1280, 2.01, 0.16667], // xl-xhdpi → 16.6667%
 	[1024, 2.01, 0.2], // lg-xhdpi → 20%
 	[768, 2.01, 0.25], // md-xhdpi → 25%
 	[640, 2.01, 0.33334], // sm-xhdpi → 33.3334%
+
 	[1536, 1.01, 0.125], // hdpi 2xl → 12.5%
+	[1440, 1.01, 0.142857], // hdpi 1440 → 14.2857%
 	[1280, 1.01, 0.16667], // xl-hdpi → 16.6667%
 	[1024, 1.01, 0.2], // lg-hdpi → 20%
 	[768, 1.01, 0.25], // md-hdpi → 25%
 	[640, 1.01, 0.33334], // sm-hdpi → 33.3334%
+
 	[1536, 0, 0.125], // default 2xl → 12.5%
+	[1440, 0, 0.142857], // default 1440 → 14.2857%
 	[1280, 0, 0.16667], // xl → 16.6667%
 	[1024, 0, 0.2], // lg → 20%
 	[768, 0, 0.25], // md → 25%
@@ -42,12 +47,20 @@ function updateItemWidth() {
 		if (width >= minWidth && dpr >= minDppx) {
 			state.itemWidth = widthRatio * width;
 			state.columnCount = Math.round(1 / widthRatio);
+			sidebarStore.width = state.itemWidth * 2;
+			if(state.columnCount === 5){
+				sidebarStore.hiddenColumnCount = 3;
+			} else {
+				sidebarStore.hiddenColumnCount = 2;
+			}
 			return;
 		}
 	}
 
 	state.columnCount = 2;
 	state.itemWidth = 0.5 * width;
+	sidebarStore.width = window.innerWidth;
+	sidebarStore.hiddenColumnCount = 2;
 }
 
 let data: MusicData[][] = $derived.by(() => {

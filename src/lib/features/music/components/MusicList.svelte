@@ -154,7 +154,7 @@
 			return indexInRow < sidebarStore.hiddenColumnCount / 2;
 		}
 		if (sidebarStore.showType === SidebarType.Right) {
-			return indexInRow >= vm.state.columnCount - sidebarStore.hiddenColumnCount / 2;
+			return indexInRow >= vm.state.columnCount - Math.ceil(sidebarStore.hiddenColumnCount / 2);
 		}
 		return false;
 	}

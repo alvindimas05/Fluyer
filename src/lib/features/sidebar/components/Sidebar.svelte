@@ -49,7 +49,7 @@
 
 	const SWIPE_RANGE = 125;
 
-	let sidebarWidth = $state(window.innerWidth);
+	let sidebarWidth = $derived(sidebarStore.width);
 	let paddingTop = $derived(
 		(isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height
 	);
@@ -124,33 +124,12 @@
 		}
 	}
 
-	function updateSidebarWidth() {
-		const w = window.innerWidth;
-		const dpi = window.devicePixelRatio;
-
-		for (const [minW, minDppx, width] of rules) {
-			if (w >= minW && dpi >= minDppx) {
-				const columnPercentage = width * window.innerWidth;
-				// 2 columns size
-				sidebarWidth = columnPercentage * 2;
-				return;
-			}
-		}
-		sidebarWidth = window.innerWidth;
-	}
-
-	function updateSize() {
-		updateSidebarWidth();
-	}
-
 	onMount(() => {
-		updateSize();
 		sidebarStore.showType = null;
 		setTimeout(() => (isMounted = true), 750);
 	});
 </script>
 
-<svelte:window onresize={updateSize} />
 <svelte:body use:swipeable on:swiped={onSwipe} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
