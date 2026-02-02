@@ -27,6 +27,7 @@
 
 	if (isLinux()) {
 		import('$lib/scss/text-linux.scss');
+		import('$lib/scss/linux.scss');
 	}
 
 	interface Props {

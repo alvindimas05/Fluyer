@@ -157,7 +157,11 @@
 	class="w-screen"
 	style="height: {vm.isHorizontal
 		? vm.itemHeight
-		: window.innerHeight - filterStore.bar.height - playerBarStore.height - mobileStore.navigationBarHeight - mobileStore.statusBarHeight}px;"
+		: window.innerHeight -
+			filterStore.bar.height -
+			playerBarStore.height -
+			mobileStore.navigationBarHeight -
+			mobileStore.statusBarHeight}px;"
 >
 	{#if vm.isHorizontal}
 		<!-- Horizontal layout -->
@@ -169,16 +173,13 @@
 			style="padding-bottom: 0;"
 		>
 			{#each vm.data as musicList, index}
-				<!-- FIXME: Animation is stuttering because of reactive and re-rendering on Sidebar change -->
 				<div
 					use:observeElement={index}
-					class="flex-shrink-0 {isLinux()
-						? ''
-						: 'animate__animated ' +
-							(shouldHideHorizontalItem(index) ? 'animate__fadeOut' : 'animate__fadeIn')}"
-					style="width: {vm.state.itemWidth}px; {isLinux()
-						? ''
-						: 'animation-duration: 500ms;'} {shouldHideHorizontalItem(index)
+					class="linux-prevent-flicker animate__animated flex-shrink-0 {shouldHideHorizontalItem(index)
+						? 'animate__fadeOut'
+						: 'animate__fadeIn'}"
+					style="width: {vm.state
+						.itemWidth}px; animation-duration: 500ms; {shouldHideHorizontalItem(index)
 						? 'pointer-events: none; opacity: 0;'
 						: 'opacity: 1;'}"
 					style:display={isVisible(musicList) ? undefined : 'none'}

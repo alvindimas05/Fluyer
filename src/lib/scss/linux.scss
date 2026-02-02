@@ -1,0 +1,11 @@
+.linux-hardware-accelerate {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+.linux-prevent-flicker {
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    backface-visibility: hidden;
+    perspective: 1000;
+}

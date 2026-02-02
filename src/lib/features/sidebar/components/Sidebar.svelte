@@ -164,18 +164,15 @@
 >
 	<!-- FIXME: Enable Sidebar animation on Linux. Probably won't happen -->
 	<View
-		class="pointer-events-auto h-full rounded-lg
-			p-3
-			{isLinux() ? '' : 'animate__animated'}
-			{!isLinux() &&
-			(isShowing
-				? type === SidebarType.Right
-					? 'animate__fadeInRight'
-					: 'animate__fadeInLeft'
-				: type === SidebarType.Right
-					? 'animate__fadeOutRight'
-					: 'animate__fadeOutLeft')}
-			{isLinux() && (isShowing ? '' : 'hidden')}
+		class="linux-hardware-accelerate animate__animated pointer-events-auto h-full
+			rounded-lg p-3
+			{isShowing
+			? type === SidebarType.Right
+				? 'animate__fadeInRight'
+				: 'animate__fadeInLeft'
+			: type === SidebarType.Right
+				? 'animate__fadeOutRight'
+				: 'animate__fadeOutLeft'}
             {props.class}
 		"
 		style="
