@@ -23,7 +23,7 @@
 		b: number;
 	}
 
-	let isInitialized = false;
+	let isInitialized = $state(false);
 	let canUpdate = true;
 	let currentCoverArt: string | null = null;
 
@@ -254,9 +254,15 @@
 	// WebGL State
 	let canvas = $state<HTMLCanvasElement>();
 	let gl: WebGLRenderingContext | null = null;
-	let texture: WebGLTexture | null = null;
+	let textureCurrent: WebGLTexture | null = null;
+	let textureNext: WebGLTexture | null = null;
 	let program: WebGLProgram | null = null;
 	let unlistenLinuxUpdate: Unsubscriber;
+
+	// Animation State
+	let transitionStartTime = 0;
+	let isTransitioning = false;
+	const TRANSITION_DURATION = 500; // ms
 
 	function setupWebGL() {
 		if (!canvas) return;
@@ -278,10 +284,14 @@
 
 		const fsSource = `
 			precision mediump float;
-			uniform sampler2D uImage;
+			uniform sampler2D uImage0;
+			uniform sampler2D uImage1;
+			uniform float uMix;
 			varying vec2 vTexCoord;
 			void main() {
-				gl_FragColor = texture2D(uImage, vTexCoord);
+				vec4 color0 = texture2D(uImage0, vTexCoord);
+				vec4 color1 = texture2D(uImage1, vTexCoord);
+				gl_FragColor = mix(color0, color1, uMix);
 			}
 		`;
 
@@ -339,6 +349,22 @@
 		const texCoordLoc = gl.getAttribLocation(program, 'texCoord');
 		gl.enableVertexAttribArray(texCoordLoc);
 		gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, false, 0, 0);
+
+		// Set uniforms for texture units
+		const uImage0Loc = gl.getUniformLocation(program, 'uImage0');
+		const uImage1Loc = gl.getUniformLocation(program, 'uImage1');
+		gl.uniform1i(uImage0Loc, 0);
+		gl.uniform1i(uImage1Loc, 1);
+	}
+
+	function createTexture(gl: WebGLRenderingContext): WebGLTexture | null {
+		const texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		return texture;
 	}
 
 	interface BackgroundUpdatePayload {
@@ -350,24 +376,63 @@
 	function updateWebGL(payload: BackgroundUpdatePayload) {
 		if (!gl || !program || !canvas) return;
 
+		// Resize canvas if needed
 		if (canvas.width !== payload.width || canvas.height !== payload.height) {
 			canvas.width = payload.width;
 			canvas.height = payload.height;
 			gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 		}
 
-		if (!texture) {
-			texture = gl.createTexture();
-			gl.bindTexture(gl.TEXTURE_2D, texture);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		} else {
-			gl.bindTexture(gl.TEXTURE_2D, texture);
+		if (!textureCurrent) {
+			textureCurrent = createTexture(gl);
+		}
+		if (!textureNext) {
+			textureNext = createTexture(gl);
 		}
 
 		const data = new Uint8Array(payload.data);
+
+		// If this is the very first frame, just load it into textureCurrent and draw
+		if (!isInitialized) {
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D, textureCurrent);
+			gl.texImage2D(
+				gl.TEXTURE_2D,
+				0,
+				gl.RGBA,
+				payload.width,
+				payload.height,
+				0,
+				gl.RGBA,
+				gl.UNSIGNED_BYTE,
+				data
+			);
+
+			// Also update textureNext to match, just in case
+			gl.activeTexture(gl.TEXTURE1);
+			gl.bindTexture(gl.TEXTURE_2D, textureNext);
+			gl.texImage2D(
+				gl.TEXTURE_2D,
+				0,
+				gl.RGBA,
+				payload.width,
+				payload.height,
+				0,
+				gl.RGBA,
+				gl.UNSIGNED_BYTE,
+				data
+			);
+
+			const uMixLoc = gl.getUniformLocation(program, 'uMix');
+			gl.uniform1f(uMixLoc, 0.0);
+			gl.drawArrays(gl.TRIANGLES, 0, 6);
+			return;
+		}
+
+		// Prepare for transition
+		// 1. Load new image into textureNext (unit 1)
+		gl.activeTexture(gl.TEXTURE1);
+		gl.bindTexture(gl.TEXTURE_2D, textureNext);
 		gl.texImage2D(
 			gl.TEXTURE_2D,
 			0,
@@ -380,7 +445,59 @@
 			data
 		);
 
+		// 2. Start animation loop
+		if (!isTransitioning) {
+			isTransitioning = true;
+			transitionStartTime = performance.now();
+			requestAnimationFrame(animateTransition);
+		} else {
+			// If already transitioning, we might want to restart or just update the target?
+			// For simplicity, let's just update textureNext and reset start time to blend new image
+			transitionStartTime = performance.now();
+		}
+	}
+
+	function animateTransition(time: number) {
+		if (!gl || !program) return;
+
+		const elapsed = time - transitionStartTime;
+		let mix = Math.min(elapsed / TRANSITION_DURATION, 1.0);
+
+		const uMixLoc = gl.getUniformLocation(program, 'uMix');
+		gl.uniform1f(uMixLoc, mix);
+
 		gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+		if (mix < 1.0) {
+			requestAnimationFrame(animateTransition);
+		} else {
+			// Transition finished
+			isTransitioning = false;
+
+			// Swap textures logic:
+			// Copy textureNext content to textureCurrent effectively by swapping internal handles?
+			// Or just ping-pong the uniforms?
+			// Easier: Copy next to current for next frame, or just swap variable references and re-bind.
+
+			// Let's swap the references and re-bind to correct units for the "idle" state
+			// Idle state: uMix = 0.0, implying we see Texture 0.
+			// So we need Texture 0 to contain the "new" image (which is currently in textureNext/Texture 1).
+
+			const temp = textureCurrent;
+			textureCurrent = textureNext;
+			textureNext = temp;
+
+			// Re-bind to correct units
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D, textureCurrent);
+
+			gl.activeTexture(gl.TEXTURE1);
+			gl.bindTexture(gl.TEXTURE_2D, textureNext); // Bind old as next, ready to be overwritten
+
+			// Reset mix to 0
+			gl.uniform1f(uMixLoc, 0.0);
+			gl.drawArrays(gl.TRIANGLES, 0, 6);
+		}
 	}
 
 	onMount(async () => {
@@ -421,3 +538,10 @@
 	<!-- But we might need a transparent container if we want to ensure pointer events pass through? -->
 	<div class="pointer-events-none fixed inset-0 -z-10"></div>
 {/if}
+
+<!-- Curtain for initial fade-in -->
+<div
+	class="pointer-events-none fixed inset-0 -z-[5] bg-black transition-opacity duration-1000 ease-in-out"
+	class:opacity-0={isInitialized}
+	class:opacity-100={!isInitialized}
+></div>
