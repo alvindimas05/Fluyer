@@ -12,10 +12,19 @@
 	import Button from '$lib/ui/components/Button.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import PageService from '$lib/services/PageService.svelte';
+	import { onMount } from 'svelte';
+
+	let disableBorder = $state(false);
+
+	function onResize() {
+		disableBorder = window.innerWidth < 768;
+	}
+	onMount(onResize);
 </script>
 
+<svelte:window onresize={onResize} />
 <div class="h-full w-full md:px-3 md:pb-4 md:pt-10">
-	<View class="h-full w-full rounded-xl">
+	<View class="h-full w-full rounded-xl {disableBorder && '!border-0 !shadow-none'}">
 		<div
 			class="grid h-full w-full grid-rows-[min-content_auto_min-content]"
 			style="padding-top: {isMobile() ? mobileStore.statusBarHeight : 20}px;
