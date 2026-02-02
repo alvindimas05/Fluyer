@@ -30,6 +30,7 @@ export function useMusicQueueList() {
 	function cleanQueue() {
 		MusicPlayerService.pause();
 		ProgressService.reset();
+		QueueService.clear();
 	}
 
 	function dragToggle() {

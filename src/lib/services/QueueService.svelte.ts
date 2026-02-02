@@ -117,6 +117,12 @@ const QueueService = {
 		return playlistMoveQueue.add(async () => {
 			await TauriQueueAPI.moveTo(from, apiTo);
 		});
+	},
+	clear: async () => {
+		await TauriMusicAPI.sendCommand(TauriMusicCommand.Clear);
+		musicStore.queue = [];
+		musicStore.queueIds = [];
+		musicStore.currentIndex = -1;
 	}
 };
 
