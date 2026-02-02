@@ -532,16 +532,14 @@
 
 <svelte:window onresize={onWindowResize} />
 {#if isLinux()}
-	<canvas bind:this={canvas} class="pointer-events-none fixed inset-0 -z-10 h-full w-full"></canvas>
+	<canvas
+		bind:this={canvas}
+		class="pointer-events-none fixed inset-0 -z-10 h-full w-full rounded-xl transition-opacity duration-1000 ease-in-out"
+		class:opacity-100={isInitialized}
+		class:opacity-0={!isInitialized}
+	></canvas>
 {:else}
 	<!-- We don't need a canvas anymore, WGPU renders to the window surface -->
 	<!-- But we might need a transparent container if we want to ensure pointer events pass through? -->
 	<div class="pointer-events-none fixed inset-0 -z-10"></div>
 {/if}
-
-<!-- Curtain for initial fade-in -->
-<div
-	class="pointer-events-none fixed inset-0 -z-[5] bg-black transition-opacity duration-1000 ease-in-out"
-	class:opacity-0={isInitialized}
-	class:opacity-100={!isInitialized}
-></div>
