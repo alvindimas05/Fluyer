@@ -12,3 +12,7 @@
 	user-select: none;
 	@apply text-white;
 }
+
+img {
+	image-rendering: optimizeQuality;
+}

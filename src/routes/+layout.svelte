@@ -26,7 +26,6 @@
 	import ToastContainer from '$lib/ui/toast/ToastContainer.svelte';
 
 	if (isLinux()) {
-		import('$lib/scss/text-linux.scss');
 		import('$lib/scss/linux.scss');
 	}
 
