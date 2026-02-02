@@ -1,5 +1,6 @@
 <script lang="ts">
 	import MusicItem from './MusicItem.svelte';
+	import VirtualItem from '$lib/ui/components/VirtualItem.svelte';
 	import { useMusicList } from '../viewmodels/useMusicList.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
 	import { SidebarType } from '$lib/features/sidebar/types';
@@ -140,15 +141,19 @@
 				{@const itemKey = getItemKey(item)}
 				<div
 					use:observeElement={itemKey}
-					class="linux-prevent-flicker animate__animated {shouldHideItem(index) ? 'animate__fadeOut' : 'animate__fadeIn'}"
+					class="linux-prevent-flicker animate__animated {shouldHideItem(index)
+						? 'animate__fadeOut'
+						: 'animate__fadeIn'}"
 					style="animation-duration: 500ms; {shouldHideItem(index) ? 'pointer-events: none;' : ''}"
 					style:display={isVisible(item) ? undefined : 'none'}
 				>
-					{#if 'duration' in item}
-						<MusicItem music={item} visible={visibleItems.has(itemKey)} />
-					{:else}
-						<MusicItem folder={item} visible={visibleItems.has(itemKey)} />
-					{/if}
+					<VirtualItem hide={shouldHideItem(index)}>
+						{#if 'duration' in item}
+							<MusicItem music={item} visible={visibleItems.has(itemKey)} />
+						{:else}
+							<MusicItem folder={item} visible={visibleItems.has(itemKey)} />
+						{/if}
+					</VirtualItem>
 				</div>
 			{/each}
 		</div>

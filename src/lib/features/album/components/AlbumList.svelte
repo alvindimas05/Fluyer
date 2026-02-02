@@ -1,5 +1,6 @@
 <script lang="ts">
 	import mobileStore from '$lib/stores/mobile.svelte';
+	import VirtualItem from '$lib/ui/components/VirtualItem.svelte';
 	import filterStore from '$lib/stores/filter.svelte';
 	import playerBarStore from '$lib/stores/playerbar.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
@@ -175,7 +176,9 @@
 			{#each vm.data as musicList, index}
 				<div
 					use:observeElement={index}
-					class="linux-prevent-flicker animate__animated flex-shrink-0 {shouldHideHorizontalItem(index)
+					class="linux-prevent-flicker animate__animated flex-shrink-0 {shouldHideHorizontalItem(
+						index
+					)
 						? 'animate__fadeOut'
 						: 'animate__fadeIn'}"
 					style="width: {vm.state
@@ -184,7 +187,9 @@
 						: 'opacity: 1;'}"
 					style:display={isVisible(musicList) ? undefined : 'none'}
 				>
-					<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
+					<VirtualItem hide={shouldHideHorizontalItem(index)}>
+						<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
+					</VirtualItem>
 				</div>
 			{/each}
 		</div>
@@ -214,7 +219,9 @@
 							: 'opacity: 1;'}"
 						style:display={isVisible(musicList) ? undefined : 'none'}
 					>
-						<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
+						<VirtualItem hide={shouldHideGridItem(index)}>
+							<AlbumItem {musicList} {index} visible={visibleItems.has(index)} />
+						</VirtualItem>
 					</div>
 				{/each}
 			</div>
