@@ -23,6 +23,7 @@
 	const { options, onchange }: Props = props;
 
 	let toggleElement: HTMLDivElement;
+	let containerElement: HTMLDivElement;
 	let toggleObserver: ResizeObserver;
 	let selected = $state(props.selected ?? options[0]?.value);
 	let indicatorWidth = $state(0);
@@ -42,23 +43,23 @@
 	}
 
 	function updateIndicatorPosition() {
-		if (!toggleElement || !options.length) return;
+		if (!containerElement || !options.length) return;
 
 		const selectedIndex = options.findIndex((opt) => opt.value === selected);
 
 		if (selectedIndex === -1) return;
 
 		// Calculate indicator size based on full width divided by options
-		indicatorWidth = toggleElement.offsetWidth / options.length;
+		indicatorWidth = containerElement.offsetWidth / options.length;
 
 		// Calculate position
 		translateX = selectedIndex * indicatorWidth;
 	}
 
 	function listenResize() {
-		if (!toggleElement) return;
+		if (!containerElement) return;
 		toggleObserver = new ResizeObserver(updateIndicatorPosition);
-		toggleObserver.observe(toggleElement);
+		toggleObserver.observe(containerElement);
 	}
 
 	onMount(() => {
@@ -84,7 +85,7 @@
 	glassEnableHoverEffect={false}
 	bind:thisElement={toggleElement}
 >
-	<div class="relative flex h-full w-full items-center">
+	<div bind:this={containerElement} class="relative flex h-full w-full items-center">
 		<!-- Sliding indicator -->
 		<div
 			class="pointer-events-none absolute left-0 top-0 z-[-1] h-full
