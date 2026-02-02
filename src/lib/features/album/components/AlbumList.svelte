@@ -269,16 +269,12 @@
 					{@const shouldRender = shouldRenderGridItem(index, musicList)}
 					<div
 						use:observeElement={index}
-						class={isLinux()
-							? ''
-							: inViewport
-								? hiddenBySidebar
-									? 'animate__animated animate__fadeOut'
-									: 'animate__animated animate__fadeIn'
-								: ''}
-						style="width: {vm.state.itemWidth}px; {isLinux()
-							? ''
-							: 'animation-duration: 500ms;'} {hiddenBySidebar
+						class="linux-prevent-flicker {inViewport
+							? hiddenBySidebar
+								? 'animate__animated animate__fadeOut'
+								: 'animate__animated animate__fadeIn'
+							: ''}"
+						style="width: {vm.state.itemWidth}px; animation-duration: 500ms; {hiddenBySidebar
 							? 'pointer-events: none; opacity: 0;'
 							: 'opacity: 1;'}"
 						style:display={visibleByFilter ? undefined : 'none'}
