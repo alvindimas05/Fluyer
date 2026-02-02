@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isAndroid } from '$lib/platform';
+	import { isAndroid, isLinux } from '$lib/platform';
 	import type { GlassShineSize } from '$lib/ui/glass/types';
 
 	interface Props {
@@ -34,6 +34,10 @@
 	};
 
 	const getShineSize = () => {
+		if (isAndroid() || isLinux()) {
+			if (shineSize === 'sm') return 'border-[1px] border-[var(--shine-color)]';
+			return 'border-[2px] border-[var(--shine-color)]';
+		}
 		if (shineSize === 'sm')
 			return 'shadow-[inset_1px_1px_0.5px_0_var(--shine-color),inset_-1px_-1px_0.5px_0_var(--shine-color),0_6px_8px_-3px_rgb(0_0_0_/_0.1),0_3px_4px_-3px_rgb(0_0_0_/_0.1)]';
 		return 'shadow-[inset_2px_2px_1px_0_var(--shine-color),inset_-1px_-1px_1px_1px_var(--shine-color),0_10px_15px_-3px_rgb(0_0_0_/_0.1),0_4px_6px_-4px_rgb(0_0_0_/_0.1)]';
