@@ -1,3 +1,5 @@
+import { page } from '$app/state';
+import { PageRoutes } from '$lib/constants/PageRoutes';
 import { listen } from '@tauri-apps/api/event';
 
 export enum ToastType {
@@ -44,7 +46,7 @@ class ToastServiceImpl {
 		this.toasts.push(toast);
 
 		// Limit to 3 toasts
-		if (this.toasts.length > 3) {
+		if (this.toasts.length > (page.url.pathname === PageRoutes.SETTINGS ? 1 : 3)) {
 			this.toasts.shift();
 		}
 

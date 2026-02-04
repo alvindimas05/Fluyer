@@ -12,12 +12,16 @@
 	import Button from '$lib/ui/components/Button.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import PageService from '$lib/services/PageService.svelte';
+	import ToastService from '$lib/services/ToastService.svelte';
 	import { onMount } from 'svelte';
 
 	let disableBorder = $state(false);
+	let isSmallScreen = $state(false);
+	let hideTitle = $derived(isSmallScreen && ToastService.toasts.length > 0);
 
 	function onResize() {
 		disableBorder = window.innerWidth < 768;
+		isSmallScreen = window.innerWidth < 768;
 	}
 	onMount(onResize);
 </script>
@@ -32,7 +36,14 @@
 				? mobileStore.navigationBarHeight
 				: 24}px;"
 		>
-			<p class="mx-5 mb-4 text-2xl font-semibold">Settings</p>
+			<p
+				class="animate__animated mx-5 mb-4 text-2xl font-semibold {hideTitle
+					? 'animate__fadeOut'
+					: 'animate__fadeIn'}"
+				style="animation-duration: 500ms; {hideTitle ? 'opacity: 0;' : 'opacity: 1;'}"
+			>
+				Settings
+			</p>
 			<div class="scrollbar-hidden mb-3 w-full overflow-auto">
 				<!-- <SettingMusicPlayerConfiguration /> -->
 				<SettingMusicPaths />
