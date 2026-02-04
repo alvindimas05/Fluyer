@@ -10,6 +10,9 @@ export default {
 				'2xl-mdpi': {
 					raw: '(min-width: 1536px) and (max-resolution: 1.0dppx)'
 				},
+				'3xl-mdpi': {
+					raw: '(min-width: 1792px) and (max-resolution: 1.0dppx)'
+				},
 
 				'sm-hdpi': { raw: '(min-width: 640px) and (min-resolution: 1.01dppx)' },
 				'md-hdpi': { raw: '(min-width: 768px) and (min-resolution: 1.01dppx)' },

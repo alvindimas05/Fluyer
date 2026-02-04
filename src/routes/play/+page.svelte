@@ -53,9 +53,9 @@
 	>
 		<div
 			class="w-full {vm.lyrics.length > 0 && 'ms-auto'}
-            md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
-            md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%]
-            md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
+            sm-mdpi:w-[90%] 3xl-mdpi:w-[65%] md-mdpi:w-[85%] lg-mdpi:w-[80%] xl-mdpi:w-[75%] 2xl-mdpi:w-[70%]
+            md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%] 2xl-hdpi:w-[65%]
+            md-xhdpi:w-[80%] lg-xhdpi:w-[70%] 2xl-xhdpi:w-[65%]"
 		>
 			{#await vm.albumImage}
 				<div class="aspect-square w-full"></div>
@@ -75,19 +75,24 @@
         flex md:p-0 md:pb-0 {vm.lyrics.length > 0 ? 'justify-end' : 'justify-center'}"
 	>
 		<View
-			class="h-fit w-full rounded-xl px-4
-            py-5 hover:px-5 hover:py-7 md:mt-4
-            md-mdpi:w-[80%] lg-mdpi:w-[75%] xl-mdpi:w-[65%]
-            md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%]
-            md-xhdpi:w-[80%] lg-xhdpi:w-[70%]"
+			class="sm-mdpi:w-[90%] 3xl-mdpi:w-[65%] h-fit w-full
+            rounded-xl px-4 py-5 hover:px-5
+            hover:py-7 md:mt-4 md-mdpi:w-[85%] lg-mdpi:w-[80%] xl-mdpi:w-[75%] 2xl-mdpi:w-[70%]
+            md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%] 2xl-hdpi:w-[65%]
+            md-xhdpi:w-[80%] lg-xhdpi:w-[70%] 2xl-xhdpi:w-[65%]"
 		>
 			<div class="grid w-full grid-cols-[auto,1fr,auto]">
-				<div class="flex w-12 text-xs lg-mdpi:text-sm">
+				<div
+					class="flex w-12 text-xs xl-mdpi:text-[13px] 2xl-mdpi:text-sm
+					lg-hdpi:text-sm lg-xhdpi:text-sm"
+				>
 					<span class="self-end opacity-75">{vm.progressDurationText}</span>
 				</div>
 				<div
-					class="mt-2 overflow-hidden text-center text-sm font-medium
-                    opacity-90 md-mdpi:text-base md-hdpi:text-base md-xhdpi:text-sm lg-xhdpi:text-base"
+					class="sm-mdpi:text-sm mt-2 overflow-hidden text-center text-sm font-medium
+					opacity-90 md-mdpi:text-[15px] xl-mdpi:text-base
+					md-hdpi:text-base
+					md-xhdpi:text-sm lg-xhdpi:text-base"
 				>
 					<!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
 					<p class="animate-scroll-overflow-text"></p>
@@ -97,7 +102,11 @@
 						{vm.music?.title ?? MusicConfig.defaultTitle}
 					</p>
 				</div>
-				<div class="flex w-12 justify-end text-xs lg-mdpi:text-sm">
+				<div
+					class="flex w-12 justify-end
+					text-xs xl-mdpi:text-[13px] 2xl-mdpi:text-sm
+					lg-hdpi:text-sm lg-xhdpi:text-sm"
+				>
 					<span class="self-end opacity-75">{vm.progressDurationNegativeText}</span>
 				</div>
 			</div>
@@ -125,7 +134,7 @@
 					<div class="flex items-center">
 						<button
 							id="btn-back"
-							class="animate__animated show-then-fade mx-2 w-7 md-mdpi:w-8 md-hdpi:w-8"
+							class="animate__animated show-then-fade mx-2 w-7 md-mdpi:w-[34px] lg-mdpi:w-8 md-hdpi:w-8"
 							use:showThenFade
 							onclick={vm.handleButtonBack}><Icon type={IconType.PlayBack} /></button
 						>
@@ -134,7 +143,8 @@
 				<div class="flex justify-end">
 					{#if settingStore.ui.showRepeatButton}
 						<button
-							class="mx-2 w-7 md-mdpi:w-8 md-hdpi:w-8 {musicStore.repeatMode === RepeatMode.None
+							class="mx-2 w-7 md-mdpi:w-[34px] lg-mdpi:w-8 md-hdpi:w-8 {musicStore.repeatMode ===
+							RepeatMode.None
 								? 'opacity-80'
 								: ''}"
 							onclick={MusicPlayerService.toggleRepeatMode}
@@ -151,13 +161,13 @@
 				</div>
 				<div class="flex justify-end">
 					<button
-						class="w-12 sm:w-14 md-mdpi:w-12 lg-mdpi:w-14 md-hdpi:w-12"
+						class="sm-mdpi:w-10 w-12 md-mdpi:w-12 lg-mdpi:w-[3.25rem] xl-mdpi:w-14 md-hdpi:w-12"
 						onclick={vm.handleButtonPrevious}><Icon type={IconType.Previous} /></button
 					>
 				</div>
 				<div class="flex justify-center">
 					<button
-						class="w-12 sm:w-14 md-mdpi:w-12 lg-mdpi:w-14 md-hdpi:w-12"
+						class="sm-mdpi:w-10 w-12 md-mdpi:w-12 lg-mdpi:w-[3.25rem] xl-mdpi:w-14 md-hdpi:w-12"
 						onclick={vm.handleButtonPlayPause}
 					>
 						{#if musicStore.isPlaying}
@@ -169,13 +179,16 @@
 				</div>
 				<div class="flex justify-start">
 					<button
-						class="w-12 sm:w-14 md-mdpi:w-12 lg-mdpi:w-14 md-hdpi:w-12"
+						class="sm-mdpi:w-10 w-12 md-mdpi:w-12 lg-mdpi:w-[3.25rem] xl-mdpi:w-14 md-hdpi:w-12"
 						onclick={vm.handleButtonNext}><Icon type={IconType.Next} /></button
 					>
 				</div>
 				<div class="flex justify-start">
 					{#if settingStore.ui.showShuffleButton}
-						<button class="mx-2 w-7 md-mdpi:w-8 md-hdpi:w-8" onclick={vm.handleButtonShuffle}>
+						<button
+							class="mx-2 w-7 md-mdpi:w-[34px] lg-mdpi:w-8 md-hdpi:w-8"
+							onclick={vm.handleButtonShuffle}
+						>
 							<Icon type={IconType.Shuffle} />
 						</button>
 					{/if}
@@ -219,20 +232,21 @@
 			<div class="flex">
 				<div
 					id="lyrics"
-					class="sm-mdpi:text-[1.25rem] h-full w-full text-[1.15rem] font-bold md:my-[40vh]
-                    md:w-[55vw] md-mdpi:text-[1.4rem] lg-mdpi:text-[1.7rem]
-                    md-hdpi:text-[1.3rem] lg-hdpi:text-[1.45rem]
-                    md-xhdpi:text-[1.2rem] lg-xhdpi:text-[1.4rem]"
+					class="sm-mdpi:text-[1.25rem] h-full w-full text-[1.15rem] font-bold
+                    md:my-[40vh]
+					md:w-[55vw] md-mdpi:text-[1.4rem] lg-mdpi:text-[1.5rem] xl-mdpi:text-[1.7rem]
+                    md-hdpi:text-[1.3rem] lg-hdpi:text-[1.45rem] xl-hdpi:text-[1.6rem]
+                    md-xhdpi:text-[1.2rem] lg-xhdpi:text-[1.4rem] xl-xhdpi:text-[1.6rem]"
 				>
 					{#each vm.lyrics as lyric, i}
 						<div
 							id={vm.selectedLyricIndex === i ? 'selected-lyric' : ''}
 							class={vm.selectedLyricIndex === i
-								? `sm-mdpi:text-[1.35rem]
-                                    py-5 text-[1.25rem] md:py-7
-                                    lg:py-10 md-mdpi:text-[1.55rem]
-                                    lg-mdpi:text-[1.85rem] md-hdpi:text-[1.4rem]
-                                    lg-hdpi:text-[1.6rem] md-xhdpi:text-[1.3rem] lg-xhdpi:text-[1.55rem]`
+								? `
+                                    sm-mdpi:text-[1.40rem] py-5 text-[1.30rem]
+                                    md:py-7 md-mdpi:text-[1.55rem] lg-mdpi:text-[1.65rem] xl-mdpi:text-[1.85rem]
+                                    md-hdpi:text-[1.45rem] lg-hdpi:text-[1.60rem] xl-hdpi:text-[1.75rem]
+                                    md-xhdpi:text-[1.35rem] lg-xhdpi:text-[1.55rem] xl-xhdpi:text-[1.75rem]`
 								: 'py-5 opacity-50 md:py-7 lg:py-10'}
 						>
 							{#if lyric.value.length > 0}
