@@ -72,25 +72,21 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
     let cover_art = request::request_cover_art(query).await;
 
     match cover_art {
-        Ok(_) => {
-            // Success, processed below
+        Ok(Some(bytes)) => {
+            queue::set_status(name.clone(), CoverArtRequestStatus::Loaded);
+            return Some(bytes);
+        }
+        Ok(None) => {
+            queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
+            crate::warn!("Failed to get cover art for: {}", name);
+            return None;
         }
         Err(e) => {
             queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
-            crate::warn!("Failed to get cover art for {} with error: {}", name, e);
+            crate::warn!("Failed to get cover art for: {} - {}", name, e);
             return None;
         }
     }
-
-    // Read the saved file
-    if let Some(image) = get_image_bytes(&file_path) {
-        queue::set_status(name.clone(), CoverArtRequestStatus::Loaded);
-        return Some(image);
-    }
-
-    queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
-    crate::warn!("Cover art file not found: {}", name);
-    None
 }
 
 fn get_image_bytes(file_path: &str) -> Option<Vec<u8>> {

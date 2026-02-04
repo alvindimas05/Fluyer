@@ -33,7 +33,6 @@ lazy_static = "1.5.0"
 dotenvy = "0.15.7"
 dotenvy_macro = "0.15.7"
 rayon = "1.11.0"
-base64-simd = "0.8.0"
 rusqlite = { version = "0.37.0", features = ["bundled"] }
 chrono = "0.4.41"
 rusqlite_migration = "2.3.0"

@@ -1,11 +1,10 @@
 use crate::api::musicbrainz::MusicBrainz;
 use crate::coverart::{cache, types::CoverArtQuery};
-use crate::music::image::ImageHandler;
 use std::io::copy;
 use std::io::Cursor;
 
 /// Request cover art from external API and cache it
-pub async fn request_cover_art(query: CoverArtQuery) -> Result<Option<String>, String> {
+pub async fn request_cover_art(query: CoverArtQuery) -> Result<Option<Vec<u8>>, String> {
     let url = MusicBrainz::get_cover_art(query.clone()).await?;
 
     if url.is_none() {
@@ -46,12 +45,9 @@ pub async fn request_cover_art(query: CoverArtQuery) -> Result<Option<String>, S
         .map_err(|e| e.to_string())?;
 
     let mut file = std::fs::File::create(file_path).map_err(|e| e.to_string())?;
-    let mut content = Cursor::new(bytes);
+    let mut content = Cursor::new(bytes.clone());
     copy(&mut content, &mut file).map_err(|e| e.to_string())?;
     file.sync_all().map_err(|e| e.to_string())?;
 
-    if let Some(image) = ImageHandler::encode_to_base64(content.get_ref()) {
-        return Ok(Some(image));
-    }
-    Err("Failed to encode image to base64".to_string())
+    Ok(Some(bytes.to_vec()))
 }
