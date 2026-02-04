@@ -23,7 +23,7 @@ pub struct CoverArtResponse {
     pub image: Option<String>,
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct CoverArtQuery {
     pub artist: String,
     pub album: Option<String>,

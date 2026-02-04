@@ -71,10 +71,15 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
     // Request from API
     let cover_art = request::request_cover_art(query).await;
 
-    if cover_art.is_none() {
-        queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
-        crate::warn!("Failed to get cover art for: {}", name);
-        return None;
+    match cover_art {
+        Ok(_) => {
+            // Success, processed below
+        }
+        Err(e) => {
+            queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
+            crate::warn!("Failed to get cover art for {} with error: {}", name, e);
+            return None;
+        }
     }
 
     // Read the saved file

@@ -5,22 +5,18 @@ use std::io::copy;
 use std::io::Cursor;
 
 /// Request cover art from external API and cache it
-pub async fn request_cover_art(query: CoverArtQuery) -> Option<String> {
-    let url = MusicBrainz::get_cover_art(query.clone()).await;
+pub async fn request_cover_art(query: CoverArtQuery) -> Result<Option<String>, String> {
+    let url = MusicBrainz::get_cover_art(query.clone()).await?;
 
     if url.is_none() {
-        return None;
+        return Ok(None);
     }
 
-    let res = reqwest::get(url.unwrap()).await;
-    if res.is_err() {
-        return None;
-    }
+    let res = reqwest::get(url.unwrap())
+        .await
+        .map_err(|e| e.to_string())?;
 
-    let bytes = res.unwrap().bytes().await;
-    if bytes.is_err() {
-        return None;
-    }
+    let bytes = res.bytes().await.map_err(|e| e.to_string())?;
     let cache_dir = cache::get_cache_directory();
 
     let mut folder_name = String::from("");
@@ -46,18 +42,16 @@ pub async fn request_cover_art(query: CoverArtQuery) -> Option<String> {
         );
     }
 
-    if std::fs::create_dir_all(format!("{}/{}", cache_dir.clone(), folder_name)).is_err() {
-        return None;
-    }
+    std::fs::create_dir_all(format!("{}/{}", cache_dir.clone(), folder_name))
+        .map_err(|e| e.to_string())?;
 
-    let mut file = std::fs::File::create(file_path).unwrap();
-    let mut content = Cursor::new(bytes.unwrap());
-    if copy(&mut content, &mut file).is_err() {
-        return None;
-    }
-    if file.sync_all().is_err() {
-        return None;
-    }
+    let mut file = std::fs::File::create(file_path).map_err(|e| e.to_string())?;
+    let mut content = Cursor::new(bytes);
+    copy(&mut content, &mut file).map_err(|e| e.to_string())?;
+    file.sync_all().map_err(|e| e.to_string())?;
 
-    ImageHandler::encode_to_base64(content.get_ref())
+    if let Some(image) = ImageHandler::encode_to_base64(content.get_ref()) {
+        return Ok(Some(image));
+    }
+    Err("Failed to encode image to base64".to_string())
 }
