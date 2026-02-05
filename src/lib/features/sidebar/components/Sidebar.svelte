@@ -124,13 +124,24 @@
 		}
 	}
 
+	function onBodyMouseLeave(e: MouseEvent) {
+		const onRightEdge = type === SidebarType.Right && e.clientX > window.innerWidth;
+		const onLeftEdge = type === SidebarType.Left && e.clientX < 0;
+
+		if(onRightEdge || onLeftEdge){
+			isMouseInsideArea = true;
+			isShowing = true;
+			sidebarStore.showType = type;
+		}
+	}
+
 	onMount(() => {
 		sidebarStore.showType = null;
 		setTimeout(() => (isMounted = true), 750);
 	});
 </script>
 
-<svelte:body use:swipeable on:swiped={onSwipe} />
+<svelte:body use:swipeable on:swiped={onSwipe} onmouseleave={onBodyMouseLeave} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
