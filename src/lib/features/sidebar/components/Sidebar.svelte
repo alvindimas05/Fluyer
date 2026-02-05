@@ -137,7 +137,7 @@
 
 	onMount(() => {
 		sidebarStore.showType = null;
-		setTimeout(() => (isMounted = true), 750);
+		setTimeout(() => (isMounted = true), 1500);
 	});
 </script>
 
