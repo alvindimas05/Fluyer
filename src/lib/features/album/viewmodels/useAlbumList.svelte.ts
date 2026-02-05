@@ -55,7 +55,7 @@ function updateItemWidth() {
 			state.itemWidth = widthRatio * width;
 			state.columnCount = Math.round(1 / widthRatio);
 			sidebarStore.width = state.itemWidth * 2;
-			if (state.columnCount === 5) {
+			if (state.columnCount === 5 && window.devicePixelRatio < 1.01) {
 				sidebarStore.hiddenMusicColumnCount = 2;
 				sidebarStore.hiddenAlbumColumnCount = 2;
 			} else {
