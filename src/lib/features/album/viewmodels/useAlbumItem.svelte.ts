@@ -23,6 +23,9 @@ export function useAlbumItem(
 
 	// Use $effect with cleanup to cancel pending requests when component unmounts
 	$effect(() => {
+		// Depend on music to ensure reactivity
+		music;
+
 		// Only fetch image when visible
 		const isVisible = getVisible();
 		if (!isVisible) return;
