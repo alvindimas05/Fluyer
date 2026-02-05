@@ -8,18 +8,42 @@
 	import { MusicConfig } from '$lib/constants/MusicConfig';
 	import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 	import settingStore from '$lib/stores/setting.svelte';
-	import showThenFade from '$lib/actions/showThenFade';
 	import { RepeatMode } from '$lib/features/music/types';
 	import { usePlayPage } from './viewmodels/usePlayPage.svelte';
 
 	const vm = usePlayPage();
+
+	let isIdle = $state(false);
+	let hideBackButton = $state(false);
+	let timer: NodeJS.Timeout;
+
+	function resetIdleTimer() {
+		isIdle = false;
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			isIdle = true;
+		}, 3000);
+	}
+
+	$effect(() => {
+		resetIdleTimer();
+		return () => clearTimeout(timer);
+	});
+
+	function handleBackWithDelay() {
+		hideBackButton = true;
+		setTimeout(() => {
+			vm.handleButtonBack();
+		}, 300);
+	}
 
 	function onKeyDown(
 		e: KeyboardEvent & {
 			currentTarget: EventTarget & Document;
 		}
 	) {
-		if (e.key === 'Escape') vm.handleButtonBack();
+		if (e.key === 'Escape') handleBackWithDelay();
+		resetIdleTimer();
 	}
 
 	function scrollToSelectedLyric() {
@@ -38,8 +62,21 @@
 	});
 </script>
 
-<svelte:document onkeydown={onKeyDown} />
+<svelte:document onkeydown={onKeyDown} onmousemove={resetIdleTimer} onclick={resetIdleTimer} />
 
+{#if !isMobile() && settingStore.ui.play.showBackButton}
+	<div class="absolute top-0 left-0 hidden md:block ps-3 pt-3 opacity-70">
+		<button
+			id="btn-back"
+			class="animate__animated w-7 {hideBackButton
+				? 'hidden'
+				: isIdle
+					? 'animate__fadeOut'
+					: 'animate__fadeIn'}"
+			onclick={handleBackWithDelay}><Icon type={IconType.PlayBack} /></button>
+
+	</div>
+{/if}
 <div
 	class="mx-auto grid h-full w-full max-w-[35rem] md:max-w-none md:gap-y-0 md:pt-0
     {vm.lyrics.length > 1
@@ -72,7 +109,9 @@
 		class="order-last md:order-2 md:col-[1] md:row-[2] {isMobile()
 			? 'px-5'
 			: 'px-4'} pb-5 pt-2 {isMobile() && 'mb-5'}
-        flex md:p-0 md:pb-0 {vm.lyrics.length > 0 ? 'justify-end' : 'justify-center'}"
+        flex md:p-0 md:pb-0 {vm.lyrics.length > 0
+			? 'justify-end'
+			: 'justify-center'} animate__animated animate__fadeIn"
 	>
 		<View
 			class="sm-mdpi:w-[90%] 3xl-mdpi:w-[65%] h-fit w-full
@@ -124,22 +163,7 @@
 					size="md"
 				/>
 			</div>
-			<div
-				class="mt-4 grid w-full items-center gap-2
-                {isAndroid() || !settingStore.ui.play.showBackButton
-					? 'grid-cols-[1fr_auto_auto_auto_1fr]'
-					: 'grid-cols-7'}"
-			>
-				{#if !isAndroid() && settingStore.ui.play.showBackButton}
-					<div class="flex items-center">
-						<button
-							id="btn-back"
-							class="animate__animated show-then-fade mx-2 w-7 md-mdpi:w-[34px] lg-mdpi:w-8 md-hdpi:w-8"
-							use:showThenFade
-							onclick={vm.handleButtonBack}><Icon type={IconType.PlayBack} /></button
-						>
-					</div>
-				{/if}
+			<div class="mt-4 grid w-full items-center gap-2 grid-cols-[1fr_auto_auto_auto_1fr]">
 				<div class="flex justify-end">
 					{#if settingStore.ui.showRepeatButton}
 						<button

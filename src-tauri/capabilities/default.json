@@ -2,7 +2,9 @@
 	"$schema": "../gen/schemas/desktop-schema.json",
 	"identifier": "default",
 	"description": "Capability for the main window",
-	"windows": ["main"],
+	"windows": [
+		"main"
+	],
 	"permissions": [
 		"core:default",
 		"store:default",
@@ -17,6 +19,7 @@
 		"core:window:allow-start-dragging",
 		"core:window:allow-toggle-maximize",
 		"core:window:allow-show",
+		"core:window:allow-set-fullscreen",
 		"decorum:allow-show-snap-overlay",
 		"os:default",
 		"fluyer:allow-toast",

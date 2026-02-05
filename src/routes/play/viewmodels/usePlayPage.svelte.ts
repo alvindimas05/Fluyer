@@ -9,117 +9,118 @@ import QueueService from '$lib/services/QueueService.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
 import LyricService, { type MusicLyric } from '$lib/services/LyricService.svelte';
 
-export function usePlayPage() {
-	let music = $derived(musicStore.currentMusic);
-	let progressPercentage = $derived.by(() => musicStore.progressPercentage);
+let music = $derived(musicStore.currentMusic);
+let progressPercentage = $derived.by(() => musicStore.progressPercentage);
 
-	let progressDurationText = $state('');
-	let progressDurationNegativeText = $state('');
-	let updateProgressText = $state(true);
+let progressDurationText = $state('');
+let progressDurationNegativeText = $state('');
+let updateProgressText = $state(true);
 
-	let albumImage = $state<Promise<string | null> | null>(null);
-	let currentBlobUrl: string | null = null;
+let albumImage = $state<Promise<string | null> | null>(null);
+let currentBlobUrl: string | null = null;
 
-	let lyrics = $state<MusicLyric[]>([]);
-	let selectedLyricIndex = $state(0);
+let lyrics = $state<MusicLyric[]>([]);
+let selectedLyricIndex = $state(0);
 
-	let volumePercentage = $state(musicStore.volume);
+let volumePercentage = $state(musicStore.volume);
+let hideBackButton = $state(false);
 
-	function handleButtonPlayPause() {
-		if (musicStore.isPlaying) {
-			MusicPlayerService.pause();
-		} else {
-			MusicPlayerService.play();
-		}
+function handleButtonPlayPause() {
+	if (musicStore.isPlaying) {
+		MusicPlayerService.pause();
+	} else {
+		MusicPlayerService.play();
 	}
+}
 
-	function handleButtonPrevious() {
-		MusicPlayerService.previous();
-	}
+function handleButtonPrevious() {
+	MusicPlayerService.previous();
+}
 
-	function handleButtonNext() {
-		MusicPlayerService.next();
-	}
+function handleButtonNext() {
+	MusicPlayerService.next();
+}
 
-	function handleButtonBack() {
-		PageService.back();
-	}
+function handleButtonBack() {
+	PageService.back();
+}
 
-	async function handleButtonShuffle() {
-		await MusicPlayerService.pause();
-		await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(musicStore.queue));
-		await MusicPlayerService.play();
-	}
+async function handleButtonShuffle() {
+	await MusicPlayerService.pause();
+	await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(musicStore.queue));
+	await MusicPlayerService.play();
+}
 
-	async function resetLyrics() {
-		selectedLyricIndex = 0;
+async function resetLyrics() {
+	selectedLyricIndex = 0;
+	lyrics = [];
+
+	if (!musicStore.currentMusic) return;
+	const resLyrics = await LyricService.get(music);
+	if (resLyrics == null) {
 		lyrics = [];
+		return;
+	}
+	lyrics = resLyrics;
+}
 
-		if (!musicStore.currentMusic) return;
-		const resLyrics = await LyricService.get(music);
-		if (resLyrics == null) {
-			lyrics = [];
+function resetSelectedLyricIndex() {
+	if (lyrics.length < 1) return;
+
+	const duration = musicStore.progressDuration / 1000;
+	if (duration < lyrics[0].duration) {
+		// Scrolled logic handled in view via effect
+		return;
+	}
+	for (let i = 0; i < lyrics.length; i++) {
+		if (duration < lyrics[i].duration) {
+			selectedLyricIndex = i - 1;
 			return;
 		}
-		lyrics = resLyrics;
 	}
+	selectedLyricIndex = lyrics.length - 1;
+}
 
-	function resetSelectedLyricIndex() {
-		if (lyrics.length < 1) return;
-
-		const duration = musicStore.progressDuration / 1000;
-		if (duration < lyrics[0].duration) {
-			// Scrolled logic handled in view via effect
-			return;
-		}
-		for (let i = 0; i < lyrics.length; i++) {
-			if (duration < lyrics[i].duration) {
-				selectedLyricIndex = i - 1;
-				return;
-			}
-		}
-		selectedLyricIndex = lyrics.length - 1;
-	}
-
-	function refreshProgressText() {
-		if (!updateProgressText) return;
-		progressDurationText = ProgressService.formatDuration(musicStore.progressDuration);
-		progressDurationNegativeText =
-			'-' +
-			ProgressService.formatDuration(
-				(musicStore.currentMusic?.duration ?? 0) - musicStore.progressDuration
-			);
-	}
-
-	function handleProgressClick(percentage: number) {
-		MusicPlayerService.seekByPercentage(percentage);
-	}
-
-	function handleProgressEnter() {
-		updateProgressText = false;
-	}
-
-	function handleProgressMove(percentage: number) {
-		updateProgressText = false;
-		progressDurationText = ProgressService.formatDuration(
-			(musicStore.currentMusic?.duration ?? 0) * (percentage / 100)
+function refreshProgressText() {
+	if (!updateProgressText) return;
+	progressDurationText = ProgressService.formatDuration(musicStore.progressDuration);
+	progressDurationNegativeText =
+		'-' +
+		ProgressService.formatDuration(
+			(musicStore.currentMusic?.duration ?? 0) - musicStore.progressDuration
 		);
-		progressDurationNegativeText =
-			'-' +
-			ProgressService.formatDuration(
-				(musicStore.currentMusic?.duration ?? 0) * ((100 - percentage) / 100)
-			);
-	}
+}
 
-	function handleProgressLeave() {
-		updateProgressText = true;
-		refreshProgressText();
-	}
+function handleProgressClick(percentage: number) {
+	MusicPlayerService.seekByPercentage(percentage);
+}
 
-	function handleVolumeProgressClick(percentage: number) {
-		musicStore.volume = percentage / 100;
-	}
+function handleProgressEnter() {
+	updateProgressText = false;
+}
 
+function handleProgressMove(percentage: number) {
+	updateProgressText = false;
+	progressDurationText = ProgressService.formatDuration(
+		(musicStore.currentMusic?.duration ?? 0) * (percentage / 100)
+	);
+	progressDurationNegativeText =
+		'-' +
+		ProgressService.formatDuration(
+			(musicStore.currentMusic?.duration ?? 0) * ((100 - percentage) / 100)
+		);
+}
+
+function handleProgressLeave() {
+	updateProgressText = true;
+	refreshProgressText();
+}
+
+function handleVolumeProgressClick(percentage: number) {
+	musicStore.volume = percentage / 100;
+}
+
+export function usePlayPage() {
 	// Effects
 	$effect(() => {
 		// Dependency on progress to trigger updates
@@ -188,6 +189,9 @@ export function usePlayPage() {
 		},
 		set updateProgressText(val: boolean) {
 			updateProgressText = val;
+		},
+		get hideBackButton() {
+			return hideBackButton;
 		},
 
 		handleButtonPlayPause,
