@@ -224,7 +224,7 @@
 		<div
 			class="scrollbar-hidden animate__animated animate__faster animate__fadeInUp w-full overflow-y-auto overflow-x-hidden
             [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))] md:col-[2]
-            md:row-[1/span_2]
+            md:row-[1/span_2] pb-[100%]
             md:h-screen md:px-20 md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] {isMobile()
 				? 'px-5'
 				: 'px-4'}"
