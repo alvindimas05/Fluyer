@@ -58,9 +58,11 @@ function updateItemWidth() {
 			state.columnCount = Math.round(1 / widthRatio);
 			sidebarStore.width = state.itemWidth * 2;
 			if (state.columnCount === 5) {
-				sidebarStore.hiddenColumnCount = 3;
+				sidebarStore.hiddenMusicColumnCount = 2;
+				sidebarStore.hiddenAlbumColumnCount = 2;
 			} else {
-				sidebarStore.hiddenColumnCount = 2;
+				sidebarStore.hiddenMusicColumnCount = 1;
+				sidebarStore.hiddenAlbumColumnCount = 2;
 			}
 			return;
 		}
@@ -69,7 +71,8 @@ function updateItemWidth() {
 	state.columnCount = 2;
 	state.itemWidth = 0.5 * width;
 	sidebarStore.width = window.innerWidth;
-	sidebarStore.hiddenColumnCount = 2;
+	sidebarStore.hiddenAlbumColumnCount = 2;
+	sidebarStore.hiddenMusicColumnCount = 1;
 }
 
 let data: MusicData[][] = $derived.by(() => {
@@ -117,7 +120,7 @@ const visualIndices = $derived.by(() => {
 });
 
 // Calculate sidebar width (2 columns)
-let sidebarWidth = $derived(state.itemWidth * sidebarStore.hiddenColumnCount);
+let sidebarWidth = $derived(state.itemWidth * sidebarStore.hiddenAlbumColumnCount);
 let toastWidth = $derived(state.itemWidth * 2); // User requested 2 items hidden
 
 const extraToleranceWidth = 10;
@@ -156,10 +159,10 @@ function shouldHideGridItem(index: number): boolean {
 	const indexInRow = visualIndex % state.columnCount;
 
 	if (sidebarStore.showType === SidebarType.Left) {
-		if (indexInRow < sidebarStore.hiddenColumnCount) return true;
+		if (indexInRow < sidebarStore.hiddenAlbumColumnCount) return true;
 	}
 	if (sidebarStore.showType === SidebarType.Right) {
-		if (indexInRow >= state.columnCount - sidebarStore.hiddenColumnCount) return true;
+		if (indexInRow >= state.columnCount - sidebarStore.hiddenAlbumColumnCount) return true;
 	}
 
 	// Hide items for Toasts (Right side)

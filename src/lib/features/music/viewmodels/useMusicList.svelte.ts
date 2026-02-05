@@ -128,10 +128,10 @@ function isHiddenBySidebar(index: number): boolean {
 	const indexInRow = visualIndex % state.columnCount;
 
 	if (sidebarStore.showType === SidebarType.Left) {
-		return indexInRow < sidebarStore.hiddenColumnCount / 2;
+		return indexInRow < sidebarStore.hiddenMusicColumnCount;
 	}
 	if (sidebarStore.showType === SidebarType.Right) {
-		return indexInRow >= state.columnCount - Math.ceil(sidebarStore.hiddenColumnCount / 2);
+		return indexInRow >= state.columnCount - sidebarStore.hiddenMusicColumnCount;
 	}
 	return false;
 }
