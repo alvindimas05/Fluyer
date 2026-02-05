@@ -10,7 +10,7 @@
 	const props = $props();
 	let { children, type }: Props = props;
 
-	import { isLinux, isMobile, isWindows } from '$lib/platform';
+	import { isLinux, isMacos, isMobile, isWindows } from '$lib/platform';
 	import { swipeable } from '@react2svelte/swipeable';
 	import type { SwipeEventData } from '@react2svelte/swipeable';
 	import { onMount } from 'svelte';
@@ -137,7 +137,7 @@
 
 	onMount(() => {
 		sidebarStore.showType = null;
-		setTimeout(() => (isMounted = true), 750);
+		setTimeout(() => (isMounted = true), isMacos() ? 1000 : 500);
 	});
 </script>
 
