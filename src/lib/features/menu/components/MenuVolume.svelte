@@ -23,8 +23,8 @@
 </script>
 
 <View
-	class="grid md:hidden mx-2 cursor-default grid-cols-[min-content_auto_min-content]
-    items-center gap-3 rounded-md px-3 py-3 text-base font-medium
+	class="grid md:hidden cursor-default grid-cols-[min-content_auto_min-content]
+    items-center gap-3 rounded-md mt-4 mx-2 px-3 py-3 text-base font-medium
     tracking-wide md:text-lg {settingStore.bitPerfectMode
 		? 'pointer-events-none opacity-50'
 		: ''}"
