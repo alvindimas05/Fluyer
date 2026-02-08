@@ -276,10 +276,13 @@ struct PlaylistItem {
 
 pub struct MusicPlayer {}
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-enum RepeatMode {
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum RepeatMode {
+    #[serde(rename = "repeatNone")]
     None,
+    #[serde(rename = "repeat")]
     All,
+    #[serde(rename = "repeatOne")]
     One,
 }
 
@@ -289,6 +292,7 @@ pub struct MusicPlayerSync {
     index: i64,
     current_position: Option<f64>,
     is_playing: bool,
+    repeat_mode: RepeatMode,
 }
 
 static mut BASS_MIXER: u32 = 0;
@@ -657,10 +661,18 @@ impl MusicPlayer {
                 .map(|i| i as i64)
                 .unwrap_or(-1);
 
+            // Get repeat mode from global state
+            let repeat_mode = PLAYER_STATE
+                .get()
+                .and_then(|state| state.lock().ok())
+                .map(|state| state.repeat_mode)
+                .unwrap_or(RepeatMode::None);
+
             return MusicPlayerSync {
                 index,
                 current_position,
                 is_playing,
+                repeat_mode,
             };
         }
 
@@ -694,10 +706,17 @@ impl MusicPlayer {
                         .map(|i| i as i64)
                         .unwrap_or(-1);
 
+                    let repeat_mode = PLAYER_STATE
+                        .get()
+                        .and_then(|state| state.lock().ok())
+                        .map(|state| state.repeat_mode)
+                        .unwrap_or(RepeatMode::None);
+
                     return MusicPlayerSync {
                         index,
                         current_position,
                         is_playing,
+                        repeat_mode,
                     };
                 }
             }
@@ -706,6 +725,7 @@ impl MusicPlayer {
                 index: -1,
                 current_position: Some(0.0),
                 is_playing: false,
+                repeat_mode: RepeatMode::None,
             }
         }
     }

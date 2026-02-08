@@ -33,6 +33,7 @@ export interface MusicPlayerSync {
 	currentPosition: number;
 	isPlaying: boolean;
 	duration: number;
+	repeatMode: RepeatMode;
 }
 
 export enum RepeatMode {

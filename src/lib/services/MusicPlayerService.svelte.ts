@@ -67,21 +67,29 @@ const MusicPlayerService = {
 		await TauriMusicAPI.setPosition(position);
 		await TauriMusicAPI.requestSync();
 	},
-	toggleRepeatMode: () => {
+	toggleRepeatMode: async () => {
 		let nextRepeatMode = RepeatMode.None;
+		let command = TauriMusicCommand.RepeatNone;
 		const currentMode = musicStore.repeatMode;
+
 		switch (currentMode) {
 			case RepeatMode.None:
 				nextRepeatMode = RepeatMode.All;
+				command = TauriMusicCommand.Repeat;
 				break;
 			case RepeatMode.All:
 				nextRepeatMode = RepeatMode.One;
+				command = TauriMusicCommand.RepeatOne;
 				break;
 			case RepeatMode.One:
-				nextRepeatMode = RepeatMode.One;
+				nextRepeatMode = RepeatMode.None;
+				command = TauriMusicCommand.RepeatNone;
 				break;
 		}
+
+		// Optimistic update
 		musicStore.repeatMode = nextRepeatMode;
+		await TauriMusicAPI.sendCommand(command);
 	},
 
 	listenSyncEvents: () => {
@@ -95,6 +103,8 @@ const MusicPlayerService = {
 			} else ProgressService.reset();
 
 			musicStore.isPlaying = e.payload.isPlaying;
+			musicStore.repeatMode = e.payload.repeatMode;
+
 			if (e.payload.isPlaying) {
 				ProgressService.stop();
 				ProgressService.start();
