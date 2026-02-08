@@ -53,7 +53,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="absolute left-0 top-0 z-[-10] h-full w-full" onmousedown={onMouseDown}></div>
-{#if (isWindows() || isLinux()) && !isPlayPage && !isVisualizerPage}
+{#if isWindows() || isLinux()}
 	<div class="absolute right-0 top-0 mt-2 pe-3">
 		<button
 			class="tb-button {isWindows() && 'win-button'} {isLinux() && 'linux-button'}"

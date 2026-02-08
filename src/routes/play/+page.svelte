@@ -32,9 +32,12 @@
 
 	function handleBackWithDelay() {
 		hideBackButton = true;
-		setTimeout(() => {
-			vm.handleButtonBack();
-		}, 300);
+		setTimeout(
+			() => {
+				vm.handleButtonBack();
+			},
+			isMacos() ? 300 : 0
+		);
 	}
 
 	function onKeyDown(
@@ -65,16 +68,16 @@
 <svelte:document onkeydown={onKeyDown} onmousemove={resetIdleTimer} onclick={resetIdleTimer} />
 
 {#if !isMobile() && settingStore.ui.play.showBackButton}
-	<div class="absolute top-0 left-0 hidden md:block ps-3 pt-3 opacity-70">
+	<div class="absolute left-0 top-0 z-10 hidden ps-3 pt-3 opacity-70 md:block">
 		<button
 			id="btn-back"
-			class="animate__animated w-7 {hideBackButton
+			class="animate__animated w-7 cursor-pointer {hideBackButton
 				? 'hidden'
 				: isIdle
 					? 'animate__fadeOut'
 					: 'animate__fadeIn'}"
-			onclick={handleBackWithDelay}><Icon type={IconType.PlayBack} /></button>
-
+			onclick={handleBackWithDelay}><Icon type={IconType.PlayBack} /></button
+		>
 	</div>
 {/if}
 <div
@@ -90,7 +93,7 @@
 	>
 		<div
 			class="w-full {vm.lyrics.length > 0 && 'ms-auto'}
-            sm-mdpi:w-[90%] 3xl-mdpi:w-[65%] md-mdpi:w-[85%] lg-mdpi:w-[80%] xl-mdpi:w-[75%] 2xl-mdpi:w-[70%]
+            sm-mdpi:w-[90%] md-mdpi:w-[85%] lg-mdpi:w-[80%] xl-mdpi:w-[75%] 2xl-mdpi:w-[70%] 3xl-mdpi:w-[65%]
             md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%] 2xl-hdpi:w-[65%]
             md-xhdpi:w-[80%] lg-xhdpi:w-[70%] 2xl-xhdpi:w-[65%]"
 		>
@@ -114,9 +117,9 @@
 			: 'justify-center'} animate__animated animate__fadeIn"
 	>
 		<View
-			class="sm-mdpi:w-[90%] 3xl-mdpi:w-[65%] h-fit w-full
-            rounded-xl px-4 py-5 hover:px-5
-            hover:py-7 md:mt-4 md-mdpi:w-[85%] lg-mdpi:w-[80%] xl-mdpi:w-[75%] 2xl-mdpi:w-[70%]
+			class="sm-mdpi:w-[90%] h-fit w-full rounded-xl
+            px-4 py-5 hover:px-5 hover:py-7
+            md:mt-4 md-mdpi:w-[85%] lg-mdpi:w-[80%] xl-mdpi:w-[75%] 2xl-mdpi:w-[70%] 3xl-mdpi:w-[65%]
             md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%] 2xl-hdpi:w-[65%]
             md-xhdpi:w-[80%] lg-xhdpi:w-[70%] 2xl-xhdpi:w-[65%]"
 		>
@@ -163,7 +166,7 @@
 					size="md"
 				/>
 			</div>
-			<div class="mt-4 grid w-full items-center gap-2 grid-cols-[1fr_auto_auto_auto_1fr]">
+			<div class="mt-4 grid w-full grid-cols-[1fr_auto_auto_auto_1fr] items-center gap-2">
 				<div class="flex justify-end">
 					{#if settingStore.ui.showRepeatButton}
 						<button
@@ -247,8 +250,8 @@
 	{#if vm.lyrics.length > 0}
 		<div
 			class="scrollbar-hidden animate__animated animate__faster animate__fadeInUp w-full overflow-y-auto overflow-x-hidden
-            [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))] md:col-[2]
-            md:row-[1/span_2] pb-[100%]
+            pb-[100%] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
+            md:col-[2] md:row-[1/span_2]
             md:h-screen md:px-20 md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] {isMobile()
 				? 'px-5'
 				: 'px-4'}"
