@@ -67,7 +67,7 @@
 
 <svelte:document onkeydown={onKeyDown} onmousemove={resetIdleTimer} onclick={resetIdleTimer} />
 
-{#if !isMobile() && settingStore.ui.play.showBackButton}
+{#if settingStore.ui.play.showBackButton}
 	<div class="absolute left-0 top-0 z-10 hidden ps-3 pt-3 opacity-70 md:block">
 		<button
 			id="btn-back"

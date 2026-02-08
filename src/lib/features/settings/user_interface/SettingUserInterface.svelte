@@ -75,27 +75,25 @@
 	</label>
 </SettingInput>
 
-{#if isDesktop()}
-	<SettingInput>
-		<label class="grid cursor-pointer grid-cols-[min-content_auto] items-center gap-3 px-3 py-2">
-			<input
-				type="checkbox"
-				class="h-4 w-4"
-				checked={settingStore.ui.play.showBackButton}
-				onchange={onUiPlayShowBackButtonChange}
-			/>
-			<div>Show Back Button On Full Play Screen (You can still press Esc to go back)</div>
-		</label>
-	</SettingInput>
-	<SettingInput>
-		<label class="grid cursor-pointer grid-cols-[min-content_auto] items-center gap-3 px-3 py-2">
-			<input
-				type="checkbox"
-				class="h-4 w-4"
-				checked={settingStore.ui.play.showVolume}
-				onchange={onUiPlayShowVolumeChange}
-			/>
-			<div>Show Volume On Full Play Screen</div>
-		</label>
-	</SettingInput>
-{/if}
+<SettingInput class="hidden md:block">
+	<label class="grid cursor-pointer grid-cols-[min-content_auto] items-center gap-3 px-3 py-2">
+		<input
+			type="checkbox"
+			class="h-4 w-4"
+			checked={settingStore.ui.play.showBackButton}
+			onchange={onUiPlayShowBackButtonChange}
+		/>
+		<div>Show Back Button On Full Play Screen (You can still press Esc to go back)</div>
+	</label>
+</SettingInput>
+<SettingInput>
+	<label class="grid cursor-pointer grid-cols-[min-content_auto] items-center gap-3 px-3 py-2">
+		<input
+			type="checkbox"
+			class="h-4 w-4"
+			checked={settingStore.ui.play.showVolume}
+			onchange={onUiPlayShowVolumeChange}
+		/>
+		<div>Show Volume On Full Play Screen</div>
+	</label>
+</SettingInput>

@@ -3,12 +3,13 @@
 
 	interface Props {
 		children?: import('svelte').Snippet;
+		class?: string;
 	}
 
-	let { children }: Props = $props();
+	let { class: className, children }: Props = $props();
 </script>
 
-<div class="w-full px-5">
+<div class="w-full px-5 {className}">
 	<View class="my-3 w-full rounded" glassShineSize="sm">
 		{@render children?.()}
 	</View>
