@@ -75,6 +75,21 @@
 			isShowing = true;
 			sidebarStore.showType = type;
 			console.log('Showing sidebar:', type);
+		} else if (isMouseInsideArea) {
+			const sidebarLeft = type === SidebarType.Right ? window.innerWidth - sidebarWidth : 0;
+			const sidebarRight = type === SidebarType.Right ? window.innerWidth : sidebarWidth;
+			const sidebarTop = paddingTop;
+			const sidebarBottom = window.innerHeight - playerBarStore.height;
+
+			const isOutside =
+				e.clientX < sidebarLeft ||
+				e.clientX > sidebarRight ||
+				e.clientY < sidebarTop ||
+				e.clientY > sidebarBottom;
+
+			if (isOutside) {
+				onMouseLeave(e);
+			}
 		}
 	}
 
@@ -128,7 +143,7 @@
 		const onRightEdge = type === SidebarType.Right && e.clientX > window.innerWidth;
 		const onLeftEdge = type === SidebarType.Left && e.clientX < 0;
 
-		if(onRightEdge || onLeftEdge){
+		if (onRightEdge || onLeftEdge) {
 			isMouseInsideArea = true;
 			isShowing = true;
 			sidebarStore.showType = type;
