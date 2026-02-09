@@ -30,7 +30,9 @@
 							? 'animate__animated animate__fadeOut'
 							: 'animate__animated animate__fadeIn'
 						: ''}"
-					style="animation-duration: 500ms; {hiddenBySidebar ? 'pointer-events: none;' : ''}"
+					style="animation-duration: 500ms; {hiddenBySidebar
+						? 'pointer-events: none; opacity: 0;'
+						: 'opacity: 1;'}"
 					style:display={visibleByFilter ? undefined : 'none'}
 					onanimationend={() => vm.handleAnimationEnd(itemKey, hiddenBySidebar)}
 				>

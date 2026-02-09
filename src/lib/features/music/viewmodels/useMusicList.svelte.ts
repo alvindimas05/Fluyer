@@ -151,8 +151,8 @@ function shouldRenderItem(itemKey: string, index: number, item: any): boolean {
 	// If not in visibleItems (outside viewport), don't render
 	if (!visibleItems.has(itemKey)) return false;
 
-	// If hidden by sidebar and animation completed, don't render
-	if (isHiddenBySidebar(index) && animatingOutItems.has(itemKey)) return false;
+	// If hidden by sidebar and animation completed, we still render but hide via CSS
+	// if (isHiddenBySidebar(index) && animatingOutItems.has(itemKey)) return false;
 
 	return true;
 }

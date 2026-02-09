@@ -179,8 +179,8 @@ function shouldRenderHorizontalItem(index: number, musicList: MusicData[]): bool
 	// If not in visibleItems (outside viewport), don't render
 	if (!visibleItems.has(index)) return false;
 
-	// If hidden by sidebar and animation completed, don't render
-	if (shouldHideHorizontalItem(index) && animatingOutItems.has(index)) return false;
+	// If hidden by sidebar and animation completed, we still render but hide via CSS
+	// if (shouldHideHorizontalItem(index) && animatingOutItems.has(index)) return false;
 
 	return true;
 }
@@ -193,8 +193,8 @@ function shouldRenderGridItem(index: number, musicList: MusicData[]): boolean {
 	// If not in visibleItems (outside viewport), don't render
 	if (!visibleItems.has(index)) return false;
 
-	// If hidden by sidebar and animation completed, don't render
-	if (shouldHideGridItem(index) && animatingOutItems.has(index)) return false;
+	// If hidden by sidebar and animation completed, we still render but hide via CSS
+	// if (shouldHideGridItem(index) && animatingOutItems.has(index)) return false;
 
 	return true;
 }
