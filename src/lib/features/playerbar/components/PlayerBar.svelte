@@ -12,6 +12,12 @@
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { usePlayerBar } from '../viewmodels/usePlayerBar.svelte';
 	import { isMobile } from '$lib/platform';
+	
+	interface Props {
+		tooltipVisible?: boolean;
+	}
+
+	let { tooltipVisible = $bindable(false) }: Props = $props();
 
 	const vm = usePlayerBar();
 </script>
@@ -33,6 +39,7 @@
 		max={MusicConfig.max}
 		step={MusicConfig.step}
 		showTooltip={true}
+		bind:tooltipVisible
 		tooltipFormatter={(percentage) =>
 			ProgressService.formatDuration((musicStore.currentMusic?.duration ?? 0) * (percentage / 100))}
 		class="mb-3"

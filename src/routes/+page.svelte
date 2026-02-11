@@ -28,6 +28,8 @@
 				return 'grid-rows-[auto_min-content]';
 		}
 	});
+
+	let tooltipVisible = $state(false);
 </script>
 
 {#if musicStore.list === null}
@@ -46,8 +48,8 @@
 			<CollectionInfo />
 		{/if}
 		{#if [MusicListType.All, MusicListType.Music, MusicListType.Folder, MusicListType.Playlist].includes(musicStore.listType)}
-			<MusicList />
+			<MusicList {tooltipVisible} />
 		{/if}
-		<PlayerBar />
+		<PlayerBar bind:tooltipVisible />
 	</div>
 {/if}

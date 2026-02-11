@@ -14,6 +14,7 @@
 		onProgressMove?: (percentage: number) => void;
 		onProgressLeave?: (percentage: number) => void;
 		size?: 'sm' | 'md' | 'lg';
+		tooltipVisible?: boolean;
 	}
 
 	let {
@@ -30,14 +31,14 @@
 		onProgressEnter,
 		onProgressMove,
 		onProgressLeave,
-		size = 'md'
+		size = 'md',
+		tooltipVisible = $bindable(false)
 	}: Props = $props();
 
-	const tooltipMargin = 12;
+	const tooltipMargin = 0;
 
 	let tooltip: HTMLDivElement;
 	let tooltipPosition = $state(0);
-	let tooltipVisible = $state(false);
 	let tooltipText = $state('0:00');
 	let touchLastX = $state(0);
 	let containerWidth = $state(0);
@@ -149,11 +150,9 @@
 <div class="relative {className}" bind:this={container}>
 	{#if showTooltip}
 		<div
-			class="absolute top-[-2.5rem] w-fit rounded-lg border px-2 py-1 text-sm shadow-xl backdrop-blur-xl"
-			style="
-				left: {tooltipPosition}px;
-				visibility: {tooltipVisible ? 'visible' : 'hidden'};
-			"
+			class="absolute top-[-2.5rem] w-fit rounded-lg border px-2 py-1 text-sm shadow-xl
+				animate__animated animate__faster {tooltipVisible ? 'animate__fadeIn' : 'animate__fadeOut'}"
+			style="left: {tooltipPosition}px;"
 			bind:this={tooltip}
 		>
 			{tooltipText}
