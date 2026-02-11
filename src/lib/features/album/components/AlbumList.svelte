@@ -10,18 +10,19 @@
 	let scrollContainer = $state<HTMLDivElement>();
 </script>
 
-<!-- FIXME: Flicker on Linux when filter type is album -->
 <svelte:window onresize={vm.updateItemWidth} />
 
 <div
 	class="w-screen"
-	style="height: {vm.isHorizontal
-		? vm.itemHeight
-		: window.innerHeight -
-			filterStore.bar.height -
-			playerBarStore.height -
-			mobileStore.navigationBarHeight -
-			mobileStore.statusBarHeight}px;"
+	style="height: {vm.filteredItemCount === 0
+		? 0
+		: vm.isHorizontal
+			? vm.itemHeight
+			: window.innerHeight -
+				filterStore.bar.height -
+				playerBarStore.height -
+				mobileStore.navigationBarHeight -
+				mobileStore.statusBarHeight}px;"
 >
 	{#if vm.isHorizontal}
 		<!-- Horizontal layout -->

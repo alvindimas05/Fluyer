@@ -319,6 +319,9 @@ export function useAlbumList() {
 		observeElement,
 		handleScroll,
 		handleWheel,
-		scrollable
+		scrollable,
+		get filteredItemCount() {
+			return visualIndices.size;
+		}
 	};
 }
