@@ -26,6 +26,7 @@
 	let isInitialized = $state(false);
 	let canUpdate = true;
 	let currentCoverArt: string | null = null;
+	let currentMusicPath: string | null = null;
 
 	let lastRenderedWidth = 0;
 	let lastRenderedHeight = 0;
@@ -170,12 +171,21 @@
 			canUpdate = false;
 		}
 
+		const newMusicPath = musicStore.currentMusic?.path;
+
+		// If the music path is same as previous, and not forced, we skip
+		if (currentMusicPath === newMusicPath && !force) return;
+
 		const newCoverArt = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
 
 		const currentWidth = window.innerWidth;
 		const currentHeight = window.innerHeight;
 
-		if (currentCoverArt === newCoverArt && !force) return;
+		// Note: even if path changed, cover art might be same (e.g. default cover art)
+		// But usually we trust path change => new song => update bg
+		// However, checking cover art URL equality is also good but MetadataService returns new blob url each time?
+		// Yes, MetadataService.getMusicCoverArt creates new blob url.
+		// So we rely on path check primarily.
 
 		if (currentCoverArt !== null && !MetadataService.isDefaultCoverArt(currentCoverArt)) {
 			URL.revokeObjectURL(currentCoverArt);
@@ -183,6 +193,7 @@
 		}
 
 		currentCoverArt = newCoverArt;
+		currentMusicPath = newMusicPath ?? null;
 
 		await invoke(CommandRoutes.UPDATE_ANIMATED_BACKGROUND, {
 			colors: await getColors(),
