@@ -49,6 +49,8 @@
 
 	const SWIPE_RANGE = 125;
 
+	const currentWindow = getCurrentWindow();
+
 	let sidebarWidth = $derived(sidebarStore.width);
 	let paddingTop = $derived(
 		(isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height
@@ -57,11 +59,9 @@
 	let isMouseInsideArea = $state(false);
 	let isShowing = $state(false);
 	let isMounted = $state(false);
+	let isMaximized = $state(true);
 
 	async function onMouseMove(e: MouseEvent) {
-		const win = getCurrentWindow();
-		const isMaximized = await win.isMaximized();
-
 		const onRightEdge =
 			type === SidebarType.Right &&
 			e.clientX > window.innerWidth - (isWindows() || !isMaximized ? 12 : 4);
@@ -149,6 +149,10 @@
 			sidebarStore.showType = type;
 		}
 	}
+
+	currentWindow.onResized(async () => {
+		isMaximized = await currentWindow.isMaximized();
+	});
 
 	onMount(() => {
 		sidebarStore.showType = null;

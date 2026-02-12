@@ -15,20 +15,20 @@
 	let isMaximized = $state(true);
 	let isPlayPage = $state(false);
 	let isVisualizerPage = $state(false);
-	const window = getCurrentWindow();
+	const currentWindow = getCurrentWindow();
 	function onMouseDown(
 		e: MouseEvent & {
 			currentTarget: EventTarget & HTMLDivElement;
 		}
 	) {
 		if (e.buttons === 1) {
-			e.detail === 2 ? window.toggleMaximize() : window.startDragging();
+			e.detail === 2 ? currentWindow.toggleMaximize() : currentWindow.startDragging();
 		}
 	}
 
 	let snapOverlayTimer: ReturnType<typeof setTimeout> | null = null;
 	function showSnapOverlay() {
-		window.setFocus().then(() => invoke('decorum_show_snap_overlay'));
+		currentWindow.setFocus().then(() => invoke('decorum_show_snap_overlay'));
 	}
 
 	function handleMaximizeMouseEnter() {
@@ -41,8 +41,8 @@
 		if (snapOverlayTimer != null) clearTimeout(snapOverlayTimer);
 	}
 
-	window.onResized(async (_) => {
-		isMaximized = await window.isMaximized();
+	currentWindow.onResized(async () => {
+		isMaximized = await currentWindow.isMaximized();
 	});
 
 	afterNavigate((navigation) => {
@@ -57,7 +57,7 @@
 	<div class="absolute right-0 top-0 mt-2 pe-3">
 		<button
 			class="tb-button {isWindows() && 'win-button'} {isLinux() && 'linux-button'}"
-			onclick={() => window.minimize()}
+			onclick={() => currentWindow.minimize()}
 		>
 			{#if isWindows()}
 				&#59681;
@@ -71,7 +71,7 @@
 			class="tb-button {isWindows() && 'win-button'} {isLinux() && 'linux-button'}"
 			onmouseenter={handleMaximizeMouseEnter}
 			onmouseleave={handleMaximizeMouseLeave}
-			onclick={() => window.toggleMaximize()}
+			onclick={() => currentWindow.toggleMaximize()}
 		>
 			{#if isWindows()}
 				{#if isMaximized}
@@ -92,7 +92,7 @@
 		</button>
 		<button
 			class="tb-button {isWindows() && 'win-button'} {isLinux() && 'linux-button'}"
-			onclick={() => window.close()}
+			onclick={() => currentWindow.close()}
 		>
 			{#if isWindows()}
 				&#59579;
