@@ -99,15 +99,12 @@ function updatePlayerBarHeight() {
 export function usePlayerBar() {
 	// Fetch album image with blob URL cleanup
 	$effect(() => {
-		const newMusicPath = musicStore.currentMusic?.path;
-
-		// If the music path hasn't changed, skip re-fetching
-		if (currentMusicPath === newMusicPath) return;
-
-		currentMusicPath = newMusicPath ?? null;
 		let cancelled = false;
 
 		(async () => {
+			const newMusicPath = musicStore.currentMusic?.path;
+			currentMusicPath = newMusicPath ?? null;
+
 			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
 			albumImage = imagePromise;
 
