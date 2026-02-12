@@ -83,23 +83,6 @@ makepkg -si
 
 ---
 
-### Linux
-
-> [!IMPORTANT]
-> 🧩 If you're using the `.deb`, there is a chance that you might need to **install mpv** manually.
-
-```bash
-sudo apt install mpv
-```
-
----
-
-### Universal
-
-- 🚫 **High resource usage** due to animated background. It’s currently disabled, but the background image remains enabled.
-
----
-
 ### iOS
 
 > [!IMPORTANT]
