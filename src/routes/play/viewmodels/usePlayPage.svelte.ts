@@ -1,13 +1,14 @@
-import { isDesktop, isMobile } from '$lib/platform';
+import { isMacos } from '$lib/platform';
 import musicStore from '$lib/stores/music.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
-import { MusicConfig } from '$lib/constants/MusicConfig';
 import MetadataService from '$lib/services/MetadataService.svelte';
 import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 import PageService from '$lib/services/PageService.svelte';
 import QueueService from '$lib/services/QueueService.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
 import LyricService, { type MusicLyric } from '$lib/services/LyricService.svelte';
+
+let lyricContainerElement: HTMLDivElement;
 
 let music = $derived(musicStore.currentMusic);
 let progressPercentage = $derived.by(() => musicStore.progressPercentage);
@@ -24,6 +25,45 @@ let selectedLyricIndex = $state(0);
 
 let volumePercentage = $state(musicStore.volume);
 let hideBackButton = $state(false);
+let isIdle = $state(false);
+let timer: NodeJS.Timeout;
+
+function resetIdleTimer() {
+	isIdle = false;
+	clearTimeout(timer);
+	timer = setTimeout(() => {
+		isIdle = true;
+	}, 3000);
+}
+
+function handleBackWithDelay() {
+	hideBackButton = true;
+	setTimeout(
+		() => {
+			handleButtonBack();
+		},
+		isMacos() ? 300 : 0
+	);
+}
+
+function onKeyDown(
+	e: KeyboardEvent & {
+		currentTarget: EventTarget & Document;
+	}
+) {
+	if (e.key === 'Escape') handleBackWithDelay();
+	resetIdleTimer();
+}
+
+function scrollToSelectedLyric() {
+	// Wait for the next frame so the selected lyric's size has updated
+	requestAnimationFrame(() => {
+		document.getElementById('selected-lyric')?.scrollIntoView({
+			block: window.innerWidth > 768 ? 'center' : 'start',
+			behavior: 'smooth'
+		});
+	});
+}
 
 function handleButtonPlayPause() {
 	if (musicStore.isPlaying) {
@@ -162,6 +202,18 @@ export function usePlayPage() {
 		volumePercentage = musicStore.volumePercentage;
 	});
 
+	$effect(() => {
+		resetIdleTimer();
+		return () => clearTimeout(timer);
+	});
+
+	$effect(() => {
+		selectedLyricIndex;
+		if (typeof document !== 'undefined') {
+			scrollToSelectedLyric();
+		}
+	});
+
 	return {
 		get music() {
 			return music;
@@ -193,6 +245,15 @@ export function usePlayPage() {
 		get hideBackButton() {
 			return hideBackButton;
 		},
+		get isIdle() {
+			return isIdle;
+		},
+		get lyricContainerElement() {
+			return lyricContainerElement;
+		},
+		set lyricContainerElement(value: HTMLDivElement) {
+			lyricContainerElement = value;
+		},
 
 		handleButtonPlayPause,
 		handleButtonPrevious,
@@ -203,6 +264,9 @@ export function usePlayPage() {
 		handleProgressEnter,
 		handleProgressMove,
 		handleProgressLeave,
-		handleVolumeProgressClick
+		handleVolumeProgressClick,
+		resetIdleTimer,
+		handleBackWithDelay,
+		onKeyDown
 	};
 }

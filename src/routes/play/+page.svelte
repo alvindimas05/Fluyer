@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isAndroid, isMobile, isMacos } from '$lib/platform';
+	import { isMobile, isMacos } from '$lib/platform';
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';
 	import View from '$lib/ui/components/View.svelte';
@@ -12,71 +12,20 @@
 	import { usePlayPage } from './viewmodels/usePlayPage.svelte';
 
 	const vm = usePlayPage();
-
-	let isIdle = $state(false);
-	let hideBackButton = $state(false);
-	let timer: NodeJS.Timeout;
-
-	function resetIdleTimer() {
-		isIdle = false;
-		clearTimeout(timer);
-		timer = setTimeout(() => {
-			isIdle = true;
-		}, 3000);
-	}
-
-	$effect(() => {
-		resetIdleTimer();
-		return () => clearTimeout(timer);
-	});
-
-	function handleBackWithDelay() {
-		hideBackButton = true;
-		setTimeout(
-			() => {
-				vm.handleButtonBack();
-			},
-			isMacos() ? 300 : 0
-		);
-	}
-
-	function onKeyDown(
-		e: KeyboardEvent & {
-			currentTarget: EventTarget & Document;
-		}
-	) {
-		if (e.key === 'Escape') handleBackWithDelay();
-		resetIdleTimer();
-	}
-
-	function scrollToSelectedLyric() {
-		// Wait for the next frame so the selected lyric's size has updated
-		requestAnimationFrame(() => {
-			document.getElementById('selected-lyric')?.scrollIntoView({
-				block: window.innerWidth > 768 ? 'center' : 'start',
-				behavior: 'smooth'
-			});
-		});
-	}
-
-	$effect(() => {
-		vm.selectedLyricIndex;
-		scrollToSelectedLyric();
-	});
 </script>
 
-<svelte:document onkeydown={onKeyDown} onmousemove={resetIdleTimer} onclick={resetIdleTimer} />
+<svelte:document onkeydown={vm.onKeyDown} onmousemove={vm.resetIdleTimer} onclick={vm.resetIdleTimer} />
 
 {#if settingStore.ui.play.showBackButton}
 	<div class="absolute left-0 top-0 z-10 hidden ps-3 pt-3 opacity-70 md:block">
 		<button
 			id="btn-back"
-			class="animate__animated w-7 cursor-pointer {hideBackButton
+			class="animate__animated w-7 cursor-pointer {vm.hideBackButton
 				? 'hidden'
-				: isIdle
+				: vm.isIdle
 					? 'animate__fadeOut'
 					: 'animate__fadeIn'}"
-			onclick={handleBackWithDelay}><Icon type={IconType.PlayBack} /></button
+			onclick={vm.handleBackWithDelay}><Icon type={IconType.PlayBack} /></button
 		>
 	</div>
 {/if}
@@ -250,11 +199,12 @@
 	{#if vm.lyrics.length > 0}
 		<div
 			class="scrollbar-hidden animate__animated animate__faster animate__fadeInUp w-full overflow-y-auto overflow-x-hidden
-            pb-[100%] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
+            [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_60%,rgba(0,0,0,0))]
             md:col-[2] md:row-[1/span_2]
             md:h-screen md:px-20 md:[mask-image:linear-gradient(to_bottom,rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,0))] {isMobile()
 				? 'px-5'
 				: 'px-4'}"
+			bind:this={vm.lyricContainerElement}
 		>
 			<div class="flex">
 				<div
@@ -264,6 +214,7 @@
 					md:w-[55vw] md-mdpi:text-[1.4rem] lg-mdpi:text-[1.5rem] xl-mdpi:text-[1.7rem]
                     md-hdpi:text-[1.3rem] lg-hdpi:text-[1.45rem] xl-hdpi:text-[1.6rem]
                     md-xhdpi:text-[1.2rem] lg-xhdpi:text-[1.4rem] xl-xhdpi:text-[1.6rem]"
+					style="padding-bottom: {window.innerWidth < 768 ? vm.lyricContainerElement?.clientHeight - 60 : 0}px"
 				>
 					{#each vm.lyrics as lyric, i}
 						<div
