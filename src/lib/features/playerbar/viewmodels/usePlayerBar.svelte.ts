@@ -17,6 +17,7 @@ let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
 let albumImage = $state<Promise<string | null> | null>(null);
 let currentBlobUrl: string | null = null;
+let currentMusicPath: string | null = null;
 
 let progressPercentage = $state(0);
 let volumePercentage = $state(0);
@@ -98,10 +99,12 @@ function updatePlayerBarHeight() {
 export function usePlayerBar() {
 	// Fetch album image with blob URL cleanup
 	$effect(() => {
-		musicStore.currentMusic;
 		let cancelled = false;
 
 		(async () => {
+			const newMusicPath = musicStore.currentMusic?.path;
+			currentMusicPath = newMusicPath ?? null;
+
 			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
 			albumImage = imagePromise;
 
