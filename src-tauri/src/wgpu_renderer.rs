@@ -254,22 +254,34 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
         let mut env = vm.attach_current_thread()?;
         let context =
             unsafe { jni::objects::JObject::from_raw(ctx.context() as jni::sys::jobject) };
-        let resources = env
+        let window_service = env.new_string("window")?;
+        let window_manager = env
             .call_method(
                 &context,
-                "getResources",
-                "()Landroid/content/res/Resources;",
-                &[],
+                "getSystemService",
+                "(Ljava/lang/String;)Ljava/lang/Object;",
+                &[jni::objects::JValue::Object(&window_service)],
             )?
             .l()?;
-        let display_metrics = env
+
+        let display = env
             .call_method(
-                &resources,
-                "getDisplayMetrics",
-                "()Landroid/util/DisplayMetrics;",
+                &window_manager,
+                "getDefaultDisplay",
+                "()Landroid/view/Display;",
                 &[],
             )?
             .l()?;
+
+        let metrics_class = env.find_class("android/util/DisplayMetrics")?;
+        let display_metrics = env.new_object(metrics_class, "()V", &[])?;
+
+        env.call_method(
+            &display,
+            "getRealMetrics",
+            "(Landroid/util/DisplayMetrics;)V",
+            &[jni::objects::JValue::Object(&display_metrics)],
+        )?;
         let width = env.get_field(&display_metrics, "widthPixels", "I")?.i()? as u32;
         let height = env.get_field(&display_metrics, "heightPixels", "I")?.i()? as u32;
         tauri::PhysicalSize::new(width, height)
