@@ -9,7 +9,7 @@
                 <action android:name="org.alvindimas05.fluyerplugin.ACTION_PAUSE" />
                 <action android:name="org.alvindimas05.fluyerplugin.ACTION_PREVIOUS" />
                 <action android:name="org.alvindimas05.fluyerplugin.ACTION_NEXT" />
-                <action android:name="org.alvindimals05.fluyerplugin.ACTION_STOP" />
+                <action android:name="org.alvindimas05.fluyerplugin.ACTION_STOP" />
             </intent-filter>
         </receiver>
     </application>
