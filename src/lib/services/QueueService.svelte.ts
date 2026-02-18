@@ -3,6 +3,7 @@ import musicStore from '$lib/stores/music.svelte';
 import TauriQueueAPI from '$lib/tauri/TauriQueueAPI';
 import { isDesktop } from '$lib/platform';
 import type { MusicData } from '$lib/features/music/types';
+import * as uuid from 'uuid';
 
 class PlaylistMoveQueue {
 	private queue: Array<() => Promise<void>> = [];
@@ -63,7 +64,7 @@ const QueueService = {
 		await TauriQueueAPI.add(list);
 		musicStore.queue.push(...list);
 		// Generate new UUIDs for added items
-		const newIds = list.map(() => crypto.randomUUID());
+		const newIds = list.map(() => uuid.v4());
 		musicStore.queueIds.push(...newIds);
 	},
 	resetAndAdd: (music: MusicData) => {
@@ -73,7 +74,7 @@ const QueueService = {
 		await TauriMusicAPI.sendCommand(TauriMusicCommand.Clear);
 
 		// Generate new UUIDs for all items
-		const newIds = list.map(() => crypto.randomUUID());
+		const newIds = list.map(() => uuid.v4());
 		musicStore.queueIds = newIds;
 		musicStore.queue = list;
 		await TauriQueueAPI.add(list);

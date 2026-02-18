@@ -2,7 +2,7 @@ import path from 'path';
 import { downloadFile, extractZip } from './install-helpers';
 import * as fs from 'fs/promises';
 import * as os from 'os';
-import * as crypto from 'crypto';
+import * as uuid from 'uuid';
 
 const VERSION = 24;
 const DEFAULT_LIBS = [
@@ -32,7 +32,7 @@ export async function installBassLib(name: string, options: InstallOptions = {})
 		return;
 	}
 
-	const downloadName = crypto.randomUUID();
+	const downloadName = uuid.v4();
 	const downloadPath = path.join(destPath, `${downloadName}.zip`);
 	const extractPath = path.join(destPath, downloadName);
 
