@@ -243,7 +243,40 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     crate::debug!("setup_wgpu: Starting WGPU initialization");
 
     let window = app.get_webview_window("main").unwrap();
+
+    // On Android, avoid using window.inner_size() which calls tao's
+    // getCurrentWindowMetrics() — unavailable on Android < 11 (API 30).
+    // Use JNI DisplayMetrics instead, which works on all Android versions.
+    #[cfg(target_os = "android")]
+    let size = {
+        let ctx = ndk_context::android_context();
+        let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }?;
+        let mut env = vm.attach_current_thread()?;
+        let context =
+            unsafe { jni::objects::JObject::from_raw(ctx.context() as jni::sys::jobject) };
+        let resources = env
+            .call_method(
+                &context,
+                "getResources",
+                "()Landroid/content/res/Resources;",
+                &[],
+            )?
+            .l()?;
+        let display_metrics = env
+            .call_method(
+                &resources,
+                "getDisplayMetrics",
+                "()Landroid/util/DisplayMetrics;",
+                &[],
+            )?
+            .l()?;
+        let width = env.get_field(&display_metrics, "widthPixels", "I")?.i()? as u32;
+        let height = env.get_field(&display_metrics, "heightPixels", "I")?.i()? as u32;
+        tauri::PhysicalSize::new(width, height)
+    };
+    #[cfg(not(target_os = "android"))]
     let size = window.inner_size()?;
+
     crate::debug!("setup_wgpu: Window size {}x{}", size.width, size.height);
 
     #[cfg(not(target_os = "macos"))]

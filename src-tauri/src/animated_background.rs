@@ -15,7 +15,6 @@ pub struct Color {
 
 #[tauri::command]
 pub async fn update_animated_background(
-    app: tauri::AppHandle,
     colors: Vec<Color>,
     width: u32,
     height: u32,
