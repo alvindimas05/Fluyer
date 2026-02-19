@@ -210,14 +210,30 @@ function observeElement(node: HTMLElement, index: number) {
 	if (!observer) {
 		observer = new IntersectionObserver(
 			(entries) => {
+				const newVisible = new Set(visibleItems);
+				let changed = false;
+
 				entries.forEach((entry) => {
 					const itemIndex = entry.target.getAttribute('data-item-index');
 					if (itemIndex !== null) {
+						const idx = parseInt(itemIndex);
 						if (entry.isIntersecting) {
-							visibleItems = new Set([...visibleItems, parseInt(itemIndex)]);
+							if (!newVisible.has(idx)) {
+								newVisible.add(idx);
+								changed = true;
+							}
+						} else {
+							if (newVisible.has(idx)) {
+								newVisible.delete(idx);
+								changed = true;
+							}
 						}
 					}
 				});
+
+				if (changed) {
+					visibleItems = newVisible;
+				}
 			},
 			{ threshold: 0 }
 		);
