@@ -28,7 +28,7 @@
 
 <svelte:window onresize={onResize} />
 <div class="h-full w-full md:px-3 md:pb-4 md:pt-10">
-	<View class="h-full w-full rounded-xl {disableBorder && '!border-0 !shadow-none'}">
+	<View class="h-full w-full rounded-xl !bg-transparent {disableBorder && '!border-0 !shadow-none'}">
 		<div
 			class="grid h-full w-full grid-rows-[min-content_auto_min-content]"
 			style="padding-top: {isMobile() ? mobileStore.statusBarHeight : 20}px;
