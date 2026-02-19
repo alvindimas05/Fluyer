@@ -143,7 +143,7 @@ function shouldHideHorizontalItem(index: number): boolean {
 	}
 
 	// Hide items for Toasts (Right side)
-	if (ToastService.toasts.length > 0 && state.columnCount > 2) {
+	if (ToastService.toasts.length > 0) {
 		if (itemRight > viewportWidth - toastWidth + extraToleranceWidth) return true;
 	}
 
@@ -164,7 +164,7 @@ function shouldHideGridItem(index: number): boolean {
 	}
 
 	// Hide items for Toasts (Right side)
-	if (ToastService.toasts.length > 0 && state.columnCount > 2) {
+	if (ToastService.toasts.length > 0) {
 		if (indexInRow >= state.columnCount - 2) return true; // User requested 2 items
 	}
 
