@@ -17,7 +17,7 @@
 		settingStore.animatedBackground.type = value;
 		settingStore.animatedBackground.trigger = new Date().toString();
 
-		ToastService.info('Animated Background method changed to ' + value);
+		ToastService.info('Background method changed to ' + value);
 	}
 </script>
 
