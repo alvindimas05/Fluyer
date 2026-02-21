@@ -19,7 +19,7 @@
 	);
 </script>
 
-<div class="relative w-full text-sm md:text-base">
+<div class="group relative w-full text-sm md:text-base">
 	<div class="grid grid-cols-[max-content_auto_max-content] py-2">
 		{#await vm.albumImage}
 			<div class="relative aspect-square h-12 w-12 md:h-14 md:w-14"></div>
@@ -32,7 +32,9 @@
 				/>
 			{:else if image && folder}
 				<!-- Folder with album art: folder icon behind, album image centered on top -->
-				<div class="animate__animated animate__fadeIn relative aspect-square h-12 w-12 md:h-14 md:w-14">
+				<div
+					class="animate__animated animate__fadeIn relative aspect-square h-12 w-12 transition-transform duration-300 group-hover:scale-110 md:h-14 md:w-14"
+				>
 					<div class="absolute inset-0 opacity-75">
 						<Icon type={IconType.Folder} />
 					</div>
@@ -70,15 +72,20 @@
 
 	<div class="absolute left-0 top-0 w-full py-2">
 		<div class="music-item-play grid w-full grid-cols-[max-content_auto_max-content]">
-			<button class="h-12 w-12 md:h-14 md:w-14" onclick={vm.addMusicAndPlay}>
-				<div
-					class="box-border grid items-center justify-items-center rounded bg-black bg-opacity-40 md:p-1"
-				>
-					<Icon type={IconType.Play} />
-				</div>
+			<button
+				class="h-12 w-12 md:h-14 md:w-14"
+				onclick={folder ? vm.selectFolder : vm.addMusicAndPlay}
+			>
+				{#if !folder}
+					<div
+						class="box-border grid items-center justify-items-center rounded bg-black bg-opacity-40 md:p-1"
+					>
+						<Icon type={IconType.Play} />
+					</div>
+				{/if}
 			</button>
 
-			<div class={folder ? 'cursor-pointer' : 'cursor-default'} onclick={vm.selectFolder}></div>
+			<div class="cursor-pointer" onclick={folder ? vm.selectFolder : vm.addMusicAndPlay}></div>
 
 			<div class="h-12 w-12 ps-4 md:h-14 md:w-14">
 				<button class="aspect-square h-full w-full" onclick={vm.addMusic}>
@@ -92,11 +99,11 @@
 <style lang="scss">
 	.music-item-play {
 		opacity: 0;
+		transition: opacity 0.75s;
 
 		&:hover {
-			animation-name: fadeIn;
-			animation-duration: 0.5s;
-			animation-fill-mode: forwards;
+			opacity: 1;
+			transition: opacity 0.5s;
 		}
 	}
 </style>
