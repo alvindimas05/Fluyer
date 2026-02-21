@@ -60,11 +60,10 @@
 <style lang="scss">
 	.album-item-actions {
 		opacity: 0;
+		transition: opacity 0.75s;
 
 		&:hover {
-			animation-name: fadeIn;
-			animation-duration: 0.5s;
-			animation-fill-mode: forwards;
+			opacity: 1;
 		}
 	}
 </style>
