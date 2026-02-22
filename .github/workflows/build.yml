@@ -3,6 +3,10 @@ name: Build & Publish
 on:
   workflow_dispatch:
     inputs:
+      release_build:
+        description: 'Publish as Release'
+        type: boolean
+        default: false
       build_windows_x86_64:
         description: 'Build windows-x86_64'
         type: boolean
@@ -71,7 +75,14 @@ jobs:
       - name: Setup Workflow
         shell: bash
         run: bash infra/windows.sh
+      - name: Upload artifact
+        if: ${{ !inputs.release_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x86_64
+          path: ./src-tauri/target/release/bundle/nsis/Fluyer_*.exe
       - name: Publish release
+        if: ${{ inputs.release_build }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./src-tauri/target/release/bundle/nsis/Fluyer_*.exe
@@ -102,7 +113,14 @@ jobs:
       - name: Setup Workflow
         shell: bash
         run: bash infra/macos.sh
+      - name: Upload artifact
+        if: ${{ !inputs.release_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-intel
+          path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_x64.dmg
       - name: Publish release
+        if: ${{ inputs.release_build }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./src-tauri/target/release/bundle/dmg/Fluyer_*_x64.dmg
@@ -133,7 +151,14 @@ jobs:
       - name: Setup Workflow
         shell: bash
         run: bash infra/macos.sh
+      - name: Upload artifact
+        if: ${{ !inputs.release_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-silicon
+          path: ./src-tauri/target/release/bundle/dmg/Fluyer_*_aarch64.dmg
       - name: Publish release
+        if: ${{ inputs.release_build }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./src-tauri/target/release/bundle/dmg/Fluyer_*_aarch64.dmg
@@ -164,7 +189,14 @@ jobs:
       - name: Setup Workflow
         shell: bash
         run: bash infra/linux.sh
+      - name: Upload artifact
+        if: ${{ !inputs.release_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: ./src-tauri/target/release/bundle/deb/Fluyer_*_amd64.deb
       - name: Publish release
+        if: ${{ inputs.release_build }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./src-tauri/target/release/bundle/deb/Fluyer_*_amd64.deb
@@ -213,7 +245,14 @@ jobs:
         run: bash infra/android.sh
       - name: Rename Android APK
         run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ needs.prepare.outputs.version }}_armv7.apk
+      - name: Upload artifact
+        if: ${{ !inputs.release_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-armv7
+          path: ./Fluyer_*_armv7.apk
       - name: Publish release
+        if: ${{ inputs.release_build }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./Fluyer_*_armv7.apk
@@ -262,7 +301,14 @@ jobs:
         run: bash infra/android.sh
       - name: Rename Android APK
         run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ needs.prepare.outputs.version }}_aarch64.apk
+      - name: Upload artifact
+        if: ${{ !inputs.release_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aarch64
+          path: ./Fluyer_*_aarch64.apk
       - name: Publish release
+        if: ${{ inputs.release_build }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./Fluyer_*_aarch64.apk
@@ -311,7 +357,14 @@ jobs:
         run: bash infra/android.sh
       - name: Rename Android APK
         run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ needs.prepare.outputs.version }}_i686.apk
+      - name: Upload artifact
+        if: ${{ !inputs.release_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-i686
+          path: ./Fluyer_*_i686.apk
       - name: Publish release
+        if: ${{ inputs.release_build }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./Fluyer_*_i686.apk
@@ -360,7 +413,14 @@ jobs:
         run: bash infra/android.sh
       - name: Rename Android APK
         run: mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk ./Fluyer_${{ needs.prepare.outputs.version }}_x86_64.apk
+      - name: Upload artifact
+        if: ${{ !inputs.release_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-x86_64
+          path: ./Fluyer_*_x86_64.apk
       - name: Publish release
+        if: ${{ inputs.release_build }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./Fluyer_*_x86_64.apk
