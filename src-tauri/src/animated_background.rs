@@ -80,6 +80,8 @@ pub async fn update_animated_background(
     #[cfg(target_os = "linux")]
     {
         use tauri::Emitter;
+
+        use crate::state::app_handle;
         #[derive(Clone, serde::Serialize)]
         struct BackgroundUpdatePayload {
             width: u32,
@@ -93,7 +95,7 @@ pub async fn update_animated_background(
             data: blurred.into_raw(),
         };
 
-        app.emit("animated_background_update", payload)
+        app_handle().emit("animated_background_update", payload)
             .map_err(|e| e.to_string())?;
     }
 
