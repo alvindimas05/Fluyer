@@ -3,23 +3,38 @@ name: Build & Publish
 on:
   workflow_dispatch:
     inputs:
-      platforms:
-        description: 'Select platforms to build'
-        required: true
-        type: choice
-        options:
-          # - "windows-x86_64"
-          # - "windows-arm64"
-          # - "macos-intel"
-          # - "macos-silicon"
-          # - "linux"
-          # - "android-armv7"
-          # - "android-aarch64"
-          # - "android-i686"
-          # - "android-x86_64"
-          # - "ios"
-          - 'all'
-        default: 'all'
+      build_windows_x86_64:
+        description: 'Build windows-x86_64'
+        type: boolean
+        default: true
+      build_macos_intel:
+        description: 'Build macos-intel'
+        type: boolean
+        default: true
+      build_macos_silicon:
+        description: 'Build macos-silicon'
+        type: boolean
+        default: true
+      build_linux:
+        description: 'Build linux'
+        type: boolean
+        default: true
+      build_android_armv7:
+        description: 'Build android-armv7'
+        type: boolean
+        default: true
+      build_android_aarch64:
+        description: 'Build android-aarch64'
+        type: boolean
+        default: true
+      build_android_i686:
+        description: 'Build android-i686'
+        type: boolean
+        default: true
+      build_android_x86_64:
+        description: 'Build android-x86_64'
+        type: boolean
+        default: true
 
 env:
   RUST_BACKTRACE: 1
@@ -41,11 +56,18 @@ jobs:
       - name: Set build matrix
         id: set-matrix
         run: |
-          if [ "${{ github.event.inputs.platforms }}" = "all" ]; then
-            echo 'matrix=["windows-x86_64","macos-intel","macos-silicon","linux","android-armv7","android-aarch64","android-i686","android-x86_64"]' >> $GITHUB_OUTPUT
-          else
-            echo "matrix=[\"${{ github.event.inputs.platforms }}\"]" >> $GITHUB_OUTPUT
-          fi
+          MATRIX_JSON="["
+          [ "${{ inputs.build_windows_x86_64 }}" = "true" ] && MATRIX_JSON+="\"windows-x86_64\","
+          [ "${{ inputs.build_macos_intel }}" = "true" ] && MATRIX_JSON+="\"macos-intel\","
+          [ "${{ inputs.build_macos_silicon }}" = "true" ] && MATRIX_JSON+="\"macos-silicon\","
+          [ "${{ inputs.build_linux }}" = "true" ] && MATRIX_JSON+="\"linux\","
+          [ "${{ inputs.build_android_armv7 }}" = "true" ] && MATRIX_JSON+="\"android-armv7\","
+          [ "${{ inputs.build_android_aarch64 }}" = "true" ] && MATRIX_JSON+="\"android-aarch64\","
+          [ "${{ inputs.build_android_i686 }}" = "true" ] && MATRIX_JSON+="\"android-i686\","
+          [ "${{ inputs.build_android_x86_64 }}" = "true" ] && MATRIX_JSON+="\"android-x86_64\","
+          MATRIX_JSON="${MATRIX_JSON%,}"
+          MATRIX_JSON+="]"
+          echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
 
       - run: echo "${{ steps.set-matrix.outputs.matrix }}"
   build:
