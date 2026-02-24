@@ -12,6 +12,7 @@
 		"tauri": "tauri",
 		"init": "bun scripts/tauri-init.ts",
 		"android:init": "bun scripts/tauri-init-android.ts",
+		"sync-version": "bun scripts/sync-version.ts",
 		"format": "PRETTIER_EXPERIMENTAL_CLI=1 prettier --write . --ignore-path .prettierignore && cargo fmt --manifest-path src-tauri/Cargo.toml",
 		"format:check": "PRETTIER_EXPERIMENTAL_CLI=1 prettier --check . --ignore-path .prettierignore && cargo fmt --manifest-path src-tauri/Cargo.toml -- --check"
 	},
