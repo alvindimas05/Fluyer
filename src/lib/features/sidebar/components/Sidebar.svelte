@@ -153,7 +153,6 @@
         top: {paddingTop}px;"
 	onmouseleave={onMouseLeave}
 >
-	<!-- FIXME: Enable Sidebar animation on Linux. Probably won't happen -->
 	<View
 		class="linux-hardware-accelerate animate__animated pointer-events-auto h-full
 			rounded-lg p-3

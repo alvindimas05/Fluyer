@@ -16,7 +16,7 @@
 <div
 	use:vm.scrollable
 	onscroll={vm.handleScroll}
-	class="linux-hardware-accelerate scrollbar-hidden relative w-full overflow-y-auto px-3 transition-all duration-300"
+	class="scrollbar-hidden relative w-full overflow-y-auto px-3 transition-all duration-300"
 	style="height: calc(100% - {tooltipVisible ? 36 : 0}px);"
 >
 	{#if vm.data && vm.data.length > 0 && vm.state.columnCount}
@@ -32,7 +32,7 @@
 				{@const shouldRender = vm.shouldRenderItem(itemKey, index, item)}
 				<div
 					use:vm.observeElement={itemKey}
-					class="linux-prevent-flicker min-h-[64px] md:min-h-[72px] {inViewport
+					class="min-h-[64px] md:min-h-[72px] {inViewport
 						? hiddenBySidebar
 							? 'animate__animated animate__fadeOut'
 							: 'animate__animated animate__fadeIn'

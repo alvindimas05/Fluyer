@@ -29,7 +29,7 @@
 		<div
 			bind:this={scrollContainer}
 			use:vm.scrollable
-			class="linux-hardware-accelerate scrollbar-hidden flex h-full overflow-x-auto"
+			class="scrollbar-hidden flex h-full overflow-x-auto"
 			onscroll={vm.handleScroll}
 			onwheel={(e) => vm.handleWheel(e, scrollContainer)}
 			style="padding-bottom: 0;"
@@ -41,7 +41,7 @@
 				{@const shouldRender = vm.shouldRenderHorizontalItem(index, musicList)}
 				<div
 					use:vm.observeElement={index}
-					class="linux-prevent-flicker flex-shrink-0 {inViewport
+					class="flex-shrink-0 {inViewport
 						? hiddenBySidebar
 							? 'animate__animated animate__fadeOut'
 							: 'animate__animated animate__fadeIn'
@@ -78,7 +78,7 @@
 					{@const shouldRender = vm.shouldRenderGridItem(index, musicList)}
 					<div
 						use:vm.observeElement={index}
-						class="linux-prevent-flicker {inViewport
+						class="{inViewport
 							? hiddenBySidebar
 								? 'animate__animated animate__fadeOut'
 								: 'animate__animated animate__fadeIn'
