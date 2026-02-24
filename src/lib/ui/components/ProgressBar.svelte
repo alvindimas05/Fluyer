@@ -153,7 +153,6 @@
 			class="animate__animated animate__faster absolute top-[-2.5rem] w-fit rounded-lg border px-2 py-1 text-sm shadow-xl
 				{tooltipVisible ? 'animate__fadeIn' : 'animate__fadeOut'}"
 			style:left="{tooltipPosition}px"
-			style:will-change="transform"
 			bind:this={tooltip}
 		>
 			{tooltipText}
@@ -224,7 +223,6 @@
 		-webkit-appearance: none;
 		background: transparent;
 		transition: linear 0.2s;
-		will-change: transform;
 
 		&::-webkit-slider-runnable-track {
 			height: var(--progress-height);
@@ -240,7 +238,6 @@
 			@extend .progress-bar;
 			opacity: 0.3;
 			height: var(--progress-height);
-			will-change: transform;
 
 			&::-webkit-slider-runnable-track {
 				@apply rounded-full;
