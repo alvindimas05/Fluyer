@@ -10,7 +10,7 @@
 	const props = $props();
 	let { children, type }: Props = props;
 
-	import { isLinux, isMacos, isMobile, isWindows } from '$lib/platform';
+	import { isLinux, isMobile, isWindows } from '$lib/platform';
 	import { swipeable } from '@react2svelte/swipeable';
 	import type { SwipeEventData } from '@react2svelte/swipeable';
 	import { onMount } from 'svelte';
@@ -24,29 +24,6 @@
 	import { MusicListType } from '$lib/features/music/types';
 	import musicStore from '$lib/stores/music.svelte';
 
-	const rules = [
-		// xhdpi (DPR > 2.0)
-		[1536, 2.01, 0.125], // 2xl → 12.5%
-		[1280, 2.01, 0.16667], // xl-xhdpi → 16.6667%
-		[1024, 2.01, 0.2], // lg-xhdpi → 20%
-		[768, 2.01, 0.25], // md-xhdpi → 25%
-		[640, 2.01, 0.33334], // sm-xhdpi → 33.3334%
-
-		// hdpi (1.01 ≤ DPR ≤ 2.0)
-		[1536, 1.01, 0.125], // 2xl → 12.5%
-		[1280, 1.01, 0.16667], // xl-hdpi → 16.6667%
-		[1024, 1.01, 0.2], // lg-hdpi → 20%
-		[768, 1.01, 0.25], // md-hdpi → 25%
-		[640, 1.01, 0.33334], // sm-hdpi → 33.3334%
-
-		// default (DPR <= 1.0)
-		[1536, 0, 0.125], // 2xl → 12.5%
-		[1280, 0, 0.16667], // xl → 16.6667%
-		[1024, 0, 0.2], // lg → 20%
-		[768, 0, 0.25], // md → 25%
-		[640, 0, 0.33334] // sm → 33.3334%
-	];
-
 	const SWIPE_RANGE = 125;
 
 	const currentWindow = getCurrentWindow();
@@ -58,8 +35,14 @@
 
 	let isMouseInsideArea = $state(false);
 	let isShowing = $state(false);
-	let isMounted = $state(false);
+	let hasShown = $state(false);
 	let isMaximized = $state(true);
+
+	$effect(() => {
+		if (isShowing && !hasShown) {
+			hasShown = true;
+		}
+	});
 
 	async function onMouseMove(e: MouseEvent) {
 		const onRightEdge =
@@ -156,7 +139,6 @@
 
 	onMount(() => {
 		sidebarStore.showType = null;
-		setTimeout(() => (isMounted = true), isMacos() ? 1000 : 500);
 	});
 </script>
 
@@ -166,7 +148,7 @@
 <div
 	class="pointer-events-none fixed top-0 z-10 px-3
         {type === SidebarType.Right ? 'right-0' : 'left-0'}
-        {isMounted ? '' : 'invisible'}"
+        {hasShown ? '' : 'invisible'}"
 	style="height: calc(100% - {playerBarStore.height}px - {paddingTop}px);
         top: {paddingTop}px;"
 	onmouseleave={onMouseLeave}
@@ -179,9 +161,11 @@
 			? type === SidebarType.Right
 				? 'animate__fadeInRight'
 				: 'animate__fadeInLeft'
-			: type === SidebarType.Right
-				? 'animate__fadeOutRight'
-				: 'animate__fadeOutLeft'}
+			: hasShown
+				? type === SidebarType.Right
+					? 'animate__fadeOutRight'
+					: 'animate__fadeOutLeft'
+				: ''}
             {props.class}
 		"
 		style="
