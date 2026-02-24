@@ -6,6 +6,15 @@
 	import { SidebarType } from '$lib/features/sidebar/types';
 	import PageService from '$lib/services/PageService.svelte';
 	import MenuVolume from './MenuVolume.svelte';
+	import { isDesktop } from '$lib/platform';
+	import { getCurrentWindow } from '@tauri-apps/api/window';
+
+	async function gotoPlayPage() {
+		if(isDesktop()){
+			await getCurrentWindow().setFullscreen(true);
+		}
+		PageService.goTo(PageRoutes.PLAY);
+	}
 </script>
 
 <Sidebar type={SidebarType.Left}>
@@ -13,7 +22,7 @@
 	<MenuButton
 		label="Play Screen"
 		icon={IconType.Fullscreen}
-		onclick={() => PageService.goTo(PageRoutes.PLAY)}
+		onclick={gotoPlayPage}
 	/>
 	<!--{#if isDesktop() && !$settingBitPerfectMode}-->
 	<!--    <MenuButton label="Equalizer" icon={IconType.Equalizer}-->

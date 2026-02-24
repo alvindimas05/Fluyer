@@ -1,4 +1,4 @@
-import { isMacos } from '$lib/platform';
+import { isDesktop, isMacos } from '$lib/platform';
 import musicStore from '$lib/stores/music.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
 import MetadataService from '$lib/services/MetadataService.svelte';
@@ -7,6 +7,7 @@ import PageService from '$lib/services/PageService.svelte';
 import QueueService from '$lib/services/QueueService.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
 import LyricService, { type MusicLyric } from '$lib/services/LyricService.svelte';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 let lyricContainerElement: HTMLDivElement;
 
@@ -81,7 +82,10 @@ function handleButtonNext() {
 	MusicPlayerService.next();
 }
 
-function handleButtonBack() {
+async function handleButtonBack() {
+	if(isDesktop()){
+		await getCurrentWindow().setFullscreen(false);
+	}
 	PageService.back();
 }
 
