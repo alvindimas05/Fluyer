@@ -1,6 +1,6 @@
 import { isMobile } from '$lib/platform';
 import mobileStore from '$lib/stores/mobile.svelte';
-import filterStore from '$lib/stores/filter.svelte';
+import filterStore, { filterBarStore } from '$lib/stores/filter.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { type MusicData, MusicListType } from '$lib/features/music/types';
 import sidebarStore from '$lib/stores/sidebar.svelte';
@@ -42,7 +42,7 @@ let observer: IntersectionObserver | null = null;
 // Track items that are animating out (hidden by sidebar)
 let animatingOutItems = $state<Set<number>>(new Set());
 
-let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height);
+let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
 let itemHeight = $derived(state.itemWidth + (window.innerWidth > 640 ? 52 : 44));
 let isHorizontal = $derived(musicStore.listType !== MusicListType.Album);
 
@@ -81,7 +81,7 @@ let data: MusicData[][] = $derived.by(() => {
 
 	// We return the full list and handle visibility via CSS to prevent component recycling issues
 	// when filtering (search or album selection).
-	if (!filterStore.bar.sortAsc) list = list.toReversed();
+	if (!filterBarStore.sortAsc) list = list.toReversed();
 
 	return list;
 });

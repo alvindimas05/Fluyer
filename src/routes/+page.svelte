@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isMobile } from '$lib/platform';
 	import mobileStore from '$lib/stores/mobile.svelte';
-	import filterStore from '$lib/stores/filter.svelte';
+	import { filterBarStore } from '$lib/stores/filter.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import { MusicListType } from '$lib/features/music/types';
 	import Intro from '$lib/features/intro/components/Intro.svelte';
@@ -12,9 +12,7 @@
 	import Menu from '$lib/features/menu/components/Menu.svelte';
 	import PlayerBar from '$lib/features/playerbar/components/PlayerBar.svelte';
 
-	let paddingTop = $derived(
-		(isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height
-	);
+	let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
 
 	let gridClass = $derived.by(() => {
 		switch (musicStore.listType) {

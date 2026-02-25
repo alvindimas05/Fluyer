@@ -6,6 +6,7 @@
 	import Button from '$lib/ui/components/Button.svelte';
 	import Input from '$lib/ui/components/Input.svelte';
 	import filterStore from '$lib/stores/filter.svelte';
+	import { filterBarStore } from '$lib/stores/filter.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import { useFilterBar } from '../viewmodels/useFilterBar.svelte';
@@ -35,7 +36,7 @@
 				onclick={vm.toggleSort}
 			>
 				<div class="w-5">
-					{#if filterStore.bar.sortAsc}
+					{#if filterBarStore.sortAsc}
 						<Icon type={IconType.SortAsc} />
 					{:else}
 						<Icon type={IconType.SortDesc} />

@@ -19,7 +19,7 @@
 	import playerBarStore from '$lib/stores/playerbar.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
-	import filterStore from '$lib/stores/filter.svelte';
+	import { filterBarStore } from '$lib/stores/filter.svelte';
 
 	import { MusicListType } from '$lib/features/music/types';
 	import musicStore from '$lib/stores/music.svelte';
@@ -29,9 +29,7 @@
 	const currentWindow = getCurrentWindow();
 
 	let sidebarWidth = $derived(sidebarStore.width);
-	let paddingTop = $derived(
-		(isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height
-	);
+	let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
 
 	let isMouseInsideArea = $state(false);
 	let isShowing = $state(false);
@@ -96,7 +94,7 @@
 			musicStore.listType === MusicListType.Music ||
 			musicStore.listType === MusicListType.Folder
 		) {
-			minTop = (isMobile() ? mobileStore.statusBarHeight : 0) + filterStore.bar.height;
+			minTop = (isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height;
 		}
 
 		if (initial[1] < minTop) return;

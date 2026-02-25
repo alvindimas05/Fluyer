@@ -2,6 +2,7 @@ import { IconThemeType, IconType } from '$lib/ui/icon/types';
 import { isMacos } from '$lib/platform';
 import { type FolderData, MusicListType } from '$lib/features/music/types';
 import filterStore from '$lib/stores/filter.svelte';
+import { filterBarStore } from '$lib/stores/filter.svelte';
 import iconStore from '$lib/stores/icon.svelte';
 import folderStore from '$lib/stores/folder.svelte';
 import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
@@ -68,11 +69,11 @@ export function useFilterBar() {
 
 	function updateFilterBarHeight() {
 		if (!element) return;
-		filterStore.bar.height = element.offsetHeight + (window.innerWidth > 640 ? 8 : 16);
+		filterBarStore.height = element.offsetHeight + (window.innerWidth > 640 ? 8 : 16);
 	}
 
 	function toggleSort() {
-		filterStore.bar.sortAsc = !filterStore.bar.sortAsc;
+		filterBarStore.sortAsc = !filterBarStore.sortAsc;
 	}
 
 	async function handleToggleChange(type: MusicListType) {

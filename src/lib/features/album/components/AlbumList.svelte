@@ -1,6 +1,6 @@
 <script lang="ts">
 	import mobileStore from '$lib/stores/mobile.svelte';
-	import filterStore from '$lib/stores/filter.svelte';
+	import { filterBarStore } from '$lib/stores/filter.svelte';
 	import playerBarStore from '$lib/stores/playerbar.svelte';
 	import AlbumItem from '$lib/features/album/components/AlbumItem.svelte';
 	import { useAlbumList } from '$lib/features/album/viewmodels/useAlbumList.svelte';
@@ -19,7 +19,7 @@
 		: vm.isHorizontal
 			? vm.itemHeight
 			: window.innerHeight -
-				filterStore.bar.height -
+				filterBarStore.height -
 				playerBarStore.height -
 				mobileStore.navigationBarHeight -
 				mobileStore.statusBarHeight}px;"
@@ -78,11 +78,11 @@
 					{@const shouldRender = vm.shouldRenderGridItem(index, musicList)}
 					<div
 						use:vm.observeElement={index}
-						class="{inViewport
+						class={inViewport
 							? hiddenBySidebar
 								? 'animate__animated animate__fadeOut'
 								: 'animate__animated animate__fadeIn'
-							: ''}"
+							: ''}
 						style="width: {vm.state.itemWidth}px; animation-duration: 500ms; {hiddenBySidebar
 							? 'pointer-events: none; opacity: 0;'
 							: 'opacity: 1;'}"
