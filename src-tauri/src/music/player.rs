@@ -9,9 +9,6 @@ use std::sync::{Mutex, OnceLock};
 use std::thread;
 use tauri::{Emitter, Manager};
 
-#[cfg(target_os = "android")]
-use tauri_plugin_fluyer::FluyerExt;
-
 const BASS_PLUGINS: [&str; 6] = [
     "bassflac", "bassopus", "bassape", "bassalac", "basswv", "bass_aac",
 ];
@@ -469,25 +466,7 @@ impl MusicPlayer {
 
         #[cfg(target_os = "android")]
         {
-            crate::info!("Initializing Android Media Control");
-            let _ = app_handle().fluyer().init_media_control(|event| {
-                crate::info!("Media Control Action: {}", event.action);
-                if event.action.starts_with("seek:") {
-                    if let Ok(pos) = event.action[5..].parse::<u64>() {
-                        std::thread::spawn(move || {
-                            Self::set_pos(pos);
-                        });
-                    }
-                } else if event.action == "previous" {
-                    std::thread::spawn(move || {
-                        Self::play_previous();
-                    });
-                } else {
-                    std::thread::spawn(move || {
-                        Self::send_command(event.action);
-                    });
-                }
-            });
+            crate::music::media_session::MediaSession::init();
         }
 
         Self {}
@@ -592,12 +571,10 @@ impl MusicPlayer {
                         sync_info.is_playing,
                         position
                     );
-                    if let Err(e) = app_handle()
-                        .fluyer()
-                        .set_media_control_state(sync_info.is_playing, position)
-                    {
-                        crate::error!("Failed to update media control state: {:?}", e);
-                    }
+                    crate::music::media_session::MediaSession::set_state(
+                        sync_info.is_playing,
+                        position,
+                    );
                 }
             }
         }
@@ -901,22 +878,8 @@ impl MusicPlayer {
                             drop(state);
 
                             tauri::async_runtime::spawn(async move {
-                                let handle = app_handle();
-                                let image_path =
-                                    match handle.fluyer().metadata_get_image(music.path.clone()) {
-                                        Ok(res) => res.path,
-                                        Err(_) => None,
-                                    };
-
-                                let _ = handle.fluyer().update_media_control(
-                                    music.title.unwrap_or("Unknown".to_string()),
-                                    music.artist.unwrap_or("Unknown".to_string()),
-                                    music.album.unwrap_or("Unknown".to_string()),
-                                    music.duration.unwrap_or(0) as u64,
-                                    image_path,
-                                    is_playing,
-                                    is_first,
-                                    is_last,
+                                crate::music::media_session::MediaSession::update_metadata(
+                                    &music, is_playing, is_first, is_last,
                                 );
                             });
                         }
