@@ -33,14 +33,20 @@
 
 	let isMouseInsideArea = $state(false);
 	let isShowing = $state(false);
-	let hasShown = $state(false);
 	let isMaximized = $state(true);
+	let isRendered = $state(false);
 
 	$effect(() => {
-		if (isShowing && !hasShown) {
-			hasShown = true;
+		if (isShowing) {
+			isRendered = true;
 		}
 	});
+
+	function handleAnimationEnd() {
+		if (!isShowing) {
+			isRendered = false;
+		}
+	}
 
 	async function onMouseMove(e: MouseEvent) {
 		const onRightEdge =
@@ -143,33 +149,33 @@
 <svelte:body use:swipeable on:swiped={onSwipe} onmouseleave={onBodyMouseLeave} />
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	class="pointer-events-none fixed top-0 z-10 px-3
-        {type === SidebarType.Right ? 'right-0' : 'left-0'}
-        {hasShown ? '' : 'invisible'}"
-	style="height: calc(100% - {playerBarStore.height}px - {paddingTop}px);
-        top: {paddingTop}px;"
-	onmouseleave={onMouseLeave}
->
-	<View
-		class="linux-hardware-accelerate animate__animated pointer-events-auto h-full
-			rounded-lg p-3
-			{isShowing
-			? type === SidebarType.Right
-				? 'animate__fadeInRight'
-				: 'animate__fadeInLeft'
-			: hasShown
-				? type === SidebarType.Right
-					? 'animate__fadeOutRight'
-					: 'animate__fadeOutLeft'
-				: ''}
-            {props.class}
-		"
-		style="
-			width: {sidebarWidth - 24}px;
-			animation-duration: {isLinux() ? '350ms' : '500ms'};
-		"
+{#if isRendered}
+	<div
+		class="pointer-events-none fixed top-0 z-10 px-3
+			{type === SidebarType.Right ? 'right-0' : 'left-0'}"
+		style="height: calc(100% - {playerBarStore.height}px - {paddingTop}px);
+			top: {paddingTop}px;"
+		onmouseleave={onMouseLeave}
 	>
-		{@render children?.()}
-	</View>
-</div>
+		<View
+			class="animate__animated pointer-events-auto h-full
+				rounded-lg p-3
+				{isShowing
+				? type === SidebarType.Right
+					? 'animate__fadeInRight'
+					: 'animate__fadeInLeft'
+				: type === SidebarType.Right
+					? 'animate__fadeOutRight'
+					: 'animate__fadeOutLeft'}
+				{props.class}
+			"
+			style="
+				width: {sidebarWidth - 24}px;
+				animation-duration: {isLinux() ? '350ms' : '500ms'};
+			"
+			events={{ onanimationend: handleAnimationEnd }}
+		>
+			{@render children?.()}
+		</View>
+	</div>
+{/if}
