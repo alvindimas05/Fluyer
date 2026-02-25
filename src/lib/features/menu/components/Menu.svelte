@@ -6,12 +6,17 @@
 	import { SidebarType } from '$lib/features/sidebar/types';
 	import PageService from '$lib/services/PageService.svelte';
 	import MenuVolume from './MenuVolume.svelte';
-	import { isDesktop } from '$lib/platform';
+	import { isDesktop, isWindows } from '$lib/platform';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
+	import { invoke } from '@tauri-apps/api/core';
+	import { CommandRoutes } from '$lib/constants/CommandRoutes';
 
 	async function gotoPlayPage() {
-		if(isDesktop()){
+		if (isDesktop()) {
 			await getCurrentWindow().setFullscreen(true);
+			if (isWindows()) {
+				await invoke(CommandRoutes.RESTORE_ANIMATED_BACKGROUND);
+			}
 		}
 		PageService.goTo(PageRoutes.PLAY);
 	}
@@ -19,11 +24,7 @@
 
 <Sidebar type={SidebarType.Left}>
 	<p class="px-3 py-2 text-[1.2rem] font-semibold md:text-[1.5rem]">Menu</p>
-	<MenuButton
-		label="Play Screen"
-		icon={IconType.Fullscreen}
-		onclick={gotoPlayPage}
-	/>
+	<MenuButton label="Play Screen" icon={IconType.Fullscreen} onclick={gotoPlayPage} />
 	<!--{#if isDesktop() && !$settingBitPerfectMode}-->
 	<!--    <MenuButton label="Equalizer" icon={IconType.Equalizer}-->
 	<!--              onclick={() => UIController.toggleEqualizer(true)}/>-->

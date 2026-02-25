@@ -1,4 +1,4 @@
-import { isDesktop, isMacos } from '$lib/platform';
+import { isDesktop, isMacos, isWindows } from '$lib/platform';
 import musicStore from '$lib/stores/music.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
 import MetadataService from '$lib/services/MetadataService.svelte';
@@ -8,6 +8,8 @@ import QueueService from '$lib/services/QueueService.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
 import LyricService, { type MusicLyric } from '$lib/services/LyricService.svelte';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { invoke } from '@tauri-apps/api/core';
+import { CommandRoutes } from '$lib/constants/CommandRoutes';
 
 let lyricContainerElement: HTMLDivElement;
 
@@ -83,8 +85,11 @@ function handleButtonNext() {
 }
 
 async function handleButtonBack() {
-	if(isDesktop()){
+	if (isDesktop()) {
 		await getCurrentWindow().setFullscreen(false);
+		if (isWindows()) {
+			await invoke(CommandRoutes.RESTORE_ANIMATED_BACKGROUND);
+		}
 	}
 	PageService.back();
 }
