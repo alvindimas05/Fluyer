@@ -7,4 +7,10 @@ if [[ "$arch" == "arm64" ]]; then
 fi
 
 bun run init
+
+# Required for wgpu
+cd src-tauri
+cargo update
+
+cd ..
 bun tauri build
