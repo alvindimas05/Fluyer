@@ -8,7 +8,6 @@
 	import { PageRoutes } from '$lib/constants/PageRoutes';
 	import { page } from '$app/state';
 	import SwipeGuide from '$lib/features/swipe_guide/components/SwipeGuide.svelte';
-	import DeveloperDebugOverlay from '$lib/features/developer_debug_overlay/components/DeveloperDebugOverlay.svelte';
 	import ToastService from '$lib/services/ToastService.svelte';
 	import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
@@ -82,7 +81,4 @@
 {/if}
 {#if isMobile() && mobileStore.showSwipeGuide}
 	<SwipeGuide />
-{/if}
-{#if settingStore.developerMode}
-	<DeveloperDebugOverlay />
 {/if}
