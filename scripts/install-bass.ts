@@ -32,9 +32,8 @@ export async function installBassLib(name: string, options: InstallOptions = {})
 		return;
 	}
 
-	const downloadName = uuid.v4();
-	const downloadPath = path.join(destPath, `${downloadName}.zip`);
-	const extractPath = path.join(destPath, downloadName);
+	const downloadPath = path.join(destPath, `${name}-${VERSION}-${platform}-${arch}.zip`);
+	const extractPath = path.join(destPath, `${name}-${VERSION}-${platform}-${arch}`);
 
 	// Ensure destination directory exists (for downloading zip)
 	await fs.mkdir(destPath, { recursive: true });
@@ -109,27 +108,51 @@ export async function installBassLib(name: string, options: InstallOptions = {})
 			await fs.access(libDestPath);
 			console.log(`${name} is already installed. Reinstalling...`);
 			await fs.rm(libDestPath);
-		} catch (e) {}
+		} catch (e) { }
 
 		console.log(
 			`Installing ${name} for ${platform}${platform === 'android' ? ` (${arch})` : ''}...`
 		);
 
-		await downloadFile(downloadUrl, downloadPath);
-		await extractZip(downloadPath, extractPath);
+		let attempts = 0;
+		const maxAttempts = 3;
+		while (attempts < maxAttempts) {
+			try {
+				await downloadFile(downloadUrl, downloadPath);
+				await extractZip(downloadPath, extractPath);
 
-		await fs.copyFile(libSourcePath, libDestPath);
+				await fs.copyFile(libSourcePath, libDestPath);
 
-		if (extraOps) {
-			await extraOps();
+				if (extraOps) {
+					await extraOps();
+				}
+				break;
+			} catch (error) {
+				attempts++;
+				console.error(`Attempt ${attempts} failed for ${name}:`, error instanceof Error ? error.message : String(error));
+
+				try {
+					await fs.rm(downloadPath);
+				} catch (e) { }
+				try {
+					await fs.rm(extractPath, { recursive: true, force: true });
+				} catch (e) { }
+
+				if (attempts >= maxAttempts) {
+					throw error;
+				}
+
+				console.log(`Retrying ${name} in 1 second...`);
+				await new Promise(resolve => setTimeout(resolve, 1000));
+			}
 		}
 	} finally {
 		try {
 			await fs.rm(downloadPath);
-		} catch (e) {}
+		} catch (e) { }
 		try {
 			await fs.rm(extractPath, { recursive: true, force: true });
-		} catch (e) {}
+		} catch (e) { }
 	}
 }
 
