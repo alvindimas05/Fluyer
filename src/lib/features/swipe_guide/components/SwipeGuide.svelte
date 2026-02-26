@@ -2,10 +2,16 @@
 	import Button from '$lib/ui/components/Button.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
+	import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 
 	let leftLoaded = $state(false);
 	let rightLoaded = $state(false);
 	let allLoaded = $derived(leftLoaded && rightLoaded);
+
+	function close() {
+		mobileStore.showSwipeGuide = false;
+		PersistentStoreService.swipeGuide.set(false);
+	}
 </script>
 
 <div
@@ -31,9 +37,6 @@
 	<div class="mt-3">Swipe in the opposite direction to close</div>
 
 	<div class="grid w-full justify-center">
-		<Button
-			class="mt-3 w-fit rounded-md px-3 py-2"
-			onclick={() => (mobileStore.showSwipeGuide = false)}>Got it</Button
-		>
+		<Button class="mt-3 w-fit rounded-md px-3 py-2" onclick={close}>Got it</Button>
 	</div>
 </div>
