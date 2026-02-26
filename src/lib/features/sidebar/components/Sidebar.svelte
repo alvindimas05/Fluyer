@@ -24,7 +24,8 @@
 	import { MusicListType } from '$lib/features/music/types';
 	import musicStore from '$lib/stores/music.svelte';
 
-	const SWIPE_RANGE = 125;
+	const SWIPE_RANGE_X = 125;
+	const SWIPE_RANGE_Y = 50;
 
 	const currentWindow = getCurrentWindow();
 
@@ -91,7 +92,7 @@
 	}
 
 	function onSwipe(e: CustomEvent<SwipeEventData>) {
-		const { initial, deltaX } = e.detail;
+		const { initial, deltaX, deltaY } = e.detail;
 
 		let minTop = sidebarStore.swipeMinimumTop;
 
@@ -106,18 +107,21 @@
 		if (initial[1] < minTop) return;
 
 		const swipeOpen =
-			(type === SidebarType.Right && deltaX < -SWIPE_RANGE) ||
-			(type === SidebarType.Left && deltaX > SWIPE_RANGE);
+			(type === SidebarType.Right && deltaX < -SWIPE_RANGE_X) ||
+			(type === SidebarType.Left && deltaX > SWIPE_RANGE_X);
 
 		const swipeClose =
-			(type === SidebarType.Right && deltaX > SWIPE_RANGE) ||
-			(type === SidebarType.Left && deltaX < -SWIPE_RANGE);
+			(type === SidebarType.Right && deltaX > SWIPE_RANGE_X) ||
+			(type === SidebarType.Left && deltaX < -SWIPE_RANGE_X);
 
-		if (swipeOpen && sidebarStore.showType === null) {
+		const swipeIsNotVertical = Math.abs(deltaY) < SWIPE_RANGE_Y;
+		console.log('Swipe is not vertical', swipeIsNotVertical);
+
+		if (swipeOpen && sidebarStore.showType === null && swipeIsNotVertical) {
 			isMouseInsideArea = true;
 			isShowing = true;
 			sidebarStore.showType = type;
-		} else if (swipeClose && sidebarStore.showType === type) {
+		} else if (swipeClose && sidebarStore.showType === type && swipeIsNotVertical) {
 			setTimeout(() => {
 				isMouseInsideArea = false;
 				isShowing = false;
