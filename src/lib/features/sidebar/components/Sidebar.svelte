@@ -115,7 +115,6 @@
 			(type === SidebarType.Left && deltaX < -SWIPE_RANGE_X);
 
 		const swipeIsNotVertical = Math.abs(deltaY) < SWIPE_RANGE_Y;
-		console.log('Swipe is not vertical', swipeIsNotVertical);
 
 		if (swipeOpen && sidebarStore.showType === null && swipeIsNotVertical) {
 			isMouseInsideArea = true;
