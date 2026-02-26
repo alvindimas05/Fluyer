@@ -19,7 +19,6 @@
 	"license": "MIT",
 	"dependencies": {
 		"@fontsource/inter": "^5.2.5",
-		"@lottiefiles/dotlottie-svelte": "^0.6.2",
 		"@lucide/svelte": "^0.525.0",
 		"@react2svelte/swipeable": "^0.1.4",
 		"@tauri-apps/api": "^2.10.1",
