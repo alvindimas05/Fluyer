@@ -108,7 +108,7 @@ export async function installBassLib(name: string, options: InstallOptions = {})
 			await fs.access(libDestPath);
 			console.log(`${name} is already installed. Reinstalling...`);
 			await fs.rm(libDestPath);
-		} catch (e) { }
+		} catch (e) {}
 
 		console.log(
 			`Installing ${name} for ${platform}${platform === 'android' ? ` (${arch})` : ''}...`
@@ -129,30 +129,33 @@ export async function installBassLib(name: string, options: InstallOptions = {})
 				break;
 			} catch (error) {
 				attempts++;
-				console.error(`Attempt ${attempts} failed for ${name}:`, error instanceof Error ? error.message : String(error));
+				console.error(
+					`Attempt ${attempts} failed for ${name}:`,
+					error instanceof Error ? error.message : String(error)
+				);
 
 				try {
 					await fs.rm(downloadPath);
-				} catch (e) { }
+				} catch (e) {}
 				try {
 					await fs.rm(extractPath, { recursive: true, force: true });
-				} catch (e) { }
+				} catch (e) {}
 
 				if (attempts >= maxAttempts) {
 					throw error;
 				}
 
 				console.log(`Retrying ${name} in 1 second...`);
-				await new Promise(resolve => setTimeout(resolve, 1000));
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 			}
 		}
 	} finally {
 		try {
 			await fs.rm(downloadPath);
-		} catch (e) { }
+		} catch (e) {}
 		try {
 			await fs.rm(extractPath, { recursive: true, force: true });
-		} catch (e) { }
+		} catch (e) {}
 	}
 }
 

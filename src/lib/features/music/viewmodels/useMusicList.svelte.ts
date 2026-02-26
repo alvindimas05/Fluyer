@@ -246,7 +246,7 @@ export function useMusicList() {
 			destroy() {
 				//
 			}
-		}
+		};
 	}
 
 	return {

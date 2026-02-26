@@ -1,27 +1,27 @@
-input[type="radio"] {
-    @apply bg-transparent border-2 border-white/50 outline-transparent accent-transparent shadow-none rounded-full;
-    appearance: none;
-    -webkit-appearance: none;
+input[type='radio'] {
+	@apply rounded-full border-2 border-white/50 bg-transparent accent-transparent shadow-none outline-transparent;
+	appearance: none;
+	-webkit-appearance: none;
 
-    &:checked {
-        @apply border-white bg-transparent;
-        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='4'/%3e%3c/svg%3e");
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
+	&:checked {
+		@apply border-white bg-transparent;
+		background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='4'/%3e%3c/svg%3e");
+		background-size: 100% 100%;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
 }
 
-input[type="checkbox"] {
-    @apply bg-transparent border-2 border-white/50 outline-transparent accent-transparent shadow-none rounded;
-    appearance: none;
-    -webkit-appearance: none;
+input[type='checkbox'] {
+	@apply rounded border-2 border-white/50 bg-transparent accent-transparent shadow-none outline-transparent;
+	appearance: none;
+	-webkit-appearance: none;
 
-    &:checked {
-        @apply border-white bg-transparent;
-        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3crect x='4' y='4' width='8' height='8' rx='1'/%3e%3c/svg%3e");
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
+	&:checked {
+		@apply border-white bg-transparent;
+		background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3crect x='4' y='4' width='8' height='8' rx='1'/%3e%3c/svg%3e");
+		background-size: 100% 100%;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
 }

@@ -14,7 +14,11 @@
 	const vm = usePlayPage();
 </script>
 
-<svelte:document onkeydown={vm.onKeyDown} onmousemove={vm.resetIdleTimer} onclick={vm.resetIdleTimer} />
+<svelte:document
+	onkeydown={vm.onKeyDown}
+	onmousemove={vm.resetIdleTimer}
+	onclick={vm.resetIdleTimer}
+/>
 
 {#if settingStore.ui.play.showBackButton}
 	<div class="absolute left-0 top-0 z-10 hidden ps-3 pt-3 opacity-70 md:block">
@@ -214,7 +218,9 @@
 					md:w-[55vw] md-mdpi:text-[1.4rem] lg-mdpi:text-[1.5rem] xl-mdpi:text-[1.7rem]
                     md-hdpi:text-[1.3rem] lg-hdpi:text-[1.45rem] xl-hdpi:text-[1.6rem]
                     md-xhdpi:text-[1.2rem] lg-xhdpi:text-[1.4rem] xl-xhdpi:text-[1.6rem]"
-					style="padding-bottom: {window.innerWidth < 768 ? vm.lyricContainerElement?.clientHeight - 60 : 0}px"
+					style="padding-bottom: {window.innerWidth < 768
+						? vm.lyricContainerElement?.clientHeight - 60
+						: 0}px"
 				>
 					{#each vm.lyrics as lyric, i}
 						<div

@@ -23,14 +23,12 @@
 </script>
 
 <View
-	class="grid md:hidden cursor-default grid-cols-[min-content_auto_min-content]
-    items-center gap-3 rounded-md mt-4 mx-2 px-3 py-3 text-base font-medium
-    tracking-wide md:text-lg {settingStore.bitPerfectMode
-		? 'pointer-events-none opacity-50'
-		: ''}"
+	class="mx-2 mt-4 grid cursor-default
+    grid-cols-[min-content_auto_min-content] items-center gap-3 rounded-md px-3 py-3 text-base font-medium tracking-wide
+    md:hidden md:text-lg {settingStore.bitPerfectMode ? 'pointer-events-none opacity-50' : ''}"
 >
 	<button class="w-5" onclick={handleMuteButton}>
-        <Icon type={IconType.Mute} />
+		<Icon type={IconType.Mute} />
 	</button>
 	<div class="relative w-full">
 		<ProgressBar
@@ -45,7 +43,7 @@
 			size="sm"
 		/>
 	</div>
-    <button class="w-5" onclick={handleSpeakerButton}>
-        <Icon type={IconType.Speaker} />
-    </button>
+	<button class="w-5" onclick={handleSpeakerButton}>
+		<Icon type={IconType.Speaker} />
+	</button>
 </View>

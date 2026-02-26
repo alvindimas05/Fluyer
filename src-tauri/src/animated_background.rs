@@ -95,7 +95,8 @@ pub async fn update_animated_background(
             data: blurred.into_raw(),
         };
 
-        app_handle().emit("animated_background_update", payload)
+        app_handle()
+            .emit("animated_background_update", payload)
             .map_err(|e| e.to_string())?;
     }
 

@@ -23,7 +23,7 @@ class ToastServiceImpl {
 	// Svelte 5 state for reactive list of toasts
 	toasts = $state<IToast[]>([]);
 
-	constructor() { }
+	constructor() {}
 
 	initialize() {
 		return listen<IToast>('toast', (event) => {

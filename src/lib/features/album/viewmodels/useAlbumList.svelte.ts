@@ -288,9 +288,7 @@ export function useAlbumList() {
 	$effect(() => {
 		if (data) {
 			data.forEach((_, index) => {
-				const isHidden = isHorizontal
-					? shouldHideHorizontalItem(index)
-					: shouldHideGridItem(index);
+				const isHidden = isHorizontal ? shouldHideHorizontalItem(index) : shouldHideGridItem(index);
 				if (!isHidden && animatingOutItems.has(index)) {
 					animatingOutItems = new Set([...animatingOutItems].filter((i) => i !== index));
 				}
@@ -302,8 +300,8 @@ export function useAlbumList() {
 		node.scrollLeft = state.scrollLeft;
 		node.scrollTop = state.scrollTop;
 		return {
-			destroy() { }
-		}
+			destroy() {}
+		};
 	}
 
 	return {

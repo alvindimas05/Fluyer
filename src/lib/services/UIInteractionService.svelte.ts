@@ -18,7 +18,6 @@ const UIInteractionService = {
 		// 	let elements = document.querySelectorAll('.animate-scroll-overflow-text');
 		// 	elements.forEach(el => {
 		// 		const htmlEl = el as HTMLElement;
-
 		// 		// Wrap contents in a span if not already wrapped
 		// 		if (!htmlEl.hasAttribute('data-scroll-wrapped')) {
 		// 			const span = document.createElement('span');
@@ -31,13 +30,10 @@ const UIInteractionService = {
 		// 			htmlEl.appendChild(span);
 		// 			htmlEl.setAttribute('data-scroll-wrapped', 'true');
 		// 		}
-
 		// 		const span = htmlEl.firstChild as HTMLElement;
 		// 		if (!span) return;
-
 		// 		// Calculate overflow
 		// 		const overflow = span.scrollWidth - htmlEl.clientWidth;
-
 		// 		if (overflow > 0) {
 		// 			if (scrollEnd) {
 		// 				span.style.transform = `translateX(-${overflow}px)`;
