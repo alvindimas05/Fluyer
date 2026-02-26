@@ -25,6 +25,10 @@ impl MediaSession {
                     std::thread::spawn(move || {
                         crate::music::player::MusicPlayer::play_previous();
                     });
+                } else if event.action == "next" {
+                    std::thread::spawn(move || {
+                        crate::music::player::MusicPlayer::play_next(true);
+                    });
                 } else {
                     std::thread::spawn(move || {
                         crate::music::player::MusicPlayer::send_command(event.action);

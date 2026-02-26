@@ -8,6 +8,8 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::thread;
 use tauri::{Emitter, Manager};
+#[cfg(target_os = "android")]
+use tauri_plugin_fluyer::FluyerExt;
 
 const BASS_PLUGINS: [&str; 6] = [
     "bassflac", "bassopus", "bassape", "bassalac", "basswv", "bass_aac",
@@ -920,7 +922,7 @@ impl MusicPlayer {
         }
     }
 
-    fn play_next(from_user: bool) {
+    pub fn play_next(from_user: bool) {
         tauri::async_runtime::spawn_blocking(move || {
             if let Some(state_lock) = PLAYER_STATE.get() {
                 let next_index = {
@@ -1002,7 +1004,7 @@ impl MusicPlayer {
         });
     }
 
-    fn play_previous() {
+    pub fn play_previous() {
         tauri::async_runtime::spawn_blocking(|| {
             if let Some(state_lock) = PLAYER_STATE.get() {
                 let prev_index = {

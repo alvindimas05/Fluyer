@@ -37,6 +37,7 @@ const PersistentStoreService = {
 			PersistentStoreService.userInterface.play.showVolume.initialize(),
 			PersistentStoreService.userInterface.showRepeatButton.initialize(),
 			PersistentStoreService.userInterface.showShuffleButton.initialize(),
+			PersistentStoreService.swipeGuide.initialize(),
 			PersistentStoreService.equalizer.initialize(),
 			PersistentStoreService.bitPerfectMode.initialize(),
 			PersistentStoreService.volume.initialize()
