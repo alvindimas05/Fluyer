@@ -67,17 +67,13 @@
 <div class="scrollbar-hidden fixed h-screen w-screen">
 	{@render children?.()}
 </div>
-{#if page.url.pathname !== PageRoutes.PLAY}
-	<div class="fixed left-0 top-0 z-[99999] grid h-12 w-full grid-cols-[1fr_auto]">
-		{#if Array.isArray(musicStore.list)}
-			{#if [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
-				<FilterBar />
-			{/if}
-		{/if}
-		{#if isDesktop()}
-			<TitleBar />
-		{/if}
-	</div>
+{#if isDesktop() && page.url.pathname !== PageRoutes.PLAY}
+	<TitleBar />
+{/if}
+{#if Array.isArray(musicStore.list)}
+	{#if [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
+		<FilterBar />
+	{/if}
 {/if}
 {#if isMobile() && mobileStore.showSwipeGuide}
 	<SwipeGuide />

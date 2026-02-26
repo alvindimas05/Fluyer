@@ -2,12 +2,18 @@
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import { filterBarStore } from '$lib/stores/filter.svelte';
 	import playerBarStore from '$lib/stores/playerbar.svelte';
+	import musicStore from '$lib/stores/music.svelte';
+	import playlistStore from '$lib/stores/playlist.svelte';
+	import { MusicListType } from '$lib/features/music/types';
 	import AlbumItem from '$lib/features/album/components/AlbumItem.svelte';
+	import PlaylistItem from '$lib/features/album/components/PlaylistItem.svelte';
 	import { useAlbumList } from '$lib/features/album/viewmodels/useAlbumList.svelte';
 
 	const vm = useAlbumList();
 
 	let scrollContainer = $state<HTMLDivElement>();
+
+	const isPlaylistMode = $derived(musicStore.listType === MusicListType.Playlist);
 </script>
 
 <svelte:window onresize={vm.updateItemWidth} />
@@ -24,7 +30,33 @@
 				mobileStore.navigationBarHeight -
 				mobileStore.statusBarHeight}px;"
 >
-	{#if vm.isHorizontal}
+	{#if isPlaylistMode}
+		<!-- Playlist grid layout -->
+		<div
+			bind:this={scrollContainer}
+			use:vm.scrollable
+			onscroll={vm.handleScroll}
+			class="scrollbar-hidden h-full overflow-y-auto"
+			style="padding-bottom: {mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
+		>
+			<div
+				class="grid"
+				style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
+			>
+				{#each playlistStore.list as playlist, index}
+					<div
+						use:vm.observeElement={index}
+						class={vm.visibleItems.has(index) ? 'animate__animated animate__fadeIn' : ''}
+						style="width: {vm.state.itemWidth}px; animation-duration: 500ms;"
+					>
+						{#if vm.visibleItems.has(index)}
+							<PlaylistItem {playlist} visible={vm.visibleItems.has(index)} />
+						{/if}
+					</div>
+				{/each}
+			</div>
+		</div>
+	{:else if vm.isHorizontal}
 		<!-- Horizontal layout -->
 		<div
 			bind:this={scrollContainer}

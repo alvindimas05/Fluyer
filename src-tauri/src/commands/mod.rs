@@ -58,4 +58,9 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     // Animated Background
     crate::animated_background::update_animated_background,
     crate::animated_background::restore_animated_background,
+    // Playlist commands
+    playlist::playlist_get_all,
+    playlist::playlist_create,
+    playlist::playlist_delete,
+    playlist::playlist_save_image,
 ];

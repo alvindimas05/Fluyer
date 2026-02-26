@@ -23,6 +23,9 @@ export const CommandRoutes = {
 	MUSIC_TOGGLE_BIT_PERFECT: 'music_toggle_bit_perfect',
 
 	PLAYLIST_GET_ALL: 'playlist_get_all',
+	PLAYLIST_CREATE: 'playlist_create',
+	PLAYLIST_DELETE: 'playlist_delete',
+	PLAYLIST_SAVE_IMAGE: 'playlist_save_image',
 
 	FOLDER_GET_ITEMS: 'folder_get_items',
 	FOLDER_GET_FIRST_MUSIC_PATH: 'folder_get_first_music_path',

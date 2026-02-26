@@ -11,6 +11,7 @@
 	import MusicList from '$lib/features/music/components/MusicList.svelte';
 	import Menu from '$lib/features/menu/components/Menu.svelte';
 	import PlayerBar from '$lib/features/playerbar/components/PlayerBar.svelte';
+	import CreatePlaylistModal from '$lib/features/playlist/components/CreatePlaylistModal.svelte';
 
 	let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
 
@@ -22,6 +23,8 @@
 				return 'grid-rows-[auto_min-content]';
 			case MusicListType.Folder:
 				return 'grid-rows-[min-content_auto_min-content]';
+			case MusicListType.Playlist:
+				return 'grid-rows-[min-content_min-content_auto_min-content]';
 			default:
 				return 'grid-rows-[auto_min-content]';
 		}
@@ -50,4 +53,5 @@
 		{/if}
 		<PlayerBar bind:tooltipVisible />
 	</div>
+	<CreatePlaylistModal />
 {/if}

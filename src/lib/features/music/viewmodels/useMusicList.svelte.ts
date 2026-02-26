@@ -2,6 +2,7 @@ import { MusicListType } from '$lib/features/music/types';
 import musicStore from '$lib/stores/music.svelte';
 import filterStore, { filterBarStore } from '$lib/stores/filter.svelte';
 import folderStore from '$lib/stores/folder.svelte';
+import playlistStore from '$lib/stores/playlist.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
 import FolderService from '$lib/services/FolderService.svelte';
 import sidebarStore from '$lib/stores/sidebar.svelte';
@@ -50,6 +51,15 @@ const data = $derived.by(() => {
 	if (!Array.isArray(musicStore.list)) return [];
 
 	const isFolderMode = musicStore.listType === MusicListType.Folder;
+	const isPlaylistMode = musicStore.listType === MusicListType.Playlist;
+
+	// In playlist mode, filter by selected playlist paths
+	if (isPlaylistMode && playlistStore.selectedPlaylist) {
+		const pathSet = new Set(playlistStore.selectedPlaylist.paths);
+		const filtered = musicStore.list.filter((music) => pathSet.has(music.path));
+		if (!filterBarStore.sortAsc) return [...filtered].reverse();
+		return filtered;
+	}
 
 	const filteredMusic = LibraryService.sortMusicList(
 		musicStore.list.filter((music) => {

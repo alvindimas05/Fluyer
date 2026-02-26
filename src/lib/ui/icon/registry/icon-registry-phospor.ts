@@ -29,6 +29,10 @@ import SpeakerX from 'phosphor-svelte/lib/SpeakerX';
 import Trash from 'phosphor-svelte/lib/Trash';
 import VinylRecord from 'phosphor-svelte/lib/VinylRecord';
 import XCircle from 'phosphor-svelte/lib/XCircle';
+import Playlist from 'phosphor-svelte/lib/Playlist';
+import Plus from 'phosphor-svelte/lib/Plus';
+import Check from 'phosphor-svelte/lib/Check';
+import X from 'phosphor-svelte/lib/X';
 
 const iconRegistryPhospor = {
 	[IconType.Unknown]: QuestionMark,
@@ -67,7 +71,11 @@ const iconRegistryPhospor = {
 	[IconType.MusicListTypeAll]: GridFour,
 	[IconType.MusicListTypeAlbum]: VinylRecord,
 	[IconType.MusicListTypeMusic]: MusicNote,
-	[IconType.MusicListTypeFolder]: Folder
+	[IconType.MusicListTypeFolder]: Folder,
+	[IconType.MusicListTypePlaylist]: Playlist,
+	[IconType.PlaylistAdd]: Plus,
+	[IconType.Check]: Check,
+	[IconType.Cancel]: X
 };
 
 export default iconRegistryPhospor;

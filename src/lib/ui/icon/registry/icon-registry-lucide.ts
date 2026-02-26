@@ -29,6 +29,10 @@ import ChevronDown from '@lucide/svelte/icons/chevron-down';
 import ChevronUp from '@lucide/svelte/icons/chevron-up';
 import Grid2x2Icon from '@lucide/svelte/icons/grid-2x2';
 import DiscAlbum from '@lucide/svelte/icons/disc-album';
+import ListMusic from '@lucide/svelte/icons/list-music';
+import Plus from '@lucide/svelte/icons/plus';
+import Check from '@lucide/svelte/icons/check';
+import X from '@lucide/svelte/icons/x';
 
 const iconRegistryLucide = {
 	[IconType.Unknown]: HelpCircle,
@@ -67,7 +71,11 @@ const iconRegistryLucide = {
 	[IconType.MusicListTypeAll]: Grid2x2Icon,
 	[IconType.MusicListTypeAlbum]: DiscAlbum,
 	[IconType.MusicListTypeMusic]: Music2,
-	[IconType.MusicListTypeFolder]: Folder
+	[IconType.MusicListTypeFolder]: Folder,
+	[IconType.MusicListTypePlaylist]: ListMusic,
+	[IconType.PlaylistAdd]: Plus,
+	[IconType.Check]: Check,
+	[IconType.Cancel]: X
 };
 
 export default iconRegistryLucide;

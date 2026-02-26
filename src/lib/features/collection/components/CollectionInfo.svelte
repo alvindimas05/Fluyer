@@ -8,10 +8,13 @@
 	import useCollectionInfo from '$lib/features/collection/viewmodels/useCollectionInfo.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
 	import { isLinux, isMobile } from '$lib/platform';
+	import playlistStore from '$lib/stores/playlist.svelte';
 
 	const vm = useCollectionInfo();
 	let shouldShow = $derived(
-		vm.album || folderStore.currentFolder || musicStore.listType === MusicListType.Playlist
+		vm.album ||
+			folderStore.currentFolder ||
+			(musicStore.listType === MusicListType.Playlist && !!playlistStore.selectedPlaylist)
 	);
 	let isSidebarVisible = $derived(!!sidebarStore.showType);
 </script>

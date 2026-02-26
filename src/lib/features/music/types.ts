@@ -49,3 +49,12 @@ export enum MusicListType {
 	Music = 'music',
 	Playlist = 'playlist'
 }
+
+export interface PlaylistData {
+	id?: number;
+	name: string;
+	image?: string;
+	title?: string;
+	artist?: string;
+	paths: string[];
+}

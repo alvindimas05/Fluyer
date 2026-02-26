@@ -1,0 +1,62 @@
+<script lang="ts">
+	import type { PlaylistData } from '$lib/features/music/types';
+	import { MusicConfig } from '$lib/constants/MusicConfig';
+	import playlistStore from '$lib/stores/playlist.svelte';
+
+	interface Props {
+		playlist: PlaylistData;
+		visible?: boolean;
+	}
+
+	let { playlist, visible = true }: Props = $props();
+
+	function selectPlaylist() {
+		playlistStore.selectedPlaylist = playlist;
+	}
+
+	const imageSrc = $derived(playlist.image || MusicConfig.defaultCoverArt);
+</script>
+
+<div class="col-auto row-[1] h-fit px-3 pb-3">
+	<div class="relative w-full">
+		{#if playlistStore.selectedPlaylist?.id === playlist.id}
+			<div
+				class="absolute left-0 top-0 z-10 h-full w-full
+            rounded-lg border-2 border-white"
+			></div>
+		{:else}
+			<div
+				class="playlist-item-actions absolute z-20 h-full w-full cursor-pointer
+                rounded-lg border-2 border-white bg-white/20"
+				onclick={selectPlaylist}
+			></div>
+		{/if}
+		<img
+			class="animate__animated animate__fadeIn aspect-square w-full rounded-lg object-cover"
+			src={imageSrc}
+			alt="Playlist"
+		/>
+	</div>
+	<p
+		class="animate-scroll-overflow-text mt-2 overflow-hidden whitespace-nowrap font-medium md:text-lg"
+	>
+		{playlist.title || playlist.name}
+	</p>
+	<p
+		class="text-opacity-background-80 animate-scroll-overflow-text overflow-hidden whitespace-nowrap text-[15px] md:text-base"
+	>
+		{playlist.artist || `${playlist.paths.length} Tracks`}
+	</p>
+</div>
+
+<style lang="scss">
+	.playlist-item-actions {
+		opacity: 0;
+		transition: opacity 0.75s;
+
+		&:hover {
+			opacity: 1;
+			transition: opacity 0.5s;
+		}
+	}
+</style>

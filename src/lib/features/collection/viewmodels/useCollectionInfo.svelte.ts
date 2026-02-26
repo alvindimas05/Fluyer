@@ -10,6 +10,7 @@ import filterStore from '$lib/stores/filter.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { MusicListType } from '$lib/features/music/types';
 import folderStore from '$lib/stores/folder.svelte';
+import playlistStore from '$lib/stores/playlist.svelte';
 
 let album = $derived(filterStore.album);
 let showBackButton = $derived.by(async () => {
@@ -25,7 +26,10 @@ let showBackButton = $derived.by(async () => {
 });
 
 let musicList = $derived.by(() => {
-	if (musicStore.listType === MusicListType.Folder) {
+	if (musicStore.listType === MusicListType.Playlist && playlistStore.selectedPlaylist) {
+		const pathSet = new Set(playlistStore.selectedPlaylist.paths);
+		return (musicStore.list ?? []).filter((m) => pathSet.has(m.path));
+	} else if (musicStore.listType === MusicListType.Folder) {
 		return FolderService.getMusicList(folderStore.currentFolder);
 	} else if (album) {
 		return LibraryService.sortMusicList(album.musicList);
@@ -34,13 +38,26 @@ let musicList = $derived.by(() => {
 });
 
 let label = $derived.by(() => {
-	if (musicStore.listType === MusicListType.Folder && folderStore.currentFolder) {
+	if (musicStore.listType === MusicListType.Playlist && playlistStore.selectedPlaylist) {
+		const pl = playlistStore.selectedPlaylist;
+		const totalDuration = (musicStore.list ?? [])
+			.filter((m) => new Set(pl.paths).has(m.path))
+			.reduce((acc, m) => acc + m.duration, 0);
+		return [
+			pl.title || pl.name,
+			pl.artist,
+			`${pl.paths.length} tracks`,
+			ProgressService.formatDuration(totalDuration)
+		]
+			.filter(Boolean)
+			.join(` ${MusicConfig.separator} `);
+	} else if (musicStore.listType === MusicListType.Folder && folderStore.currentFolder) {
 		const folderMusic = FolderService.getMusicList(folderStore.currentFolder);
 		const totalDuration = folderMusic.reduce((acc, music) => acc + music.duration, 0);
 
 		return `${folderStore.currentFolder.path} ${MusicConfig.separator} ${folderMusic.length} ${MusicConfig.separator} ${ProgressService.formatDuration(totalDuration)}`;
 	} else if (album) {
-		return [album.name, album.artist, album.year, album.duration]
+		return [album.name, album.artist, album.year, album.duration, `${album.musicList.length} Tracks`]
 			.filter(Boolean)
 			.join(` ${MusicConfig.separator} `);
 	}
@@ -48,6 +65,10 @@ let label = $derived.by(() => {
 });
 
 async function handleBack() {
+	if (musicStore.listType === MusicListType.Playlist) {
+		playlistStore.selectedPlaylist = null;
+		return;
+	}
 	if (musicStore.listType === MusicListType.Folder) {
 		const musicPaths = await PersistentStoreService.musicPath.get();
 		if (musicPaths.includes(folderStore.currentFolder!!.path)) {

@@ -3,6 +3,7 @@
 	import { useMusicItem } from '../viewmodels/useMusicItem.svelte';
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';
+	import playlistStore from '$lib/stores/playlist.svelte';
 
 	interface Props {
 		music?: MusicData;
@@ -17,6 +18,20 @@
 		() => folder,
 		() => visible
 	);
+
+	const isSelectedForPlaylist = $derived(
+		music ? playlistStore.selectedPaths.includes(music.path) : false
+	);
+
+	function togglePlaylistSelection() {
+		if (!music) return;
+		const idx = playlistStore.selectedPaths.indexOf(music.path);
+		if (idx >= 0) {
+			playlistStore.selectedPaths = playlistStore.selectedPaths.filter((p) => p !== music!.path);
+		} else {
+			playlistStore.selectedPaths = [...playlistStore.selectedPaths, music.path];
+		}
+	}
 </script>
 
 <div class="group relative w-full text-sm md:text-base">
@@ -88,9 +103,22 @@
 			<div class="cursor-pointer" onclick={folder ? vm.selectFolder : vm.addMusicAndPlay}></div>
 
 			<div class="h-12 w-12 ps-4 md:h-14 md:w-14">
-				<button class="aspect-square h-full w-full" onclick={vm.addMusic}>
-					<Icon type={IconType.QueueMusic} />
-				</button>
+				{#if playlistStore.isCreating && music}
+					<label
+						class="flex aspect-square h-full w-full cursor-pointer items-center justify-center"
+					>
+						<input
+							type="checkbox"
+							checked={isSelectedForPlaylist}
+							onchange={togglePlaylistSelection}
+							class="h-5 w-5 accent-white"
+						/>
+					</label>
+				{:else}
+					<button class="aspect-square h-full w-full" onclick={vm.addMusic}>
+						<Icon type={IconType.QueueMusic} />
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
