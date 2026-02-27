@@ -34,7 +34,7 @@
 			{musicStore.listType === 'playlist' ? 'hidden sm:block' : ''}"
 		></div>
 		<div
-			class="pointer-events-none grid h-full grid-cols-[min-content_1fr] gap-x-2
+			class="pointer-events-none grid h-full grid-cols-[min-content_minmax(0,1fr)] gap-x-2
 	        sm:mx-3 sm:h-9"
 		>
 			<Button
@@ -51,7 +51,7 @@
 			</Button>
 
 			{#if musicStore.listType === 'playlist'}
-				<div class="pointer-events-auto flex h-full w-full justify-end sm:justify-start">
+				<div class="pointer-events-auto flex h-full w-full min-w-0 justify-end sm:justify-start">
 					{#if playlistStore.isCreating}
 						<div class="grid h-full w-full grid-cols-[auto_auto] gap-x-2">
 							<Button
@@ -73,11 +73,11 @@
 						</div>
 					{:else}
 						<Button
-							class="grid h-full w-full grid-cols-[auto_min-content] items-center rounded px-2"
+							class="flex h-full w-full items-center justify-between gap-x-1 overflow-hidden rounded px-2"
 							onclick={vm.startPlaylistCreation}
 						>
-							<div>Create Playlist</div>
-							<div class="w-5">
+							<div class="truncate">Create Playlist</div>
+							<div class="w-5 shrink-0">
 								<Icon type={IconType.PlaylistAdd} />
 							</div>
 						</Button>
