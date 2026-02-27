@@ -61,9 +61,10 @@ export function useFilterBar() {
 		for (const [minW, minDppx, width] of RESPONSIVE_RULES) {
 			if (w >= minW && dpi >= minDppx) {
 				const columnPercentage = width * window.innerWidth;
+				const spannedColumn = width >= 0.33 ? columnPercentage : columnPercentage * 2;
 				state.gridSize = isMacos()
-					? `${columnPercentage}px ${columnPercentage}px ${columnPercentage * 2}px`
-					: `${columnPercentage * 2}px ${columnPercentage * 2}px ${columnPercentage}px`;
+					? `${columnPercentage}px ${columnPercentage}px ${spannedColumn}px`
+					: `${spannedColumn}px ${columnPercentage}px ${columnPercentage}px`;
 				return;
 			}
 		}

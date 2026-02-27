@@ -27,22 +27,24 @@
 >
 	<div class="pointer-events-auto h-full sm:mx-3">
 		{#if playlistStore.isCreating}
-			<div class="pointer-events-auto flex h-full gap-1">
+			<div class="pointer-events-auto grid h-full grid-cols-[auto_auto] gap-1">
 				<Button
-					class="grid h-full justify-center rounded p-[3.5px] sm:p-0"
+					class="grid h-full grid-cols-[min-content_auto] items-center rounded p-[3.5px] sm:p-0 sm:px-2"
 					onclick={vm.confirmPlaylistCreation}
 				>
 					<div class="w-5">
 						<Icon type={IconType.Check} />
 					</div>
+					<div>Confirm</div>
 				</Button>
 				<Button
-					class="grid h-full justify-center rounded p-[3.5px] sm:p-0"
+					class="grid h-full grid-cols-[min-content_auto] items-center gap-x-2 rounded p-[3.5px] sm:p-0 sm:px-2"
 					onclick={vm.cancelPlaylistCreation}
 				>
 					<div class="w-5">
 						<Icon type={IconType.Cancel} />
 					</div>
+					<div>Cancel</div>
 				</Button>
 			</div>
 		{:else if musicStore.listType === 'playlist'}
@@ -59,24 +61,20 @@
 	</div>
 	<div
 		class="pointer-events-none grid h-fit grid-cols-[min-content_1fr]
-        gap-x-2
-        sm:mx-3 sm:h-auto sm:gap-x-4
-        {isMacos() ? 'justify-end' : 'justify-start'}"
+        gap-x-1 sm:mx-3 sm:h-auto"
 	>
-		<div>
-			<Button
-				class="pointer-events-auto grid aspect-square h-full justify-center rounded p-[3.5px] sm:p-0"
-				onclick={vm.toggleSort}
-			>
-				<div class="w-5">
-					{#if filterBarStore.sortAsc}
-						<Icon type={IconType.SortAsc} />
-					{:else}
-						<Icon type={IconType.SortDesc} />
-					{/if}
-				</div>
-			</Button>
-		</div>
+		<Button
+			class="pointer-events-auto grid aspect-square h-full justify-center rounded p-[3px] sm:p-0"
+			onclick={vm.toggleSort}
+		>
+			<div class="w-5">
+				{#if filterBarStore.sortAsc}
+					<Icon type={IconType.SortAsc} />
+				{:else}
+					<Icon type={IconType.SortDesc} />
+				{/if}
+			</div>
+		</Button>
 		<Toggle
 			class="pointer-events-auto h-full w-full"
 			iconStyle="width: {vm.iconSize}px;"
