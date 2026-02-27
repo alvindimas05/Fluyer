@@ -30,7 +30,7 @@
 			{#if playlistStore.isCreating}
 				<div class="pointer-events-auto grid h-full grid-cols-[auto_auto] gap-x-1">
 					<Button
-						class="grid h-full grid-cols-[min-content_auto] items-center rounded p-[3.5px] sm:p-0 sm:px-2"
+						class="grid h-full grid-cols-[min-content_auto] items-center gap-x-2 rounded p-[3.5px] sm:p-0 sm:px-2"
 						onclick={vm.confirmPlaylistCreation}
 					>
 						<div class="w-5">
