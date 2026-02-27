@@ -57,7 +57,7 @@ let label = $derived.by(() => {
 
 		return `${folderStore.currentFolder.path} ${MusicConfig.separator} ${folderMusic.length} ${MusicConfig.separator} ${ProgressService.formatDuration(totalDuration)}`;
 	} else if (album) {
-		return [album.name, album.artist, album.year, album.duration, `${album.musicList.length} Tracks`]
+		return [album.name, album.artist, album.year, album.duration]
 			.filter(Boolean)
 			.join(` ${MusicConfig.separator} `);
 	}

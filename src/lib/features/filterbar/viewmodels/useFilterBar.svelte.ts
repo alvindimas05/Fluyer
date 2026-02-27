@@ -33,8 +33,7 @@ const musicListOptions = [
 	{ value: MusicListType.All, icon: IconType.MusicListTypeAll, label: 'All' },
 	{ value: MusicListType.Album, icon: IconType.MusicListTypeAlbum, label: 'Album' },
 	{ value: MusicListType.Music, icon: IconType.MusicListTypeMusic, label: 'Music' },
-	{ value: MusicListType.Folder, icon: IconType.MusicListTypeFolder, label: 'Folder' },
-	{ value: MusicListType.Playlist, icon: IconType.MusicListTypePlaylist, label: 'Playlist' }
+	{ value: MusicListType.Folder, icon: IconType.MusicListTypeFolder, label: 'Folder' }
 ];
 
 export function useFilterBar() {

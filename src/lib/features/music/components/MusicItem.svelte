@@ -86,24 +86,13 @@
 	</div>
 
 	<div class="absolute left-0 top-0 w-full py-2">
-		<div class="music-item-play grid w-full grid-cols-[max-content_auto_max-content]">
-			<button
-				class="h-12 w-12 md:h-14 md:w-14"
-				onclick={folder ? vm.selectFolder : vm.addMusicAndPlay}
-			>
-				{#if !folder}
-					<div
-						class="box-border grid items-center justify-items-center rounded bg-black bg-opacity-40 md:p-1"
-					>
-						<Icon type={IconType.Play} />
-					</div>
-				{/if}
-			</button>
+		{#if playlistStore.isCreating && music}
+			<div class="grid w-full grid-cols-[max-content_auto_max-content]">
+				<div class="h-12 w-12 md:h-14 md:w-14"></div>
 
-			<div class="cursor-pointer" onclick={folder ? vm.selectFolder : vm.addMusicAndPlay}></div>
+				<div class="cursor-pointer" onclick={togglePlaylistSelection}></div>
 
-			<div class="h-12 w-12 ps-4 md:h-14 md:w-14">
-				{#if playlistStore.isCreating && music}
+				<div class="h-12 w-12 ps-4 md:h-14 md:w-14">
 					<label
 						class="flex aspect-square h-full w-full cursor-pointer items-center justify-center"
 					>
@@ -114,13 +103,32 @@
 							class="h-5 w-5 accent-white"
 						/>
 					</label>
-				{:else}
+				</div>
+			</div>
+		{:else}
+			<div class="music-item-play grid w-full grid-cols-[max-content_auto_max-content]">
+				<button
+					class="h-12 w-12 md:h-14 md:w-14"
+					onclick={folder ? vm.selectFolder : vm.addMusicAndPlay}
+				>
+					{#if !folder}
+						<div
+							class="box-border grid items-center justify-items-center rounded bg-black bg-opacity-40 md:p-1"
+						>
+							<Icon type={IconType.Play} />
+						</div>
+					{/if}
+				</button>
+
+				<div class="cursor-pointer" onclick={folder ? vm.selectFolder : vm.addMusicAndPlay}></div>
+
+				<div class="h-12 w-12 ps-4 md:h-14 md:w-14">
 					<button class="aspect-square h-full w-full" onclick={vm.addMusic}>
 						<Icon type={IconType.QueueMusic} />
 					</button>
-				{/if}
+				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 </div>
 

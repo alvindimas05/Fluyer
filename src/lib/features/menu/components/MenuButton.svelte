@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { IconType } from '$lib/icon/types';
 	import Button from '$lib/ui/components/Button.svelte';
 	import Icon from '$lib/ui/icon/Icon.svelte';
+	import type { IconType } from '$lib/ui/icon/types';
 
 	interface Props {
-		onclick: () => void;
+		onclick: () => void | Promise<void>;
 		icon: IconType;
 		label: string;
 	}
