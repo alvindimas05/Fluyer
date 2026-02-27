@@ -6,6 +6,7 @@ import { type MusicData, MusicListType } from '$lib/features/music/types';
 import sidebarStore from '$lib/stores/sidebar.svelte';
 import { SidebarType } from '$lib/features/sidebar/types';
 import ToastService from '$lib/services/ToastService.svelte';
+import playlistStore from '$lib/stores/playlist.svelte';
 
 const RESPONSIVE_RULES = [
 	[1536, 2.01, 0.142857], // xhdpi 2xl → 14.2857%
@@ -171,6 +172,24 @@ function shouldHideGridItem(index: number): boolean {
 	return false;
 }
 
+function shouldHidePlaylistGridItem(index: number): boolean {
+	const indexInRow = index % state.columnCount;
+
+	if (sidebarStore.showType === SidebarType.Left) {
+		if (indexInRow < sidebarStore.hiddenAlbumColumnCount) return true;
+	}
+	if (sidebarStore.showType === SidebarType.Right) {
+		if (indexInRow >= state.columnCount - sidebarStore.hiddenAlbumColumnCount) return true;
+	}
+
+	// Hide items for Toasts (Right side)
+	if (ToastService.toasts.length > 0) {
+		if (indexInRow >= state.columnCount - 2) return true; // User requested 2 items
+	}
+
+	return false;
+}
+
 // Check if item should render based on visibility conditions (horizontal)
 function shouldRenderHorizontalItem(index: number, musicList: MusicData[]): boolean {
 	// If not visible by filter, don't render
@@ -286,9 +305,16 @@ export function useAlbumList() {
 
 	// Reset animating out state when item becomes visible by sidebar
 	$effect(() => {
-		if (data) {
+		if (data && musicStore.listType !== MusicListType.Playlist) {
 			data.forEach((_, index) => {
 				const isHidden = isHorizontal ? shouldHideHorizontalItem(index) : shouldHideGridItem(index);
+				if (!isHidden && animatingOutItems.has(index)) {
+					animatingOutItems = new Set([...animatingOutItems].filter((i) => i !== index));
+				}
+			});
+		} else if (musicStore.listType === MusicListType.Playlist) {
+			playlistStore.list.forEach((_, index) => {
+				const isHidden = shouldHidePlaylistGridItem(index);
 				if (!isHidden && animatingOutItems.has(index)) {
 					animatingOutItems = new Set([...animatingOutItems].filter((i) => i !== index));
 				}
@@ -300,7 +326,7 @@ export function useAlbumList() {
 		node.scrollLeft = state.scrollLeft;
 		node.scrollTop = state.scrollTop;
 		return {
-			destroy() {}
+			destroy() { }
 		};
 	}
 
@@ -327,6 +353,7 @@ export function useAlbumList() {
 		isVisibleByFilter,
 		shouldHideHorizontalItem,
 		shouldHideGridItem,
+		shouldHidePlaylistGridItem,
 		shouldRenderHorizontalItem,
 		shouldRenderGridItem,
 		handleAnimationEnd,

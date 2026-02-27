@@ -44,13 +44,22 @@
 				style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
 			>
 				{#each playlistStore.list as playlist, index}
+					{@const hiddenBySidebar = vm.shouldHidePlaylistGridItem(index)}
+					{@const inViewport = vm.visibleItems.has(index)}
 					<div
 						use:vm.observeElement={index}
-						class={vm.visibleItems.has(index) ? 'animate__animated animate__fadeIn' : ''}
-						style="width: {vm.state.itemWidth}px; animation-duration: 500ms;"
+						class={inViewport
+							? hiddenBySidebar
+								? 'animate__animated animate__fadeOut'
+								: 'animate__animated animate__fadeIn'
+							: ''}
+						style="width: {vm.state.itemWidth}px; animation-duration: 500ms; {hiddenBySidebar
+							? 'pointer-events: none; opacity: 0;'
+							: 'opacity: 1;'}"
+						onanimationend={() => vm.handleAnimationEnd(index, hiddenBySidebar)}
 					>
-						{#if vm.visibleItems.has(index)}
-							<PlaylistItem {playlist} visible={vm.visibleItems.has(index)} />
+						{#if inViewport}
+							<PlaylistItem {playlist} visible={inViewport} />
 						{/if}
 					</div>
 				{/each}
