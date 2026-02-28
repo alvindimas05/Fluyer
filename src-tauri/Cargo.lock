@@ -1368,6 +1368,8 @@ dependencies = [
  "dotenvy_macro",
  "enigo 0.6.1",
  "futures",
+ "glow",
+ "gtk",
  "image",
  "jni",
  "lazy_static",

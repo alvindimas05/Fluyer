@@ -28,6 +28,18 @@ pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>
         }
     }
 
+    #[cfg(target_os = "linux")]
+    {
+        crate::debug!("setup_application: About to call setup_linux_background");
+        match crate::linux_renderer::setup_linux_background(app) {
+            Ok(_) => crate::debug!("setup_application: GTK OpenGL initialized successfully"),
+            Err(e) => crate::error!(
+                "setup_application: GTK OpenGL initialization failed: {:?}",
+                e
+            ),
+        }
+    }
+
     Ok(())
 }
 
