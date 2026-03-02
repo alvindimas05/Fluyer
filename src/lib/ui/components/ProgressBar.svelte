@@ -175,7 +175,7 @@
 	></div>
 
 	<input
-		class="progress-bar absolute w-full backdrop-blur-lg"
+		class="progress-bar absolute w-full"
 		type="range"
 		style="
                 --progress-height: {getProgressHeight()}px;

@@ -89,7 +89,7 @@
 		<!-- Sliding indicator -->
 		<div
 			class="pointer-events-none absolute left-0 top-0 z-[-1] h-full
-                rounded-sm bg-white/20 backdrop-blur-sm transition-all
+                rounded-sm bg-white/20 transition-all
                 duration-300 ease-out"
 			style="width: {indicatorWidth}px;
                 transform: translateX({translateX}px);"
