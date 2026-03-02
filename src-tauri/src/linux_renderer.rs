@@ -22,7 +22,8 @@ pub struct LinuxRendererState {
     mix_ratio: f32,
     needs_redraw: bool,
     cached_image: Option<RgbaImage>,
-    next_image: Option<RgbaImage>,
+    upload_current: Option<RgbaImage>,
+    upload_next: Option<RgbaImage>,
 }
 
 unsafe impl Send for LinuxRendererState {}
@@ -167,20 +168,168 @@ pub fn setup_linux_background(app: &mut tauri::App) -> Result<(), Box<dyn std::e
         }
     });
 
-    let state_render = state.clone();
+    let shared_renderer = std::sync::Arc::new(SharedLinuxRenderer {
+        state: std::sync::Mutex::new(LinuxRendererState {
+            app_state: state.clone(),
+            transition_start_time: None,
+            mix_ratio: 0.0,
+            needs_redraw: false,
+            cached_image: None,
+            upload_next: None,
+            upload_current: None,
+        }),
+    });
+
+    let state_render_arc = shared_renderer.clone();
     gl_area.connect_render(move |_gl_area, _gl_context| {
-        if let Some(state) = state_render.borrow().as_ref() {
+        let mut s = state_render_arc.state.lock().unwrap();
+
+        let upload_next = s.upload_next.take();
+        let upload_current = s.upload_current.take();
+        let mix_ratio = s.mix_ratio;
+
+        if let Some(app_state) = s.app_state.borrow_mut().as_mut() {
             unsafe {
                 use glow::HasContext as _;
-                state.gl.clear_color(0.1, 0.2, 0.3, 1.0);
-                state.gl.clear(glow::COLOR_BUFFER_BIT);
 
-                state.gl.use_program(Some(state.program));
-                state.gl.bind_vertex_array(Some(state.vertex_array));
-                state.gl.draw_arrays(glow::TRIANGLE_STRIP, 0, 4);
+                if let Some(img) = upload_next {
+                    std::mem::swap(&mut app_state.texture_current, &mut app_state.texture_next);
+
+                    app_state
+                        .gl
+                        .bind_texture(glow::TEXTURE_2D, Some(app_state.texture_next));
+                    app_state.gl.tex_image_2d(
+                        glow::TEXTURE_2D,
+                        0,
+                        glow::RGBA as i32,
+                        img.width() as i32,
+                        img.height() as i32,
+                        0,
+                        glow::RGBA,
+                        glow::UNSIGNED_BYTE,
+                        glow::PixelUnpackData::Slice(Some(img.as_raw())),
+                    );
+                    app_state.gl.tex_parameter_i32(
+                        glow::TEXTURE_2D,
+                        glow::TEXTURE_MIN_FILTER,
+                        glow::LINEAR as i32,
+                    );
+                    app_state.gl.tex_parameter_i32(
+                        glow::TEXTURE_2D,
+                        glow::TEXTURE_MAG_FILTER,
+                        glow::LINEAR as i32,
+                    );
+                    app_state.gl.tex_parameter_i32(
+                        glow::TEXTURE_2D,
+                        glow::TEXTURE_WRAP_S,
+                        glow::CLAMP_TO_EDGE as i32,
+                    );
+                    app_state.gl.tex_parameter_i32(
+                        glow::TEXTURE_2D,
+                        glow::TEXTURE_WRAP_T,
+                        glow::CLAMP_TO_EDGE as i32,
+                    );
+                }
+
+                if let Some(img) = upload_current {
+                    app_state
+                        .gl
+                        .bind_texture(glow::TEXTURE_2D, Some(app_state.texture_current));
+                    app_state.gl.tex_image_2d(
+                        glow::TEXTURE_2D,
+                        0,
+                        glow::RGBA as i32,
+                        img.width() as i32,
+                        img.height() as i32,
+                        0,
+                        glow::RGBA,
+                        glow::UNSIGNED_BYTE,
+                        glow::PixelUnpackData::Slice(Some(img.as_raw())),
+                    );
+                    app_state.gl.tex_parameter_i32(
+                        glow::TEXTURE_2D,
+                        glow::TEXTURE_MIN_FILTER,
+                        glow::LINEAR as i32,
+                    );
+                    app_state.gl.tex_parameter_i32(
+                        glow::TEXTURE_2D,
+                        glow::TEXTURE_MAG_FILTER,
+                        glow::LINEAR as i32,
+                    );
+                    app_state.gl.tex_parameter_i32(
+                        glow::TEXTURE_2D,
+                        glow::TEXTURE_WRAP_S,
+                        glow::CLAMP_TO_EDGE as i32,
+                    );
+                    app_state.gl.tex_parameter_i32(
+                        glow::TEXTURE_2D,
+                        glow::TEXTURE_WRAP_T,
+                        glow::CLAMP_TO_EDGE as i32,
+                    );
+                }
+
+                app_state.gl.clear_color(0.1, 0.2, 0.3, 1.0);
+                app_state.gl.clear(glow::COLOR_BUFFER_BIT);
+
+                app_state.gl.use_program(Some(app_state.program));
+
+                app_state.gl.active_texture(glow::TEXTURE0);
+                app_state
+                    .gl
+                    .bind_texture(glow::TEXTURE_2D, Some(app_state.texture_current));
+                let tc_loc = app_state
+                    .gl
+                    .get_uniform_location(app_state.program, "tex_current");
+                app_state.gl.uniform_1_i32(tc_loc.as_ref(), 0);
+
+                app_state.gl.active_texture(glow::TEXTURE1);
+                app_state
+                    .gl
+                    .bind_texture(glow::TEXTURE_2D, Some(app_state.texture_next));
+                let tn_loc = app_state
+                    .gl
+                    .get_uniform_location(app_state.program, "tex_next");
+                app_state.gl.uniform_1_i32(tn_loc.as_ref(), 1);
+
+                let mix_loc = app_state
+                    .gl
+                    .get_uniform_location(app_state.program, "mix_ratio");
+                app_state.gl.uniform_1_f32(mix_loc.as_ref(), mix_ratio);
+
+                app_state.gl.bind_vertex_array(Some(app_state.vertex_array));
+                app_state.gl.draw_arrays(glow::TRIANGLE_STRIP, 0, 4);
             }
         }
         gtk::glib::Propagation::Proceed
+    });
+
+    let tick_renderer = shared_renderer.clone();
+    gl_area.add_tick_callback(move |widget, _frame_clock| {
+        let mut slock = tick_renderer.state.lock().unwrap();
+        let mut redraw = false;
+
+        if slock.needs_redraw {
+            redraw = true;
+            slock.needs_redraw = false;
+        }
+
+        if let Some(start) = slock.transition_start_time {
+            let elapsed = start.elapsed().as_secs_f32();
+            if elapsed < 1.0 {
+                slock.mix_ratio = elapsed / 1.0;
+                redraw = true;
+            } else {
+                slock.mix_ratio = 1.0;
+                slock.transition_start_time = None;
+                redraw = true;
+            }
+        }
+
+        if redraw {
+            widget.queue_render();
+        }
+
+        gtk::glib::ControlFlow::Continue
     });
 
     let state_unrealize = state.clone();
@@ -218,16 +367,7 @@ pub fn setup_linux_background(app: &mut tauri::App) -> Result<(), Box<dyn std::e
 
     overlay.show_all();
 
-    app.manage(std::sync::Arc::new(SharedLinuxRenderer {
-        state: std::sync::Mutex::new(LinuxRendererState {
-            app_state: state,
-            transition_start_time: None,
-            mix_ratio: 0.0,
-            needs_redraw: false,
-            cached_image: None,
-            next_image: None,
-        }),
-    }));
+    app.manage(shared_renderer);
 
     Ok(())
 }
@@ -235,53 +375,10 @@ pub fn setup_linux_background(app: &mut tauri::App) -> Result<(), Box<dyn std::e
 pub fn update_background(img: RgbaImage) {
     if let Some(shared) = app_handle().try_state::<std::sync::Arc<SharedLinuxRenderer>>() {
         let mut state = shared.state.lock().unwrap();
-
-        // Cache the image for restoration
-        state.cached_image = Some(img);
-        let img = state.cached_image.as_ref().unwrap();
-
-        if let Some(app_state) = state.app_state.borrow().as_ref() {
-            unsafe {
-                use glow::HasContext as _;
-                // Bind texture_next and upload data
-                app_state
-                    .gl
-                    .bind_texture(glow::TEXTURE_2D, Some(app_state.texture_next));
-                app_state.gl.tex_image_2d(
-                    glow::TEXTURE_2D,
-                    0,
-                    glow::RGBA as i32,
-                    img.width() as i32,
-                    img.height() as i32,
-                    0,
-                    glow::RGBA,
-                    glow::UNSIGNED_BYTE,
-                    glow::PixelUnpackData::Slice(Some(img.as_raw())),
-                );
-                app_state.gl.tex_parameter_i32(
-                    glow::TEXTURE_2D,
-                    glow::TEXTURE_MIN_FILTER,
-                    glow::LINEAR as i32,
-                );
-                app_state.gl.tex_parameter_i32(
-                    glow::TEXTURE_2D,
-                    glow::TEXTURE_MAG_FILTER,
-                    glow::LINEAR as i32,
-                );
-                app_state.gl.tex_parameter_i32(
-                    glow::TEXTURE_2D,
-                    glow::TEXTURE_WRAP_S,
-                    glow::CLAMP_TO_EDGE as i32,
-                );
-                app_state.gl.tex_parameter_i32(
-                    glow::TEXTURE_2D,
-                    glow::TEXTURE_WRAP_T,
-                    glow::CLAMP_TO_EDGE as i32,
-                );
-            }
-        }
-
+        state.cached_image = Some(img.clone());
+        state.upload_next = Some(img);
         state.transition_start_time = Some(std::time::Instant::now());
+        state.mix_ratio = 0.0;
         state.needs_redraw = true;
     }
 }
@@ -290,46 +387,8 @@ pub fn restore_background() {
     if let Some(shared) = app_handle().try_state::<std::sync::Arc<SharedLinuxRenderer>>() {
         let mut state = shared.state.lock().unwrap();
 
-        if let Some(img) = state.cached_image.as_ref() {
-            if let Some(app_state) = state.app_state.borrow().as_ref() {
-                unsafe {
-                    use glow::HasContext as _;
-                    app_state
-                        .gl
-                        .bind_texture(glow::TEXTURE_2D, Some(app_state.texture_current));
-                    app_state.gl.tex_image_2d(
-                        glow::TEXTURE_2D,
-                        0,
-                        glow::RGBA as i32,
-                        img.width() as i32,
-                        img.height() as i32,
-                        0,
-                        glow::RGBA,
-                        glow::UNSIGNED_BYTE,
-                        glow::PixelUnpackData::Slice(Some(img.as_raw())),
-                    );
-                    app_state.gl.tex_parameter_i32(
-                        glow::TEXTURE_2D,
-                        glow::TEXTURE_MIN_FILTER,
-                        glow::LINEAR as i32,
-                    );
-                    app_state.gl.tex_parameter_i32(
-                        glow::TEXTURE_2D,
-                        glow::TEXTURE_MAG_FILTER,
-                        glow::LINEAR as i32,
-                    );
-                    app_state.gl.tex_parameter_i32(
-                        glow::TEXTURE_2D,
-                        glow::TEXTURE_WRAP_S,
-                        glow::CLAMP_TO_EDGE as i32,
-                    );
-                    app_state.gl.tex_parameter_i32(
-                        glow::TEXTURE_2D,
-                        glow::TEXTURE_WRAP_T,
-                        glow::CLAMP_TO_EDGE as i32,
-                    );
-                }
-            }
+        if let Some(img) = state.cached_image.clone() {
+            state.upload_current = Some(img);
             state.transition_start_time = None;
             state.mix_ratio = 0.0;
             state.needs_redraw = true;
