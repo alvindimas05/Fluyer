@@ -646,10 +646,6 @@ pub fn resume_wgpu(app_handle: &tauri::AppHandle) {
                             let state = shared.state.lock().unwrap();
                             state.instance.clone() // Instance is cloneable (Arc internally usually)
                         };
-                        // Actually wgpu::Instance is not Clone?
-                        // wgpu::Instance is not Clone in 0.19? It usually is.
-                        // Let's check docs or source. wgpu::Instance is a wrapper around `Arc<Context>`.
-                        // Yes it is Clone.
 
                         match create_surface(&instance, &app_handle) {
                             Ok(surface) => {
