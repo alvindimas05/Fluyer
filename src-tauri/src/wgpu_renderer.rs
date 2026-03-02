@@ -312,7 +312,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     let surface = create_surface(&instance, &app.handle().clone())?;
 
     let adapter = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::default(),
+        power_preference: wgpu::PowerPreference::HighPerformance,
         force_fallback_adapter: false,
         compatible_surface: Some(&surface),
     }))
