@@ -53,5 +53,4 @@
 		{/if}
 		<PlayerBar bind:tooltipVisible />
 	</div>
-	<CreatePlaylistModal />
 {/if}
