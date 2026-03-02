@@ -78,27 +78,7 @@ pub async fn update_animated_background(
     let blurred = blurred_dyn.to_rgba8();
 
     #[cfg(target_os = "linux")]
-    {
-        use tauri::Emitter;
-
-        use crate::state::app_handle;
-        #[derive(Clone, serde::Serialize)]
-        struct BackgroundUpdatePayload {
-            width: u32,
-            height: u32,
-            data: Vec<u8>,
-        }
-
-        let payload = BackgroundUpdatePayload {
-            width: blurred.width(),
-            height: blurred.height(),
-            data: blurred.into_raw(),
-        };
-
-        app_handle()
-            .emit("animated_background_update", payload)
-            .map_err(|e| e.to_string())?;
-    }
+    crate::linux_renderer::update_background(blurred);
 
     #[cfg(not(target_os = "linux"))]
     crate::wgpu_renderer::update_background(blurred);
@@ -110,5 +90,7 @@ pub async fn update_animated_background(
 pub async fn restore_animated_background() -> Result<(), String> {
     #[cfg(not(target_os = "linux"))]
     crate::wgpu_renderer::restore_background();
+    #[cfg(target_os = "linux")]
+    crate::linux_renderer::restore_background();
     Ok(())
 }

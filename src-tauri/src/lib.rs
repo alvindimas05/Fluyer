@@ -5,6 +5,8 @@ pub(crate) mod commands;
 mod coverart;
 mod database;
 mod folder;
+#[cfg(target_os = "linux")]
+mod linux_renderer;
 pub mod logger;
 mod lyric;
 mod music;
