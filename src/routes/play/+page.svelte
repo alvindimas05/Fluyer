@@ -10,8 +10,16 @@
 	import settingStore from '$lib/stores/setting.svelte';
 	import { RepeatMode } from '$lib/features/music/types';
 	import { usePlayPage } from './viewmodels/usePlayPage.svelte';
+	import { getCurrentWindow } from '@tauri-apps/api/window';
 
 	const vm = usePlayPage();
+
+	let isFullscreen = $state(false);
+	$effect(() => {
+		(async () => {
+			isFullscreen = isMacos() && await getCurrentWindow().isFullscreen();
+		})();
+	});
 </script>
 
 <svelte:document
@@ -21,7 +29,10 @@
 />
 
 {#if settingStore.ui.play.showBackButton}
-	<div class="absolute left-0 top-0 z-10 hidden ps-3 pt-3 opacity-70 md:block">
+	<div
+		class="absolute left-0 top-0 z-10 hidden ps-3 pt-3 opacity-70 md:block
+		{isFullscreen ? '' : 'mt-6'}"
+	>
 		<button
 			id="btn-back"
 			class="animate__animated w-7 cursor-pointer {vm.hideBackButton

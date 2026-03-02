@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '../style.scss';
 	import { onDestroy, onMount } from 'svelte';
 	import { PageRoutes } from '$lib/constants/PageRoutes';
 	import { isAndroid, isLinux } from '$lib/platform';
