@@ -38,6 +38,8 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
     match event {
         RunEvent::Ready => {
             crate::state::initialize_on_ready(app_handle);
+            #[cfg(target_os = "linux")]
+            let _ = crate::sidebar::linux_listen_mouse_leave();
             #[cfg(not(target_os = "linux"))]
             crate::wgpu_renderer::start_render_loop(app_handle.clone());
         }

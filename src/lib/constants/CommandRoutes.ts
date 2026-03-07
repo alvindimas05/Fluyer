@@ -30,6 +30,8 @@ export const CommandRoutes = {
 	FOLDER_GET_ITEMS: 'folder_get_items',
 	FOLDER_GET_FIRST_MUSIC_PATH: 'folder_get_first_music_path',
 
+	SIDEBAR_MOUSE_LEAVE: 'sidebar_mouse_leave',
+
 	CHECK_READ_AUDIO_PERMISSION: 'check_read_audio_permission',
 	REQUEST_READ_AUDIO_PERMISSION: 'request_read_audio_permission',
 

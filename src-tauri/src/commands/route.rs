@@ -1,6 +1,8 @@
 pub const MUSIC_PLAYER_SYNC: &str = "music_player_sync";
 #[cfg(desktop)]
 pub const MUSIC_REQUEST_DIRECTORY: &str = "music_request_directory";
+#[cfg(target_os = "linux")]
+pub const SIDEBAR_MOUSE_LEAVE: &str = "sidebar_mouse_leave";
 // pub const CHECK_READ_AUDIO_PERMISSION: &str = "check_read_audio_permission";
 // pub const REQUEST_READ_AUDIO_PERMISSION: &str = "request_read_audio_permission";
 // #[cfg(target_os = "android")]
