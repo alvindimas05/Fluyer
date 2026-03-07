@@ -33,6 +33,7 @@ import ListMusic from '@lucide/svelte/icons/list-music';
 import Plus from '@lucide/svelte/icons/plus';
 import Check from '@lucide/svelte/icons/check';
 import X from '@lucide/svelte/icons/x';
+import Image from '@lucide/svelte/icons/image';
 
 const iconRegistryLucide = {
 	[IconType.Unknown]: HelpCircle,
@@ -75,7 +76,8 @@ const iconRegistryLucide = {
 	[IconType.MusicListTypePlaylist]: ListMusic,
 	[IconType.PlaylistAdd]: Plus,
 	[IconType.Check]: Check,
-	[IconType.Cancel]: X
+	[IconType.Cancel]: X,
+	[IconType.Image]: Image
 };
 
 export default iconRegistryLucide;

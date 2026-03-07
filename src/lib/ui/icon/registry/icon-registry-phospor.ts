@@ -33,6 +33,7 @@ import Playlist from 'phosphor-svelte/lib/Playlist';
 import Plus from 'phosphor-svelte/lib/Plus';
 import Check from 'phosphor-svelte/lib/Check';
 import X from 'phosphor-svelte/lib/X';
+import Image from 'phosphor-svelte/lib/Image';
 
 const iconRegistryPhospor = {
 	[IconType.Unknown]: QuestionMark,
@@ -75,7 +76,8 @@ const iconRegistryPhospor = {
 	[IconType.MusicListTypePlaylist]: Playlist,
 	[IconType.PlaylistAdd]: Plus,
 	[IconType.Check]: Check,
-	[IconType.Cancel]: X
+	[IconType.Cancel]: X,
+	[IconType.Image]: Image,
 };
 
 export default iconRegistryPhospor;

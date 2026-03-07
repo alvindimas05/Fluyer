@@ -46,5 +46,6 @@ export enum IconType {
 	MusicListTypePlaylist,
 	PlaylistAdd,
 	Check,
-	Cancel
+	Cancel,
+	Image,
 }

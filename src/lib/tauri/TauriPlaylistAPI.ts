@@ -12,8 +12,8 @@ const TauriPlaylistAPI = {
     delete: (id: number): Promise<void> => {
         return invoke(CommandRoutes.PLAYLIST_DELETE, { id });
     },
-    saveImage: (imageData: number[], filename: string): Promise<string> => {
-        return invoke(CommandRoutes.PLAYLIST_SAVE_IMAGE, { imageData, filename });
+    uploadImage: (): Promise<string> => {
+        return invoke(CommandRoutes.PLAYLIST_UPLOAD_IMAGE);
     }
 };
 

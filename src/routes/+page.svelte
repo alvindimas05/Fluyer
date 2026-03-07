@@ -12,6 +12,10 @@
 	import Menu from '$lib/features/menu/components/Menu.svelte';
 	import PlayerBar from '$lib/features/playerbar/components/PlayerBar.svelte';
 	import CreatePlaylistModal from '$lib/features/playlist/components/CreatePlaylistModal.svelte';
+	import ModalService from '$lib/services/ModalService';
+	import { Modal } from '$lib/constants/Modal';
+	import playlistStore from '$lib/stores/playlist.svelte';
+	import modalStore from '$lib/stores/modal.svelte';
 
 	let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
 
@@ -41,7 +45,11 @@
 	<!--{/if}-->
 	<MusicQueueList />
 	<Menu />
-	<div class="grid h-full w-full {gridClass}" style="padding-top: {paddingTop}px;">
+	<div
+		class="grid h-full w-full {gridClass}
+	 			{modalStore.show ? 'opacity-10 blur-sm' : ''} transition-opacity duration-300"
+		style="padding-top: {paddingTop}px;"
+	>
 		{#if [MusicListType.All, MusicListType.Album, MusicListType.Playlist].includes(musicStore.listType)}
 			<AlbumList />
 		{/if}

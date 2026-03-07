@@ -9,6 +9,8 @@ import folderStore from '$lib/stores/folder.svelte';
 import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import playlistStore from '$lib/stores/playlist.svelte';
+import ModalService from '$lib/services/ModalService';
+import { Modal } from '$lib/constants/Modal';
 import TauriPlaylistAPI from '$lib/tauri/TauriPlaylistAPI';
 
 const RESPONSIVE_RULES = [
@@ -124,7 +126,7 @@ export function useFilterBar() {
 			playlistStore.isCreating = false;
 			return;
 		}
-		playlistStore.showCreateModal = true;
+		ModalService.open(Modal.CreatePlaylist);
 	}
 
 	function cancelPlaylistCreation() {

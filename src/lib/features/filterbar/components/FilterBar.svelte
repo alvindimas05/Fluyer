@@ -9,8 +9,11 @@
 	import { filterBarStore } from '$lib/stores/filter.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import musicStore from '$lib/stores/music.svelte';
+	import ModalService from '$lib/services/ModalService';
+	import { Modal } from '$lib/constants/Modal';
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import { useFilterBar } from '../viewmodels/useFilterBar.svelte';
+	import modalStore from '$lib/stores/modal.svelte';
 
 	const vm = useFilterBar();
 </script>
@@ -20,14 +23,13 @@
 	class="pointer-events-none fixed left-0 top-0 z-20 grid w-full gap-y-2 px-3 sm:px-0 sm:pb-3
         {isMacos() ? 'sm:justify-end' : ''}
         {isMacos() ? 'right-0' : 'left-0'}
-        animate__animated animate__slideInDown"
+        {modalStore.show ? 'opacity-10 blur-sm' : ''} animate__animated animate__slideInDown
+        transition-opacity duration-300"
 	style="margin-top: {isMobile() ? mobileStore.statusBarHeight : 8}px;
         grid-template-columns: {vm.state.gridSize};"
 	bind:this={vm.element}
 >
-	<div
-		class="grid grid-cols-[min-content_minmax(0,1fr)] h-9 gap-x-2 sm:mx-3"
-	>
+	<div class="grid h-9 grid-cols-[min-content_minmax(0,1fr)] gap-x-2 sm:mx-3">
 		<Button
 			class="pointer-events-auto grid aspect-square h-full justify-center rounded sm:p-0"
 			onclick={vm.toggleSort}

@@ -16,6 +16,11 @@ pub fn playlist_delete(id: i64) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn playlist_save_image(image_data: Vec<u8>, filename: String) -> Result<String, String> {
-    Playlist::save_image(image_data, filename)
+pub async fn playlist_upload_image() -> Result<String, String> {
+    Playlist::upload_image().await
+}
+
+#[tauri::command]
+pub async fn playlist_read_image(id: String) -> Result<Vec<u8>, String> {
+    Playlist::read_image(id).await
 }

@@ -32,6 +32,7 @@ import Album from 'svelte-material-icons/Album.svelte';
 import PlaylistMusicOutline from 'svelte-material-icons/PlaylistMusicOutline.svelte';
 import Check from 'svelte-material-icons/Check.svelte';
 import Close from 'svelte-material-icons/Close.svelte';
+import Image from 'svelte-material-icons/Image.svelte';
 
 const iconRegistryMaterial = {
 	[IconType.Unknown]: HelpCircleOutline,
@@ -74,7 +75,8 @@ const iconRegistryMaterial = {
 	[IconType.MusicListTypePlaylist]: PlaylistMusicOutline,
 	[IconType.PlaylistAdd]: PlaylistPlus,
 	[IconType.Check]: Check,
-	[IconType.Cancel]: Close
+	[IconType.Cancel]: Close,
+	[IconType.Image]: Image,
 };
 
 export default iconRegistryMaterial;

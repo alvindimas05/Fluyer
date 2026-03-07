@@ -3,6 +3,7 @@ use crate::state::app_handle;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
+use tauri_plugin_dialog::DialogExt;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -108,7 +109,41 @@ impl Playlist {
         Ok(())
     }
 
-    pub fn save_image(image_data: Vec<u8>, filename: String) -> Result<String, String> {
+    pub async fn read_image(id: String) -> Result<Vec<u8>, String> {
+        let path = {
+            let conn_guard = GLOBAL_DATABASE.lock().unwrap();
+            let conn = conn_guard.as_ref().unwrap();
+
+            let mut stmt = conn
+                .prepare("SELECT image FROM playlists WHERE id = ?1")
+                .map_err(|e| e.to_string())?;
+
+            let path: Option<String> = stmt
+                .query_row(params![id], |row| row.get(0))
+                .map_err(|e| e.to_string())?;
+
+            path.ok_or_else(|| "Playlist has no image".to_string())?
+        };
+
+        let file = tokio::fs::read(path).await.map_err(|e| e.to_string())?;
+        Ok(file)
+    }
+
+    pub async fn upload_image() -> Result<String, String> {
+        let filename = format!("playlist_{}.png", chrono::Utc::now().timestamp());
+        let file = tokio::task::spawn_blocking(|| {
+            app_handle()
+                .dialog()
+                .file()
+                .add_filter("Image", &["png", "jpg", "jpeg", "webp"])
+                .blocking_pick_file()
+        })
+        .await
+        .unwrap();
+        if file.is_none() {
+            return Err("No file selected".to_string());
+        }
+
         let app_data_dir = app_handle()
             .path()
             .app_data_dir()
@@ -117,9 +152,13 @@ impl Playlist {
         let images_dir = app_data_dir.join("playlist_images");
         std::fs::create_dir_all(&images_dir).map_err(|e| e.to_string())?;
 
-        let image_path = images_dir.join(&filename);
-        std::fs::write(&image_path, image_data).map_err(|e| e.to_string())?;
+        std::fs::copy(file.unwrap().as_path().unwrap(), images_dir.join(&filename))
+            .map_err(|e| e.to_string())?;
 
-        Ok(image_path.to_str().unwrap_or_default().to_string())
+        Ok(images_dir
+            .join(&filename)
+            .to_str()
+            .unwrap_or_default()
+            .to_string())
     }
 }

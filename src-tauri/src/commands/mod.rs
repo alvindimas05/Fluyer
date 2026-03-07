@@ -1,6 +1,5 @@
 pub mod decorum;
 pub mod mobile;
-pub mod playlist;
 pub mod route;
 
 pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_handler![
@@ -59,8 +58,9 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     crate::animated_background::update_animated_background,
     crate::animated_background::restore_animated_background,
     // Playlist commands
-    playlist::playlist_get_all,
-    playlist::playlist_create,
-    playlist::playlist_delete,
-    playlist::playlist_save_image,
+    crate::playlist::commands::playlist_get_all,
+    crate::playlist::commands::playlist_create,
+    crate::playlist::commands::playlist_delete,
+    crate::playlist::commands::playlist_upload_image,
+    crate::playlist::commands::playlist_read_image,
 ];

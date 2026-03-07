@@ -23,6 +23,7 @@
 
 	import { MusicListType } from '$lib/features/music/types';
 	import musicStore from '$lib/stores/music.svelte';
+	import modalStore from '$lib/stores/modal.svelte';
 
 	const SWIPE_RANGE_X = 125;
 	const SWIPE_RANGE_Y = 50;
@@ -50,6 +51,8 @@
 	}
 
 	async function onMouseMove(e: MouseEvent) {
+		if (modalStore.show) return;
+
 		const onRightEdge =
 			type === SidebarType.Right &&
 			e.clientX > window.innerWidth - (isWindows() || !isMaximized ? 12 : 4);
@@ -92,6 +95,8 @@
 	}
 
 	function onSwipe(e: CustomEvent<SwipeEventData>) {
+		if (modalStore.show) return;
+
 		const { initial, deltaX, deltaY } = e.detail;
 
 		let minTop = sidebarStore.swipeMinimumTop;
@@ -130,6 +135,8 @@
 	}
 
 	function onBodyMouseLeave(e: MouseEvent) {
+		if (modalStore.show) return;
+
 		const onRightEdge = type === SidebarType.Right && e.clientX > window.innerWidth;
 		const onLeftEdge = type === SidebarType.Left && e.clientX < 0;
 

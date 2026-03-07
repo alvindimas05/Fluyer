@@ -24,6 +24,7 @@
 	import MetadataService from '$lib/services/MetadataService.svelte';
 	import ToastContainer from '$lib/ui/toast/ToastContainer.svelte';
 	import CreatePlaylistModal from '$lib/features/playlist/components/CreatePlaylistModal.svelte';
+	import playlistStore from '$lib/stores/playlist.svelte';
 
 	if (isLinux()) {
 		import('$lib/scss/linux.scss');
@@ -65,7 +66,9 @@
 {#if isAppReady}
 	<AnimatedBackground />
 {/if}
-<div class="scrollbar-hidden fixed h-screen w-screen">
+<div
+	class="scrollbar-hidden fixed h-screen w-screen"
+>
 	{@render children?.()}
 </div>
 {#if isDesktop() && page.url.pathname !== PageRoutes.PLAY}
