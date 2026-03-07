@@ -14,6 +14,8 @@
 	import { MusicListType } from '$lib/features/music/types';
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import TauriPlaylistAPI from '$lib/tauri/TauriPlaylistAPI';
+	import folderStore from '$lib/stores/folder.svelte';
+	import filterStore from '$lib/stores/filter.svelte';
 
 	async function gotoPlayPage() {
 		if (isDesktop()) {
@@ -48,6 +50,8 @@
 				} catch (e) {
 					console.error('Failed to load playlists:', e);
 				}
+				folderStore.currentFolder = null;
+				filterStore.album = null;
 				musicStore.listType = MusicListType.Playlist;
 				PageService.goTo(PageRoutes.HOME);
 			}}

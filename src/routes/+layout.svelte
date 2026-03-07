@@ -23,6 +23,7 @@
 	import TitleBar from '$lib/features/titlebar/components/TitleBar.svelte';
 	import MetadataService from '$lib/services/MetadataService.svelte';
 	import ToastContainer from '$lib/ui/toast/ToastContainer.svelte';
+	import CreatePlaylistModal from '$lib/features/playlist/components/CreatePlaylistModal.svelte';
 
 	if (isLinux()) {
 		import('$lib/scss/linux.scss');
@@ -78,3 +79,4 @@
 {#if isMobile() && mobileStore.showSwipeGuide}
 	<SwipeGuide />
 {/if}
+<CreatePlaylistModal />

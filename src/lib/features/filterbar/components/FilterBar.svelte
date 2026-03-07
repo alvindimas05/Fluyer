@@ -17,7 +17,7 @@
 
 <svelte:window onresize={vm.updateSize} />
 <div
-	class="pointer-events-none fixed left-0 top-0 z-50 grid w-full gap-y-2 px-3 sm:px-0 sm:pb-3
+	class="pointer-events-none fixed left-0 top-0 z-20 grid w-full gap-y-2 px-3 sm:px-0 sm:pb-3
         {isMacos() ? 'sm:justify-end' : ''}
         {isMacos() ? 'right-0' : 'left-0'}
         animate__animated animate__slideInDown"
