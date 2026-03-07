@@ -14,6 +14,7 @@ mod playlist;
 mod system;
 mod utils;
 mod wgpu_renderer;
+mod sidebar;
 
 // Application modules
 mod app_setup;

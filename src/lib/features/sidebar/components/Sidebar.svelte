@@ -7,6 +7,11 @@
 		class?: string;
 	}
 
+	interface MouseLeavePayload {
+		x: number;
+		y: number;
+	}
+
 	const props = $props();
 	let { children, type }: Props = props;
 
@@ -15,6 +20,7 @@
 	import type { SwipeEventData } from '@react2svelte/swipeable';
 	import { onMount } from 'svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
+	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 	import View from '$lib/ui/components/View.svelte';
 	import playerBarStore from '$lib/stores/playerbar.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
@@ -23,7 +29,7 @@
 
 	import { MusicListType } from '$lib/features/music/types';
 	import musicStore from '$lib/stores/music.svelte';
-	import modalStore from '$lib/stores/modal.svelte';
+	import { CommandRoutes } from '$lib/constants/CommandRoutes';
 
 	const SWIPE_RANGE_X = 125;
 	const SWIPE_RANGE_Y = 50;
@@ -135,7 +141,7 @@
 	}
 
 	function onBodyMouseLeave(e: MouseEvent) {
-		if (modalStore.show) return;
+		if (isLinux()) return;
 
 		const onRightEdge = type === SidebarType.Right && e.clientX > window.innerWidth;
 		const onLeftEdge = type === SidebarType.Left && e.clientX < 0;
@@ -149,10 +155,39 @@
 
 	currentWindow.onResized(async () => {
 		isMaximized = await currentWindow.isMaximized();
-	});
-
+	})
+	
 	onMount(() => {
 		sidebarStore.showType = null;
+		let unlistenLinuxMouseLeave: UnlistenFn | null = null;
+
+		if (isLinux()) {
+			listen<MouseLeavePayload>(CommandRoutes.SIDEBAR_MOUSE_LEAVE, (e) => {
+				const x = e.payload.x;
+				const y = e.payload.y;
+				const slicedWidth = 0.25 * window.innerWidth;
+				const slicedHeight = 0.05 * window.innerHeight;
+
+				if(y < slicedHeight) return;
+
+				const onRightEdge = type === SidebarType.Right && x >= window.innerWidth - slicedWidth;
+				const onLeftEdge = type === SidebarType.Left && x <= slicedWidth;
+
+				if (onRightEdge || onLeftEdge) {
+					isMouseInsideArea = true;
+					isShowing = true;
+					sidebarStore.showType = type;
+				}
+			}).then((unlisten) => {
+				unlistenLinuxMouseLeave = unlisten;
+			});
+		}
+
+		return () => {
+			if (unlistenLinuxMouseLeave) {
+				unlistenLinuxMouseLeave();
+			}
+		};
 	});
 </script>
 
