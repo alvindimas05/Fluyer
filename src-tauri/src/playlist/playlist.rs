@@ -109,7 +109,7 @@ impl Playlist {
         Ok(())
     }
 
-    pub async fn read_image(id: String) -> Result<Vec<u8>, String> {
+    pub async fn read_image(id: u8) -> Result<Vec<u8>, String> {
         let path = {
             let conn_guard = GLOBAL_DATABASE.lock().unwrap();
             let conn = conn_guard.as_ref().unwrap();

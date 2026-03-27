@@ -43,11 +43,20 @@ const PlaylistService = {
     getCoverArt: async (id: number) => {
         try {
             const arrayBuffer = await TauriPlaylistAPI.readImage(id);
-            if (arrayBuffer !== null && MetadataService.isValidImageBuffer(arrayBuffer)) {
-                const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
-                return URL.createObjectURL(blob);
+            console.log(`[PlaylistService] readImage returned buffer of size: ${arrayBuffer?.byteLength}`);
+            if (arrayBuffer !== null && arrayBuffer.byteLength >= 4) {
+                const bytes = new Uint8Array(arrayBuffer.slice(0, 4));
+                console.log(`[PlaylistService] Magic bytes: ${Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ')}`);
             }
-        } catch (e) { }
+            if (arrayBuffer !== null && MetadataService.isValidImageBuffer(arrayBuffer)) {
+                const blob = new Blob([arrayBuffer], { type: 'image/png' });
+                return URL.createObjectURL(blob);
+            } else if (arrayBuffer !== null) {
+                console.warn(`[PlaylistService] Invalid image buffer for playlist ${id}`);
+            }
+        } catch (e) {
+            console.error(e);
+        }
         return MusicConfig.defaultCoverArt;
     }
 };

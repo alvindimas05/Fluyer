@@ -21,6 +21,12 @@ pub async fn playlist_upload_image() -> Result<String, String> {
 }
 
 #[tauri::command]
-pub async fn playlist_read_image(id: String) -> Result<Vec<u8>, String> {
-    Playlist::read_image(id).await
+pub async fn playlist_read_image(id: u8) -> tauri::ipc::Response {
+    match Playlist::read_image(id).await {
+        Ok(data) => tauri::ipc::Response::new(data),
+        Err(e) => {
+            crate::warn!("Failed to read playlist image for id {}: {}", id, e);
+            tauri::ipc::Response::new(Vec::new())
+        }
+    }
 }

@@ -27,7 +27,7 @@ pub fn music_request_directory(app: AppHandle) {
         app_handle()
             .emit(crate::commands::route::MUSIC_REQUEST_DIRECTORY, ())
             .unwrap_or_else(|_| {
-                eprintln!(
+                crate::error!(
                     "Failed to emit {}",
                     crate::commands::route::MUSIC_REQUEST_DIRECTORY
                 )
