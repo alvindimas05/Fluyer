@@ -1,6 +1,6 @@
 <script lang="ts">
 	import playlistStore from '$lib/stores/playlist.svelte';
-	import ModalService from '$lib/services/ModalService';
+	import ModalService from '$lib/services/ModalService.svelte';
 	import { Modal } from '$lib/constants/Modal';
 	import TauriPlaylistAPI from '$lib/tauri/TauriPlaylistAPI';
 	import type { PlaylistData } from '$lib/features/music/types';
@@ -10,6 +10,7 @@
 	import View from '$lib/ui/components/View.svelte';
 	import Input from '$lib/ui/components/Input.svelte';
 	import modalStore from '$lib/stores/modal.svelte';
+	import PlaylistService from '$lib/services/PlaylistService.svelte';
 
 	let title = $state('');
 	let artist = $state('');
@@ -18,11 +19,7 @@
 	let isSubmitting = $state(false);
 
 	async function handleImageUpload() {
-		try {
-			uploadedImagePath = await TauriPlaylistAPI.uploadImage();
-		} catch (e) {
-			console.error('Failed to upload image:', e);
-		}
+		uploadedImagePath = await PlaylistService.requestUploadImage();
 	}
 
 	async function handleSubmit() {
@@ -37,26 +34,20 @@
 			paths: playlistStore.selectedPaths
 		};
 
-		try {
-			await TauriPlaylistAPI.create(playlist);
-			// Refresh playlist list
-			playlistStore.list = await TauriPlaylistAPI.getAll();
-			close();
-		} catch (e) {
-			console.error('Failed to create playlist:', e);
-		} finally {
-			isSubmitting = false;
-		}
+		await PlaylistService.create(playlist);
+		await PlaylistService.loadPlaylist();
+
+		close();
+		isSubmitting = false;
 	}
 
 	function close() {
-		ModalService.close();
-		playlistStore.isCreating = false;
-		playlistStore.selectedPaths = [];
 		title = '';
 		artist = '';
 		selectedMusicPath = '';
 		uploadedImagePath = '';
+
+		PlaylistService.cancelCreation();
 	}
 </script>
 

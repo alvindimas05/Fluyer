@@ -8,19 +8,6 @@ import { isAndroid } from '$lib/platform';
 
 let defaultCoverArt: string | null = null;
 
-// Fast magic bytes validation - O(1) check
-const isValidImageBuffer = (buffer: ArrayBuffer): boolean => {
-	if (buffer.byteLength < 4) return false;
-	const bytes = new Uint8Array(buffer);
-	// JPEG: FF D8 FF
-	if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return true;
-	// PNG: 89 50 4E 47
-	if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return true;
-	// BMP: 42 4D
-	if (bytes[0] === 0x42 && bytes[1] === 0x4d) return true;
-	return false;
-};
-
 const MetadataService = {
 	initialize: async () => {
 		if (defaultCoverArt) return;
@@ -38,11 +25,11 @@ const MetadataService = {
 		if (!music) return defaultCoverArt;
 		try {
 			const arrayBuffer = await TauriMetadataAPI.getMusicCoverArt(music.path);
-			if (arrayBuffer !== null && isValidImageBuffer(arrayBuffer)) {
+			if (arrayBuffer !== null && MetadataService.isValidImageBuffer(arrayBuffer)) {
 				const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
 				return URL.createObjectURL(blob);
 			}
-		} catch (e) {}
+		} catch (e) { }
 		if (music.title == null || music.artist == null) return defaultCoverArt;
 		const coverArt = await CoverArtService.getByQuery({
 			artist: music.artist!,
@@ -92,7 +79,19 @@ const MetadataService = {
 		}
 		// Fallback if format is unexpected
 		return date;
-	}
+	},
+	// Fast magic bytes validation - O(1) check
+	isValidImageBuffer: (buffer: ArrayBuffer): boolean => {
+		if (buffer.byteLength < 4) return false;
+		const bytes = new Uint8Array(buffer);
+		// JPEG: FF D8 FF
+		if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return true;
+		// PNG: 89 50 4E 47
+		if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return true;
+		// BMP: 42 4D
+		if (bytes[0] === 0x42 && bytes[1] === 0x4d) return true;
+		return false;
+	},
 };
 
 export default MetadataService;

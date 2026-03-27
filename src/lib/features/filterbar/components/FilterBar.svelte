@@ -9,7 +9,7 @@
 	import { filterBarStore } from '$lib/stores/filter.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import musicStore from '$lib/stores/music.svelte';
-	import ModalService from '$lib/services/ModalService';
+	import ModalService from '$lib/services/ModalService.svelte';
 	import { Modal } from '$lib/constants/Modal';
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import { useFilterBar } from '../viewmodels/useFilterBar.svelte';

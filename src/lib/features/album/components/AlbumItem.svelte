@@ -8,7 +8,7 @@
 		visible?: boolean;
 	}
 
-	let { musicList, index, visible = true }: Props = $props();
+	let { musicList, index, visible = false }: Props = $props();
 
 	const vm = useAlbumItem(
 		() => musicList,

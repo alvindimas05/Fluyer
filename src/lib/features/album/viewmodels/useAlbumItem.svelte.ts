@@ -12,6 +12,7 @@ export function useAlbumItem(
 ) {
 	const musicList = $derived(getMusicList());
 	const index = $derived(getIndex());
+	
 	let music = $derived(musicList[0]);
 
 	let isValidFilterAlbum = $derived(

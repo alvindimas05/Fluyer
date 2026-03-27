@@ -9,9 +9,10 @@ import folderStore from '$lib/stores/folder.svelte';
 import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import playlistStore from '$lib/stores/playlist.svelte';
-import ModalService from '$lib/services/ModalService';
+import ModalService from '$lib/services/ModalService.svelte';
 import { Modal } from '$lib/constants/Modal';
 import TauriPlaylistAPI from '$lib/tauri/TauriPlaylistAPI';
+import PlaylistService from '$lib/services/PlaylistService.svelte';
 
 const RESPONSIVE_RULES = [
 	[1536, 2.01, 0.125],
@@ -97,36 +98,17 @@ export function useFilterBar() {
 				musicPaths.length === 1 ? ({ path: musicPaths[0] } as FolderData) : null;
 		}
 
-		// Load playlists when switching to playlist mode
-		if (type === MusicListType.Playlist) {
-			await loadPlaylists();
-		}
-
 		musicStore.listType = type;
 
 		console.log('Music list type changed to:', type);
 	}
 
-	async function loadPlaylists() {
-		try {
-			playlistStore.list = await TauriPlaylistAPI.getAll();
-		} catch (e) {
-			console.error('Failed to load playlists:', e);
-		}
-	}
-
 	function startPlaylistCreation() {
-		playlistStore.isCreating = true;
-		playlistStore.selectedPaths = [];
-		playlistStore.selectedPlaylist = null;
+		PlaylistService.requestCreate();
 	}
 
 	function confirmPlaylistCreation() {
-		if (playlistStore.selectedPaths.length === 0) {
-			playlistStore.isCreating = false;
-			return;
-		}
-		ModalService.open(Modal.CreatePlaylist);
+		PlaylistService.confirmCreate();
 	}
 
 	function cancelPlaylistCreation() {

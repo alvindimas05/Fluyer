@@ -2,19 +2,19 @@
 	import type { PlaylistData } from '$lib/features/music/types';
 	import { MusicConfig } from '$lib/constants/MusicConfig';
 	import playlistStore from '$lib/stores/playlist.svelte';
+	import { usePlaylistItem } from '../viewmodels/usePlaylistItem.svelte';
 
 	interface Props {
 		playlist: PlaylistData;
 		visible?: boolean;
 	}
 
-	let { playlist, visible = true }: Props = $props();
+	let { playlist, visible = false }: Props = $props();
 
-	function selectPlaylist() {
-		playlistStore.selectedPlaylist = playlist;
-	}
-
-	const imageSrc = $derived(playlist.image || MusicConfig.defaultCoverArt);
+	const vm = usePlaylistItem(
+		() => playlist,
+		() => visible,
+	);
 </script>
 
 <div class="col-auto row-[1] h-fit px-3 pb-3">
@@ -28,12 +28,12 @@
 			<div
 				class="playlist-item-actions absolute z-20 h-full w-full cursor-pointer
                 rounded-lg border-2 border-white bg-white/20"
-				onclick={selectPlaylist}
+				onclick={vm.selectPlaylist}
 			></div>
 		{/if}
 		<img
 			class="animate__animated animate__fadeIn aspect-square w-full rounded-lg object-cover"
-			src={imageSrc}
+			src={vm.albumImage}
 			alt="Playlist"
 		/>
 	</div>

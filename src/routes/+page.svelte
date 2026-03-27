@@ -12,7 +12,7 @@
 	import Menu from '$lib/features/menu/components/Menu.svelte';
 	import PlayerBar from '$lib/features/playerbar/components/PlayerBar.svelte';
 	import CreatePlaylistModal from '$lib/features/playlist/components/CreatePlaylistModal.svelte';
-	import ModalService from '$lib/services/ModalService';
+	import ModalService from '$lib/services/ModalService.svelte';
 	import { Modal } from '$lib/constants/Modal';
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import modalStore from '$lib/stores/modal.svelte';

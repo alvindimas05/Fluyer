@@ -30,6 +30,7 @@
 	import { MusicListType } from '$lib/features/music/types';
 	import musicStore from '$lib/stores/music.svelte';
 	import { CommandRoutes } from '$lib/constants/CommandRoutes';
+	import modalStore from '$lib/stores/modal.svelte';
 
 	const SWIPE_RANGE_X = 125;
 	const SWIPE_RANGE_Y = 50;
