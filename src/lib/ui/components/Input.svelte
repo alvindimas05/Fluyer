@@ -24,7 +24,7 @@
 </script>
 
 <View
-	class="{props.class} {isPressed ? 'scale-[.99]' : 'scale-100'}"
+	class="px-2 py-[6px] {props.class} {isPressed ? 'scale-[.99]' : 'scale-100'}"
 	glassEnableHoverEffect={true}
 	events={{
 		onclick: handleClick,
@@ -32,7 +32,7 @@
 	}}
 >
 	<div
-		class="grid h-full w-full cursor-text items-center px-2 py-[6px]
+		class="grid h-full w-full cursor-text items-center
         {icon && 'grid-cols-[auto_min-content]'}"
 	>
 		<input

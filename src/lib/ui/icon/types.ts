@@ -48,4 +48,6 @@ export enum IconType {
 	Check,
 	Cancel,
 	Image,
+	Menu,
+	Queue,
 }

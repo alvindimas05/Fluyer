@@ -25,8 +25,8 @@ import KeyboardMusic from '@lucide/svelte/icons/keyboard-music';
 import CircleX from '@lucide/svelte/icons/circle-x';
 import ChartNoAxesColumn from '@lucide/svelte/icons/chart-no-axes-column';
 import Folder from '@lucide/svelte/icons/folder';
-import ChevronDown from '@lucide/svelte/icons/chevron-down';
-import ChevronUp from '@lucide/svelte/icons/chevron-up';
+import ArrowDownWideNarrow from '@lucide/svelte/icons/arrow-down-wide-narrow';
+import ArrowUpNarrowWide from '@lucide/svelte/icons/arrow-up-narrow-wide';
 import Grid2x2Icon from '@lucide/svelte/icons/grid-2x2';
 import DiscAlbum from '@lucide/svelte/icons/disc-album';
 import ListMusic from '@lucide/svelte/icons/list-music';
@@ -34,6 +34,7 @@ import Plus from '@lucide/svelte/icons/plus';
 import Check from '@lucide/svelte/icons/check';
 import X from '@lucide/svelte/icons/x';
 import Image from '@lucide/svelte/icons/image';
+import AlignJustify from '@lucide/svelte/icons/align-justify';
 
 const iconRegistryLucide = {
 	[IconType.Unknown]: HelpCircle,
@@ -67,8 +68,8 @@ const iconRegistryLucide = {
 	[IconType.Close]: CircleX,
 	[IconType.Visualizer]: ChartNoAxesColumn,
 	[IconType.Folder]: Folder,
-	[IconType.SortAsc]: ChevronUp,
-	[IconType.SortDesc]: ChevronDown,
+	[IconType.SortAsc]: ArrowUpNarrowWide,
+	[IconType.SortDesc]: ArrowDownWideNarrow,
 	[IconType.MusicListTypeAll]: Grid2x2Icon,
 	[IconType.MusicListTypeAlbum]: DiscAlbum,
 	[IconType.MusicListTypeMusic]: Music2,
@@ -77,7 +78,9 @@ const iconRegistryLucide = {
 	[IconType.PlaylistAdd]: Plus,
 	[IconType.Check]: Check,
 	[IconType.Cancel]: X,
-	[IconType.Image]: Image
+	[IconType.Image]: Image,
+	[IconType.Menu]: AlignJustify,
+	[IconType.Queue]: ListMusic,
 };
 
 export default iconRegistryLucide;

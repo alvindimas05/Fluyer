@@ -1,8 +1,8 @@
 import { IconType } from '$lib/ui/icon/types';
 import ArrowUUpLeft from 'phosphor-svelte/lib/ArrowUUpLeft';
 import Broom from 'phosphor-svelte/lib/Broom';
-import CaretDown from 'phosphor-svelte/lib/CaretDown';
-import CaretUp from 'phosphor-svelte/lib/CaretUp';
+import SortAscending from 'phosphor-svelte/lib/SortAscending';
+import SortDescending from 'phosphor-svelte/lib/SortDescending';
 import ChartBar from 'phosphor-svelte/lib/ChartBar';
 import DotsSixVertical from 'phosphor-svelte/lib/DotsSixVertical';
 import Faders from 'phosphor-svelte/lib/Faders';
@@ -34,6 +34,7 @@ import Plus from 'phosphor-svelte/lib/Plus';
 import Check from 'phosphor-svelte/lib/Check';
 import X from 'phosphor-svelte/lib/X';
 import Image from 'phosphor-svelte/lib/Image';
+import List from 'phosphor-svelte/lib/List';
 
 const iconRegistryPhospor = {
 	[IconType.Unknown]: QuestionMark,
@@ -67,8 +68,8 @@ const iconRegistryPhospor = {
 	[IconType.Close]: XCircle,
 	[IconType.Visualizer]: ChartBar,
 	[IconType.Folder]: Folder,
-	[IconType.SortAsc]: CaretUp,
-	[IconType.SortDesc]: CaretDown,
+	[IconType.SortAsc]: SortAscending,
+	[IconType.SortDesc]: SortDescending,
 	[IconType.MusicListTypeAll]: GridFour,
 	[IconType.MusicListTypeAlbum]: VinylRecord,
 	[IconType.MusicListTypeMusic]: MusicNote,
@@ -78,6 +79,8 @@ const iconRegistryPhospor = {
 	[IconType.Check]: Check,
 	[IconType.Cancel]: X,
 	[IconType.Image]: Image,
+	[IconType.Menu]: List,
+	[IconType.Queue]: Queue,
 };
 
 export default iconRegistryPhospor;

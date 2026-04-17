@@ -16,8 +16,8 @@
 	let { children, type }: Props = props;
 
 	import { isLinux, isMobile, isWindows } from '$lib/platform';
-	import { swipeable } from '@react2svelte/swipeable';
-	import type { SwipeEventData } from '@react2svelte/swipeable';
+	// import { swipeable } from '@react2svelte/swipeable';
+	// import type { SwipeEventData } from '@react2svelte/swipeable';
 	import { onMount } from 'svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
@@ -32,8 +32,8 @@
 	import { CommandRoutes } from '$lib/constants/CommandRoutes';
 	import modalStore from '$lib/stores/modal.svelte';
 
-	const SWIPE_RANGE_X = 125;
-	const SWIPE_RANGE_Y = 50;
+	// const SWIPE_RANGE_X = 125;
+	// const SWIPE_RANGE_Y = 50;
 
 	const currentWindow = getCurrentWindow();
 
@@ -49,6 +49,12 @@
 		if (isShowing) {
 			isRendered = true;
 		}
+	});
+
+	$effect(() => {
+		const show = sidebarStore.showType !== null && sidebarStore.showType === type;
+		isMouseInsideArea = show;
+		isShowing = show;
 	});
 
 	function handleAnimationEnd() {
@@ -69,10 +75,7 @@
 		const withinVerticalBounds = e.clientY <= window.innerHeight - 8 * 16;
 
 		if ((onRightEdge || onLeftEdge) && withinVerticalBounds && !isMouseInsideArea) {
-			isMouseInsideArea = true;
-			isShowing = true;
 			sidebarStore.showType = type;
-			console.log('Showing sidebar:', type);
 		} else if (isMouseInsideArea) {
 			const sidebarLeft = type === SidebarType.Right ? window.innerWidth - sidebarWidth : 0;
 			const sidebarRight = type === SidebarType.Right ? window.innerWidth : sidebarWidth;
@@ -96,11 +99,10 @@
 
 		if (!isMouseInsideArea || nearScreenEdge) return;
 
-		isShowing = false;
-		isMouseInsideArea = false;
 		sidebarStore.showType = null;
 	}
 
+	/*
 	function onSwipe(e: CustomEvent<SwipeEventData>) {
 		if (modalStore.show) return;
 
@@ -140,6 +142,7 @@
 			});
 		}
 	}
+	*/
 
 	function onBodyMouseLeave(e: MouseEvent) {
 		if (isLinux()) return;
@@ -156,8 +159,8 @@
 
 	currentWindow.onResized(async () => {
 		isMaximized = await currentWindow.isMaximized();
-	})
-	
+	});
+
 	onMount(() => {
 		sidebarStore.showType = null;
 		let unlistenLinuxMouseLeave: UnlistenFn | null = null;
@@ -169,7 +172,7 @@
 				const slicedWidth = 0.25 * window.innerWidth;
 				const slicedHeight = 0.05 * window.innerHeight;
 
-				if(y < slicedHeight) return;
+				if (y < slicedHeight) return;
 
 				const onRightEdge = type === SidebarType.Right && x >= window.innerWidth - slicedWidth;
 				const onLeftEdge = type === SidebarType.Left && x <= slicedWidth;
@@ -192,7 +195,8 @@
 	});
 </script>
 
-<svelte:body use:swipeable on:swiped={onSwipe} onmouseleave={onBodyMouseLeave} />
+<svelte:body onmouseleave={onBodyMouseLeave} />
+<!-- <svelte:body use:swipeable on:swiped={onSwipe} onmouseleave={onBodyMouseLeave} /> -->
 <svelte:document onmousemove={onMouseMove} />
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 {#if isRendered}
