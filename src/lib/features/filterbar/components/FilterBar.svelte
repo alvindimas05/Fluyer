@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';
-	import { isMacos, isMobile } from '$lib/platform';
+	import { isLinux, isMacos, isMobile, isWindows } from '$lib/platform';
 	import Toggle from '$lib/ui/components/Toggle.svelte';
 	import Button from '$lib/ui/components/Button.svelte';
 	import Input from '$lib/ui/components/Input.svelte';
@@ -28,8 +28,9 @@
 	bind:this={vm.element}
 >
 	<div
-		class="grid gap-x-1 ps-3 pe-2 sm:ps-3 sm:pe-3 md:gap-x-3
+		class="grid gap-x-1 pe-2 ps-3 sm:pe-3 sm:ps-3 md:gap-x-3
 		{isMacos() ? 'ms-[68px]' : ''}
+		{isWindows() || isLinux() ? 'me-[100px] sm:me-0' : ''}
 		{isMobile()
 			? 'grid-cols-[min-content_1fr_min-content_min-content] sm:grid-cols-[min-content_min-content_1fr]'
 			: 'grid-cols-[1fr_min-content_min-content] sm:grid-cols-[min-content_1fr]'}"
@@ -167,7 +168,8 @@
 	<div class="hidden sm:block"></div>
 	<div
 		class="hidden sm:grid sm:ps-3
-		{isMobile() ? '' : 'gap-x-1 sm:grid-cols-[1fr_min-content] md:gap-x-3'}"
+		{isMobile() ? '' : 'gap-x-1 sm:grid-cols-[1fr_min-content] md:gap-x-3'}
+		{isWindows() || isLinux() ? 'me-[100px]' : ''}"
 	>
 		<Input
 			class="pointer-events-auto h-9 rounded p-0"
