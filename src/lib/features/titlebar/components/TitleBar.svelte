@@ -13,8 +13,6 @@
 	};
 
 	let isMaximized = $state(true);
-	let isPlayPage = $state(false);
-	let isVisualizerPage = $state(false);
 	const currentWindow = getCurrentWindow();
 	function onMouseDown(
 		e: MouseEvent & {
@@ -44,18 +42,13 @@
 	currentWindow.onResized(async () => {
 		isMaximized = await currentWindow.isMaximized();
 	});
-
-	afterNavigate((navigation) => {
-		isPlayPage = navigation.to?.route.id === PageRoutes.PLAY;
-		isVisualizerPage = navigation.to?.route.id === PageRoutes.VISUALIZER;
-	});
 </script>
 
 <div class="fixed left-0 top-0 z-10 grid h-12 w-full grid-cols-[1fr_auto]">
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="absolute left-0 top-0 z-[-10] h-full w-full" onmousedown={onMouseDown}></div>
 	{#if isWindows() || isLinux()}
-		<div class="absolute right-0 top-0 mt-2 pe-3">
+		<div class="absolute right-0 top-0 mt-3 pe-3">
 			<button
 				class="tb-button {isWindows() && 'win-button'} {isLinux() && 'linux-button'}"
 				onclick={() => currentWindow.minimize()}
