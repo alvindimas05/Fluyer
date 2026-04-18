@@ -3,6 +3,7 @@ import { fluidScroll } from 'fluidscroll';
 import musicStore from '$lib/stores/music.svelte';
 import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
+import modalStore from '$lib/stores/modal.svelte';
 
 const UIInteractionService = {
 	initialize: async () => {
@@ -57,7 +58,7 @@ const UIInteractionService = {
 		document.addEventListener(
 			'keydown',
 			function (e) {
-				if (e.code !== 'Space') return;
+				if (e.code !== 'Space' || modalStore.show) return;
 
 				const target = e.target as Element;
 

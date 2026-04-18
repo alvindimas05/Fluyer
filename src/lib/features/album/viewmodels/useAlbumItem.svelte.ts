@@ -22,12 +22,9 @@ export function useAlbumItem(
 	let albumImage = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
 
-	// Use $effect with cleanup to cancel pending requests when component unmounts
 	$effect(() => {
-		// Depend on music to ensure reactivity
 		music;
 
-		// Only fetch image when visible
 		const isVisible = getVisible();
 		if (!isVisible) return;
 
@@ -37,10 +34,8 @@ export function useAlbumItem(
 			const imagePromise = MetadataService.getMusicCoverArt(music);
 			albumImage = imagePromise;
 
-			// Track the blob URL for cleanup
 			const url = await imagePromise;
 			if (!cancelled && url) {
-				// Revoke previous blob URL if exists
 				if (currentBlobUrl) {
 					URL.revokeObjectURL(currentBlobUrl);
 				}
@@ -51,7 +46,6 @@ export function useAlbumItem(
 		return () => {
 			cancelled = true;
 			clearTimeout(timeoutId);
-			// Revoke blob URL on cleanup
 			if (currentBlobUrl) {
 				URL.revokeObjectURL(currentBlobUrl);
 				currentBlobUrl = null;

@@ -25,11 +25,9 @@ const state = $state({
 	scrollTop: 0
 });
 
-// Track visibility of items using IntersectionObserver
 let visibleItems = $state<Set<string>>(new Set());
 let observer: IntersectionObserver | null = null;
 
-// Track items that are animating out (hidden by sidebar)
 let animatingOutItems = $state<Set<string>>(new Set());
 
 function updateColumnCount() {
@@ -153,7 +151,6 @@ function getItemKey(item: any): string {
 	return `folder-${item.path}`;
 }
 
-// Check if item should render based on all visibility conditions
 function shouldRenderItem(itemKey: string, index: number, item: any): boolean {
 	// If not visible by filter, don't render
 	if (!isVisibleByFilter(item)) return false;
@@ -243,12 +240,6 @@ export function useMusicList() {
 			});
 		}
 	});
-
-	// We can't easily move dom manipulation like setting scrollTop on mount without binding.
-	// We'll expose state.scrollTop and let the component bind it or use an action.
-	// But the component uses `onscroll`, so we expose `handleScroll`.
-	// For restoring scroll, we can use an action or just $effect in component.
-	// To keep it clean, let's create a `scrollable` action.
 
 	function scrollable(node: HTMLElement) {
 		node.scrollTop = state.scrollTop;

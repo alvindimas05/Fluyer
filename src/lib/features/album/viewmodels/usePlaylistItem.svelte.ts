@@ -10,9 +10,7 @@ export function usePlaylistItem(
     let albumImage = $state<string | null>(null);
     let currentBlobUrl: string | null = null;
 
-    // Use $effect with cleanup to cancel pending requests when component unmounts
     $effect(() => {
-        // Only fetch image when visible
         const isVisible = getVisible();
         if (!isVisible) return;
 
@@ -20,10 +18,8 @@ export function usePlaylistItem(
         const timeoutId = setTimeout(async () => {
             const id = getPlaylist().id;
             if (cancelled || id === undefined) return;
-            // Track the blob URL for cleanup
             const url = await PlaylistService.getCoverArt(id);
             if (!cancelled) {
-                // Revoke previous blob URL if exists
                 if (currentBlobUrl) {
                     URL.revokeObjectURL(currentBlobUrl);
                 }
@@ -37,7 +33,6 @@ export function usePlaylistItem(
         return () => {
             cancelled = true;
             clearTimeout(timeoutId);
-            // Revoke blob URL on cleanup
             if (currentBlobUrl) {
                 URL.revokeObjectURL(currentBlobUrl);
                 currentBlobUrl = null;

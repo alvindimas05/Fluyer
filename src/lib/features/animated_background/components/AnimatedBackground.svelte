@@ -44,7 +44,6 @@
 		const { r, g, b } = hexToRgb(hex);
 		const hsl = rgbToHsl(r, g, b);
 
-		// Balance lightness for better visibility
 		if (hsl.l > 0.65) {
 			// hsl.l = 0.45 + (hsl.l - 0.7) * 0.3;
 			hsl.l = 0.65;
@@ -172,19 +171,12 @@
 
 		const newMusicPath = musicStore.currentMusic?.path;
 
-		// If the music path is same as previous, and not forced, we skip
 		if (currentMusicPath === newMusicPath && !force) return;
 
 		const newCoverArt = await MetadataService.getMusicCoverArt(musicStore.currentMusic);
 
 		const currentWidth = window.innerWidth;
 		const currentHeight = window.innerHeight;
-
-		// Note: even if path changed, cover art might be same (e.g. default cover art)
-		// But usually we trust path change => new song => update bg
-		// However, checking cover art URL equality is also good but MetadataService returns new blob url each time?
-		// Yes, MetadataService.getMusicCoverArt creates new blob url.
-		// So we rely on path check primarily.
 
 		if (currentCoverArt !== null && !MetadataService.isDefaultCoverArt(currentCoverArt)) {
 			URL.revokeObjectURL(currentCoverArt);
@@ -209,19 +201,12 @@
 			// Since the effects references multiple stores
 			setTimeout(() => (canUpdate = true), 1000);
 
-			// Signal to other components?
-			// "Wait for wgpu background to initialize first them show svelte components"
-			// Maybe set a global store value?
 			LibraryService.initialize();
 			console.log('AnimatedBackground is initialized (WGPU)');
 		}
 	}
 
 	function onWindowResize() {
-		// Calculate percentage difference
-		// The user want to re-render when the window is resized 25% difference
-		// Detects from either width or height
-
 		if (lastRenderedWidth === 0 || lastRenderedHeight === 0) {
 			lastRenderedWidth = window.innerWidth;
 			lastRenderedHeight = window.innerHeight;
@@ -272,5 +257,3 @@
 </script>
 
 <svelte:window onresize={onWindowResize} />
-<!-- We don't need a canvas anymore, it renders to the window surface -->
-<div class="pointer-events-none fixed inset-0 -z-10"></div>
