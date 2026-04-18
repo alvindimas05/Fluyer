@@ -10,6 +10,8 @@ pub fn linux_listen_mouse_leave() -> Result<(), tauri::Error> {
     use gtk::prelude::*;
     use tauri::{Emitter, Manager};
 
+    use crate::state::app_handle;
+
     let window = app_handle().get_webview_window("main").unwrap();
     let gtk_window = window.gtk_window()?;
 
