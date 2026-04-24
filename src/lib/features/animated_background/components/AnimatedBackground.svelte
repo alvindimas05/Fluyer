@@ -10,7 +10,7 @@
 	import settingStore from '$lib/stores/setting.svelte';
 	import { SettingAnimatedBackgroundType } from '$lib/features/settings/animated_background/types';
 	// @ts-ignore
-	import ColorThief from 'colorthief/dist/color-thief.mjs';
+	import * as ColorThief from 'colorthief';
 	import { prominent } from 'color.js';
 	import { CommandRoutes } from '$lib/constants/CommandRoutes';
 	import { listen } from '@tauri-apps/api/event';
@@ -153,8 +153,8 @@
 				format: 'hex'
 			});
 		} else {
-			const colorThief = new ColorThief();
-			colors = (await colorThief.getPalette(image, 10)).map((rgb: any) =>
+			// @ts-ignore
+			colors = (await ColorThief.getPalette(image, 10)).map((rgb: any) =>
 				rgbToHex(rgb[0], rgb[1], rgb[2])
 			);
 		}
