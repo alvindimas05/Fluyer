@@ -130,6 +130,6 @@ export default function useCollectionInfo() {
 		addMusicListAndPlay,
 		addMusicList,
 		playShuffle,
-		deletePlaylist,
+		deletePlaylist
 	};
 }

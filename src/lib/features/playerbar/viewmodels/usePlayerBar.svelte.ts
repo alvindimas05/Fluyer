@@ -106,7 +106,10 @@ export function usePlayerBar() {
 			const newMusicPath = musicStore.currentMusic?.path;
 			currentMusicPath = newMusicPath ?? null;
 
-			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic, CoverArtSize.PlayerBar);
+			const imagePromise = MetadataService.getMusicCoverArt(
+				musicStore.currentMusic,
+				CoverArtSize.PlayerBar
+			);
 			albumImage = imagePromise;
 
 			const url = await imagePromise;

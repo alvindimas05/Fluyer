@@ -49,5 +49,5 @@ export enum IconType {
 	Cancel,
 	Image,
 	Menu,
-	Queue,
+	Queue
 }

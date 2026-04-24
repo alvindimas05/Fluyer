@@ -11,10 +11,10 @@ pub mod logger;
 mod lyric;
 mod music;
 mod playlist;
+mod sidebar;
 mod system;
 mod utils;
 mod wgpu_renderer;
-mod sidebar;
 
 // Application modules
 mod app_setup;

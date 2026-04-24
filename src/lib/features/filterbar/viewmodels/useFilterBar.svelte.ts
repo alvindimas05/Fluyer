@@ -38,7 +38,6 @@ const musicListOptions = [
 	{ value: MusicListType.Folder, icon: IconType.MusicListTypeFolder, label: 'Folder' }
 ];
 
-
 let element = $state<HTMLDivElement>();
 let state = $state({
 	gridSize: ''
@@ -156,6 +155,6 @@ export function useFilterBar() {
 		confirmPlaylistCreation,
 		cancelPlaylistCreation,
 		handleMenuButton,
-		handleQueueButton,
+		handleQueueButton
 	};
 }

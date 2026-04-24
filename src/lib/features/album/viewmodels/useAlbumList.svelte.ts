@@ -326,7 +326,7 @@ export function useAlbumList() {
 		node.scrollLeft = state.scrollLeft;
 		node.scrollTop = state.scrollTop;
 		return {
-			destroy() { }
+			destroy() {}
 		};
 	}
 

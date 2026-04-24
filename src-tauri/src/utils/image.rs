@@ -1,5 +1,5 @@
-use fast_image_resize::{IntoImageView, Resizer, images::Image};
-use image::{DynamicImage, ImageBuffer, Rgba, ImageFormat};
+use fast_image_resize::{images::Image, IntoImageView, Resizer};
+use image::{DynamicImage, ImageBuffer, ImageFormat, Rgba};
 
 pub fn compress_image(bytes: &[u8], size: u32) -> Result<Vec<u8>, String> {
     let rgba_image = image::load_from_memory(bytes)
@@ -7,7 +7,13 @@ pub fn compress_image(bytes: &[u8], size: u32) -> Result<Vec<u8>, String> {
         .into_rgba8();
     let dynamic_image = DynamicImage::ImageRgba8(rgba_image);
 
-    let mut dst_image = Image::new(size, size, dynamic_image.pixel_type().unwrap_or(fast_image_resize::PixelType::U8x4));
+    let mut dst_image = Image::new(
+        size,
+        size,
+        dynamic_image
+            .pixel_type()
+            .unwrap_or(fast_image_resize::PixelType::U8x4),
+    );
     let mut resizer = Resizer::new();
     resizer
         .resize(&dynamic_image, &mut dst_image, None)

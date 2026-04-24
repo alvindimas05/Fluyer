@@ -32,13 +32,16 @@ const MetadataService = {
 				const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
 				return URL.createObjectURL(blob);
 			}
-		} catch (e) { }
+		} catch (e) {}
 		if (music.title == null || music.artist == null) return defaultCoverArt;
-		const coverArt = await CoverArtService.getByQuery({
-			artist: music.artist!,
-			title: music.album ? undefined : music.title!,
-			album: music.album ?? undefined
-		}, size);
+		const coverArt = await CoverArtService.getByQuery(
+			{
+				artist: music.artist!,
+				title: music.album ? undefined : music.title!,
+				album: music.album ?? undefined
+			},
+			size
+		);
 		return coverArt ?? defaultCoverArt;
 	},
 	getFolderCoverArt: async (folderPath: string) => {
@@ -90,11 +93,12 @@ const MetadataService = {
 		// JPEG: FF D8 FF
 		if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return true;
 		// PNG: 89 50 4E 47
-		if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return true;
+		if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47)
+			return true;
 		// BMP: 42 4D
 		if (bytes[0] === 0x42 && bytes[1] === 0x4d) return true;
 		return false;
-	},
+	}
 };
 
 export default MetadataService;

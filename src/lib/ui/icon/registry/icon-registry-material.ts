@@ -80,7 +80,7 @@ const iconRegistryMaterial = {
 	[IconType.Cancel]: Close,
 	[IconType.Image]: Image,
 	[IconType.Menu]: Menu,
-	[IconType.Queue]: PlaylistMusic,
+	[IconType.Queue]: PlaylistMusic
 };
 
 export default iconRegistryMaterial;

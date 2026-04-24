@@ -1,5 +1,3 @@
-use fast_image_resize::{Resizer, images::Image};
-use futures::io::BufWriter;
 use tauri::ipc::Response;
 
 use crate::music::metadata::MusicMetadata;

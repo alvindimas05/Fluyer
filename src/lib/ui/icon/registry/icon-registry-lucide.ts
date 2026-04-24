@@ -80,7 +80,7 @@ const iconRegistryLucide = {
 	[IconType.Cancel]: X,
 	[IconType.Image]: Image,
 	[IconType.Menu]: AlignJustify,
-	[IconType.Queue]: ListMusic,
+	[IconType.Queue]: ListMusic
 };
 
 export default iconRegistryLucide;

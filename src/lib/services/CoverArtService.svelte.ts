@@ -12,7 +12,7 @@ export enum CoverArtSize {
 	MusicItem = 48,
 	AlbumItem = 200,
 	PlayerBar = 40,
-	QueueItem = 48,
+	QueueItem = 48
 }
 
 export const COVER_ART_DEBOUNCE_DELAY = isAndroid() ? 1000 : 500;

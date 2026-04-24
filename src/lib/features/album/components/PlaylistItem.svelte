@@ -13,7 +13,7 @@
 
 	const vm = usePlaylistItem(
 		() => playlist,
-		() => visible,
+		() => visible
 	);
 </script>
 

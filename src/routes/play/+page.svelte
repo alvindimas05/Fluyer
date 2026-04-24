@@ -17,7 +17,7 @@
 	let isFullscreen = $state(false);
 	$effect(() => {
 		(async () => {
-			isFullscreen = isMacos() && await getCurrentWindow().isFullscreen();
+			isFullscreen = isMacos() && (await getCurrentWindow().isFullscreen());
 		})();
 	});
 </script>

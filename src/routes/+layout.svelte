@@ -66,9 +66,7 @@
 {#if isAppReady}
 	<AnimatedBackground />
 {/if}
-<div
-	class="scrollbar-hidden fixed h-screen w-screen"
->
+<div class="scrollbar-hidden fixed h-screen w-screen">
 	{@render children?.()}
 </div>
 {#if isDesktop() && page.url.pathname !== PageRoutes.PLAY}
