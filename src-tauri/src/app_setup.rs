@@ -18,6 +18,9 @@ pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>
 
     initialize_store(app);
 
+    // Initialize unified renderer state
+    crate::renderer::init_global_renderer(app);
+
     // Initialize WGPU renderer
     #[cfg(not(target_os = "linux"))]
     {

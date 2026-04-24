@@ -50,6 +50,9 @@ tauri-plugin-device-info = "1.0.0"
 fast_image_resize = { version = "6.0.0", features = ["rayon", "image"] }
 rayon = "1.12.0"
 
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+femtovg = { version = "0.23", features = ["wgpu", "image-loading"] }
+
 [target.'cfg(not(target_os = "android"))'.dependencies]
 reqwest = { version = "0.13.1", default-features = false, features = ["json", "rustls"] }
 
@@ -66,9 +69,9 @@ ndk-context = "0.1"
 enigo = "0.6.1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-glow = "0.16.0"
 gtk = "0.18.2"
 libloading = "0.8"
+femtovg = { version = "0.23", features = ["image-loading"] }
 
 [profile.dev]
 debug = 0

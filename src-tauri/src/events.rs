@@ -19,19 +19,22 @@ pub fn handle_window_events(window: &Window, event: &WindowEvent) {
             }
         }
         WindowEvent::Focused(focused) => {
+            #[cfg(not(target_os = "linux"))]
             if *focused {
                 crate::wgpu_renderer::resume_wgpu(window.app_handle());
-                crate::wgpu_renderer::trigger_redraw();
+                crate::renderer::trigger_redraw();
             } else {
                 crate::wgpu_renderer::suspend_wgpu(window.app_handle());
             }
         }
         WindowEvent::ThemeChanged(_) => {
-            crate::wgpu_renderer::trigger_redraw();
+            #[cfg(not(target_os = "linux"))]
+            crate::renderer::trigger_redraw();
         }
         _ => {}
     }
 }
+
 
 /// Handle application runtime events
 pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {

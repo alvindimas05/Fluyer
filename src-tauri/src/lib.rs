@@ -11,6 +11,7 @@ pub mod logger;
 mod lyric;
 mod music;
 mod playlist;
+pub mod renderer;
 mod sidebar;
 mod system;
 mod utils;

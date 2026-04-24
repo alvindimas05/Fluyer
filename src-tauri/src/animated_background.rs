@@ -77,20 +77,13 @@ pub async fn update_animated_background(
     .expect("Failed to blur");
     let blurred = blurred_dyn.to_rgba8();
 
-    #[cfg(target_os = "linux")]
-    crate::linux_renderer::update_background(blurred);
-
-    #[cfg(not(target_os = "linux"))]
-    crate::wgpu_renderer::update_background(blurred);
+    crate::renderer::update_background(blurred);
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn restore_animated_background() -> Result<(), String> {
-    #[cfg(not(target_os = "linux"))]
-    crate::wgpu_renderer::restore_background();
-    #[cfg(target_os = "linux")]
-    crate::linux_renderer::restore_background();
+    crate::renderer::restore_background();
     Ok(())
 }
