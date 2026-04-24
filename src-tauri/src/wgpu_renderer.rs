@@ -233,7 +233,7 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     .expect("Failed to create device");
 
     let swapchain_capabilities = surface.get_capabilities(&adapter);
-    let swapchain_format = swapchain_capabilities.formats[0].add_srgb_suffix();
+    let swapchain_format = swapchain_capabilities.formats[0].remove_srgb_suffix();
 
     let alpha_mode = swapchain_capabilities
         .alpha_modes

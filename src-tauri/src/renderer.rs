@@ -103,7 +103,7 @@ fn load_rgba_as_image<T: Renderer>(canvas: &mut Canvas<T>, img: &RgbaImage) -> O
     {
         return None;
     }
-    canvas.load_image_mem(&png_bytes, ImageFlags::PREMULTIPLIED).ok()
+    canvas.load_image_mem(&png_bytes, ImageFlags::empty()).ok()
 }
 
 // Common drawing logic for both WGPU and GTK/OpenGL loops.

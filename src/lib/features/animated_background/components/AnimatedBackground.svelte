@@ -15,6 +15,8 @@
 	import { CommandRoutes } from '$lib/constants/CommandRoutes';
 	import { listen } from '@tauri-apps/api/event';
 	import type { Unsubscriber } from 'svelte/store';
+	import ColorConvert, { type RGB } from 'color-convert';
+	import { Color } from 'three';
 
 	interface Color {
 		r: number;
@@ -32,106 +34,6 @@
 
 	let unlistenFocus: Unsubscriber;
 
-	function hexToRgb(hex: string): Color {
-		const bigint = parseInt(hex.slice(1), 16);
-		const r = (bigint >> 16) & 255;
-		const g = (bigint >> 8) & 255;
-		const b = bigint & 255;
-		return { r, g, b };
-	}
-
-	function balanceColor(hex: string): Color {
-		const { r, g, b } = hexToRgb(hex);
-		const hsl = rgbToHsl(r, g, b);
-
-		if (hsl.l > 0.65) {
-			// hsl.l = 0.45 + (hsl.l - 0.7) * 0.3;
-			hsl.l = 0.65;
-		}
-
-		// Ensure we stay within reasonable bounds
-		if (MetadataService.isDefaultCoverArt(currentCoverArt)) {
-			hsl.s = 0.6;
-			hsl.l = 0.6;
-		} else {
-			// hsl.l = Math.max(0.1, Math.min(0.7, hsl.l));
-		}
-
-		return hslToRgb(hsl.h, hsl.s, hsl.l);
-	}
-
-	function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
-		r /= 255;
-		g /= 255;
-		b /= 255;
-
-		const max = Math.max(r, g, b);
-		const min = Math.min(r, g, b);
-		let h = 0,
-			s = 0,
-			l = (max + min) / 2;
-
-		if (max !== min) {
-			const d = max - min;
-			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-			switch (max) {
-				case r:
-					h = (g - b) / d + (g < b ? 6 : 0);
-					break;
-				case g:
-					h = (b - r) / d + 2;
-					break;
-				case b:
-					h = (r - g) / d + 4;
-					break;
-			}
-			h /= 6;
-		}
-
-		return { h, s, l };
-	}
-
-	function hslToRgb(h: number, s: number, l: number): Color {
-		let r, g, b;
-
-		if (s === 0) {
-			r = g = b = l;
-		} else {
-			const hue2rgb = (p: number, q: number, t: number) => {
-				if (t < 0) t += 1;
-				if (t > 1) t -= 1;
-				if (t < 1 / 6) return p + (q - p) * 6 * t;
-				if (t < 1 / 2) return q;
-				if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-				return p;
-			};
-
-			const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-			const p = 2 * l - q;
-
-			r = hue2rgb(p, q, h + 1 / 3);
-			g = hue2rgb(p, q, h);
-			b = hue2rgb(p, q, h - 1 / 3);
-		}
-
-		return {
-			r: Math.round(r * 255),
-			g: Math.round(g * 255),
-			b: Math.round(b * 255)
-		};
-	}
-
-	function rgbToHex(r: number, g: number, b: number): string {
-		return (
-			'#' +
-			[r, g, b]
-				.map((v) => v.toString(16).padStart(2, '0'))
-				.join('')
-				.toUpperCase()
-		);
-	}
-
 	async function getColors(): Promise<Color[] | null> {
 		if (!currentCoverArt) return null;
 		let image = new Image();
@@ -145,21 +47,38 @@
 			});
 		}
 
-		let colors: string[] = [];
+		let colors: RGB[] = [];
 		if (settingStore.animatedBackground.type === SettingAnimatedBackgroundType.Prominent) {
 			// @ts-ignore
-			colors = await prominent(image, {
-				amount: 10,
-				format: 'hex'
-			});
+			const prominentColors = (await prominent(image, {
+				amount: 10
+			})) as number[][];
+			colors = prominentColors.map((color) => [color[0], color[1], color[2]] as RGB);
 		} else {
-			// @ts-ignore
-			colors = (await ColorThief.getPalette(image, 10)).map((rgb: any) =>
-				rgbToHex(rgb[0], rgb[1], rgb[2])
-			);
+			let paletteColors = (await ColorThief.getPalette(image, {
+				colorCount: 10
+			}))!!;
+			colors = paletteColors.map((color: ColorThief.Color) => {
+				let rgbColor = color.rgb();
+				return [rgbColor.r, rgbColor.g, rgbColor.b] as RGB;
+			});
 		}
 
-		return colors.map((hex) => balanceColor(hex));
+		let balancedColors: RGB[] = colors.map((color) => {
+			let [h, s, l] = ColorConvert.rgb.hsl(color[0], color[1], color[2]);
+			if (l > 60) l = 60;
+			if (MetadataService.isDefaultCoverArt(currentCoverArt)) {
+				l = 60;
+				s = 60;
+			}
+			return ColorConvert.hsl.rgb(h, s, l);
+		});
+
+		return balancedColors.map((color) => ({
+			r: color[0],
+			g: color[1],
+			b: color[2]
+		}));
 	}
 
 	async function updateBackground(force = false) {
