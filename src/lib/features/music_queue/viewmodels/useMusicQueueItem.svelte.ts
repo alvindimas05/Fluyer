@@ -2,6 +2,7 @@ import type { MusicData } from '$lib/features/music/types';
 import musicStore from '$lib/stores/music.svelte';
 import MetadataService from '$lib/services/MetadataService.svelte';
 import QueueService from '$lib/services/QueueService.svelte';
+import { CoverArtSize } from '$lib/services/CoverArtService.svelte';
 
 export function useMusicQueueItem(
 	getMusic: () => MusicData,
@@ -31,7 +32,7 @@ export function useMusicQueueItem(
 		let cancelled = false;
 
 		(async () => {
-			const imagePromise = MetadataService.getMusicCoverArt(currentMusic);
+			const imagePromise = MetadataService.getMusicCoverArt(currentMusic, CoverArtSize.QueueItem);
 			albumImage = imagePromise;
 
 			const url = await imagePromise;

@@ -10,6 +10,7 @@ import PageService from '$lib/services/PageService.svelte';
 import playerBarStore from '$lib/stores/playerbar.svelte';
 import QueueService from '$lib/services/QueueService.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
+import { CoverArtSize } from '$lib/services/CoverArtService.svelte';
 
 let element = $state<HTMLDivElement>();
 let oldMusic: MusicData | undefined = $state(undefined);
@@ -105,7 +106,7 @@ export function usePlayerBar() {
 			const newMusicPath = musicStore.currentMusic?.path;
 			currentMusicPath = newMusicPath ?? null;
 
-			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
+			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic, CoverArtSize.PlayerBar);
 			albumImage = imagePromise;
 
 			const url = await imagePromise;

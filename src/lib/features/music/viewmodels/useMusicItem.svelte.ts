@@ -9,7 +9,7 @@ import ProgressService from '$lib/services/ProgressService.svelte';
 import QueueService from '$lib/services/QueueService.svelte';
 import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 import ToastService from '$lib/services/ToastService.svelte';
-import { COVER_ART_DEBOUNCE_DELAY } from '$lib/services/CoverArtService.svelte';
+import { COVER_ART_DEBOUNCE_DELAY, CoverArtSize } from '$lib/services/CoverArtService.svelte';
 
 export function useMusicItem(
 	getMusic: () => MusicData | undefined,
@@ -38,7 +38,7 @@ export function useMusicItem(
 			const imagePromise = currentFolder
 				? MetadataService.getFolderCoverArt(currentFolder.path)
 				: currentMusic
-					? MetadataService.getMusicCoverArt(currentMusic)
+					? MetadataService.getMusicCoverArt(currentMusic, CoverArtSize.MusicItem)
 					: Promise.resolve(null);
 
 			albumImage = imagePromise;

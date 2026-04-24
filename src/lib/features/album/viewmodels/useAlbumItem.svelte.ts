@@ -3,7 +3,7 @@ import MetadataService from '$lib/services/MetadataService.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { type AlbumData, type MusicData, MusicListType } from '$lib/features/music/types';
 import ProgressService from '$lib/services/ProgressService.svelte';
-import { COVER_ART_DEBOUNCE_DELAY } from '$lib/services/CoverArtService.svelte';
+import { COVER_ART_DEBOUNCE_DELAY, CoverArtSize } from '$lib/services/CoverArtService.svelte';
 
 export function useAlbumItem(
 	getMusicList: () => MusicData[],
@@ -31,7 +31,7 @@ export function useAlbumItem(
 		let cancelled = false;
 		const timeoutId = setTimeout(async () => {
 			if (cancelled) return;
-			const imagePromise = MetadataService.getMusicCoverArt(music);
+			const imagePromise = MetadataService.getMusicCoverArt(music, CoverArtSize.AlbumItem);
 			albumImage = imagePromise;
 
 			const url = await imagePromise;

@@ -4,7 +4,6 @@ import musicStore from '$lib/stores/music.svelte';
 import TauriMetadataAPI from '$lib/tauri/TauriMetadataAPI';
 import FolderService from './FolderService.svelte';
 import CoverArtService from './CoverArtService.svelte';
-import { isAndroid } from '$lib/platform';
 
 let defaultCoverArt: string | null = null;
 
@@ -21,10 +20,14 @@ const MetadataService = {
 		// }
 	},
 	isDefaultCoverArt: (image: string | null) => image === defaultCoverArt,
-	getMusicCoverArt: async (music?: MusicData) => {
+	getMusicCoverArt: async (music?: MusicData, size?: number) => {
 		if (!music) return defaultCoverArt;
+
+		if (size) {
+			size *= window.devicePixelRatio;
+		}
 		try {
-			const arrayBuffer = await TauriMetadataAPI.getMusicCoverArt(music.path);
+			const arrayBuffer = await TauriMetadataAPI.getMusicCoverArt(music.path, size);
 			if (arrayBuffer !== null && MetadataService.isValidImageBuffer(arrayBuffer)) {
 				const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
 				return URL.createObjectURL(blob);
@@ -35,7 +38,7 @@ const MetadataService = {
 			artist: music.artist!,
 			title: music.album ? undefined : music.title!,
 			album: music.album ?? undefined
-		});
+		}, size);
 		return coverArt ?? defaultCoverArt;
 	},
 	getFolderCoverArt: async (folderPath: string) => {

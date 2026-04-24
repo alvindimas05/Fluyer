@@ -8,14 +8,22 @@ export interface CoverArtCacheQuery {
 	title?: string;
 }
 
+export enum CoverArtSize {
+	MusicItem = 48,
+	AlbumItem = 200,
+	PlayerBar = 40,
+	QueueItem = 48,
+}
+
 export const COVER_ART_DEBOUNCE_DELAY = isAndroid() ? 1000 : 500;
 
 const CoverArtService = {
-	getByQuery: async (query: CoverArtCacheQuery): Promise<string | null> => {
+	getByQuery: async (query: CoverArtCacheQuery, size?: number): Promise<string | null> => {
 		try {
 			// Returns Uint8Array (Vec<u8> from Rust)
 			const bytes = await invoke<number[]>(CommandRoutes.COVER_ART_GET, {
-				query
+				query,
+				size
 			});
 
 			if (!bytes || bytes.length === 0) {

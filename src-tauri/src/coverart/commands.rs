@@ -3,7 +3,7 @@ use std::fs;
 
 /// Get cover art for an album or track - returns raw image bytes
 #[tauri::command]
-pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
+pub async fn cover_art_get(query: CoverArtQuery, size: Option<u32>) -> Option<Vec<u8>> {
     if query.album.is_none() && query.title.is_none() {
         crate::warn!("No album or title provided");
         return None;
@@ -28,7 +28,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
             CoverArtRequestStatus::Loaded => {
                 // Already fetched, return from cache
                 if let Some(image) = get_image_bytes(&file_path) {
-                    return Some(image);
+                    return process_image(image, size);
                 }
                 crate::warn!("Cover art file not found: {}", name);
                 return None;
@@ -44,7 +44,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
                 match status {
                     CoverArtRequestStatus::Loaded => {
                         if let Some(image) = get_image_bytes(&file_path) {
-                            return Some(image);
+                            return process_image(image, size);
                         }
                         crate::warn!("Cover art file not found: {}", name);
                         return None;
@@ -62,7 +62,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
     // Try cache first
     if let Some(image) = get_image_bytes(&file_path) {
         queue::set_status(name.clone(), CoverArtRequestStatus::Loaded);
-        return Some(image);
+        return process_image(image, size);
     }
 
     // Mark as pending before starting the fetch
@@ -74,7 +74,7 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
     match cover_art {
         Ok(Some(bytes)) => {
             queue::set_status(name.clone(), CoverArtRequestStatus::Loaded);
-            return Some(bytes);
+            return process_image(bytes, size);
         }
         Ok(None) => {
             queue::set_status(name.clone(), CoverArtRequestStatus::Failed);
@@ -91,4 +91,18 @@ pub async fn cover_art_get(query: CoverArtQuery) -> Option<Vec<u8>> {
 
 fn get_image_bytes(file_path: &str) -> Option<Vec<u8>> {
     fs::read(file_path).ok()
+}
+
+fn process_image(bytes: Vec<u8>, size: Option<u32>) -> Option<Vec<u8>> {
+    if let Some(size) = size {
+        match crate::utils::image::compress_image(&bytes, size) {
+            Ok(compressed) => Some(compressed),
+            Err(e) => {
+                crate::warn!("Failed to compress cover art: {}", e);
+                Some(bytes)
+            }
+        }
+    } else {
+        Some(bytes)
+    }
 }
