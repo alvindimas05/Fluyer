@@ -103,7 +103,7 @@ fn load_rgba_as_image<T: Renderer>(canvas: &mut Canvas<T>, img: &RgbaImage) -> O
     {
         return None;
     }
-    canvas.load_image_mem(&png_bytes, ImageFlags::empty()).ok()
+    canvas.load_image_mem(&png_bytes, ImageFlags::PREMULTIPLIED).ok()
 }
 
 // Common drawing logic for both WGPU and GTK/OpenGL loops.
@@ -150,13 +150,14 @@ pub fn draw_background<T: Renderer>(canvas: &mut Canvas<T>, state: &mut SharedRe
         0.0
     };
 
-    // Draw current image fading out
+    // Draw current image
     if let Some(cur_id) = state.current_image_id {
         let paint = Paint::image(cur_id, 0.0, 0.0, w, h, 0.0, 1.0);
         let mut path = Path::new();
         path.rect(0.0, 0.0, w, h);
         canvas.save();
-        canvas.set_global_alpha((1.0 - mix).max(0.0));
+        canvas.global_composite_operation(femtovg::CompositeOperation::Copy);
+        canvas.set_global_alpha(1.0);
         canvas.fill_path(&path, &paint);
         canvas.restore();
     }
@@ -167,6 +168,9 @@ pub fn draw_background<T: Renderer>(canvas: &mut Canvas<T>, state: &mut SharedRe
         let mut path = Path::new();
         path.rect(0.0, 0.0, w, h);
         canvas.save();
+        if state.current_image_id.is_none() {
+            canvas.global_composite_operation(femtovg::CompositeOperation::Copy);
+        }
         canvas.set_global_alpha(mix.max(0.0));
         canvas.fill_path(&path, &paint);
         canvas.restore();

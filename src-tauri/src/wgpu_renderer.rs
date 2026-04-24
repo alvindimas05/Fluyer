@@ -233,17 +233,17 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     .expect("Failed to create device");
 
     let swapchain_capabilities = surface.get_capabilities(&adapter);
-    let swapchain_format = swapchain_capabilities.formats[0];
+    let swapchain_format = swapchain_capabilities.formats[0].add_srgb_suffix();
 
     let alpha_mode = swapchain_capabilities
         .alpha_modes
         .iter()
-        .find(|&&m| m == wgpu::CompositeAlphaMode::PostMultiplied)
+        .find(|&&m| m == wgpu::CompositeAlphaMode::PreMultiplied)
         .or_else(|| {
             swapchain_capabilities
                 .alpha_modes
                 .iter()
-                .find(|&&m| m == wgpu::CompositeAlphaMode::PreMultiplied)
+                .find(|&&m| m == wgpu::CompositeAlphaMode::PostMultiplied)
         })
         .copied()
         .unwrap_or(swapchain_capabilities.alpha_modes[0]);
