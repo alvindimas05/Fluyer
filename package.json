@@ -19,7 +19,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@fontsource/inter": "^5.2.8",
-		"@lucide/svelte": "^0.525.0",
+		"@lucide/svelte": "^1.9.0",
 		"@react2svelte/swipeable": "^0.1.4",
 		"@tauri-apps/api": "^2.10.1",
 		"@tauri-apps/plugin-dialog": "~2.7.0",
