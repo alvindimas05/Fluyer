@@ -58,6 +58,10 @@ const PlaylistService = {
             console.error(e);
         }
         return MusicConfig.defaultCoverArt;
+    },
+    delete: async (id: number) => {
+        await TauriPlaylistAPI.delete(id);
+        PlaylistService.loadPlaylist();
     }
 };
 

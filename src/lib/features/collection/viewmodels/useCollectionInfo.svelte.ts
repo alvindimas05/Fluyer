@@ -11,6 +11,7 @@ import musicStore from '$lib/stores/music.svelte';
 import { MusicListType } from '$lib/features/music/types';
 import folderStore from '$lib/stores/folder.svelte';
 import playlistStore from '$lib/stores/playlist.svelte';
+import PlaylistService from '$lib/services/PlaylistService.svelte';
 
 let album = $derived(filterStore.album);
 let showBackButton = $derived.by(async () => {
@@ -106,6 +107,13 @@ async function playShuffle() {
 	ProgressService.start();
 }
 
+async function deletePlaylist() {
+	if (playlistStore.selectedPlaylist && playlistStore.selectedPlaylist.id) {
+		PlaylistService.delete(playlistStore.selectedPlaylist.id);
+		playlistStore.selectedPlaylist = null;
+	}
+}
+
 export default function useCollectionInfo() {
 	return {
 		get album() {
@@ -121,6 +129,7 @@ export default function useCollectionInfo() {
 		handleBack,
 		addMusicListAndPlay,
 		addMusicList,
-		playShuffle
+		playShuffle,
+		deletePlaylist,
 	};
 }

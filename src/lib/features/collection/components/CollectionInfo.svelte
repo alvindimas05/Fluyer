@@ -37,8 +37,9 @@
 			{#await vm.showBackButton then showBackButton}
 				<div
 					class="mt-2 grid gap-x-2 md:mt-0 md:gap-x-3"
-					class:grid-cols-4={showBackButton}
-					class:grid-cols-3={!showBackButton}
+					class:grid-cols-5={musicStore.listType === MusicListType.Playlist}
+					class:grid-cols-4={showBackButton && musicStore.listType !== MusicListType.Playlist}
+					class:grid-cols-3={!showBackButton && musicStore.listType !== MusicListType.Playlist}
 				>
 					{#if showBackButton}
 						<button
@@ -66,6 +67,14 @@
 					>
 						<Icon type={IconType.Shuffle} />
 					</button>
+					{#if musicStore.listType === MusicListType.Playlist}
+						<button
+							class="flex h-6 w-6 items-center justify-center md:h-7 md:w-7"
+							onclick={vm.deletePlaylist}
+						>
+							<Icon type={IconType.Trash} />
+						</button>
+					{/if}
 				</div>
 			{/await}
 		</div>
