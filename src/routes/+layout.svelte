@@ -7,7 +7,6 @@
 	import { onMount } from 'svelte';
 	import { PageRoutes } from '$lib/constants/PageRoutes';
 	import { page } from '$app/state';
-	import SwipeGuide from '$lib/features/swipe_guide/components/SwipeGuide.svelte';
 	import ToastService from '$lib/services/ToastService.svelte';
 	import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
@@ -76,8 +75,5 @@
 	{#if [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
 		<FilterBar />
 	{/if}
-{/if}
-{#if isMobile() && mobileStore.showSwipeGuide}
-	<SwipeGuide />
 {/if}
 <CreatePlaylistModal />
