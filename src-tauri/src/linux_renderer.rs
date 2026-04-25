@@ -3,11 +3,11 @@
 use femtovg::{Canvas, Color, ImageFlags, Paint, Path, renderer::OpenGl};
 use gtk::prelude::*;
 use image::RgbaImage;
+use tauri::Manager;
 use std::sync::{Arc, Mutex};
 
 use crate::state::app_handle;
 
-// ── Shared state ──────────────────────────────────────────────────────────────
 
 pub struct LinuxRendererState {
     canvas: Option<Canvas<OpenGl>>,
@@ -43,8 +43,6 @@ unsafe fn load_gl_fn(s: &str) -> *const std::ffi::c_void {
     }
     ptr
 }
-
-// ── Native rendering is handled by generic renderer module
 
 pub fn setup_linux_background(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     crate::debug!("setup_linux_background: Starting GTK femtovg OpenGL initialization");

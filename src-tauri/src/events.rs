@@ -55,6 +55,7 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
             crate::wgpu_renderer::handle_wgpu_resize(app_handle, size.width, size.height);
         }
         RunEvent::Resumed => {
+            #[cfg(not(target_os = "linux"))]
             crate::wgpu_renderer::resume_wgpu(app_handle);
         }
         _ => {}
