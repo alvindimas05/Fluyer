@@ -1,15 +1,11 @@
 // WGPU Renderer — femtovg cross-platform backend (non-Linux)
 #![cfg(not(target_os = "linux"))]
 
-use femtovg::{Canvas, Color, ImageFlags, Paint, Path, renderer::WGPURenderer};
-use std::sync::{Arc, Condvar, Mutex};
+use femtovg::{Canvas, renderer::WGPURenderer};
+use std::sync::{Arc, Mutex};
 use tauri::{Manager, async_runtime::block_on};
 use tauri_plugin_device_info::DeviceInfoExt;
 use wgpu::{BackendOptions, Backends, InstanceDescriptor, InstanceFlags};
-
-use image::RgbaImage;
-
-use crate::state::app_handle;
 
 pub fn create_surface(
     instance: &wgpu::Instance,
@@ -293,7 +289,7 @@ pub fn handle_wgpu_resize(app_handle: &tauri::AppHandle, width: u32, height: u32
     }
 }
 
-pub fn suspend_wgpu(_app_handle: &tauri::AppHandle) {
+pub fn suspend_wgpu(app_handle: &tauri::AppHandle) {
     #[cfg(target_os = "android")]
     {
         crate::debug!("Suspending WGPU");
@@ -304,7 +300,7 @@ pub fn suspend_wgpu(_app_handle: &tauri::AppHandle) {
     }
 }
 
-pub fn resume_wgpu(_app_handle: &tauri::AppHandle) {
+pub fn resume_wgpu(app_handle: &tauri::AppHandle) {
     #[cfg(target_os = "android")]
     {
         crate::debug!("Resuming WGPU logic");
