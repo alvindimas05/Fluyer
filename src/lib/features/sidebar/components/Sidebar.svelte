@@ -64,7 +64,7 @@
 	}
 
 	async function onMouseMove(e: MouseEvent) {
-		if (modalStore.show) return;
+		if (modalStore.show || isMobile()) return;
 
 		const onRightEdge =
 			type === SidebarType.Right &&
@@ -145,7 +145,7 @@
 	*/
 
 	function onBodyMouseLeave(e: MouseEvent) {
-		if (isLinux()) return;
+		if (isMobile() || isLinux()) return;
 
 		const onRightEdge = type === SidebarType.Right && e.clientX > window.innerWidth;
 		const onLeftEdge = type === SidebarType.Left && e.clientX < 0;
