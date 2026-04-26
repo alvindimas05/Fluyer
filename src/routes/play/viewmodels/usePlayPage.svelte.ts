@@ -118,7 +118,6 @@ function resetSelectedLyricIndex() {
 
 	const duration = musicStore.progressDuration / 1000;
 	if (duration < lyrics[0].duration) {
-		// Scrolled logic handled in view via effect
 		return;
 	}
 	for (let i = 0; i < lyrics.length; i++) {
@@ -170,16 +169,13 @@ function handleVolumeProgressClick(percentage: number) {
 }
 
 export function usePlayPage() {
-	// Effects
 	$effect(() => {
-		// Dependency on progress to trigger updates
 		musicStore.progressPercentage;
 		refreshProgressText();
 		resetSelectedLyricIndex();
 	});
 
 	$effect(() => {
-		// Image fetching
 		musicStore.currentIndex;
 		let cancelled = false;
 

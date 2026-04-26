@@ -83,7 +83,6 @@ const MetadataService = {
 			// Matches just a year like "2025"
 			return date;
 		}
-		// Fallback if format is unexpected
 		return date;
 	},
 	// Fast magic bytes validation - O(1) check

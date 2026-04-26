@@ -12,7 +12,6 @@ export function useMusicQueueItem(
 	let albumImage = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
 
-	// Derived values need to be inside the function scope or accessed via getters if they depend on arguments
 	const music = $derived(getMusic());
 	const uuid = $derived(getUuid());
 	const visible = $derived(getVisible());
@@ -21,9 +20,7 @@ export function useMusicQueueItem(
 	const isPlaying = $derived(musicStore.currentIndex === index);
 	const isPrevious = $derived(index < musicStore.currentIndex);
 
-	// Fetch album image only when visible, with blob URL cleanup
 	$effect(() => {
-		// Track dependencies synchronously
 		const currentMusic = music;
 		const isVisible = visible;
 

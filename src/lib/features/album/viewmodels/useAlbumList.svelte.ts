@@ -101,7 +101,6 @@ function isVisibleByFilter(musicList: MusicData[]) {
 }
 
 const visualIndices = $derived.by(() => {
-	// Reactively depend on filter properties
 	filterStore.search;
 	filterStore.album;
 

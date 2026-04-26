@@ -41,15 +41,6 @@ const MusicPlayerService = {
 	},
 	next: async () => {
 		if (musicStore.currentIndex === musicStore.queue.length - 1) {
-			// If we are at the end, do nothing (unless we want to repeat/loop, but request says "do nothing")
-			// But wait, the existing code:
-			// await MusicPlayerService.seekByPercentage(0);
-			// await MusicPlayerService.pause();
-			// ProgressService.reset();
-			// return;
-			// This was "stop at end". The request implies "do nothing" (don't even stop/seek?).
-			// "if the user pressing previous ... do nothing".
-			// So I should just return.
 			return;
 		}
 		return TauriMusicAPI.sendCommand(TauriMusicCommand.Next);
