@@ -85,10 +85,6 @@ const QueueService = {
 	moveTo: (from: number, to: number) => {
 		if (from === to) return Promise.resolve();
 
-		// Calculate apiTo BEFORE any state mutation to avoid stale index
-		const apiTo = isDesktop() && from < musicStore.currentIndex ? to + 1 : to;
-
-		// Update both queue and queueIds atomically
 		const queue = [...musicStore.queue];
 		const queueIds = [...musicStore.queueIds];
 		const currentPath = musicStore.currentMusic?.path;
@@ -102,7 +98,6 @@ const QueueService = {
 		queueIds.splice(from, 1);
 		queueIds.splice(to, 0, uuid);
 
-		// Commit both updates atomically
 		musicStore.queue = queue;
 		musicStore.queueIds = queueIds;
 
@@ -116,7 +111,7 @@ const QueueService = {
 
 		// Queue backend API call
 		return playlistMoveQueue.add(async () => {
-			await TauriQueueAPI.moveTo(from, apiTo);
+			await TauriQueueAPI.moveTo(from, to);
 		});
 	},
 	clear: async () => {
