@@ -144,19 +144,18 @@ export function useMusicQueueList() {
 		stopAutoScroll();
 		startAutoScroll(e.clientY);
 
-		// Calculate which item we're over
+		// Calculate which item we're over using offsetTop (unaffected by CSS transforms)
 		if (!scrollContainer) return;
 
-		const containerRect = scrollContainer.getBoundingClientRect();
-		const relativeY = e.clientY - containerRect.top + scrollContainer.scrollTop;
+		const relativeY = e.clientY - scrollContainer.getBoundingClientRect().top + scrollContainer.scrollTop;
 
 		let newOverIndex = null;
-		for (let i = 0; i < itemRefs.length; i++) {
+		const len = musicStore.queue.length;
+		for (let i = 0; i < len; i++) {
 			const item = itemRefs[i];
-			if (!item) continue;
-			const rect = item.getBoundingClientRect();
-			const itemTop = rect.top - containerRect.top + scrollContainer.scrollTop;
-			const itemMiddle = itemTop + rect.height / 2;
+			if (!item || !item.isConnected) continue;
+			const itemTop = item.offsetTop;
+			const itemMiddle = itemTop + item.offsetHeight / 2;
 
 			if (relativeY < itemMiddle) {
 				newOverIndex = i;
