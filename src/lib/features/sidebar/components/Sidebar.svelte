@@ -65,6 +65,8 @@
 
 	async function onMouseMove(e: MouseEvent) {
 		if (modalStore.show || isMobile()) return;
+		// Ignore while user is holding mouse button (e.g. dragging)
+		if (e.buttons !== 0) return;
 
 		const onRightEdge =
 			type === SidebarType.Right &&
@@ -98,6 +100,8 @@
 		const nearScreenEdge = e.clientX <= 20 || e.clientX >= window.innerWidth - 20;
 
 		if (!isMouseInsideArea || nearScreenEdge) return;
+		// Don't close sidebar while user is holding mouse button (dragging)
+		if (e.buttons !== 0) return;
 
 		sidebarStore.showType = null;
 	}
