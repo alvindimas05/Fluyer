@@ -7,11 +7,17 @@ export enum ToastType {
 	Error = 'error'
 }
 
+export interface IToastAction {
+	label: string;
+	onClick: () => void;
+}
+
 export interface IToast {
 	id: string;
 	toastType: ToastType;
 	message: string;
 	duration?: number;
+	action?: IToastAction | IToastAction[];
 }
 
 // Generate a random ID
@@ -34,13 +40,14 @@ class ToastServiceImpl {
 		});
 	}
 
-	create(message: string, type: ToastType, duration: number = 2000) {
+	create(message: string, type: ToastType, duration: number = 2000, action?: IToastAction | IToastAction[]) {
 		const id = generateId();
 		const toast: IToast = {
 			id,
 			message,
 			toastType: type,
-			duration
+			duration,
+			action
 		};
 
 		this.toasts.push(toast);
@@ -68,12 +75,12 @@ class ToastServiceImpl {
 		this.toasts = [];
 	}
 
-	info(message: string, duration?: number) {
-		this.create(message, ToastType.Info, duration);
+	info(message: string, duration?: number, action?: IToastAction | IToastAction[]) {
+		this.create(message, ToastType.Info, duration, action);
 	}
 
-	error(message: string, duration?: number) {
-		this.create(message, ToastType.Error, duration);
+	error(message: string, duration?: number, action?: IToastAction | IToastAction[]) {
+		this.create(message, ToastType.Error, duration, action);
 	}
 }
 
