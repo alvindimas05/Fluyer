@@ -322,8 +322,18 @@ export function useAlbumList() {
 	});
 
 	function scrollable(node: HTMLElement) {
-		node.scrollLeft = state.scrollLeft;
-		node.scrollTop = state.scrollTop;
+		$effect(() => {
+			if (
+				Math.abs(node.scrollLeft - state.scrollLeft) > 1 ||
+				Math.abs(node.scrollTop - state.scrollTop) > 1
+			) {
+				node.scrollTo({
+					left: state.scrollLeft,
+					top: state.scrollTop,
+					behavior: 'smooth'
+				});
+			}
+		});
 		return {
 			destroy() {}
 		};
