@@ -1354,7 +1354,6 @@ dependencies = [
  "document-features",
  "image",
  "num-traits",
- "rayon",
  "thiserror 2.0.18",
 ]
 
@@ -1476,7 +1475,6 @@ dependencies = [
  "ndk-context",
  "rand 0.10.1",
  "raw-window-handle",
- "rayon",
  "regex",
  "reqwest 0.12.28",
  "reqwest 0.13.2",

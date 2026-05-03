@@ -9,10 +9,10 @@ export interface CoverArtCacheQuery {
 }
 
 export enum CoverArtSize {
-	MusicItem = 48,
-	AlbumItem = 200,
-	PlayerBar = 40,
-	QueueItem = 48
+	MusicItem = 72,
+	AlbumItem = 300,
+	PlayerBar = 72,
+	QueueItem = 72
 }
 
 export const COVER_ART_DEBOUNCE_DELAY = isAndroid() ? 1000 : 500;

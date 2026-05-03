@@ -6,7 +6,6 @@ use crate::folder::utils::is_not_hidden;
 use crate::music::metadata::MusicMetadata;
 use chrono::{DateTime, Utc};
 use futures::StreamExt;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use walkdir::{DirEntry, WalkDir};
 
 /// Get all subdirectories in a given path
@@ -39,7 +38,7 @@ pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
         );
     }
 
-    dirs.into_par_iter()
+    dirs.into_iter()
         .filter_map(|e| {
             if let Err(err) = &e {
                 crate::error!("Error reading entry: {}", err);

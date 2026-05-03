@@ -41,11 +41,18 @@ pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
     match event {
         RunEvent::Ready => {
             crate::state::initialize_on_ready(app_handle);
+
+            let scale_factor = crate::state::main_window()
+                .scale_factor()
+                .unwrap_or(1.0);
+            crate::music::image_cache::ImageCache::init_base_cover_size(scale_factor);
+
             #[cfg(target_os = "linux")]
             let _ = crate::sidebar::linux_listen_mouse_leave();
             #[cfg(not(target_os = "linux"))]
             crate::wgpu_renderer::start_render_loop(app_handle.clone());
         }
+
         RunEvent::WindowEvent {
             label: _,
             event: tauri::WindowEvent::Resized(size),
