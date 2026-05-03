@@ -8,9 +8,17 @@ pub async fn music_get_image(path: String, size: Option<u32>) -> Response {
     let cache_key = {
         let meta = MusicMetadata::get(path.clone()).await.ok();
         let artist = meta.as_ref().and_then(|m| m.artist.as_deref());
-        let album  = meta.as_ref().and_then(|m| m.album.as_deref());
+        let album = meta.as_ref().and_then(|m| m.album.as_deref());
         ImageCache::get_cache_key(artist, album, &path)
     };
+
+    if size.is_none() {
+        #[cfg(not(target_os = "android"))]
+        let raw = MusicMetadata::get_image_from_path(path).await;
+        #[cfg(target_os = "android")]
+        let raw = MusicMetadata::get_image_from_path_android(path).await;
+        return Response::new(raw.unwrap_or(Vec::new()));
+    }
 
     let base_size = ImageCache::base_cover_size();
 
