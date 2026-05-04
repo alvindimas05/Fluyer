@@ -507,7 +507,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APP_VERSION: ${{ needs.prepare.outputs.version }}
           GITHUB_REPO: ${{ github.repository }}
-        run: bun run scripts/generate_updater_json.ts
+        run: bun run scripts/generate-updater-json.ts
       - name: Publish latest.json
         uses: ncipollo/release-action@v1
         with:
