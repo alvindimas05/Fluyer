@@ -18,7 +18,8 @@ pub fn handle_window_events(window: &Window, event: &WindowEvent) {
                     .unwrap();
             }
         }
-        WindowEvent::Focused(focused) => {
+        WindowEvent::Focused(focused) =>
+        {
             #[cfg(not(target_os = "linux"))]
             if *focused {
                 crate::wgpu_renderer::resume_wgpu(window.app_handle());
@@ -35,16 +36,13 @@ pub fn handle_window_events(window: &Window, event: &WindowEvent) {
     }
 }
 
-
 /// Handle application runtime events
 pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
     match event {
         RunEvent::Ready => {
             crate::state::initialize_on_ready(app_handle);
 
-            let scale_factor = crate::state::main_window()
-                .scale_factor()
-                .unwrap_or(1.0);
+            let scale_factor = crate::state::main_window().scale_factor().unwrap_or(1.0);
             crate::music::image_cache::ImageCache::init_base_cover_size(scale_factor);
 
             #[cfg(target_os = "linux")]

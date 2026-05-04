@@ -1,9 +1,9 @@
 // WGPU Renderer — femtovg cross-platform backend (non-Linux)
 #![cfg(not(target_os = "linux"))]
 
-use femtovg::{Canvas, renderer::WGPURenderer};
+use femtovg::{renderer::WGPURenderer, Canvas};
 use std::sync::{Arc, Mutex};
-use tauri::{Manager, async_runtime::block_on};
+use tauri::{async_runtime::block_on, Manager};
 use tauri_plugin_device_info::DeviceInfoExt;
 use wgpu::{BackendOptions, Backends, InstanceDescriptor, InstanceFlags};
 
@@ -149,7 +149,6 @@ pub struct SharedRenderer {
 unsafe impl Send for RendererState {}
 unsafe impl Sync for RendererState {}
 
-
 pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     crate::debug!("setup_wgpu: Starting femtovg WGPU initialization");
 
@@ -220,8 +219,8 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     let (device, queue) = block_on(adapter.request_device(&wgpu::DeviceDescriptor {
         label: None,
         required_features: wgpu::Features::empty(),
-        required_limits: wgpu::Limits::downlevel_webgl2_defaults()
-            .using_resolution(adapter.limits()),
+        required_limits:
+            wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits()),
         memory_hints: wgpu::MemoryHints::default(),
         experimental_features: wgpu::ExperimentalFeatures::disabled(),
         trace: wgpu::Trace::Off,

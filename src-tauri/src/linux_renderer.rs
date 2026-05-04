@@ -1,13 +1,12 @@
 #![cfg(target_os = "linux")]
 
-use femtovg::{Canvas, Color, ImageFlags, Paint, Path, renderer::OpenGl};
+use femtovg::{renderer::OpenGl, Canvas, Color, ImageFlags, Paint, Path};
 use gtk::prelude::*;
 use image::RgbaImage;
-use tauri::Manager;
 use std::sync::{Arc, Mutex};
+use tauri::Manager;
 
 use crate::state::app_handle;
-
 
 pub struct LinuxRendererState {
     canvas: Option<Canvas<OpenGl>>,
@@ -32,11 +31,9 @@ unsafe fn load_gl_fn(s: &str) -> *const std::ffi::c_void {
     }
     if ptr.is_null() {
         if let Ok(lib) = libloading::Library::new("libEGL.so.1") {
-            if let Ok(sym) = lib
-                .get::<unsafe extern "C" fn(*const i8) -> *const std::ffi::c_void>(
-                    b"eglGetProcAddress\0",
-                )
-            {
+            if let Ok(sym) = lib.get::<unsafe extern "C" fn(*const i8) -> *const std::ffi::c_void>(
+                b"eglGetProcAddress\0",
+            ) {
                 ptr = sym(name.as_ptr());
             }
         }
@@ -56,9 +53,7 @@ pub fn setup_linux_background(app: &mut tauri::App) -> Result<(), Box<dyn std::e
     gl_area.set_auto_render(true);
 
     let shared_renderer = Arc::new(SharedLinuxRenderer {
-        state: Mutex::new(LinuxRendererState {
-            canvas: None,
-        }),
+        state: Mutex::new(LinuxRendererState { canvas: None }),
     });
 
     // realize: create femtovg OpenGL canvas
@@ -94,7 +89,9 @@ pub fn setup_linux_background(app: &mut tauri::App) -> Result<(), Box<dyn std::e
         gl_area.connect_render(move |_gl_area, _ctx| {
             let mut state = shared.state.lock().unwrap();
             if let Some(canvas) = state.canvas.as_mut() {
-                if let Some(global) = crate::state::app_handle().try_state::<Arc<crate::renderer::GlobalRenderer>>() {
+                if let Some(global) =
+                    crate::state::app_handle().try_state::<Arc<crate::renderer::GlobalRenderer>>()
+                {
                     let mut bg_state = global.bg_state.lock().unwrap();
                     crate::renderer::draw_background(canvas, &mut bg_state);
                     canvas.flush();
@@ -119,7 +116,9 @@ pub fn setup_linux_background(app: &mut tauri::App) -> Result<(), Box<dyn std::e
     {
         gl_area.add_tick_callback(move |widget, _clock| {
             let mut redraw = false;
-            if let Some(global) = crate::state::app_handle().try_state::<Arc<crate::renderer::GlobalRenderer>>() {
+            if let Some(global) =
+                crate::state::app_handle().try_state::<Arc<crate::renderer::GlobalRenderer>>()
+            {
                 let mut bg_state = global.bg_state.lock().unwrap();
                 redraw = bg_state.needs_redraw;
                 bg_state.needs_redraw = false;
@@ -170,5 +169,3 @@ pub fn setup_linux_background(app: &mut tauri::App) -> Result<(), Box<dyn std::e
     app.manage(shared_renderer);
     Ok(())
 }
-
-

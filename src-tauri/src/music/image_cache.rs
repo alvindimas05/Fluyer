@@ -93,11 +93,7 @@ impl ImageCache {
         }
     }
 
-    pub fn get_cache_key(
-        artist: Option<&str>,
-        album: Option<&str>,
-        path: &str,
-    ) -> String {
+    pub fn get_cache_key(artist: Option<&str>, album: Option<&str>, path: &str) -> String {
         if let (Some(a), Some(b)) = (artist, album) {
             let raw = format!("{} {}", a, b);
             Self::sanitize_filename(&raw)
@@ -150,7 +146,11 @@ impl ImageCache {
             let (sender, receiver) = watch::channel(status);
             queue.insert(
                 key.to_string(),
-                CacheEntry { status, sender, receiver },
+                CacheEntry {
+                    status,
+                    sender,
+                    receiver,
+                },
             );
         }
     }

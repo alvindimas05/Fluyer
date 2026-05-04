@@ -1,8 +1,8 @@
-use femtovg::{Canvas, Color, ImageFlags, Paint, Path, renderer::Renderer};
+use crate::state::app_handle;
+use femtovg::{renderer::Renderer, Canvas, Color, ImageFlags, Paint, Path};
 use image::RgbaImage;
 use std::sync::{Arc, Mutex};
 use tauri::Manager;
-use crate::state::app_handle;
 
 // Common abstract state for managing the animated background transitions and caching.
 pub struct SharedRendererState {
@@ -88,7 +88,10 @@ pub fn trigger_redraw() {
 
 // ── Common Canvas Helpers ──────────────────────────────────────────────────────
 
-fn load_rgba_as_image<T: Renderer>(canvas: &mut Canvas<T>, img: &RgbaImage) -> Option<femtovg::ImageId> {
+fn load_rgba_as_image<T: Renderer>(
+    canvas: &mut Canvas<T>,
+    img: &RgbaImage,
+) -> Option<femtovg::ImageId> {
     use std::io::Cursor;
     let mut png_bytes = Vec::new();
     if image::write_buffer_with_format(
@@ -111,7 +114,13 @@ pub fn draw_background<T: Renderer>(canvas: &mut Canvas<T>, state: &mut SharedRe
     let w = canvas.width() as f32;
     let h = canvas.height() as f32;
 
-    canvas.clear_rect(0, 0, canvas.width(), canvas.height(), Color::rgba(0, 0, 0, 0));
+    canvas.clear_rect(
+        0,
+        0,
+        canvas.width(),
+        canvas.height(),
+        Color::rgba(0, 0, 0, 0),
+    );
 
     // Upload pending images into the canvas using whatever backend renderer is active
     if let Some(img) = state.pending_next.take() {
