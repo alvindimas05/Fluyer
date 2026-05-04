@@ -247,8 +247,8 @@ jobs:
         with:
           artifacts: |
             ./src-tauri/target/release/bundle/deb/Fluyer_*_amd64.deb
-            ./src-tauri/target/release/bundle/appimage/Fluyer_*_amd64.AppImage
-            ./src-tauri/target/release/bundle/appimage/Fluyer_*_amd64.AppImage.sig
+            # ./src-tauri/target/release/bundle/appimage/Fluyer_*_amd64.AppImage
+            # ./src-tauri/target/release/bundle/appimage/Fluyer_*_amd64.AppImage.sig
           tag: v${{ needs.prepare.outputs.version }}
           name: Fluyer v${{ needs.prepare.outputs.version }}
           allowUpdates: true
