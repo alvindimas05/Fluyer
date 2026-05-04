@@ -1,10 +1,13 @@
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import ToastService from './ToastService.svelte';
+import { isMacos, isWindows } from '$lib/platform';
 
 class UpdateServiceImpl {
 	async checkForUpdates() {
 		try {
+			if (!(isWindows() || isMacos())) return;
+
 			const update = await check();
 			if (!update) return;
 			ToastService.info(
