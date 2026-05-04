@@ -131,6 +131,10 @@ jobs:
       - name: Setup Workflow
         shell: bash
         run: bash infra/macos.sh
+      - name: Rename macOS App bundle
+        run: |
+          mv ./src-tauri/target/release/bundle/macos/Fluyer.app.tar.gz ./src-tauri/target/release/bundle/macos/Fluyer_${{ needs.prepare.outputs.version }}_x64.app.tar.gz
+          mv ./src-tauri/target/release/bundle/macos/Fluyer.app.tar.gz.sig ./src-tauri/target/release/bundle/macos/Fluyer_${{ needs.prepare.outputs.version }}_x64.app.tar.gz.sig
       - name: Upload artifact
         if: ${{ !inputs.release_build }}
         uses: actions/upload-artifact@v4
@@ -179,6 +183,10 @@ jobs:
       - name: Setup Workflow
         shell: bash
         run: bash infra/macos.sh
+      - name: Rename macOS App bundle
+        run: |
+          mv ./src-tauri/target/release/bundle/macos/Fluyer.app.tar.gz ./src-tauri/target/release/bundle/macos/Fluyer_${{ needs.prepare.outputs.version }}_aarch64.app.tar.gz
+          mv ./src-tauri/target/release/bundle/macos/Fluyer.app.tar.gz.sig ./src-tauri/target/release/bundle/macos/Fluyer_${{ needs.prepare.outputs.version }}_aarch64.app.tar.gz.sig
       - name: Upload artifact
         if: ${{ !inputs.release_build }}
         uses: actions/upload-artifact@v4
