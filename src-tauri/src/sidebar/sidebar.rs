@@ -17,7 +17,6 @@ pub fn linux_listen_mouse_leave() -> Result<(), tauri::Error> {
 
     gtk_window.connect_leave_notify_event(move |_, crossing| {
         let (x, y) = crossing.position();
-        crate::debug!("GTK Mouse Leave: {:?}", crossing.position());
         let _ = app_handle().emit(
             crate::commands::route::SIDEBAR_MOUSE_LEAVE,
             MouseLeavePayload { x, y },
