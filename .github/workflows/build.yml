@@ -501,8 +501,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-updater:
-    needs: [prepare, build-windows-x86_64, build-macos-intel, build-macos-silicon, build-linux]
-    if: ${{ inputs.release_build }}
+    needs: prepare
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
