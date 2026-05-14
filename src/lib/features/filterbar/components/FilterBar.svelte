@@ -77,93 +77,89 @@
 			</Button>
 		{/if}
 
-		{#if musicStore.listType === 'playlist'}
-			<div class="pointer-events-auto hidden h-9 w-full min-w-0 sm:flex sm:justify-start">
-				{#if playlistStore.isCreating}
-					<div class="grid h-9 w-full grid-cols-[auto_auto] gap-x-2">
-						<Button
-							class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px] sm:p-0 sm:px-2"
-							onclick={vm.confirmPlaylistCreation}
-						>
-							<div class="w-5">
-								<Icon type={IconType.Check} />
-							</div>
-						</Button>
-						<Button
-							class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px] sm:p-0 sm:px-2"
-							onclick={vm.cancelPlaylistCreation}
-						>
-							<div class="w-5">
-								<Icon type={IconType.Cancel} />
-							</div>
-						</Button>
-					</div>
-				{:else}
+		<div class="pointer-events-auto hidden h-9 w-full min-w-0 sm:flex sm:items-center sm:gap-x-1">
+			{#if musicStore.listType === 'playlist' && playlistStore.isCreating}
+				<div class="grid h-9 w-full grid-cols-[auto_auto] gap-x-2">
 					<Button
-						class="flex h-9 w-full items-center justify-between gap-x-1 overflow-hidden rounded px-2"
+						class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px] sm:p-0 sm:px-2"
+						onclick={vm.confirmPlaylistCreation}
+					>
+						<div class="w-5">
+							<Icon type={IconType.Check} />
+						</div>
+					</Button>
+					<Button
+						class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px] sm:p-0 sm:px-2"
+						onclick={vm.cancelPlaylistCreation}
+					>
+						<div class="w-5">
+							<Icon type={IconType.Cancel} />
+						</div>
+					</Button>
+				</div>
+			{:else}
+				<Toggle
+					class="pointer-events-auto h-9 w-full"
+					iconStyle="width: {vm.iconSize}px;"
+					options={vm.musicListOptions}
+					selected={musicStore.listType}
+					onchange={vm.handleToggleChange}
+				/>
+				{#if musicStore.listType === 'playlist'}
+					<Button
+						class="grid aspect-square h-9 shrink-0 items-center justify-center rounded"
 						onclick={vm.startPlaylistCreation}
 					>
-						<div class="truncate">Create Playlist</div>
-						<div class="w-5 shrink-0">
+						<div class="w-5">
 							<Icon type={IconType.PlaylistAdd} />
 						</div>
 					</Button>
 				{/if}
-			</div>
-		{:else}
-			<Toggle
-				class="pointer-events-auto hidden h-9 w-full sm:block"
-				iconStyle="width: {vm.iconSize}px;"
-				options={vm.musicListOptions}
-				selected={musicStore.listType}
-				onchange={vm.handleToggleChange}
-			/>
-		{/if}
+			{/if}
+		</div>
 	</div>
 
 	<div class="h-9 px-3 sm:hidden">
-		{#if musicStore.listType === 'playlist'}
-			<div class="pointer-events-auto flex h-9 w-full min-w-0 justify-end">
-				{#if playlistStore.isCreating}
-					<div class="grid h-9 w-full grid-cols-[auto_auto] gap-x-2">
-						<Button
-							class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px]"
-							onclick={vm.confirmPlaylistCreation}
-						>
-							<div class="w-5">
-								<Icon type={IconType.Check} />
-							</div>
-						</Button>
-						<Button
-							class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px]"
-							onclick={vm.cancelPlaylistCreation}
-						>
-							<div class="w-5">
-								<Icon type={IconType.Cancel} />
-							</div>
-						</Button>
-					</div>
-				{:else}
+		<div class="pointer-events-auto flex h-9 w-full min-w-0 items-center gap-x-1">
+			{#if musicStore.listType === 'playlist' && playlistStore.isCreating}
+				<div class="grid h-9 w-full grid-cols-[auto_auto] gap-x-2">
 					<Button
-						class="flex h-9 w-full items-center justify-between gap-x-1 overflow-hidden rounded px-2"
+						class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px]"
+						onclick={vm.confirmPlaylistCreation}
+					>
+						<div class="w-5">
+							<Icon type={IconType.Check} />
+						</div>
+					</Button>
+					<Button
+						class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px]"
+						onclick={vm.cancelPlaylistCreation}
+					>
+						<div class="w-5">
+							<Icon type={IconType.Cancel} />
+						</div>
+					</Button>
+				</div>
+			{:else}
+				<Toggle
+					class="pointer-events-auto w-full"
+					iconStyle="width: {vm.iconSize}px;"
+					options={vm.musicListOptions}
+					selected={musicStore.listType}
+					onchange={vm.handleToggleChange}
+				/>
+				{#if musicStore.listType === 'playlist'}
+					<Button
+						class="grid aspect-square h-9 shrink-0 items-center justify-center rounded"
 						onclick={vm.startPlaylistCreation}
 					>
-						<div class="truncate">Create Playlist</div>
-						<div class="w-5 shrink-0">
+						<div class="w-5">
 							<Icon type={IconType.PlaylistAdd} />
 						</div>
 					</Button>
 				{/if}
-			</div>
-		{:else}
-			<Toggle
-				class="pointer-events-auto w-full"
-				iconStyle="width: {vm.iconSize}px;"
-				options={vm.musicListOptions}
-				selected={musicStore.listType}
-				onchange={vm.handleToggleChange}
-			/>
-		{/if}
+			{/if}
+		</div>
 	</div>
 	<div class="hidden sm:block"></div>
 	<div
