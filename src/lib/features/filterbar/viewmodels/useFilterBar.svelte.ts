@@ -115,6 +115,7 @@ function startPlaylistCreation() {
 
 function confirmPlaylistCreation() {
 	PlaylistService.confirmCreate();
+	PlaylistService.loadPlaylist();
 }
 
 function cancelPlaylistCreation() {
