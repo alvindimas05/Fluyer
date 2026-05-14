@@ -31,11 +31,19 @@
 				onclick={vm.selectPlaylist}
 			></div>
 		{/if}
-		<img
-			class="animate__animated animate__fadeIn aspect-square w-full rounded-lg object-cover"
-			src={vm.albumImage}
-			alt="Playlist"
-		/>
+		{#await vm.albumImage}
+			<div class="aspect-square w-full"></div>
+		{:then image}
+			{#if image}
+				<img
+					class="animate__animated animate__fadeIn aspect-square w-full rounded-lg object-cover"
+					src={image}
+					alt="Playlist"
+				/>
+			{:else}
+				<div class="aspect-square w-full rounded-lg"></div>
+			{/if}
+		{/await}
 	</div>
 	<p
 		class="animate-scroll-overflow-text mt-2 overflow-hidden whitespace-nowrap font-medium md:text-lg"

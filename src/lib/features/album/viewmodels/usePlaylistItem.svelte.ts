@@ -4,7 +4,7 @@ import { COVER_ART_DEBOUNCE_DELAY } from '$lib/services/CoverArtService.svelte';
 import PlaylistService from '$lib/services/PlaylistService.svelte';
 
 export function usePlaylistItem(getPlaylist: () => PlaylistData, getVisible: () => boolean) {
-	let albumImage = $state<string | null>(null);
+	let albumImage = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
 
 	$effect(() => {
@@ -15,7 +15,11 @@ export function usePlaylistItem(getPlaylist: () => PlaylistData, getVisible: () 
 		const timeoutId = setTimeout(async () => {
 			const id = getPlaylist().id;
 			if (cancelled || id === undefined) return;
-			const url = await PlaylistService.getCoverArt(id);
+
+			const imagePromise = PlaylistService.getCoverArt(id);
+			albumImage = imagePromise;
+
+			const url = await imagePromise;
 			if (!cancelled) {
 				if (currentBlobUrl) {
 					URL.revokeObjectURL(currentBlobUrl);
@@ -23,7 +27,6 @@ export function usePlaylistItem(getPlaylist: () => PlaylistData, getVisible: () 
 				if (url) {
 					currentBlobUrl = url;
 				}
-				albumImage = url;
 			}
 		}, COVER_ART_DEBOUNCE_DELAY);
 
