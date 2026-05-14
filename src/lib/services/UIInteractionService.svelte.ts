@@ -8,8 +8,7 @@ import modalStore from '$lib/stores/modal.svelte';
 const UIInteractionService = {
 	initialize: async () => {
 		UIInteractionService.autoScrollOverflowText();
-		UIInteractionService.blockDefaultKeyActions();
-		UIInteractionService.handleSpacePlaybackToggle();
+		UIInteractionService.handleKeyControls();
 	},
 	// FIXME: Auto scroll overflow eating CPU
 	autoScrollOverflowText: () => {
@@ -49,35 +48,41 @@ const UIInteractionService = {
 		// 	scrollEnd = !scrollEnd;
 		// }, scrollDuration + 2000);
 	},
-	blockDefaultKeyActions: () => {
-		window.addEventListener('keydown', (e) => {
-			if (['Tab', 'Escape', 'Space', 'Enter'].includes(e.key)) e.preventDefault();
-		});
-	},
-	handleSpacePlaybackToggle: () => {
+	handleKeyControls: () => {
 		document.addEventListener(
 			'keydown',
 			function (e) {
-				if (e.code !== 'Space' || modalStore.show) return;
-
 				const target = e.target as Element;
 
 				if (target == document.body) e.preventDefault();
 
-				if (target.matches('a, button, input, textarea, select')) {
-					e.preventDefault();
-					e.stopPropagation();
-					// @ts-ignore
-					target.blur();
+				if (e.code === 'Space') {
+					if (target.matches('a, button, select')) {
+						e.preventDefault();
+						e.stopPropagation();
+						// @ts-ignore
+						target.blur();
 
-					document.body.focus();
-				}
+						document.body.focus();
+					}
+					if (target.matches('input, textarea')) return;
 
-				if (musicStore.isPlaying) {
-					musicStore.isPlaying = false;
-					MusicPlayerService.pause();
-				} else {
-					MusicPlayerService.play();
+					if (musicStore.isPlaying) {
+						musicStore.isPlaying = false;
+						MusicPlayerService.pause();
+					} else {
+						MusicPlayerService.play();
+					}
+				} else if (['Tab', 'Escape'].includes(e.key)) {
+					if (target.matches('a, button, select')) {
+						e.preventDefault();
+						e.stopPropagation();
+						// @ts-ignore
+						target.blur();
+
+						document.body.focus();
+					}
+					if (target.matches('input, textarea')) return;
 				}
 			},
 			true
