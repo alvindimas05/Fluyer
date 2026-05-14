@@ -371,6 +371,9 @@ export function useAlbumList() {
 		handleWheel,
 		scrollable,
 		get filteredItemCount() {
+			if (musicStore.listType === MusicListType.Playlist) {
+				return playlistStore.list.length;
+			}
 			return visualIndices.size;
 		}
 	};
