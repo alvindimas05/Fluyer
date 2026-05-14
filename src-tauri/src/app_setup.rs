@@ -77,3 +77,13 @@ pub fn prevent_default_plugin() -> tauri::plugin::TauriPlugin<tauri::Wry> {
 pub fn prevent_default_plugin() -> tauri::plugin::TauriPlugin<tauri::Wry> {
     tauri_plugin_prevent_default::init()
 }
+
+pub fn single_instance_plugin() -> tauri::plugin::TauriPlugin<tauri::Wry> {
+    tauri_plugin_single_instance::init(|app, args, cwd| {
+        #[cfg(desktop)]
+        let _ = app
+            .get_webview_window("main")
+            .expect("no main window")
+            .set_focus();
+    })
+}

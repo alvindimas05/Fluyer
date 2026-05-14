@@ -35,6 +35,7 @@ pub fn run() {
         .plugin(tauri_plugin_fluyer::init())
         .plugin(tauri_plugin_device_info::init())
         .plugin(app_setup::prevent_default_plugin())
+        .plugin(app_setup::single_instance_plugin())
         .setup(app_setup::setup_application)
         .invoke_handler(commands::COMMAND_HANDLERS)
         .on_window_event(events::handle_window_events)
