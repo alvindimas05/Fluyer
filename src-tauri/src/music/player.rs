@@ -1554,7 +1554,10 @@ impl MusicPlayer {
                     if current_stream != 0 {
                         let state = BASS_ChannelIsActive(current_stream);
                         if state == BASS_ACTIVE_STOPPED {
-                            // Track ended, trigger next
+                            // Zero out immediately before spawning to prevent the listener
+                            // from firing play_next again on the next 100ms tick while
+                            // spawn_blocking is still queued (race condition).
+                            CURRENT_STREAM.store(0, Ordering::SeqCst);
                             crate::info!("Track ended, playing next");
                             Self::play_next(false);
                         }
@@ -1569,6 +1572,10 @@ impl MusicPlayer {
                             if current_stream != 0 {
                                 let state = (bass.bass_channel_is_active)(current_stream);
                                 if state == BASS_ACTIVE_STOPPED {
+                                    // Zero out immediately before spawning to prevent the listener
+                                    // from firing play_next again on the next 100ms tick while
+                                    // spawn_blocking is still queued (race condition).
+                                    CURRENT_STREAM.store(0, Ordering::SeqCst);
                                     crate::info!("Track ended, playing next");
                                     Self::play_next(false);
                                 }
