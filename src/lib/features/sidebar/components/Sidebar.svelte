@@ -37,7 +37,7 @@
 
 	const currentWindow = getCurrentWindow();
 
-	let sidebarWidth = $derived(sidebarStore.width);
+	let sidebarWidth = $derived(sidebarStore.width - 24);
 	let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
 
 	let isMouseInsideArea = $state(false);
@@ -65,8 +65,6 @@
 
 	async function onMouseMove(e: MouseEvent) {
 		if (modalStore.show || isMobile()) return;
-		// Ignore while user is holding mouse button (e.g. dragging)
-		if (e.buttons !== 0) return;
 
 		const onRightEdge =
 			type === SidebarType.Right &&
@@ -98,10 +96,11 @@
 
 	async function onMouseLeave(e: MouseEvent) {
 		const nearScreenEdge = e.clientX <= 20 || e.clientX >= window.innerWidth - 20;
+		const isActuallyStillInside =
+			(type === SidebarType.Left && e.clientX <= sidebarWidth) ||
+			(type === SidebarType.Right && e.clientX >= window.innerWidth - sidebarWidth);
 
-		if (!isMouseInsideArea || nearScreenEdge) return;
-		// Don't close sidebar while user is holding mouse button (dragging)
-		if (e.buttons !== 0) return;
+		if (!isMouseInsideArea || nearScreenEdge || isActuallyStillInside) return;
 
 		sidebarStore.showType = null;
 	}
@@ -224,7 +223,7 @@
 				{props.class}
 			"
 			style="
-				width: {sidebarWidth - 24}px;
+				width: {sidebarWidth}px;
 				animation-duration: {isLinux() ? '350ms' : '500ms'};
 			"
 			events={{ onanimationend: handleAnimationEnd }}
