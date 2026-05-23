@@ -518,6 +518,9 @@ jobs:
         with:
           artifacts: latest.json
           tag: v${{ needs.prepare.outputs.version }}
+          name: Fluyer v${{ needs.prepare.outputs.version }}
           allowUpdates: true
           omitBodyDuringUpdate: true
+          prerelease: true
+          artifactErrorsFailBuild: true
           token: ${{ secrets.GITHUB_TOKEN }}
