@@ -74,6 +74,7 @@ femtovg = { version = "0.23", features = ["image-loading"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
 
 [profile.dev]
 debug = 0

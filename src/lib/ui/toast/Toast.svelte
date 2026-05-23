@@ -17,17 +17,17 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <View
-	class="pointer-events-auto relative mb-3 flex w-full cursor-pointer items-center justify-between overflow-hidden rounded px-3 py-2 transition-all"
+	class="pointer-events-auto relative mb-3 w-full cursor-pointer items-center justify-between overflow-hidden rounded px-3 py-2 transition-all"
 	events={{
 		onclick: close
 	}}
 >
 	<div>{toast.message}</div>
 	{#if toast.action}
-		<div class="ml-3 flex shrink-0 gap-2">
+		<div class="mt-2 flex shrink-0 gap-2">
 			{#each Array.isArray(toast.action) ? toast.action : [toast.action] as action}
 				<button
-					class="rounded bg-white/20 px-2 py-1 text-xs font-semibold hover:bg-white/30"
+					class="rounded bg-white/20 px-2 py-1 text-sm font-semibold hover:bg-white/30"
 					onclick={(e) => {
 						e.stopPropagation();
 						action.onClick();

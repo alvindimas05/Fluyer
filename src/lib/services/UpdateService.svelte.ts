@@ -2,6 +2,7 @@ import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import ToastService from './ToastService.svelte';
 import { isMacos, isWindows } from '$lib/platform';
+import sleep from 'sleep-promise';
 
 class UpdateServiceImpl {
 	async checkForUpdates() {
@@ -10,12 +11,13 @@ class UpdateServiceImpl {
 
 			const update = await check();
 			if (!update) return;
+			await sleep(3000);
 			ToastService.info(
-				`Update ${update.version} available.`,
+				`Would you like to update to version ${update.version}?`,
 				0,
 				[
 					{
-						label: 'Update',
+						label: 'Yes',
 						onClick: async () => {
 							ToastService.info('Downloading update...', 0);
 							await update.downloadAndInstall();
@@ -24,8 +26,8 @@ class UpdateServiceImpl {
 						}
 					},
 					{
-						label: 'Cancel',
-						onClick: () => {} // automatically closes due to Toast component behavior
+						label: 'No',
+						onClick: () => { }
 					}
 				]
 			);

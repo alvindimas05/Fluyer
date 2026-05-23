@@ -25,6 +25,7 @@
 	import CreatePlaylistModal from '$lib/features/playlist/components/CreatePlaylistModal.svelte';
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import PlaylistService from '$lib/services/PlaylistService.svelte';
+	import UpdateService from '$lib/services/UpdateService.svelte';
 
 	if (isLinux()) {
 		import('$lib/scss/linux.scss');
@@ -59,6 +60,8 @@
 		isAppReady = true;
 
 		console.log(`Front-end is initialized. Took ${performance.now() - now} ms`);
+
+		UpdateService.checkForUpdates();
 	});
 </script>
 
