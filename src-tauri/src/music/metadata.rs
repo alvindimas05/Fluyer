@@ -7,10 +7,11 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
-use symphonia::core::formats::FormatOptions;
+use symphonia::core::codecs::CodecParameters;
+use symphonia::core::formats::probe::Hint;
+use symphonia::core::formats::{FormatOptions, TrackType};
 use symphonia::core::io::MediaSourceStream;
-use symphonia::core::meta::{MetadataOptions, StandardTagKey, StandardVisualKey};
-use symphonia::core::probe::Hint;
+use symphonia::core::meta::{MetadataOptions, StandardTag, StandardVisualKey};
 use tauri::Manager;
 use tokio::process::Command;
 
@@ -183,61 +184,56 @@ impl MusicMetadata {
         let format_opts = FormatOptions::default();
         let metadata_opts = MetadataOptions::default();
 
-        let mut probed = symphonia::default::get_probe()
-            .format(&hint, mss, &format_opts, &metadata_opts)
+        let mut format = symphonia::default::get_probe()
+            .probe(&hint, mss, format_opts, metadata_opts)
             .map_err(|e| format!("Symphonia probe failed {} : {}", path, e))?;
 
-        let mut format = probed.format;
         let mut metadata = MusicMetadata::default();
         metadata.path = path.to_string();
 
         // Find first audio track and extract codec parameters
         let track = format
-            .tracks()
-            .iter()
-            .find(|t| t.codec_params.codec != symphonia::core::codecs::CODEC_TYPE_NULL)
+            .first_track(TrackType::Audio)
             .ok_or_else(|| "No audio track found".to_string())?;
 
-        // Extract duration
-        if let Some(n_frames) = track.codec_params.n_frames {
-            if let Some(sample_rate) = track.codec_params.sample_rate {
-                let duration_secs = n_frames as f64 / sample_rate as f64;
+        // Extract duration from track.duration + time_base
+        // duration in seconds = ticks * (numer / denom)
+        if let Some(dur) = track.duration {
+            if let Some(tb) = track.time_base {
+                let duration_secs = dur.get() as f64
+                    * tb.numer.get() as f64
+                    / tb.denom.get() as f64;
                 metadata.duration = Some((duration_secs * 1000.0) as u128);
             }
         }
 
-        // Extract sample rate and bits per sample
-        metadata.sample_rate = track.codec_params.sample_rate;
-        metadata.bits_per_sample = track.codec_params.bits_per_sample;
+        // Extract sample rate and bits per sample from AudioCodecParameters
+        if let Some(CodecParameters::Audio(audio_params)) = &track.codec_params {
+            metadata.sample_rate = audio_params.sample_rate;
+            metadata.bits_per_sample = audio_params.bits_per_sample;
+        }
 
         // Extract metadata tags from format metadata
         let extract_tags = |meta: &symphonia::core::meta::MetadataRevision,
                             metadata: &mut MusicMetadata| {
-            for tag in meta.tags() {
-                if let Some(std_key) = tag.std_key {
-                    let value = tag.value.to_string();
-                    match std_key {
-                        StandardTagKey::TrackTitle => metadata.title = Some(value),
-                        StandardTagKey::Artist => metadata.artist = Some(value),
-                        StandardTagKey::Album => metadata.album = Some(value),
-                        StandardTagKey::AlbumArtist => metadata.album_artist = Some(value),
-                        StandardTagKey::TrackNumber => metadata.track_number = Some(value),
-                        StandardTagKey::Genre => metadata.genre = Some(value),
-                        StandardTagKey::Date => metadata.date = Some(value),
+            for tag in &meta.media.tags {
+                if let Some(std_tag) = &tag.std {
+                    match std_tag {
+                        StandardTag::TrackTitle(v) => metadata.title = Some(v.as_ref().clone()),
+                        StandardTag::Artist(v) => metadata.artist = Some(v.as_ref().clone()),
+                        StandardTag::Album(v) => metadata.album = Some(v.as_ref().clone()),
+                        StandardTag::AlbumArtist(v) => metadata.album_artist = Some(v.as_ref().clone()),
+                        StandardTag::TrackNumber(n) => metadata.track_number = Some(n.to_string()),
+                        StandardTag::Genre(v) => metadata.genre = Some(v.as_ref().clone()),
+                        StandardTag::RecordingDate(v) => metadata.date = Some(v.as_ref().clone()),
+                        StandardTag::ReleaseDate(v) if metadata.date.is_none() => metadata.date = Some(v.as_ref().clone()),
                         _ => {}
                     }
                 }
             }
         };
 
-        // Try probed metadata first
-        if let Some(probe_meta) = probed.metadata.get() {
-            if let Some(rev) = probe_meta.current() {
-                extract_tags(rev, &mut metadata);
-            }
-        }
-
-        // Then try format metadata (may have more tags)
+        // Try format metadata
         if let Some(rev) = format.metadata().current() {
             extract_tags(rev, &mut metadata);
         }
@@ -426,34 +422,23 @@ impl MusicMetadata {
         let format_opts = FormatOptions::default();
         let metadata_opts = MetadataOptions::default();
 
-        let mut probed = symphonia::default::get_probe()
-            .format(&hint, mss, &format_opts, &metadata_opts)
+        let mut format = symphonia::default::get_probe()
+            .probe(&hint, mss, format_opts, metadata_opts)
             .map_err(|e| format!("Symphonia probe failed: {}", e))?;
-
-        let mut format = probed.format;
 
         // Helper to extract front cover from metadata revision
         let extract_cover = |meta: &symphonia::core::meta::MetadataRevision| -> Option<Vec<u8>> {
-            for visual in meta.visuals() {
+            for visual in &meta.media.visuals {
                 // Prefer front cover, but accept any visual
                 if visual.usage == Some(StandardVisualKey::FrontCover) || visual.usage.is_none() {
                     return Some(visual.data.to_vec());
                 }
             }
             // If no front cover found, return first visual
-            meta.visuals().first().map(|v| v.data.to_vec())
+            meta.media.visuals.first().map(|v| v.data.to_vec())
         };
 
-        // Try probed metadata first (ID3v2, Vorbis comments, etc.)
-        if let Some(probe_meta) = probed.metadata.get() {
-            if let Some(rev) = probe_meta.current() {
-                if let Some(cover) = extract_cover(rev) {
-                    return Ok(cover);
-                }
-            }
-        }
-
-        // Then try format metadata
+        // Try format metadata
         if let Some(rev) = format.metadata().current() {
             if let Some(cover) = extract_cover(rev) {
                 return Ok(cover);
@@ -718,28 +703,23 @@ impl MusicMetadata {
         let format_opts = FormatOptions::default();
         let metadata_opts = MetadataOptions::default();
 
-        let mut probed = symphonia::default::get_probe()
-            .format(&hint, mss, &format_opts, &metadata_opts)
+        let mut format = symphonia::default::get_probe()
+            .probe(&hint, mss, format_opts, metadata_opts)
             .ok()?;
-
-        let mut format = probed.format;
 
         // Helper to extract lyrics from metadata revision
         let extract_lyrics = |meta: &symphonia::core::meta::MetadataRevision| -> Option<String> {
-            for tag in meta.tags() {
+            for tag in &meta.media.tags {
                 // Check for standard lyrics key
-                if let Some(std_key) = tag.std_key {
-                    if std_key == StandardTagKey::Lyrics {
-                        let value = tag.value.to_string();
-                        if !value.is_empty() {
-                            return Some(value);
-                        }
+                if let Some(StandardTag::Lyrics(v)) = &tag.std {
+                    if !v.is_empty() {
+                        return Some(v.as_ref().clone());
                     }
                 }
                 // Also check by tag name for various lyrics tag formats
-                let tag_key_lower = tag.key.to_lowercase();
+                let tag_key_lower = tag.raw.key.to_lowercase();
                 if tag_key_lower.contains("lyrics") || tag_key_lower.contains("unsyncedlyrics") {
-                    let value = tag.value.to_string();
+                    let value = tag.raw.value.to_string();
                     if !value.is_empty() {
                         return Some(value);
                     }
@@ -748,16 +728,7 @@ impl MusicMetadata {
             None
         };
 
-        // Try probed metadata first
-        if let Some(probe_meta) = probed.metadata.get() {
-            if let Some(rev) = probe_meta.current() {
-                if let Some(lyrics) = extract_lyrics(rev) {
-                    return Some(lyrics);
-                }
-            }
-        }
-
-        // Then try format metadata
+        // Try format metadata
         if let Some(rev) = format.metadata().current() {
             if let Some(lyrics) = extract_lyrics(rev) {
                 return Some(lyrics);
