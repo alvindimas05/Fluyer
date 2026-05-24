@@ -53,8 +53,9 @@ const UIInteractionService = {
 			'keydown',
 			function (e) {
 				const target = e.target as Element;
+				const handledKeys = ['Space', 'Tab', 'Escape'];
 
-				if (target == document.body) e.preventDefault();
+				if (target == document.body && handledKeys.includes(e.code || e.key)) e.preventDefault();
 
 				if (e.code === 'Space') {
 					if (target.matches('a, button, select')) {
