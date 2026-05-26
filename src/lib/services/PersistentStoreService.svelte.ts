@@ -12,12 +12,12 @@ const STORE_PATH = 'store.json';
 const getStore = async () => Store.load(STORE_PATH, { autoSave: true });
 const makeGetter =
 	<T>(key: string, fallback?: T) =>
-		async () =>
-			(await (await getStore()).get<T>(key)) ?? fallback;
+	async () =>
+		(await (await getStore()).get<T>(key)) ?? fallback;
 const makeSetter =
 	<T>(key: string) =>
-		async (value: T) =>
-			(await getStore()).set(key, value);
+	async (value: T) =>
+		(await getStore()).set(key, value);
 const makeBinding = <T>(key: string, fallback: T, setStoreFn: (v: T) => void) => ({
 	// @ts-ignore
 	initialize: async () => setStoreFn(await makeGetter<T>(key, fallback)()),
@@ -120,11 +120,7 @@ const PersistentStoreService = {
 		(value) => (equalizerStore.values = value)
 	),
 
-	skippedUpdateVersion: makeBinding<string>(
-		'skipped-update-version',
-		'',
-		(value) => { }
-	)
+	skippedUpdateVersion: makeBinding<string>('skipped-update-version', '', (value) => {})
 };
 
 export default PersistentStoreService;

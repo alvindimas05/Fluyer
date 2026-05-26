@@ -40,7 +40,12 @@ class ToastServiceImpl {
 		});
 	}
 
-	create(message: string, type: ToastType, duration: number = 2000, action?: IToastAction | IToastAction[]) {
+	create(
+		message: string,
+		type: ToastType,
+		duration: number = 2000,
+		action?: IToastAction | IToastAction[]
+	) {
 		const id = generateId();
 		const toast: IToast = {
 			id,

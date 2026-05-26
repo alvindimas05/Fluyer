@@ -147,7 +147,8 @@ export function useMusicQueueList() {
 		// Calculate which item we're over using offsetTop (unaffected by CSS transforms)
 		if (!scrollContainer) return;
 
-		const relativeY = e.clientY - scrollContainer.getBoundingClientRect().top + scrollContainer.scrollTop;
+		const relativeY =
+			e.clientY - scrollContainer.getBoundingClientRect().top + scrollContainer.scrollTop;
 
 		let newOverIndex = null;
 		const len = musicStore.queue.length;

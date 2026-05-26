@@ -80,7 +80,7 @@ const iconRegistryPhospor = {
 	[IconType.Cancel]: XIcon,
 	[IconType.Image]: ImageIcon,
 	[IconType.Menu]: ListIcon,
-	[IconType.Queue]: QueueIcon,
+	[IconType.Queue]: QueueIcon
 };
 
 export default iconRegistryPhospor;

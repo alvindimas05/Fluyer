@@ -34,31 +34,27 @@ class UpdateServiceImpl {
 				if (skippedVersion === update.version) return;
 
 				await sleep(3000);
-				ToastService.info(
-					`Would you like to update to version ${update.version}?`,
-					0,
-					[
-						{
-							label: 'Update & Restart',
-							onClick: async () => {
-								ToastService.info('Downloading update...', 0);
-								await update.downloadAndInstall();
-								ToastService.info('Update installed. Restarting...', 2000);
-								await relaunch();
-							}
-						},
-						{
-							label: 'Skip This Version',
-							onClick: () => {
-								PersistentStoreService.skippedUpdateVersion.set(update.version);
-							}
-						},
-						{
-							label: 'Remind Me Later',
-							onClick: () => { }
+				ToastService.info(`Would you like to update to version ${update.version}?`, 0, [
+					{
+						label: 'Update & Restart',
+						onClick: async () => {
+							ToastService.info('Downloading update...', 0);
+							await update.downloadAndInstall();
+							ToastService.info('Update installed. Restarting...', 2000);
+							await relaunch();
 						}
-					]
-				);
+					},
+					{
+						label: 'Skip This Version',
+						onClick: () => {
+							PersistentStoreService.skippedUpdateVersion.set(update.version);
+						}
+					},
+					{
+						label: 'Remind Me Later',
+						onClick: () => {}
+					}
+				]);
 			} else {
 				const res = await fetch(
 					'https://github.com/alvindimas05/Fluyer/releases/latest/download/latest.json'
@@ -75,28 +71,24 @@ class UpdateServiceImpl {
 					const downloadUrl = import.meta.env.VITE_UPDATE_URL;
 
 					await sleep(3000);
-					ToastService.info(
-						`Would you like to update to version ${data.version}?`,
-						0,
-						[
-							{
-								label: 'Get Latest Version',
-								onClick: () => {
-									openUrl(downloadUrl);
-								}
-							},
-							{
-								label: 'Skip This Version',
-								onClick: () => {
-									PersistentStoreService.skippedUpdateVersion.set(data.version);
-								}
-							},
-							{
-								label: 'Remind Me Later',
-								onClick: () => { }
+					ToastService.info(`Would you like to update to version ${data.version}?`, 0, [
+						{
+							label: 'Get Latest Version',
+							onClick: () => {
+								openUrl(downloadUrl);
 							}
-						]
-					);
+						},
+						{
+							label: 'Skip This Version',
+							onClick: () => {
+								PersistentStoreService.skippedUpdateVersion.set(data.version);
+							}
+						},
+						{
+							label: 'Remind Me Later',
+							onClick: () => {}
+						}
+					]);
 				}
 			}
 		} catch (error) {
@@ -107,5 +99,3 @@ class UpdateServiceImpl {
 
 const UpdateService = new UpdateServiceImpl();
 export default UpdateService;
-
-
