@@ -2,7 +2,9 @@
 	"$schema": "../gen/schemas/desktop-schema.json",
 	"identifier": "default",
 	"description": "Capability for the main window",
-	"windows": ["main"],
+	"windows": [
+		"main"
+	],
 	"permissions": [
 		"core:default",
 		"store:default",
@@ -24,6 +26,7 @@
 		"fluyer:allow-restart-app",
 		"fluyer:allow-check-permissions",
 		"fluyer:deny-check-permissions",
-		"fs:default"
+		"fs:default",
+		"opener:default"
 	]
 }
