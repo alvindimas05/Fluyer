@@ -200,9 +200,8 @@ impl MusicMetadata {
         // duration in seconds = ticks * (numer / denom)
         if let Some(dur) = track.duration {
             if let Some(tb) = track.time_base {
-                let duration_secs = dur.get() as f64
-                    * tb.numer.get() as f64
-                    / tb.denom.get() as f64;
+                let duration_secs =
+                    dur.get() as f64 * tb.numer.get() as f64 / tb.denom.get() as f64;
                 metadata.duration = Some((duration_secs * 1000.0) as u128);
             }
         }
@@ -222,11 +221,15 @@ impl MusicMetadata {
                         StandardTag::TrackTitle(v) => metadata.title = Some(v.as_ref().clone()),
                         StandardTag::Artist(v) => metadata.artist = Some(v.as_ref().clone()),
                         StandardTag::Album(v) => metadata.album = Some(v.as_ref().clone()),
-                        StandardTag::AlbumArtist(v) => metadata.album_artist = Some(v.as_ref().clone()),
+                        StandardTag::AlbumArtist(v) => {
+                            metadata.album_artist = Some(v.as_ref().clone())
+                        }
                         StandardTag::TrackNumber(n) => metadata.track_number = Some(n.to_string()),
                         StandardTag::Genre(v) => metadata.genre = Some(v.as_ref().clone()),
                         StandardTag::RecordingDate(v) => metadata.date = Some(v.as_ref().clone()),
-                        StandardTag::ReleaseDate(v) if metadata.date.is_none() => metadata.date = Some(v.as_ref().clone()),
+                        StandardTag::ReleaseDate(v) if metadata.date.is_none() => {
+                            metadata.date = Some(v.as_ref().clone())
+                        }
                         _ => {}
                     }
                 }
