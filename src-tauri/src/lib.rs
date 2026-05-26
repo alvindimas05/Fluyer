@@ -27,17 +27,22 @@ pub mod platform;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fluyer::init())
         .plugin(tauri_plugin_device_info::init())
-        .plugin(app_setup::prevent_default_plugin())
-        .plugin(app_setup::single_instance_plugin())
+        .plugin(app_setup::prevent_default_plugin());
+
+    #[cfg(desktop)]
+    let builder = builder
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(app_setup::single_instance_plugin());
+
+    builder
         .setup(app_setup::setup_application)
         .invoke_handler(commands::COMMAND_HANDLERS)
         .on_window_event(events::handle_window_events)
