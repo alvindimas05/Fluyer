@@ -66,13 +66,12 @@
 	async function onMouseMove(e: MouseEvent) {
 		if (modalStore.show || isMobile()) return;
 
-		const onRightEdge =
-			type === SidebarType.Right &&
-			e.clientX > window.innerWidth - (isWindows() || !isMaximized ? 12 : 4);
+		const onRightEdge = type === SidebarType.Right && e.clientX >= window.innerWidth - 1;
 
-		const onLeftEdge = type === SidebarType.Left && e.clientX < (isMaximized ? 4 : 12);
+		const onLeftEdge = type === SidebarType.Left && e.clientX <= 0;
 
-		const withinVerticalBounds = e.clientY <= window.innerHeight - 8 * 16;
+		const withinVerticalBounds =
+			e.clientY >= paddingTop && e.clientY <= window.innerHeight - playerBarStore.height;
 
 		if ((onRightEdge || onLeftEdge) && withinVerticalBounds && !isMouseInsideArea) {
 			sidebarStore.showType = type;
@@ -96,9 +95,15 @@
 
 	async function onMouseLeave(e: MouseEvent) {
 		const nearScreenEdge = e.clientX <= 20 || e.clientX >= window.innerWidth - 20;
+
+		const sidebarTop = paddingTop;
+		const sidebarBottom = window.innerHeight - playerBarStore.height;
+		const withinVerticalBounds = e.clientY >= sidebarTop && e.clientY <= sidebarBottom;
+
 		const isActuallyStillInside =
-			(type === SidebarType.Left && e.clientX <= sidebarWidth) ||
-			(type === SidebarType.Right && e.clientX >= window.innerWidth - sidebarWidth);
+			withinVerticalBounds &&
+			((type === SidebarType.Left && e.clientX <= sidebarWidth) ||
+				(type === SidebarType.Right && e.clientX >= window.innerWidth - sidebarWidth));
 
 		if (!isMouseInsideArea || nearScreenEdge || isActuallyStillInside) return;
 
@@ -152,8 +157,10 @@
 
 		const onRightEdge = type === SidebarType.Right && e.clientX > window.innerWidth;
 		const onLeftEdge = type === SidebarType.Left && e.clientX < 0;
+		const withinVerticalBounds =
+			e.clientY >= paddingTop && e.clientY <= window.innerHeight - playerBarStore.height;
 
-		if (onRightEdge || onLeftEdge) {
+		if ((onRightEdge || onLeftEdge) && withinVerticalBounds) {
 			isMouseInsideArea = true;
 			isShowing = true;
 			sidebarStore.showType = type;
@@ -172,15 +179,13 @@
 			listen<MouseLeavePayload>(CommandRoutes.SIDEBAR_MOUSE_LEAVE, (e) => {
 				const x = e.payload.x;
 				const y = e.payload.y;
-				const slicedWidth = 0.25 * window.innerWidth;
-				const slicedHeight = 0.05 * window.innerHeight;
 
-				if (y < slicedHeight) return;
+				const onRightEdge = type === SidebarType.Right && x > window.innerWidth;
+				const onLeftEdge = type === SidebarType.Left && x < 0;
+				const withinVerticalBounds =
+					y >= paddingTop && y <= window.innerHeight - playerBarStore.height;
 
-				const onRightEdge = type === SidebarType.Right && x >= window.innerWidth - slicedWidth;
-				const onLeftEdge = type === SidebarType.Left && x <= slicedWidth;
-
-				if (onRightEdge || onLeftEdge) {
+				if ((onRightEdge || onLeftEdge) && withinVerticalBounds) {
 					isMouseInsideArea = true;
 					isShowing = true;
 					sidebarStore.showType = type;
