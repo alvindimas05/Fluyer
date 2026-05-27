@@ -49,5 +49,7 @@ export const CommandRoutes = {
 	RESTORE_ANIMATED_BACKGROUND: 'restore_animated_background',
 
 	DEVELOPER_SAVE_LOG: 'developer_save_log',
-	DEVELOPER_SAVE_MPV_LOG: 'developer_save_mpv_log'
+	DEVELOPER_SAVE_MPV_LOG: 'developer_save_mpv_log',
+
+	CHECK_UPDATE: 'check_update'
 };

@@ -31,6 +31,7 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     // System/Log commands
     crate::system::commands::log_error,
     crate::system::commands::log_info,
+    crate::system::commands::check_update,
     #[cfg(target_os = "android")]
     crate::system::commands::toast,
     // Developer commands

@@ -51,3 +51,58 @@ pub fn developer_save_mpv_log() {
         ToastType::Info,
     );
 }
+#[derive(serde::Deserialize)]
+struct LatestRelease {
+    version: String,
+}
+
+fn parse_version(v: &str) -> Vec<u32> {
+    v.trim_start_matches('v')
+        .split('.')
+        .map(|s| s.parse::<u32>().unwrap_or(0))
+        .collect()
+}
+
+fn is_newer_version(current: &str, latest: &str) -> bool {
+    let curr = parse_version(current);
+    let late = parse_version(latest);
+    let max_len = curr.len().max(late.len());
+    for i in 0..max_len {
+        let c = curr.get(i).copied().unwrap_or(0);
+        let l = late.get(i).copied().unwrap_or(0);
+        if l > c {
+            return true;
+        }
+        if c > l {
+            return false;
+        }
+    }
+    false
+}
+
+/// Check for update using reqwest
+#[tauri::command]
+pub async fn check_update(current_version: String) -> Result<Option<String>, String> {
+    let client = reqwest::Client::builder()
+        .user_agent("fluyer-updater")
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let response = client
+        .get("https://github.com/alvindimas05/Fluyer/releases/latest/download/latest.json")
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if !response.status().is_success() {
+        return Ok(None);
+    }
+
+    let release: LatestRelease = response.json().await.map_err(|e| e.to_string())?;
+    
+    if is_newer_version(&current_version, &release.version) {
+        Ok(Some(release.version))
+    } else {
+        Ok(None)
+    }
+}

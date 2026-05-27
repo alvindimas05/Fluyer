@@ -6,22 +6,9 @@ import { isMacos, isWindows, isLinux } from '$lib/platform';
 import sleep from 'sleep-promise';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import PersistentStoreService from './PersistentStoreService.svelte';
+import { invoke } from '@tauri-apps/api/core';
+import { CommandRoutes } from '$lib/constants/CommandRoutes';
 
-function parseVersion(v: string): number[] {
-	return v.replace(/^v/, '').split('.').map(Number);
-}
-
-function isNewerVersion(current: string, latest: string): boolean {
-	const curr = parseVersion(current);
-	const late = parseVersion(latest);
-	for (let i = 0; i < Math.max(curr.length, late.length); i++) {
-		const c = curr[i] || 0;
-		const l = late[i] || 0;
-		if (l > c) return true;
-		if (c > l) return false;
-	}
-	return false;
-}
 
 class UpdateServiceImpl {
 	async checkForUpdates() {
@@ -56,40 +43,34 @@ class UpdateServiceImpl {
 					}
 				]);
 			} else {
-				const res = await fetch(
-					'https://github.com/alvindimas05/Fluyer/releases/latest/download/latest.json'
-				);
-				if (!res.ok) return;
-				const data = await res.json();
-				if (!data || !data.version) return;
+				const currentVersion = await getVersion();
+				const latestVersion = await invoke<string | null>(CommandRoutes.CHECK_UPDATE, { currentVersion });
+				if (!latestVersion) return;
 
 				const skippedVersion = await PersistentStoreService.skippedUpdateVersion.get();
-				if (skippedVersion === data.version) return;
+				if (skippedVersion === latestVersion) return;
 
-				const currentVersion = await getVersion();
-				if (isNewerVersion(currentVersion, data.version)) {
-					const downloadUrl = import.meta.env.VITE_UPDATE_URL;
+				const downloadUrl = import.meta.env.VITE_UPDATE_URL;
 
-					await sleep(3000);
-					ToastService.info(`Would you like to update to version ${data.version}?`, 0, [
-						{
-							label: 'Get Latest Version',
-							onClick: () => {
-								openUrl(downloadUrl);
-							}
-						},
-						{
-							label: 'Skip This Version',
-							onClick: () => {
-								PersistentStoreService.skippedUpdateVersion.set(data.version);
-							}
-						},
-						{
-							label: 'Remind Me Later',
-							onClick: () => {}
+				await sleep(3000);
+				ToastService.info(`Would you like to update to version ${latestVersion}?`, 0, [
+					{
+						label: 'Get Latest Version',
+						onClick: () => {
+							openUrl(downloadUrl);
 						}
-					]);
-				}
+					},
+					{
+						label: 'Skip This Version',
+						onClick: () => {
+							PersistentStoreService.skippedUpdateVersion.set(latestVersion);
+						}
+					},
+					{
+						label: 'Remind Me Later',
+						onClick: () => {}
+					}
+				]);
 			}
 		} catch (error) {
 			console.error('Update check fail:', error);
