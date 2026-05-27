@@ -18,96 +18,129 @@ pub fn create_surface(
             AndroidDisplayHandle, AndroidNdkWindowHandle, RawDisplayHandle, RawWindowHandle,
         };
         use std::ffi::c_void;
+        use std::sync::mpsc;
+        use tauri::Manager;
 
-        let ctx = ndk_context::android_context();
-        let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }?;
-        let mut env = vm.attach_current_thread()?;
+        let window = app_handle
+            .get_webview_window("main")
+            .ok_or("Failed to get main window")?;
+        let (tx, rx) = mpsc::channel();
 
-        let context = unsafe { JObject::from_raw(ctx.context() as jni::sys::jobject) };
+        window
+            .with_webview(move |webview| {
+                // jni_handle().exec provides the JNIEnv and Android Context natively
+                webview
+                    .jni_handle()
+                    .exec(move |env, context, _android_webview| {
+                        let result: Result<usize, String> = (|| -> Result<usize, Box<dyn std::error::Error>> {
+                            let class_context = env.find_class("android/content/Context")?;
+                            let get_class_loader_method = env.get_method_id(
+                                class_context,
+                                "getClassLoader",
+                                "()Ljava/lang/ClassLoader;",
+                            )?;
 
-        let class_context = env.find_class("android/content/Context")?;
-        let get_class_loader_method =
-            env.get_method_id(class_context, "getClassLoader", "()Ljava/lang/ClassLoader;")?;
+                            let class_loader = unsafe {
+                                env.call_method_unchecked(
+                                    context,
+                                    get_class_loader_method,
+                                    jni::signature::ReturnType::Object,
+                                    &[],
+                                )
+                            }?
+                            .l()?;
 
-        let class_loader = unsafe {
-            env.call_method_unchecked(
-                &context,
-                get_class_loader_method,
-                jni::signature::ReturnType::Object,
-                &[],
-            )
-        }?
-        .l()?;
+                            let class_class_loader = env.find_class("java/lang/ClassLoader")?;
+                            let load_class_method = env.get_method_id(
+                                class_class_loader,
+                                "loadClass",
+                                "(Ljava/lang/String;)Ljava/lang/Class;",
+                            )?;
 
-        let class_class_loader = env.find_class("java/lang/ClassLoader")?;
-        let load_class_method = env.get_method_id(
-            class_class_loader,
-            "loadClass",
-            "(Ljava/lang/String;)Ljava/lang/Class;",
-        )?;
+                            let class_name_str =
+                                env.new_string("org.alvindimas05.fluyerplugin.FluyerPlugin")?;
+                            let mut android_surface_obj: JObject = JObject::null();
 
-        let class_name_str = env.new_string("org.alvindimas05.fluyerplugin.FluyerPlugin")?;
+                            crate::debug!("create_surface: Waiting for surface class load...");
 
-        let mut android_surface_obj: JObject = JObject::null();
-        crate::debug!("create_surface: Waiting for surface class load...");
+                            loop {
+                                let fluyer_plugin_class_value = unsafe {
+                                    env.call_method_unchecked(
+                                        &class_loader,
+                                        load_class_method,
+                                        jni::signature::ReturnType::Object,
+                                        &[JValue::Object(&class_name_str).as_jni()],
+                                    )
+                                };
 
-        for _ in 0..50 {
-            let fluyer_plugin_class_value = unsafe {
-                env.call_method_unchecked(
-                    &class_loader,
-                    load_class_method,
-                    jni::signature::ReturnType::Object,
-                    &[JValue::Object(&class_name_str).as_jni()],
-                )
-            };
+                                if let Ok(val) = fluyer_plugin_class_value {
+                                    let fluyer_plugin_class_obj = val.l()?;
+                                    let fluyer_plugin_class: JClass =
+                                        fluyer_plugin_class_obj.into();
 
-            if let Ok(val) = fluyer_plugin_class_value {
-                let fluyer_plugin_class_obj = val.l()?;
-                let fluyer_plugin_class: JClass = fluyer_plugin_class_obj.into();
+                                    let field_id = env.get_static_field_id(
+                                        &fluyer_plugin_class,
+                                        "surface",
+                                        "Landroid/view/Surface;",
+                                    )?;
 
-                let field_id = env.get_static_field_id(
-                    &fluyer_plugin_class,
-                    "surface",
-                    "Landroid/view/Surface;",
-                )?;
-                let surface_obj_res = env.get_static_field_unchecked(
-                    &fluyer_plugin_class,
-                    field_id,
-                    jni::signature::JavaType::Object("Landroid/view/Surface;".to_string()),
-                );
+                                    let surface_obj_res = env.get_static_field_unchecked(
+                                        &fluyer_plugin_class,
+                                        field_id,
+                                        jni::signature::JavaType::Object(
+                                            "Landroid/view/Surface;".to_string(),
+                                        ),
+                                    );
 
-                if let Ok(obj_val) = surface_obj_res {
-                    let obj = obj_val.l()?;
-                    if !obj.is_null() {
-                        crate::debug!("create_surface: Found valid surface object");
-                        android_surface_obj = obj;
-                        break;
-                    }
-                }
-            }
+                                    if let Ok(obj_val) = surface_obj_res {
+                                        let obj = obj_val.l()?;
+                                        if !obj.is_null() {
+                                            crate::debug!(
+                                                "create_surface: Found valid surface object"
+                                            );
+                                            android_surface_obj = obj;
+                                            break;
+                                        }
+                                    }
+                                }
 
-            crate::debug!("create_surface: Waiting for surface check iteration...");
-            std::thread::sleep(std::time::Duration::from_millis(100));
-        }
+                                crate::debug!(
+                                    "create_surface: Waiting for surface check iteration..."
+                                );
+                                std::thread::sleep(std::time::Duration::from_millis(100));
+                            }
 
-        if android_surface_obj.is_null() {
-            return Err("Timed out waiting for Android Surface".into());
-        }
+                            if android_surface_obj.is_null() {
+                                return Err("Timed out waiting for Android Surface".into());
+                            }
 
-        let native_window = unsafe {
-            ndk::native_window::NativeWindow::from_surface(
-                env.get_native_interface(),
-                android_surface_obj.as_raw(),
-            )
-        }
-        .ok_or("Failed to create native window from surface")?;
+                            // Extract NativeWindow inside the JNI block
+                            let native_window = unsafe {
+                                ndk::native_window::NativeWindow::from_surface(
+                                    env.get_native_interface(),
+                                    android_surface_obj.as_raw(),
+                                )
+                            }
+                            .ok_or("Failed to create native window from surface")?;
 
-        let _native_window_ref = native_window.ptr().as_ptr();
-        std::mem::forget(native_window);
+                            let native_window_ref = native_window.ptr().as_ptr();
+                            std::mem::forget(native_window);
 
-        let handle = AndroidNdkWindowHandle::new(
-            std::ptr::NonNull::new(_native_window_ref as *mut c_void).unwrap(),
-        );
+                            Ok(native_window_ref as usize)
+                        })().map_err(|e| e.to_string());
+
+                        let _ = tx.send(result);
+                    });
+            })
+            .map_err(|e| e.to_string())?;
+
+        // Block until the JNI closure completes and returns the pointer
+        let native_window_ptr = rx
+            .recv()
+            .map_err(|_| "Channel closed before surface could be extracted".to_string())?? as *mut c_void;
+
+        let handle =
+            AndroidNdkWindowHandle::new(std::ptr::NonNull::new(native_window_ptr).unwrap());
         let raw_window_handle = RawWindowHandle::AndroidNdk(handle);
 
         let display_handle = AndroidDisplayHandle::new();
@@ -130,7 +163,6 @@ pub fn create_surface(
     let surface: wgpu::Surface<'static> = unsafe { std::mem::transmute(surface) };
     Ok(surface)
 }
-
 pub struct RendererState {
     #[allow(dead_code)]
     instance: wgpu::Instance,
@@ -155,40 +187,12 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     let window = app.get_webview_window("main").unwrap();
 
     #[cfg(target_os = "android")]
-    let size = {
-        let ctx = ndk_context::android_context();
-        let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }?;
-        let mut env = vm.attach_current_thread()?;
-        let context =
-            unsafe { jni::objects::JObject::from_raw(ctx.context() as jni::sys::jobject) };
-        let window_service = env.new_string("window")?;
-        let window_manager = env
-            .call_method(
-                &context,
-                "getSystemService",
-                "(Ljava/lang/String;)Ljava/lang/Object;",
-                &[jni::objects::JValue::Object(&window_service)],
-            )?
-            .l()?;
-        let display = env
-            .call_method(
-                &window_manager,
-                "getDefaultDisplay",
-                "()Landroid/view/Display;",
-                &[],
-            )?
-            .l()?;
-        let metrics_class = env.find_class("android/util/DisplayMetrics")?;
-        let display_metrics = env.new_object(metrics_class, "()V", &[])?;
-        env.call_method(
-            &display,
-            "getRealMetrics",
-            "(Landroid/util/DisplayMetrics;)V",
-            &[jni::objects::JValue::Object(&display_metrics)],
-        )?;
-        let width = env.get_field(&display_metrics, "widthPixels", "I")?.i()? as u32;
-        let height = env.get_field(&display_metrics, "heightPixels", "I")?.i()? as u32;
-        tauri::PhysicalSize::new(width, height)
+    let size = if let Ok(Some(monitor)) = window.current_monitor() {
+        *monitor.size()
+    } else {
+        window
+            .inner_size()
+            .unwrap_or(tauri::PhysicalSize::new(0, 0))
     };
     #[cfg(not(target_os = "android"))]
     let size = window.inner_size()?;
