@@ -2,7 +2,6 @@
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';
 	import { isLinux, isMacos, isMobile, isWindows } from '$lib/platform';
-	import Toggle from '$lib/ui/components/Toggle.svelte';
 	import Button from '$lib/ui/components/Button.svelte';
 	import Input from '$lib/ui/components/Input.svelte';
 	import filterStore from '$lib/stores/filter.svelte';
@@ -12,6 +11,9 @@
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import { useFilterBar } from '../viewmodels/useFilterBar.svelte';
 	import modalStore from '$lib/stores/modal.svelte';
+	import ConfirmCancelButtons from './ConfirmCancelButtons.svelte';
+	import ListModeSelector from './ListModeSelector.svelte';
+	import AddPlaylistButton from './AddPlaylistButton.svelte';
 
 	const vm = useFilterBar();
 </script>
@@ -78,90 +80,55 @@
 		{/if}
 
 		<div class="pointer-events-auto hidden h-9 w-full min-w-0 sm:flex sm:items-center sm:gap-x-1">
-			{#if musicStore.listType === 'playlist' && playlistStore.isCreating}
-				<div class="grid h-9 w-full grid-cols-[auto_auto] gap-x-2">
-					<Button
-						class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px] sm:p-0 sm:px-2"
-						onclick={vm.confirmPlaylistCreation}
-					>
-						<div class="w-5">
-							<Icon type={IconType.Check} />
-						</div>
-					</Button>
-					<Button
-						class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px] sm:p-0 sm:px-2"
-						onclick={vm.cancelPlaylistCreation}
-					>
-						<div class="w-5">
-							<Icon type={IconType.Cancel} />
-						</div>
-					</Button>
-				</div>
+			{#if musicStore.listType === 'playlist' && playlistStore.isCreating  && vm.state.columns < 5}
+				<ConfirmCancelButtons
+					onconfirm={vm.confirmPlaylistCreation}
+					oncancel={vm.cancelPlaylistCreation}
+				/>
 			{:else}
-				<Toggle
-					class="pointer-events-auto h-9 w-full"
-					iconStyle="width: {vm.iconSize}px;"
+				<ListModeSelector
 					options={vm.musicListOptions}
 					selected={musicStore.listType}
 					onchange={vm.handleToggleChange}
+					iconStyle="width: {vm.iconSize}px;"
 				/>
-				{#if musicStore.listType === 'playlist'}
-					<Button
-						class="grid aspect-square h-9 shrink-0 items-center justify-center rounded"
-						onclick={vm.startPlaylistCreation}
-					>
-						<div class="w-5">
-							<Icon type={IconType.PlaylistAdd} />
-						</div>
-					</Button>
+				{#if musicStore.listType === 'playlist' && vm.state.columns < 5}
+					<AddPlaylistButton onclick={vm.startPlaylistCreation} />
 				{/if}
 			{/if}
 		</div>
 	</div>
 
 	<div class="h-9 px-3 sm:hidden">
-		<div class="pointer-events-auto flex h-9 w-full min-w-0 items-center gap-x-1">
-			{#if musicStore.listType === 'playlist' && playlistStore.isCreating}
-				<div class="grid h-9 w-full grid-cols-[auto_auto] gap-x-2">
-					<Button
-						class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px]"
-						onclick={vm.confirmPlaylistCreation}
-					>
-						<div class="w-5">
-							<Icon type={IconType.Check} />
-						</div>
-					</Button>
-					<Button
-						class="grid h-9 w-full items-center justify-center gap-x-2 rounded p-[3.5px]"
-						onclick={vm.cancelPlaylistCreation}
-					>
-						<div class="w-5">
-							<Icon type={IconType.Cancel} />
-						</div>
-					</Button>
-				</div>
+		<div class="flex h-9 w-full min-w-0 items-center gap-x-1">
+			{#if musicStore.listType === 'playlist' && playlistStore.isCreating && vm.state.columns < 5}
+				<ConfirmCancelButtons
+					onconfirm={vm.confirmPlaylistCreation}
+					oncancel={vm.cancelPlaylistCreation}
+				/>
 			{:else}
-				<Toggle
-					class="pointer-events-auto w-full"
-					iconStyle="width: {vm.iconSize}px;"
+				<ListModeSelector
 					options={vm.musicListOptions}
 					selected={musicStore.listType}
 					onchange={vm.handleToggleChange}
+					iconStyle="width: {vm.iconSize}px;"
 				/>
-				{#if musicStore.listType === 'playlist'}
-					<Button
-						class="grid aspect-square h-9 shrink-0 items-center justify-center rounded"
-						onclick={vm.startPlaylistCreation}
-					>
-						<div class="w-5">
-							<Icon type={IconType.PlaylistAdd} />
-						</div>
-					</Button>
+				{#if musicStore.listType === 'playlist' && vm.state.columns < 5}
+					<AddPlaylistButton onclick={vm.startPlaylistCreation} />
 				{/if}
 			{/if}
 		</div>
 	</div>
-	<div class="hidden sm:block"></div>
+	<div class="hidden sm:block" style={vm.state.columns > 5 ? 'width: 50%;' : ''}>
+		{#if musicStore.listType === 'playlist' && playlistStore.isCreating && vm.state.columns >= 5}
+			<ConfirmCancelButtons
+				onconfirm={vm.confirmPlaylistCreation}
+				oncancel={vm.cancelPlaylistCreation}
+			/>
+		{:else if musicStore.listType === 'playlist' && vm.state.columns >= 5}
+			<AddPlaylistButton onclick={vm.startPlaylistCreation} />
+		{/if}
+	</div>
 	<div
 		class="hidden sm:grid sm:ps-3
 		{isMobile() ? '' : 'gap-x-1 sm:grid-cols-[1fr_min-content] md:gap-x-3'}

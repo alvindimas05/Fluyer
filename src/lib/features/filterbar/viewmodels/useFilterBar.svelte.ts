@@ -41,7 +41,8 @@ const musicListOptions = [
 
 let element = $state<HTMLDivElement>();
 let state = $state({
-	gridSize: ''
+	gridSize: '',
+	columns: 1
 });
 
 const iconSize = $derived.by(() => {
@@ -72,6 +73,8 @@ function updateGridSizing() {
 			} else {
 				state.gridSize = '';
 			}
+			console.log(columns);
+			state.columns = columns;
 			return;
 		}
 	}
@@ -87,7 +90,7 @@ function toggleSort() {
 	filterBarStore.sortAsc = !filterBarStore.sortAsc;
 }
 
-async function handleToggleChange(type: MusicListType) {
+async function handleToggleChange(type: MusicListType | string | number) {
 	filterStore.album = null;
 	folderStore.currentFolder = null;
 
@@ -104,7 +107,7 @@ async function handleToggleChange(type: MusicListType) {
 			musicPaths.length === 1 ? ({ path: musicPaths[0] } as FolderData) : null;
 	}
 
-	musicStore.listType = type;
+	musicStore.listType = type as MusicListType;
 
 	console.log('Music list type changed to:', type);
 }
