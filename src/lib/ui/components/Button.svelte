@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isDesktop } from '$lib/platform';
 	import View from '$lib/ui/components/View.svelte';
 	import type { GlassShineSize } from '$lib/ui/glass/types';
 
@@ -28,7 +29,7 @@
 
 <View
 	class="cursor-pointer {props.class} {isPressed ? 'scale-95' : 'scale-100'}"
-	glassEnableHoverEffect={true}
+	glassEnableHoverEffect={isDesktop()}
 	glassShineSize={props.glassShineSize}
 	events={{
 		onclick: handleClick
