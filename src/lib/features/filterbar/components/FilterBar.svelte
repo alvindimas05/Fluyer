@@ -80,7 +80,7 @@
 		{/if}
 
 		<div class="pointer-events-auto hidden h-9 w-full min-w-0 sm:flex sm:items-center sm:gap-x-1">
-			{#if musicStore.listType === 'playlist' && playlistStore.isCreating  && vm.state.columns < 5}
+			{#if musicStore.listType === 'playlist' && playlistStore.isCreating && vm.state.columns < 5}
 				<ConfirmCancelButtons
 					onconfirm={vm.confirmPlaylistCreation}
 					oncancel={vm.cancelPlaylistCreation}
@@ -101,7 +101,7 @@
 
 	<div class="h-9 px-3 sm:hidden">
 		<div class="flex h-9 w-full min-w-0 items-center gap-x-1">
-			{#if musicStore.listType === 'playlist' && playlistStore.isCreating && vm.state.columns < 5}
+			{#if musicStore.listType === 'playlist' && playlistStore.isCreating}
 				<ConfirmCancelButtons
 					onconfirm={vm.confirmPlaylistCreation}
 					oncancel={vm.cancelPlaylistCreation}
@@ -113,7 +113,7 @@
 					onchange={vm.handleToggleChange}
 					iconStyle="width: {vm.iconSize}px;"
 				/>
-				{#if musicStore.listType === 'playlist' && vm.state.columns < 5}
+				{#if musicStore.listType === 'playlist'}
 					<AddPlaylistButton onclick={vm.startPlaylistCreation} />
 				{/if}
 			{/if}
