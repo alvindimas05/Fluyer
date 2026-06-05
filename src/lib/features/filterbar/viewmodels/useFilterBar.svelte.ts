@@ -73,7 +73,6 @@ function updateGridSizing() {
 			} else {
 				state.gridSize = '';
 			}
-			console.log(columns);
 			state.columns = columns;
 			return;
 		}
