@@ -169,6 +169,7 @@ function handleVolumeProgressClick(percentage: number) {
 }
 
 export function usePlayPage() {
+	hideBackButton = false;
 	$effect(() => {
 		musicStore.progressPercentage;
 		refreshProgressText();
