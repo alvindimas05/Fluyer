@@ -40,16 +40,14 @@ const MusicPlayerService = {
 		ProgressService.stop();
 	},
 	next: async () => {
-		if (musicStore.currentIndex === musicStore.queue.length - 1) {
-			return;
-		}
 		return TauriMusicAPI.sendCommand(TauriMusicCommand.Next);
 	},
 	previous: async () => {
-		if (musicStore.currentIndex === 0) {
-			return;
-		}
-		return QueueService.goTo(musicStore.currentIndex - 1);
+		if (musicStore.queue.length === 0) return;
+		const prevIndex = musicStore.currentIndex > 0
+			? musicStore.currentIndex - 1
+			: musicStore.queue.length - 1;
+		return QueueService.goTo(prevIndex);
 	},
 	seekByPercentage: async (percentage: number) => {
 		const clamped = Math.min(100, Math.max(0, percentage));

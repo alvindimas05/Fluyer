@@ -944,6 +944,7 @@ impl MusicPlayer {
                             Some(current + 1)
                         }
                         (Some(_), RepeatMode::All) => Some(0),
+                        (Some(_), _) if from_user => Some(0),
                         _ => None,
                     }
                 };
@@ -1028,7 +1029,7 @@ impl MusicPlayer {
 
                     match (state.current_index, state.repeat_mode) {
                         (Some(current), _) if current > 0 => Some(current - 1),
-                        (Some(_), RepeatMode::All) => Some(state.playlist.len() - 1),
+                        (Some(_), _) if !state.playlist.is_empty() => Some(state.playlist.len() - 1),
                         _ => None,
                     }
                 };
