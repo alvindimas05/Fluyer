@@ -961,7 +961,11 @@ impl MusicPlayer {
                         (state.playlist[index].metadata.clone(), state.playlist.len())
                     };
 
-                    // For gapless playback, remove the old stream and load the new one without stopping the mixer
+                    // Remove the old stream from the mixer.
+                    // If triggered manually (from_user), flush the mixer buffer so
+                    // no stale audio from the old track bleeds through.
+                    // If auto-advancing (track ended naturally), skip the flush so
+                    // the mixer plays through without a gap (gapless playback).
                     #[cfg(desktop)]
                     unsafe {
                         let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
@@ -969,6 +973,9 @@ impl MusicPlayer {
                             BASS_Mixer_ChannelRemove(current_stream);
                             BASS_StreamFree(current_stream);
                             CURRENT_STREAM.store(0, Ordering::SeqCst);
+                        }
+                        if from_user && BASS_MIXER != 0 {
+                            BASS_ChannelSetPosition(BASS_MIXER, 0, BASS_POS_BYTE);
                         }
                     }
 
@@ -981,6 +988,9 @@ impl MusicPlayer {
                                     (bass.bass_mixer_channel_remove)(current_stream);
                                     (bass.bass_stream_free)(current_stream);
                                     CURRENT_STREAM.store(0, Ordering::SeqCst);
+                                }
+                                if from_user && BASS_MIXER != 0 {
+                                    (bass.bass_channel_set_position)(BASS_MIXER, 0, BASS_POS_BYTE);
                                 }
                             }
                         }
@@ -1546,7 +1556,7 @@ impl MusicPlayer {
         // Spawn a thread to monitor playback state
         thread::spawn(move || {
             loop {
-                thread::sleep(std::time::Duration::from_millis(100));
+                thread::sleep(std::time::Duration::from_millis(50));
 
                 #[cfg(desktop)]
                 unsafe {
