@@ -83,7 +83,7 @@
 			checked={settingStore.ui.play.showBackButton}
 			onchange={onUiPlayShowBackButtonChange}
 		/>
-		<div>Show Back Button On Full Play Screen (You can still press Esc to go back)</div>
+		<div>Show Back Button On Play Screen (You can still press Esc to go back)</div>
 	</label>
 </SettingInput>
 <SettingInput>
@@ -94,6 +94,6 @@
 			checked={settingStore.ui.play.showVolume}
 			onchange={onUiPlayShowVolumeChange}
 		/>
-		<div>Show Volume On Full Play Screen</div>
+		<div>Show Volume On Play Screen</div>
 	</label>
 </SettingInput>
