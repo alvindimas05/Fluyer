@@ -132,7 +132,8 @@
 	<div
 		class="hidden sm:grid sm:ps-3
 		{isMobile() ? '' : 'gap-x-1 sm:grid-cols-[1fr_min-content] md:gap-x-3'}
-		{isWindows() || isLinux() ? 'me-[100px]' : ''}"
+		{isLinux() ? 'me-[100px]' : ''}
+		{isWindows() ? 'me-[120px]' : ''}"
 	>
 		<Input
 			class="pointer-events-auto h-9 rounded p-0"
