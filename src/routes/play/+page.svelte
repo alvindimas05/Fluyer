@@ -136,7 +136,7 @@
 						<button
 							class="mx-2 w-7 md-mdpi:w-[34px] lg-mdpi:w-8 md-hdpi:w-8 {musicStore.repeatMode ===
 							RepeatMode.None
-								? 'opacity-80'
+								? 'opacity-60'
 								: ''}"
 							onclick={MusicPlayerService.toggleRepeatMode}
 						>
