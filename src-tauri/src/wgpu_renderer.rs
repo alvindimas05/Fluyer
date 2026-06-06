@@ -190,35 +190,38 @@ pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>
     app.manage(shared.clone());
 
     let app_handle = app.handle().clone();
+    let window = app_handle.get_webview_window("main").unwrap();
+
+    #[cfg(target_os = "android")]
+    let size = if let Ok(Some(monitor)) = window.current_monitor() {
+        *monitor.size()
+    } else {
+        window
+            .inner_size()
+            .unwrap_or(tauri::PhysicalSize::new(0, 0))
+    };
+    #[cfg(not(target_os = "android"))]
+    let size = window.inner_size().unwrap_or(tauri::PhysicalSize::new(1280, 720));
+
+    crate::debug!("setup_wgpu: Window size {}x{}", size.width, size.height);
+
+    #[cfg(not(target_os = "macos"))]
+    let backends = Backends::GL;
+    #[cfg(target_os = "macos")]
+    let backends = Backends::METAL;
+
+    let instance = wgpu::Instance::new(&InstanceDescriptor {
+        backends,
+        flags: InstanceFlags::default(),
+        memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
+        backend_options: BackendOptions::default(),
+    });
+
+    #[cfg(not(target_os = "android"))]
+    let surface = create_surface(&instance, &app_handle)?;
 
     std::thread::spawn(move || {
-        let window = app_handle.get_webview_window("main").unwrap();
-
         #[cfg(target_os = "android")]
-        let size = if let Ok(Some(monitor)) = window.current_monitor() {
-            *monitor.size()
-        } else {
-            window
-                .inner_size()
-                .unwrap_or(tauri::PhysicalSize::new(0, 0))
-        };
-        #[cfg(not(target_os = "android"))]
-        let size = window.inner_size().unwrap_or(tauri::PhysicalSize::new(1280, 720));
-
-        crate::debug!("setup_wgpu: Window size {}x{}", size.width, size.height);
-
-        #[cfg(not(target_os = "macos"))]
-        let backends = Backends::GL;
-        #[cfg(target_os = "macos")]
-        let backends = Backends::METAL;
-
-        let instance = wgpu::Instance::new(&InstanceDescriptor {
-            backends,
-            flags: InstanceFlags::default(),
-            memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
-            backend_options: BackendOptions::default(),
-        });
-
         let surface = match create_surface(&instance, &app_handle) {
             Ok(s) => s,
             Err(e) => {
