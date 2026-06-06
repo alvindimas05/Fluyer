@@ -21,14 +21,16 @@
 	<div class="relative w-full">
 		{#if vm.isValidFilterAlbum}
 			<div
-				class="absolute left-0 top-0 z-10 h-full w-full
+				class="absolute left-0 top-0 z-10 h-full w-full cursor-pointer
             rounded-lg border-2 border-white"
+				ondblclick={vm.playAlbum}
 			></div>
 		{:else}
 			<div
 				class="album-item-actions absolute z-20 h-full w-full cursor-pointer
                 rounded-lg border-2 border-white bg-white/20"
 				onclick={vm.setFilterAlbum}
+				ondblclick={vm.playAlbum}
 			></div>
 		{/if}
 		{#await vm.albumImage}
