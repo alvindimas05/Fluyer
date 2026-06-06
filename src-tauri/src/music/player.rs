@@ -1004,10 +1004,84 @@ impl MusicPlayer {
                         Self::emit_sync(true);
                     }
                 } else if !from_user {
-                    // Only stop if auto-advance and end of playlist
-                    Self::stop_current_stream();
-                    if let Ok(mut state) = state_lock.lock() {
-                        state.current_index = None;
+                    // Queue ended (auto-advance, RepeatNone): reset to first track, ready to restart
+                    let first_music = {
+                        let state = match state_lock.lock() {
+                            Ok(s) => s,
+                            Err(e) => {
+                                crate::error!("Failed to lock player state: {}", e);
+                                return;
+                            }
+                        };
+                        if state.playlist.is_empty() {
+                            None
+                        } else {
+                            Some((state.playlist[0].metadata.clone(), state.playlist.len()))
+                        }
+                    };
+
+                    if let Some((music, total_count)) = first_music {
+                        // Remove old stream from mixer (stream already stopped/ended)
+                        #[cfg(desktop)]
+                        unsafe {
+                            let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                            if current_stream != 0 {
+                                BASS_Mixer_ChannelRemove(current_stream);
+                                BASS_StreamFree(current_stream);
+                                CURRENT_STREAM.store(0, Ordering::SeqCst);
+                            }
+                        }
+
+                        #[cfg(target_os = "android")]
+                        {
+                            if let Some(bass) = bass_android::get_bass() {
+                                unsafe {
+                                    let current_stream = CURRENT_STREAM.load(Ordering::SeqCst);
+                                    if current_stream != 0 {
+                                        (bass.bass_mixer_channel_remove)(current_stream);
+                                        (bass.bass_stream_free)(current_stream);
+                                        CURRENT_STREAM.store(0, Ordering::SeqCst);
+                                    }
+                                }
+                            }
+                        }
+
+                        if Self::load_music(music, 0, total_count) {
+                            // Pause immediately so playback doesn't auto-start
+                            #[cfg(desktop)]
+                            unsafe {
+                                if BASS_MIXER != 0 {
+                                    BASS_ChannelPause(BASS_MIXER);
+                                    BASS_ChannelSetPosition(BASS_MIXER, 0, BASS_POS_BYTE);
+                                }
+                            }
+
+                            #[cfg(target_os = "android")]
+                            {
+                                if let Some(bass) = bass_android::get_bass() {
+                                    unsafe {
+                                        if BASS_MIXER != 0 {
+                                            (bass.bass_channel_pause)(BASS_MIXER);
+                                            (bass.bass_channel_set_position)(
+                                                BASS_MIXER,
+                                                0,
+                                                BASS_POS_BYTE,
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+
+                            if let Ok(mut state) = state_lock.lock() {
+                                state.current_index = Some(0);
+                            }
+                            Self::emit_sync(false);
+                        }
+                    } else {
+                        Self::stop_current_stream();
+                        if let Ok(mut state) = state_lock.lock() {
+                            state.current_index = None;
+                        }
                     }
                 }
                 // If from_user and None, do nothing (don't stop)
