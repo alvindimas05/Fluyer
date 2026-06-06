@@ -175,7 +175,7 @@ pub struct RendererState {
 }
 
 pub struct SharedRenderer {
-    pub state: Mutex<RendererState>,
+    pub state: Mutex<Option<RendererState>>,
 }
 
 unsafe impl Send for RendererState {}
@@ -184,111 +184,129 @@ unsafe impl Sync for RendererState {}
 pub fn setup_wgpu(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     crate::debug!("setup_wgpu: Starting femtovg WGPU initialization");
 
-    let window = app.get_webview_window("main").unwrap();
-
-    #[cfg(target_os = "android")]
-    let size = if let Ok(Some(monitor)) = window.current_monitor() {
-        *monitor.size()
-    } else {
-        window
-            .inner_size()
-            .unwrap_or(tauri::PhysicalSize::new(0, 0))
-    };
-    #[cfg(not(target_os = "android"))]
-    let size = window.inner_size()?;
-
-    crate::debug!("setup_wgpu: Window size {}x{}", size.width, size.height);
-
-    #[cfg(not(target_os = "macos"))]
-    let backends = Backends::GL;
-    #[cfg(target_os = "macos")]
-    let backends = Backends::METAL;
-
-    let instance = wgpu::Instance::new(&InstanceDescriptor {
-        backends,
-        flags: InstanceFlags::default(),
-        memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
-        backend_options: BackendOptions::default(),
+    let shared = Arc::new(SharedRenderer {
+        state: Mutex::new(None),
     });
+    app.manage(shared.clone());
 
-    let surface = create_surface(&instance, &app.handle().clone())?;
+    let app_handle = app.handle().clone();
 
-    let adapter = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::HighPerformance,
-        force_fallback_adapter: false,
-        compatible_surface: Some(&surface),
-    }))
-    .expect("Failed to find an appropriate adapter");
+    std::thread::spawn(move || {
+        let window = app_handle.get_webview_window("main").unwrap();
 
-    let (device, queue) = block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-        label: None,
-        required_features: wgpu::Features::empty(),
-        required_limits:
-            wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits()),
-        memory_hints: wgpu::MemoryHints::default(),
-        experimental_features: wgpu::ExperimentalFeatures::disabled(),
-        trace: wgpu::Trace::Off,
-    }))
-    .expect("Failed to create device");
+        #[cfg(target_os = "android")]
+        let size = if let Ok(Some(monitor)) = window.current_monitor() {
+            *monitor.size()
+        } else {
+            window
+                .inner_size()
+                .unwrap_or(tauri::PhysicalSize::new(0, 0))
+        };
+        #[cfg(not(target_os = "android"))]
+        let size = window.inner_size().unwrap_or(tauri::PhysicalSize::new(1280, 720));
 
-    let swapchain_capabilities = surface.get_capabilities(&adapter);
-    let swapchain_format = swapchain_capabilities.formats[0].remove_srgb_suffix();
+        crate::debug!("setup_wgpu: Window size {}x{}", size.width, size.height);
 
-    let alpha_mode = swapchain_capabilities
-        .alpha_modes
-        .iter()
-        .find(|&&m| m == wgpu::CompositeAlphaMode::PreMultiplied)
-        .or_else(|| {
-            swapchain_capabilities
-                .alpha_modes
-                .iter()
-                .find(|&&m| m == wgpu::CompositeAlphaMode::PostMultiplied)
-        })
-        .copied()
-        .unwrap_or(swapchain_capabilities.alpha_modes[0]);
+        #[cfg(not(target_os = "macos"))]
+        let backends = Backends::GL;
+        #[cfg(target_os = "macos")]
+        let backends = Backends::METAL;
 
-    let config = wgpu::SurfaceConfiguration {
-        usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-        format: swapchain_format,
-        width: size.width,
-        height: size.height,
-        present_mode: wgpu::PresentMode::Fifo,
-        alpha_mode,
-        view_formats: vec![],
-        desired_maximum_frame_latency: 2,
-    };
+        let instance = wgpu::Instance::new(&InstanceDescriptor {
+            backends,
+            flags: InstanceFlags::default(),
+            memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
+            backend_options: BackendOptions::default(),
+        });
 
-    surface.configure(&device, &config);
+        let surface = match create_surface(&instance, &app_handle) {
+            Ok(s) => s,
+            Err(e) => {
+                crate::error!("Failed to create surface: {}", e);
+                return;
+            }
+        };
 
-    // Build femtovg WGPU renderer — takes owned Device + Queue
-    let renderer = WGPURenderer::new(device.clone(), queue.clone());
-    let mut canvas = Canvas::new(renderer).expect("Cannot create femtovg canvas");
-    canvas.set_size(size.width, size.height, 1.0);
+        let adapter = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::HighPerformance,
+            force_fallback_adapter: false,
+            compatible_surface: Some(&surface),
+        }))
+        .expect("Failed to find an appropriate adapter");
 
-    app.manage(Arc::new(SharedRenderer {
-        state: Mutex::new(RendererState {
+        let (device, queue) = block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+            label: None,
+            required_features: wgpu::Features::empty(),
+            required_limits:
+                wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits()),
+            memory_hints: wgpu::MemoryHints::default(),
+            experimental_features: wgpu::ExperimentalFeatures::disabled(),
+            trace: wgpu::Trace::Off,
+        }))
+        .expect("Failed to create device");
+
+        let swapchain_capabilities = surface.get_capabilities(&adapter);
+        let swapchain_format = swapchain_capabilities.formats[0].remove_srgb_suffix();
+
+        let alpha_mode = swapchain_capabilities
+            .alpha_modes
+            .iter()
+            .find(|&&m| m == wgpu::CompositeAlphaMode::PreMultiplied)
+            .or_else(|| {
+                swapchain_capabilities
+                    .alpha_modes
+                    .iter()
+                    .find(|&&m| m == wgpu::CompositeAlphaMode::PostMultiplied)
+            })
+            .copied()
+            .unwrap_or(swapchain_capabilities.alpha_modes[0]);
+
+        let config = wgpu::SurfaceConfiguration {
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            format: swapchain_format,
+            width: if size.width > 0 { size.width } else { 1 },
+            height: if size.height > 0 { size.height } else { 1 },
+            present_mode: wgpu::PresentMode::Fifo,
+            alpha_mode,
+            view_formats: vec![],
+            desired_maximum_frame_latency: 2,
+        };
+
+        surface.configure(&device, &config);
+
+        // Build femtovg WGPU renderer — takes owned Device + Queue
+        let renderer = WGPURenderer::new(device.clone(), queue.clone());
+        let mut canvas = Canvas::new(renderer).expect("Cannot create femtovg canvas");
+        canvas.set_size(config.width, config.height, 1.0);
+
+        let mut state_guard = shared.state.lock().unwrap();
+        *state_guard = Some(RendererState {
             instance,
             surface: Some(surface),
             device,
             queue,
             config,
             canvas,
-        }),
-    }));
+        });
+
+        crate::debug!("setup_wgpu: WGPU async initialization complete");
+    });
 
     Ok(())
 }
 
 pub fn handle_wgpu_resize(app_handle: &tauri::AppHandle, width: u32, height: u32) {
     if let Some(shared) = app_handle.try_state::<Arc<SharedRenderer>>() {
-        let mut state = shared.state.lock().unwrap();
-        state.config.width = if width > 0 { width } else { 1 };
-        state.config.height = if height > 0 { height } else { 1 };
-        if let Some(surface) = &state.surface {
-            surface.configure(&state.device, &state.config);
+        let mut state_guard = shared.state.lock().unwrap();
+        if let Some(state) = state_guard.as_mut() {
+            state.config.width = if width > 0 { width } else { 1 };
+            state.config.height = if height > 0 { height } else { 1 };
+            if let Some(surface) = &state.surface {
+                surface.configure(&state.device, &state.config);
+            }
+            let (w, h) = (state.config.width, state.config.height);
+            state.canvas.set_size(w, h, 1.0);
         }
-        let (w, h) = (state.config.width, state.config.height);
-        state.canvas.set_size(w, h, 1.0);
     }
 }
 
@@ -297,8 +315,10 @@ pub fn suspend_wgpu(app_handle: &tauri::AppHandle) {
     {
         crate::debug!("Suspending WGPU");
         if let Some(shared) = app_handle.try_state::<Arc<SharedRenderer>>() {
-            let mut state = shared.state.lock().unwrap();
-            state.surface = None;
+            let mut state_guard = shared.state.lock().unwrap();
+            if let Some(state) = state_guard.as_mut() {
+                state.surface = None;
+            }
         }
     }
 }
@@ -312,24 +332,30 @@ pub fn resume_wgpu(app_handle: &tauri::AppHandle) {
             move || {
                 if let Some(shared) = app_handle.try_state::<Arc<SharedRenderer>>() {
                     let has_surface = {
-                        let state = shared.state.lock().unwrap();
-                        state.surface.is_some()
+                        let state_guard = shared.state.lock().unwrap();
+                        state_guard.as_ref().map_or(false, |s| s.surface.is_some())
                     };
 
                     if !has_surface {
                         crate::debug!("Resuming WGPU: Recreating surface");
                         let instance = {
-                            let state = shared.state.lock().unwrap();
-                            state.instance.clone()
+                            let state_guard = shared.state.lock().unwrap();
+                            if let Some(state) = state_guard.as_ref() {
+                                state.instance.clone()
+                            } else {
+                                return;
+                            }
                         };
 
                         match create_surface(&instance, &app_handle) {
                             Ok(surface) => {
-                                let mut state = shared.state.lock().unwrap();
-                                surface.configure(&state.device, &state.config);
-                                state.surface = Some(surface);
-                                crate::debug!("Resuming WGPU: Surface recreated");
-                                crate::renderer::trigger_redraw();
+                                let mut state_guard = shared.state.lock().unwrap();
+                                if let Some(state) = state_guard.as_mut() {
+                                    surface.configure(&state.device, &state.config);
+                                    state.surface = Some(surface);
+                                    crate::debug!("Resuming WGPU: Surface recreated");
+                                    crate::renderer::trigger_redraw();
+                                }
                             }
                             Err(e) => {
                                 crate::error!("Failed to recreate surface on resume: {}", e);
@@ -374,7 +400,16 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
 
             bg_state.needs_redraw = false;
 
-            let mut state = shared.state.lock().unwrap();
+            let mut state_guard = shared.state.lock().unwrap();
+            let state = match state_guard.as_mut() {
+                Some(s) => s,
+                None => {
+                    drop(state_guard);
+                    drop(bg_state);
+                    std::thread::sleep(std::time::Duration::from_millis(100));
+                    continue;
+                }
+            };
 
             // Draw with femtovg
             crate::renderer::draw_background(&mut state.canvas, &mut bg_state);
@@ -383,7 +418,7 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
             let surface = match &state.surface {
                 Some(s) => s,
                 None => {
-                    drop(state);
+                    drop(state_guard);
                     drop(bg_state);
                     std::thread::sleep(std::time::Duration::from_millis(100));
                     continue;
@@ -394,7 +429,7 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
                 Ok(f) => f,
                 Err(e) => {
                     crate::warn!("Failed to get current texture: {e}");
-                    drop(state);
+                    drop(state_guard);
                     drop(bg_state);
                     std::thread::sleep(std::time::Duration::from_millis(1000));
                     continue;
@@ -408,7 +443,7 @@ pub fn start_render_loop(app_handle: tauri::AppHandle) {
             }
             frame.present();
 
-            drop(state);
+            drop(state_guard);
             drop(bg_state);
             std::thread::sleep(std::time::Duration::from_millis(
                 (1000.0 / refresh_rate) as u64,
