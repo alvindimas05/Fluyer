@@ -25,6 +25,11 @@ pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
         .collect()
 }
 
+const SUPPORTED_EXTENSIONS: &[&str] = &[
+    "mp3", "flac", "wav", "ogg", "m4a", "m4b", "mp4", "mkv", "webm", "avi", 
+    "aac", "wma", "opus", "alac", "ape", "aiff", "mov", "ts", "flv", "3gp", "wmv"
+];
+
 /// Scan directories for audio files
 pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
     let mut dirs: Vec<Result<DirEntry, walkdir::Error>> = vec![];
@@ -47,7 +52,15 @@ pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
             e.ok()
         })
         .filter(|e| {
-            e.path().is_file() && e.path().file_name().unwrap_or_default() != "au_uu_SzH34yR2.mp3"
+            if !e.path().is_file() || e.path().file_name().unwrap_or_default() == "au_uu_SzH34yR2.mp3" {
+                return false;
+            }
+            
+            e.path()
+                .extension()
+                .and_then(|ext| ext.to_str())
+                .map(|ext| SUPPORTED_EXTENSIONS.contains(&ext.to_lowercase().as_str()))
+                .unwrap_or(false)
         })
         .map(|entry| entry.path().to_path_buf())
         .collect()
