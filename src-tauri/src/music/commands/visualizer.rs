@@ -84,18 +84,6 @@ pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) ->
                     .unwrap()
             };
 
-            #[cfg(any(target_os = "linux", target_os = "macos"))]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                if let Ok(metadata) = std::fs::metadata(&ffmpeg_path) {
-                    let mut permissions = metadata.permissions();
-                    permissions.set_mode(0o755);
-                    if let Err(e) = std::fs::set_permissions(&ffmpeg_path, permissions) {
-                        crate::error!("Failed to set ffmpeg permissions: {}", e);
-                    }
-                }
-            }
-
             let ffmpeg_status = {
                 #[cfg(windows)]
                 {

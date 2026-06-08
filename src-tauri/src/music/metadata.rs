@@ -99,14 +99,21 @@ impl MusicMetadata {
             }
         };
 
-        // #[cfg(any(target_os = "macos", target_os = "linux"))]
-        // {
-        //     use std::os::unix::fs::PermissionsExt;
-        //     std::fs::set_permissions(&ffmpeg_path, std::fs::Permissions::from_mode(0o755))
-        //         .expect("Failed to set ffmpeg permissions");
-        //     std::fs::set_permissions(&ffprobe_path, std::fs::Permissions::from_mode(0o755))
-        //         .expect("Failed to set ffprobe permissions");
-        // }
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            for path in &[&ffmpeg_path, &ffprobe_path] {
+                if let Ok(metadata) = std::fs::metadata(path) {
+                    let mut perms = metadata.permissions();
+                    if perms.mode() & 0o111 == 0 {
+                        perms.set_mode(0o755);
+                        if let Err(e) = std::fs::set_permissions(path, perms) {
+                            crate::warn!("Failed to set permissions for {:?}: {}", path, e);
+                        }
+                    }
+                }
+            }
+        }
 
         FFMPEG_PATH.set(ffmpeg_path).unwrap();
         FFPROBE_PATH.set(ffprobe_path).unwrap();
