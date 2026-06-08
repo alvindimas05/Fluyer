@@ -48,15 +48,25 @@ pub async fn music_get_all() -> Option<Vec<MusicMetadata>> {
         search_dirs.push(scanner::get_home_dir())
     }
 
+    let now = std::time::Instant::now();
     // Scan directories for music files
     let paths = scanner::scan_directories(search_dirs);
+    crate::info!("Scan directories took {}s", now.elapsed().as_secs_f64());
 
     // database::windows_fix_music_paths_older_version(conn);
 
+    let now = std::time::Instant::now();
     // Process files and update database
     scanner::process_supported_files(&paths).await;
+    crate::info!("Process files took {}s", now.elapsed().as_secs_f64());
 
+    let now = std::time::Instant::now();
     database::delete_non_existing_paths(paths);
+    crate::info!("Delete non existing paths took {}s", now.elapsed().as_secs_f64());
 
-    Some(database::get_all_music_from_db())
+    let now = std::time::Instant::now();
+    let musics = database::get_all_music_from_db();
+    crate::info!("Get all music took {}s", now.elapsed().as_secs_f64());
+
+    Some(musics)
 }
