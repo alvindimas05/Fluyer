@@ -57,8 +57,15 @@ const QueueService = {
 	add: (music: MusicData) => {
 		return QueueService.addList([music]);
 	},
-	remove: (index: number) => {
+	remove: async (index: number) => {
+		await TauriQueueAPI.remove(index);
+
+		if (index < musicStore.currentIndex) {
+			musicStore.currentIndex--;
+		}
+
 		musicStore.queue.splice(index, 1);
+		musicStore.queueIds.splice(index, 1);
 	},
 	addList: async (list: MusicData[]) => {
 		await TauriQueueAPI.add(list);

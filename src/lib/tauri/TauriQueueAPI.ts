@@ -11,6 +11,11 @@ const TauriQueueAPI = {
 			playlist: list
 		});
 	},
+	remove: (index: number) => {
+		return invoke(CommandRoutes.MUSIC_PLAYLIST_REMOVE, {
+			index
+		});
+	},
 	moveTo: (from: number, to: number) => {
 		return invoke(CommandRoutes.MUSIC_PLAYLIST_MOVETO, {
 			from,
