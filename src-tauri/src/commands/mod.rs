@@ -4,7 +4,12 @@ pub mod route;
 
 pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_handler![
     // Music commands
-    crate::music::commands::music_controller,
+    crate::music::commands::music_play,
+    crate::music::commands::music_pause,
+    crate::music::commands::music_next,
+    crate::music::commands::music_previous,
+    crate::music::commands::music_clear,
+    crate::music::commands::music_repeat_mode_set,
     crate::music::commands::music_position_set,
     crate::folder::commands::music_all_get,
     crate::music::commands::music_queue_add,

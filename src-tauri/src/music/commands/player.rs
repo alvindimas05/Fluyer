@@ -2,9 +2,36 @@ use tauri::State;
 
 use crate::state::AppState;
 
+use crate::music::player::RepeatMode;
+
 #[tauri::command]
-pub fn music_controller(state: State<AppState>, command: String) {
-    state.music_player.send_command(command);
+pub fn music_play(state: State<AppState>) {
+    state.music_player.play();
+}
+
+#[tauri::command]
+pub fn music_pause(state: State<AppState>) {
+    state.music_player.pause();
+}
+
+#[tauri::command]
+pub fn music_next(state: State<AppState>) {
+    state.music_player.next();
+}
+
+#[tauri::command]
+pub fn music_previous(state: State<AppState>) {
+    state.music_player.previous();
+}
+
+#[tauri::command]
+pub fn music_clear(state: State<AppState>) {
+    state.music_player.clear();
+}
+
+#[tauri::command]
+pub fn music_repeat_mode_set(state: State<AppState>, mode: RepeatMode) {
+    state.music_player.set_repeat_mode(mode);
 }
 
 #[tauri::command]

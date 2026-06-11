@@ -13,19 +13,6 @@ use tauri_plugin_fluyer::FluyerExt;
 
 use super::bass::*;
 
-#[derive(Clone, Copy, Debug, Default, Serialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
-pub enum MusicCommand {
-    #[default]
-    None,
-    Pause,
-    Play,
-    Next,
-    Clear,
-    Repeat,
-    RepeatOne,
-    RepeatNone,
-}
 
 #[derive(Clone, Debug)]
 struct PlaylistItem {
@@ -374,39 +361,31 @@ impl MusicPlayer {
         }
     }
 
-    pub fn send_command(&self, command: String) {
-        let cmd = match command.as_str() {
-            "play" => MusicCommand::Play,
-            "pause" | "stop" => MusicCommand::Pause,
-            "next" => MusicCommand::Next,
-            "previous" => MusicCommand::None,
-            "clear" => MusicCommand::Clear,
-            "repeat" => MusicCommand::Repeat,
-            "repeatOne" => MusicCommand::RepeatOne,
-            "repeatNone" => MusicCommand::RepeatNone,
-            _ => MusicCommand::None,
-        };
+    pub fn play(&self) {
+        self.play_pause(true);
+    }
 
-        match cmd {
-            MusicCommand::Play => self.play_pause(true),
-            MusicCommand::Pause => self.play_pause(false),
-            MusicCommand::Clear => self.clear_playlist(),
-            MusicCommand::Next => self.play_next(true),
-            MusicCommand::Repeat | MusicCommand::RepeatOne | MusicCommand::RepeatNone => {
-                if let Ok(mut state) = self.state.lock() {
-                    state.repeat_mode = match cmd {
-                        MusicCommand::Repeat => RepeatMode::All,
-                        MusicCommand::RepeatOne => RepeatMode::One,
-                        _ => RepeatMode::None,
-                    };
-                }
-            }
-            MusicCommand::None => {
-                if command == "previous" {
-                    self.play_previous();
-                }
-            }
+    pub fn pause(&self) {
+        self.play_pause(false);
+    }
+
+    pub fn next(&self) {
+        self.play_next(true);
+    }
+
+    pub fn previous(&self) {
+        self.play_previous();
+    }
+
+    pub fn clear(&self) {
+        self.clear_playlist();
+    }
+
+    pub fn set_repeat_mode(&self, mode: RepeatMode) {
+        if let Ok(mut state) = self.state.lock() {
+            state.repeat_mode = mode;
         }
+        self.emit_sync(false);
     }
 
     pub fn set_pos(&self, position: u64) {

@@ -1,22 +1,26 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { TauriCommands } from '$lib/constants/TauriCommands';
-import type { MusicPlayerSync } from '$lib/features/music/types';
-
-export enum TauriMusicCommand {
-	None = 'none',
-	Pause = 'pause',
-	Play = 'play',
-	Next = 'next',
-	Clear = 'clear',
-	Repeat = 'repeat',
-	RepeatOne = 'repeatOne',
-	RepeatNone = 'repeatNone'
-}
+import type { MusicPlayerSync, RepeatMode } from '$lib/features/music/types';
 
 const TauriMusicAPI = {
-	sendCommand: (command: TauriMusicCommand) => {
-		return invoke(TauriCommands.MUSIC_CONTROLLER, { command });
+	play: () => {
+		return invoke(TauriCommands.MUSIC_PLAY);
+	},
+	pause: () => {
+		return invoke(TauriCommands.MUSIC_PAUSE);
+	},
+	next: () => {
+		return invoke(TauriCommands.MUSIC_NEXT);
+	},
+	previous: () => {
+		return invoke(TauriCommands.MUSIC_PREVIOUS);
+	},
+	clear: () => {
+		return invoke(TauriCommands.MUSIC_CLEAR);
+	},
+	setRepeatMode: (mode: RepeatMode) => {
+		return invoke(TauriCommands.MUSIC_REPEAT_MODE_SET, { mode });
 	},
 	setPosition: (position: number) => {
 		return invoke(TauriCommands.MUSIC_POSITION_SET, {

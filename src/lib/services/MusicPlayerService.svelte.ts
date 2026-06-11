@@ -1,6 +1,6 @@
 import musicStore from '$lib/stores/music.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
-import TauriMusicAPI, { TauriMusicCommand } from '$lib/tauri/TauriMusicAPI';
+import TauriMusicAPI from '$lib/tauri/TauriMusicAPI';
 import QueueService from '$lib/services/QueueService.svelte';
 import { RepeatMode } from '$lib/features/music/types';
 import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
@@ -24,7 +24,7 @@ const MusicPlayerService = {
 		console.log('Starting music playback...');
 
 		musicStore.isPlaying = true;
-		await TauriMusicAPI.sendCommand(TauriMusicCommand.Play);
+		await TauriMusicAPI.play();
 		ProgressService.start();
 	},
 	pause: async () => {
@@ -34,11 +34,11 @@ const MusicPlayerService = {
 
 		console.log('Pausing music playback...');
 		musicStore.isPlaying = false;
-		await TauriMusicAPI.sendCommand(TauriMusicCommand.Pause);
+		await TauriMusicAPI.pause();
 		ProgressService.stop();
 	},
 	next: async () => {
-		return TauriMusicAPI.sendCommand(TauriMusicCommand.Next);
+		return TauriMusicAPI.next();
 	},
 	previous: async () => {
 		if (musicStore.queue.length === 0) return;
@@ -55,27 +55,23 @@ const MusicPlayerService = {
 	},
 	toggleRepeatMode: async () => {
 		let nextRepeatMode = RepeatMode.None;
-		let command = TauriMusicCommand.RepeatNone;
 		const currentMode = musicStore.repeatMode;
 
 		switch (currentMode) {
 			case RepeatMode.None:
 				nextRepeatMode = RepeatMode.All;
-				command = TauriMusicCommand.Repeat;
 				break;
 			case RepeatMode.All:
 				nextRepeatMode = RepeatMode.One;
-				command = TauriMusicCommand.RepeatOne;
 				break;
 			case RepeatMode.One:
 				nextRepeatMode = RepeatMode.None;
-				command = TauriMusicCommand.RepeatNone;
 				break;
 		}
 
 		// Optimistic update
 		musicStore.repeatMode = nextRepeatMode;
-		await TauriMusicAPI.sendCommand(command);
+		await TauriMusicAPI.setRepeatMode(nextRepeatMode);
 	},
 
 	listenSyncEvents: () => {
