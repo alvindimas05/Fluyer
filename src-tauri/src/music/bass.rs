@@ -12,6 +12,10 @@ pub const BASS_ACTIVE_PAUSED: u32 = 3;
 pub const BASS_POS_BYTE: u32 = 0;
 pub const BASS_ATTRIB_VOL: u32 = 2;
 
+pub const BASS_SYNC_END: u32 = 2;
+pub const BASS_SYNC_FREE: u32 = 0x10000;
+pub const BASS_SYNC_MIXTIME: u32 = 0x40000000;
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct BASS_DEVICEINFO {
@@ -83,6 +87,13 @@ extern "C" {
     pub fn BASS_ChannelGetAttribute(handle: u32, attrib: u32, value: *mut f32) -> i32;
     pub fn BASS_ErrorGetCode() -> i32;
     pub fn BASS_Free() -> i32;
+    pub fn BASS_ChannelSetSync(
+        handle: u32,
+        type_: u32,
+        param: u64,
+        proc_: Option<unsafe extern "C" fn(handle: u32, channel: u32, data: u32, user: *mut std::ffi::c_void)>,
+        user: *mut std::ffi::c_void,
+    ) -> u32;
 }
 
 // Android BASS library loaded dynamically
@@ -112,6 +123,13 @@ pub mod bass_android {
         pub bass_channel_set_attribute: unsafe extern "C" fn(u32, u32, f32) -> i32,
         pub bass_error_get_code: unsafe extern "C" fn() -> i32,
         pub bass_free: unsafe extern "C" fn() -> i32,
+        pub bass_channel_set_sync: unsafe extern "C" fn(
+            u32,
+            u32,
+            u64,
+            Option<unsafe extern "C" fn(u32, u32, u32, *mut std::ffi::c_void)>,
+            *mut std::ffi::c_void,
+        ) -> u32,
         // BASSMIX functions
         pub bass_mixer_stream_create: unsafe extern "C" fn(u32, u32, u32) -> u32,
         pub bass_mixer_stream_add_channel: unsafe extern "C" fn(u32, u32, u32) -> i32,
@@ -195,6 +213,23 @@ pub mod bass_android {
             let bass_free_fn: unsafe extern "C" fn() -> i32 = *bass
                 .get::<unsafe extern "C" fn() -> i32>(b"BASS_Free")
                 .map_err(|e| format!("Failed to load BASS_Free: {}", e))?;
+            let bass_channel_set_sync_fn: unsafe extern "C" fn(
+                u32,
+                u32,
+                u64,
+                Option<unsafe extern "C" fn(u32, u32, u32, *mut std::ffi::c_void)>,
+                *mut std::ffi::c_void,
+            ) -> u32 = *bass
+                .get::<
+                    unsafe extern "C" fn(
+                        u32,
+                        u32,
+                        u64,
+                        Option<unsafe extern "C" fn(u32, u32, u32, *mut std::ffi::c_void)>,
+                        *mut std::ffi::c_void,
+                    ),
+                >(b"BASS_ChannelSetSync")
+                .map_err(|e| format!("Failed to load BASS_ChannelSetSync: {}", e))?;
 
             // Load BASSMIX functions
             let bass_mixer_stream_create_fn: unsafe extern "C" fn(u32, u32, u32) -> u32 = *bassmix
@@ -228,6 +263,7 @@ pub mod bass_android {
                 bass_channel_set_attribute: bass_channel_set_attribute_fn,
                 bass_error_get_code: bass_error_get_code_fn,
                 bass_free: bass_free_fn,
+                bass_channel_set_sync: bass_channel_set_sync_fn,
                 bass_mixer_stream_create: bass_mixer_stream_create_fn,
                 bass_mixer_stream_add_channel: bass_mixer_stream_add_channel_fn,
                 bass_mixer_channel_remove: bass_mixer_channel_remove_fn,

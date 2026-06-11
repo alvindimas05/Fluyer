@@ -65,6 +65,146 @@ pub struct MusicPlayer {
     temp_wav_path: Arc<Mutex<Option<PathBuf>>>,
 }
 
+struct SyncData {
+    bass_mixer: Arc<AtomicU32>,
+    current_stream: Arc<AtomicU32>,
+    state: Arc<Mutex<PlayerState>>,
+    temp_wav_path: Arc<Mutex<Option<PathBuf>>>,
+}
+
+extern "C" fn end_sync_callback(
+    _handle: u32,
+    _channel: u32,
+    _data: u32,
+    user: *mut std::ffi::c_void,
+) {
+    if user.is_null() {
+        return;
+    }
+
+    let sync_data = unsafe { &*(user as *const SyncData) };
+    let bm = Arc::clone(&sync_data.bass_mixer);
+    let cs_arc = Arc::clone(&sync_data.current_stream);
+    let st = Arc::clone(&sync_data.state);
+    let twp = Arc::clone(&sync_data.temp_wav_path);
+
+    cs_arc.store(0, Ordering::SeqCst);
+    crate::info!("Track ended, playing next");
+
+    tauri::async_runtime::spawn_blocking(move || {
+        let next_index = {
+            let state = match st.lock() {
+                Ok(s) => s,
+                Err(e) => {
+                    crate::error!("Failed to lock player state: {}", e);
+                    return;
+                }
+            };
+            match (state.current_index, state.repeat_mode) {
+                (Some(current), RepeatMode::One) => Some(current),
+                (Some(current), _) if current + 1 < state.playlist.len() => Some(current + 1),
+                (Some(_), RepeatMode::All) => Some(0),
+                _ => None,
+            }
+        };
+
+        if let Some(index) = next_index {
+            let (music, total_count) = {
+                let state = match st.lock() {
+                    Ok(s) => s,
+                    Err(e) => {
+                        crate::error!("Failed to lock player state: {}", e);
+                        return;
+                    }
+                };
+                (state.playlist[index].metadata.clone(), state.playlist.len())
+            };
+
+            let cs2 = cs_arc.load(Ordering::SeqCst);
+            #[cfg(desktop)]
+            unsafe {
+                if cs2 != 0 {
+                    BASS_Mixer_ChannelRemove(cs2);
+                    BASS_StreamFree(cs2);
+                    cs_arc.store(0, Ordering::SeqCst);
+                }
+            }
+            #[cfg(target_os = "android")]
+            if let Some(bass) = bass_android::get_bass() {
+                unsafe {
+                    if cs2 != 0 {
+                        (bass.bass_mixer_channel_remove)(cs2);
+                        (bass.bass_stream_free)(cs2);
+                        cs_arc.store(0, Ordering::SeqCst);
+                    }
+                }
+            }
+
+            if MusicPlayer::load_music_inner(&bm, &cs_arc, &st, &twp, music, index, total_count) {
+                if let Ok(mut state) = st.lock() {
+                    state.current_index = Some(index);
+                }
+                MusicPlayer::emit_sync_inner(&bm, &cs_arc, &st, true);
+            }
+        } else {
+            let first = {
+                let state = match st.lock() {
+                    Ok(s) => s,
+                    Err(e) => {
+                        crate::error!("Failed to lock player state: {}", e);
+                        return;
+                    }
+                };
+                if state.playlist.is_empty() {
+                    None
+                } else {
+                    Some((state.playlist[0].metadata.clone(), state.playlist.len()))
+                }
+            };
+
+            if let Some((music, total_count)) = first {
+                if MusicPlayer::load_music_inner(&bm, &cs_arc, &st, &twp, music, 0, total_count) {
+                    let bm_val = bm.load(Ordering::SeqCst);
+                    #[cfg(desktop)]
+                    unsafe {
+                        if bm_val != 0 {
+                            BASS_ChannelPause(bm_val);
+                            BASS_ChannelSetPosition(bm_val, 0, BASS_POS_BYTE);
+                        }
+                    }
+                    #[cfg(target_os = "android")]
+                    if let Some(bass) = bass_android::get_bass() {
+                        unsafe {
+                            if bm_val != 0 {
+                                (bass.bass_channel_pause)(bm_val);
+                                (bass.bass_channel_set_position)(bm_val, 0, BASS_POS_BYTE);
+                            }
+                        }
+                    }
+
+                    if let Ok(mut state) = st.lock() {
+                        state.current_index = Some(0);
+                    }
+                    MusicPlayer::emit_sync_inner(&bm, &cs_arc, &st, false);
+                }
+            } else {
+                MusicPlayer::stop_stream(&bm, &cs_arc, &twp);
+                if let Ok(mut state) = st.lock() {
+                    state.current_index = None;
+                }
+            }
+        }
+    });
+}
+
+extern "C" fn free_sync_callback(_: u32, _: u32, _: u32, user: *mut std::ffi::c_void) {
+    if !user.is_null() {
+        unsafe {
+            let _ = Box::from_raw(user as *mut SyncData);
+        }
+    }
+}
+
 // BASS handles are plain u32 values – not OS handles tied to a specific thread –
 // so it is safe to send/share them across threads as long as we serialise access
 // ourselves (AtomicU32 / Mutex already do that).
@@ -86,7 +226,6 @@ impl MusicPlayer {
 
         player.start_focus_listener();
         player.init_bass();
-        player.start_listener();
 
         #[cfg(target_os = "android")]
         {
@@ -219,8 +358,7 @@ impl MusicPlayer {
                             }
                         }
 
-                        let mixer =
-                            (bass.bass_mixer_stream_create)(44100, 2, BASS_SAMPLE_FLOAT);
+                        let mixer = (bass.bass_mixer_stream_create)(44100, 2, BASS_SAMPLE_FLOAT);
                         if mixer == 0 {
                             crate::error!(
                                 "Failed to create BASS mixer stream, error: {}",
@@ -295,13 +433,9 @@ impl MusicPlayer {
                     if current_stream != 0 && bass_mixer != 0 {
                         (bass.bass_channel_pause)(bass_mixer);
                         let seconds = position as f64 / 1000.0;
-                        let byte_pos =
-                            (bass.bass_channel_seconds2bytes)(current_stream, seconds);
-                        if (bass.bass_channel_set_position)(
-                            current_stream,
-                            byte_pos,
-                            BASS_POS_BYTE,
-                        ) == 0
+                        let byte_pos = (bass.bass_channel_seconds2bytes)(current_stream, seconds);
+                        if (bass.bass_channel_set_position)(current_stream, byte_pos, BASS_POS_BYTE)
+                            == 0
                         {
                             crate::error!(
                                 "Failed to set position, error: {}",
@@ -345,8 +479,7 @@ impl MusicPlayer {
                     if current_stream == 0 {
                         return 0.0;
                     }
-                    let byte_pos =
-                        (bass.bass_channel_get_position)(current_stream, BASS_POS_BYTE);
+                    let byte_pos = (bass.bass_channel_get_position)(current_stream, BASS_POS_BYTE);
                     return (bass.bass_channel_bytes2seconds)(current_stream, byte_pos) * 1000.0;
                 }
             }
@@ -515,6 +648,7 @@ impl MusicPlayer {
             if Self::load_music_inner(
                 &bass_mixer,
                 &current_stream,
+                &state_arc,
                 &temp_wav_path,
                 music,
                 index,
@@ -546,9 +680,7 @@ impl MusicPlayer {
                 };
                 match (state.current_index, state.repeat_mode) {
                     (Some(current), RepeatMode::One) if !from_user => Some(current),
-                    (Some(current), _) if current + 1 < state.playlist.len() => {
-                        Some(current + 1)
-                    }
+                    (Some(current), _) if current + 1 < state.playlist.len() => Some(current + 1),
                     (Some(_), RepeatMode::All) => Some(0),
                     (Some(_), _) if from_user => Some(0),
                     _ => None,
@@ -599,6 +731,7 @@ impl MusicPlayer {
                 if Self::load_music_inner(
                     &bass_mixer,
                     &current_stream,
+                    &state_arc,
                     &temp_wav_path,
                     music,
                     index,
@@ -650,6 +783,7 @@ impl MusicPlayer {
                     if Self::load_music_inner(
                         &bass_mixer,
                         &current_stream,
+                        &state_arc,
                         &temp_wav_path,
                         music,
                         0,
@@ -727,6 +861,7 @@ impl MusicPlayer {
                 if Self::load_music_inner(
                     &bass_mixer,
                     &current_stream,
+                    &state_arc,
                     &temp_wav_path,
                     music,
                     index,
@@ -864,10 +999,7 @@ impl MusicPlayer {
                 }
                 if play {
                     if (bass.bass_channel_play)(bm, 0) == 0 {
-                        crate::error!(
-                            "Failed to play, error: {}",
-                            (bass.bass_error_get_code)()
-                        );
+                        crate::error!("Failed to play, error: {}", (bass.bass_error_get_code)());
                     } else {
                         let cs = current_stream.load(Ordering::SeqCst);
                         let pos = {
@@ -881,10 +1013,7 @@ impl MusicPlayer {
                         let _ = app_handle().fluyer().set_media_control_state(true, pos);
                     }
                 } else if (bass.bass_channel_pause)(bm) == 0 {
-                    crate::error!(
-                        "Failed to pause, error: {}",
-                        (bass.bass_error_get_code)()
-                    );
+                    crate::error!("Failed to pause, error: {}", (bass.bass_error_get_code)());
                 } else {
                     let cs = current_stream.load(Ordering::SeqCst);
                     let pos = {
@@ -1025,9 +1154,7 @@ impl MusicPlayer {
             #[cfg(target_os = "android")]
             {
                 bass_android::get_bass()
-                    .map(|bass| unsafe {
-                        (bass.bass_channel_is_active)(bm) == BASS_ACTIVE_PLAYING
-                    })
+                    .map(|bass| unsafe { (bass.bass_channel_is_active)(bm) == BASS_ACTIVE_PLAYING })
                     .unwrap_or(false)
             }
         };
@@ -1056,9 +1183,67 @@ impl MusicPlayer {
     }
 
     /// Load a music file into BASS and add it to the mixer.
+    fn setup_sync(
+        stream: u32,
+        bass_mixer: &Arc<AtomicU32>,
+        current_stream: &Arc<AtomicU32>,
+        state: &Arc<Mutex<PlayerState>>,
+        temp_wav_path: &Arc<Mutex<Option<PathBuf>>>,
+    ) {
+        if stream == 0 {
+            return;
+        }
+
+        let sync_data = Box::into_raw(Box::new(SyncData {
+            bass_mixer: Arc::clone(bass_mixer),
+            current_stream: Arc::clone(current_stream),
+            state: Arc::clone(state),
+            temp_wav_path: Arc::clone(temp_wav_path),
+        }));
+
+        #[cfg(desktop)]
+        unsafe {
+            BASS_ChannelSetSync(
+                stream,
+                BASS_SYNC_END | BASS_SYNC_MIXTIME | 0x80000000,
+                0,
+                Some(end_sync_callback),
+                sync_data as *mut _,
+            );
+            BASS_ChannelSetSync(
+                stream,
+                BASS_SYNC_FREE | 0x80000000,
+                0,
+                Some(free_sync_callback),
+                sync_data as *mut _,
+            );
+        }
+
+        #[cfg(target_os = "android")]
+        if let Some(bass) = bass_android::get_bass() {
+            unsafe {
+                (bass.bass_channel_set_sync)(
+                    stream,
+                    BASS_SYNC_END | BASS_SYNC_MIXTIME | 0x80000000,
+                    0,
+                    Some(end_sync_callback),
+                    sync_data as *mut _,
+                );
+                (bass.bass_channel_set_sync)(
+                    stream,
+                    BASS_SYNC_FREE | 0x80000000,
+                    0,
+                    Some(free_sync_callback),
+                    sync_data as *mut _,
+                );
+            }
+        }
+    }
+
     fn load_music_inner(
         bass_mixer: &Arc<AtomicU32>,
         current_stream: &Arc<AtomicU32>,
+        state: &Arc<Mutex<PlayerState>>,
         temp_wav_path: &Arc<Mutex<Option<PathBuf>>>,
         music: MusicMetadata,
         _index: usize,
@@ -1091,10 +1276,16 @@ impl MusicPlayer {
                     );
 
                     if wav_stream != 0 {
-                        let ok =
-                            BASS_Mixer_StreamAddChannel(bm, wav_stream, BASS_MIXER_NORAMPIN);
+                        let ok = BASS_Mixer_StreamAddChannel(bm, wav_stream, BASS_MIXER_NORAMPIN);
                         if ok != 0 {
                             current_stream.store(wav_stream, Ordering::SeqCst);
+                            Self::setup_sync(
+                                wav_stream,
+                                bass_mixer,
+                                current_stream,
+                                state,
+                                temp_wav_path,
+                            );
                             if let Ok(mut guard) = temp_wav_path.lock() {
                                 *guard = Some(wav_path.clone());
                             }
@@ -1137,6 +1328,7 @@ impl MusicPlayer {
             }
 
             current_stream.store(stream, Ordering::SeqCst);
+            Self::setup_sync(stream, bass_mixer, current_stream, state, temp_wav_path);
             crate::info!("Successfully loaded: {}", music.path);
 
             #[cfg(target_os = "android")]
@@ -1244,18 +1436,17 @@ impl MusicPlayer {
                     }
 
                     current_stream.store(stream, Ordering::SeqCst);
+                    Self::setup_sync(stream, bass_mixer, current_stream, state, temp_wav_path);
                     crate::info!("Successfully loaded: {}", music.path);
 
                     let music_clone = music.clone();
                     tauri::async_runtime::spawn(async move {
                         let handle = app_handle();
-                        let image_path = match handle
-                            .fluyer()
-                            .metadata_get_image(music_clone.path.clone())
-                        {
-                            Ok(res) => res.path,
-                            Err(_) => None,
-                        };
+                        let image_path =
+                            match handle.fluyer().metadata_get_image(music_clone.path.clone()) {
+                                Ok(res) => res.path,
+                                Err(_) => None,
+                            };
                         let _ = handle.fluyer().update_media_control(
                             music_clone.title.unwrap_or("Unknown".to_string()),
                             music_clone.artist.unwrap_or("Unknown".to_string()),
@@ -1374,11 +1565,7 @@ impl MusicPlayer {
 
     /// Update Android media control with current boundary state (is_first, is_last)
     #[cfg(target_os = "android")]
-    fn update_android_media_boundaries(
-        &self,
-        current_index: Option<usize>,
-        total_count: usize,
-    ) {
+    fn update_android_media_boundaries(&self, current_index: Option<usize>, total_count: usize) {
         if let Some(index) = current_index {
             if total_count > 0 {
                 let is_first = index == 0;
@@ -1401,153 +1588,6 @@ impl MusicPlayer {
         }
     }
 
-    pub fn start_listener(&self) {
-        let bass_mixer = Arc::clone(&self.bass_mixer);
-        let current_stream = Arc::clone(&self.current_stream);
-        let state_arc = Arc::clone(&self.state);
-        let temp_wav_path = Arc::clone(&self.temp_wav_path);
-
-        thread::spawn(move || loop {
-            thread::sleep(std::time::Duration::from_millis(50));
-
-            let cs = current_stream.load(Ordering::SeqCst);
-            if cs == 0 {
-                continue;
-            }
-
-            #[cfg(desktop)]
-            let stopped = unsafe { BASS_ChannelIsActive(cs) == BASS_ACTIVE_STOPPED };
-
-            #[cfg(target_os = "android")]
-            let stopped = bass_android::get_bass()
-                .map(|bass| unsafe { (bass.bass_channel_is_active)(cs) == BASS_ACTIVE_STOPPED })
-                .unwrap_or(false);
-
-            if stopped {
-                // Zero out before spawning to prevent double-fire on next tick
-                current_stream.store(0, Ordering::SeqCst);
-                crate::info!("Track ended, playing next");
-
-                let bm = Arc::clone(&bass_mixer);
-                let cs_arc = Arc::clone(&current_stream);
-                let st = Arc::clone(&state_arc);
-                let twp = Arc::clone(&temp_wav_path);
-
-                tauri::async_runtime::spawn_blocking(move || {
-                    let next_index = {
-                        let state = match st.lock() {
-                            Ok(s) => s,
-                            Err(e) => {
-                                crate::error!("Failed to lock player state: {}", e);
-                                return;
-                            }
-                        };
-                        match (state.current_index, state.repeat_mode) {
-                            (Some(current), RepeatMode::One) => Some(current),
-                            (Some(current), _) if current + 1 < state.playlist.len() => {
-                                Some(current + 1)
-                            }
-                            (Some(_), RepeatMode::All) => Some(0),
-                            _ => None,
-                        }
-                    };
-
-                    if let Some(index) = next_index {
-                        let (music, total_count) = {
-                            let state = match st.lock() {
-                                Ok(s) => s,
-                                Err(e) => {
-                                    crate::error!("Failed to lock player state: {}", e);
-                                    return;
-                                }
-                            };
-                            (state.playlist[index].metadata.clone(), state.playlist.len())
-                        };
-
-                        let cs2 = cs_arc.load(Ordering::SeqCst);
-                        #[cfg(desktop)]
-                        unsafe {
-                            if cs2 != 0 {
-                                BASS_Mixer_ChannelRemove(cs2);
-                                BASS_StreamFree(cs2);
-                                cs_arc.store(0, Ordering::SeqCst);
-                            }
-                        }
-                        #[cfg(target_os = "android")]
-                        if let Some(bass) = bass_android::get_bass() {
-                            unsafe {
-                                if cs2 != 0 {
-                                    (bass.bass_mixer_channel_remove)(cs2);
-                                    (bass.bass_stream_free)(cs2);
-                                    cs_arc.store(0, Ordering::SeqCst);
-                                }
-                            }
-                        }
-
-                        if Self::load_music_inner(&bm, &cs_arc, &twp, music, index, total_count) {
-                            if let Ok(mut state) = st.lock() {
-                                state.current_index = Some(index);
-                            }
-                            Self::emit_sync_inner(&bm, &cs_arc, &st, true);
-                        }
-                    } else {
-                        // Queue ended: reset to first track, paused
-                        let first = {
-                            let state = match st.lock() {
-                                Ok(s) => s,
-                                Err(e) => {
-                                    crate::error!("Failed to lock player state: {}", e);
-                                    return;
-                                }
-                            };
-                            if state.playlist.is_empty() {
-                                None
-                            } else {
-                                Some((state.playlist[0].metadata.clone(), state.playlist.len()))
-                            }
-                        };
-
-                        if let Some((music, total_count)) = first {
-                            if Self::load_music_inner(&bm, &cs_arc, &twp, music, 0, total_count) {
-                                let bm_val = bm.load(Ordering::SeqCst);
-                                #[cfg(desktop)]
-                                unsafe {
-                                    if bm_val != 0 {
-                                        BASS_ChannelPause(bm_val);
-                                        BASS_ChannelSetPosition(bm_val, 0, BASS_POS_BYTE);
-                                    }
-                                }
-                                #[cfg(target_os = "android")]
-                                if let Some(bass) = bass_android::get_bass() {
-                                    unsafe {
-                                        if bm_val != 0 {
-                                            (bass.bass_channel_pause)(bm_val);
-                                            (bass.bass_channel_set_position)(
-                                                bm_val,
-                                                0,
-                                                BASS_POS_BYTE,
-                                            );
-                                        }
-                                    }
-                                }
-
-                                if let Ok(mut state) = st.lock() {
-                                    state.current_index = Some(0);
-                                }
-                                Self::emit_sync_inner(&bm, &cs_arc, &st, false);
-                            }
-                        } else {
-                            Self::stop_stream(&bm, &cs_arc, &twp);
-                            if let Ok(mut state) = st.lock() {
-                                state.current_index = None;
-                            }
-                        }
-                    }
-                });
-            }
-        });
-    }
-
     fn start_focus_listener(&self) {
         use tauri::Listener;
         let bass_mixer = Arc::clone(&self.bass_mixer);
@@ -1566,11 +1606,7 @@ impl Drop for MusicPlayer {
 
         #[cfg(desktop)]
         unsafe {
-            Self::stop_stream(
-                &self.bass_mixer,
-                &self.current_stream,
-                &self.temp_wav_path,
-            );
+            Self::stop_stream(&self.bass_mixer, &self.current_stream, &self.temp_wav_path);
             if bm != 0 {
                 BASS_StreamFree(bm);
                 self.bass_mixer.store(0, Ordering::SeqCst);
@@ -1582,11 +1618,7 @@ impl Drop for MusicPlayer {
         #[cfg(target_os = "android")]
         if let Some(bass) = bass_android::get_bass() {
             unsafe {
-                Self::stop_stream(
-                    &self.bass_mixer,
-                    &self.current_stream,
-                    &self.temp_wav_path,
-                );
+                Self::stop_stream(&self.bass_mixer, &self.current_stream, &self.temp_wav_path);
                 if bm != 0 {
                     (bass.bass_stream_free)(bm);
                     self.bass_mixer.store(0, Ordering::SeqCst);
