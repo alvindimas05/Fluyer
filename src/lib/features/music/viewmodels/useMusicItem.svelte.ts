@@ -16,7 +16,7 @@ export function useMusicItem(
 	getFolder: () => FolderData | undefined,
 	getVisible: () => boolean = () => true
 ) {
-	let albumImage = $state<Promise<string | null> | null>(null);
+	let coverArt = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
 
 	const music = $derived(getMusic());
@@ -41,7 +41,7 @@ export function useMusicItem(
 					? MetadataService.getMusicCoverArt(currentMusic, CoverArtSize.MusicItem)
 					: Promise.resolve(null);
 
-			albumImage = imagePromise;
+			coverArt = imagePromise;
 
 			// Track the blob URL for cleanup
 			const url = await imagePromise;
@@ -156,8 +156,8 @@ export function useMusicItem(
 		get isVisible() {
 			return isVisible;
 		},
-		get albumImage() {
-			return albumImage;
+		get coverArt() {
+			return coverArt;
 		},
 		get titleLabel() {
 			return titleLabel;

@@ -31,7 +31,7 @@
 				onclick={vm.selectPlaylist}
 			></div>
 		{/if}
-		{#await vm.albumImage}
+		{#await vm.coverArt}
 			<div class="aspect-square w-full"></div>
 		{:then image}
 			{#if image}

@@ -21,7 +21,7 @@ export function useAlbumItem(
 		filterStore.album && music.album && filterStore.album.name === music.album
 	);
 
-	let albumImage = $state<Promise<string | null> | null>(null);
+	let coverArt = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
 
 	$effect(() => {
@@ -34,7 +34,7 @@ export function useAlbumItem(
 		const timeoutId = setTimeout(async () => {
 			if (cancelled) return;
 			const imagePromise = MetadataService.getMusicCoverArt(music, CoverArtSize.AlbumItem);
-			albumImage = imagePromise;
+			coverArt = imagePromise;
 
 			const url = await imagePromise;
 			if (!cancelled && url) {
@@ -79,8 +79,8 @@ export function useAlbumItem(
 		get isValidFilterAlbum() {
 			return isValidFilterAlbum;
 		},
-		get albumImage() {
-			return albumImage;
+		get coverArt() {
+			return coverArt;
 		},
 		get music() {
 			return music;

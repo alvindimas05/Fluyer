@@ -9,7 +9,7 @@ export function useMusicQueueItem(
 	getUuid: () => string,
 	getVisible: () => boolean = () => true
 ) {
-	let albumImage = $state<Promise<string | null> | null>(null);
+	let coverArt = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
 
 	const music = $derived(getMusic());
@@ -30,7 +30,7 @@ export function useMusicQueueItem(
 
 		(async () => {
 			const imagePromise = MetadataService.getMusicCoverArt(currentMusic, CoverArtSize.QueueItem);
-			albumImage = imagePromise;
+			coverArt = imagePromise;
 
 			const url = await imagePromise;
 			if (!cancelled && url && url.startsWith('blob:')) {
@@ -65,8 +65,8 @@ export function useMusicQueueItem(
 		get isPrevious() {
 			return isPrevious;
 		},
-		get albumImage() {
-			return albumImage;
+		get coverArt() {
+			return coverArt;
 		},
 		removePlaylist,
 		goToPlaylist

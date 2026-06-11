@@ -61,7 +61,7 @@
             md-hdpi:w-[90%] lg-hdpi:w-[80%] xl-hdpi:w-[70%] 2xl-hdpi:w-[65%]
             md-xhdpi:w-[80%] lg-xhdpi:w-[70%] 2xl-xhdpi:w-[65%]"
 		>
-			{#await vm.albumImage}
+			{#await vm.coverArt}
 				<div class="aspect-square w-full"></div>
 			{:then image}
 				<img

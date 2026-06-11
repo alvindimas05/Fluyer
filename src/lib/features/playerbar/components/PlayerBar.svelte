@@ -70,7 +70,7 @@
 			>
 				<div class="grid grid-cols-[2.5rem_auto] md:grid-cols-[3rem_auto]">
 					<button onclick={vm.redirectToPlay}>
-						{#await vm.albumImage}
+						{#await vm.coverArt}
 							<div class="aspect-square w-full"></div>
 						{:then image}
 							<img

@@ -36,7 +36,7 @@
 
 <div class="group relative w-full text-sm md:text-base">
 	<div class="grid grid-cols-[max-content_auto_max-content] py-2">
-		{#await vm.albumImage}
+		{#await vm.coverArt}
 			<div class="relative aspect-square h-12 w-12 md:h-14 md:w-14"></div>
 		{:then image}
 			{#if image && !folder}

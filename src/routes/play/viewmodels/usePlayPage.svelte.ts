@@ -20,7 +20,7 @@ let progressDurationText = $state('');
 let progressDurationNegativeText = $state('');
 let updateProgressText = $state(true);
 
-let albumImage = $state<Promise<string | null> | null>(null);
+let coverArt = $state<Promise<string | null> | null>(null);
 let currentBlobUrl: string | null = null;
 
 let lyrics = $state<MusicLyric[]>([]);
@@ -182,7 +182,7 @@ export function usePlayPage() {
 
 		(async () => {
 			const imagePromise = MetadataService.getMusicCoverArt(musicStore.currentMusic);
-			albumImage = imagePromise;
+			coverArt = imagePromise;
 
 			const url = await imagePromise;
 			if (!cancelled && url && url.startsWith('blob:')) {
@@ -233,8 +233,8 @@ export function usePlayPage() {
 		get progressDurationNegativeText() {
 			return progressDurationNegativeText;
 		},
-		get albumImage() {
-			return albumImage;
+		get coverArt() {
+			return coverArt;
 		},
 		get lyrics() {
 			return lyrics;

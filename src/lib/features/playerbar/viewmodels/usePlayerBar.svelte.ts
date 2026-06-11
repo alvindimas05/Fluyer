@@ -16,7 +16,7 @@ let element = $state<HTMLDivElement>();
 let oldMusic: MusicData | undefined = $state(undefined);
 let title = $state(MusicConfig.defaultTitle);
 let artist = $state(MusicConfig.defaultArtist);
-let albumImage = $state<Promise<string | null> | null>(null);
+let coverArt = $state<Promise<string | null> | null>(null);
 let currentBlobUrl: string | null = null;
 let currentMusicPath: string | null = null;
 
@@ -110,7 +110,7 @@ export function usePlayerBar() {
 				musicStore.currentMusic,
 				CoverArtSize.PlayerBar
 			);
-			albumImage = imagePromise;
+			coverArt = imagePromise;
 
 			const url = await imagePromise;
 			if (!cancelled && url && url.startsWith('blob:')) {
@@ -158,8 +158,8 @@ export function usePlayerBar() {
 		get artist() {
 			return artist;
 		},
-		get albumImage() {
-			return albumImage;
+		get coverArt() {
+			return coverArt;
 		},
 		get isPlaying() {
 			return isPlaying;
