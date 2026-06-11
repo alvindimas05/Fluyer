@@ -1,8 +1,6 @@
 <script lang="ts">
 	import playlistStore from '$lib/stores/playlist.svelte';
-	import ModalService from '$lib/services/ModalService.svelte';
 	import { Modal } from '$lib/constants/Modal';
-	import TauriPlaylistAPI from '$lib/tauri/TauriPlaylistAPI';
 	import type { PlaylistData } from '$lib/features/music/types';
 	import Icon from '$lib/ui/icon/Icon.svelte';
 	import { IconType } from '$lib/ui/icon/types';

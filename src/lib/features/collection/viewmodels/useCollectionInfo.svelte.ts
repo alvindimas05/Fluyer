@@ -13,8 +13,8 @@ import folderStore from '$lib/stores/folder.svelte';
 import playlistStore from '$lib/stores/playlist.svelte';
 import PlaylistService from '$lib/services/PlaylistService.svelte';
 
-let album = $derived(filterStore.album);
-let showBackButton = $derived.by(async () => {
+const album = $derived(filterStore.album);
+const showBackButton = $derived.by(async () => {
 	const isNotFolderView = musicStore.listType !== MusicListType.Folder;
 
 	const folderPath = folderStore.currentFolder?.path;
@@ -26,7 +26,7 @@ let showBackButton = $derived.by(async () => {
 	);
 });
 
-let tracks = $derived.by(() => {
+const tracks = $derived.by(() => {
 	if (musicStore.listType === MusicListType.Playlist && playlistStore.selectedPlaylist) {
 		const pathSet = new Set(playlistStore.selectedPlaylist.paths);
 		return (musicStore.list ?? []).filter((m) => pathSet.has(m.path));
@@ -38,7 +38,7 @@ let tracks = $derived.by(() => {
 	return [];
 });
 
-let label = $derived.by(() => {
+const label = $derived.by(() => {
 	if (musicStore.listType === MusicListType.Playlist && playlistStore.selectedPlaylist) {
 		const pl = playlistStore.selectedPlaylist;
 		const totalDuration = (musicStore.list ?? [])
@@ -72,7 +72,7 @@ async function handleBack() {
 	}
 	if (musicStore.listType === MusicListType.Folder) {
 		const musicPaths = await PersistentStoreService.musicPath.get();
-		if (musicPaths.includes(folderStore.currentFolder!!.path)) {
+		if (musicPaths.includes(folderStore.currentFolder!.path)) {
 			folderStore.currentFolder = null;
 			return;
 		}

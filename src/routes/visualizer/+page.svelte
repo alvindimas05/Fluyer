@@ -79,7 +79,7 @@
 		try {
 			let now = performance.now();
 			const buffer = await TauriVisualizerAPI.getMusicBuffer(
-				music ? music.path : musicStore.currentMusic!!.path
+				music ? music.path : musicStore.currentMusic!.path
 			);
 			if (buffer === null) return;
 			console.log('Visualizer get music buffer took', performance.now() - now, 'ms');

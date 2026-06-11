@@ -27,21 +27,21 @@ class Tricentric extends Visualizer {
 		View.usePerspectiveCamera();
 		View.data.camera.position.y = 0;
 
-		var positionZ = 498;
+		let positionZ = 498;
 
-		for (var i = 0; i < this.numBars; i++) {
+		for (let i = 0; i < this.numBars; i++) {
 			const geometry = new THREE.CylinderGeometry(20, 20, 2, 3, 1, true);
-			var uniforms = {
+			const uniforms = {
 				col: { type: 'c', value: new THREE.Color('hsl(250, 100%, 70%)') },
 				alpha: { type: 'f', value: 1 }
 			};
-			var material = new THREE.ShaderMaterial({
+			const material = new THREE.ShaderMaterial({
 				uniforms: uniforms,
 				vertexShader: this.vertexShader,
 				fragmentShader: this.fragmentShader,
 				side: THREE.DoubleSide
 			});
-			let cylinder = new THREE.Mesh(geometry, material);
+			const cylinder = new THREE.Mesh(geometry, material);
 			cylinder.position.z = positionZ;
 			cylinder.rotation.x = Math.PI / 2;
 
@@ -60,11 +60,11 @@ class Tricentric extends Visualizer {
 	render() {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);
 		const visualArray = Spectrum.getVisualBins(this.dataArray, 32, 0, 1300);
-		var avg = this.arrayAverage(visualArray);
+		const avg = this.arrayAverage(visualArray);
 		View.data.camera.rotation.z += avg <= 1 ? 0 : Math.pow(avg / 8192 + 1, 2) - 1;
 
 		if (!this.group) return;
-		for (var i = 0; i < visualArray.length; i++) {
+		for (let i = 0; i < visualArray.length; i++) {
 			this.setTricentricUniformColor(
 				i,
 				308 - visualArray[i],
@@ -88,8 +88,8 @@ class Tricentric extends Visualizer {
 	}
 
 	arrayAverage(arr: number[]) {
-		var sum = 0;
-		for (var i = 0; i < arr.length; i++) {
+		let sum = 0;
+		for (let i = 0; i < arr.length; i++) {
 			sum += arr[i];
 		}
 		return sum / arr.length;

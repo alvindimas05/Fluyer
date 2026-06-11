@@ -10,8 +10,8 @@ const Spectrum = {
 		SpectrumEnd: number
 	) => {
 		const SpectrumBarCount = numElements;
-		let SamplePoints = [];
-		let NewArray = [];
+		const SamplePoints = [];
+		const NewArray = [];
 		let LastSpot = 0;
 		for (let i = 0; i < SpectrumBarCount; i++) {
 			let Bin = Math.round(
@@ -24,7 +24,7 @@ const Spectrum = {
 			SamplePoints[i] = Bin;
 		}
 
-		let MaxSamplePoints = [];
+		const MaxSamplePoints = [];
 		for (let i = 0; i < SpectrumBarCount; i++) {
 			const CurSpot = SamplePoints[i];
 			let NextSpot = SamplePoints[i + 1];
@@ -46,13 +46,13 @@ const Spectrum = {
 		}
 
 		for (let i = 0; i < SpectrumBarCount; i++) {
-			let NextMaxSpot = MaxSamplePoints[i];
+			const NextMaxSpot = MaxSamplePoints[i];
 			let LastMaxSpot = MaxSamplePoints[i - 1];
 			if (LastMaxSpot == null) {
 				LastMaxSpot = SpectrumStart;
 			}
-			let LastMax = dataArray[LastMaxSpot];
-			let NextMax = dataArray[NextMaxSpot];
+			const LastMax = dataArray[LastMaxSpot];
+			const NextMax = dataArray[NextMaxSpot];
 
 			NewArray[i] = (LastMax + NextMax) / 2;
 			if (isNaN(NewArray[i])) {
@@ -63,7 +63,7 @@ const Spectrum = {
 	},
 	ease: (value: number) => Math.pow(value, 2.55),
 	exponentialTransform: (array: number[]) => {
-		let newArr = [];
+		const newArr = [];
 		for (let i = 0; i < array.length; i++) {
 			const exp =
 				spectrumMaxExponent + (spectrumMinExponent - spectrumMaxExponent) * (i / array.length);

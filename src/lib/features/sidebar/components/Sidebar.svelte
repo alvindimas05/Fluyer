@@ -15,7 +15,7 @@
 	const props = $props();
 	let { children, type }: Props = props;
 
-	import { isLinux, isMobile, isWindows } from '$lib/platform';
+	import { isLinux, isMobile } from '$lib/platform';
 	// import { swipeable } from '@react2svelte/swipeable';
 	// import type { SwipeEventData } from '@react2svelte/swipeable';
 	import { onMount } from 'svelte';
@@ -27,8 +27,6 @@
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import filterBarStore from '$lib/stores/filterBar.svelte';
 
-	import { MusicListType } from '$lib/features/music/types';
-	import musicStore from '$lib/stores/music.svelte';
 	import TauriSidebarAPI from '$lib/tauri/TauriSidebarAPI';
 	import modalStore from '$lib/stores/modal.svelte';
 

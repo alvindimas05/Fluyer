@@ -2,12 +2,11 @@ import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { getVersion } from '@tauri-apps/api/app';
 import ToastService from './ToastService.svelte';
-import { isMacos, isWindows, isLinux } from '$lib/platform';
+import { isMacos, isWindows } from '$lib/platform';
 import sleep from 'sleep-promise';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import PersistentStoreService from './PersistentStoreService.svelte';
 import TauriUpdateAPI from '$lib/tauri/TauriUpdateAPI';
-
 
 class UpdateServiceImpl {
 	async checkForUpdates() {

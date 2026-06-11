@@ -39,7 +39,7 @@ const LyricService = {
 	},
 	parse: (text: string) => {
 		const rawLyrics = text.split('\n');
-		let lyrics: MusicLyric[] = [];
+		const lyrics: MusicLyric[] = [];
 
 		rawLyrics.forEach((lyric, index) => {
 			const currentLyric = new MusicLyric(lyric);

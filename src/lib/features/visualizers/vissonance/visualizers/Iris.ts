@@ -65,7 +65,7 @@ class Iris extends Visualizer {
 	}
 	render() {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);
-		let loudness = this.getLoudness(this.dataArray);
+		const loudness = this.getLoudness(this.dataArray);
 		const visualArray = Spectrum.getVisualBins(this.dataArray, this.numBars, 4, 1300);
 		if (!this.group) return;
 		for (let i = 0; i < visualArray.length / 2; i++) {

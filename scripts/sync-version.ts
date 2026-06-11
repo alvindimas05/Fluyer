@@ -47,7 +47,7 @@ async function syncPackageJson(version: string) {
 
 async function syncCargoToml(version: string) {
 	const file = path.join(ROOT, 'src-tauri', 'Cargo.toml');
-	let content = await fs.readFile(file, 'utf8');
+	const content = await fs.readFile(file, 'utf8');
 	// Only replace the version inside [package] section
 	const updated = content.replace(/^(version\s*=\s*)"[^"]*"/m, `$1"${version}"`);
 	if (updated === content) {
@@ -72,7 +72,7 @@ async function syncTauriConf(version: string) {
 
 async function syncEnvViteVersion(version: string) {
 	const file = path.join(ROOT, '.env');
-	let content = await fs.readFile(file, 'utf8');
+	const content = await fs.readFile(file, 'utf8');
 	const updated = content.replace(/^(VITE_APP_VERSION\s*=\s*).*/m, `$1${version}`);
 	if (updated === content) {
 		// VITE_APP_VERSION line might not exist, append it

@@ -91,7 +91,9 @@ extern "C" {
         handle: u32,
         type_: u32,
         param: u64,
-        proc_: Option<unsafe extern "C" fn(handle: u32, channel: u32, data: u32, user: *mut std::ffi::c_void)>,
+        proc_: Option<
+            unsafe extern "C" fn(handle: u32, channel: u32, data: u32, user: *mut std::ffi::c_void),
+        >,
         user: *mut std::ffi::c_void,
     ) -> u32;
 }
@@ -220,15 +222,13 @@ pub mod bass_android {
                 Option<unsafe extern "C" fn(u32, u32, u32, *mut std::ffi::c_void)>,
                 *mut std::ffi::c_void,
             ) -> u32 = *bass
-                .get::<
-                    unsafe extern "C" fn(
-                        u32,
-                        u32,
-                        u64,
-                        Option<unsafe extern "C" fn(u32, u32, u32, *mut std::ffi::c_void)>,
-                        *mut std::ffi::c_void,
-                    ),
-                >(b"BASS_ChannelSetSync")
+                .get::<unsafe extern "C" fn(
+                    u32,
+                    u32,
+                    u64,
+                    Option<unsafe extern "C" fn(u32, u32, u32, *mut std::ffi::c_void)>,
+                    *mut std::ffi::c_void,
+                )>(b"BASS_ChannelSetSync")
                 .map_err(|e| format!("Failed to load BASS_ChannelSetSync: {}", e))?;
 
             // Load BASSMIX functions

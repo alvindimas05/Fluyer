@@ -9,14 +9,8 @@
 	import { isDesktop, isWindows } from '$lib/platform';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import TauriBackgroundAPI from '$lib/tauri/TauriBackgroundAPI';
-	import musicStore from '$lib/stores/music.svelte';
-	import { MusicListType } from '$lib/features/music/types';
-	import playlistStore from '$lib/stores/playlist.svelte';
-	import TauriPlaylistAPI from '$lib/tauri/TauriPlaylistAPI';
-	import folderStore from '$lib/stores/folder.svelte';
-	import filterStore from '$lib/stores/filter.svelte';
-
-	async function gotoPlayPage() {
+	
+async function gotoPlayPage() {
 		if (isDesktop()) {
 			await getCurrentWindow().setFullscreen(true);
 			if (isWindows()) {

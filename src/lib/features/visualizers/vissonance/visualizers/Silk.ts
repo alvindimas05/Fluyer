@@ -85,7 +85,7 @@ class Silk extends Visualizer {
             sprite.position.z = -50;
 
             */
-			let circle = new THREE.Mesh(this.geometry, material);
+			const circle = new THREE.Mesh(this.geometry, material);
 			circle.position.x = posX;
 			circle.position.y = 0;
 			circle.position.z = -50;
@@ -176,7 +176,7 @@ class Silk extends Visualizer {
 	}
 	render() {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);
-		let visualArray = Spectrum.getVisualBins(this.dataArray, this.numBars, 6, 1300);
+		const visualArray = Spectrum.getVisualBins(this.dataArray, this.numBars, 6, 1300);
 		//visualArray.reverse();
 		let loudness = this.getLoudness(this.dataArray);
 		//smooth loudness

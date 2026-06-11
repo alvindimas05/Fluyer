@@ -12,7 +12,7 @@ export function useMusicQueueList() {
 	let dragOverIndex = $state<number | null>(null);
 	let dragOffsetY = $state(0);
 	let currentY = $state(0);
-	let itemRefs: HTMLElement[] = [];
+	const itemRefs: HTMLElement[] = [];
 	let scrollContainer = $state<HTMLDivElement>();
 
 	// Auto-scroll configuration
@@ -25,7 +25,7 @@ export function useMusicQueueList() {
 	let observer: IntersectionObserver | null = null;
 
 	// Track if sidebar is visible
-	let isSidebarVisible = $derived(sidebarStore.showType === SidebarType.Right);
+	const isSidebarVisible = $derived(sidebarStore.showType === SidebarType.Right);
 
 	function cleanQueue() {
 		MusicPlayerService.pause();

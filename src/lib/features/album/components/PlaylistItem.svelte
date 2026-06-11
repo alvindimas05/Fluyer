@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PlaylistData } from '$lib/features/music/types';
-	import { MusicConfig } from '$lib/constants/MusicConfig';
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import { usePlaylistItem } from '../viewmodels/usePlaylistItem.svelte';
 

@@ -94,7 +94,7 @@ pub async fn update_check(current_version: String) -> Result<Option<String>, Str
     }
 
     let release: LatestRelease = response.json().await.map_err(|e| e.to_string())?;
-    
+
     if is_newer_version(&current_version, &release.version) {
         Ok(Some(release.version))
     } else {

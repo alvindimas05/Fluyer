@@ -34,9 +34,9 @@ class Siphon extends Visualizer {
 		View.data.renderer.autoClearColor = true;
 		View.data.renderer.setClearColor(new THREE.Color('hsl( 0, 0%, 100%)'), 1);
 
-		var posX = 0;
+		let posX = 0;
 
-		for (var i = 0; i < this.numBands; i++) {
+		for (let i = 0; i < this.numBands; i++) {
 			const geometry = new THREE.CylinderGeometry(
 				this.cylRadius,
 				this.cylRadius,
@@ -45,16 +45,16 @@ class Siphon extends Visualizer {
 				1,
 				true
 			);
-			var uniforms = {
+			const uniforms = {
 				col: { type: 'c', value: new THREE.Color('hsl(240, 100%, 50%)') }
 			};
-			var material = new THREE.ShaderMaterial({
+			const material = new THREE.ShaderMaterial({
 				uniforms: uniforms,
 				vertexShader: this.vertexShader,
 				fragmentShader: this.fragmentShader,
 				side: THREE.BackSide
 			});
-			let cylinder = new THREE.Mesh(geometry, material);
+			const cylinder = new THREE.Mesh(geometry, material);
 			cylinder.rotation.z = Math.PI / 2;
 			cylinder.rotation.y = Math.PI / 2;
 			cylinder.position.z = posX;
@@ -84,7 +84,7 @@ class Siphon extends Visualizer {
 		this.group.scale.y = 1 - Math.min(loudness / 255, 0.8);
 
 		let currentBand = 0;
-		for (var c = 0; c < this.group.children.length; c++) {
+		for (let c = 0; c < this.group.children.length; c++) {
 			this.group.children[c].position.z +=
 				loudness <= 1 ? 0 : (Math.pow(loudness / 8192 + 1, 2) - 1) * loudness * 4;
 			//Put plane back when out of sight
@@ -93,7 +93,7 @@ class Siphon extends Visualizer {
 				currentBand = c;
 			}
 		}
-		for (var i = 0; i < visualArray.length; i++) {
+		for (let i = 0; i < visualArray.length; i++) {
 			this.scaleGroupVectorLength(
 				currentBand,
 				i * 3 + this.numBars * 6,
@@ -114,19 +114,19 @@ class Siphon extends Visualizer {
 		this.lastLoudness = loudness;
 	}
 	scaleGroupVectorLength(groupC: number, groupI: number, length: number) {
-		var v3 = new THREE.Vector3(
+		const v3 = new THREE.Vector3(
 			this.group.children[groupC].geometry.attributes.position.array[groupI + 0],
 			this.group.children[groupC].geometry.attributes.position.array[groupI + 1],
 			this.group.children[groupC].geometry.attributes.position.array[groupI + 2]
 		);
-		var scalar = (length + this.cylRadius) / v3.distanceTo(new THREE.Vector3(0, 0, 0));
+		const scalar = (length + this.cylRadius) / v3.distanceTo(new THREE.Vector3(0, 0, 0));
 
 		this.group.children[groupC].geometry.attributes.position.array[groupI + 0] *= scalar;
 		this.group.children[groupC].geometry.attributes.position.array[groupI + 1] *= scalar;
 		this.group.children[groupC].geometry.attributes.position.array[groupI + 2] *= scalar;
 	}
 	setUniformColor(groupI: number, loudness: number) {
-		var h = this.modn(250 - loudness * 7, 360);
+		const h = this.modn(250 - loudness * 7, 360);
 		this.group.children[groupI].material.uniforms.col.value = new THREE.Color(
 			'hsl(' + h + ', 100%, 50%)'
 		);

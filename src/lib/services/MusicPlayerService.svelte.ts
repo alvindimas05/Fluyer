@@ -2,7 +2,7 @@ import musicStore from '$lib/stores/music.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
 import TauriMusicAPI, { TauriMusicCommand } from '$lib/tauri/TauriMusicAPI';
 import QueueService from '$lib/services/QueueService.svelte';
-import { type MusicPlayerSync, RepeatMode } from '$lib/features/music/types';
+import { RepeatMode } from '$lib/features/music/types';
 import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 import { MusicConfig } from '$lib/constants/MusicConfig';
 
@@ -42,9 +42,8 @@ const MusicPlayerService = {
 	},
 	previous: async () => {
 		if (musicStore.queue.length === 0) return;
-		const prevIndex = musicStore.currentIndex > 0
-			? musicStore.currentIndex - 1
-			: musicStore.queue.length - 1;
+		const prevIndex =
+			musicStore.currentIndex > 0 ? musicStore.currentIndex - 1 : musicStore.queue.length - 1;
 		return QueueService.goTo(prevIndex);
 	},
 	seekByPercentage: async (percentage: number) => {
@@ -86,7 +85,7 @@ const MusicPlayerService = {
 			if (e.payload.index > -1) {
 				musicStore.currentIndex = e.payload.index;
 				musicStore.progressValue =
-					(e.payload.currentPosition / musicStore.currentMusic!!.duration) * MusicConfig.max;
+					(e.payload.currentPosition / musicStore.currentMusic!.duration) * MusicConfig.max;
 			} else ProgressService.reset();
 
 			musicStore.isPlaying = e.payload.isPlaying;

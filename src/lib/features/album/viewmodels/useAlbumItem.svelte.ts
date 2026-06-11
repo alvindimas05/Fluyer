@@ -15,9 +15,9 @@ export function useAlbumItem(
 	const tracks = $derived(getMusicList());
 	const index = $derived(getIndex());
 
-	let music = $derived(tracks[0]);
+	const music = $derived(tracks[0]);
 
-	let isValidFilterAlbum = $derived(
+	const isValidFilterAlbum = $derived(
 		filterStore.album && music.album && filterStore.album.name === music.album
 	);
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isAndroid, isLinux } from '$lib/platform';
+	import { isAndroid } from '$lib/platform';
 	import type { GlassShineSize } from '$lib/ui/glass/types';
 
 	interface Props {

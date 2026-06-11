@@ -2,19 +2,17 @@
 	import 'animate.css';
 	import AnimatedBackground from '$lib/features/animated_background/components/AnimatedBackground.svelte';
 	import '../app.scss';
-	import { isDesktop, isLinux, isMobile, isWindows } from '$lib/platform';
+	import { isDesktop, isLinux } from '$lib/platform';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { onMount } from 'svelte';
 	import { PageRoutes } from '$lib/constants/PageRoutes';
 	import { page } from '$app/state';
 	import ToastService from '$lib/services/ToastService.svelte';
 	import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
-	import mobileStore from '$lib/stores/mobile.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 	import UIInteractionService from '$lib/services/UIInteractionService.svelte';
 	import MobileService from '$lib/services/MobileService.svelte';
-	import settingStore from '$lib/stores/setting.svelte';
 	import FolderService from '$lib/services/FolderService.svelte';
 	import LogService from '$lib/services/LogService.svelte';
 	import Font from '$lib/ui/font/Font.svelte';
@@ -23,7 +21,6 @@
 	import MetadataService from '$lib/services/MetadataService.svelte';
 	import ToastContainer from '$lib/ui/toast/ToastContainer.svelte';
 	import CreatePlaylistModal from '$lib/features/playlist/components/CreatePlaylistModal.svelte';
-	import playlistStore from '$lib/stores/playlist.svelte';
 	import PlaylistService from '$lib/services/PlaylistService.svelte';
 	import UpdateService from '$lib/services/UpdateService.svelte';
 

@@ -45,7 +45,7 @@ class Visualizer {
 	}
 
 	setUniformColor(groupI: number, loudness: number) {
-		let h = this.modn(250 - loudness * 2.2, 360);
+		const h = this.modn(250 - loudness * 2.2, 360);
 		this.group.children[groupI].material.uniforms.col.value = new THREE.Color(
 			`hsl(${h}, 100%, 50%)`
 		);

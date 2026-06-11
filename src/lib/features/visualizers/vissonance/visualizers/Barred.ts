@@ -25,14 +25,14 @@ class Barred extends Visualizer {
 		let positionX = -20 * (this.numBars / 2);
 
 		for (let i = 0; i < this.numBars; i++) {
-			let geometry = new THREE.PlaneGeometry(18, 5, 1);
-			let uniforms = {};
-			let material = new THREE.ShaderMaterial({
+			const geometry = new THREE.PlaneGeometry(18, 5, 1);
+			const uniforms = {};
+			const material = new THREE.ShaderMaterial({
 				uniforms: uniforms,
 				vertexShader: this.vertexShader,
 				fragmentShader: this.fragmentShader
 			});
-			let plane = new THREE.Mesh(geometry, material);
+			const plane = new THREE.Mesh(geometry, material);
 			plane.position.x = positionX;
 			positionX += 20;
 
@@ -50,7 +50,7 @@ class Barred extends Visualizer {
 		AudioAnalyser.data.analyser.getByteFrequencyData(this.dataArray);
 		const visualArray = Spectrum.getVisualBins(this.dataArray, this.numBars, 4, 1300);
 		if (!this.group) return;
-		for (var i = 0; i < visualArray.length; i++) {
+		for (let i = 0; i < visualArray.length; i++) {
 			this.group.children[i].geometry.attributes.position.array[1] = visualArray[i];
 			this.group.children[i].geometry.attributes.position.array[4] = visualArray[i];
 			this.group.children[i].geometry.attributes.position.needsUpdate = true;

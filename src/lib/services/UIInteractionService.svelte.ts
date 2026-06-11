@@ -1,9 +1,6 @@
 // @ts-ignore
-import { fluidScroll } from 'fluidscroll';
 import musicStore from '$lib/stores/music.svelte';
 import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
-import ProgressService from '$lib/services/ProgressService.svelte';
-import modalStore from '$lib/stores/modal.svelte';
 
 const UIInteractionService = {
 	initialize: async () => {

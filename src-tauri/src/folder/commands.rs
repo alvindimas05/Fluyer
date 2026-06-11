@@ -59,7 +59,10 @@ pub async fn music_all_get() -> Option<Vec<MusicMetadata>> {
 
     let now = std::time::Instant::now();
     database::delete_non_existing_paths(paths);
-    crate::info!("Delete non existing paths took {}s", now.elapsed().as_secs_f64());
+    crate::info!(
+        "Delete non existing paths took {}s",
+        now.elapsed().as_secs_f64()
+    );
 
     let now = std::time::Instant::now();
     let musics = database::get_all_music_from_db();

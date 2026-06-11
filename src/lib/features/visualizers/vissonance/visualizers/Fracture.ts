@@ -37,16 +37,16 @@ class Fracture extends Visualizer {
 
 		for (let i = 0; i < this.numBands; i++) {
 			const geometry = new THREE.PlaneGeometry(this.barLen * 2, 10, this.numBars * 2 - 1);
-			let uniforms = {
+			const uniforms = {
 				col: { type: 'c', value: new THREE.Color('hsl(240, 100%, 50%)') }
 			};
-			let material = new THREE.ShaderMaterial({
+			const material = new THREE.ShaderMaterial({
 				uniforms: uniforms,
 				vertexShader: this.vertexShader,
 				fragmentShader: this.fragmentShader
 			});
 			//material = new THREE.MeshBasicMaterial({color:"red",wireframe:true});
-			let plane = new THREE.Mesh(geometry, material);
+			const plane = new THREE.Mesh(geometry, material);
 			plane.rotation.x = -Math.PI / 2;
 			plane.position.y = -10;
 			plane.position.z = positionZ;
@@ -82,7 +82,7 @@ class Fracture extends Visualizer {
 		if (!this.group) return;
 		this.group.position.y = loudness <= 1 ? -10 : -10 + Math.min((loudness / 255) * 20, 9.8);
 		this.group2.position.y = loudness <= 1 ? 10 : 10 - Math.min((loudness / 255) * 20, 9.8);
-		for (var c = 0; c < this.group.children.length; c++) {
+		for (let c = 0; c < this.group.children.length; c++) {
 			this.group.children[c].position.z +=
 				loudness <= 1 ? 0 : (Math.pow(loudness / 8192 + 1, 2) - 1) * loudness * 1.7;
 			this.group2.children[c].position.z +=

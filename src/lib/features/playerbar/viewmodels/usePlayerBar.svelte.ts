@@ -1,6 +1,6 @@
 import { PageRoutes } from '$lib/constants/PageRoutes';
 import { MusicConfig } from '$lib/constants/MusicConfig';
-import { type MusicData, RepeatMode } from '$lib/features/music/types';
+import { type MusicData } from '$lib/features/music/types';
 import MetadataService from '$lib/services/MetadataService.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import settingStore from '$lib/stores/setting.svelte';
@@ -23,7 +23,7 @@ let currentMusicPath: string | null = null;
 let progressPercentage = $state(0);
 let volumePercentage = $state(0);
 
-let isPlaying = $derived(musicStore.isPlaying);
+const isPlaying = $derived(musicStore.isPlaying);
 
 const gridRight = $derived.by(() => {
 	if (settingStore.ui.showRepeatButton && settingStore.ui.showShuffleButton)
@@ -68,7 +68,7 @@ function handleVolumeButton() {
 }
 
 function refresh() {
-	let music = musicStore.currentMusic;
+	const music = musicStore.currentMusic;
 
 	if (!music) {
 		title = MusicConfig.defaultTitle;

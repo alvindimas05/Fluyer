@@ -12,8 +12,8 @@ import TauriBackgroundAPI from '$lib/tauri/TauriBackgroundAPI';
 
 let lyricContainerElement: HTMLDivElement;
 
-let music = $derived(musicStore.currentMusic);
-let progressPercentage = $derived.by(() => musicStore.progressPercentage);
+const music = $derived(musicStore.currentMusic);
+const progressPercentage = $derived.by(() => musicStore.progressPercentage);
 
 let progressDurationText = $state('');
 let progressDurationNegativeText = $state('');

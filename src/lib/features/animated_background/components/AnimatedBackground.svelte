@@ -56,7 +56,7 @@
 		} else {
 			let paletteColors = (await ColorThief.getPalette(image, {
 				colorCount: 10
-			}))!!;
+			}))!;
 			colors = paletteColors.map((color: ColorThief.Color) => {
 				let rgbColor = color.rgb();
 				return [rgbColor.r, rgbColor.g, rgbColor.b] as RGB;
@@ -104,11 +104,7 @@
 		currentCoverArt = newCoverArt;
 		currentMusicPath = newMusicPath ?? null;
 
-		await TauriBackgroundAPI.updateBackground(
-			await getColors(),
-			currentWidth,
-			currentHeight
-		);
+		await TauriBackgroundAPI.updateBackground(await getColors(), currentWidth, currentHeight);
 
 		lastRenderedWidth = currentWidth;
 		lastRenderedHeight = currentHeight;

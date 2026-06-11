@@ -30,7 +30,7 @@ const RESPONSIVE_RULES = [
 	[640, 0, 0.33334] // sm → 33.3334%
 ];
 
-let state = $state({
+const state = $state({
 	columnCount: 2,
 	itemWidth: window.innerWidth * 0.5,
 	scrollLeft: 0,
@@ -44,9 +44,9 @@ let observer: IntersectionObserver | null = null;
 // Track items that are animating out (hidden by sidebar)
 let animatingOutItems = $state<Set<number>>(new Set());
 
-let paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
-let itemHeight = $derived(state.itemWidth + (window.innerWidth > 640 ? 52 : 44));
-let isHorizontal = $derived(musicStore.listType !== MusicListType.Album);
+const paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
+const itemHeight = $derived(state.itemWidth + (window.innerWidth > 640 ? 52 : 44));
+const isHorizontal = $derived(musicStore.listType !== MusicListType.Album);
 
 function updateItemWidth() {
 	const width = window.innerWidth;
@@ -75,7 +75,7 @@ function updateItemWidth() {
 	sidebarStore.hiddenMusicColumnCount = 1;
 }
 
-let data: MusicData[][] = $derived.by(() => {
+const data: MusicData[][] = $derived.by(() => {
 	if (!Array.isArray(musicStore.albums)) return [];
 
 	const search = filterStore.search.toLowerCase();
@@ -119,8 +119,8 @@ const visualIndices = $derived.by(() => {
 });
 
 // Calculate sidebar width (2 columns)
-let sidebarWidth = $derived(state.itemWidth * sidebarStore.hiddenAlbumColumnCount);
-let toastWidth = $derived(state.itemWidth * 2); // User requested 2 items hidden
+const sidebarWidth = $derived(state.itemWidth * sidebarStore.hiddenAlbumColumnCount);
+const toastWidth = $derived(state.itemWidth * 2); // User requested 2 items hidden
 
 const extraToleranceWidth = 10;
 function shouldHideHorizontalItem(index: number): boolean {

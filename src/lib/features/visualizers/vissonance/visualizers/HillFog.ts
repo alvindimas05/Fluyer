@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import View from '$lib/features/visualizers/vissonance/View';
 import AudioAnalyser from '$lib/features/visualizers/vissonance/AudioAnalyser';
-import Spectrum from '$lib/features/visualizers/vissonance/Spectrum';
 import Visualizer from '$lib/features/visualizers/vissonance/visualizers/Visualizer';
 
 class HillFog extends Visualizer {

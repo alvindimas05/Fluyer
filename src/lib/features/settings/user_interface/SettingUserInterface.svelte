@@ -1,7 +1,6 @@
 <script lang="ts">
 	import SettingLabel from '$lib/features/settings/SettingLabel.svelte';
 	import SettingInput from '$lib/features/settings/SettingInput.svelte';
-	import { isDesktop } from '$lib/platform';
 	import settingStore from '$lib/stores/setting.svelte';
 	import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 	import ToastService from '$lib/services/ToastService.svelte';

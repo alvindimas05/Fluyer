@@ -1,5 +1,4 @@
 import { IconType } from '$lib/ui/icon/types';
-import { isMacos } from '$lib/platform';
 import { type FolderData, MusicListType } from '$lib/features/music/types';
 import filterStore from '$lib/stores/filter.svelte';
 import filterBarStore from '$lib/stores/filterBar.svelte';
@@ -40,7 +39,7 @@ const tracksOptions = [
 ];
 
 let element = $state<HTMLDivElement>();
-let state = $state({
+const state = $state({
 	gridSize: '',
 	columns: 1
 });

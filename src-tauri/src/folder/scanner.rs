@@ -25,8 +25,8 @@ pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
 }
 
 const SUPPORTED_EXTENSIONS: &[&str] = &[
-    "mp3", "flac", "wav", "ogg", "m4a", "m4b", "mp4", "mkv", "webm", "avi", 
-    "aac", "wma", "opus", "alac", "ape", "aiff", "mov", "ts", "flv", "3gp", "wmv"
+    "mp3", "flac", "wav", "ogg", "m4a", "m4b", "mp4", "mkv", "webm", "avi", "aac", "wma", "opus",
+    "alac", "ape", "aiff", "mov", "ts", "flv", "3gp", "wmv",
 ];
 
 pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
@@ -50,10 +50,12 @@ pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
             e.ok()
         })
         .filter(|e| {
-            if !e.path().is_file() || e.path().file_name().unwrap_or_default() == "au_uu_SzH34yR2.mp3" {
+            if !e.path().is_file()
+                || e.path().file_name().unwrap_or_default() == "au_uu_SzH34yR2.mp3"
+            {
                 return false;
             }
-            
+
             e.path()
                 .extension()
                 .and_then(|ext| ext.to_str())

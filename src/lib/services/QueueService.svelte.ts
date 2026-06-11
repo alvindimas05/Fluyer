@@ -1,7 +1,6 @@
 import TauriMusicAPI, { TauriMusicCommand } from '$lib/tauri/TauriMusicAPI';
 import musicStore from '$lib/stores/music.svelte';
 import TauriQueueAPI from '$lib/tauri/TauriQueueAPI';
-import { isDesktop } from '$lib/platform';
 import type { MusicData } from '$lib/features/music/types';
 import * as uuid from 'uuid';
 

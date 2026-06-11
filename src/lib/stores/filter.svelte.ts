@@ -6,4 +6,3 @@ const filterStore = $state({
 });
 
 export default filterStore;
-

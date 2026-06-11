@@ -2,10 +2,8 @@
 	import { isLinux, isWindows } from '$lib/platform';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
 	import { invoke } from '@tauri-apps/api/core';
-	import { PageRoutes } from '$lib/constants/PageRoutes';
-	import { afterNavigate } from '$app/navigation';
-
-	const LINUX_ICONS = {
+	
+const LINUX_ICONS = {
 		close: '/icons/linux/window-close-symbolic.svg',
 		maximize: '/icons/linux/window-maximize-symbolic.svg',
 		minimize: '/icons/linux/window-minimize-symbolic.svg',

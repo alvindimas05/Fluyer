@@ -7,7 +7,6 @@
 	import SettingUserInteface from '$lib/features/settings/user_interface/SettingUserInterface.svelte';
 	import SettingDeveloper from '$lib/features/settings/developer/SettingDeveloper.svelte';
 	import SettingIconTheme from '$lib/features/settings/icon_theme/SettingIconTheme.svelte';
-	import SettingMusicPlayerConfiguration from '$lib/features/settings/music_player_configuration/SettingMusicPlayerConfiguration.svelte';
 	import View from '$lib/ui/components/View.svelte';
 	import Button from '$lib/ui/components/Button.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';

@@ -2,7 +2,6 @@ import path from 'path';
 import { downloadFile, extractZip } from './install-helpers';
 import * as fs from 'fs/promises';
 import * as os from 'os';
-import * as uuid from 'uuid';
 
 const VERSION = 24;
 const DEFAULT_LIBS = [
@@ -25,7 +24,7 @@ export interface InstallOptions {
 export async function installBassLib(name: string, options: InstallOptions = {}) {
 	const platform = options.platform || os.platform();
 	const arch = options.arch || os.arch();
-	let destPath = options.destDir || path.resolve('src-tauri', 'libs');
+	const destPath = options.destDir || path.resolve('src-tauri', 'libs');
 
 	if (platform === 'darwin' && (name === 'bassalac' || name === 'bass_aac')) {
 		console.log(`Skipping ${name} for macOS...`);
