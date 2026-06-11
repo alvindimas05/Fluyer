@@ -1,4 +1,4 @@
-import TauriMusicAPI, { TauriMusicCommand } from '$lib/tauri/TauriMusicAPI';
+import TauriMusicAPI from '$lib/tauri/TauriMusicAPI';
 import musicStore from '$lib/stores/music.svelte';
 import TauriQueueAPI from '$lib/tauri/TauriQueueAPI';
 import type { MusicData } from '$lib/features/music/types';
@@ -77,7 +77,7 @@ const QueueService = {
 		return QueueService.resetAndAddList([music]);
 	},
 	resetAndAddList: async (list: MusicData[]) => {
-		await TauriMusicAPI.sendCommand(TauriMusicCommand.Clear);
+		await TauriMusicAPI.clear();
 
 		// Generate new UUIDs for all items
 		const newIds = list.map(() => uuid.v4());
@@ -121,7 +121,7 @@ const QueueService = {
 		});
 	},
 	clear: async () => {
-		await TauriMusicAPI.sendCommand(TauriMusicCommand.Clear);
+		await TauriMusicAPI.clear();
 		musicStore.queue = [];
 		musicStore.queueIds = [];
 		musicStore.currentIndex = -1;
