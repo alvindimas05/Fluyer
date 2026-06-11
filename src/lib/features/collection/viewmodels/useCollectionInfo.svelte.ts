@@ -26,14 +26,14 @@ let showBackButton = $derived.by(async () => {
 	);
 });
 
-let musicList = $derived.by(() => {
+let tracks = $derived.by(() => {
 	if (musicStore.listType === MusicListType.Playlist && playlistStore.selectedPlaylist) {
 		const pathSet = new Set(playlistStore.selectedPlaylist.paths);
 		return (musicStore.list ?? []).filter((m) => pathSet.has(m.path));
 	} else if (musicStore.listType === MusicListType.Folder) {
 		return FolderService.getMusicList(folderStore.currentFolder);
 	} else if (album) {
-		return LibraryService.sortMusicList(album.musicList);
+		return LibraryService.sortMusicList(album.tracks);
 	}
 	return [];
 });
@@ -83,12 +83,12 @@ async function handleBack() {
 }
 
 async function addMusicListAndPlay() {
-	await QueueService.resetAndAddList(musicList);
+	await QueueService.resetAndAddList(tracks);
 	if (!musicStore.isPlaying) MusicPlayerService.play();
 }
 
 async function addMusicList() {
-	await QueueService.addList(musicList);
+	await QueueService.addList(tracks);
 	const label =
 		musicStore.listType === MusicListType.Folder && folderStore.currentFolder
 			? folderStore.currentFolder.path
@@ -101,7 +101,7 @@ async function addMusicList() {
 async function playShuffle() {
 	await MusicPlayerService.pause();
 
-	await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(musicList));
+	await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(tracks));
 
 	await MusicPlayerService.play();
 	ProgressService.start();

@@ -1,6 +1,7 @@
 import { isMobile } from '$lib/platform';
 import mobileStore from '$lib/stores/mobile.svelte';
-import filterStore, { filterBarStore } from '$lib/stores/filter.svelte';
+import filterStore from '$lib/stores/filter.svelte';
+import filterBarStore from '$lib/stores/filterBar.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { type MusicData, MusicListType } from '$lib/features/music/types';
 import sidebarStore from '$lib/stores/sidebar.svelte';
@@ -75,10 +76,10 @@ function updateItemWidth() {
 }
 
 let data: MusicData[][] = $derived.by(() => {
-	if (!Array.isArray(musicStore.albumList)) return [];
+	if (!Array.isArray(musicStore.albums)) return [];
 
 	const search = filterStore.search.toLowerCase();
-	let list = musicStore.albumList;
+	let list = musicStore.albums;
 
 	// We return the full list and handle visibility via CSS to prevent component recycling issues
 	// when filtering (search or album selection).
@@ -87,9 +88,9 @@ let data: MusicData[][] = $derived.by(() => {
 	return list;
 });
 
-function isVisibleByFilter(musicList: MusicData[]) {
+function isVisibleByFilter(tracks: MusicData[]) {
 	const search = filterStore.search.toLowerCase();
-	const firstItem = musicList[0];
+	const firstItem = tracks[0];
 
 	if (!filterStore.search && !filterStore.album) return true;
 
@@ -190,9 +191,9 @@ function shouldHidePlaylistGridItem(index: number): boolean {
 }
 
 // Check if item should render based on visibility conditions (horizontal)
-function shouldRenderHorizontalItem(index: number, musicList: MusicData[]): boolean {
+function shouldRenderHorizontalItem(index: number, tracks: MusicData[]): boolean {
 	// If not visible by filter, don't render
-	if (!isVisibleByFilter(musicList)) return false;
+	if (!isVisibleByFilter(tracks)) return false;
 
 	// If not in visibleItems (outside viewport), don't render
 	if (!visibleItems.has(index)) return false;
@@ -204,9 +205,9 @@ function shouldRenderHorizontalItem(index: number, musicList: MusicData[]): bool
 }
 
 // Check if item should render based on visibility conditions (grid)
-function shouldRenderGridItem(index: number, musicList: MusicData[]): boolean {
+function shouldRenderGridItem(index: number, tracks: MusicData[]): boolean {
 	// If not visible by filter, don't render
-	if (!isVisibleByFilter(musicList)) return false;
+	if (!isVisibleByFilter(tracks)) return false;
 
 	// If not in visibleItems (outside viewport), don't render
 	if (!visibleItems.has(index)) return false;
@@ -286,7 +287,7 @@ export function useAlbumList() {
 	});
 
 	$effect(() => {
-		const index = musicStore.albumListUi.scrollIndex;
+		const index = musicStore.albumsUi.scrollIndex;
 		if (index >= 0) {
 			if (isHorizontal) {
 				state.scrollLeft = index * state.itemWidth;
@@ -294,7 +295,7 @@ export function useAlbumList() {
 				const rowIndex = Math.floor(index / state.columnCount);
 				state.scrollTop = rowIndex * itemHeight;
 			}
-			musicStore.albumListUi.scrollIndex = -1;
+			musicStore.albumsUi.scrollIndex = -1;
 		}
 	});
 

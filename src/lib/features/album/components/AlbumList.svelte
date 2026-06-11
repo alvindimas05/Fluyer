@@ -1,7 +1,7 @@
 <script lang="ts">
 	import mobileStore from '$lib/stores/mobile.svelte';
-	import { filterBarStore } from '$lib/stores/filter.svelte';
-	import playerBarStore from '$lib/stores/playerbar.svelte';
+	import filterBarStore from '$lib/stores/filterBar.svelte';
+	import playerBarStore from '$lib/stores/playerBar.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import { MusicListType } from '$lib/features/music/types';
@@ -75,11 +75,11 @@
 			onwheel={(e) => vm.handleWheel(e, scrollContainer)}
 			style="padding-bottom: 0;"
 		>
-			{#each vm.data as musicList, index}
+			{#each vm.data as tracks, index}
 				{@const hiddenBySidebar = vm.shouldHideHorizontalItem(index)}
-				{@const visibleByFilter = vm.isVisibleByFilter(musicList)}
+				{@const visibleByFilter = vm.isVisibleByFilter(tracks)}
 				{@const inViewport = vm.visibleItems.has(index)}
-				{@const shouldRender = vm.shouldRenderHorizontalItem(index, musicList)}
+				{@const shouldRender = vm.shouldRenderHorizontalItem(index, tracks)}
 				<div
 					use:vm.observeElement={index}
 					class="flex-shrink-0 {inViewport
@@ -94,7 +94,7 @@
 					onanimationend={() => vm.handleAnimationEnd(index, hiddenBySidebar)}
 				>
 					{#if shouldRender}
-						<AlbumItem {musicList} {index} visible={inViewport} />
+						<AlbumItem {tracks} {index} visible={inViewport} />
 					{/if}
 				</div>
 			{/each}
@@ -112,11 +112,11 @@
 				class="grid"
 				style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
 			>
-				{#each vm.data as musicList, index}
+				{#each vm.data as tracks, index}
 					{@const hiddenBySidebar = vm.shouldHideGridItem(index)}
-					{@const visibleByFilter = vm.isVisibleByFilter(musicList)}
+					{@const visibleByFilter = vm.isVisibleByFilter(tracks)}
 					{@const inViewport = vm.visibleItems.has(index)}
-					{@const shouldRender = vm.shouldRenderGridItem(index, musicList)}
+					{@const shouldRender = vm.shouldRenderGridItem(index, tracks)}
 					<div
 						use:vm.observeElement={index}
 						class={inViewport
@@ -131,7 +131,7 @@
 						onanimationend={() => vm.handleAnimationEnd(index, hiddenBySidebar)}
 					>
 						{#if shouldRender}
-							<AlbumItem {musicList} {index} visible={inViewport} />
+							<AlbumItem {tracks} {index} visible={inViewport} />
 						{/if}
 					</div>
 				{/each}

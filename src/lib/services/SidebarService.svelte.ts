@@ -9,7 +9,6 @@ const SidebarService = {
 		sidebarStore.showType = null;
 	},
 	toggle: (type: SidebarType) => {
-		console.log('toggle', type);
 		if (sidebarStore.showType === type) {
 			SidebarService.hide();
 		} else {

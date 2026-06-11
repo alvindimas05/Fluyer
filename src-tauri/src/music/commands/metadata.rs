@@ -4,7 +4,7 @@ use crate::music::image_cache::{CacheStatus, ImageCache};
 use crate::music::metadata::MusicMetadata;
 
 #[tauri::command]
-pub async fn music_get_image(path: String, size: Option<u32>) -> Response {
+pub async fn music_image_get(path: String, size: Option<u32>) -> Response {
     let cache_key = {
         let meta = MusicMetadata::get(path.clone()).await.ok();
         let artist = meta.as_ref().and_then(|m| m.artist.as_deref());
@@ -117,6 +117,6 @@ async fn serve_bytes(bytes: Vec<u8>, size: Option<u32>, base_size: u32) -> Respo
 }
 
 #[tauri::command]
-pub fn music_get_lyrics(path: String) -> Option<String> {
+pub fn music_lyrics_get(path: String) -> Option<String> {
     MusicMetadata::get_lyrics_from_path(path)
 }

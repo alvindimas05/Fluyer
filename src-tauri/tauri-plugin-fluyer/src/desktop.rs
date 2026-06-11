@@ -18,7 +18,7 @@ impl<R: Runtime> Fluyer<R> {
         Ok(())
     }
 
-    pub fn get_navigation_bar_height(&self) -> crate::Result<NavigationBarHeight> {
+    pub fn navigation_bar_height_get(&self) -> crate::Result<NavigationBarHeight> {
         Ok(NavigationBarHeight::default())
     }
 
@@ -26,7 +26,7 @@ impl<R: Runtime> Fluyer<R> {
         Ok(NavigationBarSize::default())
     }
 
-    pub fn get_status_bar_height(&self) -> crate::Result<StatusBarHeight> {
+    pub fn status_bar_height_get(&self) -> crate::Result<StatusBarHeight> {
         Ok(StatusBarHeight::default())
     }
 
@@ -49,7 +49,7 @@ impl<R: Runtime> Fluyer<R> {
         Ok(SdkVersion::default())
     }
 
-    pub fn set_navigation_bar_visibility(&self, _: bool) -> crate::Result<()> {
+    pub fn navigation_bar_visibility_set(&self, _: bool) -> crate::Result<()> {
         Ok(())
     }
 

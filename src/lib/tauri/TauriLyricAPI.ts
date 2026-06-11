@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import { TauriCommands } from '$lib/constants/TauriCommands';
 
 interface LyricQuery {
 	path: string;
@@ -11,10 +11,10 @@ interface LyricQuery {
 
 const TauriLyricAPI = {
 	get: (path: string) => {
-		return invoke<string | null>(CommandRoutes.MUSIC_GET_LYRICS, { path });
+		return invoke<string | null>(TauriCommands.MUSIC_LYRICS_GET, { path });
 	},
 	search: (query: LyricQuery) => {
-		return invoke<string | null>(CommandRoutes.LYRIC_GET, { query });
+		return invoke<string | null>(TauriCommands.LYRIC_GET, { query });
 	}
 };
 

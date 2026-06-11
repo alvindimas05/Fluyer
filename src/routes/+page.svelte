@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isMobile } from '$lib/platform';
 	import mobileStore from '$lib/stores/mobile.svelte';
-	import { filterBarStore } from '$lib/stores/filter.svelte';
+	import filterBarStore from '$lib/stores/filterBar.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import { MusicListType } from '$lib/features/music/types';
 	import Intro from '$lib/features/intro/components/Intro.svelte';

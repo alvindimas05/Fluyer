@@ -1,6 +1,5 @@
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
 import { isAndroid } from '$lib/platform';
-import { invoke } from '@tauri-apps/api/core';
+import TauriCoverArtAPI from '$lib/tauri/TauriCoverArtAPI';
 
 export interface CoverArtCacheQuery {
 	artist: string;
@@ -20,10 +19,7 @@ export const COVER_ART_DEBOUNCE_DELAY = isAndroid() ? 1000 : 500;
 const CoverArtService = {
 	getByQuery: async (query: CoverArtCacheQuery, size?: number): Promise<string | null> => {
 		try {
-			const bytes = await invoke<number[]>(CommandRoutes.COVER_ART_GET, {
-				query,
-				size
-			});
+			const bytes = await TauriCoverArtAPI.getCoverArt(query, size);
 
 			if (!bytes || bytes.length === 0) {
 				return null;

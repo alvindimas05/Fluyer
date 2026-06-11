@@ -1,9 +1,9 @@
 import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import { TauriCommands } from '$lib/constants/TauriCommands';
 
 const TauriVisualizerAPI = {
 	getMusicBuffer: async (path: string) => {
-		return invoke(CommandRoutes.MUSIC_GET_VISUALIZER_BUFFER, { path });
+		return invoke(TauriCommands.MUSIC_VISUALIZER_BUFFER_GET, { path });
 	}
 };
 

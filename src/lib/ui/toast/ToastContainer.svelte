@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isMobile } from '$lib/platform';
 	import ToastService from '$lib/services/ToastService.svelte';
-	import { filterBarStore } from '$lib/stores/filter.svelte';
+	import filterBarStore from '$lib/stores/filterBar.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import { onMount } from 'svelte';
 	import Toast from './Toast.svelte';

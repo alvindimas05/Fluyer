@@ -6,9 +6,7 @@
 	import SettingLabel from '$lib/features/settings/SettingLabel.svelte';
 	import SettingInput from '$lib/features/settings/SettingInput.svelte';
 	import { isAndroid, isDesktop } from '$lib/platform';
-	import { invoke } from '@tauri-apps/api/core';
-	import { CommandRoutes } from '$lib/constants/CommandRoutes.js';
-	import { listen } from '@tauri-apps/api/event';
+	import TauriIntroAPI from '$lib/tauri/TauriIntroAPI';
 	import PersistentStoreService from '$lib/services/PersistentStoreService.svelte.js';
 	import LibraryService from '$lib/services/LibraryService.svelte.js';
 	import ToastService from '$lib/services/ToastService.svelte.js';
@@ -21,22 +19,15 @@
 	}
 
 	async function addPath() {
-		let newPath = null;
+		let newPath: string | null = null;
 		if (isDesktop()) {
-			newPath = await open({
+			newPath = (await open({
 				directory: true,
 				multiple: false
-			});
+			})) as string | null;
 		}
 		if (isAndroid()) {
-			await invoke(CommandRoutes.ANDROID_REQUEST_DIRECTORY);
-			await new Promise(async (resolve) => {
-				const unlisten = await listen<string>(CommandRoutes.ANDROID_REQUEST_DIRECTORY, (e) => {
-					newPath = e.payload;
-					unlisten();
-					resolve(true);
-				});
-			});
+			newPath = await TauriIntroAPI.requestDirectoryPath();
 		}
 		if (!newPath || musicPath.includes(newPath)) return;
 

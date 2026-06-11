@@ -1,23 +1,22 @@
 import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import { TauriCommands } from '$lib/constants/TauriCommands';
 import type { MusicData } from '$lib/features/music/types';
-
 const TauriQueueAPI = {
 	goTo: (index: number) => {
-		return invoke(CommandRoutes.MUSIC_PLAYLIST_GOTO, { index });
+		return invoke(TauriCommands.MUSIC_QUEUE_GOTO, { index });
 	},
 	add: (list: MusicData[]) => {
-		return invoke(CommandRoutes.MUSIC_PLAYLIST_ADD, {
+		return invoke(TauriCommands.MUSIC_QUEUE_ADD, {
 			playlist: list
 		});
 	},
 	remove: (index: number) => {
-		return invoke(CommandRoutes.MUSIC_PLAYLIST_REMOVE, {
+		return invoke(TauriCommands.MUSIC_QUEUE_REMOVE, {
 			index
 		});
 	},
 	moveTo: (from: number, to: number) => {
-		return invoke(CommandRoutes.MUSIC_PLAYLIST_MOVETO, {
+		return invoke(TauriCommands.MUSIC_QUEUE_MOVETO, {
 			from,
 			to
 		});

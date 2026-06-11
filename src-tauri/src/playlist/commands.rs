@@ -1,7 +1,7 @@
 use crate::playlist::playlist::Playlist;
 
 #[tauri::command]
-pub fn playlist_get_all() -> Vec<Playlist> {
+pub fn playlist_all_get() -> Vec<Playlist> {
     Playlist::get_all()
 }
 
@@ -16,12 +16,12 @@ pub fn playlist_delete(id: i64) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn playlist_upload_image() -> Result<String, String> {
+pub async fn playlist_image_upload() -> Result<String, String> {
     Playlist::upload_image().await
 }
 
 #[tauri::command]
-pub async fn playlist_read_image(id: u8) -> tauri::ipc::Response {
+pub async fn playlist_image_read(id: u8) -> tauri::ipc::Response {
     match Playlist::read_image(id).await {
         Ok(data) => tauri::ipc::Response::new(data),
         Err(e) => {

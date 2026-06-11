@@ -1,10 +1,10 @@
 import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import { TauriCommands } from '$lib/constants/TauriCommands';
 import type { MusicData } from '$lib/features/music/types';
 
 const TauriLibraryAPI = {
 	getMusicList: async () => {
-		return invoke<MusicData[] | null>(CommandRoutes.MUSIC_GET_ALL);
+		return invoke<MusicData[] | null>(TauriCommands.MUSIC_ALL_GET);
 	}
 };
 

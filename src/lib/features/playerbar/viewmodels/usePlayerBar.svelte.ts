@@ -7,7 +7,7 @@ import settingStore from '$lib/stores/setting.svelte';
 import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
 import PageService from '$lib/services/PageService.svelte';
-import playerBarStore from '$lib/stores/playerbar.svelte';
+import playerBarStore from '$lib/stores/playerBar.svelte';
 import QueueService from '$lib/services/QueueService.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
 import { CoverArtSize } from '$lib/services/CoverArtService.svelte';

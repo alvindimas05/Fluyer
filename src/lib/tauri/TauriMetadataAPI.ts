@@ -1,15 +1,15 @@
 import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import { TauriCommands } from '$lib/constants/TauriCommands';
 
 const TauriMetadataAPI = {
 	getMusicCoverArt: (path: string, size?: number) => {
-		return invoke<ArrayBuffer>(CommandRoutes.MUSIC_GET_IMAGE, { path, size });
+		return invoke<ArrayBuffer>(TauriCommands.MUSIC_IMAGE_GET, { path, size });
 	},
 	getDefaultCoverArt: () => {
-		return invoke<ArrayBuffer>(CommandRoutes.MUSIC_GET_DEFAULT_COVER_ART);
+		return invoke<ArrayBuffer>(TauriCommands.MUSIC_DEFAULT_COVER_ART_GET);
 	},
 	getFolderCoverArtPath: (path: string) => {
-		return invoke<string>(CommandRoutes.FOLDER_GET_FIRST_MUSIC_PATH, { path });
+		return invoke<string>(TauriCommands.FOLDER_FIRST_MUSIC_PATH_GET, { path });
 	}
 };
 

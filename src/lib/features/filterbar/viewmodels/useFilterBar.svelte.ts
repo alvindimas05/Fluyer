@@ -2,7 +2,7 @@ import { IconType } from '$lib/ui/icon/types';
 import { isMacos } from '$lib/platform';
 import { type FolderData, MusicListType } from '$lib/features/music/types';
 import filterStore from '$lib/stores/filter.svelte';
-import { filterBarStore } from '$lib/stores/filter.svelte';
+import filterBarStore from '$lib/stores/filterBar.svelte';
 import { IconThemeType } from '$lib/ui/icon/types';
 import iconStore from '$lib/stores/icon.svelte';
 import folderStore from '$lib/stores/folder.svelte';
@@ -31,7 +31,7 @@ const RESPONSIVE_RULES = [
 	[640, 0, 0.33334]
 ];
 
-const musicListOptions = [
+const tracksOptions = [
 	{ value: MusicListType.All, icon: IconType.MusicListTypeAll, label: 'All' },
 	{ value: MusicListType.Album, icon: IconType.MusicListTypeAlbum, label: 'Album' },
 	{ value: MusicListType.Music, icon: IconType.MusicListTypeMusic, label: 'Music' },
@@ -141,7 +141,7 @@ function handleQueueButton() {
 export function useFilterBar() {
 	return {
 		state,
-		musicListOptions,
+		tracksOptions,
 		get element() {
 			return element;
 		},

@@ -20,16 +20,16 @@
 	// import type { SwipeEventData } from '@react2svelte/swipeable';
 	import { onMount } from 'svelte';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
-	import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+	import type { UnlistenFn } from '@tauri-apps/api/event';
 	import View from '$lib/ui/components/View.svelte';
-	import playerBarStore from '$lib/stores/playerbar.svelte';
+	import playerBarStore from '$lib/stores/playerBar.svelte';
 	import sidebarStore from '$lib/stores/sidebar.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
-	import { filterBarStore } from '$lib/stores/filter.svelte';
+	import filterBarStore from '$lib/stores/filterBar.svelte';
 
 	import { MusicListType } from '$lib/features/music/types';
 	import musicStore from '$lib/stores/music.svelte';
-	import { CommandRoutes } from '$lib/constants/CommandRoutes';
+	import TauriSidebarAPI from '$lib/tauri/TauriSidebarAPI';
 	import modalStore from '$lib/stores/modal.svelte';
 
 	// const SWIPE_RANGE_X = 125;
@@ -176,7 +176,7 @@
 		let unlistenLinuxMouseLeave: UnlistenFn | null = null;
 
 		if (isLinux()) {
-			listen<MouseLeavePayload>(CommandRoutes.SIDEBAR_MOUSE_LEAVE, (e) => {
+			TauriSidebarAPI.listenMouseLeave((e) => {
 				const x = e.payload.x;
 				const y = e.payload.y;
 

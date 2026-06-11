@@ -7,7 +7,7 @@ use tauri_plugin_fluyer::FluyerExt;
 
 #[cfg(target_os = "android")]
 #[tauri::command]
-pub fn check_read_audio_permission() -> bool {
+pub fn audio_permission_read_check() -> bool {
     use tauri::plugin::PermissionState;
 
     let permissions_result = app_handle().fluyer().check_permissions().unwrap();
@@ -21,12 +21,12 @@ pub fn check_read_audio_permission() -> bool {
 
 #[cfg(target_os = "android")]
 #[tauri::command]
-pub fn request_read_audio_permission() -> bool {
+pub fn audio_permission_read_request() -> bool {
     use crate::state::app_handle;
     use tauri::plugin::PermissionState;
     use tauri_plugin_fluyer::models::PermissionType;
 
-    if !check_read_audio_permission() {
+    if !audio_permission_read_check() {
         let permissions = app_handle()
             .fluyer()
             .request_permissions(Some(vec![
@@ -45,32 +45,32 @@ pub fn request_read_audio_permission() -> bool {
 
 #[cfg(mobile)]
 #[tauri::command]
-pub fn get_navigation_bar_height() -> u8 {
+pub fn navigation_bar_height_get() -> u8 {
     app_handle()
         .fluyer()
-        .get_navigation_bar_height()
+        .navigation_bar_height_get()
         .unwrap()
         .value
 }
 
 #[cfg(mobile)]
 #[tauri::command]
-pub fn get_status_bar_height() -> u8 {
-    app_handle().fluyer().get_status_bar_height().unwrap().value
+pub fn status_bar_height_get() -> u8 {
+    app_handle().fluyer().status_bar_height_get().unwrap().value
 }
 
 #[cfg(mobile)]
 #[tauri::command]
-pub fn set_navigation_bar_visibility(visible: bool) {
+pub fn navigation_bar_visibility_set(visible: bool) {
     app_handle()
         .fluyer()
-        .set_navigation_bar_visibility(visible)
+        .navigation_bar_visibility_set(visible)
         .unwrap();
 }
 
 #[cfg(target_os = "android")]
 #[tauri::command]
-pub fn android_request_directory() {
+pub fn android_directory_request() {
     use crate::state::app_handle;
 
     app_handle()
@@ -78,7 +78,7 @@ pub fn android_request_directory() {
         .android_pick_folder(|payload| {
             if let Some(dir) = payload.value {
                 app_handle()
-                    .emit(crate::commands::route::ANDROID_REQUEST_DIRECTORY, dir)
+                    .emit(crate::commands::route::ANDROID_DIRECTORY_REQUEST, dir)
                     .unwrap();
             }
         })

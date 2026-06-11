@@ -8,8 +8,7 @@ import QueueService from '$lib/services/QueueService.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';
 import LyricService, { type MusicLyric } from '$lib/services/LyricService.svelte';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import TauriBackgroundAPI from '$lib/tauri/TauriBackgroundAPI';
 
 let lyricContainerElement: HTMLDivElement;
 
@@ -88,7 +87,7 @@ async function handleButtonBack() {
 	if (isDesktop()) {
 		await getCurrentWindow().setFullscreen(false);
 		if (isWindows()) {
-			await invoke(CommandRoutes.RESTORE_ANIMATED_BACKGROUND);
+			await TauriBackgroundAPI.restoreBackground();
 		}
 	}
 	PageService.back();

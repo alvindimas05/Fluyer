@@ -14,7 +14,7 @@ pub struct Color {
 }
 
 #[tauri::command]
-pub async fn update_animated_background(
+pub async fn animated_background_update(
     colors: Vec<Color>,
     width: u32,
     height: u32,
@@ -83,7 +83,7 @@ pub async fn update_animated_background(
 }
 
 #[tauri::command]
-pub async fn restore_animated_background() -> Result<(), String> {
+pub async fn animated_background_restore() -> Result<(), String> {
     crate::renderer::restore_background();
     Ok(())
 }

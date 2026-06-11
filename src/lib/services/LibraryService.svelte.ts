@@ -28,7 +28,7 @@ const LibraryService = {
 			albumsMap[album].push(item);
 		}
 
-		musicStore.albumList = Object.keys(albumsMap)
+		musicStore.albums = Object.keys(albumsMap)
 			.sort()
 			.map((key) => LibraryService.sortMusicList(albumsMap[key]));
 	},

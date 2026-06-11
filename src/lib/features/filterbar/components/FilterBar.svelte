@@ -5,7 +5,7 @@
 	import Button from '$lib/ui/components/Button.svelte';
 	import Input from '$lib/ui/components/Input.svelte';
 	import filterStore from '$lib/stores/filter.svelte';
-	import { filterBarStore } from '$lib/stores/filter.svelte';
+	import filterBarStore from '$lib/stores/filterBar.svelte';
 	import mobileStore from '$lib/stores/mobile.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import playlistStore from '$lib/stores/playlist.svelte';
@@ -87,7 +87,7 @@
 				/>
 			{:else}
 				<ListModeSelector
-					options={vm.musicListOptions}
+					options={vm.tracksOptions}
 					selected={musicStore.listType}
 					onchange={vm.handleToggleChange}
 					iconStyle="width: {vm.iconSize}px;"
@@ -108,7 +108,7 @@
 				/>
 			{:else}
 				<ListModeSelector
-					options={vm.musicListOptions}
+					options={vm.tracksOptions}
 					selected={musicStore.listType}
 					onchange={vm.handleToggleChange}
 					iconStyle="width: {vm.iconSize}px;"

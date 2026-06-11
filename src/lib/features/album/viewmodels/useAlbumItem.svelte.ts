@@ -12,10 +12,10 @@ export function useAlbumItem(
 	getIndex: () => number,
 	getVisible: () => boolean = () => true
 ) {
-	const musicList = $derived(getMusicList());
+	const tracks = $derived(getMusicList());
 	const index = $derived(getIndex());
 
-	let music = $derived(musicList[0]);
+	let music = $derived(tracks[0]);
 
 	let isValidFilterAlbum = $derived(
 		filterStore.album && music.album && filterStore.album.name === music.album
@@ -63,15 +63,15 @@ export function useAlbumItem(
 			artist: music.albumArtist ?? music.artist,
 			year: MetadataService.getYearFromDate(music.date),
 			duration: ProgressService.formatDuration(
-				musicList.map((m) => m.duration).reduce((a, b) => a + b, 0)
+				tracks.map((m) => m.duration).reduce((a, b) => a + b, 0)
 			),
-			musicList
+			tracks
 		} as AlbumData;
-		if (isAlbumType) setTimeout(() => (musicStore.albumListUi.scrollIndex = index), 500);
+		if (isAlbumType) setTimeout(() => (musicStore.albumsUi.scrollIndex = index), 500);
 	}
 
 	async function playAlbum() {
-		await QueueService.resetAndAddList(musicList);
+		await QueueService.resetAndAddList(tracks);
 		MusicPlayerService.play();
 	}
 

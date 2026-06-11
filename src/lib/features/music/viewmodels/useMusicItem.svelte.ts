@@ -112,12 +112,12 @@ export function useMusicItem(
 	}
 
 	async function addMusic() {
-		const musicList = music ? [music] : FolderService.getMusicList(folder!);
+		const tracks = music ? [music] : FolderService.getMusicList(folder!);
 
 		if (music) {
 			await QueueService.add(music);
 		} else {
-			await QueueService.resetAndAddList(musicList);
+			await QueueService.resetAndAddList(tracks);
 		}
 
 		const title = music?.title ?? music?.filename ?? MusicConfig.defaultTitle;

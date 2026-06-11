@@ -1,0 +1,55 @@
+export const TauriCommands = {
+	MUSIC_CONTROLLER: 'music_controller',
+	MUSIC_PLAYER_SYNC: 'music_player_sync',
+	MUSIC_PLAYER_REQUEST_SYNC: 'music_player_request_sync',
+	MUSIC_PLAYER_NEXT: 'music_player_next',
+	MUSIC_ALL_GET: 'music_all_get',
+	MUSIC_INFO_GET: 'music_info_get',
+	MUSIC_POSITION_SET: 'music_position_set',
+	MUSIC_QUEUE_ADD: 'music_queue_add',
+	MUSIC_DIRECTORY_REQUEST: 'music_directory_request',
+	MUSIC_HEADSET_CHANGE: 'music_headset_change',
+	MUSIC_QUEUE_REMOVE: 'music_queue_remove',
+	MUSIC_QUEUE_GOTO: 'music_queue_goto',
+	MUSIC_QUEUE_MOVETO: 'music_queue_moveto',
+	MUSIC_VOLUME_SET: 'music_volume_set',
+	MUSIC_EQUALIZER: 'music_equalizer',
+	MUSIC_EQUALIZER_RESET: 'music_equalizer_reset',
+	MUSIC_IMAGE_GET: 'music_image_get',
+	MUSIC_DEFAULT_COVER_ART_GET: 'music_default_cover_art_get',
+	MUSIC_VISUALIZER_BUFFER_GET: 'music_visualizer_buffer_get',
+	MUSIC_CURRENT_DURATION_GET: 'music_current_duration_get',
+	MUSIC_LYRICS_GET: 'music_lyrics_get',
+	MUSIC_BIT_PERFECT_TOGGLE: 'music_bit_perfect_toggle',
+
+	PLAYLIST_ALL_GET: 'playlist_all_get',
+	PLAYLIST_CREATE: 'playlist_create',
+	PLAYLIST_DELETE: 'playlist_delete',
+	PLAYLIST_IMAGE_UPLOAD: 'playlist_image_upload',
+	PLAYLIST_IMAGE_READ: 'playlist_image_read',
+
+	FOLDER_ITEMS_GET: 'folder_items_get',
+	FOLDER_FIRST_MUSIC_PATH_GET: 'folder_first_music_path_get',
+
+	SIDEBAR_MOUSE_LEAVE: 'sidebar_mouse_leave',
+
+	AUDIO_PERMISSION_READ_CHECK: 'audio_permission_read_check',
+	AUDIO_PERMISSION_READ_REQUEST: 'audio_permission_read_request',
+
+	NAVIGATION_BAR_HEIGHT_GET: 'navigation_bar_height_get',
+	STATUS_BAR_HEIGHT_GET: 'status_bar_height_get',
+	NAVIGATION_BAR_VISIBILITY_SET: 'navigation_bar_visibility_set',
+	ANDROID_DIRECTORY_REQUEST: 'android_directory_request',
+
+	LOG: 'log',
+
+	COVER_ART_GET: 'cover_art_get',
+	LYRIC_GET: 'lyric_get',
+	ANIMATED_BACKGROUND_UPDATE: 'animated_background_update',
+	ANIMATED_BACKGROUND_RESTORE: 'animated_background_restore',
+
+	DEVELOPER_LOG_SAVE: 'developer_log_save',
+	DEVELOPER_MPV_LOG_SAVE: 'developer_mpv_log_save',
+
+	UPDATE_CHECK: 'update_check'
+};

@@ -5,7 +5,7 @@ const musicStore = $state({
 	// Library
 	list: undefined as MusicData[] | null | undefined,
 	listIds: [] as string[],
-	albumList: [] as MusicData[][],
+	albums: [] as MusicData[][],
 	listType: MusicListType.All,
 
 	// Playback
@@ -23,7 +23,7 @@ const musicStore = $state({
 	volume: 1,
 
 	// UI State
-	albumListUi: {
+	albumsUi: {
 		scrollIndex: -1,
 		scrollLeft: -1
 	},

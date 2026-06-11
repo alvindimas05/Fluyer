@@ -11,7 +11,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// This command converts the audio file to a standardized format (mono, 44100Hz, 192kbps MP3)
 /// suitable for visualizer processing. The conversion is done using FFmpeg.
 #[tauri::command]
-pub async fn music_get_visualizer_buffer(app_handle: AppHandle, path: String) -> Option<Vec<u8>> {
+pub async fn music_visualizer_buffer_get(app_handle: AppHandle, path: String) -> Option<Vec<u8>> {
     tokio::task::spawn_blocking(move || {
         #[cfg(desktop)]
         let dir = std::env::temp_dir();

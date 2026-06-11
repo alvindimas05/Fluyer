@@ -1,6 +1,7 @@
 import { MusicListType } from '$lib/features/music/types';
 import musicStore from '$lib/stores/music.svelte';
-import filterStore, { filterBarStore } from '$lib/stores/filter.svelte';
+import filterStore from '$lib/stores/filter.svelte';
+import filterBarStore from '$lib/stores/filterBar.svelte';
 import folderStore from '$lib/stores/folder.svelte';
 import playlistStore from '$lib/stores/playlist.svelte';
 import LibraryService from '$lib/services/LibraryService.svelte';

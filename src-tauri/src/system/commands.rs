@@ -20,7 +20,7 @@ pub fn toast(message: String) {
 }
 
 #[tauri::command]
-pub fn developer_save_log() {
+pub fn developer_log_save() {
     let path = format!(
         "{}/{}",
         app_handle().path().home_dir().unwrap().display(),
@@ -34,7 +34,7 @@ pub fn developer_save_log() {
 }
 
 #[tauri::command]
-pub fn developer_save_mpv_log() {
+pub fn developer_mpv_log_save() {
     let path = format!(
         "{}/{}",
         app_handle().path().home_dir().unwrap().display(),
@@ -77,7 +77,7 @@ fn is_newer_version(current: &str, latest: &str) -> bool {
 
 /// Check for update using reqwest
 #[tauri::command]
-pub async fn check_update(current_version: String) -> Result<Option<String>, String> {
+pub async fn update_check(current_version: String) -> Result<Option<String>, String> {
     let client = reqwest::Client::builder()
         .user_agent("fluyer-updater")
         .build()

@@ -1,5 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import { listen } from '@tauri-apps/api/event';
+import { TauriCommands } from '$lib/constants/TauriCommands';
+import type { MusicPlayerSync } from '$lib/features/music/types';
 
 export enum TauriMusicCommand {
 	None = 'none',
@@ -14,18 +16,21 @@ export enum TauriMusicCommand {
 
 const TauriMusicAPI = {
 	sendCommand: (command: TauriMusicCommand) => {
-		return invoke(CommandRoutes.MUSIC_CONTROLLER, { command });
+		return invoke(TauriCommands.MUSIC_CONTROLLER, { command });
 	},
 	setPosition: (position: number) => {
-		return invoke(CommandRoutes.MUSIC_POSITION_SET, {
+		return invoke(TauriCommands.MUSIC_POSITION_SET, {
 			position: Math.trunc(position)
 		});
 	},
 	requestSync: () => {
-		return invoke(CommandRoutes.MUSIC_PLAYER_REQUEST_SYNC);
+		return invoke(TauriCommands.MUSIC_PLAYER_REQUEST_SYNC);
 	},
 	setVolume: (volume: number) => {
-		return invoke(CommandRoutes.MUSIC_SET_VOLUME, { volume });
+		return invoke(TauriCommands.MUSIC_VOLUME_SET, { volume });
+	},
+	listenSync: (callback: (event: { payload: MusicPlayerSync }) => void) => {
+		return listen<MusicPlayerSync>(TauriCommands.MUSIC_PLAYER_SYNC, callback);
 	}
 };
 

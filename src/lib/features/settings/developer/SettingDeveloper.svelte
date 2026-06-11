@@ -3,12 +3,11 @@
 	import SettingInput from '$lib/features/settings/SettingInput.svelte';
 	import SettingButton from '$lib/features/settings/SettingButton.svelte';
 	import { IconType } from '$lib/ui/icon/types';
-	import { invoke } from '@tauri-apps/api/core';
-	import { CommandRoutes } from '$lib/constants/CommandRoutes';
 	import { isDesktop } from '$lib/platform';
 	import settingStore from '$lib/stores/setting.svelte.js';
 	import PersistentStoreService from '$lib/services/PersistentStoreService.svelte.js';
 	import ToastService from '$lib/services/ToastService.svelte.js';
+	import TauriLogAPI from '$lib/tauri/TauriLogAPI';
 
 	function onDeveloperModeChange(
 		e: Event & {
@@ -21,7 +20,7 @@
 	}
 
 	async function saveLog() {
-		await invoke(CommandRoutes.DEVELOPER_SAVE_LOG);
+		await TauriLogAPI.saveDeveloperLog();
 	}
 </script>
 

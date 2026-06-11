@@ -1,5 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import TauriFolderAPI from '$lib/tauri/TauriFolderAPI';
 import { type FolderData, type MusicData } from '$lib/features/music/types';
 import { isWindows } from '$lib/platform';
 import folderStore from '$lib/stores/folder.svelte';
@@ -23,9 +22,7 @@ const FolderService = {
 					let folders: FolderData[];
 
 					if (currentFolder) {
-						folders = await invoke(CommandRoutes.FOLDER_GET_ITEMS, {
-							path: currentFolder.path
-						});
+						folders = await TauriFolderAPI.getFolderItems(currentFolder.path);
 					} else {
 						const musicPaths = await PersistentStoreService.musicPath.get();
 						folders = musicPaths.map((path) => ({ path }) as FolderData);

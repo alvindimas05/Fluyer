@@ -6,8 +6,7 @@ import { isMacos, isWindows, isLinux } from '$lib/platform';
 import sleep from 'sleep-promise';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import PersistentStoreService from './PersistentStoreService.svelte';
-import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import TauriUpdateAPI from '$lib/tauri/TauriUpdateAPI';
 
 
 class UpdateServiceImpl {
@@ -44,7 +43,7 @@ class UpdateServiceImpl {
 				]);
 			} else {
 				const currentVersion = await getVersion();
-				const latestVersion = await invoke<string | null>(CommandRoutes.CHECK_UPDATE, { currentVersion });
+				const latestVersion = await TauriUpdateAPI.checkUpdate(currentVersion);
 				if (!latestVersion) return;
 
 				const skippedVersion = await PersistentStoreService.skippedUpdateVersion.get();

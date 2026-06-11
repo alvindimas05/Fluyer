@@ -8,8 +8,7 @@
 	import MenuVolume from './MenuVolume.svelte';
 	import { isDesktop, isWindows } from '$lib/platform';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
-	import { invoke } from '@tauri-apps/api/core';
-	import { CommandRoutes } from '$lib/constants/CommandRoutes';
+	import TauriBackgroundAPI from '$lib/tauri/TauriBackgroundAPI';
 	import musicStore from '$lib/stores/music.svelte';
 	import { MusicListType } from '$lib/features/music/types';
 	import playlistStore from '$lib/stores/playlist.svelte';
@@ -21,7 +20,7 @@
 		if (isDesktop()) {
 			await getCurrentWindow().setFullscreen(true);
 			if (isWindows()) {
-				await invoke(CommandRoutes.RESTORE_ANIMATED_BACKGROUND);
+				await TauriBackgroundAPI.restoreBackground();
 			}
 		}
 		PageService.goTo(PageRoutes.PLAY);

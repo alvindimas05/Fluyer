@@ -1,22 +1,22 @@
 import { invoke } from '@tauri-apps/api/core';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
+import { TauriCommands } from '$lib/constants/TauriCommands';
 import type { PlaylistData } from '$lib/features/music/types';
 
 const TauriPlaylistAPI = {
 	getAll: () => {
-		return invoke<PlaylistData[]>(CommandRoutes.PLAYLIST_GET_ALL);
+		return invoke<PlaylistData[]>(TauriCommands.PLAYLIST_ALL_GET);
 	},
 	create: (playlist: PlaylistData) => {
-		return invoke<number>(CommandRoutes.PLAYLIST_CREATE, { playlist });
+		return invoke<number>(TauriCommands.PLAYLIST_CREATE, { playlist });
 	},
 	delete: (id: number) => {
-		return invoke(CommandRoutes.PLAYLIST_DELETE, { id });
+		return invoke(TauriCommands.PLAYLIST_DELETE, { id });
 	},
 	uploadImage: () => {
-		return invoke<string>(CommandRoutes.PLAYLIST_UPLOAD_IMAGE);
+		return invoke<string>(TauriCommands.PLAYLIST_IMAGE_UPLOAD);
 	},
 	readImage: (id: number) => {
-		return invoke<ArrayBuffer>(CommandRoutes.PLAYLIST_READ_IMAGE, { id });
+		return invoke<ArrayBuffer>(TauriCommands.PLAYLIST_IMAGE_READ, { id });
 	}
 };
 

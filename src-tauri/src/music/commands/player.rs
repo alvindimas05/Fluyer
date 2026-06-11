@@ -13,12 +13,12 @@ pub fn music_position_set(state: State<AppState>, position: u64) {
 }
 
 #[tauri::command]
-pub fn music_set_volume(state: State<AppState>, volume: f32) {
+pub fn music_volume_set(state: State<AppState>, volume: f32) {
     state.music_player.set_volume(volume);
 }
 
 #[tauri::command]
-pub fn music_get_current_duration(state: State<AppState>) -> Option<f64> {
+pub fn music_current_duration_get(state: State<AppState>) -> Option<f64> {
     Some(state.music_player.get_current_duration())
 }
 
@@ -28,7 +28,7 @@ pub fn music_player_request_sync(state: State<AppState>) {
 }
 
 #[tauri::command]
-pub fn music_toggle_bit_perfect(state: State<AppState>, enable: bool) {
+pub fn music_bit_perfect_toggle(state: State<AppState>, enable: bool) {
     state.music_player.toggle_bit_perfect(enable);
 }
 

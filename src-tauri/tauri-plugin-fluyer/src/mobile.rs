@@ -32,7 +32,7 @@ impl<R: Runtime> Fluyer<R> {
             .map_err(Into::into)
     }
 
-    pub fn get_navigation_bar_height(&self) -> crate::Result<NavigationBarHeight> {
+    pub fn navigation_bar_height_get(&self) -> crate::Result<NavigationBarHeight> {
         self.0
             .run_mobile_plugin("getNavigationBarHeight", ())
             .map_err(Into::into)
@@ -44,7 +44,7 @@ impl<R: Runtime> Fluyer<R> {
             .map_err(Into::into)
     }
 
-    pub fn get_status_bar_height(&self) -> crate::Result<StatusBarHeight> {
+    pub fn status_bar_height_get(&self) -> crate::Result<StatusBarHeight> {
         self.0
             .run_mobile_plugin("getStatusBarHeight", ())
             .map_err(Into::into)
@@ -80,7 +80,7 @@ impl<R: Runtime> Fluyer<R> {
             .map_err(Into::into)
     }
 
-    pub fn set_navigation_bar_visibility(&self, visible: bool) -> crate::Result<()> {
+    pub fn navigation_bar_visibility_set(&self, visible: bool) -> crate::Result<()> {
         self.0
             .run_mobile_plugin(
                 "setNavigationBarVisibility",

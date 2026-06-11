@@ -3,8 +3,6 @@ import ProgressService from '$lib/services/ProgressService.svelte';
 import TauriMusicAPI, { TauriMusicCommand } from '$lib/tauri/TauriMusicAPI';
 import QueueService from '$lib/services/QueueService.svelte';
 import { type MusicPlayerSync, RepeatMode } from '$lib/features/music/types';
-import { listen } from '@tauri-apps/api/event';
-import { CommandRoutes } from '$lib/constants/CommandRoutes';
 import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 import { MusicConfig } from '$lib/constants/MusicConfig';
 
@@ -82,7 +80,7 @@ const MusicPlayerService = {
 	},
 
 	listenSyncEvents: () => {
-		return listen<MusicPlayerSync>(CommandRoutes.MUSIC_PLAYER_SYNC, async (e) => {
+		return TauriMusicAPI.listenSync(async (e) => {
 			console.log('Received music player sync event:', e.payload);
 
 			if (e.payload.index > -1) {

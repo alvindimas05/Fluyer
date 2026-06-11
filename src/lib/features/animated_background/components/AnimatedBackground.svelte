@@ -6,13 +6,12 @@
 	import MetadataService from '$lib/services/MetadataService.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import LibraryService from '$lib/services/LibraryService.svelte';
-	import { invoke } from '@tauri-apps/api/core';
 	import settingStore from '$lib/stores/setting.svelte';
 	import { SettingAnimatedBackgroundType } from '$lib/features/settings/animated_background/types';
 	// @ts-ignore
 	import * as ColorThief from 'colorthief';
 	import { prominent } from 'color.js';
-	import { CommandRoutes } from '$lib/constants/CommandRoutes';
+	import TauriBackgroundAPI from '$lib/tauri/TauriBackgroundAPI';
 	import { listen } from '@tauri-apps/api/event';
 	import type { Unsubscriber } from 'svelte/store';
 	import ColorConvert, { type RGB } from 'color-convert';
@@ -105,11 +104,11 @@
 		currentCoverArt = newCoverArt;
 		currentMusicPath = newMusicPath ?? null;
 
-		await invoke(CommandRoutes.UPDATE_ANIMATED_BACKGROUND, {
-			colors: await getColors(),
-			width: currentWidth,
-			height: currentHeight
-		});
+		await TauriBackgroundAPI.updateBackground(
+			await getColors(),
+			currentWidth,
+			currentHeight
+		);
 
 		lastRenderedWidth = currentWidth;
 		lastRenderedHeight = currentHeight;
@@ -162,7 +161,7 @@
 
 	async function restoreBackground() {
 		if (!isInitialized) return;
-		await invoke(CommandRoutes.RESTORE_ANIMATED_BACKGROUND);
+		await TauriBackgroundAPI.restoreBackground();
 	}
 
 	onMount(async () => {
