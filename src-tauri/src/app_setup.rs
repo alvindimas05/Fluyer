@@ -6,7 +6,6 @@ use crate::platform::{TRAFFIC_LIGHTS_INSET_X, TRAFFIC_LIGHTS_INSET_Y};
 #[cfg(target_os = "macos")]
 use tauri_plugin_decorum::WebviewWindowExt;
 
-/// Setup function called during app initialization
 pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let main_window = app
         .get_webview_window("main")
@@ -18,10 +17,8 @@ pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>
 
     initialize_store(app);
 
-    // Initialize unified renderer state
     crate::renderer::init_global_renderer(app);
 
-    // Initialize WGPU renderer
     #[cfg(not(target_os = "linux"))]
     {
         crate::debug!("setup_application: About to call setup_wgpu");
@@ -46,7 +43,6 @@ pub fn setup_application(app: &mut App) -> Result<(), Box<dyn std::error::Error>
     Ok(())
 }
 
-/// Configure window decorations and appearance based on platform
 fn configure_window(window: &tauri::WebviewWindow) {
     #[cfg(any(windows, target_os = "linux"))]
     {
@@ -63,7 +59,6 @@ fn configure_window(window: &tauri::WebviewWindow) {
     }
 }
 
-/// Create the prevent default plugin based on build configuration
 #[cfg(debug_assertions)]
 pub fn prevent_default_plugin() -> tauri::plugin::TauriPlugin<tauri::Wry> {
     use tauri_plugin_prevent_default::Flags;

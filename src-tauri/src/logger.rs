@@ -3,7 +3,6 @@ use std::sync::atomic::{AtomicU8, Ordering};
 
 use tauri::Emitter;
 
-/// Log levels for custom logger
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Level {
     Error = 1,
@@ -25,7 +24,6 @@ impl Level {
     }
 }
 
-/// Get ANSI color code for log level
 fn level_color(level: Level) -> &'static str {
     match level {
         Level::Error => "\x1b[31m", // Red
@@ -41,13 +39,11 @@ const RESET: &str = "\x1b[0m";
 // Global max level filter (4 = Debug by default)
 static MAX_LEVEL: AtomicU8 = AtomicU8::new(4);
 
-/// Initialize logging system for the application
 pub fn init() {
     // Set max level to Debug
     MAX_LEVEL.store(4, Ordering::Relaxed);
 }
 
-/// Internal logging function
 #[doc(hidden)]
 pub fn _log(level: Level, target: &str, args: std::fmt::Arguments) {
     // Check if this level is enabled
@@ -75,7 +71,6 @@ pub fn _log(level: Level, target: &str, args: std::fmt::Arguments) {
     }
 }
 
-/// Log an error message
 #[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {
@@ -83,7 +78,6 @@ macro_rules! error {
     };
 }
 
-/// Log a warning message
 #[macro_export]
 macro_rules! warn {
     ($($arg:tt)*) => {
@@ -91,7 +85,6 @@ macro_rules! warn {
     };
 }
 
-/// Log an info message
 #[macro_export]
 macro_rules! info {
     ($($arg:tt)*) => {
@@ -99,7 +92,6 @@ macro_rules! info {
     };
 }
 
-/// Log a debug message
 #[macro_export]
 macro_rules! debug {
     ($($arg:tt)*) => {
@@ -108,7 +100,6 @@ macro_rules! debug {
 }
 
 /// Log a trace message
-#[macro_export]
 macro_rules! trace {
     ($($arg:tt)*) => {
         $crate::logger::_log($crate::logger::Level::Trace, module_path!(), format_args!($($arg)*))

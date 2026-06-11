@@ -3,26 +3,22 @@ use crate::state::app_handle;
 use crate::utils::toast::{Toast, ToastType};
 use tauri::Manager;
 
-/// Log an error message
 #[tauri::command]
 pub fn log_error(message: String) {
     crate::error!("{}", message);
 }
 
-/// Log an info message
 #[tauri::command]
 pub fn log_info(message: String) {
     crate::info!("{}", message);
 }
 
-/// Show a toast message (Android only)
 #[cfg(target_os = "android")]
 #[tauri::command]
 pub fn toast(message: String) {
     Toast::show(message, ToastType::Info);
 }
 
-/// Save application log file to home directory
 #[tauri::command]
 pub fn developer_save_log() {
     let path = format!(
@@ -37,7 +33,6 @@ pub fn developer_save_log() {
     );
 }
 
-/// Save MPV log file to home directory
 #[tauri::command]
 pub fn developer_save_mpv_log() {
     let path = format!(

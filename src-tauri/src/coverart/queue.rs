@@ -19,13 +19,11 @@ pub fn get_queue(name: &str) -> Option<CoverArtRequest> {
     queue.get(name).map(|entry| entry.request.clone())
 }
 
-/// Get a receiver to wait for status changes
 pub fn get_receiver(name: &str) -> Option<watch::Receiver<CoverArtRequestStatus>> {
     let queue = COVER_ART_QUEUE.lock().unwrap();
     queue.get(name).map(|entry| entry.receiver.clone())
 }
 
-/// Set status and notify all waiters
 pub fn set_status(name: String, status: CoverArtRequestStatus) {
     let mut queue = COVER_ART_QUEUE.lock().unwrap();
 
@@ -51,7 +49,6 @@ pub fn remove(name: &str) {
     COVER_ART_QUEUE.lock().unwrap().remove(name);
 }
 
-/// Wait for a pending request to complete (become Loaded or Failed)
 pub async fn wait_for_result(name: &str) -> CoverArtRequestStatus {
     let receiver = {
         let queue = COVER_ART_QUEUE.lock().unwrap();

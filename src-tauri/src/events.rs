@@ -7,7 +7,6 @@ use crate::state::main_window;
 #[cfg(target_os = "macos")]
 use tauri_plugin_decorum::WebviewWindowExt;
 
-/// Handle window events
 pub fn handle_window_events(window: &Window, event: &WindowEvent) {
     match event {
         WindowEvent::Resized(_) => {
@@ -36,7 +35,6 @@ pub fn handle_window_events(window: &Window, event: &WindowEvent) {
     }
 }
 
-/// Handle application runtime events
 pub fn handle_app_events(app_handle: &AppHandle, event: RunEvent) {
     match event {
         RunEvent::Ready => {

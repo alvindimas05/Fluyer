@@ -2,7 +2,6 @@ use crate::{database::database::GLOBAL_DATABASE, music::metadata::MusicMetadata}
 use rusqlite::{params, Connection};
 use std::path::{Path, PathBuf};
 
-/// Get first music file path from a folder
 pub fn get_folder_first_music_path(conn: &mut Connection, path: &str) -> Option<String> {
     let mut stmt = conn
         .prepare("SELECT path FROM musics WHERE path LIKE ? ORDER BY path LIMIT 1")
@@ -15,7 +14,6 @@ pub fn get_folder_first_music_path(conn: &mut Connection, path: &str) -> Option<
     None
 }
 
-/// Retrieve music metadata from database
 pub fn get_all_music_from_db() -> Vec<MusicMetadata> {
     let query = "
         SELECT path, duration, title, artist, album, album_artist, track_number,
@@ -71,7 +69,6 @@ pub fn get_all_music_from_db() -> Vec<MusicMetadata> {
     .collect()
 }
 
-/// Delete paths from database that no longer exist on filesystem
 pub fn delete_non_existing_paths(musics: Vec<PathBuf>) {
     let mut conn_guard = GLOBAL_DATABASE.lock().ok().unwrap();
     let conn = conn_guard.as_mut().unwrap();

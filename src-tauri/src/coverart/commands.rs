@@ -1,7 +1,6 @@
 use crate::coverart::{cache, queue, request, types::*};
 use std::fs;
 
-/// Get cover art for an album or track - returns raw image bytes
 #[tauri::command]
 pub async fn cover_art_get(query: CoverArtQuery, size: Option<u32>) -> Option<Vec<u8>> {
     if query.album.is_none() && query.title.is_none() {

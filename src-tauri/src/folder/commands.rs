@@ -9,13 +9,11 @@ use crate::state::app_store;
 #[cfg(target_os = "android")]
 use crate::commands::mobile::check_read_audio_permission;
 
-/// Get all subdirectories in a folder
 #[tauri::command]
 pub fn folder_get_items(path: String) -> Vec<FolderItem> {
     scanner::get_folder_items(path.as_str())
 }
 
-/// Get the first music file path from a folder
 #[tauri::command]
 pub fn folder_get_first_music_path(path: String) -> Option<String> {
     let mut conn_guard = GLOBAL_DATABASE.lock().ok()?;
@@ -23,7 +21,6 @@ pub fn folder_get_first_music_path(path: String) -> Option<String> {
     database::get_folder_first_music_path(conn, path.as_str())
 }
 
-/// Get all music files from the library
 #[tauri::command]
 pub async fn music_get_all() -> Option<Vec<MusicMetadata>> {
     #[cfg(target_os = "android")]

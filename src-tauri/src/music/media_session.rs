@@ -1,7 +1,6 @@
 #![allow(unused_variables)]
 
 use crate::music::metadata::MusicMetadata;
-use crate::state::app_handle;
 
 #[cfg(target_os = "android")]
 use tauri_plugin_fluyer::FluyerExt;
@@ -12,27 +11,22 @@ impl MediaSession {
     pub fn init() {
         #[cfg(target_os = "android")]
         {
+            use crate::state::app_handle;
             crate::info!("Initializing Android Media Control");
             let _ = app_handle().fluyer().init_media_control(|event| {
                 crate::info!("Media Control Action: {}", event.action);
+                let handle = app_handle();
+                let state = handle.state::<crate::state::AppState>();
                 if event.action.starts_with("seek:") {
                     if let Ok(pos) = event.action[5..].parse::<u64>() {
-                        std::thread::spawn(move || {
-                            crate::music::player::MusicPlayer::set_pos(pos);
-                        });
+                        state.music_player.set_pos(pos);
                     }
                 } else if event.action == "previous" {
-                    std::thread::spawn(move || {
-                        crate::music::player::MusicPlayer::play_previous();
-                    });
+                    state.music_player.play_previous();
                 } else if event.action == "next" {
-                    std::thread::spawn(move || {
-                        crate::music::player::MusicPlayer::play_next(true);
-                    });
+                    state.music_player.play_next(true);
                 } else {
-                    std::thread::spawn(move || {
-                        crate::music::player::MusicPlayer::send_command(event.action);
-                    });
+                    state.music_player.send_command(event.action);
                 }
             });
         }

@@ -8,8 +8,6 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-/// Get visualizer buffer data from an audio file
-///
 /// This command converts the audio file to a standardized format (mono, 44100Hz, 192kbps MP3)
 /// suitable for visualizer processing. The conversion is done using FFmpeg.
 #[tauri::command]

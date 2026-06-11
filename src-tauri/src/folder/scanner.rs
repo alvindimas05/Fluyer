@@ -8,7 +8,6 @@ use chrono::{DateTime, Utc};
 use futures::StreamExt;
 use walkdir::{DirEntry, WalkDir};
 
-/// Get all subdirectories in a given path
 pub fn get_folder_items(path: &str) -> Vec<FolderItem> {
     WalkDir::new(path)
         .max_depth(1)
@@ -30,7 +29,6 @@ const SUPPORTED_EXTENSIONS: &[&str] = &[
     "aac", "wma", "opus", "alac", "ape", "aiff", "mov", "ts", "flv", "3gp", "wmv"
 ];
 
-/// Scan directories for audio files
 pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
     let mut dirs: Vec<Result<DirEntry, walkdir::Error>> = vec![];
 
@@ -66,7 +64,6 @@ pub fn scan_directories(search_dirs: Vec<String>) -> Vec<PathBuf> {
         .collect()
 }
 
-/// Get home directory path
 pub fn get_home_dir() -> String {
     use crate::state::app_handle;
     use tauri::Manager;
@@ -79,7 +76,6 @@ pub fn get_home_dir() -> String {
         .to_string()
 }
 
-/// Process music files and update database
 pub async fn process_supported_files(paths: &[PathBuf]) {
     // Optimization: Pre-fetch existing records to skip unmodified files
     let existing_records = tokio::task::spawn_blocking(|| {

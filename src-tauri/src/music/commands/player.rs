@@ -1,51 +1,45 @@
-use crate::music::player::MusicPlayer;
+use tauri::State;
 
-/// Send a control command to the music player
+use crate::state::AppState;
+
 #[tauri::command]
-pub fn music_controller(command: String) {
-    MusicPlayer::send_command(command.clone());
+pub fn music_controller(state: State<AppState>, command: String) {
+    state.music_player.send_command(command);
 }
 
-/// Set the playback position
 #[tauri::command]
-pub fn music_position_set(position: u64) {
-    MusicPlayer::set_pos(position);
+pub fn music_position_set(state: State<AppState>, position: u64) {
+    state.music_player.set_pos(position);
 }
 
-/// Set the volume level
 #[tauri::command]
-pub fn music_set_volume(volume: f32) {
-    MusicPlayer::set_volume(volume);
+pub fn music_set_volume(state: State<AppState>, volume: f32) {
+    state.music_player.set_volume(volume);
 }
 
-/// Get the current playback duration
 #[tauri::command]
-pub fn music_get_current_duration() -> Option<f64> {
-    Some(MusicPlayer::get_current_duration())
+pub fn music_get_current_duration(state: State<AppState>) -> Option<f64> {
+    Some(state.music_player.get_current_duration())
 }
 
-/// Request player state sync
 #[tauri::command]
-pub fn music_player_request_sync() {
-    MusicPlayer::request_sync();
+pub fn music_player_request_sync(state: State<AppState>) {
+    state.music_player.request_sync();
 }
 
-/// Toggle bit-perfect audio mode
 #[tauri::command]
-pub fn music_toggle_bit_perfect(enable: bool) {
-    MusicPlayer::toggle_bit_perfect(enable);
+pub fn music_toggle_bit_perfect(state: State<AppState>, enable: bool) {
+    state.music_player.toggle_bit_perfect(enable);
 }
 
-/// Set equalizer values (desktop only)
 #[cfg(desktop)]
 #[tauri::command]
-pub fn music_equalizer(values: Vec<f32>) {
-    MusicPlayer::equalizer(values);
+pub fn music_equalizer(state: State<AppState>, values: Vec<f32>) {
+    state.music_player.equalizer(values);
 }
 
-/// Reset equalizer to default (desktop only)
 #[cfg(desktop)]
 #[tauri::command]
-pub fn music_equalizer_reset() {
-    MusicPlayer::reset_equalizer();
+pub fn music_equalizer_reset(state: State<AppState>) {
+    state.music_player.reset_equalizer();
 }

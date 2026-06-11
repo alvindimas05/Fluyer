@@ -1,7 +1,6 @@
 use crate::state::app_handle;
 use tauri::Manager;
 
-/// Get the cover art cache directory path
 pub fn get_cache_directory() -> String {
     let dir = format!(
         "{}/coverarts",

@@ -1,9 +1,8 @@
 use crate::music::player::MusicPlayer;
-use std::sync::{Arc, Mutex, OnceLock};
-use tauri::{App, AppHandle, Manager, RunEvent, WebviewWindow, Wry};
+use std::sync::{Arc, OnceLock};
+use tauri::{App, AppHandle, Manager, WebviewWindow, Wry};
 use tauri_plugin_store::{Store, StoreExt};
 
-/// Global application state
 pub struct AppState {
     pub music_player: MusicPlayer,
 }
@@ -28,7 +27,6 @@ static MAIN_WINDOW: OnceLock<WebviewWindow> = OnceLock::new();
 static STORE_NAME: &str = "store.json";
 static APP_STORE: OnceLock<Arc<Store<Wry>>> = OnceLock::new();
 
-/// Get the global application handle
 pub fn app_handle() -> &'static AppHandle {
     APP_HANDLE.get().expect("APP_HANDLE not initialized")
 }
@@ -37,7 +35,6 @@ pub fn try_app_handle() -> Option<&'static AppHandle> {
     APP_HANDLE.get()
 }
 
-/// Get the global main window
 pub fn main_window() -> &'static WebviewWindow {
     MAIN_WINDOW.get().expect("MAIN_WINDOW not initialized")
 }
@@ -50,13 +47,12 @@ pub fn app_store() -> &'static Arc<Store<Wry>> {
     APP_STORE.get().expect("APP_STORE not initialized")
 }
 
-/// Initialize global state with app handle
 pub fn initialize_globals(app_handle: &AppHandle) {
     APP_HANDLE
         .set(app_handle.clone())
         .expect("Failed to set APP_HANDLE");
 
-    app_handle.manage(Mutex::new(AppState::default()));
+    app_handle.manage(AppState::default());
 }
 
 pub fn initialize_store(app: &mut App) {
@@ -76,7 +72,6 @@ pub fn initialize_on_ready(app_handle: &AppHandle) {
     log_directory_paths(app_handle);
 }
 
-/// Log application directory paths for debugging
 fn log_directory_paths(app_handle: &AppHandle) {
     crate::debug!(
         "The app data dir is located at: {}",
