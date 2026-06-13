@@ -100,7 +100,6 @@ export function useAlbumItem(
 			search: filterStore.search,
 			sortAsc: filterBarStore.sortAsc
 		});
-		await QueueService.refreshCount();
 		MusicPlayerService.play();
 	}
 

@@ -104,6 +104,8 @@ const MusicPlayerService = {
 				ProgressService.stop();
 				ProgressService.start();
 			} else ProgressService.stop();
+
+			QueueService.refreshCount();
 		});
 	},
 	listenVolumeEvents: () => {
