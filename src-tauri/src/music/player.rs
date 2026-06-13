@@ -381,6 +381,45 @@ impl MusicPlayer {
         self.clear_playlist();
     }
 
+    pub fn queue_count(&self) -> usize {
+        self.state
+            .lock()
+            .map(|s| s.playlist.len())
+            .unwrap_or(0)
+    }
+
+    pub fn queue_get_by_index(&self, index: usize) -> Option<MusicMetadata> {
+        self.state
+            .lock()
+            .ok()
+            .and_then(|s| s.playlist.get(index).map(|p| p.metadata.clone()))
+    }
+
+    pub fn shuffle_playlist(&self) {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+        use std::time::SystemTime;
+
+        let seed = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .map(|d| d.subsec_nanos())
+            .unwrap_or(42);
+
+        let mut rng = seed as usize;
+        if let Ok(mut state) = self.state.lock() {
+            let len = state.playlist.len();
+            for i in (1..len).rev() {
+                let mut h = DefaultHasher::new();
+                (rng ^ i).hash(&mut h);
+                rng = h.finish() as usize;
+                let j = rng % (i + 1);
+                state.playlist.swap(i, j);
+            }
+            state.current_index = if len > 0 { Some(0) } else { None };
+        }
+        self.goto_playlist(0);
+    }
+
     pub fn set_repeat_mode(&self, mode: RepeatMode) {
         if let Ok(mut state) = self.state.lock() {
             state.repeat_mode = mode;

@@ -1,8 +1,10 @@
 import TauriMusicAPI from '$lib/tauri/TauriMusicAPI';
 import musicStore from '$lib/stores/music.svelte';
 import TauriQueueAPI from '$lib/tauri/TauriQueueAPI';
+import TauriLibraryAPI from '$lib/tauri/TauriLibraryAPI';
+import { invoke } from '@tauri-apps/api/core';
+import { TauriCommands } from '$lib/constants/TauriCommands';
 import type { MusicData } from '$lib/features/music/types';
-import * as uuid from 'uuid';
 
 class PlaylistMoveQueue {
 	private queue: Array<() => Promise<void>> = [];
@@ -19,7 +21,6 @@ class PlaylistMoveQueue {
 				}
 			});
 
-			// Start processing if not already running
 			if (!this.isProcessing) {
 				this.processQueue();
 			}
@@ -44,87 +45,64 @@ class PlaylistMoveQueue {
 
 		this.isProcessing = false;
 	}
-
-	getQueueLength(): number {
-		return this.queue.length;
-	}
 }
 
 const playlistMoveQueue = new PlaylistMoveQueue();
 
+/**
+ * Queue service – Rust owns the playlist; we only send commands and update
+ * `musicStore.queueCount` (and `currentIndex`) based on Tauri sync events.
+ */
 const QueueService = {
 	add: (music: MusicData) => {
 		return QueueService.addList([music]);
 	},
+
 	remove: async (index: number) => {
 		await TauriQueueAPI.remove(index);
-
-		if (index < musicStore.currentIndex) {
-			musicStore.currentIndex--;
-		}
-
-		musicStore.queue.splice(index, 1);
-		musicStore.queueIds.splice(index, 1);
+		// currentIndex adjustment is handled by the music_player_sync event
 	},
+
 	addList: async (list: MusicData[]) => {
 		await TauriQueueAPI.add(list);
-		musicStore.queue.push(...list);
-		// Generate new UUIDs for added items
-		const newIds = list.map(() => uuid.v4());
-		musicStore.queueIds.push(...newIds);
+		// queueCount will be updated via sync event; bump optimistically
+		musicStore.queueCount += list.length;
 	},
+
 	resetAndAdd: (music: MusicData) => {
 		return QueueService.resetAndAddList([music]);
 	},
+
 	resetAndAddList: async (list: MusicData[]) => {
 		await TauriMusicAPI.clear();
-
-		// Generate new UUIDs for all items
-		const newIds = list.map(() => uuid.v4());
-		musicStore.queueIds = newIds;
-		musicStore.queue = list;
 		await TauriQueueAPI.add(list);
+		musicStore.queueCount = list.length;
 	},
+
 	goTo: (index: number) => {
 		return TauriQueueAPI.goTo(index);
 	},
+
 	moveTo: (from: number, to: number) => {
 		if (from === to) return Promise.resolve();
 
-		const queue = [...musicStore.queue];
-		const queueIds = [...musicStore.queueIds];
-		const currentPath = musicStore.currentMusic?.path;
-
-		const music = queue[from];
-		const uuid = queueIds[from];
-
-		queue.splice(from, 1);
-		queue.splice(to, 0, music);
-
-		queueIds.splice(from, 1);
-		queueIds.splice(to, 0, uuid);
-
-		musicStore.queue = queue;
-		musicStore.queueIds = queueIds;
-
-		if (currentPath) {
-			const newIndex = queue.findIndex((m) => m.path === currentPath);
-			if (newIndex !== -1) {
-				console.log('Moving to index:', newIndex);
-				musicStore.currentIndex = newIndex;
-			}
-		}
-
-		// Queue backend API call
 		return playlistMoveQueue.add(async () => {
 			await TauriQueueAPI.moveTo(from, to);
 		});
 	},
+
+	shuffleQueue: async () => {
+		await invoke<void>(TauriCommands.MUSIC_QUEUE_SHUFFLE);
+	},
+
 	clear: async () => {
 		await TauriMusicAPI.clear();
-		musicStore.queue = [];
-		musicStore.queueIds = [];
+		musicStore.queueCount = 0;
 		musicStore.currentIndex = -1;
+	},
+
+	refreshCount: async () => {
+		musicStore.queueCount = await TauriLibraryAPI.getQueueCount();
 	}
 };
 

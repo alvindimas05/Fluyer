@@ -2,17 +2,17 @@ import { MusicConfig } from '$lib/constants/MusicConfig';
 import { type MusicData, MusicListType, RepeatMode } from '$lib/features/music/types';
 
 const musicStore = $state({
-	// Library
-	list: undefined as MusicData[] | null | undefined,
-	listIds: [] as string[],
-	albums: [] as MusicData[][],
+	// Library counts (actual data lives in Rust LibraryState)
+	listCount: 0,
+	albumCount: 0,
 	listType: MusicListType.All,
+	// null = still loading, 0 = loaded (empty), >0 = loaded with data
+	isLibraryLoaded: false as boolean,
 
 	// Playback
 	isPlaying: false,
 	currentIndex: -1,
-	queue: [] as MusicData[],
-	queueIds: [] as string[],
+	queueCount: 0,
 	repeatMode: RepeatMode.None,
 
 	// Progress
@@ -28,9 +28,8 @@ const musicStore = $state({
 		scrollLeft: -1
 	},
 
-	get currentMusic(): MusicData | undefined {
-		return this.queue[this.currentIndex] ?? undefined;
-	},
+	// Current music is still tracked here (small struct, no duplication)
+	currentMusic: undefined as MusicData | undefined,
 
 	get progressDuration(): number {
 		return (this.progressValue / MusicConfig.max) * (this.currentMusic?.duration ?? 0);

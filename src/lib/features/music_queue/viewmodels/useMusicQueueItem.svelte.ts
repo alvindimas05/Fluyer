@@ -3,28 +3,33 @@ import musicStore from '$lib/stores/music.svelte';
 import MetadataService from '$lib/services/MetadataService.svelte';
 import QueueService from '$lib/services/QueueService.svelte';
 import { CoverArtSize } from '$lib/services/CoverArtService.svelte';
+import TauriLibraryAPI from '$lib/tauri/TauriLibraryAPI';
 
-export function useMusicQueueItem(
-	getMusic: () => MusicData,
-	getUuid: () => string,
-	getVisible: () => boolean = () => true
-) {
+export function useMusicQueueItem(getIndex: () => number, getVisible: () => boolean = () => true) {
 	let coverArt = $state<Promise<string | null> | null>(null);
 	let currentBlobUrl: string | null = null;
+	let music = $state<MusicData | null>(null);
 
-	const music = $derived(getMusic());
-	const uuid = $derived(getUuid());
+	const index = $derived(getIndex());
 	const visible = $derived(getVisible());
 
-	const index = $derived(musicStore.queueIds.indexOf(uuid));
 	const isPlaying = $derived(musicStore.currentIndex === index);
 	const isPrevious = $derived(index < musicStore.currentIndex);
+
+	$effect(() => {
+		const isVisible = visible;
+		if (!isVisible) return;
+
+		TauriLibraryAPI.getQueueByIndex(index).then((m) => {
+			music = m;
+		});
+	});
 
 	$effect(() => {
 		const currentMusic = music;
 		const isVisible = visible;
 
-		if (!isVisible) return;
+		if (!isVisible || !currentMusic) return;
 
 		let cancelled = false;
 
@@ -67,6 +72,9 @@ export function useMusicQueueItem(
 		},
 		get coverArt() {
 			return coverArt;
+		},
+		get music() {
+			return music;
 		},
 		removePlaylist,
 		goToPlaylist

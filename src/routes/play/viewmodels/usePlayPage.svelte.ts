@@ -95,7 +95,7 @@ async function handleButtonBack() {
 
 async function handleButtonShuffle() {
 	await MusicPlayerService.pause();
-	await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(musicStore.queue));
+	await QueueService.shuffleQueue();
 	await MusicPlayerService.play();
 }
 

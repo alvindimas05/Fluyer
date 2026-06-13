@@ -16,6 +16,9 @@ export const TauriCommands = {
 	MUSIC_QUEUE_REMOVE: 'music_queue_remove',
 	MUSIC_QUEUE_GOTO: 'music_queue_goto',
 	MUSIC_QUEUE_MOVETO: 'music_queue_moveto',
+	MUSIC_QUEUE_SHUFFLE: 'music_queue_shuffle',
+	MUSIC_QUEUE_COUNT_GET: 'music_queue_count_get',
+	MUSIC_QUEUE_GET_BY_INDEX: 'music_queue_get_by_index',
 	MUSIC_VOLUME_SET: 'music_volume_set',
 	MUSIC_EQUALIZER: 'music_equalizer',
 	MUSIC_EQUALIZER_RESET: 'music_equalizer_reset',
@@ -25,6 +28,18 @@ export const TauriCommands = {
 	MUSIC_CURRENT_DURATION_GET: 'music_current_duration_get',
 	MUSIC_LYRICS_GET: 'music_lyrics_get',
 	MUSIC_BIT_PERFECT_TOGGLE: 'music_bit_perfect_toggle',
+
+	// Library (Rust-side state)
+	LIBRARY_LOAD: 'library_load',
+	LIBRARY_MUSIC_COUNT_GET: 'library_music_count_get',
+	LIBRARY_MUSIC_GET_BY_INDEX: 'library_music_get_by_index',
+	LIBRARY_MUSIC_GET_BY_PATH: 'library_music_get_by_path',
+	LIBRARY_ALBUM_COUNT_GET: 'library_album_count_get',
+	LIBRARY_ALBUM_GET_BY_INDEX: 'library_album_get_by_index',
+	LIBRARY_ALBUM_GET_FIRST_BY_INDEX: 'library_album_get_first_by_index',
+	LIBRARY_COLLECTION_ADD_AND_PLAY: 'library_collection_add_and_play',
+	LIBRARY_COLLECTION_ADD_TO_QUEUE: 'library_collection_add_to_queue',
+	LIBRARY_COLLECTION_SHUFFLE_AND_PLAY: 'library_collection_shuffle_and_play',
 
 	PLAYLIST_ALL_GET: 'playlist_all_get',
 	PLAYLIST_CREATE: 'playlist_create',
@@ -57,3 +72,4 @@ export const TauriCommands = {
 
 	UPDATE_CHECK: 'update_check'
 };
+

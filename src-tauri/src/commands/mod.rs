@@ -17,6 +17,7 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     crate::music::commands::music_volume_set,
     crate::music::commands::music_queue_goto,
     crate::music::commands::music_queue_moveto,
+    crate::music::commands::music_queue_shuffle,
     crate::music::commands::music_visualizer_buffer_get,
     crate::music::commands::music_image_get,
     // crate::music::commands::music_default_cover_art_get,
@@ -33,6 +34,19 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     // Folder commands
     crate::folder::commands::folder_items_get,
     crate::folder::commands::folder_first_music_path_get,
+    // Library commands (Rust-side state, index-based access)
+    crate::library::commands::library_load,
+    crate::library::commands::library_music_count_get,
+    crate::library::commands::library_music_get_by_index,
+    crate::library::commands::library_music_get_by_path,
+    crate::library::commands::library_album_count_get,
+    crate::library::commands::library_album_get_by_index,
+    crate::library::commands::library_album_get_first_by_index,
+    crate::library::commands::music_queue_count_get,
+    crate::library::commands::music_queue_get_by_index,
+    crate::library::commands::library_collection_add_and_play,
+    crate::library::commands::library_collection_add_to_queue,
+    crate::library::commands::library_collection_shuffle_and_play,
     // System/Log commands
     crate::system::commands::log_error,
     crate::system::commands::log_info,
@@ -70,3 +84,4 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     crate::playlist::commands::playlist_image_upload,
     crate::playlist::commands::playlist_image_read,
 ];
+

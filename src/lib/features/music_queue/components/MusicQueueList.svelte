@@ -29,14 +29,13 @@
 	</div>
 	<div bind:this={vm.scrollContainer} class="scrollbar-hidden w-full flex-1 overflow-auto">
 		<div class="relative w-full">
-			{#each musicStore.queue as music, index (musicStore.queueIds[index])}
-				{@const uuid = musicStore.queueIds[index]}
+			{#each Array(musicStore.queueCount) as _, index (index)}
 				{@const isPlaying = index === musicStore.currentIndex}
 				{@const isDragging = vm.draggedIndex === index}
 				{@const showDropIndicator =
 					vm.dragOverIndex === index && vm.draggedIndex !== null && vm.draggedIndex !== index}
 				<div
-					use:vm.observeElement={uuid}
+					use:vm.observeElement={index.toString()}
 					use:vm.registerItem={index}
 					role="listitem"
 					class="w-full select-none"
@@ -56,9 +55,8 @@
 						<div class="h-1 w-full bg-white bg-opacity-20"></div>
 					{/if}
 					<MusicQueueItem
-						{music}
-						{uuid}
-						visible={vm.isSidebarVisible && vm.visibleItems.has(uuid)}
+						{index}
+						visible={vm.isSidebarVisible && vm.visibleItems.has(index.toString())}
 					/>
 					{#if showDropIndicator && vm.draggedIndex !== null && vm.draggedIndex < index}
 						<div class="h-1 w-full bg-white bg-opacity-20"></div>

@@ -1,9 +1,6 @@
 <script lang="ts">
-	import type { MusicData } from '$lib/features/music/types';
-
 	interface Props {
-		music: MusicData;
-		uuid: string;
+		index: number;
 		visible?: boolean;
 	}
 
@@ -11,12 +8,11 @@
 	import { IconType } from '$lib/ui/icon/types';
 	import { useMusicQueueItem } from '$lib/features/music_queue/viewmodels/useMusicQueueItem.svelte';
 
-	let { music, uuid, visible = true }: Props = $props();
+	let { index, visible = true }: Props = $props();
 
 	// Initialize viewmodel
 	const vm = useMusicQueueItem(
-		() => music,
-		() => uuid,
+		() => index,
 		() => visible
 	);
 </script>
@@ -29,16 +25,18 @@
 			{#await vm.coverArt}
 				<div class="aspect-square w-full"></div>
 			{:then image}
-				<img
-					class="animate__animated animate__fadeIn aspect-square w-full rounded"
-					src={image}
-					alt="Album"
-				/>
+				{#if image}
+					<img
+						class="animate__animated animate__fadeIn aspect-square w-full rounded"
+						src={image}
+						alt="Album"
+					/>
+				{/if}
 			{/await}
 		</div>
 		<div class="ms-3 text-sm md:text-base">
-			<p class="font-medium">{music.title}</p>
-			<p class="text-opacity-background-80">{music.artist}</p>
+			<p class="font-medium">{vm.music?.title ?? '...'}</p>
+			<p class="text-opacity-background-80">{vm.music?.artist ?? '...'}</p>
 		</div>
 		<div
 			class="h-11 w-11 md:h-12 md:w-12 lg:h-14 lg:w-14 md-hdpi:h-11 md-hdpi:w-11 lg-hdpi:h-12 lg-hdpi:w-12"

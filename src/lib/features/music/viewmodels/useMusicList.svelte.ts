@@ -4,10 +4,11 @@ import filterStore from '$lib/stores/filter.svelte';
 import filterBarStore from '$lib/stores/filterBar.svelte';
 import folderStore from '$lib/stores/folder.svelte';
 import playlistStore from '$lib/stores/playlist.svelte';
-import LibraryService from '$lib/services/LibraryService.svelte';
 import FolderService from '$lib/services/FolderService.svelte';
 import sidebarStore from '$lib/stores/sidebar.svelte';
 import { SidebarType } from '$lib/features/sidebar/types';
+import TauriLibraryAPI, { type MusicFilter } from '$lib/tauri/TauriLibraryAPI';
+import type { FolderData } from '$lib/features/music/types';
 
 const RESPONSIVE_RULES = [
 	[1280, 2.01, 4],
@@ -28,8 +29,10 @@ const state = $state({
 
 let visibleItems = $state<Set<string>>(new Set());
 let observer: IntersectionObserver | null = null;
-
 let animatingOutItems = $state<Set<string>>(new Set());
+
+// Async-fetched music count from Rust
+let rustMusicCount = $state(0);
 
 function updateColumnCount() {
 	const w = window.innerWidth;
@@ -46,73 +49,51 @@ function updateColumnCount() {
 
 const updateSize = () => updateColumnCount();
 
-const data = $derived.by(() => {
-	if (!Array.isArray(musicStore.list)) return [];
-
+function buildFilter(): MusicFilter {
 	const isFolderMode = musicStore.listType === MusicListType.Folder;
 	const isPlaylistMode = musicStore.listType === MusicListType.Playlist;
 
-	// In playlist mode, filter by selected playlist paths
-	if (isPlaylistMode && playlistStore.selectedPlaylist) {
-		const pathSet = new Set(playlistStore.selectedPlaylist.paths);
-		const filtered = musicStore.list.filter((music) => pathSet.has(music.path));
-		if (!filterBarStore.sortAsc) return [...filtered].reverse();
-		return filtered;
-	}
+	return {
+		search: filterStore.search,
+		sortAsc: filterBarStore.sortAsc,
+		albumName: filterStore.album?.name,
+		folderPath: isFolderMode ? folderStore.currentFolder?.path : undefined,
+		playlistPaths:
+			isPlaylistMode && playlistStore.selectedPlaylist
+				? playlistStore.selectedPlaylist.paths
+				: undefined
+	};
+}
 
-	const filteredMusic = LibraryService.sortMusicList(
-		musicStore.list.filter((music) => {
-			if (isFolderMode) {
-				return FolderService.containsMusic(music, folderStore.currentFolder);
-			}
-			return true;
-		})
+const data = $derived.by(() => {
+	const isFolderMode = musicStore.listType === MusicListType.Folder;
+
+	const musicIndices: (number | FolderData)[] = Array.from(
+		{ length: rustMusicCount },
+		(_, i) => i
 	);
 
-	let filteredFolders = folderStore.list;
-
-	if (!filterBarStore.sortAsc) filteredFolders = [...filteredFolders].reverse();
-
-	const finalList: any[] = filterStore.album
-		? LibraryService.sortMusicList(filteredMusic)
-		: [...filteredMusic];
-
-	if (!filterBarStore.sortAsc) finalList.reverse();
-
 	if (isFolderMode) {
-		const nonEmpty = filteredFolders.filter((f) => FolderService.getMusicList(f).length > 0);
-		finalList.push(...nonEmpty);
+		let folders = folderStore.list.filter((f) => FolderService.getMusicList(f).length > 0);
+		if (!filterBarStore.sortAsc) folders = [...folders].reverse();
+		return [...musicIndices, ...folders];
 	}
 
-	return finalList;
+	return musicIndices;
 });
 
-function isVisibleByFilter(item: any): boolean {
+function isVisibleByFilter(item: number | FolderData): boolean {
 	const search = filterStore.search.toLowerCase();
 
-	// Folder check
-	if (!('duration' in item)) {
+	if (typeof item !== 'number') {
 		// Folder
 		return item.path.toLowerCase().includes(search);
 	}
 
-	// Music check
-	const music = item;
-	const album = filterStore.album;
-	const hasSearch = search.length > 0;
-	const matchesSearch =
-		!hasSearch ||
-		[music.album, music.title, music.artist, music.albumArtist].some((v) =>
-			v?.toLowerCase().includes(search)
-		);
-
-	const hasAlbum = !!album;
-	const matchesAlbum = !hasAlbum || album.name === music.album;
-
-	return matchesSearch && matchesAlbum;
+	// Music index – filter already applied by Rust count, always visible
+	return true;
 }
 
-// Calculate visual indices for items that are visible references
 const visualIndices = $derived.by(() => {
 	filterStore.search;
 	filterStore.album;
@@ -131,7 +112,7 @@ const visualIndices = $derived.by(() => {
 });
 
 function isHiddenBySidebar(index: number): boolean {
-	if (!visualIndices.has(index)) return true; // Should be hidden anyway if not in visual map
+	if (!visualIndices.has(index)) return true;
 
 	const visualIndex = visualIndices.get(index)!;
 	const indexInRow = visualIndex % state.columnCount;
@@ -145,27 +126,19 @@ function isHiddenBySidebar(index: number): boolean {
 	return false;
 }
 
-function getItemKey(item: any): string {
-	if ('duration' in item) {
-		return `music-${item.path}`;
+function getItemKey(item: number | FolderData): string {
+	if (typeof item === 'number') {
+		return `music-index-${item}`;
 	}
 	return `folder-${item.path}`;
 }
 
-function shouldRenderItem(itemKey: string, index: number, item: any): boolean {
-	// If not visible by filter, don't render
+function shouldRenderItem(itemKey: string, index: number, item: number | FolderData): boolean {
 	if (!isVisibleByFilter(item)) return false;
-
-	// If not in visibleItems (outside viewport), don't render
 	if (!visibleItems.has(itemKey)) return false;
-
-	// If hidden by sidebar and animation completed, we still render but hide via CSS
-	// if (isHiddenBySidebar(index) && animatingOutItems.has(itemKey)) return false;
-
 	return true;
 }
 
-// Handle sidebar fadeout animation completion
 function handleAnimationEnd(itemKey: string, isHiddenBySidebar: boolean) {
 	if (isHiddenBySidebar) {
 		animatingOutItems = new Set([...animatingOutItems, itemKey]);
@@ -230,7 +203,21 @@ export function useMusicList() {
 		updateSize();
 	});
 
-	// Reset animating out state when item becomes visible by sidebar
+	$effect(() => {
+		musicStore.listType;
+		musicStore.listCount;
+		filterStore.search;
+		filterStore.album;
+		filterBarStore.sortAsc;
+		folderStore.currentFolder;
+		playlistStore.selectedPlaylist;
+
+		const filter = buildFilter();
+		TauriLibraryAPI.getMusicCount(filter).then((count) => {
+			rustMusicCount = count;
+		});
+	});
+
 	$effect(() => {
 		if (data) {
 			data.forEach((item, index) => {

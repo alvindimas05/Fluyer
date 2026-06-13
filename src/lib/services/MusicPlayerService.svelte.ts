@@ -1,6 +1,7 @@
 import musicStore from '$lib/stores/music.svelte';
 import ProgressService from '$lib/services/ProgressService.svelte';
 import TauriMusicAPI from '$lib/tauri/TauriMusicAPI';
+import TauriLibraryAPI from '$lib/tauri/TauriLibraryAPI';
 import QueueService from '$lib/services/QueueService.svelte';
 import { RepeatMode } from '$lib/features/music/types';
 import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
@@ -12,7 +13,7 @@ const MusicPlayerService = {
 		MusicPlayerService.listenVolumeEvents();
 	},
 	play: async () => {
-		if (musicStore.queue.length === 0) {
+		if (musicStore.queueCount === 0) {
 			console.warn("Can't play music playback because the queue is empty.");
 			return;
 		}
@@ -41,9 +42,9 @@ const MusicPlayerService = {
 		return TauriMusicAPI.next();
 	},
 	previous: async () => {
-		if (musicStore.queue.length === 0) return;
+		if (musicStore.queueCount === 0) return;
 		const prevIndex =
-			musicStore.currentIndex > 0 ? musicStore.currentIndex - 1 : musicStore.queue.length - 1;
+			musicStore.currentIndex > 0 ? musicStore.currentIndex - 1 : musicStore.queueCount - 1;
 		return QueueService.goTo(prevIndex);
 	},
 	seekByPercentage: async (percentage: number) => {
@@ -79,10 +80,22 @@ const MusicPlayerService = {
 			console.log('Received music player sync event:', e.payload);
 
 			if (e.payload.index > -1) {
-				musicStore.currentIndex = e.payload.index;
-				musicStore.progressValue =
-					(e.payload.currentPosition / musicStore.currentMusic!.duration) * MusicConfig.max;
-			} else ProgressService.reset();
+				if (musicStore.currentIndex !== e.payload.index || !musicStore.currentMusic) {
+					musicStore.currentIndex = e.payload.index;
+					const musicData = await TauriLibraryAPI.getQueueByIndex(e.payload.index);
+					if (musicData) {
+						musicStore.currentMusic = musicData;
+					}
+				}
+				if (musicStore.currentMusic) {
+					musicStore.progressValue =
+						(e.payload.currentPosition / musicStore.currentMusic.duration) * MusicConfig.max;
+				}
+			} else {
+				musicStore.currentIndex = -1;
+				musicStore.currentMusic = undefined;
+				ProgressService.reset();
+			}
 
 			musicStore.isPlaying = e.payload.isPlaying;
 			musicStore.repeatMode = e.payload.repeatMode;

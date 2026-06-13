@@ -1,7 +1,7 @@
 import { type MusicData } from '$lib/features/music/types';
 import { MusicConfig } from '$lib/constants/MusicConfig';
-import musicStore from '$lib/stores/music.svelte';
 import TauriMetadataAPI from '$lib/tauri/TauriMetadataAPI';
+import TauriLibraryAPI from '$lib/tauri/TauriLibraryAPI';
 import FolderService from './FolderService.svelte';
 import CoverArtService from './CoverArtService.svelte';
 
@@ -50,7 +50,7 @@ const MetadataService = {
 		);
 		if (!path) return defaultCoverArt;
 
-		const music = musicStore.list?.find((m) => m.path === path);
+		const music = await TauriLibraryAPI.getMusicByPath(path);
 		if (!music) return defaultCoverArt;
 
 		return MetadataService.getMusicCoverArt(music);

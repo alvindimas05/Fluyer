@@ -1,11 +1,10 @@
 import PersistentStoreService from '$lib/services/PersistentStoreService.svelte';
 import FolderService from '$lib/services/FolderService.svelte';
-import LibraryService from '$lib/services/LibraryService.svelte';
 import { MusicConfig } from '$lib/constants/MusicConfig';
 import ProgressService from '$lib/services/ProgressService.svelte';
-import QueueService from '$lib/services/QueueService.svelte';
 import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 import ToastService from '$lib/services/ToastService.svelte';
+import TauriLibraryAPI, { type CollectionContext } from '$lib/tauri/TauriLibraryAPI';
 import filterStore from '$lib/stores/filter.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { MusicListType } from '$lib/features/music/types';
@@ -26,37 +25,27 @@ const showBackButton = $derived.by(async () => {
 	);
 });
 
-const tracks = $derived.by(() => {
+function buildContext(): CollectionContext | null {
 	if (musicStore.listType === MusicListType.Playlist && playlistStore.selectedPlaylist) {
-		const pathSet = new Set(playlistStore.selectedPlaylist.paths);
-		return (musicStore.list ?? []).filter((m) => pathSet.has(m.path));
-	} else if (musicStore.listType === MusicListType.Folder) {
-		return FolderService.getMusicList(folderStore.currentFolder);
-	} else if (album) {
-		return LibraryService.sortMusicList(album.tracks);
+		return { type: 'playlist', paths: playlistStore.selectedPlaylist.paths };
 	}
-	return [];
-});
+	if (musicStore.listType === MusicListType.Folder && folderStore.currentFolder) {
+		return { type: 'folder', path: folderStore.currentFolder.path };
+	}
+	if (album) {
+		return { type: 'album', name: album.name };
+	}
+	return null;
+}
 
 const label = $derived.by(() => {
 	if (musicStore.listType === MusicListType.Playlist && playlistStore.selectedPlaylist) {
 		const pl = playlistStore.selectedPlaylist;
-		const totalDuration = (musicStore.list ?? [])
-			.filter((m) => new Set(pl.paths).has(m.path))
-			.reduce((acc, m) => acc + m.duration, 0);
-		return [
-			pl.title || pl.name,
-			pl.artist,
-			`${pl.paths.length} tracks`,
-			ProgressService.formatDuration(totalDuration)
-		]
+		return [pl.title || pl.name, pl.artist, `${pl.paths.length} tracks`]
 			.filter(Boolean)
 			.join(` ${MusicConfig.separator} `);
 	} else if (musicStore.listType === MusicListType.Folder && folderStore.currentFolder) {
-		const folderMusic = FolderService.getMusicList(folderStore.currentFolder);
-		const totalDuration = folderMusic.reduce((acc, music) => acc + music.duration, 0);
-
-		return `${folderStore.currentFolder.path} ${MusicConfig.separator} ${folderMusic.length} ${MusicConfig.separator} ${ProgressService.formatDuration(totalDuration)}`;
+		return folderStore.currentFolder.path;
 	} else if (album) {
 		return [album.name, album.artist, album.year, album.duration]
 			.filter(Boolean)
@@ -83,27 +72,36 @@ async function handleBack() {
 }
 
 async function addMusicListAndPlay() {
-	await QueueService.resetAndAddList(tracks);
+	const context = buildContext();
+	if (!context) return;
+
+	await TauriLibraryAPI.collectionAddAndPlay(context);
 	if (!musicStore.isPlaying) MusicPlayerService.play();
 }
 
 async function addMusicList() {
-	await QueueService.addList(tracks);
-	const label =
+	const context = buildContext();
+	if (!context) return;
+
+	await TauriLibraryAPI.collectionAddToQueue(context);
+
+	const toastLabel =
 		musicStore.listType === MusicListType.Folder && folderStore.currentFolder
 			? folderStore.currentFolder.path
 			: album
 				? `${album.name} ${MusicConfig.separatorAlbum} ${album.artist}`
 				: null;
-	ToastService.info(`Added music list to queue: ${label}`);
+	ToastService.info(`Added music list to queue: ${toastLabel}`);
 }
 
 async function playShuffle() {
 	await MusicPlayerService.pause();
 
-	await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(tracks));
+	const context = buildContext();
+	if (!context) return;
 
-	await MusicPlayerService.play();
+	await TauriLibraryAPI.collectionShuffleAndPlay(context);
+
 	ProgressService.start();
 }
 

@@ -21,3 +21,9 @@ pub fn music_queue_goto(state: State<AppState>, index: usize) {
 pub fn music_queue_moveto(state: State<AppState>, from: usize, to: usize) {
     state.music_player.moveto_playlist(from, to);
 }
+
+#[tauri::command]
+pub fn music_queue_shuffle(state: State<AppState>) {
+    state.music_player.shuffle_playlist();
+}
+

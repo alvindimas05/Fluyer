@@ -47,11 +47,11 @@
 			</div>
 		{:else if vm.isHorizontal}
 			<!-- Horizontal layout -->
-			{#each vm.data as tracks, index}
+			{#each vm.data as albumIndex, index}
 				{@const hiddenBySidebar = vm.shouldHideHorizontalItem(index)}
-				{@const visibleByFilter = vm.isVisibleByFilter(tracks)}
+				{@const visibleByFilter = vm.isVisibleByFilter(albumIndex)}
 				{@const inViewport = vm.visibleItems.has(index)}
-				{@const shouldRender = vm.shouldRenderHorizontalItem(index, tracks)}
+				{@const shouldRender = vm.shouldRenderHorizontalItem(index, albumIndex)}
 				<div
 					use:vm.observeElement={index}
 					class={vm.itemClass(inViewport, hiddenBySidebar, 'flex-shrink-0')}
@@ -60,7 +60,7 @@
 					onanimationend={() => vm.handleAnimationEnd(index, hiddenBySidebar)}
 				>
 					{#if shouldRender}
-						<AlbumItem {tracks} {index} visible={inViewport} />
+						<AlbumItem {albumIndex} {index} visible={inViewport} />
 					{/if}
 				</div>
 			{/each}
@@ -70,11 +70,11 @@
 				class="grid"
 				style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
 			>
-				{#each vm.data as tracks, index}
+				{#each vm.data as albumIndex, index}
 					{@const hiddenBySidebar = vm.shouldHideGridItem(index)}
-					{@const visibleByFilter = vm.isVisibleByFilter(tracks)}
+					{@const visibleByFilter = vm.isVisibleByFilter(albumIndex)}
 					{@const inViewport = vm.visibleItems.has(index)}
-					{@const shouldRender = vm.shouldRenderGridItem(index, tracks)}
+					{@const shouldRender = vm.shouldRenderGridItem(index, albumIndex)}
 					<div
 						use:vm.observeElement={index}
 						class={vm.itemClass(inViewport, hiddenBySidebar)}
@@ -83,7 +83,7 @@
 						onanimationend={() => vm.handleAnimationEnd(index, hiddenBySidebar)}
 					>
 						{#if shouldRender}
-							<AlbumItem {tracks} {index} visible={inViewport} />
+							<AlbumItem {albumIndex} {index} visible={inViewport} />
 						{/if}
 					</div>
 				{/each}

@@ -4,11 +4,12 @@ import filterStore from '$lib/stores/filter.svelte';
 import filterBarStore from '$lib/stores/filterBar.svelte';
 import playerBarStore from '$lib/stores/playerBar.svelte';
 import musicStore from '$lib/stores/music.svelte';
-import { type MusicData, MusicListType } from '$lib/features/music/types';
+import { MusicListType } from '$lib/features/music/types';
 import sidebarStore from '$lib/stores/sidebar.svelte';
 import { SidebarType } from '$lib/features/sidebar/types';
 import ToastService from '$lib/services/ToastService.svelte';
 import playlistStore from '$lib/stores/playlist.svelte';
+import TauriLibraryAPI from '$lib/tauri/TauriLibraryAPI';
 
 const RESPONSIVE_RULES = [
 	[1536, 2.01, 0.142857], // xhdpi 2xl → 14.2857%
@@ -42,7 +43,9 @@ const state = $state({
 let visibleItems = $state<Set<number>>(new Set());
 let observer: IntersectionObserver | null = null;
 
-// Track items that are animating out (hidden by sidebar)
+let rustAlbumCount = $state(0);
+
+// Track items animating out (hidden by sidebar)
 let animatingOutItems = $state<Set<number>>(new Set());
 
 const paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
@@ -116,30 +119,22 @@ function updateItemWidth() {
 	sidebarStore.hiddenMusicColumnCount = 1;
 }
 
-const data: MusicData[][] = $derived.by(() => {
-	if (!Array.isArray(musicStore.albums)) return [];
-
-	const search = filterStore.search.toLowerCase();
-	let list = musicStore.albums;
-
-	// We return the full list and handle visibility via CSS to prevent component recycling issues
-	// when filtering (search or album selection).
-	if (!filterBarStore.sortAsc) list = list.toReversed();
-
-	return list;
+const data: number[] = $derived.by(() => {
+	const count = rustAlbumCount;
+	const arr = Array.from({ length: count }, (_, i) => i);
+	if (!filterBarStore.sortAsc) return arr.reverse();
+	return arr;
 });
 
-function isVisibleByFilter(tracks: MusicData[]) {
-	const search = filterStore.search.toLowerCase();
-	const firstItem = tracks[0];
-
-	if (!filterStore.search && !filterStore.album) return true;
-
-	return (
-		(filterStore.album && firstItem.album === filterStore.album.name) ||
-		firstItem.album?.toLowerCase().includes(search) ||
-		firstItem.albumArtist?.toLowerCase().includes(search)
-	);
+function isVisibleByFilter(albumIndex: number): boolean {
+	// Rust already applies the search filter when computing count;
+	// all indices in data[] are visible. Filter by selected album only.
+	if (filterStore.album) {
+		// We don't have track data here; AlbumItem handles this via its own fetch.
+		// Return true and let AlbumItem hide itself if needed once data is loaded.
+		return true;
+	}
+	return true;
 }
 
 const visualIndices = $derived.by(() => {
@@ -232,9 +227,9 @@ function shouldHidePlaylistGridItem(index: number): boolean {
 }
 
 // Check if item should render based on visibility conditions (horizontal)
-function shouldRenderHorizontalItem(index: number, tracks: MusicData[]): boolean {
+function shouldRenderHorizontalItem(index: number, albumIndex: number): boolean {
 	// If not visible by filter, don't render
-	if (!isVisibleByFilter(tracks)) return false;
+	if (!isVisibleByFilter(albumIndex)) return false;
 
 	// If not in visibleItems (outside viewport), don't render
 	if (!visibleItems.has(index)) return false;
@@ -246,9 +241,9 @@ function shouldRenderHorizontalItem(index: number, tracks: MusicData[]): boolean
 }
 
 // Check if item should render based on visibility conditions (grid)
-function shouldRenderGridItem(index: number, tracks: MusicData[]): boolean {
+function shouldRenderGridItem(index: number, albumIndex: number): boolean {
 	// If not visible by filter, don't render
-	if (!isVisibleByFilter(tracks)) return false;
+	if (!isVisibleByFilter(albumIndex)) return false;
 
 	// If not in visibleItems (outside viewport), don't render
 	if (!visibleItems.has(index)) return false;
@@ -342,6 +337,16 @@ export function useAlbumList() {
 
 	$effect(() => {
 		updateItemWidth();
+	});
+
+	// Re-fetch album count when search or library changes
+	$effect(() => {
+		const search = filterStore.search;
+		const sortAsc = filterBarStore.sortAsc;
+		musicStore.albumCount; // reactive dependency
+		TauriLibraryAPI.getAlbumCount(search, sortAsc).then((count) => {
+			rustAlbumCount = count;
+		});
 	});
 
 	// Reset animating out state when item becomes visible by sidebar

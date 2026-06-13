@@ -53,7 +53,7 @@ function handleButtonNext() {
 async function handleButtonShuffle() {
 	await MusicPlayerService.pause();
 
-	await QueueService.resetAndAddList(await LibraryService.shuffleMusicList(musicStore.queue));
+	await QueueService.shuffleQueue();
 
 	await MusicPlayerService.play();
 	ProgressService.start();
@@ -140,7 +140,7 @@ export function usePlayerBar() {
 
 	$effect(() => {
 		musicStore.currentIndex;
-		musicStore.list;
+		musicStore.isLibraryLoaded;
 		refresh();
 	});
 

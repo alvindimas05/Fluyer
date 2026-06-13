@@ -3,15 +3,15 @@
 	import { useAlbumItem } from '$lib/features/album/viewmodels/useAlbumItem.svelte';
 
 	interface Props {
-		tracks: MusicData[];
+		albumIndex: number;
 		index: number;
 		visible?: boolean;
 	}
 
-	let { tracks, index, visible = false }: Props = $props();
+	let { albumIndex, index, visible = false }: Props = $props();
 
 	const vm = useAlbumItem(
-		() => tracks,
+		() => albumIndex,
 		() => index,
 		() => visible
 	);
@@ -50,12 +50,12 @@
 	<p
 		class="animate-scroll-overflow-text mt-2 overflow-hidden whitespace-nowrap font-medium md:text-lg"
 	>
-		{vm.music.album}
+		{vm.music?.album}
 	</p>
 	<p
 		class="text-opacity-background-80 animate-scroll-overflow-text overflow-hidden whitespace-nowrap text-[15px] md:text-base"
 	>
-		{vm.music.albumArtist ?? vm.music.artist}
+		{vm.music?.albumArtist ?? vm.music?.artist}
 	</p>
 </div>
 

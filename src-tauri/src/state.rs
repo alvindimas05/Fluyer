@@ -1,3 +1,4 @@
+use crate::library::SharedLibraryState;
 use crate::music::player::MusicPlayer;
 use std::sync::{Arc, OnceLock};
 use tauri::{App, AppHandle, Manager, WebviewWindow, Wry};
@@ -53,6 +54,7 @@ pub fn initialize_globals(app_handle: &AppHandle) {
         .expect("Failed to set APP_HANDLE");
 
     app_handle.manage(AppState::default());
+    app_handle.manage(SharedLibraryState::default());
 }
 
 pub fn initialize_store(app: &mut App) {

@@ -151,7 +151,7 @@ export function useMusicQueueList() {
 			e.clientY - scrollContainer.getBoundingClientRect().top + scrollContainer.scrollTop;
 
 		let newOverIndex = null;
-		const len = musicStore.queue.length;
+		const len = musicStore.queueCount;
 		for (let i = 0; i < len; i++) {
 			const item = itemRefs[i];
 			if (!item || !item.isConnected) continue;
@@ -166,7 +166,7 @@ export function useMusicQueueList() {
 		}
 
 		if (newOverIndex !== null && newOverIndex !== draggedIndex) {
-			dragOverIndex = Math.min(newOverIndex, musicStore.queue.length - 1);
+			dragOverIndex = Math.min(newOverIndex, musicStore.queueCount - 1);
 		}
 	}
 

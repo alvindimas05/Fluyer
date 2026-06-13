@@ -1,6 +1,7 @@
 <script lang="ts">
 	import MusicItem from './MusicItem.svelte';
 	import { useMusicList } from '../viewmodels/useMusicList.svelte';
+	import type { FolderData } from '$lib/features/music/types';
 
 	interface Props {
 		tooltipVisible?: boolean;
@@ -48,10 +49,10 @@
 					onanimationend={() => vm.handleAnimationEnd(itemKey, hiddenBySidebar)}
 				>
 					{#if shouldRender}
-						{#if 'duration' in item}
-							<MusicItem music={item} visible={inViewport} />
+						{#if typeof item === 'number'}
+							<MusicItem musicIndex={item} visible={inViewport} />
 						{:else}
-							<MusicItem folder={item} visible={inViewport} />
+							<MusicItem folder={item as FolderData} visible={inViewport} />
 						{/if}
 					{/if}
 				</div>
@@ -59,4 +60,3 @@
 		</div>
 	{/if}
 </div>
-

@@ -73,7 +73,7 @@
 {#if isDesktop() && page.url.pathname !== PageRoutes.PLAY}
 	<TitleBar />
 {/if}
-{#if Array.isArray(musicStore.list)}
+{#if musicStore.isLibraryLoaded}
 	{#if [PageRoutes.HOME, PageRoutes.HOME_PRODUCTION].includes(page.url.pathname)}
 		<FilterBar />
 	{/if}
