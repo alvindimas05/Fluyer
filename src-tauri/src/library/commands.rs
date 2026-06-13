@@ -194,7 +194,7 @@ pub fn library_collection_add_and_play(
         resolve_tracks(&guard, &context)
     };
     state.music_player.clear();
-    state.music_player.add_playlist(tracks);
+    state.music_player.add_track(tracks);
     state.music_player.play();
 }
 
@@ -208,7 +208,7 @@ pub fn library_collection_add_to_queue(
         let guard = lib.0.read().unwrap();
         resolve_tracks(&guard, &context)
     };
-    state.music_player.add_playlist(tracks);
+    state.music_player.add_track(tracks);
 }
 
 #[tauri::command]
@@ -242,6 +242,6 @@ pub fn library_collection_shuffle_and_play(
     }
 
     state.music_player.clear();
-    state.music_player.add_playlist(tracks);
+    state.music_player.add_track(tracks);
     state.music_player.play();
 }

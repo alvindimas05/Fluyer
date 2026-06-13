@@ -15,7 +15,7 @@ use super::bass::*;
 
 
 #[derive(Clone, Debug)]
-struct PlaylistItem {
+struct TrackItem {
     metadata: MusicMetadata,
 }
 
@@ -40,7 +40,7 @@ pub struct MusicPlayerSync {
 
 #[derive(Debug, Clone)]
 struct PlayerState {
-    playlist: Vec<PlaylistItem>,
+    track: Vec<TrackItem>,
     current_index: Option<usize>,
     repeat_mode: RepeatMode,
 }
@@ -89,7 +89,7 @@ extern "C" fn end_sync_callback(
             };
             match (state.current_index, state.repeat_mode) {
                 (Some(current), RepeatMode::One) => Some(current),
-                (Some(current), _) if current + 1 < state.playlist.len() => Some(current + 1),
+                (Some(current), _) if current + 1 < state.track.len() => Some(current + 1),
                 (Some(_), RepeatMode::All) => Some(0),
                 _ => None,
             }
@@ -104,7 +104,7 @@ extern "C" fn end_sync_callback(
                         return;
                     }
                 };
-                (state.playlist[index].metadata.clone(), state.playlist.len())
+                (state.track[index].metadata.clone(), state.track.len())
             };
 
             let cs2 = cs_arc.load(Ordering::SeqCst);
@@ -142,10 +142,10 @@ extern "C" fn end_sync_callback(
                         return;
                     }
                 };
-                if state.playlist.is_empty() {
+                if state.track.is_empty() {
                     None
                 } else {
-                    Some((state.playlist[0].metadata.clone(), state.playlist.len()))
+                    Some((state.track[0].metadata.clone(), state.track.len()))
                 }
             };
 
@@ -204,7 +204,7 @@ impl MusicPlayer {
             bass_mixer: Arc::new(AtomicU32::new(0)),
             current_stream: Arc::new(AtomicU32::new(0)),
             state: Arc::new(Mutex::new(PlayerState {
-                playlist: Vec::new(),
+                track: Vec::new(),
                 current_index: None,
                 repeat_mode: RepeatMode::None,
             })),
@@ -378,13 +378,13 @@ impl MusicPlayer {
     }
 
     pub fn clear(&self) {
-        self.clear_playlist();
+        self.clear_track();
     }
 
     pub fn queue_count(&self) -> usize {
         self.state
             .lock()
-            .map(|s| s.playlist.len())
+            .map(|s| s.track.len())
             .unwrap_or(0)
     }
 
@@ -392,10 +392,10 @@ impl MusicPlayer {
         self.state
             .lock()
             .ok()
-            .and_then(|s| s.playlist.get(index).map(|p| p.metadata.clone()))
+            .and_then(|s| s.track.get(index).map(|p| p.metadata.clone()))
     }
 
-    pub fn shuffle_playlist(&self) {
+    pub fn shuffle_track(&self) {
         use std::collections::hash_map::DefaultHasher;
         use std::hash::{Hash, Hasher};
         use std::time::SystemTime;
@@ -407,17 +407,17 @@ impl MusicPlayer {
 
         let mut rng = seed as usize;
         if let Ok(mut state) = self.state.lock() {
-            let len = state.playlist.len();
+            let len = state.track.len();
             for i in (1..len).rev() {
                 let mut h = DefaultHasher::new();
                 (rng ^ i).hash(&mut h);
                 rng = h.finish() as usize;
                 let j = rng % (i + 1);
-                state.playlist.swap(i, j);
+                state.track.swap(i, j);
             }
             state.current_index = if len > 0 { Some(0) } else { None };
         }
-        self.goto_playlist(0);
+        self.goto_track(0);
     }
 
     pub fn set_repeat_mode(&self, mode: RepeatMode) {
@@ -567,7 +567,7 @@ impl MusicPlayer {
         }
     }
 
-    pub fn add_playlist(&self, playlist: Vec<MusicMetadata>) {
+    pub fn add_track(&self, track: Vec<MusicMetadata>) {
         let was_empty;
         {
             let mut state = match self.state.lock() {
@@ -577,28 +577,28 @@ impl MusicPlayer {
                     return;
                 }
             };
-            was_empty = state.playlist.is_empty();
-            for music in playlist {
-                state.playlist.push(PlaylistItem { metadata: music });
+            was_empty = state.track.is_empty();
+            for music in track {
+                state.track.push(TrackItem { metadata: music });
             }
         }
 
         if was_empty {
-            self.goto_playlist(0);
+            self.goto_track(0);
         } else {
             #[cfg(target_os = "android")]
             {
                 let (current_index, total_count) = self
                     .state
                     .lock()
-                    .map(|s| (s.current_index, s.playlist.len()))
+                    .map(|s| (s.current_index, s.track.len()))
                     .unwrap_or((None, 0));
                 self.update_android_media_boundaries(current_index, total_count);
             }
         }
     }
 
-    pub fn remove_playlist(&self, index: usize) {
+    pub fn remove_track(&self, index: usize) {
         let mut state = match self.state.lock() {
             Ok(s) => s,
             Err(e) => {
@@ -607,7 +607,7 @@ impl MusicPlayer {
             }
         };
 
-        if index >= state.playlist.len() {
+        if index >= state.track.len() {
             return;
         }
 
@@ -617,13 +617,13 @@ impl MusicPlayer {
                 self.stop_current_stream();
                 if let Ok(mut state) = self.state.lock() {
                     state.current_index = None;
-                    state.playlist.remove(index);
+                    state.track.remove(index);
                 }
                 return;
             }
         }
 
-        state.playlist.remove(index);
+        state.track.remove(index);
 
         if let Some(current) = state.current_index {
             if index < current {
@@ -634,13 +634,13 @@ impl MusicPlayer {
         #[cfg(target_os = "android")]
         {
             let current_index = state.current_index;
-            let total_count = state.playlist.len();
+            let total_count = state.track.len();
             drop(state);
             self.update_android_media_boundaries(current_index, total_count);
         }
     }
 
-    pub fn goto_playlist(&self, index: usize) {
+    pub fn goto_track(&self, index: usize) {
         let state_arc = Arc::clone(&self.state);
         let bass_mixer = Arc::clone(&self.bass_mixer);
         let current_stream = Arc::clone(&self.current_stream);
@@ -655,10 +655,10 @@ impl MusicPlayer {
                         return;
                     }
                 };
-                if index >= state.playlist.len() {
+                if index >= state.track.len() {
                     return;
                 }
-                (state.playlist[index].metadata.clone(), state.playlist.len())
+                (state.track[index].metadata.clone(), state.track.len())
             };
 
             Self::stop_stream(&bass_mixer, &current_stream, &temp_wav_path);
@@ -698,7 +698,7 @@ impl MusicPlayer {
                 };
                 match (state.current_index, state.repeat_mode) {
                     (Some(current), RepeatMode::One) if !from_user => Some(current),
-                    (Some(current), _) if current + 1 < state.playlist.len() => Some(current + 1),
+                    (Some(current), _) if current + 1 < state.track.len() => Some(current + 1),
                     (Some(_), RepeatMode::All) => Some(0),
                     (Some(_), _) if from_user => Some(0),
                     _ => None,
@@ -714,7 +714,7 @@ impl MusicPlayer {
                             return;
                         }
                     };
-                    (state.playlist[index].metadata.clone(), state.playlist.len())
+                    (state.track[index].metadata.clone(), state.track.len())
                 };
 
                 // Remove old stream from mixer. Flush buffer only on user-initiated skip
@@ -770,10 +770,10 @@ impl MusicPlayer {
                             return;
                         }
                     };
-                    if state.playlist.is_empty() {
+                    if state.track.is_empty() {
                         None
                     } else {
-                        Some((state.playlist[0].metadata.clone(), state.playlist.len()))
+                        Some((state.track[0].metadata.clone(), state.track.len()))
                     }
                 };
 
@@ -857,7 +857,7 @@ impl MusicPlayer {
                 };
                 match state.current_index {
                     Some(current) if current > 0 => Some(current - 1),
-                    Some(_) if !state.playlist.is_empty() => Some(state.playlist.len() - 1),
+                    Some(_) if !state.track.is_empty() => Some(state.track.len() - 1),
                     _ => None,
                 }
             };
@@ -871,7 +871,7 @@ impl MusicPlayer {
                             return;
                         }
                     };
-                    (state.playlist[index].metadata.clone(), state.playlist.len())
+                    (state.track[index].metadata.clone(), state.track.len())
                 };
 
                 Self::stop_stream(&bass_mixer, &current_stream, &temp_wav_path);
@@ -895,7 +895,7 @@ impl MusicPlayer {
         });
     }
 
-    pub fn moveto_playlist(&self, from: usize, to: usize) {
+    pub fn moveto_track(&self, from: usize, to: usize) {
         {
             let mut state = match self.state.lock() {
                 Ok(s) => s,
@@ -905,12 +905,12 @@ impl MusicPlayer {
                 }
             };
 
-            if from >= state.playlist.len() || to >= state.playlist.len() {
+            if from >= state.track.len() || to >= state.track.len() {
                 return;
             }
 
-            let item = state.playlist.remove(from);
-            state.playlist.insert(to, item);
+            let item = state.track.remove(from);
+            state.track.insert(to, item);
 
             if let Some(current) = state.current_index {
                 state.current_index = Some(if current == from {
@@ -1048,7 +1048,7 @@ impl MusicPlayer {
         }
     }
 
-    fn clear_playlist(&self) {
+    fn clear_track(&self) {
         let bm = self.bass_mixer.load(Ordering::SeqCst);
 
         #[cfg(desktop)]
@@ -1070,7 +1070,7 @@ impl MusicPlayer {
 
         self.stop_current_stream();
         if let Ok(mut state) = self.state.lock() {
-            state.playlist.clear();
+            state.track.clear();
             state.current_index = None;
         }
     }
@@ -1590,8 +1590,8 @@ impl MusicPlayer {
                 let is_last = index == total_count - 1;
 
                 if let Ok(state) = self.state.lock() {
-                    if index < state.playlist.len() {
-                        let music = state.playlist[index].metadata.clone();
+                    if index < state.track.len() {
+                        let music = state.track[index].metadata.clone();
                         let is_playing = self.current_stream.load(Ordering::SeqCst) != 0;
                         drop(state);
 
