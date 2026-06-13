@@ -6,217 +6,217 @@ import { SidebarType } from '$lib/features/sidebar/types';
 import QueueService from '$lib/services/QueueService.svelte';
 import sidebarStore from '$lib/stores/sidebar.svelte';
 
-export function useMusicQueueList() {
-	let draggingEnabled = $state(!isMobile());
-	let draggedIndex = $state<number | null>(null);
-	let dragOverIndex = $state<number | null>(null);
-	let dragOffsetY = $state(0);
-	let currentY = $state(0);
-	const itemRefs: HTMLElement[] = [];
-	let scrollContainer = $state<HTMLDivElement>();
+let draggingEnabled = $state(!isMobile());
+let draggedIndex = $state<number | null>(null);
+let dragOverIndex = $state<number | null>(null);
+let dragOffsetY = $state(0);
+let currentY = $state(0);
+const itemRefs: HTMLElement[] = [];
+let scrollContainer = $state<HTMLDivElement>();
 
-	// Auto-scroll configuration
-	const EDGE_THRESHOLD = 50; // pixels from edge to trigger scroll
-	const SCROLL_SPEED = 8; // pixels per frame
-	let autoScrollAnimationId: number | null = null;
+// Auto-scroll configuration
+const EDGE_THRESHOLD = 50; // pixels from edge to trigger scroll
+const SCROLL_SPEED = 8; // pixels per frame
+let autoScrollAnimationId: number | null = null;
 
-	// Track visibility of items using IntersectionObserver
-	let visibleItems = $state<Set<string>>(new Set());
-	let observer: IntersectionObserver | null = null;
+// Track visibility of items using IntersectionObserver
+let visibleItems = $state<Set<string>>(new Set());
+let observer: IntersectionObserver | null = null;
 
-	// Track if sidebar is visible
-	const isSidebarVisible = $derived(sidebarStore.showType === SidebarType.Right);
+// Track if sidebar is visible
+const isSidebarVisible = $derived(sidebarStore.showType === SidebarType.Right);
 
-	function cleanQueue() {
-		MusicPlayerService.pause();
-		ProgressService.reset();
-		QueueService.clear();
-	}
+function cleanQueue() {
+	MusicPlayerService.pause();
+	ProgressService.reset();
+	QueueService.clear();
+}
 
-	function dragToggle() {
-		draggingEnabled = !draggingEnabled;
-	}
+function dragToggle() {
+	draggingEnabled = !draggingEnabled;
+}
 
-	function observeElement(node: HTMLElement, uuid: string) {
-		if (!observer) {
-			observer = new IntersectionObserver(
-				(entries) => {
-					entries.forEach((entry) => {
-						const itemUuid = entry.target.getAttribute('data-uuid');
-						if (itemUuid) {
-							if (entry.isIntersecting) {
-								visibleItems = new Set([...visibleItems, itemUuid]);
-							} else {
-								const newSet = new Set(visibleItems);
-								newSet.delete(itemUuid);
-								visibleItems = newSet;
-							}
+function observeElement(node: HTMLElement, uuid: string) {
+	if (!observer) {
+		observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					const itemUuid = entry.target.getAttribute('data-uuid');
+					if (itemUuid) {
+						if (entry.isIntersecting) {
+							visibleItems = new Set([...visibleItems, itemUuid]);
+						} else {
+							const newSet = new Set(visibleItems);
+							newSet.delete(itemUuid);
+							visibleItems = newSet;
 						}
-					});
-				},
-				{ threshold: 0 }
-			);
-		}
-
-		node.setAttribute('data-uuid', uuid);
-		observer.observe(node);
-
-		return {
-			update(newUuid: string) {
-				node.setAttribute('data-uuid', newUuid);
+					}
+				});
 			},
-			destroy() {
-				observer?.unobserve(node);
-			}
-		};
+			{ threshold: 0 }
+		);
 	}
 
-	// Register item ref
-	function registerItem(node: HTMLElement, index: number) {
-		itemRefs[index] = node;
-		return {
-			update(newIndex: number) {
-				itemRefs[newIndex] = node;
-			},
-			destroy() {
-				// Clean up reference
-			}
-		};
-	}
+	node.setAttribute('data-uuid', uuid);
+	observer.observe(node);
 
-	// Auto-scroll when dragging near edges
-	function startAutoScroll(clientY: number) {
-		if (!scrollContainer) return;
-
-		const containerRect = scrollContainer.getBoundingClientRect();
-		const distanceFromTop = clientY - containerRect.top;
-		const distanceFromBottom = containerRect.bottom - clientY;
-
-		let scrollDelta = 0;
-
-		if (distanceFromTop < EDGE_THRESHOLD && scrollContainer.scrollTop > 0) {
-			// Near top edge - scroll up
-			scrollDelta = -SCROLL_SPEED * (1 - distanceFromTop / EDGE_THRESHOLD);
-		} else if (
-			distanceFromBottom < EDGE_THRESHOLD &&
-			scrollContainer.scrollTop < scrollContainer.scrollHeight - scrollContainer.clientHeight
-		) {
-			// Near bottom edge - scroll down
-			scrollDelta = SCROLL_SPEED * (1 - distanceFromBottom / EDGE_THRESHOLD);
+	return {
+		update(newUuid: string) {
+			node.setAttribute('data-uuid', newUuid);
+		},
+		destroy() {
+			observer?.unobserve(node);
 		}
+	};
+}
 
-		if (scrollDelta !== 0) {
-			scrollContainer.scrollTop += scrollDelta;
-
-			// Continue auto-scroll animation
-			autoScrollAnimationId = requestAnimationFrame(() => startAutoScroll(clientY));
-		} else {
-			stopAutoScroll();
+// Register item ref
+function registerItem(node: HTMLElement, index: number) {
+	itemRefs[index] = node;
+	return {
+		update(newIndex: number) {
+			itemRefs[newIndex] = node;
+		},
+		destroy() {
+			// Clean up reference
 		}
+	};
+}
+
+// Auto-scroll when dragging near edges
+function startAutoScroll(clientY: number) {
+	if (!scrollContainer) return;
+
+	const containerRect = scrollContainer.getBoundingClientRect();
+	const distanceFromTop = clientY - containerRect.top;
+	const distanceFromBottom = containerRect.bottom - clientY;
+
+	let scrollDelta = 0;
+
+	if (distanceFromTop < EDGE_THRESHOLD && scrollContainer.scrollTop > 0) {
+		// Near top edge - scroll up
+		scrollDelta = -SCROLL_SPEED * (1 - distanceFromTop / EDGE_THRESHOLD);
+	} else if (
+		distanceFromBottom < EDGE_THRESHOLD &&
+		scrollContainer.scrollTop < scrollContainer.scrollHeight - scrollContainer.clientHeight
+	) {
+		// Near bottom edge - scroll down
+		scrollDelta = SCROLL_SPEED * (1 - distanceFromBottom / EDGE_THRESHOLD);
 	}
 
-	function stopAutoScroll() {
-		if (autoScrollAnimationId !== null) {
-			cancelAnimationFrame(autoScrollAnimationId);
-			autoScrollAnimationId = null;
-		}
-	}
+	if (scrollDelta !== 0) {
+		scrollContainer.scrollTop += scrollDelta;
 
-	// Pointer-based drag handlers
-	function handlePointerDown(e: PointerEvent, index: number) {
-		if (!draggingEnabled || index === musicStore.currentIndex) return;
-
-		const target = e.currentTarget as HTMLElement;
-		target.setPointerCapture(e.pointerId);
-
-		draggedIndex = index;
-		const rect = target.getBoundingClientRect();
-		dragOffsetY = e.clientY - rect.top;
-		currentY = e.clientY;
-	}
-
-	function handlePointerMove(e: PointerEvent) {
-		if (draggedIndex === null) return;
-
-		currentY = e.clientY;
-
-		// Handle auto-scroll when near edges
+		// Continue auto-scroll animation
+		autoScrollAnimationId = requestAnimationFrame(() => startAutoScroll(clientY));
+	} else {
 		stopAutoScroll();
-		startAutoScroll(e.clientY);
+	}
+}
 
-		// Calculate which item we're over using offsetTop (unaffected by CSS transforms)
-		if (!scrollContainer) return;
+function stopAutoScroll() {
+	if (autoScrollAnimationId !== null) {
+		cancelAnimationFrame(autoScrollAnimationId);
+		autoScrollAnimationId = null;
+	}
+}
 
-		const relativeY =
-			e.clientY - scrollContainer.getBoundingClientRect().top + scrollContainer.scrollTop;
+// Pointer-based drag handlers
+function handlePointerDown(e: PointerEvent, index: number) {
+	if (!draggingEnabled || index === musicStore.currentIndex) return;
 
-		let newOverIndex = null;
-		const len = musicStore.queueCount;
-		for (let i = 0; i < len; i++) {
-			const item = itemRefs[i];
-			if (!item || !item.isConnected) continue;
-			const itemTop = item.offsetTop;
-			const itemMiddle = itemTop + item.offsetHeight / 2;
+	const target = e.currentTarget as HTMLElement;
+	target.setPointerCapture(e.pointerId);
 
-			if (relativeY < itemMiddle) {
-				newOverIndex = i;
-				break;
-			}
-			newOverIndex = i + 1;
+	draggedIndex = index;
+	const rect = target.getBoundingClientRect();
+	dragOffsetY = e.clientY - rect.top;
+	currentY = e.clientY;
+}
+
+function handlePointerMove(e: PointerEvent) {
+	if (draggedIndex === null) return;
+
+	currentY = e.clientY;
+
+	// Handle auto-scroll when near edges
+	stopAutoScroll();
+	startAutoScroll(e.clientY);
+
+	// Calculate which item we're over using offsetTop (unaffected by CSS transforms)
+	if (!scrollContainer) return;
+
+	const relativeY =
+		e.clientY - scrollContainer.getBoundingClientRect().top + scrollContainer.scrollTop;
+
+	let newOverIndex = null;
+	const len = musicStore.queueCount;
+	for (let i = 0; i < len; i++) {
+		const item = itemRefs[i];
+		if (!item || !item.isConnected) continue;
+		const itemTop = item.offsetTop;
+		const itemMiddle = itemTop + item.offsetHeight / 2;
+
+		if (relativeY < itemMiddle) {
+			newOverIndex = i;
+			break;
 		}
-
-		if (newOverIndex !== null && newOverIndex !== draggedIndex) {
-			dragOverIndex = Math.min(newOverIndex, musicStore.queueCount - 1);
-		}
+		newOverIndex = i + 1;
 	}
 
-	async function handlePointerUp(e: PointerEvent) {
-		if (draggedIndex === null) return;
-
-		stopAutoScroll();
-
-		const target = e.currentTarget as HTMLElement;
-		target.releasePointerCapture(e.pointerId);
-
-		const fromIndex = draggedIndex;
-		const toIndex = dragOverIndex ?? draggedIndex;
-
-		draggedIndex = null;
-		dragOverIndex = null;
-
-		if (fromIndex !== toIndex) {
-			// Let QueueService.moveTo handle all state updates to avoid race condition
-			await QueueService.moveTo(fromIndex, toIndex);
-		}
+	if (newOverIndex !== null && newOverIndex !== draggedIndex) {
+		dragOverIndex = Math.min(newOverIndex, musicStore.queueCount - 1);
 	}
+}
 
-	function handlePointerCancel() {
-		stopAutoScroll();
-		draggedIndex = null;
-		dragOverIndex = null;
+async function handlePointerUp(e: PointerEvent) {
+	if (draggedIndex === null) return;
+
+	stopAutoScroll();
+
+	const target = e.currentTarget as HTMLElement;
+	target.releasePointerCapture(e.pointerId);
+
+	const fromIndex = draggedIndex;
+	const toIndex = dragOverIndex ?? draggedIndex;
+
+	draggedIndex = null;
+	dragOverIndex = null;
+
+	if (fromIndex !== toIndex) {
+		// Let QueueService.moveTo handle all state updates to avoid race condition
+		await QueueService.moveTo(fromIndex, toIndex);
 	}
+}
 
-	// Calculate transform for dragged item
-	function getDragTransform(index: number): string {
-		if (draggedIndex !== index) return '';
+function handlePointerCancel() {
+	stopAutoScroll();
+	draggedIndex = null;
+	dragOverIndex = null;
+}
 
-		const item = itemRefs[index];
-		if (!item) return '';
+// Calculate transform for dragged item
+function getDragTransform(index: number): string {
+	if (draggedIndex !== index) return '';
 
-		// Use offsetParent (the relative container) to calculate stable layout position
-		// ignoring the current transform
-		const parent = item.offsetParent as HTMLElement;
-		if (!parent) return '';
+	const item = itemRefs[index];
+	if (!item) return '';
 
-		const parentRect = parent.getBoundingClientRect();
-		// Layout top relative to viewport = parent viewport top + item offset top
-		const currentLayoutTop = parentRect.top + item.offsetTop;
+	// Use offsetParent (the relative container) to calculate stable layout position
+	// ignoring the current transform
+	const parent = item.offsetParent as HTMLElement;
+	if (!parent) return '';
 
-		const targetY = currentY - dragOffsetY;
+	const parentRect = parent.getBoundingClientRect();
+	// Layout top relative to viewport = parent viewport top + item offset top
+	const currentLayoutTop = parentRect.top + item.offsetTop;
 
-		return `translateY(${targetY - currentLayoutTop}px)`;
-	}
+	const targetY = currentY - dragOffsetY;
 
+	return `translateY(${targetY - currentLayoutTop}px)`;
+}
+
+export function useMusicQueueList() {
 	return {
 		get draggingEnabled() {
 			return draggingEnabled;
