@@ -2,6 +2,7 @@ import { isMobile } from '$lib/platform';
 import mobileStore from '$lib/stores/mobile.svelte';
 import filterStore from '$lib/stores/filter.svelte';
 import filterBarStore from '$lib/stores/filterBar.svelte';
+import playerBarStore from '$lib/stores/playerBar.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { type MusicData, MusicListType } from '$lib/features/music/types';
 import sidebarStore from '$lib/stores/sidebar.svelte';
@@ -47,6 +48,46 @@ let animatingOutItems = $state<Set<number>>(new Set());
 const paddingTop = $derived((isMobile() ? mobileStore.statusBarHeight : 0) + filterBarStore.height);
 const itemHeight = $derived(state.itemWidth + (window.innerWidth > 640 ? 52 : 44));
 const isHorizontal = $derived(musicStore.listType !== MusicListType.Album);
+
+const containerHeight = $derived.by(() => {
+	if (musicStore.listType === MusicListType.Playlist ? playlistStore.list.length === 0 : visualIndices.size === 0) {
+		return 0;
+	}
+	if (isHorizontal) {
+		return itemHeight;
+	}
+	return (
+		window.innerHeight -
+		filterBarStore.height -
+		playerBarStore.height -
+		mobileStore.navigationBarHeight -
+		mobileStore.statusBarHeight
+	);
+});
+
+const bottomPadding = $derived(
+	isHorizontal ? 0 : mobileStore.navigationBarHeight + mobileStore.statusBarHeight
+);
+
+const scrollClass = $derived(
+	isHorizontal
+		? 'scrollbar-hidden flex h-full overflow-x-auto'
+		: 'scrollbar-hidden h-full overflow-y-auto'
+);
+
+function itemClass(inViewport: boolean, hiddenBySidebar: boolean, extraClass = ''): string {
+	const animation = inViewport
+		? hiddenBySidebar
+			? 'animate__animated animate__fadeOut'
+			: 'animate__animated animate__fadeIn'
+		: '';
+	return [extraClass, animation].filter(Boolean).join(' ');
+}
+
+function itemStyle(hiddenBySidebar: boolean): string {
+	return `width: ${state.itemWidth}px; animation-duration: 500ms; ${hiddenBySidebar ? 'pointer-events: none; opacity: 0;' : 'opacity: 1;'
+		}`;
+}
 
 function updateItemWidth() {
 	const width = window.innerWidth;
@@ -336,29 +377,24 @@ export function useAlbumList() {
 			}
 		});
 		return {
-			destroy() {}
+			destroy() { }
 		};
 	}
 
 	return {
 		state,
 
-		get isHorizontal() {
-			return isHorizontal;
-		},
-		get paddingTop() {
-			return paddingTop;
-		},
-		get itemHeight() {
-			return itemHeight;
-		},
-		get data() {
-			return data;
-		},
-		get visibleItems() {
-			return visibleItems;
-		},
+		get isHorizontal() { return isHorizontal; },
+		get paddingTop() { return paddingTop; },
+		get itemHeight() { return itemHeight; },
+		get containerHeight() { return containerHeight; },
+		get bottomPadding() { return bottomPadding; },
+		get scrollClass() { return scrollClass; },
+		get data() { return data; },
+		get visibleItems() { return visibleItems; },
 
+		itemClass,
+		itemStyle,
 		updateItemWidth,
 		isVisibleByFilter,
 		shouldHideHorizontalItem,

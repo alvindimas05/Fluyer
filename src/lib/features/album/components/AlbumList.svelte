@@ -1,7 +1,4 @@
 <script lang="ts">
-	import mobileStore from '$lib/stores/mobile.svelte';
-	import filterBarStore from '$lib/stores/filterBar.svelte';
-	import playerBarStore from '$lib/stores/playerBar.svelte';
 	import musicStore from '$lib/stores/music.svelte';
 	import playlistStore from '$lib/stores/playlist.svelte';
 	import { MusicListType } from '$lib/features/music/types';
@@ -18,27 +15,17 @@
 
 <svelte:window onresize={vm.updateItemWidth} />
 
-<div
-	class="w-screen"
-	style="height: {vm.filteredItemCount === 0
-		? 0
-		: vm.isHorizontal
-			? vm.itemHeight
-			: window.innerHeight -
-				filterBarStore.height -
-				playerBarStore.height -
-				mobileStore.navigationBarHeight -
-				mobileStore.statusBarHeight}px;"
->
-	{#if isPlaylistMode}
-		<!-- Playlist grid layout -->
-		<div
-			bind:this={scrollContainer}
-			use:vm.scrollable
-			onscroll={vm.handleScroll}
-			class="scrollbar-hidden h-full overflow-y-auto"
-			style="padding-bottom: {mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
-		>
+<div class="w-screen" style="height: {vm.containerHeight}px;">
+	<div
+		bind:this={scrollContainer}
+		use:vm.scrollable
+		class={vm.scrollClass}
+		onscroll={vm.handleScroll}
+		onwheel={vm.isHorizontal ? (e) => vm.handleWheel(e, scrollContainer) : undefined}
+		style="padding-bottom: {vm.bottomPadding}px;"
+	>
+		{#if isPlaylistMode}
+			<!-- Playlist grid layout -->
 			<div
 				class="grid"
 				style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
@@ -48,14 +35,8 @@
 					{@const inViewport = vm.visibleItems.has(index)}
 					<div
 						use:vm.observeElement={index}
-						class={inViewport
-							? hiddenBySidebar
-								? 'animate__animated animate__fadeOut'
-								: 'animate__animated animate__fadeIn'
-							: ''}
-						style="width: {vm.state.itemWidth}px; animation-duration: 500ms; {hiddenBySidebar
-							? 'pointer-events: none; opacity: 0;'
-							: 'opacity: 1;'}"
+						class={vm.itemClass(inViewport, hiddenBySidebar)}
+						style={vm.itemStyle(hiddenBySidebar)}
 						onanimationend={() => vm.handleAnimationEnd(index, hiddenBySidebar)}
 					>
 						{#if inViewport}
@@ -64,17 +45,8 @@
 					</div>
 				{/each}
 			</div>
-		</div>
-	{:else if vm.isHorizontal}
-		<!-- Horizontal layout -->
-		<div
-			bind:this={scrollContainer}
-			use:vm.scrollable
-			class="scrollbar-hidden flex h-full overflow-x-auto"
-			onscroll={vm.handleScroll}
-			onwheel={(e) => vm.handleWheel(e, scrollContainer)}
-			style="padding-bottom: 0;"
-		>
+		{:else if vm.isHorizontal}
+			<!-- Horizontal layout -->
 			{#each vm.data as tracks, index}
 				{@const hiddenBySidebar = vm.shouldHideHorizontalItem(index)}
 				{@const visibleByFilter = vm.isVisibleByFilter(tracks)}
@@ -82,14 +54,8 @@
 				{@const shouldRender = vm.shouldRenderHorizontalItem(index, tracks)}
 				<div
 					use:vm.observeElement={index}
-					class="flex-shrink-0 {inViewport
-						? hiddenBySidebar
-							? 'animate__animated animate__fadeOut'
-							: 'animate__animated animate__fadeIn'
-						: ''}"
-					style="width: {vm.state.itemWidth}px; animation-duration: 500ms; {hiddenBySidebar
-						? 'pointer-events: none; opacity: 0;'
-						: 'opacity: 1;'}"
+					class={vm.itemClass(inViewport, hiddenBySidebar, 'flex-shrink-0')}
+					style={vm.itemStyle(hiddenBySidebar)}
 					style:display={visibleByFilter ? undefined : 'none'}
 					onanimationend={() => vm.handleAnimationEnd(index, hiddenBySidebar)}
 				>
@@ -98,16 +64,8 @@
 					{/if}
 				</div>
 			{/each}
-		</div>
-	{:else}
-		<!-- Grid layout -->
-		<div
-			bind:this={scrollContainer}
-			use:vm.scrollable
-			onscroll={vm.handleScroll}
-			class="scrollbar-hidden h-full overflow-y-auto"
-			style="padding-bottom: {mobileStore.navigationBarHeight + mobileStore.statusBarHeight}px;"
-		>
+		{:else}
+			<!-- Grid layout -->
 			<div
 				class="grid"
 				style="grid-template-columns: repeat({vm.state.columnCount}, minmax(0, 1fr));"
@@ -119,14 +77,8 @@
 					{@const shouldRender = vm.shouldRenderGridItem(index, tracks)}
 					<div
 						use:vm.observeElement={index}
-						class={inViewport
-							? hiddenBySidebar
-								? 'animate__animated animate__fadeOut'
-								: 'animate__animated animate__fadeIn'
-							: ''}
-						style="width: {vm.state.itemWidth}px; animation-duration: 500ms; {hiddenBySidebar
-							? 'pointer-events: none; opacity: 0;'
-							: 'opacity: 1;'}"
+						class={vm.itemClass(inViewport, hiddenBySidebar)}
+						style={vm.itemStyle(hiddenBySidebar)}
 						style:display={visibleByFilter ? undefined : 'none'}
 						onanimationend={() => vm.handleAnimationEnd(index, hiddenBySidebar)}
 					>
@@ -136,6 +88,6 @@
 					</div>
 				{/each}
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </div>
