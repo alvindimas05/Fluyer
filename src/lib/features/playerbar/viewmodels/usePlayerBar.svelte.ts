@@ -13,9 +13,6 @@ import LibraryService from '$lib/services/LibraryService.svelte';
 import { CoverArtSize } from '$lib/services/CoverArtService.svelte';
 
 let element = $state<HTMLDivElement>();
-let oldMusic: MusicData | undefined = $state(undefined);
-let title = $state(MusicConfig.defaultTitle);
-let artist = $state(MusicConfig.defaultArtist);
 let coverArt = $state<Promise<string | null> | null>(null);
 let currentBlobUrl: string | null = null;
 let currentMusicPath: string | null = null;
@@ -65,22 +62,6 @@ function redirectToPlay() {
 
 function handleVolumeButton() {
 	musicStore.volume = musicStore.volume > 0 ? 0 : 1;
-}
-
-function refresh() {
-	const music = musicStore.currentMusic;
-
-	if (!music) {
-		title = MusicConfig.defaultTitle;
-		artist = MusicConfig.defaultArtist;
-		return;
-	}
-
-	if (oldMusic && oldMusic.path === music.path) return;
-
-	oldMusic = music;
-	title = music.title!;
-	artist = music.artist;
 }
 
 function handleProgressClick(percentage: number) {
@@ -141,7 +122,6 @@ export function usePlayerBar() {
 	$effect(() => {
 		musicStore.currentIndex;
 		musicStore.isLibraryLoaded;
-		refresh();
 	});
 
 	return {
@@ -151,12 +131,6 @@ export function usePlayerBar() {
 		set element(value) {
 			element = value;
 			updatePlayerBarHeight();
-		},
-		get title() {
-			return title;
-		},
-		get artist() {
-			return artist;
 		},
 		get coverArt() {
 			return coverArt;

@@ -84,12 +84,12 @@
 						<!-- Note: Idk why the title scroll doesn't work without sacrificing first element -->
 						<p class="animate-scroll-overflow-text"></p>
 						<p class="animate-scroll-overflow-text overflow-x-hidden whitespace-nowrap font-medium">
-							{vm.title}
+							{musicStore.currentMusic?.title ?? MusicConfig.defaultTitle}
 						</p>
 						<p
 							class="animate-scroll-overflow-text overflow-x-hidden whitespace-nowrap text-opacity-80"
 						>
-							{vm.artist}
+							{musicStore.currentMusic?.artist ?? MusicConfig.defaultArtist}
 						</p>
 					</div>
 				</div>
