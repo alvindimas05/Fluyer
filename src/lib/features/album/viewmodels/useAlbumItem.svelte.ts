@@ -7,7 +7,7 @@ import ProgressService from '$lib/services/ProgressService.svelte';
 import { COVER_ART_DEBOUNCE_DELAY, CoverArtSize } from '$lib/services/CoverArtService.svelte';
 import QueueService from '$lib/services/QueueService.svelte';
 import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
-import TauriLibraryAPI from '$lib/tauri/TauriLibraryAPI';
+import TauriLibraryAPI, { CollectionType } from '$lib/tauri/TauriLibraryAPI';
 
 export function useAlbumItem(
 	getAlbumIndex: () => number,
@@ -95,7 +95,7 @@ export function useAlbumItem(
 	async function playAlbum() {
 		if (!music) return;
 		await TauriLibraryAPI.collectionAddAndPlay({
-			type: 'albumIndex',
+			type: CollectionType.AlbumIndex,
 			index: albumIndex,
 			search: filterStore.search,
 			sortAsc: filterBarStore.sortAsc

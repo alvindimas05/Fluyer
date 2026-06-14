@@ -21,6 +21,7 @@ pub enum CollectionContext {
     AlbumIndex {
         index: usize,
         search: String,
+        #[serde(rename = "sortAsc")]
         sort_asc: bool,
     },
     Folder {

@@ -15,11 +15,18 @@ export interface MusicFilter {
 	playlistPaths?: string[];
 }
 
+export enum CollectionType {
+	Album = 'album',
+	AlbumIndex = 'albumIndex',
+	Folder = 'folder',
+	Playlist = 'playlist'
+}
+
 export type CollectionContext =
-	| { type: 'album'; name: string }
-	| { type: 'albumIndex'; index: number; search: string; sortAsc: boolean }
-	| { type: 'folder'; path: string }
-	| { type: 'playlist'; paths: string[] };
+	| { type: CollectionType.Album; name: string }
+	| { type: CollectionType.AlbumIndex; index: number; search: string; sortAsc: boolean }
+	| { type: CollectionType.Folder; path: string }
+	| { type: CollectionType.Playlist; paths: string[] };
 
 const TauriLibraryAPI = {
 	load: async (): Promise<LibraryCounts> => {

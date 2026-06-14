@@ -4,7 +4,7 @@ import { MusicConfig } from '$lib/constants/MusicConfig';
 import ProgressService from '$lib/services/ProgressService.svelte';
 import MusicPlayerService from '$lib/services/MusicPlayerService.svelte';
 import ToastService from '$lib/services/ToastService.svelte';
-import TauriLibraryAPI, { type CollectionContext } from '$lib/tauri/TauriLibraryAPI';
+import TauriLibraryAPI, { CollectionType, type CollectionContext } from '$lib/tauri/TauriLibraryAPI';
 import filterStore from '$lib/stores/filter.svelte';
 import musicStore from '$lib/stores/music.svelte';
 import { MusicListType } from '$lib/features/music/types';
@@ -27,13 +27,13 @@ const showBackButton = $derived.by(async () => {
 
 function buildContext(): CollectionContext | null {
 	if (musicStore.listType === MusicListType.Playlist && playlistStore.selectedPlaylist) {
-		return { type: 'playlist', paths: playlistStore.selectedPlaylist.paths };
+		return { type: CollectionType.Playlist, paths: playlistStore.selectedPlaylist.paths };
 	}
 	if (musicStore.listType === MusicListType.Folder && folderStore.currentFolder) {
-		return { type: 'folder', path: folderStore.currentFolder.path };
+		return { type: CollectionType.Folder, path: folderStore.currentFolder.path };
 	}
 	if (album) {
-		return { type: 'album', name: album.name };
+		return { type: CollectionType.Album, name: album.name };
 	}
 	return null;
 }
