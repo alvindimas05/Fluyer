@@ -246,3 +246,49 @@ pub fn library_collection_shuffle_and_play(
     state.music_player.add_track(tracks);
     state.music_player.play();
 }
+
+#[tauri::command]
+pub async fn library_sync() {
+    #[cfg(target_os = "android")]
+    if !crate::commands::mobile::audio_permission_read_check() {
+        return;
+    }
+
+    let mut search_dirs: Vec<String> = vec![];
+
+    // Get store music paths
+    let dir = match crate::state::app_store().get(crate::music::commands::directory::MUSIC_STORE_PATH_NAME) {
+        Some(d) => d.to_string(),
+        None => return,
+    };
+    let dir_paths = dir.split(crate::folder::types::MUSIC_PATH_SEPARATOR);
+
+    for d in dir_paths {
+        let trimmed = d.trim().trim_matches('"');
+        if !trimmed.is_empty() {
+            search_dirs.push(trimmed.to_string());
+        }
+    }
+
+    if crate::platform::is_ios() {
+        search_dirs.push(crate::folder::scanner::get_home_dir())
+    }
+
+    let now = std::time::Instant::now();
+    // Scan directories for music files
+    let paths = crate::folder::scanner::scan_directories(search_dirs);
+    crate::info!("Scan directories took {}s", now.elapsed().as_secs_f64());
+
+    let now = std::time::Instant::now();
+    // Process files and update database
+    crate::folder::scanner::process_supported_files(&paths).await;
+    crate::info!("Process files took {}s", now.elapsed().as_secs_f64());
+
+    let now = std::time::Instant::now();
+    crate::folder::database::delete_non_existing_paths(paths);
+    crate::info!(
+        "Delete non existing paths took {}s",
+        now.elapsed().as_secs_f64()
+    );
+}
+

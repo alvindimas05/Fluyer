@@ -11,7 +11,6 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     crate::music::commands::music_clear,
     crate::music::commands::music_repeat_mode_set,
     crate::music::commands::music_position_set,
-    crate::folder::commands::music_all_get,
     crate::music::commands::music_queue_add,
     crate::music::commands::music_queue_remove,
     crate::music::commands::music_volume_set,
@@ -47,6 +46,7 @@ pub const COMMAND_HANDLERS: fn(tauri::ipc::Invoke) -> bool = tauri::generate_han
     crate::library::commands::library_collection_add_and_play,
     crate::library::commands::library_collection_add_to_queue,
     crate::library::commands::library_collection_shuffle_and_play,
+    crate::library::commands::library_sync,
     // System/Log commands
     crate::system::commands::log_error,
     crate::system::commands::log_info,

@@ -7,7 +7,7 @@ export const TauriCommands = {
 	MUSIC_REPEAT_MODE_SET: 'music_repeat_mode_set',
 	MUSIC_PLAYER_SYNC: 'music_player_sync',
 	MUSIC_PLAYER_REQUEST_SYNC: 'music_player_request_sync',
-	MUSIC_ALL_GET: 'music_all_get',
+	LIBRARY_SYNC: 'library_sync',
 	MUSIC_INFO_GET: 'music_info_get',
 	MUSIC_POSITION_SET: 'music_position_set',
 	MUSIC_QUEUE_ADD: 'music_queue_add',

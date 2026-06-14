@@ -33,9 +33,9 @@
 	let tooltipVisible = $state(false);
 </script>
 
-{#if !musicStore.isLibraryLoaded}
+{#if musicStore.isLibraryLoaded === false}
 	<Intro />
-{:else}
+{:else if musicStore.isLibraryLoaded === true}
 	<!--{#if isDesktop()}-->
 	<!--    <Equalizer />-->
 	<!--{/if}-->

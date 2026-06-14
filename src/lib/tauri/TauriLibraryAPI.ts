@@ -93,8 +93,8 @@ const TauriLibraryAPI = {
 		return invoke<void>(TauriCommands.LIBRARY_COLLECTION_SHUFFLE_AND_PLAY, { context });
 	},
 
-	getMusicList: async (): Promise<MusicData[] | null> => {
-		return invoke<MusicData[] | null>(TauriCommands.MUSIC_ALL_GET);
+	sync: async (): Promise<void> => {
+		return invoke<void>(TauriCommands.LIBRARY_SYNC);
 	}
 };
 

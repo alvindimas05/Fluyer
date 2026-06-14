@@ -6,8 +6,8 @@ const musicStore = $state({
 	listCount: 0,
 	albumCount: 0,
 	listType: MusicListType.All,
-	// null = still loading, 0 = loaded (empty), >0 = loaded with data
-	isLibraryLoaded: false as boolean,
+	// null = still loading, false = paths is empty, true = loaded with data
+	isLibraryLoaded: null as boolean | null,
 
 	// Playback
 	isPlaying: false,
