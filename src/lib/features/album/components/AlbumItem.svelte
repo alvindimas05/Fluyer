@@ -19,20 +19,12 @@
 
 <div class="col-auto row-[1] h-fit px-3 pb-3">
 	<div class="relative w-full">
-		{#if vm.isValidFilterAlbum}
-			<div
-				class="absolute left-0 top-0 z-10 h-full w-full cursor-pointer
-            rounded-lg border-2 border-white"
-				ondblclick={vm.playAlbum}
-			></div>
-		{:else}
-			<div
-				class="album-item-actions absolute z-20 h-full w-full cursor-pointer
-                rounded-lg border-2 border-white bg-white/20"
-				onclick={vm.setFilterAlbum}
-				ondblclick={vm.playAlbum}
-			></div>
-		{/if}
+		<div
+			class="absolute left-0 top-0 w-full h-full cursor-pointer rounded-lg border-2 border-white transition-all
+            {vm.isValidFilterAlbum ? 'z-10' : 'album-item-actions z-20 bg-white/20'}"
+			onclick={!vm.isValidFilterAlbum ? vm.setFilterAlbum : undefined}
+			ondblclick={vm.playAlbum}
+		></div>
 		{#await vm.coverArt}
 			<div class="aspect-square w-full"></div>
 		{:then image}
