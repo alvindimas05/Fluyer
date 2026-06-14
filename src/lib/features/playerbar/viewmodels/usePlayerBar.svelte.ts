@@ -119,11 +119,6 @@ export function usePlayerBar() {
 		volumePercentage = musicStore.volumePercentage;
 	});
 
-	$effect(() => {
-		musicStore.currentIndex;
-		musicStore.isLibraryLoaded;
-	});
-
 	return {
 		get element() {
 			return element;
