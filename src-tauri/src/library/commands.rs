@@ -34,7 +34,7 @@ pub enum CollectionContext {
 
 #[tauri::command]
 pub async fn library_load(lib: State<'_, SharedLibraryState>) -> Result<LibraryCounts, String> {
-    let raw = crate::folder::database::get_all_music_from_db();
+    let raw = crate::folder::database::get_tracks();
     let mut guard = lib.0.write().map_err(|e| e.to_string())?;
     guard.rebuild(raw);
     Ok(LibraryCounts {

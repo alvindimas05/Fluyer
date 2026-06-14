@@ -14,7 +14,7 @@ pub fn get_folder_first_music_path(conn: &mut Connection, path: &str) -> Option<
     None
 }
 
-pub fn get_all_music_from_db() -> Vec<MusicMetadata> {
+pub fn get_tracks() -> Vec<MusicMetadata> {
     let query = "
         SELECT path, duration, title, artist, album, album_artist, track_number,
         genre, bits_per_sample, sample_rate, date, id FROM musics
