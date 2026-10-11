@@ -8,6 +8,7 @@
 
 mod album;
 mod artwork;
+mod backdrop;
 mod discord;
 mod events;
 mod library;

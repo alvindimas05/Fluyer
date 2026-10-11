@@ -10,9 +10,11 @@ using System.Runtime.InteropServices.WindowsRuntime;
 namespace Fluyer.Components;
 
 /// <summary>
-/// Animated, blurred artwork backdrop behind the whole window. Refresh key
-/// mirrors macOS (<c>track path + palette</c>): artwork re-uploads only when
-/// the song or its colors change; the GPU animates continuously at 15fps and
+/// Animated, blurred backdrop behind the whole window. Input is the cover or a
+/// Rust-generated square of palette blocks, per <see cref="SettingsState.BackdropSource"/>;
+/// no track (or no cover) always uses Rust's grey blocks. Refresh key mirrors
+/// macOS (<c>source + track path + palette</c>): the image re-uploads only when
+/// one of those changes; the GPU animates continuously at 15fps and
 /// each frame is uploaded as a bitmap (capped ~640px long edge — blurred to
 /// mush either way). When Direct3D is unavailable, falls
 /// back to the core's pre-blurred ambient frame as a static bitmap.
@@ -89,6 +91,7 @@ public sealed partial class AnimatedBackgroundView : UserControl
         {
             newSettings.PropertyChanged += self.OnSettingsChanged;
         }
+        _ = self.RefreshArtworkAsync(); // source is part of the key
     }
 
     private void OnPlaybackChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -104,6 +107,10 @@ public sealed partial class AnimatedBackgroundView : UserControl
         if (e.PropertyName == nameof(SettingsState.AnimatedBackground) && IsLoaded)
         {
             ApplyMode();
+        }
+        else if (e.PropertyName == nameof(SettingsState.BackdropSource))
+        {
+            _ = RefreshArtworkAsync();
         }
     }
 
@@ -256,24 +263,26 @@ public sealed partial class AnimatedBackgroundView : UserControl
     private async Task RefreshArtworkAsync()
     {
         var covers = Covers;
-        var track = Playback?.PlayView.Track;
-        if (covers is null || track is null)
+        if (covers is null || Playback is null)
         {
             return;
         }
-        var palette = string.Join(";", Playback!.PlayView.Palette.Select(c => $"{c.R},{c.G},{c.B}"));
-        var key = $"{track.Path}|{palette}";
+        var key = CurrentKey();
         if (key == _appliedKey)
         {
             return;
         }
         _appliedKey = key;
 
-        // Backdrop source is blurred to mush, so 1200px is ample (macOS backdropPixels).
-        var jpeg = await covers.CurrentBytes(1200).ConfigureAwait(true);
+        var source = Settings?.BackdropSource ?? BackdropSource.Artwork;
+        var jpeg = await covers.BackdropBytes(source, Playback.PlayView.Track is not null).ConfigureAwait(true);
         if (key != CurrentKey())
         {
-            return; // track changed mid-load — drop the stale upload
+            return; // track/source changed mid-load — drop the stale upload
+        }
+        if (jpeg is null)
+        {
+            _appliedKey = string.Empty; // engine not ready yet: let the next refresh retry
         }
         if (_renderer is not null)
         {
@@ -301,7 +310,8 @@ public sealed partial class AnimatedBackgroundView : UserControl
             return string.Empty;
         }
         var palette = string.Join(";", playback.PlayView.Palette.Select(c => $"{c.R},{c.G},{c.B}"));
-        return $"{playback.PlayView.Track?.Path}|{palette}";
+        var source = Settings?.BackdropSource ?? BackdropSource.Artwork;
+        return $"{source}|{playback.PlayView.Track?.Path ?? "none"}|{palette}";
     }
 
     private async Task ShowStaticFallbackAsync(byte[]? jpeg)

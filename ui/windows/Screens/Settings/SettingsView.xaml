@@ -50,6 +50,14 @@
         <ToggleSwitch
             Header="Animated background"
             IsOn="{x:Bind State.Settings.AnimatedBackground, Mode=TwoWay}" />
+        <!-- Item order matches the BackdropSource enum (index = value). -->
+        <ComboBox
+            x:Name="BackdropSourcePicker"
+            Header="Backdrop"
+            SelectionChanged="OnBackdropSourceChanged">
+            <x:String>Artwork</x:String>
+            <x:String>Color blocks</x:String>
+        </ComboBox>
         <ToggleSwitch
             Header="Discord Rich Presence"
             IsOn="{x:Bind State.Settings.DiscordRpc, Mode=TwoWay}" />

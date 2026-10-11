@@ -23,12 +23,14 @@ public sealed class SettingsStateTests : IDisposable
         a.AnimatedBackground = false;
         a.DiscordRpc = false;
         a.Volume = 0.3f;
+        a.BackdropSource = BackdropSource.Blocks;
 
         var b = new SettingsState(FilePath);
         Assert.Equal(new[] { "C:\\Music", "D:\\Songs" }, b.MusicFolders);
         Assert.False(b.AnimatedBackground);
         Assert.False(b.DiscordRpc);
         Assert.Equal(0.3f, b.Volume);
+        Assert.Equal(BackdropSource.Blocks, b.BackdropSource);
     }
 
     [Fact]
@@ -68,5 +70,19 @@ public sealed class SettingsStateTests : IDisposable
         Assert.True(s.AnimatedBackground);
         Assert.True(s.DiscordRpc);
         Assert.Equal(1.0f, s.Volume);
+        Assert.Equal(BackdropSource.Artwork, s.BackdropSource);
+    }
+
+    [Theory]
+    [InlineData("\"Sparkles\"")]
+    [InlineData("\"7\"")]
+    public void UnknownBackdropSource_DegradesToArtwork_KeepsOtherSettings(string value)
+    {
+        Directory.CreateDirectory(_dir);
+        File.WriteAllText(FilePath, $"{{\"MusicFolders\":[],\"DiscordRpc\":false,\"BackdropSource\":{value}}}");
+
+        var s = new SettingsState(FilePath);
+        Assert.Equal(BackdropSource.Artwork, s.BackdropSource);
+        Assert.False(s.DiscordRpc);
     }
 }

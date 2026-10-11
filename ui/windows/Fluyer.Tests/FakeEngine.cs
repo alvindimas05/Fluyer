@@ -76,6 +76,7 @@ internal sealed class FakeEngine : IFluyerEngine
     public Task<byte[]?> GetTrackThumbnailAsync(ulong index, uint maxSize) => Task.FromResult<byte[]?>(null);
     public Task<byte[]?> GetAlbumThumbnailAsync(ulong index, uint maxSize) => Task.FromResult<byte[]?>(null);
     public Task<byte[]?> GetCurrentThumbnailAsync(uint maxSize) => Task.FromResult<byte[]?>(null);
+    public Task<byte[]?> GetBlockArtworkAsync() => Task.FromResult<byte[]?>(null);
 
     internal static TrackItemViewModel Track(ulong index, bool current = false) => new(
         Index: index, Path: $"/music/{index}.mp3", Title: $"T{index}", Artist: "A",

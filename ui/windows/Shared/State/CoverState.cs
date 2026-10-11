@@ -49,5 +49,30 @@ public sealed class CoverState : IThumbnailInvalidator
     public Task<byte[]?> CurrentBytes(int px)
         => Engine?.GetCurrentThumbnailAsync((uint)px) ?? Task.FromResult<byte[]?>(null);
 
+    /// <summary>
+    /// Backdrop input as JPEG: the cover in Artwork mode, else Rust's palette blocks.
+    /// No track (or no cover) always gets the grey blocks. Port of macOS <c>backdrop(source:hasTrack:)</c>.
+    /// </summary>
+    public async Task<byte[]?> BackdropBytes(BackdropSource source, bool hasTrack)
+    {
+        var engine = Engine;
+        if (engine is null)
+        {
+            return null;
+        }
+        if (source == BackdropSource.Artwork && hasTrack)
+        {
+            var cover = await engine.GetCurrentThumbnailAsync(BackdropPixels).ConfigureAwait(true);
+            if (cover is { Length: > 0 })
+            {
+                return cover;
+            }
+        }
+        return await engine.GetBlockArtworkAsync().ConfigureAwait(true);
+    }
+
+    /// <summary>ponytail: the backdrop is full-screen and blurred to mush, so 1200px is ample.</summary>
+    private const uint BackdropPixels = 1200;
+
     public void InvalidatePrefix(string prefix) => ThumbnailStore.Shared.InvalidatePrefix(prefix);
 }

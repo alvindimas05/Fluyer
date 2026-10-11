@@ -14,7 +14,10 @@ public sealed class SettingsState : Support.ObservableObject
         List<string> MusicFolders,
         bool AnimatedBackground = true,
         bool DiscordRpc = true,
-        float Volume = 1.0f);
+        float Volume = 1.0f,
+        // Stored as text and parsed leniently: an unknown value (newer build wrote it)
+        // degrades to Artwork instead of failing the whole file.
+        string? BackdropSource = null);
 
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
@@ -23,6 +26,7 @@ public sealed class SettingsState : Support.ObservableObject
     private bool _animatedBackground = true;
     private bool _discordRpc = true;
     private float _volume = 1.0f;
+    private BackdropSource _backdropSource = BackdropSource.Artwork;
 
     public SettingsState(string? path = null)
     {
@@ -38,6 +42,18 @@ public sealed class SettingsState : Support.ObservableObject
         set
         {
             if (SetProperty(ref _animatedBackground, value))
+            {
+                Save();
+            }
+        }
+    }
+
+    public BackdropSource BackdropSource
+    {
+        get => _backdropSource;
+        set
+        {
+            if (SetProperty(ref _backdropSource, value))
             {
                 Save();
             }
@@ -130,6 +146,8 @@ public sealed class SettingsState : Support.ObservableObject
             _animatedBackground = snap.AnimatedBackground;
             _discordRpc = snap.DiscordRpc;
             _volume = Math.Clamp(snap.Volume, 0.0f, 1.0f);
+            _backdropSource = Enum.TryParse<BackdropSource>(snap.BackdropSource, ignoreCase: true, out var source)
+                && Enum.IsDefined(source) ? source : BackdropSource.Artwork;
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
         {
@@ -150,7 +168,7 @@ public sealed class SettingsState : Support.ObservableObject
             Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
             var tmp = _path + ".tmp";
             File.WriteAllText(tmp, JsonSerializer.Serialize(
-                new Snapshot(_folders.ToList(), _animatedBackground, _discordRpc, _volume), JsonOptions));
+                new Snapshot(_folders.ToList(), _animatedBackground, _discordRpc, _volume, _backdropSource.ToString()), JsonOptions));
             File.Move(tmp, _path, overwrite: true);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

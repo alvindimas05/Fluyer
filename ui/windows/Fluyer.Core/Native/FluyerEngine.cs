@@ -64,6 +64,8 @@ public interface IFluyerEngine : IDisposable
     public Task<byte[]?> GetTrackThumbnailAsync(ulong index, uint maxSize);
     public Task<byte[]?> GetAlbumThumbnailAsync(ulong index, uint maxSize);
     public Task<byte[]?> GetCurrentThumbnailAsync(uint maxSize);
+    /// <summary>Palette-block backdrop square as JPEG (grey when nothing plays); random per call.</summary>
+    public Task<byte[]?> GetBlockArtworkAsync();
 }
 
 /// <summary>
@@ -293,6 +295,16 @@ public sealed class FluyerEngine : IFluyerEngine
 
     public Task<byte[]?> GetCurrentThumbnailAsync(uint maxSize)
         => Task.Run(() => GetCurrentThumbnail(maxSize));
+
+    public Task<byte[]?> GetBlockArtworkAsync() => Task.Run(() =>
+    {
+        if (_handle == IntPtr.Zero)
+        {
+            return null;
+        }
+        var ptr = FluyerNative.fluyer_backdrop_get_block_artwork(_handle, out var len);
+        return TakeBytes(ptr, len);
+    });
 
 
     // MARK: - Callbacks (fire on arbitrary Rust threads — hop to _context)

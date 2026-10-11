@@ -23,6 +23,15 @@ public sealed partial class SettingsView : UserControl
         var empty = (State?.Settings.MusicFolders.Count ?? 0) == 0;
         NoFolders.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
         RescanButton.IsEnabled = !empty;
+        BackdropSourcePicker.SelectedIndex = (int)(State?.Settings.BackdropSource ?? BackdropSource.Artwork);
+    }
+
+    private void OnBackdropSourceChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (State is not null && BackdropSourcePicker.SelectedIndex >= 0)
+        {
+            State.Settings.BackdropSource = (BackdropSource)BackdropSourcePicker.SelectedIndex;
+        }
     }
 
     private void OnAddFolder(object sender, RoutedEventArgs e) => AddFolderRequested?.Invoke();

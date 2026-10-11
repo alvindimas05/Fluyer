@@ -105,3 +105,9 @@ Status: Implemented. Learner request: "update the queue to have the same styling
 - Rows reuse TrackRow look (44px cover radius 4, title 13 + speaker icon on current, "artist • album" 11, mono duration); cover cache key shared with song grid (library index resolved by path, needs new Library + Covers DPs).
 - Hover: cover becomes jump button (back/forward glyph vs current row), duration swaps to remove. Up/down buttons moved to right-click menu (Play / Move Up / Move Down / Remove), as on macOS.
 - Not ported: drag-to-reorder (macOS List onMove). Hover state not visually verified.
+
+## Windows backdrop source (artwork vs color blocks)
+Status: Implemented (Implement this step).
+Learner decisions: go through FFI (Windows C ABI); show the Artwork / Color blocks picker in Windows settings. Carried from macOS section: Rust generates blocks, default Artwork, grey blocks with no track/cover.
+Accepted additions: C ABI `fluyer_backdrop_get_block_artwork` returns JPEG via `bytes_into_c` (renderer already decodes JPEG; size travels in the file); `IFluyerEngine.GetBlockArtworkAsync`; `CoverState.BackdropBytes(source, hasTrack)`; `BackdropSource` enum + persisted string setting (unknown -> Artwork); ComboBox "Backdrop" in SettingsView; key `source|path|palette`, no-track shows grey blocks.
+Verified: cargo test (new rgba_to_jpeg test), dotnet build, dotnet test 118 pass (round-trip, default, unknown value). Screenshot: no-track grey blocks in both modes. Not verified: colored blocks while playing (automation could not start playback), picker UI.

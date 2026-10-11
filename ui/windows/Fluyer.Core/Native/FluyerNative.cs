@@ -193,6 +193,9 @@ internal static class FluyerNative
     public static extern IntPtr fluyer_artwork_get_current_thumbnail(
         IntPtr engine, uint maxSize, out ulong outLen);
 
+    [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr fluyer_backdrop_get_block_artwork(IntPtr engine, out ulong outLen);
+
 
 
     [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
