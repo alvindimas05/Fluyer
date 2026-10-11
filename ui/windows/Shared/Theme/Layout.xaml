@@ -103,7 +103,8 @@
     <x:Double x:Key="PlayCoverToControls">16</x:Double>
     <x:Double x:Key="PlayInitialCoverSide">300</x:Double>
     <x:Double x:Key="PlayMinCoverSide">200</x:Double>
-    <x:Double x:Key="PlayMaxCoverSide">360</x:Double>
+    <!-- Above macOS (360): the cap, not the column ratio, limited the cover on wide windows. -->
+    <x:Double x:Key="PlayMaxCoverSide">480</x:Double>
     <!-- Gap between the cover column and lyrics; also subtracted from the column for the cover side. -->
     <x:Double x:Key="PlayColumnGutter">40</x:Double>
     <x:Double x:Key="PlayCoverColumnRatio">0.40</x:Double>
@@ -115,16 +116,17 @@
     <x:Double x:Key="PlayControlsInfoSpacing">10</x:Double>
     <GridLength x:Key="PlayControlsTimeLabelWidth">48</GridLength>
     <x:Double x:Key="PlayControlsSeekHeight">8</x:Double>
-    <Thickness x:Key="PlayControlsTransportMargin">0,20,0,0</Thickness>
+    <Thickness x:Key="PlayControlsTransportMargin">0,16,0,0</Thickness>
     <x:Double x:Key="PlayControlsTransportSpacing">8</x:Double>
     <Thickness x:Key="PlayControlsVolumeMargin">0,8,0,0</Thickness>
     <x:Double x:Key="PlayControlsVolumeSpacing">12</x:Double>
     <x:Double x:Key="PlayControlsVolumeSliderHeight">14</x:Double>
 
-    <!-- Lyrics column (PlayView lyrics list). Vertical padding lets the first/last
-         line scroll to the viewport center. -->
-    <Thickness x:Key="LyricsPadding">28,260,28,260</Thickness>
-    <Thickness x:Key="LyricsLineMargin">0,20</Thickness>
+    <!-- Lyrics column (PlayView lyrics list). Vertical centering room comes from
+         half-height Header/Footer spacers in PlayView, not padding. -->
+    <Thickness x:Key="LyricsPadding">28,0,28,0</Thickness>
+    <Thickness x:Key="LyricsLineMargin">0,15</Thickness>
+    <Thickness x:Key="LyricsLinePadding">0,15</Thickness>
 
     <!-- Slider (SliderTrack): bar thickness, normal / hovered -->
     <x:Double x:Key="SliderThickness">5</x:Double>

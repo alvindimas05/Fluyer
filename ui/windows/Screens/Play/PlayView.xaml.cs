@@ -6,6 +6,9 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Layout = Fluyer.Shared.Layout;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Xaml.Hosting;
+using System.Numerics;
 
 namespace Fluyer.Screens;
 
@@ -35,6 +38,51 @@ public sealed partial class PlayView : UserControl
     }
 
     private Microsoft.UI.Dispatching.DispatcherQueueTimer? _idleTimer;
+    private readonly (SpriteVisual Sprite, CompositionVisualSurface Surface) _lyricsFade;
+
+    // Swift LyricsView mask stops: clear at the edges, solid through the middle 40-60%.
+    private static readonly (float Offset, byte Alpha)[] FadeStops = [(0f, 0), (0.4f, 255), (0.6f, 255), (1f, 0)];
+
+    // Lyrics' own visual is hidden; a live snapshot of it (visual surface) is drawn
+    // in LyricsFadeHost through a vertical alpha gradient. Same idea as the
+    // Community Toolkit OpacityMaskView, without the dependency.
+    private (SpriteVisual, CompositionVisualSurface) CreateLyricsFade()
+    {
+        var source = ElementCompositionPreview.GetElementVisual(Lyrics);
+        var c = source.Compositor;
+        var surface = c.CreateVisualSurface();
+        surface.SourceVisual = source;
+
+        var gradient = c.CreateLinearGradientBrush();
+        gradient.MappingMode = CompositionMappingMode.Relative;
+        gradient.StartPoint = new Vector2(0, 0);
+        gradient.EndPoint = new Vector2(0, 1);
+        foreach (var (offset, alpha) in FadeStops)
+        {
+            gradient.ColorStops.Add(c.CreateColorGradientStop(offset, Windows.UI.Color.FromArgb(alpha, 0, 0, 0)));
+        }
+
+        var mask = c.CreateMaskBrush();
+        mask.Source = c.CreateSurfaceBrush(surface);
+        mask.Mask = gradient;
+        var sprite = c.CreateSpriteVisual();
+        sprite.Brush = mask;
+        ElementCompositionPreview.SetElementChildVisual(LyricsFadeHost, sprite);
+        source.Opacity = 0; // the sprite shows it instead
+        return (sprite, surface);
+    }
+
+    // Spacers = half the viewport (CSS py-[50%], but of height), so the first and
+    // last line can reach center. Snapshot + mask follow the list size.
+    private void OnLyricsSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var half = e.NewSize.Height / 2;
+        LyricsTopSpacer.Height = half;
+        LyricsBottomSpacer.Height = half;
+        var size = new Vector2((float)e.NewSize.Width, (float)e.NewSize.Height);
+        _lyricsFade.Surface.SourceSize = size;
+        _lyricsFade.Sprite.Size = size;
+    }
 
     public PlayView()
     {
@@ -42,6 +90,8 @@ public sealed partial class PlayView : UserControl
         Progress.UserChanged += fraction => Playback?.SeekFraction((float)fraction);
         Volume.UserChanged += fraction => Playback?.SetVolume((float)fraction);
         Lyrics.ContainerContentChanging += OnLyricContainerChanging;
+        Lyrics.SizeChanged += OnLyricsSizeChanged;
+        _lyricsFade = CreateLyricsFade();
         SizeChanged += (_, _) => LayoutColumns();
         Root.PointerMoved += (_, _) => ResetIdleTimer();
 

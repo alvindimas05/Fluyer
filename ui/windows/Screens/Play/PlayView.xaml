@@ -67,31 +67,31 @@
                         Click="OnCycleRepeat"
                         Style="{StaticResource IconButtonStyle}"
                         ToolTipService.ToolTip="Repeat">
-                        <FontIcon x:Name="RepeatIcon" FontSize="15" Glyph="&#xE8EE;" />
+                        <FontIcon x:Name="RepeatIcon" FontSize="18" Glyph="&#xE8EE;" />
                     </Button>
                     <Button
                         Click="OnPrevious"
                         Style="{StaticResource IconButtonStyle}"
                         ToolTipService.ToolTip="Previous">
-                        <FontIcon FontSize="18" Glyph="&#xE892;" />
+                        <FontIcon FontSize="24" Glyph="&#xE892;" />
                     </Button>
                     <Button
                         Click="OnTogglePlay"
                         Style="{StaticResource IconButtonStyle}"
                         ToolTipService.ToolTip="Play/Pause">
-                        <FontIcon x:Name="PlayPauseIcon" FontSize="24" Glyph="&#xE768;" />
+                        <FontIcon x:Name="PlayPauseIcon" FontSize="30" Glyph="&#xE768;" />
                     </Button>
                     <Button
                         Click="OnNext"
                         Style="{StaticResource IconButtonStyle}"
                         ToolTipService.ToolTip="Next">
-                        <FontIcon FontSize="18" Glyph="&#xE893;" />
+                        <FontIcon FontSize="24" Glyph="&#xE893;" />
                     </Button>
                     <Button
                         Click="OnShuffle"
                         Style="{StaticResource IconButtonStyle}"
                         ToolTipService.ToolTip="Shuffle">
-                        <FontIcon x:Name="ShuffleIcon" FontSize="15" Glyph="&#xE8B1;" />
+                        <FontIcon x:Name="ShuffleIcon" FontSize="18" Glyph="&#xE8B1;" />
                     </Button>
                 </StackPanel>
 
@@ -105,7 +105,7 @@
                         Click="OnToggleMute"
                         Style="{StaticResource IconButtonStyle}"
                         ToolTipService.ToolTip="Mute/Unmute">
-                        <FontIcon FontSize="13" Glyph="&#xE74F;" />
+                        <FontIcon FontSize="16" Glyph="&#xE74F;" />
                     </Button>
                     <components:SliderTrack
                         x:Name="Volume"
@@ -118,14 +118,15 @@
                         Click="OnMaxVolume"
                         Style="{StaticResource IconButtonStyle}"
                         ToolTipService.ToolTip="Max volume">
-                        <FontIcon x:Name="VolumeIcon" FontSize="13" Glyph="&#xE995;" />
+                        <FontIcon x:Name="VolumeIcon" FontSize="16" Glyph="&#xE995;" />
                     </Button>
                 </Grid>
             </StackPanel>
         </StackPanel>
 
-        <!-- Lyrics column. Top/bottom padding lets the first/last lines scroll to
-             viewport center. Indicators hidden like Swift's .scrollIndicators(.hidden). -->
+        <!-- Lyrics column. Header/Footer spacers (half the list height, set on
+             SizeChanged) let the first/last lines scroll to viewport center without
+             shifting item indices. Indicators hidden like Swift's .scrollIndicators(.hidden). -->
         <ListView
             x:Name="Lyrics"
             Grid.Column="1"
@@ -135,9 +136,22 @@
             ItemsSource="{x:Bind Playback.PlayView.Lyrics, Mode=OneWay}"
             ScrollViewer.VerticalScrollBarVisibility="Hidden"
             SelectionMode="None">
+            <ListView.Header>
+                <Border x:Name="LyricsTopSpacer" />
+            </ListView.Header>
+            <ListView.Footer>
+                <Border x:Name="LyricsBottomSpacer" />
+            </ListView.Footer>
+            <!-- Line spacing on the container, not the template: the container paints
+                 the hover, so a template margin would grow the hover box too. -->
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Margin" Value="{StaticResource LyricsLineMargin}" />
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="native:LyricLine">
-                    <Grid Margin="{StaticResource LyricsLineMargin}">
+                    <Grid Margin="{StaticResource LyricsLinePadding}">
                         <!-- Empty (instrumental) lines: Swift's music.note. -->
                         <FontIcon
                             HorizontalAlignment="Left"
@@ -147,7 +161,7 @@
                             Opacity="0.5"
                             Visibility="Collapsed" />
                         <TextBlock
-                            FontSize="25"
+                            FontSize="40"
                             FontWeight="Bold"
                             Opacity="0.4"
                             Text="{x:Bind Text}"
@@ -156,6 +170,12 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        <!-- Draws the lyrics through a top/bottom fade (Swift's .mask(LinearGradient)).
+             The list's own pixels are hidden; input still goes to the list. -->
+        <Border
+            x:Name="LyricsFadeHost"
+            Grid.Column="1"
+            IsHitTestVisible="False" />
 
         <!-- Back -->
         <Button

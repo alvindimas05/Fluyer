@@ -111,3 +111,10 @@ Status: Implemented (Implement this step).
 Learner decisions: go through FFI (Windows C ABI); show the Artwork / Color blocks picker in Windows settings. Carried from macOS section: Rust generates blocks, default Artwork, grey blocks with no track/cover.
 Accepted additions: C ABI `fluyer_backdrop_get_block_artwork` returns JPEG via `bytes_into_c` (renderer already decodes JPEG; size travels in the file); `IFluyerEngine.GetBlockArtworkAsync`; `CoverState.BackdropBytes(source, hasTrack)`; `BackdropSource` enum + persisted string setting (unknown -> Artwork); ComboBox "Backdrop" in SettingsView; key `source|path|palette`, no-track shows grey blocks.
 Verified: cargo test (new rgba_to_jpeg test), dotnet build, dotnet test 118 pass (round-trip, default, unknown value). Screenshot: no-track grey blocks in both modes. Not verified: colored blocks while playing (automation could not start playback), picker UI.
+
+## Windows lyrics centering + edge fade
+Status: Implemented (Implement this step).
+Learner decisions: spacer above/below lyrics sized to half the visible height (their Svelte py-[50%] idea); fade via composition mask ("the other 2 is just hacky trick" — rejected overlay gradient and per-line opacity).
+Explained concepts: CSS % padding is relative to width; WinUI Thickness is fixed px; SizeChanged; ListView Header/Footer keep item indices intact; XAML has no OpacityMask, Composition visual surface + mask brush does.
+Accepted additions: spacers in ListView.Header/Footer (not items, so CurrentLyricIndex/ContainerFromIndex stay aligned); Lyrics.SizeChanged sets heights = height/2 and resizes snapshot + sprite; LyricsPadding 28,0,28,0; LyricsFadeHost Border overlays column, list's own visual opacity 0; stops 0/0.4/0.6/1 like Swift.
+Verified: dotnet build ok; screenshot shows first line centered and bottom fade. Not verified: top fade mid-song, window resize.
