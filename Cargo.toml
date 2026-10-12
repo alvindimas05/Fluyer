@@ -1,5 +1,11 @@
 [workspace]
 members = [
     "crates/fluyer_core",
+    "ui/linux",
 ]
 resolver = "2"
+
+# ponytail: image/zune-jpeg unoptimized take seconds per cover; optimize deps
+# in dev builds only. Our own crates stay debuggable.
+[profile.dev.package."*"]
+opt-level = 3

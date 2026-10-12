@@ -290,3 +290,13 @@ library (window capture). Not checked: queue/menu sidebars, play screen, setting
 | Windows: queue panel look / behavior | `ui/windows/Screens/Home/Queue/QueueView.xaml` / `Fluyer.Core/Screens/Home/Queue/QueueState.cs` |
 | Windows: cover loading | `ui/windows/Shared/State/CoverState.cs` |
 | Windows: window shell, menu bar, queue sidebar | `ui/windows/MainWindow.xaml` |
+| Linux: window shell, main stack | `ui/linux/src/main.rs` |
+| Linux: home view & overlay split view | `ui/linux/src/screens/home/home_view.rs` |
+| Linux: queue look & behavior | `ui/linux/src/screens/home/queue/queue_view.rs` |
+| Linux: song grid / track row | `ui/linux/src/screens/home/music_grid/` |
+| Linux: album grid & cards | `ui/linux/src/screens/home/albums/` |
+| Linux: bottom player bar | `ui/linux/src/screens/home/player_bar/` |
+| Linux: play screen & lyrics | `ui/linux/src/screens/play/` |
+| Linux: settings dialog | `ui/linux/src/screens/settings/` |
+| Linux: GSK backdrop | `ui/linux/src/components/backdrop/` |
+| Linux: state & models | `ui/linux/src/shared/` |

@@ -118,3 +118,31 @@ Learner decisions: spacer above/below lyrics sized to half the visible height (t
 Explained concepts: CSS % padding is relative to width; WinUI Thickness is fixed px; SizeChanged; ListView Header/Footer keep item indices intact; XAML has no OpacityMask, Composition visual surface + mask brush does.
 Accepted additions: spacers in ListView.Header/Footer (not items, so CurrentLyricIndex/ContainerFromIndex stay aligned); Lyrics.SizeChanged sets heights = height/2 and resizes snapshot + sprite; LyricsPadding 28,0,28,0; LyricsFadeHost Border overlays column, list's own visual opacity 0; stops 0/0.4/0.6/1 like Swift.
 Verified: dotnet build ok; screenshot shows first line centered and bottom fade. Not verified: top fade mid-song, window resize.
+
+## Linux GTK (gtk-rs) port
+Status: G1 implemented.
+Requirement (learner): implement the app on gtk-rs; macOS Swift UI is the main reference (most complete); plan first.
+Facts found: Linux host; GTK 4.14 + libadwaita 1.5 runtime installed, -dev packages not installed (no sudo for agent); no `libs/linux` (build.rs expects `libs/<target_os>`); BASS .so files exist in legacy `~/Fluyer/src-tauri/libs/`; core already has Linux cfg for plugin names; `fluyer_core` builds as rlib too.
+Learner decisions:
+- GTK app calls `FluyerEngine` directly (Rust dependency, no FFI).
+- Keep the Swift state/view split (XState + XView).
+- Events: "same answer as first one" (direct; exact mechanism not chosen).
+- Order: build everything in one pass ("yolo"), fix afterwards.
+Learner assumption to correct: "GTK doesn't have observable state" (it has GObject properties + notify, ListModel).
+Setup done: learner installed gtk4/adwaita dev pkgs; BASS .so copied to libs/linux (gitignored); `.cargo/config.toml` disables rust-lld (libbassmix.so symbol table rejected by rust-lld); core builds, cargo test passes with LD_LIBRARY_PATH=$PWD/libs/linux.
+Explained: GObject properties/notify/bind_property, gio::ListModel; non-Send widgets need a channel + glib::spawn_future_local for core events.
+- Views observe state via GObject properties (+ notify / bind_property); learner chose it as "the preferable way for GTK".
+Implemented G1:
+- `build.rs`: rpath embeds `$ORIGIN/../../libs/linux` and `libs/linux`.
+- `events.rs`: `EventBridge` implements `EventSink`, forwards to `async_channel::unbounded`.
+- `shared/`: GObject models (`TrackItemObject`, `AlbumCardObject`, `LyricLineObject`), states (`PlaybackState`, `LibraryState`, `QueueState`, `CoverState`, `SettingsState`, `AppState`), clock 250ms sync.
+- `components/`: `AnimatedBackgroundView` (GSK snapshot `push_blur(50.0)`, texture render, dark scrim overlay).
+- `screens/home/`: `HomeView` with `adw::OverlaySplitView`, `ToolbarView` (scan spinner, mode toggle, search, add folder, queue toggle, settings), `MusicGridView` (track list, empty state, click to play), `AlbumGridView` (album cards grid), `QueueView` ("Now Playing" header, clear button, remove button, click to jump), `PlayerBarView` (seek scale, transport buttons, cover thumbnail, title/artist, volume scale, repeat, shuffle).
+- `screens/play/`: `PlayView` (two-column layout, large cover, `PlayControlsView`, `LyricsView` with active lyric auto-scroll and seek on click).
+- `screens/settings/`: `SettingsView` (`adw::PreferencesDialog` with music folders, folder picker dialog, backdrop source combo row).
+- `main.rs`: `adw::Application`, CSS styles, keyboard shortcuts (Space, Esc, Ctrl+L, Ctrl+1, Ctrl+2).
+Verified: `cargo test -p fluyer_linux` passes (1 model unit test), `cargo build -p fluyer_linux` OK with 0 warnings. Visual runtime check not done.
+Bugfix (learner report: folder added but list empty; after restart no window):
+- No window: list-row bind decoded every cover on the main thread (gdb: zune_jpeg under `TrackRow::bind`), unoptimized deps made it seconds per cover. Fix: `CoverState` loads via `gio::spawn_blocking`, sets texture when done; root `Cargo.toml` `[profile.dev.package."*"] opt-level = 3`. Window now shows in ~0.5s.
+- Empty after scan: UI waited for `current >= total`, but core counts only changed files. Fix: reload on the "Library scan completed" toast (same trick as uniffi_api/events.rs).
+Not fixed (core, all platforms): repeated MusicBrainz requests for the same album when covers are missing.
