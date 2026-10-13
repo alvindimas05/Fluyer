@@ -14,7 +14,7 @@ pub struct AlbumGridView {
 
 impl AlbumGridView {
     pub fn new(app: Rc<AppState>) -> Self {
-        let store = app.library.albums_store();
+        let store = app.library.displayed_albums_store();
         let cover_size = Rc::new(Cell::new(AlbumMetrics::new(1100.0).cover_size as i32));
 
         let factory = gtk::SignalListItemFactory::new();

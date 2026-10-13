@@ -22,8 +22,8 @@ impl AlbumHeaderView {
         container.append(&subtitle);
 
         let buttons: [(&str, &str, fn(&AppState, usize)); 4] = [
-            ("go-previous-symbolic", "Back to Albums", |a, _| a.library.clear_album(&a.engine)),
-            ("media-playback-start-symbolic", "Play Album", |a, i| a.engine.album_play(i)),
+            ("go-previous-symbolic", "Back to Albums", |a, _| a.library.clear_album()),
+            ("media-playback-start-symbolic", "Play Album", |a, _| a.library.play_selected(&a.engine)),
             ("list-add-symbolic", "Add to Queue", |a, i| a.engine.album_queue(i)),
             ("media-playlist-shuffle-symbolic", "Shuffle Album", |a, i| a.engine.album_shuffle(i)),
         ];

@@ -152,3 +152,11 @@ Bugfix 2 (learner report: no album carousel, song list not a grid, `gtk_list_vie
 - Song grid: `GridView`, columns = width / (280 + 12) like macOS adaptive grid. Click plays the shown list from that track (`library_play_tracks`).
 - Width tracking via `add_tick_callback` (ponytail: GTK4 has no resize signal).
 Verified: build 0 warnings, 2 tests pass, screenshot shows carousel with names + 3-column song grid, 0 CRITICAL at startup. Not verified: album click/header, Albums mode, lyrics scroll while playing.
+
+## Linux sort (macOS SortMenu port)
+Status: Implemented. Learner: "yes, and just make it the same as macos" (no own design; layout copied from macOS LibraryFilterState/SortMenu).
+- `LibraryState`: `track_sort` (Album/Title/Artist/Duration), `album_sort` (Name/Artist/Year/Track Count), shared `sort_ascending`; session-only like macOS. `refresh_displayed` re-derives `filtered_tracks` + new `displayed_albums` store on any notify of query/sort.
+- Natural order via `glib::FilenameCollationKey` on casefolded text (test caught C-locale case sensitivity). Search: casefold + NFD minus combining marks (diacritic-insensitive), albums match name/artist only.
+- Play from grid / header Play = sorted unfiltered list (macOS `playTrack`/`playSelected`). Carousel + Albums grid use `displayed_albums_store`.
+- `toolbar/sort_menu.rs`: MenuButton + gio::Menu radio items via stateful actions; keys swap with mode.
+Verified: 4 tests pass (incl. sort/filter, natural/folded search), build 0 warnings, screenshot shows sort button. Not verified: clicking menu items (no xdotool).

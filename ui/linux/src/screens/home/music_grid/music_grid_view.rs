@@ -85,11 +85,9 @@ impl MusicGridView {
             let app = app_state.clone();
             let store_clone = store.clone();
             grid.connect_activate(move |_, pos| {
-                let indices: Vec<usize> = (0..store_clone.n_items())
-                    .filter_map(|i| store_clone.item(i).and_downcast::<TrackItemObject>())
-                    .map(|t| t.index() as usize)
-                    .collect();
-                app.engine.library_play_tracks(&indices, pos as usize);
+                if let Some(t) = store_clone.item(pos).and_downcast::<TrackItemObject>() {
+                    app.library.play_track(&app.engine, &t.path());
+                }
             });
         }
 

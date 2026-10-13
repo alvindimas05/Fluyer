@@ -79,7 +79,6 @@ impl ToolbarView {
             let app = app_state.clone();
             search_entry.connect_search_changed(move |entry| {
                 app.library.set_search_query(entry.text().as_str());
-                app.library.apply_filter(&app.engine);
             });
         }
 
@@ -132,6 +131,7 @@ impl ToolbarView {
             });
         }
 
+        right_box.append(&super::sort_menu::sort_menu(&app_state.library));
         right_box.append(&search_entry);
         right_box.append(&folder_btn);
         right_box.append(&queue_btn);
