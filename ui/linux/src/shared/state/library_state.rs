@@ -26,6 +26,11 @@ mod imp {
         pub search_query: RefCell<String>,
         #[property(get, set)]
         pub selected_album_index: Cell<i64>, // -1 = None
+        #[property(get, set)]
+        pub selected_album_subtitle: RefCell<String>,
+
+        /// Track paths of the open album (album rows use album-local indices).
+        pub selected_album_paths: RefCell<std::collections::HashSet<String>>,
 
         pub tracks: RefCell<Option<gio::ListStore>>,
         pub filtered_tracks: RefCell<Option<gio::ListStore>>,
@@ -120,7 +125,12 @@ impl LibraryState {
             }
         }
 
-        self.apply_filter(engine);
+        let open = self.selected_album_index();
+        if open >= 0 && (open as usize) < album_count {
+            self.load_album(engine, open as usize); // re-read paths after rescan
+        } else {
+            self.clear_album(engine);
+        }
     }
 
     pub fn apply_filter(&self, _engine: &FluyerEngine) {
@@ -141,12 +151,8 @@ impl LibraryState {
                         || track.album().to_lowercase().contains(&query)
                 };
 
-                let matches_album = if album_filter >= 0 {
-                    // ponytail: index match on album when selected
-                    track.index() == album_filter as u64
-                } else {
-                    true
-                };
+                let matches_album = album_filter < 0
+                    || self.imp().selected_album_paths.borrow().contains(&track.path());
 
                 if matches_query && matches_album {
                     filtered.append(&track);
@@ -155,21 +161,33 @@ impl LibraryState {
         }
     }
 
+    /// Open an album: grid shows its tracks; from the album grid this returns to Songs.
+    pub fn select_album(&self, engine: &FluyerEngine, index: usize) {
+        self.load_album(engine, index);
+        self.set_mode(0);
+    }
+
+    fn load_album(&self, engine: &FluyerEngine, index: usize) {
+        let Some(detail) = engine.album_get_detail(index) else {
+            return self.clear_album(engine);
+        };
+        *self.imp().selected_album_paths.borrow_mut() =
+            detail.tracks.iter().map(|t| t.path.clone()).collect();
+        self.set_selected_album_subtitle(detail.subtitle);
+        self.set_selected_album_index(index as i64);
+        self.apply_filter(engine);
+    }
+
+    pub fn clear_album(&self, engine: &FluyerEngine) {
+        self.imp().selected_album_paths.borrow_mut().clear();
+        self.set_selected_album_index(-1);
+        self.apply_filter(engine);
+    }
+
     pub fn scan(&self, engine: &FluyerEngine, folders: &[String]) {
         self.set_is_scanning(true);
         self.set_scan_progress_label("Scanning music library...".to_string());
         engine.library_scan(folders);
     }
 
-    pub fn play_all(&self, engine: &FluyerEngine, start_index: usize) {
-        engine.library_play_all(start_index);
-    }
-
-    pub fn play_track(&self, engine: &FluyerEngine, track_index: usize) {
-        engine.library_play_tracks(&[track_index], 0);
-    }
-
-    pub fn play_album(&self, engine: &FluyerEngine, album_index: usize) {
-        engine.album_play(album_index);
-    }
 }

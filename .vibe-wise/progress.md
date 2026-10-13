@@ -146,3 +146,9 @@ Bugfix (learner report: folder added but list empty; after restart no window):
 - No window: list-row bind decoded every cover on the main thread (gdb: zune_jpeg under `TrackRow::bind`), unoptimized deps made it seconds per cover. Fix: `CoverState` loads via `gio::spawn_blocking`, sets texture when done; root `Cargo.toml` `[profile.dev.package."*"] opt-level = 3`. Window now shows in ~0.5s.
 - Empty after scan: UI waited for `current >= total`, but core counts only changed files. Fix: reload on the "Library scan completed" toast (same trick as uniffi_api/events.rs).
 Not fixed (core, all platforms): repeated MusicBrainz requests for the same album when covers are missing.
+Bugfix 2 (learner report: no album carousel, song list not a grid, `gtk_list_view_scroll_to` CRITICAL):
+- Lyrics CRITICAL: cursor index set before the lyric store was refilled / past its end. Fix: `PlaybackState::set_active_lyric` clamps to the store; `sync_lyrics` resets to -1, fills, then sets.
+- Added (macOS port): `albums/album_carousel_view.rs` (horizontal ListView), `album_header_view.rs` (subtitle, Back/Play/Queue/Shuffle), `album_metrics.rs` (macOS AlbumMetrics, 1x rules only; test: cards fill width). Album card click opens album (`LibraryState::select_album`, filter by track paths from `album_get_detail`), right-click Play/Add to Queue/Shuffle, selected/dimmed CSS. Album grid uses same metrics.
+- Song grid: `GridView`, columns = width / (280 + 12) like macOS adaptive grid. Click plays the shown list from that track (`library_play_tracks`).
+- Width tracking via `add_tick_callback` (ponytail: GTK4 has no resize signal).
+Verified: build 0 warnings, 2 tests pass, screenshot shows carousel with names + 3-column song grid, 0 CRITICAL at startup. Not verified: album click/header, Albums mode, lyrics scroll while playing.

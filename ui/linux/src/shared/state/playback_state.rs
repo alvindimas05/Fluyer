@@ -129,16 +129,20 @@ impl PlaybackState {
             self.set_progress_pct(pct);
             self.set_time_label(&*label);
 
-            let active_idx = engine.lyrics_get_active_index(cur_ms);
-            if self.current_lyric_index() != active_idx {
-                self.set_current_lyric_index(active_idx);
-                self.update_active_lyric(active_idx);
-            }
+            self.set_active_lyric(engine.lyrics_get_active_index(cur_ms));
         }
     }
 
-    fn update_active_lyric(&self, active_idx: i32) {
+    /// Moves the lyric cursor; clamps to the loaded lines (core may answer for
+    /// lyrics the store hasn't synced yet).
+    pub fn set_active_lyric(&self, idx: i32) {
         let store = self.lyrics_store();
+        let idx = if idx >= 0 && (idx as u32) < store.n_items() { idx } else { -1 };
+        if self.current_lyric_index() == idx {
+            return;
+        }
+        self.set_current_lyric_index(idx);
+        let active_idx = idx;
         for i in 0..store.n_items() {
             if let Some(item) = store.item(i).and_downcast::<LyricLineObject>() {
                 item.set_is_active(i as i32 == active_idx);
@@ -149,16 +153,14 @@ impl PlaybackState {
     pub fn sync_lyrics(&self, engine: &FluyerEngine) {
         let lines = engine.lyrics_get();
         let store = self.lyrics_store();
+        // Reset the cursor before the store changes, set it again after it is filled:
+        // an index past the store end makes ListView::scroll_to assert.
+        self.set_current_lyric_index(-1);
         store.remove_all();
-        let cur_pos = self.position_ms();
-        let active_idx = engine.lyrics_get_active_index(cur_pos);
-        self.set_current_lyric_index(active_idx);
-
-        for (idx, line) in lines.iter().enumerate() {
-            let is_active = idx as i32 == active_idx;
-            let obj = LyricLineObject::new(line.timestamp_ms, &line.text, is_active);
-            store.append(&obj);
+        for line in &lines {
+            store.append(&LyricLineObject::new(line.timestamp_ms, &line.text, false));
         }
+        self.set_active_lyric(engine.lyrics_get_active_index(self.position_ms()));
     }
 
     pub fn toggle_play(&self, engine: &FluyerEngine) {

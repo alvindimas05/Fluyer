@@ -1,4 +1,4 @@
-use crate::screens::home::albums::AlbumGridView;
+use crate::screens::home::albums::{AlbumCarouselView, AlbumGridView, AlbumHeaderView};
 use crate::screens::home::music_grid::MusicGridView;
 use crate::screens::home::player_bar::PlayerBarView;
 use crate::screens::home::queue::QueueView;
@@ -45,7 +45,12 @@ impl HomeView {
         let music_grid = MusicGridView::new(app_state.clone());
         let album_grid = AlbumGridView::new(app_state.clone());
 
-        library_stack.add_named(&music_grid.container, Some("songs"));
+        // Songs mode: album strip, open-album header, song grid (macOS HomeView).
+        let songs_box = gtk::Box::new(gtk::Orientation::Vertical, 0);
+        songs_box.append(&AlbumCarouselView::new(app_state.clone()).container);
+        songs_box.append(&AlbumHeaderView::new(app_state.clone()).container);
+        songs_box.append(&music_grid.container);
+        library_stack.add_named(&songs_box, Some("songs"));
         library_stack.add_named(&album_grid.container, Some("albums"));
 
         {

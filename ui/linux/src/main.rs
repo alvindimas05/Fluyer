@@ -66,10 +66,9 @@ fn build_ui(app: &adw::Application) {
                     state.playback.set_progress_pct(pct);
                     let label = format!("{} / {}", format_time(pos), format_time(dur));
                     state.playback.set_time_label(label.as_str());
-                    let active = state.engine.lyrics_get_active_index(pos);
-                    if state.playback.current_lyric_index() != active {
-                        state.playback.set_current_lyric_index(active);
-                    }
+                    state
+                        .playback
+                        .set_active_lyric(state.engine.lyrics_get_active_index(pos));
                 }
             }
             glib::ControlFlow::Continue
@@ -226,31 +225,40 @@ window {
     border-radius: 6px;
 }
 
-.album-grid {
-    padding: 16px;
+/* List widgets draw their own background and row padding; clear both so cards
+   sit on the backdrop with the gap from AlbumMetrics. */
+listview, gridview, .album-carousel, .album-grid, .music-grid {
+    background: transparent;
 }
-
-.album-card {
-    padding: 8px;
-    border-radius: 8px;
+.album-carousel > row, .album-grid > child, .music-grid > child {
+    padding: 0;
+    background: none;
 }
-
-.album-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
+.album-carousel > row { margin-right: 12px; }
+.album-grid > child { margin: 0 12px 12px 0; }
+.music-grid > child { margin: 0 12px 8px 0; border-radius: 6px; }
+.music-grid { padding: 8px 16px; }
 
 .album-card-cover {
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+}
+.album-card:hover .album-card-cover { outline: 2px solid white; outline-offset: -2px; }
+.album-card.selected .album-card-cover { outline: 2px solid white; outline-offset: -2px; }
+.album-card.dimmed { opacity: 0.4; }
+.album-card-name { font-size: 13px; font-weight: 500; }
+.album-card.selected .album-card-name { font-weight: 600; }
+.album-card-artist { font-size: 11px; opacity: 0.6; }
+
+.album-header {
+    margin: 8px 16px 0 16px;
+    padding: 0 12px;
+    min-height: 40px;
     border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
-
-.album-card-name {
-    font-weight: bold;
-}
-
-.album-card-artist, .album-card-meta {
-    opacity: 0.7;
-    font-size: 0.9em;
-}
+.album-header-title { font-size: 13px; font-weight: 500; }
 
 .active-control {
     color: #3584e4;

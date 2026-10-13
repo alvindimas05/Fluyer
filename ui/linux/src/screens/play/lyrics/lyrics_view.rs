@@ -69,15 +69,11 @@ impl LyricsView {
                 .playback
                 .connect_current_lyric_index_notify(move |ps| {
                     let idx = ps.current_lyric_index();
+                    // set_active_lyric keeps idx inside the store
                     if idx >= 0 {
-                        // ponytail: scroll to row index with center alignment
-                        lv.scroll_to(
-                            idx as u32,
-                            gtk::ListScrollFlags::FOCUS | gtk::ListScrollFlags::SELECT,
-                            None,
-                        );
-                        let _ = sc;
+                        lv.scroll_to(idx as u32, gtk::ListScrollFlags::NONE, None);
                     }
+                    let _ = &sc;
                 });
         }
 

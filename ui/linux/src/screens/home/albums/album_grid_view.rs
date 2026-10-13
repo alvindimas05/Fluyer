@@ -1,55 +1,61 @@
+use super::album_card::AlbumCard;
+use super::album_metrics::{AlbumMetrics, EDGE};
 use crate::shared::models::AlbumCardObject;
 use crate::shared::AppState;
 use gtk::prelude::*;
+use std::cell::Cell;
 use std::rc::Rc;
 
-use super::album_card::AlbumCard;
-
+/// Full-height album grid (Albums mode). Same card size as the carousel.
+/// Click opens the album and returns to Songs.
 pub struct AlbumGridView {
     pub container: gtk::ScrolledWindow,
 }
 
 impl AlbumGridView {
-    pub fn new(app_state: Rc<AppState>) -> Self {
-        let store = app_state.library.albums_store();
-        let selection_model = gtk::NoSelection::new(Some(store.clone()));
+    pub fn new(app: Rc<AppState>) -> Self {
+        let store = app.library.albums_store();
+        let cover_size = Rc::new(Cell::new(AlbumMetrics::new(1100.0).cover_size as i32));
 
         let factory = gtk::SignalListItemFactory::new();
         {
-            let app = app_state.clone();
+            let app = app.clone();
+            let size = cover_size.clone();
             factory.connect_bind(move |_, obj| {
-                let list_item = obj.downcast_ref::<gtk::ListItem>().unwrap();
-                let item = list_item
-                    .item()
-                    .and_downcast::<AlbumCardObject>()
-                    .expect("item is AlbumCardObject");
-
-                let card = AlbumCard::new();
-                card.bind(&item, app.clone());
-                list_item.set_child(Some(&card.container));
+                let item = obj.downcast_ref::<gtk::ListItem>().unwrap();
+                let album = item.item().and_downcast::<AlbumCardObject>().unwrap();
+                item.set_child(Some(&AlbumCard::new(&album, size.get(), app.clone()).container));
             });
         }
 
-        let grid_view = gtk::GridView::new(Some(selection_model), Some(factory));
-        grid_view.set_max_columns(8);
-        grid_view.set_min_columns(2);
-        grid_view.add_css_class("album-grid");
-
-        // Click album -> play album
-        {
-            let app = app_state.clone();
-            let store_clone = store.clone();
-            grid_view.connect_activate(move |_, pos| {
-                if let Some(item) = store_clone.item(pos).and_downcast::<AlbumCardObject>() {
-                    app.library.play_album(&app.engine, item.index() as usize);
-                }
-            });
-        }
+        let grid = gtk::GridView::new(Some(gtk::NoSelection::new(Some(store.clone()))), Some(factory));
+        grid.add_css_class("album-grid");
+        grid.set_margin_start(EDGE as i32);
+        grid.set_margin_end(EDGE as i32);
 
         let scrolled = gtk::ScrolledWindow::new();
+        scrolled.set_policy(gtk::PolicyType::Never, gtk::PolicyType::External);
         scrolled.set_vexpand(true);
-        scrolled.set_hexpand(true);
-        scrolled.set_child(Some(&grid_view));
+        scrolled.set_child(Some(&grid));
+
+        // ponytail: per-frame width check, same as the carousel.
+        {
+            let grid = grid.clone();
+            let last_w = Cell::new(0);
+            scrolled.add_tick_callback(move |w, _| {
+                let width = w.width();
+                if width > 0 && width != last_w.get() {
+                    last_w.set(width);
+                    let m = AlbumMetrics::new(width as f64);
+                    grid.set_min_columns(m.columns);
+                    grid.set_max_columns(m.columns);
+                    cover_size.set(m.cover_size as i32);
+                    grid.set_model(None::<&gtk::NoSelection>);
+                    grid.set_model(Some(&gtk::NoSelection::new(Some(store.clone()))));
+                }
+                gtk::glib::ControlFlow::Continue
+            });
+        }
 
         Self { container: scrolled }
     }

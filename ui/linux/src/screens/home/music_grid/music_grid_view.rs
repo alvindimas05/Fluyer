@@ -5,6 +5,8 @@ use std::rc::Rc;
 
 use super::track_row::TrackRow;
 
+const MIN_COLUMN_WIDTH: i32 = 280;
+
 pub struct MusicGridView {
     pub container: gtk::Stack,
 }
@@ -72,24 +74,46 @@ impl MusicGridView {
             });
         }
 
-        let list_view = gtk::ListView::new(Some(selection_model), Some(factory));
-        list_view.add_css_class("music-grid-list");
+        // Adaptive grid like macOS `GridItem(.adaptive(minimum: 280))`.
+        let grid = gtk::GridView::new(Some(selection_model), Some(factory));
+        grid.add_css_class("music-grid");
+        grid.set_single_click_activate(true);
+        grid.set_max_columns(12);
 
-        // Click track -> play all starting at track
+        // Click track: play the shown list from that track.
         {
             let app = app_state.clone();
             let store_clone = store.clone();
-            list_view.connect_activate(move |_, pos| {
-                if let Some(item) = store_clone.item(pos).and_downcast::<TrackItemObject>() {
-                    app.library.play_all(&app.engine, item.index() as usize);
-                }
+            grid.connect_activate(move |_, pos| {
+                let indices: Vec<usize> = (0..store_clone.n_items())
+                    .filter_map(|i| store_clone.item(i).and_downcast::<TrackItemObject>())
+                    .map(|t| t.index() as usize)
+                    .collect();
+                app.engine.library_play_tracks(&indices, pos as usize);
             });
         }
 
         let scrolled = gtk::ScrolledWindow::new();
+        scrolled.set_policy(gtk::PolicyType::Never, gtk::PolicyType::External);
         scrolled.set_vexpand(true);
         scrolled.set_hexpand(true);
-        scrolled.set_child(Some(&list_view));
+        scrolled.set_child(Some(&grid));
+
+        // ponytail: per-frame width check (GTK4 has no resize signal).
+        {
+            let grid = grid.clone();
+            let last_w = std::cell::Cell::new(0);
+            scrolled.add_tick_callback(move |w, _| {
+                let width = w.width();
+                if width > 0 && width != last_w.get() {
+                    last_w.set(width);
+                    let cols = ((width - 32) / (MIN_COLUMN_WIDTH + 12)).max(1) as u32;
+                    grid.set_min_columns(cols);
+                    grid.set_max_columns(cols);
+                }
+                gtk::glib::ControlFlow::Continue
+            });
+        }
 
         container.add_named(&empty_box, Some("empty"));
         container.add_named(&scrolled, Some("list"));
