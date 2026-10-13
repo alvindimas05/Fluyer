@@ -1,5 +1,5 @@
 use super::album_card::AlbumCard;
-use super::album_metrics::{AlbumMetrics, EDGE};
+use super::album_metrics::{AlbumMetrics, CARD_GAP, EDGE};
 use crate::shared::models::AlbumCardObject;
 use crate::shared::AppState;
 use gtk::prelude::*;
@@ -30,11 +30,13 @@ impl AlbumGridView {
 
         let grid = gtk::GridView::new(Some(gtk::NoSelection::new(Some(store.clone()))), Some(factory));
         grid.add_css_class("album-grid");
-        grid.set_margin_start(EDGE as i32);
-        grid.set_margin_end(EDGE as i32);
+        // Each card has 6px side margins (CSS), so EDGE - 6 here keeps the AlbumMetrics math exact.
+        grid.set_margin_start((EDGE - CARD_GAP / 2.0) as i32);
+        grid.set_margin_end((EDGE - CARD_GAP / 2.0) as i32);
 
         let scrolled = gtk::ScrolledWindow::new();
-        scrolled.set_policy(gtk::PolicyType::Never, gtk::PolicyType::External);
+        // External, not Never: Never makes the window grow to fit the grid, and the grid is sized from the window (feedback loop).
+        scrolled.set_policy(gtk::PolicyType::External, gtk::PolicyType::External);
         scrolled.set_vexpand(true);
         scrolled.set_child(Some(&grid));
 

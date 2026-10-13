@@ -168,3 +168,11 @@ Learner decisions: in-flight dedup in `CoverArtService`, keyed by cache path.
 Accepted additions: duplicate caller gets `Ok(None)` (UI reloads on cover-loaded event); failures not remembered (retry next launch); one unit test.
 Implemented: `in_flight: Mutex<HashSet<PathBuf>>`, `begin_fetch` + `InFlight` drop guard (clears on error/cancel).
 Verified: core tests 26 pass incl. `second_fetch_of_same_cover_is_skipped_until_first_ends`; live cold-cache run: 1 MusicBrainz request for 'Dabin Between Broken' (was 13+), cover re-cached. Linux 4 tests pass. macOS/Windows not rebuilt.
+
+## Linux album grid grows forever (Bugfix)
+Status: Implemented (Implement this step).
+Learner report: Albums-mode grid kept expanding; Gtk-CRITICAL `gtk_widget_measure: for_size >= -1`, negative allocations.
+Explained: layout feedback loop. `ScrolledWindow` hscroll `Never` forces window >= content min width; card size computed from window width; last column's CSS margin-right 12px made content width+12, so it grew every frame until overflow.
+Learner decisions: confirmed proposed fix (External policy + split margins).
+Implemented: `album_grid_view.rs` hscroll policy `External`; grid side margins EDGE - CARD_GAP/2 (10px); CSS `.album-grid > child { margin: 0 6px 12px 6px; }` so n*(cover+12)+20 == width.
+Verified: Albums-mode launch (temp env hook, reverted) shows 5 columns at stable width, 0 CRITICAL/WARNING in log. Window resize not tested manually.

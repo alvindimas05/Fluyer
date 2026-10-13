@@ -235,7 +235,7 @@ listview, gridview, .album-carousel, .album-grid, .music-grid {
     background: none;
 }
 .album-carousel > row { margin-right: 12px; }
-.album-grid > child { margin: 0 12px 12px 0; }
+.album-grid > child { margin: 0 6px 12px 6px; }
 .music-grid > child { margin: 0 12px 8px 0; border-radius: 6px; }
 .music-grid { padding: 8px 16px; }
 
