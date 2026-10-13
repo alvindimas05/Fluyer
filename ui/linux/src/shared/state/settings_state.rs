@@ -8,6 +8,7 @@ use std::path::PathBuf;
 #[derive(Serialize, Deserialize, Default)]
 struct SettingsFile {
     backdrop_source: Option<String>,
+    animated_background: Option<bool>,
 }
 
 mod imp {
@@ -18,6 +19,8 @@ mod imp {
     pub struct SettingsState {
         #[property(get, set)]
         pub backdrop_source: RefCell<String>,
+        #[property(get, set)]
+        pub animated_background: std::cell::Cell<bool>,
         pub config_path: RefCell<PathBuf>,
     }
 
@@ -36,15 +39,12 @@ mod imp {
             let path = config_dir.join("settings.json");
             *self.config_path.borrow_mut() = path.clone();
 
-            let mut source = "artwork".to_string();
-            if let Ok(data) = std::fs::read_to_string(&path) {
-                if let Ok(file) = serde_json::from_str::<SettingsFile>(&data) {
-                    if let Some(s) = file.backdrop_source {
-                        source = s;
-                    }
-                }
-            }
-            *self.backdrop_source.borrow_mut() = source;
+            let file = std::fs::read_to_string(&path)
+                .ok()
+                .and_then(|data| serde_json::from_str::<SettingsFile>(&data).ok())
+                .unwrap_or_default();
+            *self.backdrop_source.borrow_mut() = file.backdrop_source.unwrap_or_else(|| "artwork".into());
+            self.animated_background.set(file.animated_background.unwrap_or(true));
         }
     }
 }
@@ -69,6 +69,7 @@ impl SettingsState {
         let path = imp.config_path.borrow().clone();
         let file = SettingsFile {
             backdrop_source: Some(self.backdrop_source()),
+            animated_background: Some(self.animated_background()),
         };
         if let Ok(json) = serde_json::to_string_pretty(&file) {
             let _ = std::fs::write(path, json);

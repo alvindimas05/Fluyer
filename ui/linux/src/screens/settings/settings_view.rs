@@ -78,6 +78,18 @@ impl SettingsView {
         }
 
         app_group.add(&backdrop_row);
+
+        let animated_row = adw::SwitchRow::new();
+        animated_row.set_title("Animated background");
+        animated_row.set_active(app_state.settings.animated_background());
+        {
+            let app = app_state.clone();
+            animated_row.connect_active_notify(move |row| {
+                app.settings.set_animated_background(row.is_active());
+                app.settings.save();
+            });
+        }
+        app_group.add(&animated_row);
         page.add(&app_group);
 
         dialog.present(parent);

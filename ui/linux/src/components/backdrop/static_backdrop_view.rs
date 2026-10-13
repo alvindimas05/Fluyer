@@ -11,20 +11,20 @@ mod imp {
     use super::*;
 
     #[derive(Default)]
-    pub struct AnimatedBackgroundView {
+    pub struct StaticBackdropView {
         pub app_state: RefCell<Option<Rc<AppState>>>,
     }
 
     #[glib::object_subclass]
-    impl ObjectSubclass for AnimatedBackgroundView {
-        const NAME: &'static str = "FluyerAnimatedBackgroundView";
-        type Type = super::AnimatedBackgroundView;
+    impl ObjectSubclass for StaticBackdropView {
+        const NAME: &'static str = "FluyerStaticBackdropView";
+        type Type = super::StaticBackdropView;
         type ParentType = gtk::Widget;
     }
 
-    impl ObjectImpl for AnimatedBackgroundView {}
+    impl ObjectImpl for StaticBackdropView {}
 
-    impl WidgetImpl for AnimatedBackgroundView {
+    impl WidgetImpl for StaticBackdropView {
         fn snapshot(&self, snapshot: &gtk::Snapshot) {
             let width = self.obj().width() as f32;
             let height = self.obj().height() as f32;
@@ -55,12 +55,12 @@ mod imp {
 }
 
 glib::wrapper! {
-    pub struct AnimatedBackgroundView(ObjectSubclass<imp::AnimatedBackgroundView>)
+    pub struct StaticBackdropView(ObjectSubclass<imp::StaticBackdropView>)
         @extends gtk::Widget,
         @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
-impl AnimatedBackgroundView {
+impl StaticBackdropView {
     pub fn new(app_state: Rc<AppState>) -> Self {
         let obj: Self = glib::Object::new();
         *obj.imp().app_state.borrow_mut() = Some(app_state.clone());

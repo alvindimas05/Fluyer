@@ -4,7 +4,7 @@ mod screens;
 mod shared;
 
 use adw::prelude::*;
-use components::AnimatedBackgroundView;
+use components::backdrop_view;
 use events::{AppEvent, EventBridge};
 use fluyer_core::FluyerEngine;
 use gtk::gdk;
@@ -89,8 +89,8 @@ fn build_ui(app: &adw::Application) {
 
     let root_overlay = gtk::Overlay::new();
 
-    // Background: GSK blurred block artwork / cover
-    let backdrop = AnimatedBackgroundView::new(app_state.clone());
+    // Background: animated GL backdrop (macOS port) or static GSK blur
+    let backdrop = backdrop_view(app_state.clone());
     root_overlay.set_child(Some(&backdrop));
 
     // Foreground: Stack between Home and PlayView

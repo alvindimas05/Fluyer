@@ -1,3 +1,3 @@
 pub mod backdrop;
 
-pub use backdrop::AnimatedBackgroundView;
+pub use backdrop::backdrop_view;

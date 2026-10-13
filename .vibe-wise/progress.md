@@ -176,3 +176,12 @@ Explained: layout feedback loop. `ScrolledWindow` hscroll `Never` forces window 
 Learner decisions: confirmed proposed fix (External policy + split margins).
 Implemented: `album_grid_view.rs` hscroll policy `External`; grid side margins EDGE - CARD_GAP/2 (10px); CSS `.album-grid > child { margin: 0 6px 12px 6px; }` so n*(cover+12)+20 == width.
 Verified: Albums-mode launch (temp env hook, reverted) shows 5 columns at stable width, 0 CRITICAL/WARNING in log. Window resize not tested manually.
+
+## Linux animated backdrop (macOS port)
+Status: Implemented. Learner: "just implement it like macos; the current one can be the off option for now" (direct, no design checkpoint).
+Explained: macOS pipeline = rotation (3 rotating copies, sat x1.3, 0.5s crossfade) → Gaussian blur → pinch mesh warp (sat x2, dark scrim, clamp); GTK options (snapshot nodes, deprecated GLShader, GLArea).
+AI choices (unreviewed): `gtk::GLArea` + new dep `glow` (GL loaded through GTK's libepoxy via dlsym, no extra system lib); blur as 2-pass separable GLSL at 320px long edge (macOS 960 + MPS); Reduce Motion = GTK enable-animations off (1/10 speed); GL failure falls back to static for the session.
+Learner decisions: off = existing static GSK blur view.
+Implemented: components/backdrop/{backdrop_mesh.rs (Catmull-Clark mesh port + test), backdrop_renderer.rs (GL pipeline), animated_backdrop_view.rs (GLArea, tick-driven), static_backdrop_view.rs (renamed old view), mod.rs backdrop_view() Stack switch}; SettingsState `animated_background` (default true, persisted); Settings "Animated background" SwitchRow.
+Verified: build 0 warnings, 5 tests pass; screenshots 4s apart while playing differ, colorful moving blur from cover; ~17% CPU steady (dev build). Not verified: toggle switch in Settings, crossfade on track change, Wayland/GLES path.
+Banding fix (learner: "already fixed on windows"): ported Windows fixes from BackdropShaders.cs/ArtworkBackdropRenderer.cs: per-pixel temporal ±1 LSB dither (`DitherNoise` hash) in pinch shader, RGBA16F intermediate targets (Windows R16G16B16A16_Float). Gotcha: GTK gave a GLES context; without `precision highp int` Mesa ran the hash at mediump and the noise came out 0. Verified by pixel row: before flat 137,137,...; after 79,79,78,80,79,... Build 0 warnings, 5 tests pass.
