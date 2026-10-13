@@ -160,3 +160,11 @@ Status: Implemented. Learner: "yes, and just make it the same as macos" (no own 
 - Play from grid / header Play = sorted unfiltered list (macOS `playTrack`/`playSelected`). Carousel + Albums grid use `displayed_albums_store`.
 - `toolbar/sort_menu.rs`: MenuButton + gio::Menu radio items via stateful actions; keys swap with mode.
 Verified: 4 tests pass (incl. sort/filter, natural/folded search), build 0 warnings, screenshot shows sort button. Not verified: clicking menu items (no xdotool).
+
+## Cover fetch dedup (core, all platforms)
+Status: Implemented (Implement this step).
+Learner reasoning: skip a request if another is already running; check the cache first; layer unsure, noted the core is shared. Explained: disk-cache check already existed in `fetch_and_cache`; spam came from parallel row requests on a cold cache all missing before the first download finished; core is the layer every platform shares.
+Learner decisions: in-flight dedup in `CoverArtService`, keyed by cache path.
+Accepted additions: duplicate caller gets `Ok(None)` (UI reloads on cover-loaded event); failures not remembered (retry next launch); one unit test.
+Implemented: `in_flight: Mutex<HashSet<PathBuf>>`, `begin_fetch` + `InFlight` drop guard (clears on error/cancel).
+Verified: core tests 26 pass incl. `second_fetch_of_same_cover_is_skipped_until_first_ends`; live cold-cache run: 1 MusicBrainz request for 'Dabin Between Broken' (was 13+), cover re-cached. Linux 4 tests pass. macOS/Windows not rebuilt.
