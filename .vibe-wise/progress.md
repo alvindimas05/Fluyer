@@ -194,3 +194,8 @@ Accepted additions: RGBA8 fallback when RGBA16F framebuffer incomplete (GLES 3.0
 Implemented (BackdropRenderer.kt): highp, ditherNoise in PINCH_FS (time uniform), RGBA16F/HALF_FLOAT targets w/ fallback, single 320px work size (down4 pass removed), blur zero edges, sigma floor 1.0; blur uniform renamed `texelStep` (avoid shadowing GLSL `step()`).
 Verified: compile + unit tests OK; installed on Z2351N (Mali-G57, GLES 3.2), app runs, no Backdrop errors/fallback in logcat. Not verified: visual (screenshot black, Firefox was focused).
 Follow-up (learner: keep grey animated bg when empty; chose "Grey like Linux"): empty queue already gets Rust GREY_PALETTE blocks via backdropLoadBlockArtwork (unchanged); null-artwork placeholder now 1x1 rgb(51,51,54) like Linux (music note removed). Build + tests OK, installed. Not verified visually (phone on lock/notification shade).
+
+## Android library mode toggle icons
+Status: Implemented (direct request: icons instead of Songs/Albums text, remove checkmark).
+AI choices (unreviewed): Icons.Rounded.MusicNote (Songs), Icons.Rounded.Album (Albums); contentDescription keeps labels for TalkBack; `icon = {}` hides the SegmentedButton checkmark.
+Verified: build OK, installed. Not checked visually.

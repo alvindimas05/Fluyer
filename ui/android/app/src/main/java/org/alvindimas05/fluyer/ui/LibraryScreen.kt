@@ -75,12 +75,14 @@ private fun TopBar(state: AppState, openSettings: () -> Unit) {
                     sel.mode == LibraryMode.TRACKS, { sel.mode = LibraryMode.TRACKS },
                     SegmentedButtonDefaults.itemShape(0, 2),
                     colors = segColors,
-                ) { Text("Songs") }
+                    icon = {}, // no selected checkmark
+                ) { Icon(Icons.Rounded.MusicNote, "Songs") }
                 SegmentedButton(
                     sel.mode == LibraryMode.ALBUMS, { sel.mode = LibraryMode.ALBUMS },
                     SegmentedButtonDefaults.itemShape(1, 2),
                     colors = segColors,
-                ) { Text("Albums") }
+                    icon = {},
+                ) { Icon(Icons.Rounded.Album, "Albums") }
             }
             IconButton({ searching = !searching; if (!searching) sel.query = "" }) { Icon(Icons.Rounded.Search, "Search") }
             SortMenu(sel)
