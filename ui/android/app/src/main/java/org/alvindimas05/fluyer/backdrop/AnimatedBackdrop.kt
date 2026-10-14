@@ -31,7 +31,7 @@ private val Grey = Color(0.2f, 0.2f, 0.21f)
 
 /**
  * Animated, blurred backdrop of [artwork] (GLES 3 port of ui/macos ArtworkBackdropRenderer).
- * Null shows the music-note placeholder. Pauses with the lifecycle. The caller keeps ownership of [artwork].
+ * Null shows plain grey (Linux). Pauses with the lifecycle. The caller keeps ownership of [artwork].
  */
 @Composable
 fun AnimatedBackdrop(artwork: Bitmap?, reduceMotion: Boolean, modifier: Modifier = Modifier) {

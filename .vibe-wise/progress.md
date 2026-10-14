@@ -185,3 +185,12 @@ Learner decisions: off = existing static GSK blur view.
 Implemented: components/backdrop/{backdrop_mesh.rs (Catmull-Clark mesh port + test), backdrop_renderer.rs (GL pipeline), animated_backdrop_view.rs (GLArea, tick-driven), static_backdrop_view.rs (renamed old view), mod.rs backdrop_view() Stack switch}; SettingsState `animated_background` (default true, persisted); Settings "Animated background" SwitchRow.
 Verified: build 0 warnings, 5 tests pass; screenshots 4s apart while playing differ, colorful moving blur from cover; ~17% CPU steady (dev build). Not verified: toggle switch in Settings, crossfade on track change, Wayland/GLES path.
 Banding fix (learner: "already fixed on windows"): ported Windows fixes from BackdropShaders.cs/ArtworkBackdropRenderer.cs: per-pixel temporal ±1 LSB dither (`DitherNoise` hash) in pinch shader, RGBA16F intermediate targets (Windows R16G16B16A16_Float). Gotcha: GTK gave a GLES context; without `precision highp int` Mesa ran the hash at mediump and the noise came out 0. Verified by pixel row: before flat 137,137,...; after 79,79,78,80,79,... Build 0 warnings, 5 tests pass.
+
+## Android backdrop (Linux renderer port)
+Status: Implemented (Implement this step). Visual banding check pending (learner).
+Learner decision: replicate Linux renderer on Android (same OpenGL; fixes banding elsewhere).
+Explained: banding = 8-bit intermediates + no dither; fixes = RGBA16F targets + temporal ±1 LSB dither; GLES needs `precision highp int` for the hash.
+Accepted additions: RGBA8 fallback when RGBA16F framebuffer incomplete (GLES 3.0 needs EXT_color_buffer_half_float); keep 30 fps cap; keep music-note placeholder for null artwork (later replaced, see below).
+Implemented (BackdropRenderer.kt): highp, ditherNoise in PINCH_FS (time uniform), RGBA16F/HALF_FLOAT targets w/ fallback, single 320px work size (down4 pass removed), blur zero edges, sigma floor 1.0; blur uniform renamed `texelStep` (avoid shadowing GLSL `step()`).
+Verified: compile + unit tests OK; installed on Z2351N (Mali-G57, GLES 3.2), app runs, no Backdrop errors/fallback in logcat. Not verified: visual (screenshot black, Firefox was focused).
+Follow-up (learner: keep grey animated bg when empty; chose "Grey like Linux"): empty queue already gets Rust GREY_PALETTE blocks via backdropLoadBlockArtwork (unchanged); null-artwork placeholder now 1x1 rgb(51,51,54) like Linux (music note removed). Build + tests OK, installed. Not verified visually (phone on lock/notification shade).
