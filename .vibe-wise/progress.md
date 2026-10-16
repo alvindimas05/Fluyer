@@ -118,3 +118,84 @@ Learner decisions: spacer above/below lyrics sized to half the visible height (t
 Explained concepts: CSS % padding is relative to width; WinUI Thickness is fixed px; SizeChanged; ListView Header/Footer keep item indices intact; XAML has no OpacityMask, Composition visual surface + mask brush does.
 Accepted additions: spacers in ListView.Header/Footer (not items, so CurrentLyricIndex/ContainerFromIndex stay aligned); Lyrics.SizeChanged sets heights = height/2 and resizes snapshot + sprite; LyricsPadding 28,0,28,0; LyricsFadeHost Border overlays column, list's own visual opacity 0; stops 0/0.4/0.6/1 like Swift.
 Verified: dotnet build ok; screenshot shows first line centered and bottom fade. Not verified: top fade mid-song, window resize.
+
+## Linux GTK (gtk-rs) port
+Status: G1 implemented.
+Requirement (learner): implement the app on gtk-rs; macOS Swift UI is the main reference (most complete); plan first.
+Facts found: Linux host; GTK 4.14 + libadwaita 1.5 runtime installed, -dev packages not installed (no sudo for agent); no `libs/linux` (build.rs expects `libs/<target_os>`); BASS .so files exist in legacy `~/Fluyer/src-tauri/libs/`; core already has Linux cfg for plugin names; `fluyer_core` builds as rlib too.
+Learner decisions:
+- GTK app calls `FluyerEngine` directly (Rust dependency, no FFI).
+- Keep the Swift state/view split (XState + XView).
+- Events: "same answer as first one" (direct; exact mechanism not chosen).
+- Order: build everything in one pass ("yolo"), fix afterwards.
+Learner assumption to correct: "GTK doesn't have observable state" (it has GObject properties + notify, ListModel).
+Setup done: learner installed gtk4/adwaita dev pkgs; BASS .so copied to libs/linux (gitignored); `.cargo/config.toml` disables rust-lld (libbassmix.so symbol table rejected by rust-lld); core builds, cargo test passes with LD_LIBRARY_PATH=$PWD/libs/linux.
+Explained: GObject properties/notify/bind_property, gio::ListModel; non-Send widgets need a channel + glib::spawn_future_local for core events.
+- Views observe state via GObject properties (+ notify / bind_property); learner chose it as "the preferable way for GTK".
+Implemented G1:
+- `build.rs`: rpath embeds `$ORIGIN/../../libs/linux` and `libs/linux`.
+- `events.rs`: `EventBridge` implements `EventSink`, forwards to `async_channel::unbounded`.
+- `shared/`: GObject models (`TrackItemObject`, `AlbumCardObject`, `LyricLineObject`), states (`PlaybackState`, `LibraryState`, `QueueState`, `CoverState`, `SettingsState`, `AppState`), clock 250ms sync.
+- `components/`: `AnimatedBackgroundView` (GSK snapshot `push_blur(50.0)`, texture render, dark scrim overlay).
+- `screens/home/`: `HomeView` with `adw::OverlaySplitView`, `ToolbarView` (scan spinner, mode toggle, search, add folder, queue toggle, settings), `MusicGridView` (track list, empty state, click to play), `AlbumGridView` (album cards grid), `QueueView` ("Now Playing" header, clear button, remove button, click to jump), `PlayerBarView` (seek scale, transport buttons, cover thumbnail, title/artist, volume scale, repeat, shuffle).
+- `screens/play/`: `PlayView` (two-column layout, large cover, `PlayControlsView`, `LyricsView` with active lyric auto-scroll and seek on click).
+- `screens/settings/`: `SettingsView` (`adw::PreferencesDialog` with music folders, folder picker dialog, backdrop source combo row).
+- `main.rs`: `adw::Application`, CSS styles, keyboard shortcuts (Space, Esc, Ctrl+L, Ctrl+1, Ctrl+2).
+Verified: `cargo test -p fluyer_linux` passes (1 model unit test), `cargo build -p fluyer_linux` OK with 0 warnings. Visual runtime check not done.
+Bugfix (learner report: folder added but list empty; after restart no window):
+- No window: list-row bind decoded every cover on the main thread (gdb: zune_jpeg under `TrackRow::bind`), unoptimized deps made it seconds per cover. Fix: `CoverState` loads via `gio::spawn_blocking`, sets texture when done; root `Cargo.toml` `[profile.dev.package."*"] opt-level = 3`. Window now shows in ~0.5s.
+- Empty after scan: UI waited for `current >= total`, but core counts only changed files. Fix: reload on the "Library scan completed" toast (same trick as uniffi_api/events.rs).
+Not fixed (core, all platforms): repeated MusicBrainz requests for the same album when covers are missing.
+Bugfix 2 (learner report: no album carousel, song list not a grid, `gtk_list_view_scroll_to` CRITICAL):
+- Lyrics CRITICAL: cursor index set before the lyric store was refilled / past its end. Fix: `PlaybackState::set_active_lyric` clamps to the store; `sync_lyrics` resets to -1, fills, then sets.
+- Added (macOS port): `albums/album_carousel_view.rs` (horizontal ListView), `album_header_view.rs` (subtitle, Back/Play/Queue/Shuffle), `album_metrics.rs` (macOS AlbumMetrics, 1x rules only; test: cards fill width). Album card click opens album (`LibraryState::select_album`, filter by track paths from `album_get_detail`), right-click Play/Add to Queue/Shuffle, selected/dimmed CSS. Album grid uses same metrics.
+- Song grid: `GridView`, columns = width / (280 + 12) like macOS adaptive grid. Click plays the shown list from that track (`library_play_tracks`).
+- Width tracking via `add_tick_callback` (ponytail: GTK4 has no resize signal).
+Verified: build 0 warnings, 2 tests pass, screenshot shows carousel with names + 3-column song grid, 0 CRITICAL at startup. Not verified: album click/header, Albums mode, lyrics scroll while playing.
+
+## Linux sort (macOS SortMenu port)
+Status: Implemented. Learner: "yes, and just make it the same as macos" (no own design; layout copied from macOS LibraryFilterState/SortMenu).
+- `LibraryState`: `track_sort` (Album/Title/Artist/Duration), `album_sort` (Name/Artist/Year/Track Count), shared `sort_ascending`; session-only like macOS. `refresh_displayed` re-derives `filtered_tracks` + new `displayed_albums` store on any notify of query/sort.
+- Natural order via `glib::FilenameCollationKey` on casefolded text (test caught C-locale case sensitivity). Search: casefold + NFD minus combining marks (diacritic-insensitive), albums match name/artist only.
+- Play from grid / header Play = sorted unfiltered list (macOS `playTrack`/`playSelected`). Carousel + Albums grid use `displayed_albums_store`.
+- `toolbar/sort_menu.rs`: MenuButton + gio::Menu radio items via stateful actions; keys swap with mode.
+Verified: 4 tests pass (incl. sort/filter, natural/folded search), build 0 warnings, screenshot shows sort button. Not verified: clicking menu items (no xdotool).
+
+## Cover fetch dedup (core, all platforms)
+Status: Implemented (Implement this step).
+Learner reasoning: skip a request if another is already running; check the cache first; layer unsure, noted the core is shared. Explained: disk-cache check already existed in `fetch_and_cache`; spam came from parallel row requests on a cold cache all missing before the first download finished; core is the layer every platform shares.
+Learner decisions: in-flight dedup in `CoverArtService`, keyed by cache path.
+Accepted additions: duplicate caller gets `Ok(None)` (UI reloads on cover-loaded event); failures not remembered (retry next launch); one unit test.
+Implemented: `in_flight: Mutex<HashSet<PathBuf>>`, `begin_fetch` + `InFlight` drop guard (clears on error/cancel).
+Verified: core tests 26 pass incl. `second_fetch_of_same_cover_is_skipped_until_first_ends`; live cold-cache run: 1 MusicBrainz request for 'Dabin Between Broken' (was 13+), cover re-cached. Linux 4 tests pass. macOS/Windows not rebuilt.
+
+## Linux album grid grows forever (Bugfix)
+Status: Implemented (Implement this step).
+Learner report: Albums-mode grid kept expanding; Gtk-CRITICAL `gtk_widget_measure: for_size >= -1`, negative allocations.
+Explained: layout feedback loop. `ScrolledWindow` hscroll `Never` forces window >= content min width; card size computed from window width; last column's CSS margin-right 12px made content width+12, so it grew every frame until overflow.
+Learner decisions: confirmed proposed fix (External policy + split margins).
+Implemented: `album_grid_view.rs` hscroll policy `External`; grid side margins EDGE - CARD_GAP/2 (10px); CSS `.album-grid > child { margin: 0 6px 12px 6px; }` so n*(cover+12)+20 == width.
+Verified: Albums-mode launch (temp env hook, reverted) shows 5 columns at stable width, 0 CRITICAL/WARNING in log. Window resize not tested manually.
+
+## Linux animated backdrop (macOS port)
+Status: Implemented. Learner: "just implement it like macos; the current one can be the off option for now" (direct, no design checkpoint).
+Explained: macOS pipeline = rotation (3 rotating copies, sat x1.3, 0.5s crossfade) → Gaussian blur → pinch mesh warp (sat x2, dark scrim, clamp); GTK options (snapshot nodes, deprecated GLShader, GLArea).
+AI choices (unreviewed): `gtk::GLArea` + new dep `glow` (GL loaded through GTK's libepoxy via dlsym, no extra system lib); blur as 2-pass separable GLSL at 320px long edge (macOS 960 + MPS); Reduce Motion = GTK enable-animations off (1/10 speed); GL failure falls back to static for the session.
+Learner decisions: off = existing static GSK blur view.
+Implemented: components/backdrop/{backdrop_mesh.rs (Catmull-Clark mesh port + test), backdrop_renderer.rs (GL pipeline), animated_backdrop_view.rs (GLArea, tick-driven), static_backdrop_view.rs (renamed old view), mod.rs backdrop_view() Stack switch}; SettingsState `animated_background` (default true, persisted); Settings "Animated background" SwitchRow.
+Verified: build 0 warnings, 5 tests pass; screenshots 4s apart while playing differ, colorful moving blur from cover; ~17% CPU steady (dev build). Not verified: toggle switch in Settings, crossfade on track change, Wayland/GLES path.
+Banding fix (learner: "already fixed on windows"): ported Windows fixes from BackdropShaders.cs/ArtworkBackdropRenderer.cs: per-pixel temporal ±1 LSB dither (`DitherNoise` hash) in pinch shader, RGBA16F intermediate targets (Windows R16G16B16A16_Float). Gotcha: GTK gave a GLES context; without `precision highp int` Mesa ran the hash at mediump and the noise came out 0. Verified by pixel row: before flat 137,137,...; after 79,79,78,80,79,... Build 0 warnings, 5 tests pass.
+
+## Android backdrop (Linux renderer port)
+Status: Implemented (Implement this step). Visual banding check pending (learner).
+Learner decision: replicate Linux renderer on Android (same OpenGL; fixes banding elsewhere).
+Explained: banding = 8-bit intermediates + no dither; fixes = RGBA16F targets + temporal ±1 LSB dither; GLES needs `precision highp int` for the hash.
+Accepted additions: RGBA8 fallback when RGBA16F framebuffer incomplete (GLES 3.0 needs EXT_color_buffer_half_float); keep 30 fps cap; keep music-note placeholder for null artwork (later replaced, see below).
+Implemented (BackdropRenderer.kt): highp, ditherNoise in PINCH_FS (time uniform), RGBA16F/HALF_FLOAT targets w/ fallback, single 320px work size (down4 pass removed), blur zero edges, sigma floor 1.0; blur uniform renamed `texelStep` (avoid shadowing GLSL `step()`).
+Verified: compile + unit tests OK; installed on Z2351N (Mali-G57, GLES 3.2), app runs, no Backdrop errors/fallback in logcat. Not verified: visual (screenshot black, Firefox was focused).
+Follow-up (learner: keep grey animated bg when empty; chose "Grey like Linux"): empty queue already gets Rust GREY_PALETTE blocks via backdropLoadBlockArtwork (unchanged); null-artwork placeholder now 1x1 rgb(51,51,54) like Linux (music note removed). Build + tests OK, installed. Not verified visually (phone on lock/notification shade).
+
+## Android library mode toggle icons
+Status: Implemented (direct request: icons instead of Songs/Albums text, remove checkmark).
+AI choices (unreviewed): Icons.Rounded.MusicNote (Songs), Icons.Rounded.Album (Albums); contentDescription keeps labels for TalkBack; `icon = {}` hides the SegmentedButton checkmark.
+Verified: build OK, installed. Not checked visually.

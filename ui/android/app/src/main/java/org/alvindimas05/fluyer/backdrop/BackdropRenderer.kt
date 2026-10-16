@@ -1,10 +1,6 @@
 package org.alvindimas05.fluyer.backdrop
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.RectF
 import android.opengl.GLES30.*
 import android.opengl.GLSurfaceView
 import android.opengl.GLUtils
@@ -22,7 +18,9 @@ import kotlin.math.min
 import kotlin.math.sin
 
 private const val TAG = "Backdrop"
-private const val MAX_EDGE = 960      // ponytail: intermediate long-edge cap, same as macOS/Windows
+// ponytail: blur runs at long edge 320px like Linux (macOS: 960 + MPS). Output is a heavy blur, so the
+// lower res is invisible and keeps the shader loop short. Raise if banding shows on tablets.
+private const val WORK_LONG_EDGE = 320
 private const val FRAME_NANOS = 33_000_000L // ~30 fps
 
 private const val FULLSCREEN_VS = """#version 300 es
@@ -52,7 +50,8 @@ void main() {
 }"""
 
 private const val COMMON_FS = """#version 300 es
-precision mediump float;
+precision highp float;
+precision highp int; // dither hash needs 32-bit uint; mediump zeroes the noise on some GPUs
 in vec2 uv;
 out vec4 color;
 vec3 saturateColor(vec3 rgb, float amount) {
@@ -71,19 +70,10 @@ void main() {
     color = vec4(saturateColor(rgb, saturation), 1.0);
 }"""
 
-// 4x4 box downsample: four bilinear taps on texel corners.
-private const val DOWN4_FS = COMMON_FS + """
-uniform sampler2D src;
-uniform vec2 step;
-void main() {
-    vec3 c = texture(src, uv + vec2(-step.x, -step.y)).rgb + texture(src, uv + vec2(step.x, -step.y)).rgb
-           + texture(src, uv + vec2(-step.x, step.y)).rgb + texture(src, uv + vec2(step.x, step.y)).rgb;
-    color = vec4(c * 0.25, 1.0);
-}"""
-
+// Separable Gaussian; outside texels count as black (MPS edgeMode .zero), like Linux.
 private const val GAUSS_FS = COMMON_FS + """
 uniform sampler2D src;
-uniform vec2 step;   // one blur texel along the axis, in uv
+uniform vec2 texelStep; // one blur texel along the axis, in uv
 uniform float sigma; // blur texels
 void main() {
     int r = min(int(ceil(sigma * 3.0)), 64);
@@ -92,7 +82,9 @@ void main() {
     float wsum = 0.0;
     for (int k = -r; k <= r; k++) {
         float w = exp(float(k * k) * inv);
-        sum += texture(src, uv + step * float(k)).rgb * w;
+        vec2 p = uv + texelStep * float(k);
+        float inside = step(0.0, p.x) * step(p.x, 1.0) * step(0.0, p.y) * step(p.y, 1.0);
+        sum += texture(src, p).rgb * w * inside;
         wsum += w;
     }
     color = vec4(sum / wsum, 1.0);
@@ -114,14 +106,29 @@ void main() {
     uv = vec2(t.x, 1.0 - t.y);
 }"""
 
+// Dither: port of Linux/Windows `DitherNoise`. Per-pixel temporal ±1 LSB, separate channel seeds,
+// so the 8-bit output shows no contour steps in smooth dark gradients.
 private const val PINCH_FS = COMMON_FS + """
 uniform sampler2D blurred;
 uniform float saturation;
+uniform float time;
+float ditherNoise(uvec2 p, uint frame, uint channel) {
+    uint n = p.x * 1664525u + p.y * 1013904223u;
+    n += frame * 747796405u + channel * 2891336453u;
+    n ^= n >> 16;
+    n *= 2246822519u;
+    n ^= n >> 13;
+    return float(n & 0xffffu) / 65535.0 * 2.0 - 1.0;
+}
 void main() {
     vec3 rgb = min(saturateColor(texture(blurred, uv).rgb, saturation), vec3(0.995));
     // Dark mode only: blackScrimAlpha 0.25, factorForDarkMode 0.2.
     rgb = mix(rgb, vec3(0.0), 0.25) - 0.2 * 0.1;
-    color = vec4(clamp(rgb, vec3(0.07), vec3(0.97)), 1.0);
+    rgb = clamp(rgb, vec3(0.07), vec3(0.97));
+    uvec2 px = uvec2(gl_FragCoord.xy);
+    uint f = uint(time * 60.0);
+    rgb += vec3(ditherNoise(px, f, 0u), ditherNoise(px, f, 1u), ditherNoise(px, f, 2u)) / 255.0;
+    color = vec4(clamp(rgb, 0.0, 1.0), 1.0);
 }"""
 
 private class Target(val tex: Int, val fbo: Int, val w: Int, val h: Int)
@@ -136,7 +143,7 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
     private var artwork: Bitmap? = null
 
     private var broken = false
-    private var rotationProg = 0; private var down4Prog = 0; private var gaussProg = 0; private var pinchProg = 0
+    private var rotationProg = 0; private var gaussProg = 0; private var pinchProg = 0
     private var vao = 0; private var emptyVao = 0; private var meshVbo = 0; private var meshIbo = 0
     private var indexCount = 0
     private var current = 0; private var previous = 0; private var pending = 0
@@ -156,7 +163,6 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         try {
             rotationProg = program(ROTATION_VS, ROTATION_FS)
-            down4Prog = program(FULLSCREEN_VS, DOWN4_FS)
             gaussProg = program(FULLSCREEN_VS, GAUSS_FS)
             pinchProg = program(PINCH_VS, PINCH_FS)
             val mesh = BackdropMesh.make()
@@ -196,13 +202,11 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
         width = w; height = h
         if (broken || w <= 0 || h <= 0) return
         rotationTarget?.let { release(it) }; blurA?.let { release(it) }; blurB?.let { release(it) }
-        val scale = min(1.0, MAX_EDGE.toDouble() / max(w, h))
+        val scale = min(1.0, WORK_LONG_EDGE.toDouble() / max(w, h))
         val iw = max(1, (w * scale).toInt()); val ih = max(1, (h * scale).toInt())
-        val bw = max(1, iw / 4); val bh = max(1, ih / 4)
-        rotationTarget = target(iw, ih); blurA = target(bw, bh); blurB = target(bw, bh)
-        // MPS sigma ported verbatim, then scaled into quarter-res blur texels.
-        val sigmaIntermediate = floor(hypot(w.toDouble(), h.toDouble()) * 0.045394707) * scale
-        sigma = max(sigmaIntermediate * bw / iw, 0.5).toFloat()
+        rotationTarget = target(iw, ih); blurA = target(iw, ih); blurB = target(iw, ih)
+        // MPS sigma ported verbatim, scaled to the work texture (Linux).
+        sigma = max(floor(hypot(w.toDouble(), h.toDouble()) * 0.045394707) * iw / w, 1.0).toFloat()
     }
 
     override fun onDrawFrame(gl: GL10?) {
@@ -256,10 +260,9 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
         glBindVertexArray(emptyVao)
         glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 3)
 
-        // Pass 2: down4 + separable gaussian.
-        blit(down4Prog, a, rot.tex, 1f / rot.w, 1f / rot.h)
-        blit(gaussProg, b, a.tex, 1f / a.w, 0f)
-        blit(gaussProg, a, b.tex, 0f, 1f / a.h)
+        // Pass 2: separable gaussian, horizontal into a, vertical into b.
+        blit(gaussProg, a, rot.tex, 1f / a.w, 0f)
+        blit(gaussProg, b, a.tex, 0f, 1f / b.h)
 
         // Pass 3: pinch mesh to screen.
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
@@ -269,7 +272,7 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
         glUniform1f(loc(pinchProg, "time"), animationTime)
         glUniform1f(loc(pinchProg, "warpScale"), 1.75f)
         glUniform1f(loc(pinchProg, "saturation"), 2f)
-        bind(0, a.tex, pinchProg, "blurred")
+        bind(0, b.tex, pinchProg, "blurred")
         glBindVertexArray(vao)
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0)
         glBindVertexArray(0)
@@ -294,7 +297,7 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
         glBindFramebuffer(GL_FRAMEBUFFER, to.fbo)
         glViewport(0, 0, to.w, to.h)
         glUseProgram(prog)
-        glUniform2f(loc(prog, "step"), sx, sy)
+        glUniform2f(loc(prog, "texelStep"), sx, sy)
         glUniform1f(loc(prog, "sigma"), sigma)
         bind(0, src, prog, "src")
         glBindVertexArray(emptyVao)
@@ -315,12 +318,25 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
     private fun floatBuffer(a: FloatArray) =
         ByteBuffer.allocateDirect(a.size * 4).order(ByteOrder.nativeOrder()).also { it.asFloatBuffer().put(a) }
 
+    // Half-float like Linux/Windows: blur keeps precision, quantize once at output.
+    // GLES 3.0 can only render to RGBA16F with EXT_color_buffer_half_float; fall back to RGBA8.
+    private var halfFloat = true
+
     private fun target(w: Int, h: Int): Target {
+        if (halfFloat) {
+            try { return target(w, h, GL_RGBA16F, GL_HALF_FLOAT) } catch (e: IllegalStateException) {
+                Log.w(TAG, "RGBA16F not renderable, using RGBA8", e); halfFloat = false
+            }
+        }
+        return target(w, h, GL_RGBA8, GL_UNSIGNED_BYTE)
+    }
+
+    private fun target(w: Int, h: Int, internal: Int, type: Int): Target {
         val ids = IntArray(1)
         glGenTextures(1, ids, 0)
         val tex = ids[0]
         glBindTexture(GL_TEXTURE_2D, tex)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, null)
+        glTexImage2D(GL_TEXTURE_2D, 0, internal, w, h, 0, GL_RGBA, type, null)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
@@ -328,8 +344,11 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
         glGenFramebuffers(1, ids, 0)
         glBindFramebuffer(GL_FRAMEBUFFER, ids[0])
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0)
-        check(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) { "framebuffer incomplete" }
-        return Target(tex, ids[0], w, h)
+        val target = Target(tex, ids[0], w, h)
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            release(target); error("framebuffer incomplete")
+        }
+        return target
     }
 
     private fun release(t: Target) {
@@ -344,7 +363,7 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
         glGenTextures(1, ids, 0)
         glBindTexture(GL_TEXTURE_2D, ids[0])
         GLUtils.texImage2D(GL_TEXTURE_2D, 0, bmp, 0)
-        glGenerateMipmap(GL_TEXTURE_2D) // artwork is downscaled onto <=960px; mips avoid aliasing
+        glGenerateMipmap(GL_TEXTURE_2D) // artwork is downscaled onto <=320px; mips avoid aliasing
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
@@ -353,21 +372,9 @@ internal class BackdropRenderer(private val onError: () -> Unit) : GLSurfaceView
         return ids[0]
     }
 
-    /** 300x300 rgb(51,51,54) card with a lighter note, like Music's DefaultArtwork. */
-    private fun makePlaceholder(): Bitmap {
-        val side = 300
-        val bmp = Bitmap.createBitmap(side, side, Bitmap.Config.ARGB_8888)
-        val c = Canvas(bmp)
-        c.drawColor(android.graphics.Color.rgb(51, 51, 54))
-        val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.rgb(100, 100, 104) }
-        c.drawOval(RectF(105f, 170f, 160f, 210f), p)  // head
-        c.drawRect(150f, 85f, 160f, 190f, p)           // stem
-        c.drawPath(Path().apply {                      // flag
-            moveTo(160f, 85f); cubicTo(160f, 110f, 195f, 115f, 195f, 150f)
-            cubicTo(185f, 130f, 170f, 128f, 160f, 128f); close()
-        }, p)
-        return bmp
-    }
+    /** Linux placeholder: 1x1 Music grey rgb(51,51,54); real grey blocks come from Rust. */
+    private fun makePlaceholder(): Bitmap =
+        Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888).apply { eraseColor(android.graphics.Color.rgb(51, 51, 54)) }
 
     private fun program(vs: String, fs: String): Int {
         fun shader(type: Int, src: String): Int {
